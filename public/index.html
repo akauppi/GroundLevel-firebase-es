@@ -16,13 +16,26 @@
     <script defer src="/__/firebase/7.7.0/firebase-storage.js"></script>
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
+
+    <!-- Load Vue
+    - didn't get it bound via npm, with Rollup. Why not?
+    - Track ->
+    -->
+    <!--
+    <script type="module">
+      // tbd. How to import to global 'Vue', in one step?
+      //
+      import Vue_ from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js';
+      Vue = Vue_;
+    </script>
+    -->
+
+    <script type="module" src="/bundle.esm.js"></script>
   </head>
   <body>
     <!-- Note: We don't need to load Vue. Parts needing it will 'import' it themselves.
     -->
     <app></app>
-
-    <script type="module" src="/bundle.esm.js"></script>
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
