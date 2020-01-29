@@ -1,9 +1,11 @@
 import vue from 'rollup-plugin-vue';
-import buble from 'rollup-plugin-buble';
+import buble from '@rollup/plugin-buble';
 import { eslint } from 'rollup-plugin-eslint';
 import bundleSize from 'rollup-plugin-filesize';
-import resolve from 'rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
+import commonjs from '@rollup/plugin-commonjs';
+import alias from '@rollup/plugin-alias';
 
 import pkg from './package.json';
 
@@ -15,7 +17,9 @@ const extensions = ['.js', '.vue'];
 const watching = process.env.ROLLUP_WATCH;
 const production = !watching;
 
-const globals = { vue: 'Vue' };
+const globals = {
+  //vue: 'Vue'
+};
 
 const lintOpts = {
   extensions,
@@ -36,7 +40,12 @@ const plugins = [
     css: true
   }),
   buble(),
-  watching && livereload('public')
+  watching && livereload('public'),
+  commonjs(),
+  alias({
+    // Needed this
+    'vue': require.resolve('vue/dist/vue.esm.browser.js')
+  })
 ];
 
 export default {
@@ -46,7 +55,6 @@ export default {
   output: {
     globals,
     file: 'public/bundle.esm.js',
-    //format: 'umd'
     format: 'esm'
   }
 };

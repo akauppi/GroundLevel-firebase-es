@@ -18,19 +18,11 @@
     <script defer src="/__/firebase/init.js"></script>
   </head>
   <body>
+    <!-- Note: We don't need to load Vue. Parts needing it will 'import' it themselves.
+    -->
     <app></app>
 
-    <!-- remove
-    <script src="https://unpkg.com/vue"></script>
-    -->
-    <script type="module">
-      import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
-    </script>
-    <script src="/bundle.esm.js"></script>
-
-    <!-- Note: live reload does not cover this file. tbd.
-    -->
-    <p>Hey there!</p>
+    <script type="module" src="/bundle.esm.js"></script>
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
