@@ -3,11 +3,18 @@ import buble from 'rollup-plugin-buble';
 import { eslint } from 'rollup-plugin-eslint';
 import bundleSize from 'rollup-plugin-filesize';
 import resolve from 'rollup-plugin-node-resolve';
+import livereload from 'rollup-plugin-livereload';
+
 import pkg from './package.json';
 
 const external = Object.keys(pkg.dependencies);
 const extensions = ['.js', '.vue'];
-const isProduction = !process.env.ROLLUP_WATCH;
+
+// Taking production from lack of 'rollup -w'.
+//
+const watching = process.env.ROLLUP_WATCH;
+const production = !watching;
+
 const globals = { vue: 'Vue' };
 
 const lintOpts = {
@@ -23,12 +30,13 @@ const plugins = [
   bundleSize(),
   vue({
     template: {
-      isProduction,
+      isProduction: production,
       compilerOptions: { preserveWhitespace: false }
     },
     css: true
   }),
-  buble()
+  buble(),
+  watching && livereload('public')
 ];
 
 export default {
@@ -37,7 +45,8 @@ export default {
   input: 'src/entry.js',
   output: {
     globals,
-    file: 'dist/bundle.js',
-    format: 'umd'
+    file: 'public/bundle.esm.js',
+    //format: 'umd'
+    format: 'esm'
   }
 };

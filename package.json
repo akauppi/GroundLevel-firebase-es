@@ -1,29 +1,43 @@
 {
   "name": "vue-rollup-example-with-firebase-auth",
   "version": "0.0.0",
-  "repository": "https://github.com/akauppi/vue-rollup-example-with-firebase-auth",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akauppi/vue-rollup-example-with-firebase-auth.git"
+  },
   "author": "<akauppi@gmail.com>",
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "clean": "(rm dist/* 2> /dev/null || true)"
+    "//dev": "rollup -c -w",
+    "dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
+    "clean": "(rm public/bundle.js 2> /dev/null || true)"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-jwalker": "^5.2.0",
     "eslint-plugin-vue": "^6.1.2",
     "rollup": "^1.30.1",
+    "rollup-plugin-livereload": "^1.0.0",
     "rollup-plugin-buble": "^0.19.8",
     "rollup-plugin-eslint": "^7.0.0",
     "rollup-plugin-filesize": "^6.2.1",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-vue": "^5.1.6",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "concurrently": "^5.0.2"
   },
   "dependencies": {
+    "firebase": "^7.7.0",
+    "firebaseui": "^4.4.0",
     "vue": "^2.6.11"
   },
   "//comments": {
-    "": ""
+    "devDependencies": {
+      "eslint-config-jwalker": "Provides a default set of ESLint configs; we can override in '.eslintrc.js'."
+    },
+    "scripts": {
+      "build": [ "Builds production code", "tbd. add rollup terser plugin" ]
+    }
   }
 }

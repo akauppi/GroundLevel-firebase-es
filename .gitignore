@@ -1,18 +1,9 @@
 /node_modules/
-/dist/
-# Logs
-#logs
-#*.log
-#npm-debug.log*
+/public/bundle.*
 
-# Runtime data
-#pids
-#*.pid
-#*.seed
+#needed?
+#/.eslintcache
 
-# Optional npm cache directory
-#.npm
-
-# Eslint
-#.eslintcache
+/.firebaserc
+/firebase-debug.log
 
