@@ -1,0 +1,6 @@
+# Changelog
+
+## latest
+
+- Updated dependencies
+
