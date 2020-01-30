@@ -62,6 +62,22 @@ Then open http://localhost:5000
 Deployment is left out from this template. You should be able to do it simply by `firebase deploy`.
 
 
+## Help needed!
+
+If you wish to help, check out:
+
+- [TODO.md](TODO.md)
+- [Issues](https://github.com/akauppi/vue-rollup-example-with-firebase-auth/issues)
+
+Issues has more formal definition of shortcomings, and is the main forum of contributions and discussion. `TODO` is a shorthand for authors.
+
+In particular:
+
+- help from Vue and/or Rollup aficiados, to check whether the configs are Best in class ☺️
+
+
 ## References
 
-...
+- [Handling 3rd-party JavaScript with Rollup](https://engineering.mixmax.com/blog/rollup-externals/) (blog, Dec 2017)
+
+

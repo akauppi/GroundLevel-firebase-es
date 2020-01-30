@@ -1,11 +1,11 @@
 import vue from 'rollup-plugin-vue';
+import alias from '@rollup/plugin-alias';
 import buble from '@rollup/plugin-buble';
 import { eslint } from 'rollup-plugin-eslint';
 import bundleSize from 'rollup-plugin-filesize';
 import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 //import commonjs from '@rollup/plugin-commonjs';
-import alias from '@rollup/plugin-alias';
 import replace from '@rollup/plugin-replace';
 
 //import pkg from './package.json';
@@ -51,12 +51,15 @@ const plugins = [
   alias({
     entries: {
       //'x-vue-runtime': 'vue/dist/vue.runtime.esm.js',
-      vue: 'vue/dist/vue.esm.js'   // runtime + compiler
+      //vue: 'vue/dist/vue.esm.js'   // runtime + compiler
+      'x-vue-cdn': 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
     }
   }),
   // See -> https://vuejs.org/v2/guide/installation.html#Development-vs-Production-Mode
   //
   // Note: We need to replace it always, also for development. Value in non-prod does not matter.
+  //
+  // tbd. Try whether we still need this. May not, if Vue comes from CDN (not npm).
   //
   replace({
     'process.env.NODE_ENV': `"${ production ? "production":"" }"`  // JSON.stringify('production')
