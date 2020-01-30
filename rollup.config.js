@@ -8,9 +8,9 @@ import livereload from 'rollup-plugin-livereload';
 import alias from '@rollup/plugin-alias';
 import replace from '@rollup/plugin-replace';
 
-import pkg from './package.json';
+//import pkg from './package.json';
 
-const external = Object.keys(pkg.dependencies);
+//const external = Object.keys(pkg.dependencies);   // Q: what's the purpose of this?
 const extensions = ['.js', '.vue'];
 
 // Taking production from lack of 'rollup -w'.
@@ -31,13 +31,12 @@ const lintOpts = {
 
 const plugins = [
   resolve({
-    browser: true,
-    jsnext: true
+    mainFields: ['module']  // insist on importing ES6, only (pkg.module)
   }),
   //commonjs(),
   eslint(lintOpts),
   bundleSize(),
-  vue({
+  vue({   // for compiling '.vue' files
     template: {
       isProduction: production,
       compilerOptions: { preserveWhitespace: false }
@@ -46,6 +45,9 @@ const plugins = [
   }),
   buble(),
   watching && livereload('public'),
+
+  // Note: DOES NOT WORK. Not even if placed topmost.
+  // Track -> https://stackoverflow.com/questions/59984656/bringing-in-vue-via-npm-and-rollup
   alias({
     entries: {
       //'x-vue-runtime': 'vue/dist/vue.runtime.esm.js',
@@ -62,7 +64,8 @@ const plugins = [
 ];
 
 export default {
-  external,
+  external: ['vue'],
+  //external,
   plugins,
   input: 'src/entry.js',
   output: {

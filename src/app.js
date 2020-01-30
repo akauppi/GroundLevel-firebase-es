@@ -1,7 +1,6 @@
 
-import Vue from 'vue/dist/vue.esm.js';
-//import Vue from 'vue';
-//import Vue from 'x-vue-runtime';  // REMOVE
+import Vue from 'vue/dist/vue.runtime.esm.js';    // works
+//import Vue from 'vue';    // fails with: "Failed to resolve module specifier "vue". Relative references must start with either "/", "./", or "../"."
 
 import App from './App.vue';
 
