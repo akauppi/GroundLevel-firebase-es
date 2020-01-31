@@ -55,7 +55,6 @@ This works.
 Once `@rollup/plugin-alias` would work, let's do that!
 </font>
 
-
 ## 2. From npm
 
 Above way is good. CDN's are nice. But if you insist getting Vue via npm, this could work:

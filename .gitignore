@@ -1,6 +1,9 @@
 /node_modules/
 /public/bundle.*
 
+# Firebase hosting caches
+/.firebase/
+
 #needed?
 #/.eslintcache
 

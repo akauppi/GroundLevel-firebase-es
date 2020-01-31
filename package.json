@@ -8,7 +8,8 @@
   "author": "<akauppi@gmail.com>",
   "private": true,
   "scripts": {
-    "build": "rollup -c",
+    "build": "prod:build",
+    "prod:build": "rollup -c",
     "dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
     "clean": "(rm public/bundle.js 2> /dev/null || true)"
   },
@@ -32,10 +33,10 @@
     "vue-template-compiler": "^2.6.11"
   },
   "//dependencies": {
-    "//vue": "^2.6.11"
+    "//vue": "^2.6.11",
+    "//firebase": "^7.7.0"
   },
   "dependencies": {
-    "firebase": "^7.7.0",
     "firebaseui": "^4.4.0"
   },
   "//comments": {

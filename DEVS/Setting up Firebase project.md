@@ -1,4 +1,4 @@
-# Create Firebase project
+# Setting up the Firebase project
 
 Create a Firebase project in the [console](https://console.firebase.google.com):
 

@@ -36,11 +36,21 @@ This template has been used in the following applications:
 
 ### Firebase project
 
-See [DEVS/Creating Firebase project.md](DEVS/Creating Firebase project.md) for details.
+You need to:
 
-```
-$ firebase login
-```
+- create a Firebase project
+- enable hosting and authentication
+  - you can choose the set of authentication providers you like (we use Google)
+- `firebase login`
+- `firebase use --add` to activate the project for this working directory
+
+See [DEVS/Setting up a Firebase project.md](Setting up a Firebase project.md) for details.
+
+>Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
+
+<!-- Editor's note: no need to provide more details?...
+-->
+
 
 ## Getting started
 
@@ -50,13 +60,16 @@ Fetch dependencies:
 $ npm install
 ```
 
-### Development workflow
+There are currently no tests for the project. 😢
+
+## Development workflow
 
 ```
 $ npm run dev
 ```
 
 Serves the project locally, reacting to source code changes.
+
 
 ## Production build
 
@@ -71,7 +84,33 @@ Then open http://localhost:5000
 
 ## Deploy
 
-Deployment is left out from this template. You should be able to do it simply by `firebase deploy`.
+```
+$ firebase deploy
+
+=== Deploying to 'vue-rollup-example'...
+
+i  deploying hosting
+i  hosting[vue-rollup-example]: beginning deploy...
+i  hosting[vue-rollup-example]: found 3 files in ./public
+✔  hosting[vue-rollup-example]: file upload complete
+i  hosting[vue-rollup-example]: finalizing version...
+✔  hosting[vue-rollup-example]: version finalized
+i  hosting[vue-rollup-example]: releasing new version...
+✔  hosting[vue-rollup-example]: release complete
+
+✔  Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/vue-rollup-example/overview
+Hosting URL: https://vue-rollup-example.firebaseapp.com
+```
+
+You can now reach the app in the stated URL: [https://vue-rollup-example.firebaseapp.com](https://vue-rollup-example.firebaseapp.com)
+
+>Note: These instructions are not complete, nor does it make sense to duplicate Firebase documentation (it being awesome!! 🥳). Check e.g. [Test locally then deploy to your site](https://firebase.google.com/docs/hosting/deploying)
+
+<font color=red>tbd. write about A/B testing</font>
+
+<font color=red>tbd. write about monitoring</font>
 
 
 ## Help needed!
@@ -91,4 +130,7 @@ In particular:
 
 - [Handling 3rd-party JavaScript with Rollup](https://engineering.mixmax.com/blog/rollup-externals/) (blog, Dec 2017)
 
-
+- [Firebase web Codelab](https://codelabs.developers.google.com/codelabs/firebase-web/#1)
+  - A walk-through that we followed, and took inspiration from
+  - [source repo](https://github.com/firebase/friendlychat-web) (GitHub)
+ 
