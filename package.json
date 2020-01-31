@@ -17,11 +17,11 @@
     "//@rollup/plugin-alias": "^3.0.0",
     "//@rollup/plugin-buble": "^0.21.0",
     "//@rollup/plugin-commonjs": "^11.0.1",
-    "//rollup-plugin-filesize": "^6.2.1"
+    "//@rollup/plugin-replace": "^2.3.0",
+    "//rollup-plugin-filesize": "^6.2.1",
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^7.0.0",
-    "@rollup/plugin-replace": "^2.3.0",
     "concurrently": "^5.0.2",
     "eslint": "^6.8.0",
     "eslint-config-jwalker": "^5.2.0",

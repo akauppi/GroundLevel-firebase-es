@@ -2,7 +2,7 @@
 //import buble from '@rollup/plugin-buble';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
-import replace from '@rollup/plugin-replace';
+//import replace from '@rollup/plugin-replace';
 import { eslint } from 'rollup-plugin-eslint';
 //import bundleSize from 'rollup-plugin-filesize';
 import livereload from 'rollup-plugin-livereload';
@@ -54,6 +54,7 @@ const plugins = [
     }
   }), */
 
+  /* disabled
   // See -> https://vuejs.org/v2/guide/installation.html#Development-vs-Production-Mode
   //
   // Note: We need to replace it also for development. Value in non-prod does not matter.
@@ -63,6 +64,7 @@ const plugins = [
   replace({
     'process.env.NODE_ENV': `"${ production ? 'production':'' }"`
   })
+  */
 ];
 
 export default {

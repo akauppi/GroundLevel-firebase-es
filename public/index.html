@@ -6,26 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Firebase
-    - update the version number as needed
+    -   - latest versions -> https://firebase.google.com/support/release-notes/js
+    -
+    - Include only the Firebase features as you need.
     -->
     <script defer src="/__/firebase/7.8.0/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
     <script defer src="/__/firebase/7.8.0/firebase-auth.js"></script>
+    <!--
     <script defer src="/__/firebase/7.8.0/firebase-database.js"></script>
     <script defer src="/__/firebase/7.8.0/firebase-messaging.js"></script>
     <script defer src="/__/firebase/7.8.0/firebase-storage.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
+    -->
+    <!-- initialize the SDK (keep last) -->
     <script defer src="/__/firebase/init.js"></script>
 
-    <!-- Load Vue via CDN (see alternatives in -> DEVS/Getting Vue.md)
-    -->
-    <!--
-    <script type="module">
-      // tbd. How to import to global 'Vue', in one step?
-      //
-      import Vue_ from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js';
-      Vue = Vue_;
-    </script>
+    <!-- Vue is loaded via CDN imports in the code, where needed.  -> DEVS/Getting Vue.md
     -->
 
     <script type="module" src="/bundle.esm.js"></script>
