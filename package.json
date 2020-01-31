@@ -9,7 +9,6 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "//dev": "rollup -c -w",
     "dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
     "clean": "(rm public/bundle.js 2> /dev/null || true)"
   },

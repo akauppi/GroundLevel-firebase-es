@@ -66,7 +66,10 @@ const plugins = [
 ];
 
 export default {
-  external: ['vue'],    // Q: does this matter?
+  external: [
+    //'vue',
+    'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
+  ],
   plugins,
   input: 'src/entry.js',
   output: {
