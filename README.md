@@ -10,8 +10,20 @@ Based on [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue
 - `package-lock.json` disabled (just a matter of taste...)
 - added `dev` target for "watch" workflow
 - using `public` as the public folder (Firebase Hosting default); `dist` and `index.html` moved there.
+- targeting "evergreen" ([ES6 compatible](https://caniuse.com/#search=ES6%20modules), not IE11) browsers.
+  - for IE11 support, add [@rollup/plugin-buble](https://github.com/rollup/plugins/tree/master/packages/buble) to `package.json` and `rollup.config.js`
 
-In addition, we target "evergreen" browsers, expecting EcmaScript 6 native support.
+---
+  
+The repo provides a non-project-specific template for bringing a web app online, with Vue, Rollup and Firebase authentication.
+
+<!--
+This template has been used in the following applications:
+
+- ...
+
+! Your application reference appreciated here; even if it were commercial and closed source, you may be able to share the name. :)
+-->
 
 
 ## Requirements
@@ -74,7 +86,6 @@ Issues has more formal definition of shortcomings, and is the main forum of cont
 In particular:
 
 - help from Vue and/or Rollup aficiados, to check whether the configs are Best in class ☺️
-
 
 ## References
 

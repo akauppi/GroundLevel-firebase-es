@@ -1,5 +1,6 @@
 module.exports = {
-  extends: ['plugin:vue/recommended', 'jwalker'],
+  //extends: ['plugin:vue/recommended', 'jwalker'],   // as in jwalker's template
+  extends: ['plugin:vue/recommended'],
 
   rules: {
     'no-console': 0,
@@ -30,7 +31,8 @@ module.exports = {
           AssignmentExpression: true,
         },
       },
-    ],
+    ]
 
+    //... add more above
   }
 };
