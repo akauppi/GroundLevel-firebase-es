@@ -1,5 +1,4 @@
 //import alias from '@rollup/plugin-alias';
-//import buble from '@rollup/plugin-buble';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 //import replace from '@rollup/plugin-replace';
@@ -36,10 +35,11 @@ const plugins = [
       isProduction: production,   // note: could trust defaults to do the same, via 'process.env.NODE_ENV'
       compilerOptions: { preserveWhitespace: false }
     },
-    css: true
-  }),
+    css: true,
 
-  //buble(),
+    // Trying to survive -> https://github.com/vuejs/rollup-plugin-vue/issues/238
+    needMap: false
+  }),
 
   watching && livereload('public'),
 

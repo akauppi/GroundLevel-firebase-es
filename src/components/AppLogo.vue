@@ -4,23 +4,20 @@
 - The logo in top left corner; part of 'AppOverlay'.
 -->
 <template>
-  <div id="app-logo-NOTUSED">
+  <div class="app-logo">
     YOUR LOGO HERE!
   </div>
 </template>
 
 <style>
-  /* Presuming scoped CSS */
-  div {
-    margin: 20px 0;
-    padding: 10px 0;
-    border: 1px solid #333;
-    background-color: aqua;
+  .app-logo {
+    padding: 10px;
+    background-color: orange;
   }
 </style>
 
 <script>
   export default {
-    name: 'AppLogo'
+    //name: 'AppLogo'
   };
 </script>

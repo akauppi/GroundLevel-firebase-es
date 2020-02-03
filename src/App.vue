@@ -3,14 +3,16 @@
     <app-overlay />
 
     <!-- tbd. actual content here -->
-    <div>TO BE DONE 🏂</div>
+    <div id="to-be-done">
+      TO BE DONE 🏂
+    </div>
   </div>
 </template>
 
 <style>
-  div {
+  #to-be-done div {
     text-align: center;
-    vertical-align: center;
+    vertical-align: middle;
   }
 </style>
 

@@ -4,23 +4,21 @@
 - Information about the user, or 'Sign up' text.
 -->
 <template>
-  <div>
+  <div class="app-profile">
     <!-- tbd. if/else here, based on authentication -->
-    <a href="">Sign up</a>
+    <!-- tbd. make green for 'sign in', blue for profile (signed in) -->
+    <a href="">Sign in</a>
   </div>
 </template>
 
 <style>
-  /* Presuming scoped CSS */
-  div {
-    margin: 20px 0;
-    padding: 10px 0;
-    border: 1px solid #333;
+  .app-profile {
+    padding: 10px;
   }
 </style>
 
 <script>
   export default {
-    name: 'AppProfile'
+    //name: 'AppProfile'
   };
 </script>

@@ -7,23 +7,20 @@
 - Signed out: (not used)
 -->
 <template>
-  <div class="footer-NOTUSED">
+  <div class="app-footer">
     Copyright 2020
   </div>
 </template>
 
 <style>
-div {
-  margin: 20px 0;
-  padding: 10px 0;
-  border: 1px solid #333;
-
+.app-footer {
+  padding: 10px;
   text-align: center;
 }
 </style>
 
 <script>
 export default {
-  name: 'AppFooter'
+  //name: 'AppFooter'
 };
 </script>
