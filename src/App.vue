@@ -1,26 +1,24 @@
 <template>
-  <div id="app" class="layout">
-    <header>
-      <app-header title="Boilerplate App" />
-    </header>
-    <div class="body">
-      <main class="content">
-        <app-body />
-      </main>
-    </div>
-    <footer>
-      <app-footer />
-    </footer>
+  <div>
+    <app-overlay />
+
+    <!-- tbd. actual content here -->
+    <div>TO BE DONE 🏂</div>
   </div>
 </template>
 
+<style>
+  div {
+    text-align: center;
+    vertical-align: center;
+  }
+</style>
+
 <script>
-import AppHeader from './components/AppHeader.vue';
-import AppBody from './components/AppBody.vue';
-import AppFooter from './components/AppFooter.vue';
+import AppOverlay from './components/AppOverlay.vue';
 
 export default {
   name: 'App',
-  components: { AppHeader, AppBody, AppFooter }
+  components: { AppOverlay }
 };
 </script>

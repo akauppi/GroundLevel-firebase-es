@@ -31,8 +31,10 @@ This template has been used in the following applications:
 - `npm`
 - `firebase`
   - `npm install -g firebase-tools`
-- `vue` 3 CLI
+- `vue`
   - `npm install -g @vue/cli`
+
+>Note: `@vue/cli` is the new version; `vue-cli` shown in some tutorials is the one it deprecates. Note: Vue CLI version 3 doesn't mean Vue version 3. You can use it to target Vue 2 as well. :)
 
 ### Firebase project
 
@@ -133,4 +135,7 @@ In particular:
 - [Firebase web Codelab](https://codelabs.developers.google.com/codelabs/firebase-web/#1)
   - A walk-through that we followed, and took inspiration from
   - [source repo](https://github.com/firebase/friendlychat-web) (GitHub)
+ 
+- [Easily add sign-in to your Web app with FirebaseUI](https://firebase.google.com/docs/auth/web/firebaseui) (Firebase docs)
+
  

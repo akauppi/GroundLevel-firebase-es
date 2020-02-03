@@ -9,6 +9,8 @@
     -   - latest versions -> https://firebase.google.com/support/release-notes/js
     -
     - Include only the Firebase features as you need.
+    -
+    - Note: Firebase docs mention to put this in the 'body' - instead of 'head'. Is there a benefit for doing so?
     -->
     <script defer src="/__/firebase/7.8.0/firebase-app.js"></script>
     <script defer src="/__/firebase/7.8.0/firebase-auth.js"></script>
@@ -17,14 +19,32 @@
     <script defer src="/__/firebase/7.8.0/firebase-messaging.js"></script>
     <script defer src="/__/firebase/7.8.0/firebase-storage.js"></script>
     -->
+
     <!-- initialize the SDK (keep last) -->
     <script defer src="/__/firebase/init.js"></script>
 
+    <!-- FirebaseUI
+    -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
+    -
+    - tbd. update to 4.4.0
+    -->
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
     <!-- Vue is loaded via CDN imports in the code, where needed.  -> DEVS/Getting Vue.md
+    -
+    - tbd. We COULD bring it here, via CDN.
     -->
 
     <script type="module" src="/bundle.esm.js"></script>
+
+    <!-- DEBUG: can we import 'firebase' and 'firebaseui'?
+    <script>
+      import firebase from 'firebase';
+      import firebaseui from 'firebaseui';
+    </script>
   </head>
+
   <body>
     <!-- Note: We don't need to load Vue. Parts needing it will 'import' it themselves.
     -->
@@ -51,7 +71,6 @@
           alert('Error loading the Firebase SDK, check the console.');
         }
       });
-
     </script>
   </body>
 </html>
