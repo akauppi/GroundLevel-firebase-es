@@ -36,20 +36,10 @@
     - tbd. We COULD bring it here, via CDN.
     -->
 
-    <!-- Firebase UI initialization
-    -->
-    <script type="module">
-      import { uiInit } from '/firebaseui.js';
-      const elContainerSelector = '#firebaseui-auth-container';
-
-      document.addEventListener('DOMContentLoaded', () => {
-        uiInit(elContainerSelector);
-      } );
-    </script>
-
     <!-- Application
     -->
     <script type="module" src="/bundle.esm.js"></script>
+    <script src="../rollup.config.js"></script>
   </head>
 
   <body>

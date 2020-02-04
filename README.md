@@ -1,4 +1,6 @@
-# vue-rollup-example-with-firebase-auth
+# GroundLevel: firebase-web
+
+<!-- tbd. logo of GroundLevel -->
 
 Based on [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example).
 
@@ -46,7 +48,7 @@ You need to:
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
 
-See [DEVS/Setting up a Firebase project.md](Setting up a Firebase project.md) for details.
+See [DEVS/Setting up Firebase project](DEVS/Setting%20up%%20Firebase%20project.md) for details.
 
 >Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
 

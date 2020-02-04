@@ -2,7 +2,7 @@
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
-//import bundleSize from 'rollup-plugin-filesize';
+import fileSize from 'rollup-plugin-filesize';
 import livereload from 'rollup-plugin-livereload';
 import vue from 'rollup-plugin-vue';
 
@@ -26,7 +26,8 @@ const plugins = [
 
   eslint(lintOpts),
 
-  //bundleSize(),
+  // not really needed
+  production && fileSize(),
 
   // Needed for compiling '.vue' files.
   vue({
@@ -72,6 +73,10 @@ export default {
   ],
   plugins,
   input: 'src/entry.js',
+
+  // Note: Samples normally use 'iife' format for output, but we target ES6-capable browsers only, so _should_ be able
+  //    to use 'esm'.
+  //
   output: {
     file: 'public/bundle.esm.js',
     format: 'esm',
