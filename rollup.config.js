@@ -1,7 +1,6 @@
 //import alias from '@rollup/plugin-alias';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
-//import replace from '@rollup/plugin-replace';
 import { eslint } from 'rollup-plugin-eslint';
 //import bundleSize from 'rollup-plugin-filesize';
 import livereload from 'rollup-plugin-livereload';
@@ -37,7 +36,8 @@ const plugins = [
     },
     css: true,
 
-    // Trying to survive -> https://github.com/vuejs/rollup-plugin-vue/issues/238
+    // Avoid sourcemap errors when watching
+    //    -> https://github.com/vuejs/rollup-plugin-vue/issues/238
     needMap: false
   }),
 
@@ -53,23 +53,21 @@ const plugins = [
       'x-vue-cdn': 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
     }
   }), */
-
-  /* disabled
-  // See -> https://vuejs.org/v2/guide/installation.html#Development-vs-Production-Mode
-  //
-  // Note: We need to replace it also for development. Value in non-prod does not matter.
-  //
-  // tbd. Try whether we still need this. May not, if Vue comes from CDN (not npm).
-  //
-  replace({
-    'process.env.NODE_ENV': `"${ production ? 'production':'' }"`
-  })
-  */
 ];
 
 export default {
+  // ...
+  // tbd. Note: "If I remember correctly globals only works on iife modules and by extension umd ones"
+  //    -> https://stackoverflow.com/questions/49947250/how-do-rollup-externals-and-globals-work-with-esm-targets/50427603#50427603
+  //
+  globals: {
+    'firebase': 'firebase',
+    'firebaseui': 'firebaseui'
+  },
   external: [
     //'vue',
+    'firebase',
+    'firebaseui',
     'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
   ],
   plugins,
@@ -77,6 +75,9 @@ export default {
   output: {
     file: 'public/bundle.esm.js',
     format: 'esm',
+    paths: {    // tbd. is this correct??? -> https://stackoverflow.com/questions/44512249/rollup-globals-external
+      vue: 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
+    },
     sourcemap: true   // note: may be good to have source map even for production
   }
 };

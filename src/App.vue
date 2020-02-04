@@ -10,7 +10,7 @@
 </template>
 
 <style>
-  #to-be-done div {
+  #to-be-done {
     text-align: center;
     vertical-align: middle;
   }
