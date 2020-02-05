@@ -8,7 +8,7 @@
   "author": "<akauppi@gmail.com>",
   "private": true,
   "scripts": {
-    "build": "prod:build",
+    "build": "npm run prod:build",
     "prod:build": "rollup -c",
     "dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
     "clean": "(rm public/bundle.js 2> /dev/null || true)"

@@ -57,19 +57,10 @@ const plugins = [
 ];
 
 export default {
-  // ...
-  // tbd. Note: "If I remember correctly globals only works on iife modules and by extension umd ones"
-  //    -> https://stackoverflow.com/questions/49947250/how-do-rollup-externals-and-globals-work-with-esm-targets/50427603#50427603
-  //
-  globals: {
-    'firebase': 'firebase',
-    'firebaseui': 'firebaseui'
-  },
   external: [
-    //'vue',
-    'firebase',
-    'firebaseui',
-    'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
+    'vue',
+    //'firebase',
+    //'firebaseui',
   ],
   plugins,
   input: 'src/entry.js',
@@ -79,10 +70,29 @@ export default {
   //
   output: {
     file: 'public/bundle.esm.js',
+
+    // EXPERIMENTAL: testing '.preserveModules' (disabled '.file' if you use this)
+    //dir: 'public/bundle',
+    //preserveModules: true,
+
     format: 'esm',
-    paths: {    // tbd. is this correct??? -> https://stackoverflow.com/questions/44512249/rollup-globals-external
+
+    paths: {
+      // latest versions -> https://cdn.jsdelivr.net/npm/vue/
       vue: 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
     },
+
+    // tbd. Do we need to use 'globals'?
+    //
+    // Note: "If I remember correctly globals only works on iife modules and by extension umd ones"
+    //    -> https://stackoverflow.com/questions/49947250/how-do-rollup-externals-and-globals-work-with-esm-targets/50427603#50427603
+    //
+    //globals: { },
+
     sourcemap: true   // note: may be good to have source map even for production
+  },
+
+  watch: {
+    clearScreen: true
   }
 };

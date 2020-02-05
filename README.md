@@ -1,25 +1,38 @@
-# GroundLevel: firebase-web
+# GroundLevel: firebase-web-auth
 
 <!-- tbd. logo of GroundLevel -->
 
 Based on [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example).
 
-**Changes**
+Changes from the above:
 
 - Jonatas's code is unlicensed. This is MIT licensed.
-- Simplified `package.json` a bit (an app template doesn't need to be exported)
+- Simplified `package.json` a bit
 - updated dependencies
 - `package-lock.json` disabled (just a matter of taste...)
 - added `dev` target for "watch" workflow
-- using `public` as the public folder (Firebase Hosting default); `dist` and `index.html` moved there.
-- targeting "evergreen" ([ES6 compatible](https://caniuse.com/#search=ES6%20modules), not IE11) browsers.
+- using `public` as the public folder (Firebase Hosting default)
+- targeting "evergreen" ([ES6 compatible](https://caniuse.com/#search=ES6%20modules)) browsers.
   - for IE11 support, add [@rollup/plugin-buble](https://github.com/rollup/plugins/tree/master/packages/buble) to `package.json` and `rollup.config.js`
 
 ---
   
-The repo provides a non-project-specific template for bringing a web app online, with Vue, Rollup and Firebase authentication.
+The repo provides a non-project-specific template for bringing a web app with authentication online, using Vue, Rollup and Firebase.
+
+The choice of technologies (other than Firebase) can be changed. E.g. use of Svelte 3 instead of Vue at some point is a possibility.
+
+**Opinionated**
+
+As any template, one has made decisions. These mostly fall to how Firebase authentication is being used. It's good you know about these - other ways are also possible but you'd need to tinker with the code.
+
+- Using [Firebase UI](https://firebase.google.com/docs/auth/web/firebaseui) library
+- Using redirect (not popup) method for sign in. Firebase UI provides both. The choice is because of how we want the app to behave.
+- Instead of a 'sign in' menu (in place of the user profile), we require the user to always sign in. Another approach could have been to keep a "website" integrated with the app, but in this case we do an "app" only and a website (which requires no authentication) would be maintained separately.
+
+As stated, you can tinker with the code if you don't feel these choices match your needs.
 
 <!--
+**Used in**
 This template has been used in the following applications:
 
 - ...

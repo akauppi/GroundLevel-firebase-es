@@ -6,6 +6,7 @@
 <template>
   <div class="app-overlay">
     <app-logo class="fixed-top-left" />
+    <!-- only show if signed in -->
     <app-profile class="fixed-top-right" />
     <app-footer class="fixed-bottom-line" />
   </div>

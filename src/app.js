@@ -4,7 +4,8 @@
 //
 //  latest versions -> https://cdn.jsdelivr.net/npm/vue@2.6.11/ + menu top-right
 //
-import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js';  // works (CDN)
+//import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js';  // works (CDN)
+import Vue from 'vue';
 
 import App from './App.vue';
 
