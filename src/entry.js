@@ -1,8 +1,13 @@
 /*
-* Firebase UI initialization
+* src/entry.js
 *
-* Note: Here since 'index.html' doesn't get processed through Rollup (and we use 'import' for getting 'firebaseui'
-*       and 'firebase').
+* The entry point for the bundle.
+*
+* Handles:
+*   - Firebase UI (non-application specific parts); together with 'index.html' that loads it
+*
+* Delegates:
+*   - Application stuff to './app'
 */
 const elContainerSelector = '#firebaseui-auth-container';
 
@@ -61,10 +66,17 @@ const uiConfig = {
     },
 };
 
-// tbd. Could use Promises 'firebaseProm' and 'firebaseuiProm', that materialize to the loaded globals. This way,
-//      '.addEventListener' could be shuffed into index.html. (we don't really want to deal with 'document', here)
-//
-document.addEventListener('DOMContentLoaded', () => {
+firebaseLoadedProm.then( () => {
+    // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+    // // The Firebase SDK is initialized and available here!
+    //
+    // firebase.auth().onAuthStateChanged(user => { });
+    // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
+    // firebase.messaging().requestPermission().then(() => { });
+    // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+    //
+    // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+
     // Initialize the FirebaseUI Widget using Firebase
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
@@ -82,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         ui.start( elContainerSelector, uiConfig);
+
+        console.log("FirebaseUI initialized.")
     }
 } );
 

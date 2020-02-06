@@ -42,23 +42,13 @@ const plugins = [
     needMap: false
   }),
 
-  watching && livereload('public'),
-
-  /*
-  // Note: DOES NOT WORK. Not even if placed topmost.
-  // Track -> https://stackoverflow.com/questions/59984656/bringing-in-vue-via-npm-and-rollup
-  alias({
-    entries: {
-      //'x-vue-runtime': 'vue/dist/vue.runtime.esm.js',
-      //vue: 'vue/dist/vue.esm.js'   // runtime + compiler
-      'x-vue-cdn': 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
-    }
-  }), */
+  watching && livereload('public')
 ];
 
 export default {
   external: [
     'vue',
+    'vue-router'
     //'firebase',
     //'firebaseui',
   ],
@@ -78,8 +68,13 @@ export default {
     format: 'esm',
 
     paths: {
-      // latest versions -> https://cdn.jsdelivr.net/npm/vue/
-      vue: 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js'
+      // Vue.js
+      //    latest versions -> https://cdn.jsdelivr.net/npm/vue/
+      vue: 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js',
+
+      // Vue router
+      //    latest versions -> https://cdn.jsdelivr.net/npm/vue-router/
+      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js'
     },
 
     // tbd. Do we need to use 'globals'?

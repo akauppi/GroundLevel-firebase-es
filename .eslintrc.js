@@ -15,7 +15,7 @@ module.exports = {
 
     // AK 30-Jan-20
     'max-len': [1, {    // 1: warning
-      code: 80,
+      code: 100,
       tabWidth: 2,
       ignoreUrls: true,
       ignoreComments: true  // AK
