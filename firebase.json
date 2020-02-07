@@ -8,6 +8,7 @@
     ],
     "rewrites": [
       {
+        "//": "Single-page application setup, as indicated by vue-router docs. (also default)",
         "source": "**",
         "destination": "/index.html"
       }

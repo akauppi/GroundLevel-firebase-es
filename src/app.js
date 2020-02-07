@@ -7,7 +7,7 @@ const app = new Vue({
     signedIn: null    // Boolean, once Firebase UI sets it      // tbd. how to make this read-only to others? #vue-advice
   },
   render: h => h(App)    // Q: what's the difference between this and 'el: ...'. Which should we use?  #vue-advice
-});
+}).$mount('app');
 
 /*
 * Keep 'app.signedIn' up to date.
