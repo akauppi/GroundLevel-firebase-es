@@ -1,0 +1,10 @@
+/*
+* src/entry.js
+*
+* The entry point for the bundle.
+*
+* tbd. This WILL eventually merge with 'app.js'.
+*/
+import './firebase-init';
+import './app';
+

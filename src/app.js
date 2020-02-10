@@ -1,17 +1,22 @@
 import Vue from 'vue';    // ignore IDE warning (Q: how to disable the warning in WebStorm?)
-
 import App from './App.vue';
+import router from './router';
+
+//Vue.config.productionTip = false  // tbd. what is?
 
 const app = new Vue({
+  router,
+  /*
   data: {
     signedIn: null    // Boolean, once Firebase UI sets it      // tbd. how to make this read-only to others? #vue-advice
   },
+  */
   render: h => h(App)    // Q: what's the difference between this and 'el: ...'. Which should we use?  #vue-advice
 }).$mount('app');
 
 /*
 * Keep 'app.signedIn' up to date.
-*/
+*_/
 firebaseLoadedProm.then( () => {
   firebase.auth().onAuthStateChanged( (user) => {
     if (user) {   // user is signed in
@@ -45,7 +50,4 @@ firebaseLoadedProm.then( () => {
     console.log(error);
   });
 });
-
-export { app };   // Q: is this needed?  If we use 'el' instead of 'render', do we need it?
-
-
+*/

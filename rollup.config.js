@@ -53,7 +53,7 @@ export default {
     //'firebaseui',
   ],
   plugins,
-  input: 'src/entry.js',
+  input: 'src/app.js',
 
   // Note: Samples normally use 'iife' format for output, but we target ES6-capable browsers only, so _should_ be able
   //    to use 'esm'.

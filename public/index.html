@@ -27,6 +27,11 @@
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
     - tbd. consider adding 'defer' - does it matter to us?
+    -
+    - Note: If we wish to import these via Rollup alias (and still CDN), we can. Something like:
+    -       <<
+    -           `import "firebaseui/dist/firebaseui.css";`
+    -       <<
     -->
     <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
@@ -55,6 +60,8 @@
     </script>
 
     <!-- Application
+    -
+    - tbd. Write that out. Do we initialize the bundle anyhow also after DOM has loaded? Then no need for the Firebase promise.
     -->
     <script type="module" src="/bundle.esm.js"></script>
   </head>

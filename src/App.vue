@@ -1,8 +1,21 @@
 <template>
+  <!-- No navigation - we expect to automatically fall to the right page
+  -->
+  <div>NADA! You shouldn't be here! 😱</div>
+  <!-- disabled
+  <main>
+    <nav>
+      <router-link to="/signIn"><span>SignIn</span></router-link>
+      <router-link to="/"><span>SomeIn</span></router-link>
+    </nav>
+    <router-view/>
+  </main>
+  -->
+  <!-- was (REMOVE)
   <div>
     <app-overlay />
 
-    <!-- Actual app content -->
+    <!_-- Actual app content --_>
     <div v-if="this.$root.signedIn" id="to-be-done">
       TO BE DONE 🏂
     </div>
@@ -20,6 +33,7 @@
       </div>
     </div>
   </div>
+  -->
 </template>
 
 <style>
@@ -39,10 +53,10 @@
 </style>
 
 <script>
-import AppOverlay from './components/AppOverlay.vue';
+//import AppOverlay from './components/AppOverlay.vue';
 
 export default {
   //name: 'App',
-  components: { AppOverlay }
+  //components: { AppOverlay }
 };
 </script>
