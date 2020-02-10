@@ -7,16 +7,22 @@
 - Signed out: (not used)
 -->
 <template>
-  <div class="app-footer">
+  <div class="app-footer fixed-bottom">
     Copyright 2020
   </div>
 </template>
 
-<style>
-.app-footer {
-  padding: 10px;
-  text-align: center;
-}
+<style scoped>
+  .app-footer {
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .fixed-bottom {
+    position: fixed;
+    bottom: 0;
+  }
 </style>
 
 <script>

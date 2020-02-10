@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Boilerplate App</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Firebase
     -   - latest versions -> https://firebase.google.com/support/release-notes/js
     -
-    - Include only the Firebase features as you need.
+    - Note: Firebase is loaded in 'index.html' because the '/__/' method allows us to get configuration nicely, both
+    -     in development and when deployed via Firebase Hosting. Other CDN-based code is imported via Rollup paths.
+    -
+    - Include only the Firebase features that you need.
     -
     - Note: Firebase docs mention to put this in the 'body' - instead of 'head'. Is there a benefit for doing so?
     -->
@@ -23,41 +25,24 @@
     <!-- initialize the SDK (keep last) -->
     <script defer src="/__/firebase/init.js"></script>
 
-    <!-- FirebaseUI
-    -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
+    <!-- Firebase UI
     -
-    - tbd. consider adding 'defer' - does it matter to us?
+    - Disclaimer: We TRIED to make this load via 'import' but both approaches were problematic:
+    -   a) via 'rollup.config.js' mapping; CSS wouldn't load
+    -   b) via 'npm', it'd want 'firebase/app' and 'firebase/auth' as imported dependencies, but we already have them
+    -      here, via CDN.
     -
-    - Note: If we wish to import these via Rollup alias (and still CDN), we can. Something like:
-    -       <<
-    -           `import "firebaseui/dist/firebaseui.css";`
-    -       <<
+    - So (for now??) let's swallow pride and load it here. #gulp
+    -
+    - The damage?
+    -   - .js (ESM) is 200kB
+    -   - .css is 40kB
+    -
+    -   'npm' dependency would likely also allow tree-shaking, keeping only the code needed for the authentication
+    -   methods we actually want to use.
     -->
     <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
-
-    <!-- Basic loading check of 'firebase' and 'firebaseui' close to where we load them. Nothing app specific, here.
-    -->
-    <script>
-      firebaseLoadedProm = new Promise( (resolve, reject) => {
-
-        document.addEventListener('DOMContentLoaded', () => {   // Q: does this fire just once, or multiple times?
-          try {
-            let app = firebase.app();
-            let features = ['auth'].filter(feature => typeof app[feature] === 'function');
-            console.log(`Firebase SDK loaded with ${features.join(', ')}`);
-            resolve();
-          } catch (e) {
-            console.error(e);
-            alert('Error loading the Firebase SDK, check the console.');
-            reject(e);
-          }
-        });
-
-      } );
-
-      const firebaseUiProm = Promise.resolve(firebaseui);
-    </script>
 
     <!-- Application
     -

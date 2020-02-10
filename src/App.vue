@@ -1,62 +1,33 @@
+<!--
+- src/App.vue
+-
+- The frame of the application - same for all pages
+-->
 <template>
-  <!-- No navigation - we expect to automatically fall to the right page
-  -->
-  <div>NADA! You shouldn't be here! 😱</div>
-  <!-- disabled
-  <main>
-    <nav>
-      <router-link to="/signIn"><span>SignIn</span></router-link>
-      <router-link to="/"><span>SomeIn</span></router-link>
-    </nav>
-    <router-view/>
-  </main>
-  -->
-  <!-- was (REMOVE)
   <div>
-    <app-overlay />
-
-    <!_-- Actual app content --_>
-    <div v-if="this.$root.signedIn" id="to-be-done">
-      TO BE DONE 🏂
-    </div>
-
-    <div v-else>
-      <div id="stranger">
-        <h1>WELCOME STRANGER!</h1>
-        <div>
-          Would you like to log in - you can do it anonymously..?  No login, no app.
-        </div>
-        <div id="firebaseui-auth-container" />
-        <div>
-          <a href="https://github.com/akauppi/GroundLevel-firebase-web">About the application</a>
-        </div>
-      </div>
-    </div>
+    <!-- tbd. IDE warnings "unknown HTML tag" - how to remove those? #help -->
+    <app-logo />
+    <app-profile />   <!-- tbd. hide when not signed in -->
+    <router-view />
+    <app-footer />
   </div>
-  -->
 </template>
 
-<style>
-  #to-be-done {
-    text-align: center;
-  }
-
-  #stranger {
-    text-align: center;
-    margin-top: 150px;
-  }
-
-  #firebaseui-auth-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
-  }
+<style scoped>
 </style>
 
 <script>
-//import AppOverlay from './components/AppOverlay.vue';
+  import AppLogo from './components/AppLogo.vue';
+  import AppProfile from './components/AppProfile.vue';
+  import AppFooter from './components/AppFooter.vue';
 
-export default {
-  //name: 'App',
-  //components: { AppOverlay }
-};
+  export default {
+    components: {
+      AppLogo, AppProfile, AppFooter
+    },
+    // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
+    mounted() {
+      document.title = "GroundLevel with Firebase-auth"   // your title here
+    },
+  }
 </script>

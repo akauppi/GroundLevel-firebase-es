@@ -28,3 +28,9 @@
    ```
        { path: '*', component: NotFoundComponent }
    ```
+
+## Vue 
+
+- [ ] Use `scoped` styles where-ever possible (and less id's)
+
+

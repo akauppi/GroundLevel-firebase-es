@@ -1,4 +1,3 @@
-//import alias from '@rollup/plugin-alias';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
@@ -48,12 +47,12 @@ const plugins = [
 export default {
   external: [
     'vue',
-    'vue-router'
-    //'firebase',
-    //'firebaseui',
+    'vue-router' //,
+    //'firebase-ui',
+    //'firebase-ui.css'
   ],
   plugins,
-  input: 'src/app.js',
+  input: 'src/entry.js',
 
   // Note: Samples normally use 'iife' format for output, but we target ES6-capable browsers only, so _should_ be able
   //    to use 'esm'.
@@ -62,7 +61,7 @@ export default {
     file: 'public/bundle.esm.js',
 
     // EXPERIMENTAL: testing '.preserveModules' (disabled '.file' if you use this)
-    //dir: 'public/bundle',
+    //dir: 'public/dist',
     //preserveModules: true,
 
     format: 'esm',
@@ -74,7 +73,15 @@ export default {
 
       // Vue router
       //    latest versions -> https://cdn.jsdelivr.net/npm/vue-router/
-      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js'
+      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js',
+
+      // Firebase UI
+      //    latest versions -> https://github.com/firebase/firebaseui-web/releases
+      //
+      // Note: Make the CSS URL match in 'SignIn.vue'
+      //
+      //"firebase-ui": 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js',
+      //"firebase-ui.css": 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css'
     },
 
     // tbd. Do we need to use 'globals'?

@@ -15,13 +15,13 @@
   },
   "//devDependencies": {
     "//@rollup/plugin-alias": "^3.0.0",
-    "//@rollup/plugin-commonjs": "^11.0.1"
+    "//@rollup/plugin-commonjs": "^11.0.1",
+    "//eslint-config-jwalker": "^5.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^7.0.0",
     "concurrently": "^5.0.2",
     "eslint": "^6.8.0",
-    "eslint-config-jwalker": "^5.2.0",
     "eslint-plugin-vue": "^6.1.2",
     "rollup": "^1.30.1",
     "rollup-plugin-eslint": "^7.0.0",
@@ -30,14 +30,17 @@
     "rollup-plugin-vue": "^5.1.6",
     "vue-template-compiler": "^2.6.11"
   },
-  "//dependencies": {
-    "//vue": "^2.6.11",
-    "//firebase": "^7.7.0"
-  },
   "dependencies": {
     "firebaseui": "^4.4.0"
   },
   "//comments": {
+    "dependencies": {
+      "firebaseui": [
+        "Decided to load via 'npm' (gets baked into our bundle), instead of a) in 'index.html' or b) in 'rollup.config.js'",
+        "Default CDN (https://www.gstatic.com/firebasejs/ui/4.4.0/...) doesn't seem to provide an ES6 module, but npm does.",
+        "Also, wasn't able to import CSS from CDN. Ideally, we'd be able to map these in 'rollup.config.js'."
+      ]
+    },
     "devDependencies": {
       "eslint-config-jwalker": "Provides a default set of ESLint configs; we can override in '.eslintrc.js'."
     },
