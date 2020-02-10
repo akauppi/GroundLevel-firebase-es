@@ -5,9 +5,8 @@
 -->
 <template>
   <div>
-    <!-- tbd. IDE warnings "unknown HTML tag" - how to remove those? #help -->
     <app-logo />
-    <app-profile />   <!-- tbd. hide when not signed in -->
+    <app-profile v-if="this.$root.signedIn" />
     <router-view />
     <app-footer />
   </div>
@@ -20,8 +19,10 @@
   import AppLogo from './components/AppLogo.vue';
   import AppProfile from './components/AppProfile.vue';
   import AppFooter from './components/AppFooter.vue';
+  import 'vue-router';
 
   export default {
+    name: 'App',     // tbd. is this needed?
     components: {
       AppLogo, AppProfile, AppFooter
     },
@@ -29,5 +30,16 @@
     mounted() {
       document.title = "GroundLevel with Firebase-auth"   // your title here
     },
+    methods: {
+      signedIn: async () => {   // Promise of Boolean
+        return new Promise((resolve, reject) => {
+          const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+            console.log(`signedIn: ${user}`);
+            unsubscribe();
+            resolve(user !== null);
+          }, reject);
+        })
+      }
+    }
   }
 </script>

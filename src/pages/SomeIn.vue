@@ -14,6 +14,7 @@
 
 <script>
   export default {
+    name: 'SomeIn',     // tbd. is this needed?
     data() {
       return{
         name: ''    // tbd. can we set it to 'null'?

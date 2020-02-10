@@ -15,7 +15,7 @@ module.exports = {
     'vue/no-multi-spaces': 1,    // 0: off, 1: warn, 2: error
 
     // Without this, the toolchain doesn't pass HTML comments in '.vue' file's template section through. #sniff
-    'vue/comment-directive': 0,
+    //'vue/comment-directive': 0,
 
     /*
     'no-console': 0,

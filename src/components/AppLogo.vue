@@ -23,6 +23,6 @@
 
 <script>
   export default {
-    //name: 'AppLogo'
+    name: 'AppLogo'
   };
 </script>

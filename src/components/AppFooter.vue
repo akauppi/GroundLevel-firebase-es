@@ -27,6 +27,6 @@
 
 <script>
 export default {
-  //name: 'AppFooter'
+  name: 'AppFooter'
 };
 </script>

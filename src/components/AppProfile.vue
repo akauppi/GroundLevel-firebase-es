@@ -30,7 +30,7 @@
 
 <script>
   export default {
-    //name: 'AppProfile'
+    name: 'AppProfile',
     data() {
       return {
         // tbd. provide it as read-only #vue

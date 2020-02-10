@@ -3,8 +3,6 @@
 -->
 <template>
   <section>
-    <app-logo />
-
     <div id="stranger">
       <h1>WELCOME STRANGER!</h1>
       <div>
@@ -12,6 +10,7 @@
       </div>
       <div id="firebaseui-auth-container" />
       <div>
+        <!-- eslint-disable-next-line vue/max-attributes-per-line -->
         <a href="https://github.com/akauppi/GroundLevel-firebase-web" target="_blank">About the application</a>
       </div>
     </div>
@@ -39,10 +38,6 @@
 
   // If we have it via 'npm':
   //import { auth as firebaseUi_auth } from 'firebaseui/dist/esm.js';  // npm
-  //const ui = new firebaseUi_auth.AuthUI(firebase.auth());
-
-  // Directly loaded
-  const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
   const uiConfig = {
     signInSuccessUrl: "/somein",    // tbd. use 'redirect' query param (default to some main page)
@@ -95,7 +90,13 @@
   };
 
   export default {
+    name: 'SignIn',     // tbd. is this needed?
     mounted() {
+      //const ui = new firebaseUi_auth.AuthUI(firebase.auth());
+
+      // Directly loaded
+      const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
       // Note: Checking '.isPendingRedirect' is connected to using 'firebase.auth.EmailAuthProvider', but it doesn't harm
       //      for other means.
       //
