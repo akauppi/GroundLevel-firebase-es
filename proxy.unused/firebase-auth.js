@@ -1,5 +1,5 @@
 /*
-* proxies/firebase-auth.js
+* proxy/firebase-auth.js
 *
 * Reverse-engineered from 'firebase', 'firebaseui' and '@firebase/auth' npm sources, to tie npm 'firebaseui' to use
 * the CDN-loaded Firebase as its peer dependency.

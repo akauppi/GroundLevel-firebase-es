@@ -1,5 +1,17 @@
 <!--
 - src/pages/SignIn.vue
+-
+- Note: Only this page needs 'firebaseui'. We tried pulling it via npm but it has problems (bloating the bundle by 200k;
+-     not properly depending on latest '@firebase/...' npm modules but earlier ones. Got all of that to work, but
+-     the idea of isolating the whole thing here took over.
+-
+-     Cannot just add '<script>' to the template, though. Vue would give (build time):
+-       <<
+-         [rollup] Error: Templates should only be responsible for mapping the state to the UI. Avoid placing tags with \
+-                   side-effects in your templates, such as <script>, as they will not be parsed.
+-       <<
+-
+-     ..but we can inject the tags into 'head', at runtime.
 -->
 <template>
   <section>
@@ -36,7 +48,7 @@
 <script>
   import { allowAnonymousAuth } from '../config.js';
 
-  import { auth as firebaseUi_auth } from 'firebaseui';  // npm
+  //import { auth as firebaseUi_auth } from 'firebaseui';  // npm
 
   const uiConfig = {
     signInSuccessUrl: "/somein",    // tbd. use 'redirect' query param (default to some main page)
@@ -47,7 +59,9 @@
       //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
       //firebase.auth.GithubAuthProvider.PROVIDER_ID,
       //firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-      allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+
+      // tbd. Enable this later. Does it really use 'firebaseui'? (we don't have it here, yet; need to make this a factory)
+      //allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
     ],
     autoUpgradeAnonymousUsers: allowAnonymousAuth,
 
@@ -88,13 +102,57 @@
     }
   };
 
+  /*
+  * Inject FirebaseUI to the current page. (see comments at the top for why)
+  *
+  * Note: Svelte 3 has header directives. We could do all this declaratively, there. #just-saying
+  */
+  function injectFirebaseUI() {
+    console.log("INJECTING FIREBASE UI");   // DEBUG
+
+    // For what we need, see -> https://github.com/firebase/firebaseui-web#option-1-cdn
+    //  <<
+    //    <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"> < /script>
+    //    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
+    //  <<
+
+    const a = document.createElement('script');
+      //
+      a.src = 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js';
+
+    const b = document.createElement('link');
+      //
+      b.type = 'text/css';
+      b.rel = 'stylesheet';
+      b.href = 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css';
+
+    // see -> https://stackoverflow.com/questions/14910196/how-to-add-multiple-divs-with-appendchild/19759120#answer-14910308
+    const tmp = document.createDocumentFragment();
+      //
+      tmp.appendChild(a);
+      tmp.appendChild(b);
+
+    document.head.appendChild(tmp);
+
+    console.log("CSS and SCRIPT FOR FIREBASE UI should now be there. Are they?");   // DEBUG
+  }
+
   export default {
     name: 'SignIn',     // tbd. is this needed?
-    mounted() {
-      //const ui = new firebaseUi_auth.AuthUI(firebase.auth());
 
-      // Directly loaded
-      const ui = new firebaseUi_auth.AuthUI(firebase.auth());
+    created() {
+      console.log("SignIn created");  // DEBUG
+      injectFirebaseUI()
+    },
+
+    mounted() {
+      console.log("SignIn mounted");  // DEBUG
+
+      if (!firebaseui) {
+        throw "We're here too soon! Added elements didn't come to life, yet!"
+      }
+
+      const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
       // Note: Checking '.isPendingRedirect' is connected to using 'firebase.auth.EmailAuthProvider', but it doesn't harm
       //      for other means.

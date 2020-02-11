@@ -1,5 +1,5 @@
 /*
-* proxies/firebase-app.js
+* proxy/firebase-app.js
 *
 * Reverse-engineered from 'firebase', 'firebaseui' and '@firebase/app' npm sources, to tie npm 'firebaseui' to use
 * the CDN-loaded Firebase as its peer dependency.

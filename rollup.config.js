@@ -1,5 +1,5 @@
-import alias from '@rollup/plugin-alias';
-import commonjs from '@rollup/plugin-commonjs';
+//import alias from '@rollup/plugin-alias';
+//import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
 import fileSize from 'rollup-plugin-filesize';
@@ -19,6 +19,7 @@ const lintOpts = {
 };
 
 const plugins = [
+  /* Not needed (keep around though, may be handy!)
   alias({
     entries: [
       // 'firebaseui' wants 'firebase/[app|auth]' as given. It does *not* use the recent '@firebase/app' and '@firebase/auth'
@@ -28,11 +29,12 @@ const plugins = [
       { find: 'firebase/auth', replacement: './proxy/firebase-auth.js' },    // import 'firebase/auth' (within npm 'firebaseui/dist/esm.js')
     ]
   }),
+  */
 
   resolve({
     mainFields: ['module']  // insist on importing ES6, only (pkg.module)
   }),
-  commonjs(),
+  //commonjs(),
 
   eslint(lintOpts),
 
