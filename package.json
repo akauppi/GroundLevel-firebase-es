@@ -31,11 +31,6 @@
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {
-    "@firebase/app": "^0.5.4",
-    "@firebase/auth": "^0.13.5",
-    "firebase": "^7.8.1",
-    "firebase-app": "0.0.1",
-    "firebase-auth": "^0.1.2",
     "firebaseui": "^4.4.0"
   },
   "//comments": {
