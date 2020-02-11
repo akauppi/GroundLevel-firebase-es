@@ -21,43 +21,55 @@
     <script defer src="/__/firebase/7.8.0/firebase-messaging.js"></script>
     <script defer src="/__/firebase/7.8.0/firebase-storage.js"></script>
     -->
-
-    <!--
-    // tbd. If we can make 'import "firebase/app"' get something, and 'import "firebase/auth"' get something else,
-    //    that'd allow Firebase UI to be loaded via 'npm' - which liiiiikely would be the best way (tree-shaking).
-    //    #help 0)
-    -->
-
     <!-- initialize the SDK (keep last) -->
-    <script defer src="/__/firebase/init.js"></script>
+    <!--
+    <script type="module">
+      import '@firebase/app';
+    </script>
+    -->
+    <script defer src="/__/firebase/init.js"></script>  <!-- calls 'firebase.initializeApp({ ... })' -->
 
     <!-- Firebase UI
     -
-    - Disclaimer: We TRIED to make this load via 'import' but both approaches were problematic:
-    -   a) via 'rollup.config.js' mapping; CSS wouldn't load
-    -   b) via 'npm', it'd want 'firebase/app' and 'firebase/auth' as imported dependencies, but we already have them
-    -      here, via CDN.
+    - Bringing this in via 'npm', but CSS here. Wasn't able to import the CSS. :R
     -
-    - So (for now??) let's swallow pride and load it here. #gulp
+    - Why npm?
+    -   - Because we can
+    -   - Tree shaking should reduce the size of the library (from 200kB); only bringing in the authentication methods
+    -     your app uses.
+    -   - CDN didn't serve ES modules (didn't find it) but 'npm' has it.
     -
-    - The damage?
-    -   - .js (ESM) is 200kB
-    -   - .css is 40kB
-    -
-    -   'npm' dependency would likely also allow tree-shaking, keeping only the code needed for the authentication
-    -   methods we actually want to use.
+    - NOTE: Keep the CSS version here same as the library version in 'package.json'.
     -->
-    <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
+    <!-- disabled
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
+    -->
+
+    <!--
+    - Checking that Firebase loaded properly
+    -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {   // Q: does this fire just once, or after navigations?
+        try {
+          console.log("!!! JUST AT FIRST LOAD?");    // DEBUG
+
+          const app = firebase.app();
+          const features = ['auth'].filter(feature => typeof app[feature] === 'function');
+          console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
+
+        } catch (e) {
+          console.error(e);
+          alert('Error loading the Firebase SDK, check the console.');
+        }
+      });
+    </script>
 
     <!-- Application
-    -
-    - tbd. Write that out. Do we initialize the bundle anyhow also after DOM has loaded? Then no need for the Firebase promise.
     -->
     <script type="module" src="/bundle.esm.js"></script>
   </head>
 
   <body>
-    <app></app>
+    <div id="app"></div>
   </body>
 </html>

@@ -29,8 +29,18 @@
        { path: '*', component: NotFoundComponent }
    ```
 
-## Vue 
+## npm
 
-- [ ] Use `scoped` styles where-ever possible (and less id's)
+- [ ] Load FirebaseUI via `npm`.  This means you must:
+  - figure out a way to serve `import 'firebase/app'` and `import 'firebase/auth'`, from the `firebase` global loaded to globals. :R
+  - figure out a way to fetch and inject the CSS (or just keep it in the `index.html` which would be simple)
 
+
+## Firebaseui
+
+- [ ] It should depend directly on `@firebase/app` and `@firebase/auth`, instead of `firebase` - as it now does.
+  - [ ] Track this (link here, if none, make one)
+
+  
+  
 

@@ -14,11 +14,11 @@
     "clean": "(rm public/bundle.js 2> /dev/null || true)"
   },
   "//devDependencies": {
-    "//@rollup/plugin-alias": "^3.0.0",
-    "//@rollup/plugin-commonjs": "^11.0.1",
     "//eslint-config-jwalker": "^5.2.0"
   },
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.0.0",
+    "@rollup/plugin-commonjs": "^11.0.1",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "concurrently": "^5.0.2",
     "eslint": "^6.8.0",
@@ -31,6 +31,11 @@
     "vue-template-compiler": "^2.6.11"
   },
   "dependencies": {
+    "@firebase/app": "^0.5.4",
+    "@firebase/auth": "^0.13.5",
+    "firebase": "^7.8.1",
+    "firebase-app": "0.0.1",
+    "firebase-auth": "^0.1.2",
     "firebaseui": "^4.4.0"
   },
   "//comments": {

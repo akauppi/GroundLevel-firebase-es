@@ -6,10 +6,11 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-Vue.use(VueRouter);     // tbd. what for?
+// "This has to be done before you start your app by calling new Vue()."
+Vue.use(VueRouter);
 
 // Pages
-// note: not using lazy loading.
+// note: not using lazy loading (didn't get it to work). #help
 //
 import pageSignIn from './pages/SignIn.vue';
 import pageSomeIn from './pages/SomeIn.vue';

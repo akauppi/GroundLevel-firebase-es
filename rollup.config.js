@@ -1,4 +1,5 @@
-//import commonjs from '@rollup/plugin-commonjs';
+import alias from '@rollup/plugin-alias';
+import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
 import fileSize from 'rollup-plugin-filesize';
@@ -18,10 +19,20 @@ const lintOpts = {
 };
 
 const plugins = [
+  alias({
+    entries: [
+      // 'firebaseui' wants 'firebase/[app|auth]' as given. It does *not* use the recent '@firebase/app' and '@firebase/auth'
+      // nor does it care where they come from (CDN in 'index.html'). We prepared little proxies to keep it pleased.
+      //
+      { find: 'firebase/app', replacement: './proxy/firebase-app.js' },    // import * from 'firebase/app' (within npm 'firebaseui/dist/esm.js')
+      { find: 'firebase/auth', replacement: './proxy/firebase-auth.js' },    // import 'firebase/auth' (within npm 'firebaseui/dist/esm.js')
+    ]
+  }),
+
   resolve({
     mainFields: ['module']  // insist on importing ES6, only (pkg.module)
   }),
-  //commonjs(),
+  commonjs(),
 
   eslint(lintOpts),
 
@@ -47,9 +58,7 @@ const plugins = [
 export default {
   external: [
     'vue',
-    'vue-router' //,
-    //'firebase-ui',
-    //'firebase-ui.css'
+    'vue-router'
   ],
   plugins,
   input: 'src/entry.js',
@@ -73,15 +82,7 @@ export default {
 
       // Vue router
       //    latest versions -> https://cdn.jsdelivr.net/npm/vue-router/
-      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js',
-
-      // Firebase UI
-      //    latest versions -> https://github.com/firebase/firebaseui-web/releases
-      //
-      // Note: Make the CSS URL match in 'SignIn.vue'
-      //
-      //"firebase-ui": 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js',
-      //"firebase-ui.css": 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css'
+      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js'
     },
 
     // tbd. Do we need to use 'globals'?

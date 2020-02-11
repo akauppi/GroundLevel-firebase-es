@@ -36,8 +36,7 @@
 <script>
   import { allowAnonymousAuth } from '../config.js';
 
-  // If we have it via 'npm':
-  //import { auth as firebaseUi_auth } from 'firebaseui/dist/esm.js';  // npm
+  import { auth as firebaseUi_auth } from 'firebaseui';  // npm
 
   const uiConfig = {
     signInSuccessUrl: "/somein",    // tbd. use 'redirect' query param (default to some main page)
@@ -95,7 +94,7 @@
       //const ui = new firebaseUi_auth.AuthUI(firebase.auth());
 
       // Directly loaded
-      const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      const ui = new firebaseUi_auth.AuthUI(firebase.auth());
 
       // Note: Checking '.isPendingRedirect' is connected to using 'firebase.auth.EmailAuthProvider', but it doesn't harm
       //      for other means.
