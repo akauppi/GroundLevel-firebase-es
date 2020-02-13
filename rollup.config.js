@@ -43,6 +43,9 @@ const plugins = [
     needMap: false
   }),
 
+  // Note: If you bring in Vue via 'npm' (not CDN), you'll need this to tell the bundle whether it's production or not.
+  //replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
+
   watching && livereload('public')
 ];
 

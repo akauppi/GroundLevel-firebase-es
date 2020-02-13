@@ -5,7 +5,7 @@
 - Signing in with mere '/signin' leads here.
 -->
 <template>
-  <section>
+  <section id="here">
     <app-profile />
     <div>
       YOU ARE AT HOME 🏯
@@ -15,11 +15,14 @@
   </section>
 </template>
 
+<style scoped>
+  #here {
+    text-align: center;
+  }
+</style>
+
 <script>
   export default {
     //name: 'Home'     // tbd. is this needed?
   }
 </script>
-
-<style scoped>
-</style>

@@ -6,6 +6,7 @@
 * We should handle Firebase auth API; pages don't need to know it ('SignIn' page being excepted).
 */
 
+/*** REMOVE?
 // A Vue observable allows us to propagate changes downstream in a meaningful way.
 //
 // Background:  <-- remove later?
@@ -23,39 +24,69 @@ const user = Vue.observable({
   displayName: null,    // String|null
   isSignedIn: null      // Boolean (when authenticated)
 });
+***/
+
+// Note: a stream of user objects (or 'null') would really be the best abstraction for this. :&
+
+let currentUser = undefined;  // 'undefined': busy checking | 'null' (signed out) | {...} (signed in)
 
 firebase.auth().onAuthStateChanged(o => {
 
   if (o) {
     console.log("Signed in: ", o);
 
-    // Signed in:
+    // Signed in:   (fields mentioned in FirebaseUI GitHub README listed)
     //  {
-    //    displayName: "Jack Nicholson"
-    //    email:
-    //    emailVerified:
-    //    metadata: { ... }
+    //    displayName: string
+    //    email: string
+    //    emailVerified: boolean
+    //    photoURL: URL
     //    uid: <string>
-    //    photoURL: ...
+    //    phoneNumber: ...
+    //    providerData: ...
+    //
+    //    isAnonymous: Boolean    // not mentioned in the README
     //  }
     //
     if (!o.displayName) console.warn('Unexpected signed in data (no \'.displayName\'):', o);
 
-    user.displayName = o.displayName;
-    user.signedIn = true;
+    o.getIdToken().then( (accessToken) => {
+      console.log( "Got token:", accessToken);
+    });
+
+    currentUser = o;    // signed in
 
   } else {  // o === null
     console.log("Signed out");
-
-    user.displayName = null;
-    user.isSignedIn = false;
+    currentUser = null;
   }
 });
 
-// Note: exported as a separate entry (not a method of '.user') so we can see, which parts would require sign-out.
+// Export a promise interface.
+//
+// For checking again and again (router), use 'userPromGen()'.
+// For pages / components where the user doesn't change (most pages!), use 'userProm'.
+//
+const userPromGen = () => new Promise( (resolve, reject) => {
+  if (currentUser !== undefined) {
+    // Already tracking authentication - we know the result
+    resolve(currentUser);
+  } else {
+    // Adapted from -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
+    //
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      unsubscribe();
+      resolve(user);
+    }, reject);
+  }
+});
+
+const userProm = userPromGen();
+
+// Note: exported as a separate entry so we can see, which parts would require sign-out.
 //
 function signOut() {
   firebase.auth().signOut();    // side effects
 }
 
-export { user, signOut };
+export { userProm, userPromGen, signOut };

@@ -12,6 +12,10 @@
 -       <<
 -
 -     ..but we can inject the tags into 'head', at runtime.
+-
+- References:
+-   - Easily add sign-in to your Web app with FirebaseUI (Firebase docs)
+-     -> https://firebase.google.com/docs/auth/web/firebaseui
 -->
 <template>
   <section>
@@ -49,41 +53,58 @@
   import { allowAnonymousAuth } from '../config.js';
   import { signOut } from '../auth.js';
 
-  const genUiConfig = (toPath) => ({
-    signInSuccessUrl: toPath,
+  const genUiConfig = (goThere) => ({     // ( () => () ) => {...}    // 'goThere' changes URL to the target
+    //signInFlow: 'redirect',   // 'redirect' is default
+    //signInSuccessUrl: toPath,
     signInOptions: [
+      // OAuth providers
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      firebase.auth.EmailAuthProvider.PROVIDER_ID,
       //firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
       //firebase.auth.GithubAuthProvider.PROVIDER_ID,
+
+      /* Email auth is pretty complex, and we didn't really need / care for it. Enable and customize on your own risk!
+      * Working contributions welcome!!
+      {
+        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+        // Allow the user the ability to complete sign-in cross device, including the mobile apps specified in the
+        // 'ActionCodeSettings' object below.
+        forceSameDevice: false,
+        emailLinkSignIn: function() {
+          return { ... see docs ... }
+        }
+      } */
+
       //firebase.auth.PhoneAuthProvider.PROVIDER_ID,
 
       // tbd. Enable this later. Does it really use 'firebaseui'? (we don't have it here, yet; need to make this a factory)
       //allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
     ],
-    autoUpgradeAnonymousUsers: allowAnonymousAuth,
 
-    /* disabled
-    // Terms of service
-    tosUrl: '<your-tos-url>',
-    // Privacy policy
-    privacyPolicyUrl: '<your-privacy-policy-url>',
-    */
+    //disabled (tbd. enable when other things work)
+    //autoUpgradeAnonymousUsers: allowAnonymousAuth,
 
     callbacks: {
-      signInSuccessWithAuthResult: () => {
+      signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+        // authResult: {
+        //    credential: { ..., token: string, ... }
+        //    operationType: "signIn"
+        //    user: { displayName: string, ... }    // normal Firebase user object
+        //    additionalUserInfo: { isNewUser: boolean, profile: { name: ..., granted_scopes: string }
+        // }
+        //
+        // redirectUrl: undefined
+        //
         // User successfully signed in.
-        // Return type determines whether we continue the redirect automatically
-        // or whether we leave that to developer to handle.
-        return true;
-      },
-      uiShown: () => {
-        // The widget is rendered. (can hide a loader but we have none)
+        // Return type determines whether we continue the redirect automatically or whether we leave that to developer to handle.
+
+        goThere();
+        return false;   // FirebaseUI may chill 🧃
       },
 
-      // 'signInFailure' callback must be provided to handle merge conflicts which
-      // occur when an existing credential is linked to an anonymous user.
+      // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
+      // an existing credential is linked to an anonymous user.
       //
       signInFailure: (error) => {
         if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
@@ -94,13 +115,24 @@
         const cred = error.credential;
 
         // Copy data from anonymous user to permanent user and delete anonymous user.
-        // ...
+        // ... (this part would be application specific, i.e. rearranging user data in database) ...
+        //    see -> https://firebase.google.com/docs/auth/web/anonymous-auth?hl=fi
+        //
+        //    "If the call to link succeeds, the user's new account can access the anonymous account's Firebase data."
+        //
         // Finish sign-in after data is copied.
+
         return firebase.auth().signInWithCredential(cred);
       }
-    }
+    },
+
+    /* disabled
+    tosUrl: '<your-tos-url>',     // Terms of Service
+    privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
+    */
   });
 
+  /*** DISABLED
   /*
   * Inject FirebaseUI to the current page. (see comments at the top for why)
   *
@@ -108,7 +140,8 @@
   *
   * Crafted based on:
   *   -> https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute#answer-39008859
-  */
+  *_/
+  // NOT USED!!!
   function injectFirebaseUI() {   // () -> Promise of something ('firebaseui' is set as a global)
     console.log("INJECTING FIREBASE UI");   // DEBUG
 
@@ -143,10 +176,11 @@
       document.head.appendChild(tmp);
     });
   }
+  ***/
 
   // Inject right here (not dependent on Vue component lifespan). Once the promise is fulfilled, 'firebaseui' should exist.
   //
-  const injectedProm = injectFirebaseUI();
+  const injectedProm = Promise.resolve(); //injectFirebaseUI();
 
   export default {
     name: 'SignIn',     // tbd. is this needed?
@@ -157,26 +191,24 @@
     created() {
       const toPath = this.$route.query.final || '/';
 
-      // If it were that we get here signed in (development, or user gave manually a URL), sign out. Helps us keep
-      // things consistent.
+      // Decision: what auth state persistence does your app favor?
+      // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi
       //
-      signOut();
+      // tbd. This could be driven from 'config.js'
+      //
+      const prom = firebase.auth().setPersistence( firebase.auth.Auth.Persistence.SESSION )
+        .catch( (error) => {
+          console.error('Error in \'.setPersistence\'', error.code, error.message);
+        });
 
-      injectedProm.then( () => {
-        if (typeof firebaseui === 'undefined') throw "No 'firebaseui' global - how come???!";   // assert
+      prom.then( () => {
+        injectedProm.then( () => {
+          const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
-        const ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-        // Note: Checking '.isPendingRedirect' is connected to using 'firebase.auth.EmailAuthProvider', but it doesn't harm
-        //      for other means.
-        //
-        // "When rendering the sign-in UI conditionally (relevant for single page apps), use 'ui.isPendingRedirect()' to detect
-        // if the URL corresponds to a sign-in with email link and the UI needs to be rendered to complete sign-in."
-        //      source -> https://firebase.google.com/docs/auth/web/firebaseui
-        //
-        if (true) /*(ui.isPendingRedirect())*/ {    // tbd. enable once redirecting has been done to work!  (now was just hiding the dialog)
-          ui.start("#firebaseui-auth-container", genUiConfig(toPath));
-        }
+          ui.start("#firebaseui-auth-container", genUiConfig( () => this.$router.push(toPath) ));
+          //
+          // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
+        });
       });
     }
   };

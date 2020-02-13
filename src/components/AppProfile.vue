@@ -31,18 +31,25 @@
 </style>
 
 <script>
-  import { user, signOut as authSignOut } from '../auth.js';
+  // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
+
+  import { userProm, signOut as authSignOut } from '../auth.js';
 
   export default {
     name: 'AppProfile',
-    computed: {
-      displayName: () => user.displayName || '...'    // '??' "not in Safari yet" -> https://www.caniuse.com/#search=%3F%3F
+    data: () => {
+      displayName: ''    // while waiting for auth
     },
     methods: {
       signOut() {
         authSignOut();
         this.$router.push('/');
       }
+    },
+    created () {
+      userProm.then( (user) => {
+        this.displayName = user.displayName;
+      });
     }
   };
 </script>

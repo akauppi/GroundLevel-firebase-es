@@ -13,14 +13,14 @@ import pageHome from './pages/Home.vue';
 import pageSignIn from './pages/SignIn.vue';
 import pageSomeIn from './pages/SomeIn.vue';
 
-import { user } from './auth.js';
+import { userPromGen } from './auth.js';
 import { assert } from './tools.js';
 
 const routes = [
   {
     path: '/',
     naem: 'home',
-    component: pageHome,
+    component: pageHome,      // note: this doesn't compile: >> component: () => import './pages/Home.vue', <<
     meta: {
       requiresAuth: true    // tbd. for many apps, it may be better to tag the pages _not_ needing auth
     }
@@ -46,12 +46,13 @@ const router = new VueRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !user.isSignedIn) {
-    console.log("Wanting to go to (but not signed in): ", to);  // DEBUG
+router.beforeEach(async (to, from, next) => {
+  assert(to.path !== null);   // "/someIn"
 
-    assert(to.path !== null);   // "/someIn"
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  if (requiresAuth && !await userPromGen()) {   // waits the small while if authentication check still going on
+    // user is signed in (we ignored its value from the Promise)
+    console.log("Wanting to go to (but not signed in): ", to);  // DEBUG
 
     if (to.path === '/') {
       next('/signin')   // no need to clutter the URL
@@ -59,7 +60,7 @@ router.beforeEach((to, from, next) => {
       next(`/signin?final=${to.path}`);
     }
   } else {
-    next();
+    next();   // just proceed
   }
 });
 

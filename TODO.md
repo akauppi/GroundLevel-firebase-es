@@ -1,11 +1,5 @@
 # Todo
 
-## Building
-
-- [ ] Add Rollup terser plugin
-  - Also see https://vuejs.org/v2/guide/installation.html#Development-vs-Production-Mode and https://vuejs.org/v2/guide/deployment.html
-  
-  
 ## Authentication
 
 - [ ] Add Apple auth. See [extra information](https://firebase.google.com/docs/auth/web/apple?authuser=0)
