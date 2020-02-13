@@ -47,11 +47,10 @@
 
 <script>
   import { allowAnonymousAuth } from '../config.js';
+  import { signOut } from '../auth.js';
 
-  //import { auth as firebaseUi_auth } from 'firebaseui';  // npm
-
-  const uiConfig = {
-    signInSuccessUrl: "/somein",    // tbd. use 'redirect' query param (default to some main page)
+  const genUiConfig = (toPath) => ({
+    signInSuccessUrl: toPath,
     signInOptions: [
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -100,14 +99,17 @@
         return firebase.auth().signInWithCredential(cred);
       }
     }
-  };
+  });
 
   /*
   * Inject FirebaseUI to the current page. (see comments at the top for why)
   *
   * Note: Svelte 3 has header directives. We could do all this declaratively, there. #just-saying
+  *
+  * Crafted based on:
+  *   -> https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute#answer-39008859
   */
-  function injectFirebaseUI() {
+  function injectFirebaseUI() {   // () -> Promise of something ('firebaseui' is set as a global)
     console.log("INJECTING FIREBASE UI");   // DEBUG
 
     // For what we need, see -> https://github.com/firebase/firebaseui-web#option-1-cdn
@@ -118,6 +120,7 @@
 
     const a = document.createElement('script');
       //
+      a.async = true;
       a.src = 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js';
 
     const b = document.createElement('link');
@@ -126,49 +129,55 @@
       b.rel = 'stylesheet';
       b.href = 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css';
 
-    // see -> https://stackoverflow.com/questions/14910196/how-to-add-multiple-divs-with-appendchild/19759120#answer-14910308
-    const tmp = document.createDocumentFragment();
-      //
-      tmp.appendChild(a);
-      tmp.appendChild(b);
+    return new Promise((resolve, reject) => {
+      a.addEventListener('load', resolve, { once: true } );
+      a.addEventListener('error', () => reject('Error loading script'));    // tbd. can we get an error description in the listener, and pass it on?
+      a.addEventListener('abort', () => reject('Script loading aborted'));  //    -''-
 
-    document.head.appendChild(tmp);
+      // see -> https://stackoverflow.com/questions/14910196/how-to-add-multiple-divs-with-appendchild/19759120#answer-14910308
+      const tmp = document.createDocumentFragment();
+        //
+        tmp.appendChild(a);
+        tmp.appendChild(b);
 
-    console.log("CSS and SCRIPT FOR FIREBASE UI should now be there. Are they?");   // DEBUG
+      document.head.appendChild(tmp);
+    });
   }
+
+  // Inject right here (not dependent on Vue component lifespan). Once the promise is fulfilled, 'firebaseui' should exist.
+  //
+  const injectedProm = injectFirebaseUI();
 
   export default {
     name: 'SignIn',     // tbd. is this needed?
 
+    // Taking the code in here, so we have access to Vue-router's 'this.$route.query' API (could do otherwise, in plain JS).
+    //
+    // tbd. Should we wait as far as 'mounted' for this? 'created', maybe?
     created() {
-      console.log("SignIn created");  // DEBUG
-      injectFirebaseUI()
-    },
+      const toPath = this.$route.query.final || '/';
 
-    mounted() {
-      console.log("SignIn mounted");  // DEBUG
-
-      if (!firebaseui) {
-        throw "We're here too soon! Added elements didn't come to life, yet!"
-      }
-
-      const ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-      // Note: Checking '.isPendingRedirect' is connected to using 'firebase.auth.EmailAuthProvider', but it doesn't harm
-      //      for other means.
+      // If it were that we get here signed in (development, or user gave manually a URL), sign out. Helps us keep
+      // things consistent.
       //
-      // "When rendering the sign-in UI conditionally (relevant for single page apps), use 'ui.isPendingRedirect()' to detect
-      // if the URL corresponds to a sign-in with email link and the UI needs to be rendered to complete sign-in."
-      //      source -> https://firebase.google.com/docs/auth/web/firebaseui
-      //
-      if (ui.isPendingRedirect()) {
-        ui.start("#firebaseui-auth-container", uiConfig);
+      signOut();
 
-        debugger;
-        console.log("Hmm.. auth UI should now show?");
-      }
-    },
-    methods: {
-    },
+      injectedProm.then( () => {
+        if (typeof firebaseui === 'undefined') throw "No 'firebaseui' global - how come???!";   // assert
+
+        const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+        // Note: Checking '.isPendingRedirect' is connected to using 'firebase.auth.EmailAuthProvider', but it doesn't harm
+        //      for other means.
+        //
+        // "When rendering the sign-in UI conditionally (relevant for single page apps), use 'ui.isPendingRedirect()' to detect
+        // if the URL corresponds to a sign-in with email link and the UI needs to be rendered to complete sign-in."
+        //      source -> https://firebase.google.com/docs/auth/web/firebaseui
+        //
+        if (true) /*(ui.isPendingRedirect())*/ {    // tbd. enable once redirecting has been done to work!  (now was just hiding the dialog)
+          ui.start("#firebaseui-auth-container", genUiConfig(toPath));
+        }
+      });
+    }
   };
 </script>

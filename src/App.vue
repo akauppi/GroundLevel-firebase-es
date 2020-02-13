@@ -19,28 +19,6 @@
   import AppLogo from './components/AppLogo.vue';
   import AppProfile from './components/AppProfile.vue';
   import AppFooter from './components/AppFooter.vue';
-  import Vue from 'vue';
-
-  // We need 'RouterView' to use it in the template.
-  //
-  const RouterView = Vue.component('router-view');
-
-  /*
-  * Promise to get the current signed in user (or none).
-  *
-  * Usage:
-  *   'this.$root.currentUser()'
-  *
-  * From 'gautemo/Vue-guard-routes-with-Firebase-Authentication' 'src/firebaseinit.js'.
-  */
-  const currentUser = () => {    // promise of: { ... }
-    return new Promise((resolve, reject) => {
-      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-        unsubscribe();
-        resolve(user);
-      }, reject);
-    })
-  };
 
   export default {
     name: 'App',     // tbd. is this needed?
@@ -51,10 +29,9 @@
     mounted() {
       document.title = "GroundLevel with Firebase-auth"   // your title here
     },
-    methods: {
-      signedIn: () => {   // Promise of Boolean
-        return currentUser()
-            .then( user => user !== null );
+    calculated: {
+      signedIn: async () => {   // () => Boolean
+        await currentUser().then( user => user !== null )
       }
     }
   }

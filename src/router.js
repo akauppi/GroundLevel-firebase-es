@@ -6,22 +6,27 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-// "This has to be done before you start your app by calling new Vue()."
-Vue.use(VueRouter);
-
 // Pages
 // note: not using lazy loading (didn't get it to work). #help
 //
+import pageHome from './pages/Home.vue';
 import pageSignIn from './pages/SignIn.vue';
 import pageSomeIn from './pages/SomeIn.vue';
+
+import { user } from './auth.js';
+import { assert } from './tools.js';
 
 const routes = [
   {
     path: '/',
-    redirect: '/signin'
+    naem: 'home',
+    component: pageHome,
+    meta: {
+      requiresAuth: true    // tbd. for many apps, it may be better to tag the pages _not_ needing auth
+    }
   },
   {
-    path: '/signin',
+    path: '/signin',    // '?final=/somein'
     name: 'signin',
     component: pageSignIn
   },
@@ -41,10 +46,18 @@ const router = new VueRouter({
   routes
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !await firebase.getCurrentUser()) {
-    next('signin');   // tbd. add '?redirect=<url>'
+  if (requiresAuth && !user.isSignedIn) {
+    console.log("Wanting to go to (but not signed in): ", to);  // DEBUG
+
+    assert(to.path !== null);   // "/someIn"
+
+    if (to.path === '/') {
+      next('/signin')   // no need to clutter the URL
+    } else {
+      next(`/signin?final=${to.path}`);
+    }
   } else {
     next();
   }

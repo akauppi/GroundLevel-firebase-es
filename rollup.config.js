@@ -1,9 +1,9 @@
-//import alias from '@rollup/plugin-alias';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
 import fileSize from 'rollup-plugin-filesize';
 import livereload from 'rollup-plugin-livereload';
+import { terser } from "rollup-plugin-terser";
 import vue from 'rollup-plugin-vue';
 
 // Taking production from lack of 'rollup -w'.
@@ -19,18 +19,6 @@ const lintOpts = {
 };
 
 const plugins = [
-  /* Not needed (keep around though, may be handy!)
-  alias({
-    entries: [
-      // 'firebaseui' wants 'firebase/[app|auth]' as given. It does *not* use the recent '@firebase/app' and '@firebase/auth'
-      // nor does it care where they come from (CDN in 'index.html'). We prepared little proxies to keep it pleased.
-      //
-      { find: 'firebase/app', replacement: './proxy/firebase-app.js' },    // import * from 'firebase/app' (within npm 'firebaseui/dist/esm.js')
-      { find: 'firebase/auth', replacement: './proxy/firebase-auth.js' },    // import 'firebase/auth' (within npm 'firebaseui/dist/esm.js')
-    ]
-  }),
-  */
-
   resolve({
     mainFields: ['module']  // insist on importing ES6, only (pkg.module)
   }),
@@ -39,7 +27,8 @@ const plugins = [
   eslint(lintOpts),
 
   // not really needed
-  production && fileSize(),
+  production && fileSize(),   // tbd. where does this pick the minimized etc. sizes?  (could we just print out from terser?)
+  production && terser(),
 
   // Needed for compiling '.vue' files.
   vue({
@@ -70,12 +59,10 @@ export default {
   //
   output: {
     file: 'public/bundle.esm.js',
-
+    format: 'esm',
     // EXPERIMENTAL: testing '.preserveModules' (disabled '.file' if you use this)
     //dir: 'public/dist',
     //preserveModules: true,
-
-    format: 'esm',
 
     paths: {
       // Vue.js

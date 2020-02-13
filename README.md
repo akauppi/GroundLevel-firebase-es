@@ -12,7 +12,7 @@ Changes from the above:
 - `package-lock.json` disabled (just a matter of taste...)
 - added `dev` target for "watch" workflow
 - using `public` as the public folder (Firebase Hosting default)
-- targeting "evergreen" ([ES6 compatible](https://caniuse.com/#search=ES6%20modules)) browsers.
+- targeting "evergreen" ([ES6](https://caniuse.com/#search=ES6%20modules) and [async/await](https://www.caniuse.com/#search=await) capable) browsers.
   - for IE11 support, add [@rollup/plugin-buble](https://github.com/rollup/plugins/tree/master/packages/buble) to `package.json` and `rollup.config.js`
 
 ---
