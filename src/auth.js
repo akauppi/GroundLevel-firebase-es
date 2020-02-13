@@ -4,27 +4,13 @@
 * Application interfacing to the authentication: is the user signed in, information about them.
 *
 * We should handle Firebase auth API; pages don't need to know it ('SignIn' page being excepted).
+*
+* References:
+*   - firebase.auth.Auth (Firebase docs)
+*       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
 
-/*** REMOVE?
-// A Vue observable allows us to propagate changes downstream in a meaningful way.
-//
-// Background:  <-- remove later?
-//    Also tried a mere ES6 object (with read-only fields); problem was initialization. Promise was making things
-//    complicated.
-//
-// Note: Initial values are used only until we get the first Firebase callback.
-//
 import Vue from 'vue';
-
-// Q: Is there a way to ban writes to the observable, from outside this module? #vue-advice
-//    Track -> https://stackoverflow.com/questions/60205751/making-read-only-fields-in-a-vue-observable
-//
-const user = Vue.observable({
-  displayName: null,    // String|null
-  isSignedIn: null      // Boolean (when authenticated)
-});
-***/
 
 // Note: a stream of user objects (or 'null') would really be the best abstraction for this. :&
 
@@ -83,10 +69,47 @@ const userPromGen = () => new Promise( (resolve, reject) => {
 
 const userProm = userPromGen();
 
+// We cannot feed a 'Promise' to vue HTML template (unfortunate, something like Svelte's '{await}' support would suit
+// nicely, here). To ease the pain, we make some reactive fields that visual components can use, directly.
+//
+// Note: Without this, there wouldn't have been a reason to mention Vue in this module.
+//
+
+/*** disabled, because:
+ * - not able to export just a reactive 'displayName' - exporting the 'obs' is clumsy
+ * - anyhow needing a 'computed' field to proxy the value in the receiving component (to use in its HTML template)
+ *
+ * With those two, there's too much complexity. Let's just pass on the 'userProm' and receiver picks the field(s).
+
+// Q: Is there a way to ban writes to the observable, from outside this module? #vue-advice
+//    track -> https://stackoverflow.com/questions/60205751/making-read-only-fields-in-a-vue-observable
+//
+// Initial values are in effect until the authentication has gone through.
+//
+const obs = Vue.observable({
+  displayName: '',          // String
+  isSignedIn: undefined     // Boolean (when authenticated)
+});
+
+userProm.then( (user) => {
+  if (user) {
+    obs.displayName = user.displayName;
+    obs.isSignedIn = true;
+  } else {
+    obs.displayName = '';
+    obs.isSignedIn = false;
+  }
+});
+***/
+
 // Note: exported as a separate entry so we can see, which parts would require sign-out.
 //
-function signOut() {
-  firebase.auth().signOut();    // side effects
+function signOut() {    // () => Promise of ()
+  return firebase.auth().signOut();    // side effects; presumably sign-out has happened once the promise is successful
 }
 
-export { userProm, userPromGen, signOut };
+// tbd. see if we don't need to export 'userProm' (just the reactive fields)
+//
+// Note: Don't seem to be able to export 'obs.displayName as displayName', in Vue.
+//
+export { /*obs as userObs,*/ userProm, userPromGen, signOut };

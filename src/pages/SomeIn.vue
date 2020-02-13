@@ -3,7 +3,6 @@
 -->
 <template>
   <section id="here">
-    <app-profile />
     <div>
       TO BE DONE 🏂
     </div>
@@ -22,11 +21,14 @@
   import { userProm } from '../auth.js';
 
   export default {
-    name: 'SomeIn',     // tbd. is this needed?
-    data() {
-      return{
-        name: userProm      // Wouldn't it be great to be able to use Promise's...
-      }
+    name: 'SomeIn',
+    data: () => ({
+      name: ''     // Wouldn't it be great to be able to use Promise's...
+    }),
+    created() {
+      userProm.then( (user) => {
+        this.name = user.displayName
+      })
     }
   }
 </script>

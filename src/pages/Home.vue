@@ -6,7 +6,6 @@
 -->
 <template>
   <section id="here">
-    <app-profile />
     <div>
       YOU ARE AT HOME 🏯
     </div>
@@ -22,7 +21,18 @@
 </style>
 
 <script>
+  // Let's do this via 'userProm', just to see.
+  import { userProm } from '../auth.js';
+
   export default {
-    //name: 'Home'     // tbd. is this needed?
+    name: 'Home',      // Vue note: names help in debugging
+    data: () => ({
+      name: "..."
+    }),
+    created() {
+      userProm.then( (user) => {
+        this.name = user.displayName.split(' ')[0];
+      })
+    }
   }
 </script>

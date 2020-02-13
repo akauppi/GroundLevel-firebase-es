@@ -24,6 +24,6 @@ import App from './App.vue';
   render: h => h(App),    // Q: what's the difference between this and 'el: ...'. Which should we use?  #vue-advice
 
   renderError: (h, err) => {    // is this worth having? (we ever see it?)
-    return h('pre', { style: { color: 'red' }}, err.stack)
+    return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
   }
 });

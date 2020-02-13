@@ -51,7 +51,6 @@
 
 <script>
   import { allowAnonymousAuth } from '../config.js';
-  import { signOut } from '../auth.js';
 
   const genUiConfig = (goThere) => ({     // ( () => () ) => {...}    // 'goThere' changes URL to the target
     //signInFlow: 'redirect',   // 'redirect' is default
