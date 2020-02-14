@@ -1,3 +1,4 @@
+import alias from '@rollup/plugin-alias';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { eslint } from 'rollup-plugin-eslint';
@@ -19,8 +20,16 @@ const lintOpts = {
 };
 
 const plugins = [
+  // For '@/...' to work as advertised by Vue, this is needed:  [^1]
+  alias({
+    entries: {
+      ['@']: __dirname + '/src'    // path.resolve( __dirname, 'src' )    // <-- no idea why 'path' is not found. tbd.
+    }
+  }),
+
   resolve({
-    mainFields: ['module']  // insist on importing ES6, only (pkg.module)
+    mainFields: ['module'],  // insist on importing ES6, only (pkg.module)
+    modulesOnly: true        // ES6 imports, only. Disable if you need to import CommonJS modules (you'll need 'commonjs', as well)
   }),
   //commonjs(),
 

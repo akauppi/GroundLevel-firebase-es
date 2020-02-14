@@ -21,13 +21,13 @@
 </style>
 
 <script>
-  import userMixin from '@/mixins/user.js';
+  import userMixin from '@/mixins/user.js';   // ignore IDE warning
 
   export default {
     name: 'Home',      // Vue note: names help in debugging
-    mixins: userMixin,
+    mixins: [userMixin],
     computed: {
-      firstName: user.displayName.split(' ')[0]
+      firstName: (vm) => vm.user.displayName.split(' ')[0]
     },
   }
 </script>

@@ -14,13 +14,12 @@
     "clean": "(rm public/bundle.js 2> /dev/null || true)"
   },
   "//devDependencies": {
-    "//@rollup/plugin-alias": "^3.0.0",
     "//@rollup/plugin-commonjs": "^11.0.1",
     "//eslint-config-jwalker": "^5.2.0"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.0.0",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "concurrently": "^5.0.2",
     "eslint": "^6.8.0",

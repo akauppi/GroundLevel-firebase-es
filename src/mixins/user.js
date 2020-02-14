@@ -5,10 +5,9 @@
 */
 // We expect the user to be signed in and not to change, during our lifespan.
 
-import Vue from 'vue';
 import { userProm } from '../auth.js';
 
-export default Vue.mixin( {
+export default ({
   data: () => ({
     user: {
       displayName: '',

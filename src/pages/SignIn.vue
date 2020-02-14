@@ -52,7 +52,7 @@
 <script>
   import { allowAnonymousAuth } from '../config.js';
 
-  const genUiConfig = (goThere) => ({     // ( () => () ) => {...}    // 'goThere' changes URL to the target
+  const genUiConfig = (goThere, fbui) => ({     // ( () => (), ... ) => {...}    // 'goThere' changes URL to the target
     //signInFlow: 'redirect',   // 'redirect' is default
     //signInSuccessUrl: toPath,
     signInOptions: [
@@ -77,7 +77,7 @@
 
       //firebase.auth.PhoneAuthProvider.PROVIDER_ID,
 
-      // tbd. Enable this later. Does it really use 'firebaseui'? (we don't have it here, yet; need to make this a factory)
+      // tbd. Enable this later. NOTE: it uses 'firebaseui'.
       //allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
     ],
 
@@ -202,11 +202,12 @@
 
       prom.then( () => {
         injectedProm.then( () => {
+          const uiConfig = genUiConfig( () => this.$router.push(toPath), firebaseui);    // we now have 'firebaseui' (even if injected)
           const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
-          ui.start("#firebaseui-auth-container", genUiConfig( () => this.$router.push(toPath) ));
-          //
-          // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
+          ui.start("#firebaseui-auth-container", uiConfig);
+            //
+            // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
         });
       });
     }
