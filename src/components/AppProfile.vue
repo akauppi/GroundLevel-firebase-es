@@ -12,7 +12,9 @@
       {{ displayName }}
     </div>
     <hr>  <!-- tbd. make into a push-down menu -->
-    <button type="button" @click="signOut">
+    <button type="button"
+            @click="signOut"
+    >
       Sign out
     </button>
   </section>
@@ -38,19 +40,19 @@
   export default {
     name: 'AppProfile',
     data: () => ({
-      displayName: ''
+      displayName: ''   // tbd. use mixin
     }),
+    created() {
+      userProm.then( (user) => {
+        this.displayName = user.displayName
+      })
+    },
     methods: {
       signOut() {
         authSignOut().then( () => {
           this.$router.push('/');   // tbd. not sure if this needs to wait for the promise
         });
       }
-    },
-    created() {
-      userProm.then( (user) => {
-        this.displayName = user.displayName
-      })
     }
   };
 </script>

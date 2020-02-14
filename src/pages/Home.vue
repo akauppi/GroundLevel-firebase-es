@@ -10,7 +10,7 @@
       YOU ARE AT HOME 🏯
     </div>
 
-    <h2>Hi {{name}}</h2>
+    <h2>Hi {{ firstName }}</h2>
   </section>
 </template>
 
@@ -21,18 +21,13 @@
 </style>
 
 <script>
-  // Let's do this via 'userProm', just to see.
-  import { userProm } from '../auth.js';
+  import userMixin from '@/mixins/user.js';
 
   export default {
     name: 'Home',      // Vue note: names help in debugging
-    data: () => ({
-      name: "..."
-    }),
-    created() {
-      userProm.then( (user) => {
-        this.name = user.displayName.split(' ')[0];
-      })
-    }
+    mixins: userMixin,
+    computed: {
+      firstName: user.displayName.split(' ')[0]
+    },
   }
 </script>

@@ -17,6 +17,14 @@ module.exports = {
     // Without this, the toolchain doesn't pass HTML comments in '.vue' file's template section through. #sniff
     //'vue/comment-directive': 0,
 
+    'vue/max-attributes-per-line': ['error', {
+      'singleline': 1,
+      'multiline': {
+        'max': 1,
+        'allowFirstLine': true    // AK
+      }
+    }],
+
     /*
     'no-console': 0,
     // 'vue/html-self-closing': 1,
