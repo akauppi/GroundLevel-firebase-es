@@ -9,21 +9,21 @@
 import Vue from 'vue';    // ignore IDE warning "Module is not installed" (Q: how to disable the warning in WebStorm?) #help
 
 import VueRouter from 'vue-router';
-Vue.use(VueRouter);   // needs to be before first 'new Vue()'
+Vue.use(VueRouter);       // needed before first 'new Vue(...)'
 
-//Vue.config.productionTip = false  // tbd. what is?
-
-// Initializes 'VueRouter' and creates one for us.
-//
-import router from './router.js';
 import App from './App.vue';
+import router from './router.js';
 
-/*global app =*/ new Vue({
+new Vue({
   el: '#app',
   router,
-  render: h => h(App),    // Q: what's the difference between this and 'el: ...'. Which should we use?  #vue-advice
+  render: h => {
+    console.log( "Rendering..." );
+    return h(App)
+  },
 
-  renderError: (h, err) => {    // is this worth having? (we ever see it?)
+  renderError: (h, err) => {  // pour runtime problems on the screen, if we have them (may help in development);
+                              // in production we may want to pour these to central monitoring
     return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
   }
 });

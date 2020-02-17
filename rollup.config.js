@@ -20,10 +20,10 @@ const lintOpts = {
 };
 
 const plugins = [
-  // For '@/...' to work as advertised by Vue, this is needed:  [^1]
+  // Needed for 'import "@/..."' to point to the source directory (Q: do Vue CLI projects get this, automatically? #help)
   alias({
     entries: {
-      ['@']: __dirname + '/src'    // path.resolve( __dirname, 'src' )    // <-- no idea why 'path' is not found. tbd.
+      ['@']: __dirname + '/src'
     }
   }),
 
@@ -35,17 +35,15 @@ const plugins = [
 
   eslint(lintOpts),
 
-  // not really needed
-  production && fileSize(),   // tbd. where does this pick the minimized etc. sizes?  (could we just print out from terser?)
-  production && terser(),
-
-  // Needed for compiling '.vue' files.
+  // Compiles '.vue' files.
+  // For options, see -> https://rollup-plugin-vue.vuejs.org/options.html#include
+  //
   vue({
     template: {
       isProduction: production,   // note: could trust defaults to do the same, via 'process.env.NODE_ENV'
       compilerOptions: { preserveWhitespace: false }
     },
-    css: true,
+    //css: false,   // note: 'false' extracts styles as a separate '.css' file
 
     // Avoid sourcemap errors when watching
     //    -> https://github.com/vuejs/rollup-plugin-vue/issues/238
@@ -55,7 +53,10 @@ const plugins = [
   // Note: If you bring in Vue via 'npm' (not CDN), you'll need this to tell the bundle whether it's production or not.
   //replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
 
-  watching && livereload('public')
+  watching && livereload('public'),
+
+  production && fileSize(),   // tbd. where does this pick the minimized etc. sizes?  (could we just print out from terser?)
+  production && terser()
 ];
 
 export default {
@@ -91,7 +92,7 @@ export default {
     // Note: "If I remember correctly globals only works on iife modules and by extension umd ones"
     //    -> https://stackoverflow.com/questions/49947250/how-do-rollup-externals-and-globals-work-with-esm-targets/50427603#50427603
     //
-    //globals: { },
+    //globals: {},
 
     sourcemap: true   // note: may be good to have source map even for production
   },

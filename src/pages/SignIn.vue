@@ -51,85 +51,90 @@
 
 <script>
   import { allowAnonymousAuth } from '../config.js';
+  import { assert } from '@/utils/assert.js';
 
-  const genUiConfig = (goThere, fbui) => ({     // ( () => (), ... ) => {...}    // 'goThere' changes URL to the target
-    //signInFlow: 'redirect',   // 'redirect' is default
-    //signInSuccessUrl: toPath,
-    signInOptions: [
-      // OAuth providers
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      //firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-      //firebase.auth.GithubAuthProvider.PROVIDER_ID,
+  const genUiConfig = (goThere) => {     // ( () => () ) => {...}    // 'goThere' changes URL to the target
+    assert(firebaseui);
 
-      /* Email auth is pretty complex, and we didn't really need / care for it. Enable and customize on your own risk!
-      * Working contributions welcome!!
-      {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-        // Allow the user the ability to complete sign-in cross device, including the mobile apps specified in the
-        // 'ActionCodeSettings' object below.
-        forceSameDevice: false,
-        emailLinkSignIn: function() {
-          return { ... see docs ... }
+    return {
+      //signInFlow: 'redirect',   // 'redirect' is default
+      //signInSuccessUrl: toPath,
+      signInOptions: [
+        // OAuth providers
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        //firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        //firebase.auth.GithubAuthProvider.PROVIDER_ID,
+
+        /* Email auth is pretty complex, and we didn't really need / care for it. Enable and customize on your own risk!
+        * Working contributions welcome!!
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+          // Allow the user the ability to complete sign-in cross device, including the mobile apps specified in the
+          // 'ActionCodeSettings' object below.
+          forceSameDevice: false,
+          emailLinkSignIn: function() {
+            return { ... see docs ... }
+          }
+        } */
+
+        //firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+
+        // tbd. Enable this later. NOTE: it uses 'firebaseui'
+        //allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+      ],
+
+      //disabled (tbd. enable when other things work)
+      //autoUpgradeAnonymousUsers: allowAnonymousAuth,
+
+      callbacks: {
+        signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+          // authResult: {
+          //    credential: { ..., token: string, ... }
+          //    operationType: "signIn"
+          //    user: { displayName: string, ... }    // normal Firebase user object
+          //    additionalUserInfo: { isNewUser: boolean, profile: { name: ..., granted_scopes: string }
+          // }
+          //
+          // redirectUrl: undefined
+          //
+          // User successfully signed in.
+          // Return type determines whether we continue the redirect automatically or whether we leave that to developer to handle.
+
+          goThere();
+          return false;   // FirebaseUI may chill 🧃
+        },
+
+        // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
+        // an existing credential is linked to an anonymous user.
+        //
+        signInFailure: (error) => {
+          if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
+            return Promise.resolve();
+          }
+
+          // The credential the user tried to sign in with.
+          const cred = error.credential;
+
+          // Copy data from anonymous user to permanent user and delete anonymous user.
+          // ... (this part would be application specific, i.e. rearranging user data in database) ...
+          //    see -> https://firebase.google.com/docs/auth/web/anonymous-auth?hl=fi
+          //
+          //    "If the call to link succeeds, the user's new account can access the anonymous account's Firebase data."
+          //
+          // Finish sign-in after data is copied.
+
+          return firebase.auth().signInWithCredential(cred);
         }
-      } */
-
-      //firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-
-      // tbd. Enable this later. NOTE: it uses 'firebaseui'.
-      //allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
-    ],
-
-    //disabled (tbd. enable when other things work)
-    //autoUpgradeAnonymousUsers: allowAnonymousAuth,
-
-    callbacks: {
-      signInSuccessWithAuthResult: (authResult, redirectUrl) => {
-        // authResult: {
-        //    credential: { ..., token: string, ... }
-        //    operationType: "signIn"
-        //    user: { displayName: string, ... }    // normal Firebase user object
-        //    additionalUserInfo: { isNewUser: boolean, profile: { name: ..., granted_scopes: string }
-        // }
-        //
-        // redirectUrl: undefined
-        //
-        // User successfully signed in.
-        // Return type determines whether we continue the redirect automatically or whether we leave that to developer to handle.
-
-        goThere();
-        return false;   // FirebaseUI may chill 🧃
       },
 
-      // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
-      // an existing credential is linked to an anonymous user.
-      //
-      signInFailure: (error) => {
-        if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
-          return Promise.resolve();
-        }
-
-        // The credential the user tried to sign in with.
-        const cred = error.credential;
-
-        // Copy data from anonymous user to permanent user and delete anonymous user.
-        // ... (this part would be application specific, i.e. rearranging user data in database) ...
-        //    see -> https://firebase.google.com/docs/auth/web/anonymous-auth?hl=fi
-        //
-        //    "If the call to link succeeds, the user's new account can access the anonymous account's Firebase data."
-        //
-        // Finish sign-in after data is copied.
-
-        return firebase.auth().signInWithCredential(cred);
-      }
-    },
-
-    /* disabled
-    tosUrl: '<your-tos-url>',     // Terms of Service
-    privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
-    */
-  });
+      /* disabled
+      tosUrl: '<your-tos-url>',     // Terms of Service
+      privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
+      */
+    };
+  };
 
   /*** DISABLED
   /*
@@ -202,7 +207,9 @@
 
       prom.then( () => {
         injectedProm.then( () => {
-          const uiConfig = genUiConfig( () => this.$router.push(toPath), firebaseui);    // we now have 'firebaseui' (even if injected)
+          // Note: Calling 'genUiConfig' here means it has access to 'firebaseui' - which it needs.
+          //
+          const uiConfig = genUiConfig( () => this.$router.push(toPath));    // we now have 'firebaseui' (even if injected)
           const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
           ui.start("#firebaseui-auth-container", uiConfig);

@@ -21,13 +21,20 @@
 </style>
 
 <script>
-  import userMixin from '@/mixins/user.js';   // ignore IDE warning
+  import { userMixin } from '@/mixins/user.js';   // ignore IDE warning
+  import { assert } from '@/utils/assert.js';
 
   export default {
     name: 'Home',      // Vue note: names help in debugging
     mixins: [userMixin],
     computed: {
-      firstName: (vm) => vm.user.displayName.split(' ')[0]
+      firstName: (vm) => {
+        return vm.user ? vm.user.displayName.split(' ')[0] : '...';
+      }
     },
+
+    mounted(vm) {
+      //console.log("At home, with: ", vm.user ? ""+ vm.user.displayName : "(unsigned)" )
+    }
   }
 </script>

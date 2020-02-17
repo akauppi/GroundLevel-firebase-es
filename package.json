@@ -1,9 +1,9 @@
 {
-  "name": "vue-rollup-example-with-firebase-auth",
+  "name": "groundlevel-firebase-web-template",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akauppi/vue-rollup-example-with-firebase-auth.git"
+    "url": "git+https://github.com/akauppi/groundlevel-firebase-auth.git"
   },
   "author": "<akauppi@gmail.com>",
   "private": true,
@@ -38,8 +38,7 @@
     },
     "scripts": {
       "build": [
-        "Builds production code",
-        "tbd. add rollup terser plugin"
+        "Builds production code"
       ]
     }
   }

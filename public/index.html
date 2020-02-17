@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- Firebase
     -   - latest versions -> https://firebase.google.com/support/release-notes/js
@@ -14,12 +15,12 @@
     -
     - Note: Firebase docs mention to put this in the 'body' - instead of 'head'. Is there a benefit for doing so?
     -->
-    <script defer src="/__/firebase/7.8.0/firebase-app.js"></script>
-    <script defer src="/__/firebase/7.8.0/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.8.2/firebase-app.js"></script>
+    <script defer src="/__/firebase/7.8.2/firebase-auth.js"></script>
     <!--
-    <script defer src="/__/firebase/7.8.0/firebase-database.js"></script>
-    <script defer src="/__/firebase/7.8.0/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/7.8.0/firebase-storage.js"></script>
+    <script defer src="/__/firebase/7.8.2/firebase-database.js"></script>
+    <script defer src="/__/firebase/7.8.2/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/7.8.2/firebase-storage.js"></script>
     -->
     <!-- initialize the SDK (keep last) -->
     <!--
@@ -31,6 +32,7 @@
 
     <!--
     - Firebase UI
+    -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
     - Seems we would need this for all the pages, not just 'SignIn'. DEVELOPMENT
     -->
@@ -39,11 +41,14 @@
 
     <!--
     - Checking that Firebase loaded properly
+    -
+    - tbd. If this only happens once per load, and 'App' initialization also, we can place the code in 'entry.js'.
+    -     It's not bad here, though.
     -->
     <script>
-      document.addEventListener('DOMContentLoaded', () => {   // Q: does this fire just once, or after navigations?
+      document.addEventListener('DOMContentLoaded', () => {   // Q: does this fire just once, or after inside-SPA navidations?
         try {
-          console.log("!!! JUST AT FIRST LOAD?");    // DEBUG
+          console.log("'index.html' loaded");    // DEBUG
 
           const app = firebase.app();
           const features = ['auth'].filter(feature => typeof app[feature] === 'function');

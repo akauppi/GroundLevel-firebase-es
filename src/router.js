@@ -3,54 +3,54 @@
 *
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
 */
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 // Pages
 // note: not using lazy loading (didn't get it to work). #help
+//      Track -> https://github.com/vuejs/rollup-plugin-vue/issues/328
 //
 import pageHome from './pages/Home.vue';
 import pageSignIn from './pages/SignIn.vue';
 import pageSomeIn from './pages/SomeIn.vue';
+import page404 from './pages/404.vue';
 
-import { userPromGen } from './auth.js';
-import { assert } from './tools.js';
+import { currentFirebaseUserProm } from './auth.js';
+import { assert } from '@/utils/assert.js';
 
+const reqAuth = { requiresAuth: true }
+
+// Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose not to do
+//    this, and go for the shorter format (best when there are lots of routes).
+//
 const routes = [
-  {
-    path: '/',
-    naem: 'home',
-    component: pageHome,      // note: this doesn't compile: >> component: () => import './pages/Home.vue', <<
-    meta: {
-      requiresAuth: true    // tbd. for many apps, it may be better to tag the pages _not_ needing auth
-    }
-  },
-  {
-    path: '/signin',    // '?final=/somein'
-    name: 'signin',
-    component: pageSignIn
-  },
-  {
-    path: '/somein',
-    name: 'somein',
-    component: pageSomeIn,
-    meta: {
-      requiresAuth: true
-    }
-  }
+  { path: '/',        component: pageHome, meta: reqAuth },
+  { path: '/signin',  component: pageSignIn },    // '?final=/somein'
+  { path: '/somein',  component: pageSomeIn, meta: reqAuth },
+    //
+  { path: '*', component: page404 } //,
+
+  //{ path: '/ignore', component: () => import './pages/Home.vue' }   // tbd. Why doesn't this compile?
 ];
 
 const router = new VueRouter({
   mode: 'history',
-  //base: process.env.BASE_URL,   // tbd. what to place instead?
+  //base: ...,    // tbd. what is this used for?  What to place here?
   routes
 });
 
 router.beforeEach(async (to, from, next) => {
   assert(to.path !== null);   // "/someIn"
 
+  console.log(`router entering page: ${to.path}`);
+
+  // tbd. Describe exactly what the 'to.matched.some(record => record.meta.requiresAuth);' does.
+  //    Some samples also have simpler: ...(paste here when coming across it)...
+  //
+  // Based on -> https://router.vuejs.org/guide/advanced/meta.html
+  //
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  if (requiresAuth && !await userPromGen()) {   // waits the small while if authentication check still going on
+
+  if (requiresAuth && ! await currentFirebaseUserProm().then( user => user !== null )) {
     // user is signed in (we ignored its value from the Promise)
     console.log("Wanting to go to (but not signed in): ", to);  // DEBUG
 

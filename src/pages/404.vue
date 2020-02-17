@@ -1,13 +1,13 @@
 <!--
-- src/pages/SomeIn.vue
+- src/pages/404.vue
+-
+- Fallback page. Good to have one in Single Page App.
 -->
 <template>
   <section id="here">
     <div>
-      TO BE DONE 🏂
+      THAT PAGE DOES NOT EXIST 🗺
     </div>
-
-    <h2>Hi {{ user ? user.displayName : '...' }}</h2>
   </section>
 </template>
 
@@ -18,11 +18,7 @@
 </style>
 
 <script>
-  import { userMixin } from '@/mixins/user.js';
-
   export default {
-    name: 'SomeIn',
-    mixins: [userMixin]
+    name: 'NotFound404'      // Vue note: names help in debugging
   }
 </script>
-

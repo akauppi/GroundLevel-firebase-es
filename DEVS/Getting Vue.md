@@ -68,3 +68,10 @@ You can then `import './vue.runtime.esm.js'` or alias that to `vue` <font color=
 
 >DISCLAIMER: Above hasn't been tested!  Please do. :)
 
+If you do this, you'll also need to initialize `VueRouter` explicitly:[^3]
+
+```
+Vue.use(VueRouter);   // needs to be before first 'new Vue()'
+```
+
+[^3]: The reason why CDN doesn't need this is that `VueRouter` does the call if it finds `Vue` defined as a global.

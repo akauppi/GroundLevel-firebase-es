@@ -1,44 +1,21 @@
-# GroundLevel: firebase-web-auth
+# GroundLevel * Firebase-auth
 
-<!-- tbd. logo of GroundLevel -->
-
-Based on [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example).
-
-Changes from the above:
-
-- Jonatas's code is unlicensed. This is MIT licensed.
-- Simplified `package.json` a bit
-- updated dependencies
-- `package-lock.json` disabled (just a matter of taste...)
-- added `dev` target for "watch" workflow
-- using `public` as the public folder (Firebase Hosting default)
-- targeting "evergreen" ([ES6](https://caniuse.com/#search=ES6%20modules) and [async/await](https://www.caniuse.com/#search=await) capable) browsers.
-  - for IE11 support, add [@rollup/plugin-buble](https://github.com/rollup/plugins/tree/master/packages/buble) to `package.json` and `rollup.config.js`
-
----
-  
-The repo provides a non-project-specific template for bringing a web app with authentication online, using Vue, Rollup and Firebase.
-
-The choice of technologies (other than Firebase) can be changed. E.g. use of Svelte 3 instead of Vue at some point is a possibility.
-
-**Opinionated**
-
-As any template, one has made decisions. These mostly fall to how Firebase authentication is being used. It's good you know about these - other ways are also possible but you'd need to tinker with the code.
-
-- Using [Firebase UI](https://firebase.google.com/docs/auth/web/firebaseui) library
-- Using redirect (not popup) method for sign in. Firebase UI provides both. The choice is because of how we want the app to behave.
-- Instead of a 'sign in' menu (in place of the user profile), we require the user to always sign in. Another approach could have been to keep a "website" integrated with the app, but in this case we do an "app" only and a website (which requires no authentication) would be maintained separately.
-
-As stated, you can tinker with the code if you don't feel these choices match your needs.
-
-<!--
-**Used in**
-This template has been used in the following applications:
-
-- ...
-
-! Your application reference appreciated here; even if it were commercial and closed source, you may be able to share the name. :)
+<!-- Using 'img' to be able to scale from Markdown.
+- Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
 -->
+<img alt="Logo" src="iconart/logo_512x512.png" width=300>
+
+**A foundation for a web app, using Firebase suite of back-end tools.**
+
+You want a web app and you want it now?
+
+This aims to become the best place to make that happen. We chose and configured the [right tools](Ingredients.md) for the job (so you don't need to read multiple manuals). We aim not only to show how it's done, but also argue why certain approaches were taken. We aim to start with 2020's technology, and stay relevant.
+
+Welcome.
+
+>⏱ Before we start, it would be nice if you can time your experience and tell us, how fast you got *your app* rolling. Data based metrics, you know.. 😉
+
+Let's start! 🤾‍♀️
 
 
 ## Requirements
@@ -46,10 +23,15 @@ This template has been used in the following applications:
 - `npm`
 - `firebase`
   - `npm install -g firebase-tools`
+
+<!-- We don't need 'vue' - except initial creation
 - `vue`
   - `npm install -g @vue/cli`
 
 >Note: `@vue/cli` is the new version; `vue-cli` shown in some tutorials is the one it deprecates. Note: Vue CLI version 3 doesn't mean Vue version 3. You can use it to target Vue 2 as well. :)
+-->
+
+Note that we don't use Vue CLI. It's not strictly needed for creating or running a Vue project. Instead, we use rollup.js for building and Firebase Hosting for deployments.
 
 ### Firebase project
 
@@ -57,17 +39,15 @@ You need to:
 
 - create a Firebase project
 - enable hosting and authentication
-  - you can choose the set of authentication providers you like (we use Google)
+  - you can choose the set of authentication providers you like
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
 
-See [DEVS/Setting up Firebase project](DEVS/Setting%20up%%20Firebase%20project.md) for details.
+See [DEVS/Setting up Firebase project](DEVS/Setting%20up%%20Firebase%20project.md) for more details.
 
+<!-- disabled 
 >Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
-
-<!-- Editor's note: no need to provide more details?...
 -->
-
 
 ## Getting started
 
@@ -83,12 +63,54 @@ There are currently no tests for the project. 😢
 
 ```
 $ npm run dev
+...
+[firebase-serve] i  hosting: Serving hosting files from: public
+[firebase-serve] ✔  hosting: Local server: http://localhost:3000
+...
 ```
 
 Serves the project locally, reacting to source code changes.
 
+Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
+
+
+## Bring in your App!
+
+This is where You can code.
+
+We presume you have a suitable IDE, and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
+
+The code is under `src`. 
+
+>Only one request: if you deviate the app from the original template, please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
+
+>Change also the `name`, `version` and `author` fields in `package.json`, to match your application. :)
+
+### You need `npm` modules?
+
+No problem.
+
+If your modules provide ES6 exports, you may be able to use them, as is (let us know!). If they need `plugin-commonjs`, enable it in `package.json` and `rollup.config.js`. 
+
+As always, let us know if you think the template should be changed.
+
+
+## Support
+
+<!-- disabled, until created tbd.
+You can discuss the template, and suitable Firebase-centric issues at the project's [Gitter stream]().
+-->
+
+If you have suggestions or bugs, [GitHub Issues](https://github.com/akauppi/GroundLevel-firebase-web/issues) is currently the way. 
+
+We're working also on other streams of idea exchange; [suggestions](https://github.com/akauppi/GroundLevel-firebase-web/issues/6) are welcome!
+
 
 ## Production build
+
+Once you've got your app together, you want to roll it out to the world. There are many ways, either manually or using a CI/CD pipeline.
+
+>*We've not come to setting up CI/CD for this template, but that could be feasible. It's anyways best to start with a working, manual process, and doing CI/CD without tests is.. not a good idea. So, tests first.*
 
 ```
 $ npm run build
@@ -96,10 +118,11 @@ $ firebase serve
 ...
 ```
 
-Then open http://localhost:5000
+>Note: The output bundle sizes shown on the console are not quite what's in the file system. #help
 
+The reason the output bundle can be pretty small (e.g. 8kB) is that Firebase, Firebase UI and Vue are brought in from CDN at `index.html`, instead of `npm`.
 
-## Deploy
+### Deploy
 
 ```
 $ firebase deploy
@@ -121,13 +144,23 @@ Project Console: https://console.firebase.google.com/project/vue-rollup-example/
 Hosting URL: https://vue-rollup-example.firebaseapp.com
 ```
 
-You can now reach the app in the stated URL: [https://vue-rollup-example.firebaseapp.com](https://vue-rollup-example.firebaseapp.com)
+Visit the stated URL. :)
 
->Note: These instructions are not complete, nor does it make sense to duplicate Firebase documentation (it being awesome!! 🥳). Check e.g. [Test locally then deploy to your site](https://firebase.google.com/docs/hosting/deploying)
+Note: These instructions are no-where complete, and you should really visit the Firebase documentation (it being awesome!! 🥳). Check e.g. [Test locally then deploy to your site](https://firebase.google.com/docs/hosting/deploying)
 
-<font color=red>tbd. write about A/B testing</font>
 
-<font color=red>tbd. write about monitoring</font>
+## Digging deeper...
+
+The template aims to cover more ground. It's not enough to get authentication running. You need to manage the data behind your application. Firebase provides solutions to these, and it makes sense to show them in action.
+
+This means:
+
+- Firestore (planned); creating an actual collaborative app behind the authentication
+- Performance monitoring
+- Logging
+- A/B testing
+
+Stay tuned for these developments, or chime in to make them happen!!! 🏅
 
 
 ## Help needed!
@@ -137,11 +170,32 @@ If you wish to help, check out:
 - [TODO.md](TODO.md)
 - [Issues](https://github.com/akauppi/vue-rollup-example-with-firebase-auth/issues)
 
-Issues has more formal definition of shortcomings, and is the main forum of contributions and discussion. `TODO` is a shorthand for authors.
+Issues has more formal definition of shortcomings and plans, and is the main forum of contributions and discussion. `TODO` is a shorthand for authors.
 
 In particular:
 
-- help from Vue and/or Rollup aficiados, to check whether the configs are Best in class ☺️
+- help from Vue and/or Rollup aficiados, to check the configs are Best in class ☺️
+
+## Credits
+
+Thanks to Jaakko Roppola for wonderful icon art!! 🙌
+
+Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it, then changed a few things.
+
+<!-- things changed (easter egg):
+- Jonatas's code is unlicensed. This is MIT licensed.
+- Simplified `package.json` a bit
+- updated dependencies
+- `package-lock.json` disabled (just a matter of taste...)
+- added `dev` target for "watch" workflow
+- using `public` as the public folder (Firebase Hosting default)
+- targeting "evergreen" ([ES6](https://caniuse.com/#search=ES6%20modules) and [async/await](https://www.caniuse.com/#search=await) capable) browsers; for IE11 support, see [here](https://github.com/akauppi/GroundLevel-firebase-web/issues/5)
+-->
+
+Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (blog, Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
+
+   - btw. most material online gets that wrong. Using `firebase.auth.currentUser` in route guards is _not_ the correct way, and should be discouraged!
+
 
 ## References
 
@@ -155,6 +209,8 @@ In particular:
 
 - [Vue, guard routes with Firebase Authentication](https://dev.to/gautemeekolsen/vue-guard-routes-with-firebase-authentication-f4l) (blog, Nov 2019) 
   - associated [source code](https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication) (GitHub)
-
-- [gautemo/Vue-guard-routes-with-Firebase-Authentication](https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication) (GitHub)
+  - associated [narrative](https://gaute.dev/dev-blog/vue-router-firebase-auth)
   - learned about Vue-router with Firebase auth here! :)
+
+<!-- Editor's note: Gaute's dev.to blog is slightly different from his gaute.dev entry. The latter is clearer, in some regards, so listing them both.
+-->

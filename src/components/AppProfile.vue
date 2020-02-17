@@ -9,7 +9,7 @@
 <template>
   <section class="app-profile fixed-top-right">
     <div id="user-name">
-      {{ displayName }}
+      {{ user ? user.displayName : '...' }}
     </div>
     <hr>  <!-- tbd. make into a push-down menu -->
     <button type="button"
@@ -35,22 +35,18 @@
 <script>
   // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
 
-  import { userProm, signOut as authSignOut } from '../auth.js';
+  import { signOut as authSignOut } from '../auth.js';
+  import { userMixin } from '@/mixins/user.js';
 
   export default {
     name: 'AppProfile',
-    data: () => ({
-      displayName: ''   // tbd. use mixin
-    }),
-    created() {
-      userProm.then( (user) => {
-        this.displayName = user.displayName
-      })
-    },
+    mixins: [userMixin],
     methods: {
       signOut() {
+        // Note: We need to fly directly to sign-in page. Pushing like this seems to bypass the route guards.
+        //
         authSignOut().then( () => {
-          this.$router.push('/');   // tbd. not sure if this needs to wait for the promise
+          this.$router.push('/signin');
         });
       }
     }
