@@ -34,7 +34,10 @@
     - Firebase UI
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
-    - Seems we would need this for all the pages, not just 'SignIn'. DEVELOPMENT
+    - Likely this is only needed by 'SignIn' page, but in development it was easiest to have it here. Since it likely
+    - gets cached, there's little benefit in injecting it just for that one page. Right? #advice
+    -
+    - tbd. Try 'defer' here as well - does it improve anything?
     -->
     <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />

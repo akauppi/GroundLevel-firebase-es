@@ -2,7 +2,7 @@
 
 Create a Firebase project in the [console](https://console.firebase.google.com):
 
->![](.images/pick-me.png)
+![](.images/pick-me.png)
 
 Register your Firebase web app online.
 
@@ -19,7 +19,9 @@ Can you log in:
 $ firebase login
 ```
 
-Then, we'll tie the local folder to the Firebase project you created online:
+## Initializing a Firebase project
+
+To tie a local folder to the Firebase project you created online:
 
 ```
 $ firebase init
@@ -75,5 +77,6 @@ $ firebase deploy
 Try again. See a difference?
 
 Your site should be up, now. 🌟
+
 
 

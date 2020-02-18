@@ -24,13 +24,6 @@ Let's start! 🤾‍♀️
 - `firebase`
   - `npm install -g firebase-tools`
 
-<!-- We don't need 'vue' - except initial creation
-- `vue`
-  - `npm install -g @vue/cli`
-
->Note: `@vue/cli` is the new version; `vue-cli` shown in some tutorials is the one it deprecates. Note: Vue CLI version 3 doesn't mean Vue version 3. You can use it to target Vue 2 as well. :)
--->
-
 Note that we don't use Vue CLI. It's not strictly needed for creating or running a Vue project. Instead, we use rollup.js for building and Firebase Hosting for deployments.
 
 ### Firebase project
@@ -43,7 +36,7 @@ You need to:
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
 
-See [DEVS/Setting up Firebase project](DEVS/Setting%20up%%20Firebase%20project.md) for more details.
+See [DEVS/Setting up the Firebase project](DEVS/Setting%20up%%20the%20Firebase%20project.md) for more details.
 
 <!-- disabled 
 >Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
@@ -82,9 +75,11 @@ We presume you have a suitable IDE, and know web programming (JavaScript, HTML, 
 
 The code is under `src`. 
 
->Only one request: if you deviate the app from the original template, please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
+Three steps to brand your own app:
 
->Change also the `name`, `version` and `author` fields in `package.json`, to match your application. :)
+1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
+2. Change the `name`, `version` and `author` fields in `package.json`, to match your application.
+3. Change the `
 
 ### You need `npm` modules?
 

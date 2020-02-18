@@ -49,6 +49,13 @@
    For some reason, WebStorm thinks it's a good idea to compare `public/bundle.ems.js` with our source files. It should know that it's an output file, by a) `.gitignore`, b) Rollup config.
    
    Folders can be marked as output/ignore, but what about a single file?  If this hurts, we can change the output to be a directory (`public/dist`).   
+
+
+- Syntax highlighter for Firebase storage rules
+
+   - [StackOverflow](https://stackoverflow.com/questions/59999967/is-there-a-firebase-storage-rules-syntax-highlighter-for-webstorm)
+   - [IntelliJ WebStorm backlog](https://youtrack.jetbrains.com/issue/IDEABKL-7927?p=IDEA-200507)
+
    
    
 ## rollup-plugin-vue
@@ -65,4 +72,9 @@
 - [ ] Change the Firebase project name so URL is no longer: `https://vue-rollup-example.firebaseapp.com`.
 
 
+## Firebase
+
+- What is the difference between `firebase init` and `firebase use --add`? 
+
+   Could someone with more Firebase experience check out the instructions in `README.md` and `DEVS/Setting up the Firebase project.md`. #help
 

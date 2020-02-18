@@ -92,7 +92,10 @@ export default {
     // Note: "If I remember correctly globals only works on iife modules and by extension umd ones"
     //    -> https://stackoverflow.com/questions/49947250/how-do-rollup-externals-and-globals-work-with-esm-targets/50427603#50427603
     //
-    //globals: {},
+    globals: {
+      firebase: "firebase",
+      firebaseui: "firebaseui"
+    },
 
     sourcemap: true   // note: may be good to have source map even for production
   },

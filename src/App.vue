@@ -20,6 +20,7 @@
   import AppProfile from './components/AppProfile.vue';
   import AppFooter from './components/AppFooter.vue';
   import { userMixin } from '@/mixins/user.js';   // ignore IDE warning
+  import { appTitle } from './config.js';
 
   export default {
     name: 'App',     // helps in debugging
@@ -30,8 +31,7 @@
     // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
     mounted() {
       console.log("Houston, App is mounted");
-
-      document.title = "GroundLevel for Firebase-auth"   // your title here
+      document.title = appTitle;
     }
   }
 </script>

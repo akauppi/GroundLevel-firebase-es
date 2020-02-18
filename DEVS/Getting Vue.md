@@ -22,10 +22,10 @@ Gotcha.
 
 I <u>want</u> my Vue to be in a separate file. I <u>may want</u> it to be coming from a CDN.
 
-Let's prepare our template so that both of the good ways are easy to use. :)
+These goals can be reached using either `index.html` or import mapping straight to CDN URLs. As a third option, you could link the `npm` files as symbolic links from the `public` folder, thus keeping them outside of the bundle. Let's study the two first options. They both utilize CDN.
 
 
-## 1. From CDN
+## 1. Via `index.html`
 
 The Vue [instructions](https://vuejs.org/v2/guide/installation.html#CDN) suggest us to place this in the `index.html`:
 
@@ -40,38 +40,22 @@ This has two problems:
 - we need to map `insert 'vue'` to `Vue` somewhere (doable)
 - the `Vue` here is not global; the author doesn't know how to import directly to a global.
 
-..but:
+One could circumvent these with a little bit of coding in `index.html`, but let's look at the other option. 
 
-We can skip `index.html` and do the same CDN import within code (`src/app.js`):
 
-```
-import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js';  // works (CDN)
-```
+## 2. Via Rollup `output.paths`
 
-This works. 
-
-<font color=red>tbd. How to take the URL to one place, let the bundle see it as just 'vue'?
-
-Once `@rollup/plugin-alias` would work, let's do that!
-</font>
-
-## 2. From npm
-
-Above way is good. CDN's are nice. But if you insist getting Vue via npm, this could work:
+We add the following config in `rollup.config.js`:
 
 ```
-$ cd public
-$ ln -s ../node_modules/vue/dist/vue.runtime.esm.js
+output: {
+   ...   
+   paths: {
+      vue: 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js',
+      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js'
+   }
+} 
 ```
 
-You can then `import './vue.runtime.esm.js'` or alias that to `vue` <font color=red>(if alias works!)</font>, but the code won't get baked into your bundle but hosted separately.
+This allows you to use `import Vue from 'vue'` anywhere in the code (makes access explicit), yet directs the request to a certain URL in a centralized place.
 
->DISCLAIMER: Above hasn't been tested!  Please do. :)
-
-If you do this, you'll also need to initialize `VueRouter` explicitly:[^3]
-
-```
-Vue.use(VueRouter);   // needs to be before first 'new Vue()'
-```
-
-[^3]: The reason why CDN doesn't need this is that `VueRouter` does the call if it finds `Vue` defined as a global.
