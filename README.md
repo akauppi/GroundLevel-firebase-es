@@ -1,5 +1,7 @@
 # GroundLevel * Firebase-auth
 
+[![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
+
 <!-- Using 'img' to be able to scale from Markdown.
 - Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
 -->
