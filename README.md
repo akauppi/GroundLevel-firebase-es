@@ -52,7 +52,17 @@ Fetch dependencies:
 $ npm install
 ```
 
+### Running tests
+
 There are currently no tests for the project. 😢
+
+<!-- tbd. Once there are:
+```
+$ npm test
+...  
+```
+-->
+
 
 ## Development workflow
 
@@ -87,20 +97,20 @@ Three steps to brand your own app:
 
 No problem.
 
-If your modules provide ES6 exports, you may be able to use them, as is (let us know!). If they need `plugin-commonjs`, enable it in `package.json` and `rollup.config.js`. 
+If your modules provide ES6 exports, you may be able to use them, as is (let us know!). If they need `plugin-commonjs`, enable it in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
 
-As always, let us know if you think the template should be changed.
+Maybe we should add an `npm` dependency, just to show how it works?
 
 
 ## Support
 
-<!-- disabled, until created tbd.
-You can discuss the template, and suitable Firebase-centric issues at the project's [Gitter stream]().
+If you have suggestions or bugs, [GitHub Issues](https://github.com/akauppi/GroundLevel-firebase-web/issues) is the way. 
+
+For general questions and casual chat, visit the project's [Gitter stream](https://gitter.im/akauppi/GroundLevel-firebase-web).
+
+<!-- Editor's note:
+Slack channel might be justified, but that's later.. (Asko)
 -->
-
-If you have suggestions or bugs, [GitHub Issues](https://github.com/akauppi/GroundLevel-firebase-web/issues) is currently the way. 
-
-We're working also on other streams of idea exchange; [suggestions](https://github.com/akauppi/GroundLevel-firebase-web/issues/6) are welcome!
 
 
 ## Production build

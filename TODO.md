@@ -78,3 +78,19 @@
 
    Could someone with more Firebase experience check out the instructions in `README.md` and `DEVS/Setting up the Firebase project.md`. #help
 
+
+## Vue 3 beta
+
+Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-router). Many things how it can simplify code:
+
+- allows multiple root nodes in a `template`
+- use of `ref` to have any values reactive
+
+( ) When we do this, let's take them via `npm` dependencies (not CDN link). Vue 3 is better suited to tree-shaking.
+
+
+## Font Awesome
+
+- [ ] Consider bringing it in, to replace e.g. the menu down-arrow with an icon from `npm`. 
+
+   See https://github.com/FortAwesome/vue-fontawesome

@@ -17,7 +17,11 @@
     "//@rollup/plugin-commonjs": "^11.0.1",
     "//eslint-config-jwalker": "^5.2.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.27",
+    "@fortawesome/free-solid-svg-icons": "^5.12.1",
+    "@fortawesome/vue-fontawesome": "^0.1.9"
+  },
   "devDependencies": {
     "@rollup/plugin-alias": "^3.0.0",
     "@rollup/plugin-node-resolve": "^7.0.0",
