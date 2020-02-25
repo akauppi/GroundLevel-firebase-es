@@ -8,9 +8,18 @@ As any template, one has made decisions. These fall into three categories: selec
 - Vue.js 2 + Vue-router
 - Firebase-auth and Firebase UI
 
+>*We'll consider Vue 3 the moment it's available in beta. It has 🍫🍬🍭 that makes the template simpler. :)*
+
+<!-- Placeholder; not using Font Awesome
+Font Awesome may only be used for some individual icons, in the template. Having it included is intended to make creating your app smoother.
+-->
+
 **Does not contain:**
 
-- Vue CLI usage
+- Vue CLI (not needed) [^1]
+- Babel (can be easily added)
+
+[^1]: Instead, we use GitHub for getting started, Rollup for packing and Firebase for deploying.
 
 **Consumed with:**
 

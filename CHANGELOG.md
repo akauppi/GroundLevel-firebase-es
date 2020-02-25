@@ -1,12 +1,12 @@
 # Changelog
 
-## Firestorm data management
+## latest (`firestorm`)
 
-- ... working on it ...
+## 24-Feb-20
 
-## First light 🕯
+- Proper-looking drop-down menu for the sign-out
+
+## ~19-Feb-20
 
 - Authentication works
-- Inviting some fellow template authors to review the code and docs
-
-
+- Mentioned to some prior template authors, and at Vue.js Amsterdam, for feedback

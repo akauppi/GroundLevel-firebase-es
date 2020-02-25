@@ -18,7 +18,7 @@ module.exports = {
     //'vue/comment-directive': 0,
 
     'vue/max-attributes-per-line': ['error', {
-      'singleline': 1,
+      'singleline': 99,  // AK
       'multiline': {
         'max': 1,
         'allowFirstLine': true    // AK
