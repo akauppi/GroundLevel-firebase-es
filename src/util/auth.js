@@ -1,5 +1,5 @@
 /*
-* src/auth.js
+* src/util/auth.js
 *
 * Application interfacing to the authentication: is the user signed in, information about them.
 *

@@ -25,6 +25,8 @@ module.exports = {
       }
     }],
 
+    'vue/singleline-html-element-content-newline': 0, // AK (could also let it be enabled?)
+
     /*
     'no-console': 0,
     // 'vue/html-self-closing': 1,

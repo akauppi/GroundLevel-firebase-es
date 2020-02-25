@@ -2,32 +2,35 @@
 
 Schemas for the data stored in Firestore.
 
-These follow the collection-document-collection-... way of FireStore.
+These follow the collection-document-collection-... way of FireStore. Collections are marked with `C <id-type>`.
 
 ```
-/projects
-   /id: (unique string)			<-- identity
-   /authors: [ uuid [, ...] ]
-   /collaborators [ [uuid [, ...] ]
-
+/projects:C <project-id: automatic>
    /title: string
-   /created: date-time		<-- unless Firebase has some built-in way
-   [/deleted: <date-time>]		// keep data resurrectable from the database console
-
-   /symbols
+   /created: time-stamp		<-- unless Firebase has some built-in way
+   [/deleted: time-stamp]		// keep data resurrectable from the database console
+	/access: {
+		<uid>: "author"|"collaborator"
+	}	
+	/last-used: {
+		<uid>: time-stamp		// when a user last opened the project (*)
+	}	
+   /symbols:C <automatic-id>
       {
-			id: (unique, growing integer) <-- identity
+      		layer: int
 			shape: "star"						// potentially more shapes
 			size: int
 			fill-color: <color-string>
 			x: <number>		// coordinates of the star's center
 			y: <number>
       }
+   /layer-range: { min: int, max: int }
 
-/users
-   /uuid: string		<-- from Firebase auth; identity
+/users:C <uid>		// user id from Firebase auth
    /photo: bytes		<-- JPEG, PNG etc. (max. 1MB-89 bytes)
 ```	
+
+(*) Having your user-id here doesn't mean access rights. They are provided by the `authors` and `collaborators` arrays.
 
 With that, we should be able to:
 

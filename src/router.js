@@ -14,8 +14,8 @@ import pageSignIn from './pages/SignIn.vue';
 import pageSomeIn from './pages/SomeIn.vue';
 import page404 from './pages/404.vue';
 
-import { currentFirebaseUserProm } from './auth.js';
-import { assert } from '@/utils/assert.js';
+import { currentFirebaseUserProm } from '@/util/auth.js';
+import { assert } from '@/util/assert.js';
 
 const reqAuth = { requiresAuth: true }
 
