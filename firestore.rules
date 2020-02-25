@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // General rules (expecting these *and* the other rules to be merged, with strictest deciding access) <-- tbd. is that how it works?
+    match /{document=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isVerified();
+    }
+
+    match /projects/{projectId} {
+      allow
+    }
+
+    function isSignedIn(){
+      return request.auth.uid != null;
+    }
+    function isVerified(){
+      return request.auth.token.email_verified;
+    }
+
+    //...
+
+    //REMOVE
+    // Make sure to write security rules for your app before that time, or else
+    // your app will lose access to your Firestore database
+    //match /{document=**} {
+    //  allow read, write: if request.time < timestamp.date(2020, 3, 1);
+    //}
+  }
+}
+

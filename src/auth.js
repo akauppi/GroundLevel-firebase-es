@@ -18,13 +18,20 @@
 //    return immediately with what it knows to be the authentication state, except for the first call where it likely
 //    needs some time.  (<-- let's confirm by logging and timing...)
 //
-// Signed in:   (fields mentioned in FirebaseUI README listed)
+// Signed in:   (as documented in -> https://firebase.google.com/docs/reference/js/firebase.User.html#displayname )
 //  {
-//    displayName: string
-//    email: string
-//    emailVerified: boolean
-//    photoURL: URL
-//    uid: <string>
+//    displayName:    string | null
+//    email:          string | null
+//    emailVerified:  boolean
+//    isAnonymous:    boolean
+//    metadata:       { creationTime: string, lastSignInTime: string }
+//    phoneNumber:    string | null
+//    photoURL:       string | null
+//    providerData:   [ { ...similar fields as the generic ones... } ]
+//    providerId:     string        // tbd. examples; or do we need to know?
+//    refreshToken:   string
+//    tenantId:       string | null
+//    uid:            string        // "the user's unique id"
 //    phoneNumber: ...
 //    providerData: ...
 //
@@ -43,6 +50,7 @@ const currentFirebaseUserProm = () => new Promise( (resolve, reject) => {   // (
   const unsubscribe = firebase.auth().onAuthStateChanged(user => {
     const dt = performance.now() - t0;
     console.log(`Checked Firebase auth state (took ${dt} ms): `, user);   // 92ms ... 231ms
+
     unsubscribe();
     resolve(user);
   }, reject);

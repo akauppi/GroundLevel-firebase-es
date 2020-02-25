@@ -1,19 +1,29 @@
 # GroundLevel * Firebase-auth
 
+[![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
+
 <!-- Using 'img' to be able to scale from Markdown.
 - Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
 -->
-<img alt="Logo" src="iconart/logo_512x512.png" width=300>
+<img alt="Logo" src="iconart/logo_512x512.png" width=300 align="left" style="margin: 40px">
+
+<br />
+<br />
 
 **A foundation for a web app, using Firebase suite of back-end tools.**
 
 You want a web app and you want it now?
 
-This aims to become the best place to make that happen. We chose and configured the [right tools](Ingredients.md) for the job (so you don't need to read multiple manuals). We aim not only to show how it's done, but also argue why certain approaches were taken. We aim to start with 2020's technology, and stay relevant.
+This aims to become the best place to make that happen. We chose and configured [great tools](Ingredients.md) so you don't need to read multiple manuals. We aim not only to show how it's done, but also argue why certain approaches were taken. We aim to start with 2020's technology (ES6, async/await), and stay relevant.
 
-Welcome.
+Welcome!
 
+<br clear=all />
 >⏱ Before we start, it would be nice if you can time your experience and tell us, how fast you got *your app* rolling. Data based metrics, you know.. 😉
+
+<!-- Statistics reported so far:
+9 mins: 1 user
+-->
 
 Let's start! 🤾‍♀️
 
