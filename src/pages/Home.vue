@@ -13,9 +13,9 @@
     <h2>Hi <tt>{{ uuid }}</tt></h2>
 
     <!-- List the projects we have access to -->
-    <template v-if="projects.length">
+    <template v-if="projectsLatestFirst.length">
       <ul>
-        <li v-for="p in projects" :key="p.uid">{{ p.title }}</li>
+        <li v-for="p in projectsLatestFirst" :key="p.uid">{{ p.title }}</li>
       </ul>
     </template>
   </section>
@@ -28,12 +28,10 @@
 </style>
 
 <script>
-  import { userMixin } from '@/mixins/user.js';   // ignore IDE warning
-  //import { assert } from '@/util/assert.js';
-  //REMOVE:
-  //import { store } from '@/state.js';
+  import { userMixin } from '@/mixins/user';   // ignore IDE warning
+  //import { assert } from '@/util/assert';
 
-  import { myProjectsMixin } from "@/mixins/myProjects.js";
+  import { myProjectsMixin } from '@/mixins/myProjects';
 
   export default {
     name: 'Home',      // Vue note: names help in debugging

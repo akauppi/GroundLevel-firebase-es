@@ -10,11 +10,11 @@ Collections are marked with `C <id-type>`.
    /created: time-stamp
    /authors: [ <uid> [, ...] ]
    /collaborators: [ <uid> [, ...] ]		// includes people in 'authors'
-   /last-used: {
+   /lastUsed: {
 		<uid>: time-stamp		// when a user last opened the project (*)
-	}	
-   /symbols:C <automatic-id>
-      {
+	}
+   /symbols:C 
+      /<automatic-id>: {
       		layer: int
 			shape: "star"						// potentially more shapes
 			size: int
@@ -22,7 +22,8 @@ Collections are marked with `C <id-type>`.
 			x: <number>		// coordinates of the star's center
 			y: <number>
       }
-   /layer-range: { min: int, max: int }
+      /_minLayer: int
+      /_maxLayer: int
 
 /users:C <uid>		// user id from Firebase auth
    /photo: bytes		<-- JPEG, PNG etc. (max. 1MB-89 bytes)

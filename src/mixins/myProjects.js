@@ -1,13 +1,15 @@
 /*
 * src/mixins/myProjects.js
 *
-* Follow the projects that the current user has access to, and provide (also write) access to them.
-* This is a bridge between Firestore state and the application.
+* Follow the projects that the current user has access to, and provides access to them.
 */
-import { userMixin } from "@/mixins/user";
+import { userMixin } from '@/mixins/user';
+import { project } from '@/data/project';
+import Vue from 'vue';
+import { assert } from '@/util/assert';
 
-// Using a 'collection' function allows us to override, for testing purposes.
-// tbd. Consider moving to a separate module, later.
+// Note: Using a function allows us to override, for testing purposes. (tbd.)
+//      tbd. Consider moving to a separate module, later.
 //
 const db = firebase.firestore();
 function fbCollection(name) {   // (string) => collection-handle
@@ -15,70 +17,136 @@ function fbCollection(name) {   // (string) => collection-handle
 }
 
 //--- The state ---
-// Just one state per application (one user at a time)
+// Singleton - just one logged in user.
+
+let unsubscribe = null;   // call to stop the earlier Firestore tracker
+
+// The project id's that the user can access. This is synced with Firestore projects getting added/removed.
 //
-let unsubscribe = null;   // stop the earlier Firestore tracker; PRIVATE
+// Q: How to have an observable set (array), in Vue? #help
+//
+const projectsRawVO = Vue.observable({
+  value: {}     // { <project-id>: Vue.observable({ title: string, ... }) }
+});
+
+// Observable used by the mixin. Just the projects (no id's). Synced to the above by a watcher.
+//
+// Note: The frequency of projects list changing (for a single user) is pretty infrequent. Thus it doesn't matter
+//    that we might do extra get's when it does.
+//
+const projectsLatestFirstVO = Vue.observable({
+  _: []   // [ Vue.observable({ title: ..., ... }), ... ]
+});
+
+// Watch one observable, reflect changes in another
+//
+new Vue({   // from -> https://github.com/vuejs/vue/issues/9509#issuecomment-464460414
+  created() {
+    this.$watch(() => projectsRawVO.value, (o) => {   // ({ <project-id>: Vue.observable({ title: string, ... } }) => ()
+      console.log('Watching projects change to:', o);
+
+      let sorted;
+      if (o === null) {
+        sorted = [];
+      } else {
+        // Note: We recreate the array each time the set of projects changes (but hopefully not for project-internal
+        //    changes!). Thus this whole watcher does the object-value-to-array transform, without losing reactivity.
+
+        const copy = [... Object.values(o)];    // (copy because '.sort' sorts in place; playing safe...)
+        sorted = copy.sort( (a,b) => {
+          if (a.created > b.created) {  // latest first (reversed order)
+            return -1;
+          } else if (a.created < b.created) {
+            return 1;
+          } else {    // Quite unlikely - two projects created at the same time. Give deterministic sorting, nonetheless.
+            return (a.title < b.title) ? -1 : (a.title > b.title) ? +1 : 0;
+          }
+        });
+      }
+
+      console.log('Reflecting sorted projects to:', sorted);
+
+      projectsLatestFirstVO._ = sorted;
+    });
+  }
+});
 
 /*
 * Called when the authenticated user changes.
+*
+* Sets 'projectsRawVO' to null (no projects; signed out), or populates with the projects we have access to (and keeps
+* that set up to date).
+*
+* Note: Losing access really kicks in in the database rules side; we are not pulling copied objects out of our callers'
+*     hands.
 */
-function userChanged(vm, uid) {    // (view-model, string | null) => ()
+function userChanged(uid) {    // (string | null) => ()
   console.log( "User changed to (myProjects):", uid);
 
   // Remove the earlier projects and (if logged in), repopulate.
   //
-  vm.projects = [];
-  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (uid === null) {
+    projectsRawVO.value = {};
+    unsubscribe();
+    unsubscribe = null;
 
-  if (uid !== null) {
-    /* Firestore note: Firestore does not provide OR queries over multiple collection keys, so we need to have the data
-    *     modeled such that our project-we-have-access-to can be checked from one key ('collaborators').
+  } else {
+    //assert( projects.value.size === 0 );    // (more complex to check for empty object)
+    assert( unsubscribe === null );
+
+    const projectsC = fbCollection('projects');
+
+    /* Firestore note: Firestore does not provide OR queries over multiple collection keys (Feb 2020), so we have
+    *     modeled the data so that access rights can be checked from a single key.
     */
-    unsubscribe = fbCollection('projects')
+    unsubscribe = projectsC
                     .where('collaborators', 'array-contains', uid)
-                    //.where(`access.${uid}`, 'in', ['author', 'contributor'])    <-- this would be a wonderful way to do it, but is unconventional and pollutes the root key space #cleanup
+        //.where(`access.${uid}`, 'in', ['author', 'contributor'])    <-- tbd. this would be a wonderful way to do it, but is unconventional and pollutes the root key space (well, unless 'access' is a map; let's try it some day? :) )
                     .onSnapshot( snapshot => {
                       snapshot.docChanges().forEach( change => {
-                        switch (change.type) {
-                          case 'added':
-                            console.log('Project ADDED:', change.doc.data());
-                            //tbd. vm.projects.push( { _id: o.id, title: o.title, lastUsed: o['last-used'] } );   // tbd. Use of 'last-used' in Firestore doc keys may be bad example?
-                            break;
+                        // Note: Not using 'switch' because it doesn't provide scopes for the cases.
 
-                          case 'modified':
-                            console.log('Project MODIFIED:', change.doc.data());
-                            //tbd. replace said project (by id)
-                            break;
+                        if (change.type === 'added') {
+                          console.log('Adding project, id:', change.doc.id);  // DEBUG
+                          const p = project(change.doc, uid);    // starts tracking changes to that project (title, data, ...)
 
-                          case 'removed':
-                            console.log('Project REMOVED or lost access to:', change.doc.data());
-                            //tbd. remove said project (by id)
-                            break;
+                          const id = change.doc.id;
+                          assert(!projectsRawVO.value[id]);
+                          projectsRawVO.value[id] = p;
+
+                        } else if (change.type === 'modified') {
+                          // no-op for us (project objects take care)
+
+                        } else if (change.type === 'removed') {
+                          console.log('Project REMOVED or lost access to:', change.doc.data());
+
+                          const id = change.doc.id;
+                          assert(projectsRawVO.value[id]);   // should be there
+                          delete projectsRawVO.value[id];   // remove the key
                         }
                       });
                     });
   }
 }
 
+/* Watch the 'user' change
+*/
+new Vue({
+  mixins: [userMixin],
+  watch: {
+    user: (o) => {
+      userChanged(o !== null ? o.uid : null );
+    }
+  }
+});
+
 //--- The Mixin ---
 // Provides access to current user's projects
 //
 const myProjectsMixin = ({
-  mixins: [userMixin],    // tbd. ideally, we'd just privately have access to 'user'; not exposing it as our API
-  data: () => ({
-    projects: []    // { _id: unique-string, title: string, lastUsed: time-stamp, ... }     // tbd. make 'ProjectHandle' class!!!
-  }),
-  /*
-  created() {   // Note: no 'vm' parameter; forced to use 'this' #help
-    const vm = this;
-  },
-  */
-  watch: {
-    user: function (o) {    // (must use 'function' to have 'this')
-      const vm = this;
-      userChanged(vm, o !== null ? o.uid : null );
-    }
-  },
+  computed: {
+    projectsLatestFirst: () => projectsLatestFirstVO._    // [ Vue.observable{ title: string, ... }, ... ]
+  }
 });
 
 export {

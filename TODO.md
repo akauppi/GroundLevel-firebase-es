@@ -44,13 +44,6 @@
    - [ ] Alert IntelliJ to this. It behaves like [this issue from 2016](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207304095-Using-ES6-import-and-node-modules-are-marked-as-Module-is-not-installed-) but is likely different.
 
 
-- "Contents are identical" between source and `bundle.esm.js`
-
-   For some reason, WebStorm thinks it's a good idea to compare `public/bundle.ems.js` with our source files. It should know that it's an output file, by a) `.gitignore`, b) Rollup config.
-   
-   Folders can be marked as output/ignore, but what about a single file?  If this hurts, we can change the output to be a directory (`public/dist`).   
-
-
 - Syntax highlighter for Firebase storage rules
 
    - [StackOverflow](https://stackoverflow.com/questions/59999967/is-there-a-firebase-storage-rules-syntax-highlighter-for-webstorm)

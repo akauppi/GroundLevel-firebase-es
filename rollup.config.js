@@ -71,10 +71,10 @@ export default {
   //    to use 'esm'.
   //
   output: {
-    file: 'public/bundle.esm.js',
-    format: 'esm',
-    // EXPERIMENTAL: testing '.preserveModules' (disabled '.file' if you use this)
+    file: 'public/dist/bundle.esm.js',
     //dir: 'public/dist',
+    format: 'esm',
+    // EXPERIMENTAL: testing '.preserveModules' (disable '.file' if you use this)
     //preserveModules: true,
 
     paths: {
