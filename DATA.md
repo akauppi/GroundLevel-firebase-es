@@ -2,17 +2,15 @@
 
 Schemas for the data stored in Firestore.
 
-These follow the collection-document-collection-... way of FireStore. Collections are marked with `C <id-type>`.
+Collections are marked with `C <id-type>`.
 
 ```
 /projects:C <project-id: automatic>
    /title: string
-   /created: time-stamp		<-- unless Firebase has some built-in way
-   [/deleted: time-stamp]		// keep data resurrectable from the database console
-	/access: {
-		<uid>: "author"|"collaborator"
-	}	
-	/last-used: {
+   /created: time-stamp
+   /authors: [ <uid> [, ...] ]
+   /collaborators: [ <uid> [, ...] ]		// includes people in 'authors'
+   /last-used: {
 		<uid>: time-stamp		// when a user last opened the project (*)
 	}	
    /symbols:C <automatic-id>
@@ -28,11 +26,22 @@ These follow the collection-document-collection-... way of FireStore. Collection
 
 /users:C <uid>		// user id from Firebase auth
    /photo: bytes		<-- JPEG, PNG etc. (max. 1MB-89 bytes)
+   
+/trashed-projects:C <project-id>
+   # fields like with 'projects'; this is the grave yard but documents can be lifted back, if needed   
+   # +:
+   /deleted: time-stamp		// keep data resurrectable from the database console (also easy to flush such separate collection)
 ```	
 
 (*) Having your user-id here doesn't mean access rights. They are provided by the `authors` and `collaborators` arrays.
 
-With that, we should be able to:
+The `collaborators` field is used for access control (ability to open the project, work on it, and invite collaborators). 
+
+The `authors` are able to e.g. close the project.
+
+>Note: Authors *must* be included also as collaborators! Wasn't able to do Firestore fetches for "project where <uid> is either in the `collaborators` array or in the `authors` array.
+
+With this data schema, we should be able to:
 
 - list project id's where a user is author, collaborator or either
 - get the title and other meta data of a project
