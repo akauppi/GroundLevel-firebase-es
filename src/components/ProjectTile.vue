@@ -41,7 +41,8 @@
     props: {
       project: {    // { title: String, created: time-stamp, lastUsed: time-stamp, ... }    ; for presentation purposes
         type: Object,
-        required: false
+        required: false,
+        default: null
       }
     },
     mounted() {

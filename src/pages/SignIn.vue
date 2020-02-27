@@ -19,6 +19,8 @@
 -->
 <template>
   <section>
+    <!-- tbd. Replace this with a spinner when signing-in is in process...
+    -->
     <div id="stranger">
       <h1>WELCOME STRANGER!</h1>
       <div>
@@ -51,7 +53,8 @@
 
 <script>
   import { allowAnonymousAuth } from '../config.js';
-  import { assert } from '@/util/assert.js';
+  import { assert } from '@/util/assert';
+  import { userMixin } from '@/mixins/user';
 
   const genUiConfig = (goThere) => {     // ( () => () ) => {...}    // 'goThere' changes URL to the target
     assert(firebaseui);
@@ -184,7 +187,7 @@
 
   // Inject right here (not dependent on Vue component lifespan). Once the promise is fulfilled, 'firebaseui' should exist.
   //
-  const injectedProm = Promise.resolve(); //injectFirebaseUI();
+  //const injectedProm = Promise.resolve(); //injectFirebaseUI();
 
   export default {
     name: 'SignIn',     // tbd. is this needed?
@@ -205,17 +208,15 @@
           console.error('Error in \'.setPersistence\'', error.code, error.message);
         });
 
-      prom.then( () => {
-        injectedProm.then( () => {
-          // Note: Calling 'genUiConfig' here means it has access to 'firebaseui' - which it needs.
-          //
-          const uiConfig = genUiConfig( () => this.$router.push(toPath));    // we now have 'firebaseui' (even if injected)
-          const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      prom.then( () => {    // and if 'injectedProm' if we use it...
+        // Note: Calling 'genUiConfig' here means it has access to 'firebaseui' - which it needs.
+        //
+        const uiConfig = genUiConfig( () => this.$router.push(toPath));    // we now have 'firebaseui' (even if injected)
+        const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
-          ui.start("#firebaseui-auth-container", uiConfig);
-            //
-            // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
-        });
+        ui.start("#firebaseui-auth-container", uiConfig);
+          //
+          // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
       });
     }
   };

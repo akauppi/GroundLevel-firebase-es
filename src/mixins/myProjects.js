@@ -9,65 +9,46 @@ import Vue from 'vue';
 import { assert } from '@/util/assert';
 import { fbCollection } from '@/fb';
 
-// For most state, we can just use module-wide variables. There's only one logged in user, in the app.
-
 let unsubscribe = null;   // call to stop the earlier Firestore tracker
 
-// The project id's that the user can access. This is synced with Firestore projects getting added/removed.
-//
-// Q: How to have an observable set (array), in Vue? #help
-//
-const projectsRawVO = Vue.observable({
-  value: null     // { <project-id>: Vue.observable({ title: string, ... }) | null (= no sign-in)
-});
+// References:
+//    The sync-between-observables mechanism (IF we end up using it) is from
+//      -> https://github.com/vuejs/vue/issues/9509#issuecomment-464460414
 
-// Observable used by the mixin. Just the projects (no id's). Synced to the above by a watcher.
-//
-// Note: The frequency of projects list changing (for a single user) is pretty infrequent. Thus it doesn't matter
-//    that we might do extra get's when it does.
-//
-const projectsLatestFirstVO = Vue.observable({
-  _: []   // [ Vue.observable({ title: ..., ... }), ... ]
-});
+const state = new Vue({
+  data() {
+    return {
+      raw: new Map(),     // constant; contents change but the value doesn't. of: <project-id>: Vue.observable({ title: string, ... })
+      'ding!!!': 0        // Gong played when 'raw' contents change!
+    }
+  },
+  computed: {
+    latestFirst: (vm) => {    // (view-model) => [ Vue.observable({ title: string. ... }), ... ]
+      vm['ding!!!'];    // so that we are triggered
 
-// Watch one observable, reflect changes in another
-//
-new Vue({   // from -> https://github.com/vuejs/vue/issues/9509#issuecomment-464460414
-  created() {
-    this.$watch(() => projectsRawVO.value, (o) => {   // ({ <project-id>: Vue.observable({ title: string, ... } } | null) => ()
-      console.log('Watching projects change to:', o);
+      console.log("DONNNGGG!!!");
 
-      let sorted;
-      if (o === null) {
-        sorted = [];
-      } else {
-        // Note: We recreate the array each time the set of projects changes (but hopefully not for project-internal
-        //    changes!). Thus this whole watcher does the object-value-to-array transform, without losing reactivity.
+      const copy = [ ...vm.raw.values() ];
+      const ret= copy.sort( (a,b) => {
+        if (a.created > b.created) {  // latest first (reversed order)
+          return -1;
+        } else if (a.created < b.created) {
+          return 1;
+        } else {    // Quite unlikely - two projects created at the same time. Give deterministic sorting, nonetheless.
+          return (a.title < b.title) ? -1 : (a.title > b.title) ? +1 : 0;
+        }
+      });
 
-        const copy = [... Object.values(o)];    // (copy because '.sort' sorts in place; playing safe...)
-        sorted = copy.sort( (a,b) => {
-          if (a.created > b.created) {  // latest first (reversed order)
-            return -1;
-          } else if (a.created < b.created) {
-            return 1;
-          } else {    // Quite unlikely - two projects created at the same time. Give deterministic sorting, nonetheless.
-            return (a.title < b.title) ? -1 : (a.title > b.title) ? +1 : 0;
-          }
-        });
-      }
-
-      console.log('Reflecting sorted projects to:', sorted);
-
-      projectsLatestFirstVO._ = sorted;
-    });
+      console.log('Reflecting sorted projects to:', ret);
+      return ret;
+    }
   }
 });
 
 /*
 * Called when the authenticated user changes.
 *
-* Sets 'projectsRawVO' to null (signed out), or populates with the projects we have access to (and keeps that set
-* up to date).
+* Updates 'state.raw' with the projects we have access to (and keeps that set up to date).
 *
 * Note: Losing access really kicks in in the database rules side; we are not pulling copied objects out of our callers'
 *     hands.
@@ -78,14 +59,12 @@ function userChanged(uid) {    // (string | null) => ()
   // Remove the earlier projects and (if logged in), repopulate.
   //
   if (uid === null) {
-    projectsRawVO.value = null;
+    state.raw.clear();
     unsubscribe();
     unsubscribe = null;
 
   } else {
-    projectsRawVO.value = Vue.observable({});   // { <project-id>: Vue.observable({ title: string, ... }) }
-
-    //assert( projects.value.size === 0 );    // (more complex to check for empty object)
+    assert( state.raw.size === 0 );
     assert( unsubscribe === null );
 
     const projectsC = fbCollection('projects');
@@ -105,8 +84,8 @@ function userChanged(uid) {    // (string | null) => ()
                           const p = project(change.doc, uid);    // starts tracking changes to that project (title, data, ...)
 
                           const id = change.doc.id;
-                          assert(!projectsRawVO.value[id]);
-                          projectsRawVO.value[id] = p;
+                          assert(!state.raw.has(id));
+                          state.raw.set(id, p);
 
                         } else if (change.type === 'modified') {
                           // no-op for us (project objects take care)
@@ -115,11 +94,13 @@ function userChanged(uid) {    // (string | null) => ()
                           console.log('Project REMOVED or lost access to:', change.doc.data());
 
                           const id = change.doc.id;
-                          assert(projectsRawVO.value[id]);   // should be there
-                          delete projectsRawVO.value[id];   // remove the key
+                          assert(state.raw.has(id));   // should be there
+                          state.raw.delete(id);
                         }
                       });
                     });
+
+    state['ding!!!'] = state['ding!!!'] + 1;    // trigger the compute of 'latestFirst'
   }
 }
 
@@ -139,7 +120,7 @@ new Vue({
 //
 const myProjectsMixin = ({
   computed: {
-    projectsLatestFirst: () => projectsLatestFirstVO._    // [ Vue.observable{ title: string, ... }, ... ]
+    projectsLatestFirst: () => state.latestFirst    // [ Vue.observable{ title: string, ... }, ... ]
   }
 });
 
