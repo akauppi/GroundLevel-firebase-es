@@ -7,14 +7,7 @@ import { userMixin } from '@/mixins/user';
 import { project } from '@/data/project';
 import Vue from 'vue';
 import { assert } from '@/util/assert';
-
-// Note: Using a function allows us to override, for testing purposes. (tbd.)
-//      tbd. Consider moving to a separate module, later.
-//
-const db = firebase.firestore();
-function fbCollection(name) {   // (string) => collection-handle
-  return db.collection(name);
-}
+import { fbCollection } from '@/fb';
 
 //--- The state ---
 // Singleton - just one logged in user.

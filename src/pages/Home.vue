@@ -12,12 +12,12 @@
 
     <h2>Hi <tt>{{ uuid }}</tt></h2>
 
+    <div>Projects: {{ projectsLatestFirst.length }}</div>
     <!-- List the projects we have access to -->
-    <template v-if="projectsLatestFirst.length">
-      <ul>
-        <li v-for="p in projectsLatestFirst" :key="p.uid">{{ p.title }}</li>
-      </ul>
-    </template>
+    <ul>
+      <li is="ProjectTile" :project="null" />
+      <li is="ProjectTile" v-for="p in projectsLatestFirst" :key="p.uid" :project="p" />
+    </ul>
   </section>
 </template>
 
@@ -30,11 +30,14 @@
 <script>
   import { userMixin } from '@/mixins/user';   // ignore IDE warning
   //import { assert } from '@/util/assert';
-
+  import ProjectTile from '@/components/ProjectTile.vue';
   import { myProjectsMixin } from '@/mixins/myProjects';
 
   export default {
     name: 'Home',      // Vue note: names help in debugging
+    components: {
+      ProjectTile
+    },
     mixins: [userMixin, myProjectsMixin],
     computed: {
       uuid: (vm) => {

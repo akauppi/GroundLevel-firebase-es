@@ -53,7 +53,9 @@ const plugins = [
   // Note: If you bring in Vue via 'npm' (not CDN), you'll need this to tell the bundle whether it's production or not.
   //replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
 
-  watching && livereload('public'),
+  watching && livereload({
+    watch: 'public/**'
+  }),
 
   production && fileSize(),   // tbd. where does this pick the minimized etc. sizes?  (could we just print out from terser?)
   production && terser()
