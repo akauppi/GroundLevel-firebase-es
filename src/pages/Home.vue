@@ -10,7 +10,7 @@
       YOU ARE AT HOME 🏯
     </div>
 
-    <h2>Hi <tt>{{ uuid }}</tt></h2>
+    <h2>Hi <tt>{{ uid }}</tt></h2>
 
     <div>Projects: {{ projectsLatestFirst.length }}</div>
     <!-- List the projects we have access to -->
@@ -40,7 +40,7 @@
     },
     mixins: [userMixin, myProjectsMixin],
     computed: {
-      uuid: (vm) => {
+      uid: (vm) => {
         return vm.user ? vm.user.uid : '...';
       }
     }

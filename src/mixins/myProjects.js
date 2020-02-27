@@ -9,8 +9,7 @@ import Vue from 'vue';
 import { assert } from '@/util/assert';
 import { fbCollection } from '@/fb';
 
-//--- The state ---
-// Singleton - just one logged in user.
+// For most state, we can just use module-wide variables. There's only one logged in user, in the app.
 
 let unsubscribe = null;   // call to stop the earlier Firestore tracker
 
@@ -19,7 +18,7 @@ let unsubscribe = null;   // call to stop the earlier Firestore tracker
 // Q: How to have an observable set (array), in Vue? #help
 //
 const projectsRawVO = Vue.observable({
-  value: {}     // { <project-id>: Vue.observable({ title: string, ... }) }
+  value: null     // { <project-id>: Vue.observable({ title: string, ... }) | null (= no sign-in)
 });
 
 // Observable used by the mixin. Just the projects (no id's). Synced to the above by a watcher.
@@ -35,7 +34,7 @@ const projectsLatestFirstVO = Vue.observable({
 //
 new Vue({   // from -> https://github.com/vuejs/vue/issues/9509#issuecomment-464460414
   created() {
-    this.$watch(() => projectsRawVO.value, (o) => {   // ({ <project-id>: Vue.observable({ title: string, ... } }) => ()
+    this.$watch(() => projectsRawVO.value, (o) => {   // ({ <project-id>: Vue.observable({ title: string, ... } } | null) => ()
       console.log('Watching projects change to:', o);
 
       let sorted;
@@ -67,8 +66,8 @@ new Vue({   // from -> https://github.com/vuejs/vue/issues/9509#issuecomment-464
 /*
 * Called when the authenticated user changes.
 *
-* Sets 'projectsRawVO' to null (no projects; signed out), or populates with the projects we have access to (and keeps
-* that set up to date).
+* Sets 'projectsRawVO' to null (signed out), or populates with the projects we have access to (and keeps that set
+* up to date).
 *
 * Note: Losing access really kicks in in the database rules side; we are not pulling copied objects out of our callers'
 *     hands.
@@ -79,11 +78,13 @@ function userChanged(uid) {    // (string | null) => ()
   // Remove the earlier projects and (if logged in), repopulate.
   //
   if (uid === null) {
-    projectsRawVO.value = {};
+    projectsRawVO.value = null;
     unsubscribe();
     unsubscribe = null;
 
   } else {
+    projectsRawVO.value = Vue.observable({});   // { <project-id>: Vue.observable({ title: string, ... }) }
+
     //assert( projects.value.size === 0 );    // (more complex to check for empty object)
     assert( unsubscribe === null );
 
