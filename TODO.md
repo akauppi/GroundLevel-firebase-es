@@ -87,3 +87,8 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 - [ ] Consider bringing it in, to replace e.g. the menu down-arrow with an icon from `npm`. 
 
    See https://github.com/FortAwesome/vue-fontawesome
+
+## Firebase Functions
+
+- Consider making a cloud function that periodically looks for projects that were removed a certain time ago (e.g. > 1 month), and completely removes them. (of course making notes to the log)
+

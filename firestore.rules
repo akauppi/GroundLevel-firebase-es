@@ -2,31 +2,90 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // General rules (expecting these *and* the other rules to be merged, with strictest deciding access) <-- tbd. is that how it works?
-    match /{document=**} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && isVerified();
-    }
+    // In Firestore:
+    //  - reads are allowed/rejected for the whole document
+    //  - writes can be restricted by the fields
+    //  - if there are overlapping rules, *any* rule allowing access wins
+
+    //tbd. experiment
+    //allow read: if isSignedIn();        // tbd. is this correct, or loosens everything?
 
     match /projects/{projectId} {
-      allow
+      allow read: if isAuthorOrCollaborator();
+
+      // Creation
+      //    - the creating user must be listed as an author
+      //
+      allow create: if isSignedIn()
+        && validateProject()
+        && getAfter( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"     // creator added as an author
+
+      // Update
+      //    - at least one author must remain
+      //
+      allow update: if isSignedIn() && isAuthor()
+        && validateProject()
+
+      allow delete: if false        // no deletion via web app
+
+      match /users/{userId} {
+        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
+
+        // role: only authors can change it
+        // lastOpened (, name, photoURL): only user themselves
+      }
+
+      match /symbols/{_} {
+        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
+
+        // Only two kinds of changes are allowed:
+        //  1. claim: no other fields changed, 'claimed' field created
+        //  2. unclaim: any fields changed, 'claim' cleared
+        //
+        allow write: if isAuthorOrCollaborator()
+          && validateSymbol()
+          && (symbolClaim() || symbolUnclaim())
+      }
     }
 
-    function isSignedIn(){
+    // Common 'projects' write rules. Ensures consistency of the data, after the write.
+    //
+    function validateProject() {
+        return true //&&
+            // title must not be empty
+            // 'created' must be provided, and be a time-stamp
+            // 'removed' is optional. If it exists, it must be a time-stamp
+            // there must be at least one author
+    }
+
+    function validateUser() {
+
+    }
+
+    function validateSymbol() {
+
+    }
+
+    function symbolClaim() {
+
+    }
+
+    function symbolUnclaim() {
+    
+    }
+
+    function isSignedIn() {
       return request.auth.uid != null;
     }
-    function isVerified(){
-      return request.auth.token.email_verified;
+
+    function isAuthor() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid)).data.role == "author"
     }
 
-    //...
-
-    //REMOVE
-    // Make sure to write security rules for your app before that time, or else
-    // your app will lose access to your Firestore database
-    //match /{document=**} {
-    //  allow read, write: if request.time < timestamp.date(2020, 3, 1);
-    //}
+    function isCollaboratorOrAuthor() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid))
+    }
   }
 }
-

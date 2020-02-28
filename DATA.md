@@ -1,46 +1,106 @@
 # Data
 
+With Cloud Firestore, design of data schemas is steered by these considerations:
+
+To go in-document:
+
+- **Billing:** access is charged per document. Avoid sub-collections unless they are really required.
+
+To go sub-collection:
+
+- **Access:** you cannot restrict reading of individual fields &mdash; documents are either fully available or not at all. You can restrict write access to individual fields.
+- **Security rules:** you cannot use in-document arrays as part of security rule logic ("allow if `uid` is found within the `authors`"). You can express this with sub-collections.
+- **Document size:** Documents must fit 1MB - 89 bytes. If you think they might grow larger, split something to sub-collections.
+
+>Do you know more guidance for steering database schema design in Firestore? Please share the info at [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) or as a PR. 📝🙂
+
+## Schemas
+
 Schemas for the data stored in Firestore.
 
 Collections are marked with `C <id-type>`.
+
+### Projects
 
 ```
 /projects:C <project-id: automatic>
    /title: string
    /created: time-stamp
-   /authors: [ <uid> [, ...] ]
-   /collaborators: [ <uid> [, ...] ]		// includes people in 'authors'
-   /lastUsed: {
-		<uid>: time-stamp		// when a user last opened the project (*)
-	}
+   /removed: [time-stamp] 	// keep data resurrectable from the database console for a while
+
+   /users:C <uid>
+      /role: "author"|"collaborator"
+      /lastOpened: [time-stamp]	// Q: when to update this?
+      /name: [string]         // <-- may get deprecated
+      /photoURL: [string]     //     -''-
+
    /symbols:C 
       /<automatic-id>: {
-      		layer: int
-			shape: "star"						// potentially more shapes
-			size: int
-			fill-color: <color-string>
-			x: <number>		// coordinates of the star's center
-			y: <number>
+         layer: int
+         shape: "star"      // potentially more shapes
+         size: int
+         fill-color: <color-string>
+         x: <number>        // coordinates of the star's center
+         y: <number>
+         claimed: [{        // edited or dragged by a certain user (highlight; others keep a distance)
+           uid: uid
+           since: time-stamp 
+         }]
       }
-      /_minLayer: int
-      /_maxLayer: int
+```
 
-/users:C <uid>		// user id from Firebase auth
-   /photo: bytes		<-- JPEG, PNG etc. (max. 1MB-89 bytes)
-   
-/trashed-projects:C <project-id>
-   # fields like with 'projects'; this is the grave yard but documents can be lifted back, if needed   
-   # +:
-   /deleted: time-stamp		// keep data resurrectable from the database console (also easy to flush such separate collection)
-```	
+#### Users sub-collection
 
-(*) Having your user-id here doesn't mean access rights. They are provided by the `authors` and `collaborators` arrays.
+The `users` collection is used for access control (`.role`), but also for sharing human-consumable information about the users, among each other (`.name`, `.photoURL`).
 
-The `collaborators` field is used for access control (ability to open the project, work on it, and invite collaborators). 
+Keeping users' `name` and `photoURL` within the projects collection provides more privacy than having them as a root-level collection (at the price of duplicating for each project one works with). 
 
-The `authors` are able to e.g. close the project.
+When project specific, only the people working together can see each others' names and picture. As a root level collection, either access rights management would become complex or impossible (security role "is user X in the same collection with `request.auth.uid`, in any of the projects"?), or names and photos could be seen with anyone signed in to the app.
 
->Note: Authors *must* be included also as collaborators! Wasn't able to do Firestore fetches for "project where <uid> is either in the `collaborators` array or in the `authors` array.
+Note: The `.name` and `.photoURL` fields are optional, since they can be set only by the user themselves. Between an invite and signing in, those fields are empty. 
+
+>Note: The `.name` and `.photoURL` could be handled by a backend function, having access to all the users and being able to handle access rules of any complexity. This may be the better way, and would lead to the fields being dropped from this schema, replaced by a service.
+
+#### Symbols sub-collection
+
+Symbols are not tied to the person originally drawing them. Anyone may change any.
+
+New symbols should be added with a higher `layer` than previous ones. This is not enforced across users - there is a possibility two symbols would end up on the same layer (from different users, creating them at the same time). Not a problem[^1].
+
+[^1]: maybe we should store the creating user's id as a secondary sorting key to keep sorting deterministic, though.
+
+
+#### Access roles
+
+The authors are able to (and collaborators are not):
+- change the title of a project
+- invite new people to the project (as collaborators or authors)
+- close the project
+
+If the project is closed, its `removed` field is set to the closing date. Such project can be resurrected manually, from the Firestore console, or completely removed once a certain grace period has passed by.
+
+
+<!-- REMOVE
+## Access rules
+
+### Projects collection
+
+This is visible for anyone signed in, and listed in `.collaborators`. <sup>★</sup>
+
+|field|access|
+|---|---|
+|`title`|write: if author|
+|`created`|create: if original creation; write: none|
+|`authors`|write: if author|
+|`collaborators`|write: if author|
+|`lastUsed.<my-uid>`|write: if the current user's field|
+
+>tbd. Let's see if `.lastUsed` can be a an object, or whether it deserves to be a collection of its own.
+
+*★ In Firestore, we cannot do access rules based on multiple fields. We cannot state "anyone in `.authors` or `.collaborators`, but including all people in authors also as collaborators solves this.*
+-->
+
+### Use cases
 
 With this data schema, we should be able to:
 
@@ -57,3 +117,18 @@ Note: We don't store history. Eventually, we could.
 
 - i.e. snapshots when people especially save; ability to revert back to earlier snapshots (this does get complex, unless we can merge between snapshots and present diffs...)
 
+
+<!-- tbd.
+## Settings
+
+User-specific settings are to be stored in this collection.
+
+```
+/settings:C <uid>
+```
+
+tbd.
+
+- colors assigned to other users (same color would identify them in all projects)
+
+-->

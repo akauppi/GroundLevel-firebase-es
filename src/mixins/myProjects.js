@@ -15,6 +15,9 @@ let unsubscribe = null;   // call to stop the earlier Firestore tracker
 //    The sync-between-observables mechanism (IF we end up using it) is from
 //      -> https://github.com/vuejs/vue/issues/9509#issuecomment-464460414
 
+// Q: How to inspect a faceless (no rendering) component, in the Vue browser extension? #help #vuejs
+//    - likely would need to list them in the App's '.components'.  <-- worth a try, but exposes these
+
 const state = new Vue({
   data() {
     return {
@@ -24,7 +27,7 @@ const state = new Vue({
   },
   computed: {
     latestFirst: (vm) => {    // (view-model) => [ Vue.observable({ title: string. ... }), ... ]
-      vm['ding!!!'];    // so that we are triggered
+      if (vm['ding!!!'] < 0) { assert(false); };    // so that we are triggered
 
       console.log("DONNNGGG!!!");
 
@@ -98,9 +101,10 @@ function userChanged(uid) {    // (string | null) => ()
                           state.raw.delete(id);
                         }
                       });
-                    });
 
-    state['ding!!!'] = state['ding!!!'] + 1;    // trigger the compute of 'latestFirst'
+                      state['ding!!!'] = state['ding!!!'] + 1;    // trigger the compute of 'latestFirst'
+                      debugger;
+                    });
   }
 }
 
