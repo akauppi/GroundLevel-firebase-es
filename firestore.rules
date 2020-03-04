@@ -4,75 +4,178 @@ service cloud.firestore {
 
     // In Firestore:
     //  - reads are allowed/rejected for the whole document
-    //  - writes can be restricted by the fields
+    //  - writes can be restricted by field contents (comparing 'request.resource.data.X' with 'resource.data.X')
     //  - if there are overlapping rules, *any* rule allowing access wins
-
-    //tbd. experiment
-    //allow read: if isSignedIn();        // tbd. is this correct, or loosens everything?
 
     match /projects/{projectId} {
       allow read: if isAuthorOrCollaborator();
 
       // Creation
-      //    - the creating user must be listed as an author
+      //    - the creating user must list themselves as an author
+      //    - creating time-stamp must be done using 'FieldValue.serverTimestamp()'
       //
       allow create: if isSignedIn()
-        && validateProject()
-        && getAfter( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"     // creator added as an author
+        && validProject()
+        && request.resource.data.created == request.time
+        && getAfter( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"     // creator added as an author, in a sub-collection
 
       // Update
-      //    - at least one author must remain
+      //    - must bypass normal object validation
+      //    - not allowed to be changed:
+      //        .created
+      //    - required to be author to change:
+      //        .title
+      //    - any project member may change:
+      //        .symbols
       //
-      allow update: if isSignedIn() && isAuthor()
-        && validateProject()
+      allow update: if isAuthor()
+        && validProject()
+        && request.resource.data.created == resource.data.created
+
+      allow update: if isCollaborator()
+        && validProject()
+        && request.resource.data.title == resource.data.title
+        && request.resource.data.created == resource.data.created
+        && request.resource.removed == null
 
       allow delete: if false        // no deletion via web app
 
+      // Project consistency:
+      //
+      //  - title may not be empty
+      //  - created must exist
+      //  - at least one author must remain (NOT CHECKED; WOULD READ TOO MANY DOCUMENTS)
+      //
+      function validProject() {
+          return true
+              && request.resource.data.title is string && request.resource.data.title != ''
+              && request.resource.data.created is timestamp
+              && (request.resource.data.removed == null || request.resource.data.removed is timestamp)
+      }
+
+
+      //--- Users ---
+
+      // tbd. We would like to make sure there's always at least one author in the users collection, for a project.
+      //    This doesn't seem to match the role ;) of the Security Rules, though - since it is a collection-level
+      //    invariant. #help is appreciated. Currently managed by disallowing an author to remove their own authorship
+      //    (other authors can remove them, or demote to being a collaborator).
+
       match /users/{userId} {
-        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
+        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can list and get
 
-        // role: only authors can change it
-        // lastOpened (, name, photoURL): only user themselves
+        allow create: if isAuthorAfter()       // anyone who's author after the request would pass (i.e. allows first time creation, adding the user as an author)
+          && validUser()
+          && request.resource.data.lastOpened == null       // does not exist, until the user visits
+          && request.resource.data.pendingInvite == request.time        // pending since now (in server time)
+
+        allow update: if !isMyUserEntry() && isAuthor()       // other person's user entry
+          && validUser()
+          && request.resource.data.lastOpened == request.data.lastOpened        // only user themselves may change
+          && request.resource.data.pendingInvite == request.data.pendingInvite  // only user themselves may change
+
+        allow update: if isMyUserEntry()        // one's own user entry
+          && validUser()
+          && request.resource.data.role == resource.data.role       // don't allow even an author to downgrade themselves to collaborator (ensures indirectly that at least one author remains)
+          && request.resource.data.lastOpened == resource.time      // updating only to server time allowed (and expected)
+          && request.resource.data.pendingInvite == null            // removal of '.pendingInvite' required
+
+        allow delete: if false      // tbd. we maybe should allow deletion of users, by someone who remains an author?
+
+        function isMyUserEntry() {
+            return isSignedIn() && request.auth.uid == userId
+        }
+
+        function validUser() {
+            return true
+                && request.resource.data.role in ['author', 'collaborator']     // must be either
+                && (    // either of them
+                    (request.resource.data.lastOpened && request.resource.data.lastOpened is timestamp) ||
+                    (request.resource.data.pendingInvite && request.resource.data.pendingInvite is timestamp)
+                )
+        }
       }
 
-      match /symbols/{_} {
+      //--- Symbols ---
+
+      // tbd. Symbols MAY NOT BE A COLLECTION. This is made with the assumption, they are.
+
+      match /symbols/{symbolId} {
         allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
 
-        // Only two kinds of changes are allowed:
-        //  1. claim: no other fields changed, 'claimed' field created
-        //  2. unclaim: any fields changed, 'claim' cleared
+        // Allow creation already at the claim level, in fact require it.
         //
-        allow write: if isAuthorOrCollaborator()
-          && validateSymbol()
-          && (symbolClaim() || symbolUnclaim())
+        allow create: if isAuthorOrCollaborator()
+            && validSymbol()
+            && claimedByAfter(symbolId) == request.auth.uid
+
+        // Updates only allowed to shapes claimed by oneself. Claim can be removed, or kept going.
+        //
+        // Note: claims shouldn't allow updates, by their own rules, so a claim cannot be extended.
+        //
+        allow update: if isAuthorOrCollaborator()
+            && validSymbol()
+            && claimedByMe()
+
+        allow delete: if isAuthorOrCollaborator()
+            && claimedByMe()
+            && claimedByAfter(symbolId) == null     // must clear the claim
+
+        function claimedByMe() {
+            request claimedBy(symbolId) == request.auth.uid
+        }
+
+      function validSymbol() {
+        let requiredKeys = ['layer','shape','size','fillColor','x','y'];
+
+        return true
+            && request.resource.data.keys() hasAll(requiredKeys) && requiredKeys hasAll(request.resource.data.keys())   // must have all keys, and no unknowns
+            && request.resource.data.layer is integer
+            && request.resource.data.shape in ['star']      // enum
+            && request.resource.data.size > 0
+            && request.resource.data.fillColor is string
+            && request.resource.data.x is number
+            && request.resource.data.y is number
+      }
+
+      //--- Claims ---
+
+      match /claims/{symbolId} {        // note: claims are indexed by symbol id
+        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
+
+        // Creation of claims is required when creating a new symbol, or before editing an existing one (claim and
+        // edit are separate steps; though merged in the creation. There can be many edit steps per claim - they
+        // allow others to see the edits done by the claimant).
+        //
+        allow create: if isAuthorOrCollaborator()
+            && validClaim()
+            && request.resource.data.by == request.auth.uid     // can only claim for oneself
+            && request.resource.data.since == request.time      // server time
+
+        allow update: if false      // updating claims is _not_ allowed - only creation and removal
+
+        allow delete: if isAuthorOrCollaborator()
+            && resource.data.by == request.auth.uid     // claimed by the same user
+      }
+
+      function validClaim() {
+        return true
+            && request.resource.data.by is string       // <uid>
+            && request.resource.since is timestamp
+      }
+
+      function claimedBy(symbolId) {
+        let claim = get( /databases/$(database)/documents/projects/$(projectId)/claims/$(symbolId) )
+        return claim.get('by',null);        // tbd. how to provide defaults? :F
+      }
+
+      function claimedByAfter(symbolId) {
+        let claim = getAfter( /databases/$(database)/documents/projects/$(projectId)/claims/$(symbolId) )
+        //return ... (like above)
       }
     }
 
-    // Common 'projects' write rules. Ensures consistency of the data, after the write.
-    //
-    function validateProject() {
-        return true //&&
-            // title must not be empty
-            // 'created' must be provided, and be a time-stamp
-            // 'removed' is optional. If it exists, it must be a time-stamp
-            // there must be at least one author
-    }
-
-    function validateUser() {
-
-    }
-
-    function validateSymbol() {
-
-    }
-
-    function symbolClaim() {
-
-    }
-
-    function symbolUnclaim() {
-    
-    }
+    //--- Authentication ---
 
     function isSignedIn() {
       return request.auth.uid != null;
@@ -80,12 +183,17 @@ service cloud.firestore {
 
     function isAuthor() {
       return isSignedIn() &&
-        get(/databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid)).data.role == "author"
+        get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"
+    }
+
+    function isCollaborator() {
+      return isSignedIn() &&
+        get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "collaborator"
     }
 
     function isCollaboratorOrAuthor() {
       return isSignedIn() &&
-        exists(/databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid))
+        (isCollaborator() || isAuthor())
     }
   }
 }

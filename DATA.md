@@ -26,28 +26,29 @@ Collections are marked with `C <id-type>`.
 /projects:C <project-id: automatic>
    /title: string
    /created: time-stamp
-   /removed: [time-stamp] 	// keep data resurrectable from the database console for a while
+   /removed: [time-stamp] 	// keep data resurrectable from the database console for a while; who removed is in the logs
 
    /users:C <uid>
       /role: "author"|"collaborator"
-      /lastOpened: [time-stamp]	// Q: when to update this?
-      /name: [string]         // <-- may get deprecated
-      /photoURL: [string]     //     -''-
+      [/lastOpened: time-stamp]	// written when starting to track a project's symbols
+      [/pendingInvite: time-stamp]	// if the person has been invited, but hasn't visited
 
-   /symbols:C 
-      /<automatic-id>: {
-         layer: int
-         shape: "star"      // potentially more shapes
-         size: int
-         fill-color: <color-string>
-         x: <number>        // coordinates of the star's center
-         y: <number>
-         claimed: [{        // edited or dragged by a certain user (highlight; others keep a distance)
-           uid: uid
-           since: time-stamp 
-         }]
-      }
+   /symbols: [{
+      id: <symbol-id>		// made e.g. from 'uid' and a time, by client
+      shape: "star"      // potentially more shapes
+      size: int
+      fillColor: <color-string>
+      x: <number>        // center
+      y: <number>
+   }, ...]
+      
+   /claims:C <symbol-id>    // edited or dragged by a certain user
+      /by: uid
+      /since: time-stamp
 ```
+
+Spreading things into subcollections is mainly decided by security rules. If one needs to use a collection entry in the rules, such entries need to be in a sub-collection (not a map within a document).
+
 
 #### Users sub-collection
 
@@ -73,12 +74,14 @@ New symbols should be added with a higher `layer` than previous ones. This is no
 #### Access roles
 
 The authors are able to (and collaborators are not):
+
 - change the title of a project
 - invite new people to the project (as collaborators or authors)
 - close the project
 
 If the project is closed, its `removed` field is set to the closing date. Such project can be resurrected manually, from the Firestore console, or completely removed once a certain grace period has passed by.
 
+>Note: If you only have application-wide admin roles, using "custom user claims" (data carried within the authentication token) may be the better approach. See [here](https://medium.com/@gaute.meek/firestore-and-security-1d77812715c1) (blog, Nov 2018)
 
 <!-- REMOVE
 ## Access rules

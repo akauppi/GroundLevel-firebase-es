@@ -229,3 +229,7 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 
 <!-- Editor's note: Gaute's dev.to blog is slightly different from his gaute.dev entry. The latter is clearer, in some regards, so listing them both.
 -->
+
+### Cloud Firestore
+
+- [Advanced examples of using Cloud Firestore Security Rules](https://medium.com/@khreniak/advanced-examples-of-using-cloud-firestore-security-rules-9e641d023c7e) (blog, Mar 2019)

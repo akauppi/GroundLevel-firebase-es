@@ -92,3 +92,10 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 
 - Consider making a cloud function that periodically looks for projects that were removed a certain time ago (e.g. > 1 month), and completely removes them. (of course making notes to the log)
 
+## Narrative as the Wiki
+
+Move narrative documents (why we do things in certain way) to the Wiki. 
+
+Make it a walk-through or bisection of the project, leaving project itself uncluttered. :)
+
+
