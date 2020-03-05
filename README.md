@@ -52,6 +52,15 @@ See [DEVS/Setting up the Firebase project](DEVS/Setting%20up%%20the%20Firebase%2
 >Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
 -->
 
+### Local FireStore Security Rules emulation
+
+If you are serious about development, you should consider installing this:
+
+```
+$ firebase setup:emulators:firestore
+```
+
+
 ## Getting started
 
 Fetch dependencies:

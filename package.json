@@ -18,11 +18,13 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@firebase/testing": "^0.16.13",
     "@rollup/plugin-alias": "^3.0.0",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "concurrently": "^5.0.2",
     "eslint": "^6.8.0",
     "eslint-plugin-vue": "^6.2.1",
+    "jest": "^25.1.0",
     "rollup": "^1.31.1",
     "rollup-plugin-eslint": "^7.0.0",
     "rollup-plugin-filesize": "^6.2.1",
@@ -32,8 +34,7 @@
     "vue-template-compiler": "^2.6.11"
   },
   "//comments": {
-    "devDependencies": {
-    },
+    "devDependencies": {},
     "scripts": {
       "build": [
         "Builds production code"
