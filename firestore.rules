@@ -114,7 +114,7 @@ service cloud.firestore {
             && (request.resource.data.claimedBy == null || (
                 request.resource.data.claimedBy == resource.data.claimedBy &&
                 request.resource.data.claimedAt == resource.data.claimedAt
-            )
+            ))
 
         allow delete: if isAuthorOrCollaborator()
             && claimedByMe()
@@ -131,81 +131,45 @@ service cloud.firestore {
             return request.resource.data.claimedBy
         }
 
-      function validSymbol() {
-        let requiredKeys = ['layer','shape','size','fillColor','center'];
-        let possibleKeys = requiredKeys :: ['claimedBy', 'claimedAt'];      // tbd. can we concatenate arrays?
+        function validSymbol() {
+          let requiredKeys = ['layer','shape','size','fillColor','center'];
+          let possibleKeys = requiredKeys :: ['claimedBy', 'claimedAt'];      // tbd. can we concatenate arrays?
 
-        return true
-            && (request.resource.data.keys().hasAll(requiredKeys) && possibleKeys.hasAll(request.resource.data.keys()))
-            && (request.resource.data.claimedBy == null || request.resource.data.claimedBy is string)
-            && (request.resource.data.claimedAt == null || request.resource.data.claimedAt is timestamp)
-            && bothOrNeither(request.resource.data.claimedBy, request.resource.data.claimedAt)
-            && request.resource.data.layer is integer
-            && request.resource.data.shape in ['star']      // enum
-            && request.resource.data.size > 0
-            && request.resource.data.fillColor is string
-            && request.resource.data.center.x is number
-            && request.resource.data.center.y is number
+          return true
+              && (request.resource.data.keys().hasAll(requiredKeys) && possibleKeys.hasAll(request.resource.data.keys()))
+              && (request.resource.data.claimedBy == null || request.resource.data.claimedBy is string)
+              && (request.resource.data.claimedAt == null || request.resource.data.claimedAt is timestamp)
+              && bothOrNeither(request.resource.data.claimedBy, request.resource.data.claimedAt)
+              && request.resource.data.layer is integer
+              && request.resource.data.shape in ['star']      // enum
+              && request.resource.data.size > 0
+              && request.resource.data.fillColor is string
+              && request.resource.data.center.x is number
+              && request.resource.data.center.y is number
+        }
+      }   // symbols
+
+
+      //--- Authentication ---
+
+      function isSignedIn() {
+        return request.auth.uid != null;
       }
 
-/*** REMOVE
-      //--- Claims ---
-
-      match /claims/{symbolId} {        // note: claims are indexed by symbol id
-        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
-
-        // Creation of claims is required when creating a new symbol, or before editing an existing one (claim and
-        // edit are separate steps; though merged in the creation. There can be many edit steps per claim - they
-        // allow others to see the edits done by the claimant).
-        //
-        allow create: if isAuthorOrCollaborator()
-            && validClaim()
-            && request.resource.data.by == request.auth.uid     // can only claim for oneself
-            && request.resource.data.since == request.time      // server time
-
-        allow update: if false      // updating claims is _not_ allowed - only creation and removal
-
-        allow delete: if isAuthorOrCollaborator()
-            && resource.data.by == request.auth.uid     // claimed by the same user
+      function isAuthor() {
+        return isSignedIn() &&
+          get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"
       }
 
-      function validClaim() {
-        return true
-            && request.resource.data.by is string       // <uid>
-            && request.resource.since is timestamp
+      function isCollaborator() {
+        return isSignedIn() &&
+          get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "collaborator"
       }
 
-      function claimedBy(symbolId) {
-        let claim = get( /databases/$(database)/documents/projects/$(projectId)/claims/$(symbolId) )
-        return claim.get('by',null);        // tbd. how to provide defaults? :F
+      function isCollaboratorOrAuthor() {
+        return isSignedIn() &&
+          (isCollaborator() || isAuthor())
       }
-
-      function claimedByAfter(symbolId) {
-        let claim = getAfter( /databases/$(database)/documents/projects/$(projectId)/claims/$(symbolId) )
-        //return ... (like above)
-      }
-    }
-***/
-
-    //--- Authentication ---
-
-    function isSignedIn() {
-      return request.auth.uid != null;
-    }
-
-    function isAuthor() {
-      return isSignedIn() &&
-        get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"
-    }
-
-    function isCollaborator() {
-      return isSignedIn() &&
-        get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "collaborator"
-    }
-
-    function isCollaboratorOrAuthor() {
-      return isSignedIn() &&
-        (isCollaborator() || isAuthor())
-    }
-  }
+    }  // project
+  } // database
 }

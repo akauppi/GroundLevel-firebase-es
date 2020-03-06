@@ -26,10 +26,13 @@ Collections are marked with `C <id-type>`.
 /projects:C <project-id: automatic>
    /title: string
    /created: time-stamp
-   /removed: [time-stamp] 	// keep data resurrectable from the database console for a while; who removed is in the logs
+   [/removed: time-stamp] 	// keep data resurrectable from the database console for a while; who removed is in the logs
+
+   /authors: array of <uid> (>=1)
+   /collaborators: array of <uid> (>=0)
 
    /users:C <uid>
-      /role: "author"|"collaborator"
+      **REMOVE: /role: "author"|"collaborator"
       [/lastOpened: time-stamp]	// written when starting to track a project's symbols
       [/pendingInvite: time-stamp]	// if the person has been invited, but hasn't visited
 
