@@ -33,19 +33,21 @@ Collections are marked with `C <id-type>`.
       [/lastOpened: time-stamp]	// written when starting to track a project's symbols
       [/pendingInvite: time-stamp]	// if the person has been invited, but hasn't visited
 
-   /symbols: [{
-      id: <symbol-id>		// made e.g. from 'uid' and a time, by client
-      shape: "star"      // potentially more shapes
-      size: int
-      fillColor: <color-string>
-      x: <number>        // center
-      y: <number>
-   }, ...]
-      
+   /symbols:C <auto-id>
+      [/claimedBy: <uid>]
+      [/claimedAt: <timestamp>]
+      /layer: int
+      /shape: "star"      // potentially more shapes
+      /size: int
+      /fillColor: <color-string>
+      /center: {x: <number>, y: <number>}
+```
+
+<!-- REMOVE???      
    /claims:C <symbol-id>    // edited or dragged by a certain user
       /by: uid
       /since: time-stamp
-```
+-->
 
 Spreading things into subcollections is mainly decided by security rules. If one needs to use a collection entry in the rules, such entries need to be in a sub-collection (not a map within a document).
 

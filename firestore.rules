@@ -98,46 +98,57 @@ service cloud.firestore {
 
       //--- Symbols ---
 
-      // tbd. Symbols MAY NOT BE A COLLECTION. This is made with the assumption, they are.
-
       match /symbols/{symbolId} {
         allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
 
-        // Allow creation already at the claim level, in fact require it.
-        //
         allow create: if isAuthorOrCollaborator()
             && validSymbol()
-            && claimedByAfter(symbolId) == request.auth.uid
+            && request.resource.data.claimedBy == request.auth.uid
+            && request.resource.data.claimedAt == request.time
 
-        // Updates only allowed to shapes claimed by oneself. Claim can be removed, or kept going.
-        //
-        // Note: claims shouldn't allow updates, by their own rules, so a claim cannot be extended.
+        // Updates only allowed to shapes claimed by oneself. Claim itself cannot be changed; only cleared.
         //
         allow update: if isAuthorOrCollaborator()
             && validSymbol()
             && claimedByMe()
+            && (request.resource.data.claimedBy == null || (
+                request.resource.data.claimedBy == resource.data.claimedBy &&
+                request.resource.data.claimedAt == resource.data.claimedAt
+            )
 
         allow delete: if isAuthorOrCollaborator()
             && claimedByMe()
-            && claimedByAfter(symbolId) == null     // must clear the claim
 
         function claimedByMe() {
-            request claimedBy(symbolId) == request.auth.uid
+            return claimedBy() == request.auth.uid
+        }
+
+        function claimedBy() {
+            return resource.data.claimedBy      // before the change
+        }
+
+        function claimedByAfter() {
+            return request.resource.data.claimedBy
         }
 
       function validSymbol() {
-        let requiredKeys = ['layer','shape','size','fillColor','x','y'];
+        let requiredKeys = ['layer','shape','size','fillColor','center'];
+        let possibleKeys = requiredKeys :: ['claimedBy', 'claimedAt'];      // tbd. can we concatenate arrays?
 
         return true
-            && request.resource.data.keys() hasAll(requiredKeys) && requiredKeys hasAll(request.resource.data.keys())   // must have all keys, and no unknowns
+            && (request.resource.data.keys().hasAll(requiredKeys) && possibleKeys.hasAll(request.resource.data.keys()))
+            && (request.resource.data.claimedBy == null || request.resource.data.claimedBy is string)
+            && (request.resource.data.claimedAt == null || request.resource.data.claimedAt is timestamp)
+            && bothOrNeither(request.resource.data.claimedBy, request.resource.data.claimedAt)
             && request.resource.data.layer is integer
             && request.resource.data.shape in ['star']      // enum
             && request.resource.data.size > 0
             && request.resource.data.fillColor is string
-            && request.resource.data.x is number
-            && request.resource.data.y is number
+            && request.resource.data.center.x is number
+            && request.resource.data.center.y is number
       }
 
+/*** REMOVE
       //--- Claims ---
 
       match /claims/{symbolId} {        // note: claims are indexed by symbol id
@@ -174,6 +185,7 @@ service cloud.firestore {
         //return ... (like above)
       }
     }
+***/
 
     //--- Authentication ---
 
