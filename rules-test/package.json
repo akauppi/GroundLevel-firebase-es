@@ -7,17 +7,25 @@
     "//": "configuration options can be set here"
   },
   "scripts": {
-    "test": "jest",
-    "test2": "start-server-and-test 'firebase serve --only firestore' 8080 test"
+    "test": "npx jest",
+
+    "testA": "firebase emulators:exec --only firestore 'npm test'",
+    "testB": "start-server-and-test 'firebase emulators:start --only firestore' 6767 'FIRESTORE_EMULATOR_HOST=localhost:6767 npm test'"
   },
   "//": {
-    "scripts.test2": [
-      "Does not seem to matter, which port we use. (maybe Firebase client picks up the deprecated 8081; let's fix that",
-      "later, if things break).",
-      "",
-      "@TODO: Wasn't able to set the '--port' for 'firebase serve'"
-    ],
-    "jest": "Using 'npx' because that allows one to have it globally installed. Could work as a 'devDependency' just as well."
+    "scripts": {
+      "testA": [
+        "'firebase emulators:exec' runs the tests under the Firebase emulator.",
+        "Pro: simple, just one statement",
+        "Con: cannot see coverage etc. since the emulator doesn't remain up"
+      ],
+      "testB": [
+        "Another way of running the emulator & tests. Allows you to see the parts."
+      ],
+      "test": [
+        "Using 'npx' so we don't need to do 'node_modules/.bin/'."
+      ]
+    }
   },
   "devDependencies": {
     "@firebase/testing": "^0.16.13",

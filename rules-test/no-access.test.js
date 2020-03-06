@@ -20,9 +20,6 @@ describe('Rules with no access', () => {
   });
 
   test('fail when reading/writing an unauthorized collection', async () => {
-    //const failedRead = await assertFails(ref.get());
-    //expect(failedRead);
-
     // One-line await
     expect(await assertFails(ref.add({})));
 

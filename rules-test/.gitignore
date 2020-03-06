@@ -1,4 +1,5 @@
 /fire*-debug.log
+/.firebaserc
 
 /node_modules/
 /package-lock.json

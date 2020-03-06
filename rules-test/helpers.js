@@ -14,7 +14,10 @@ const USER = process.env.USER;
 const rulesFilename = 'firestore.rules';
 
 module.exports.setup = async (auth, data) => {
-  const projectId = `test-${USER}-${Date.now()}`;   // adding USER to allow multiple users running tests - and to see who leaves trash
+  const projectId = `test-${Date.now()}`;   // e.g. 'test-1583506734171'
+    //
+    // sessions persist "on a single emulator run"; the time stamp makes sure we get a clean sheet
+
   const app = await firebase.initializeTestApp({
     projectId,
     auth
