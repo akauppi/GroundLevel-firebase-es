@@ -1,0 +1,16 @@
+{
+  "name": "rules-test",
+  "version": "0.0.0",
+  "description": "Rules tests",
+  "private": "true",
+
+  "jest": {
+    "//": "configuration options can be set here"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@firebase/testing": "^0.16.13"
+  }
+}
