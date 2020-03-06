@@ -3,14 +3,25 @@
   "version": "0.0.0",
   "description": "Rules tests",
   "private": "true",
-
   "jest": {
     "//": "configuration options can be set here"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test2": "start-server-and-test 'firebase serve --only firestore' 8080 test"
+  },
+  "//": {
+    "scripts.test2": [
+      "Does not seem to matter, which port we use. (maybe Firebase client picks up the deprecated 8081; let's fix that",
+      "later, if things break).",
+      "",
+      "@TODO: Wasn't able to set the '--port' for 'firebase serve'"
+    ],
+    "jest": "Using 'npx' because that allows one to have it globally installed. Could work as a 'devDependency' just as well."
   },
   "devDependencies": {
-    "@firebase/testing": "^0.16.13"
+    "@firebase/testing": "^0.16.13",
+    "jest": "^25.1.0",
+    "start-server-and-test": "^1.10.8"
   }
 }

@@ -1,9 +1,9 @@
 {
-  "name": "groundlevel-firebase-web-template",
+  "name": "groundlevel-es6-firebase-web",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akauppi/groundlevel-firebase-auth.git"
+    "url": "git+https://github.com/akauppi/groundlevel-es6-firebase-web.git"
   },
   "author": "<akauppi@gmail.com>",
   "private": true,
@@ -11,7 +11,8 @@
     "build": "npm run prod:build",
     "prod:build": "rollup -c",
     "dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
-    "clean": "(rm public/dist/bundle* 2> /dev/null || true)"
+    "clean": "(rm public/dist/bundle* 2> /dev/null || true)",
+    "rules-test": "(cd rules-test && npm test)"
   },
   "//devDependencies": {
     "//@rollup/plugin-commonjs": "^11.0.1"

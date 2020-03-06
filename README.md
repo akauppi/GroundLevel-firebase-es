@@ -52,14 +52,6 @@ See [DEVS/Setting up the Firebase project](DEVS/Setting%20up%%20the%20Firebase%2
 >Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
 -->
 
-### Local FireStore Security Rules emulation
-
-If you are serious about development, you should consider installing this:
-
-```
-$ firebase setup:emulators:firestore
-```
-
 
 ## Getting started
 
@@ -94,6 +86,20 @@ $ npm run dev
 Serves the project locally, reacting to source code changes.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
+
+### Testing Security Rules (optional)
+
+If you are serious about development, have a look at the `rules-test` sub-project. It uses the Firestore emulator to check the rules we have in `firestore.rules` behave as intended.
+
+Since this is quite an added complexity (more `npm` dependencies, need to install the emulator), it's been left as a self-sufficient sub-project. At least for now.
+
+You can run the rules-tests also by:
+
+```
+$ npm run rules-test
+```
+
+However, this expects that you have installed the necessary gear in the sub-project first. Please see its [README](rules-test/README.md) file.
 
 
 ## Bring in your App!
