@@ -31,26 +31,23 @@ Collections are marked with `C <id-type>`.
    /authors: array of <uid> (>=1)
    /collaborators: array of <uid> (>=0)
 
+   /pendingInvites:C <email>
+   	  /by: uid
+   	  /at: timestamp
+
    /users:C <uid>
-      **REMOVE: /role: "author"|"collaborator"
-      [/lastOpened: time-stamp]	// written when starting to track a project's symbols
-      [/pendingInvite: time-stamp]	// if the person has been invited, but hasn't visited
+      /lastOpened: time-stamp		// written when starting to track a project's symbols
 
    /symbols:C <auto-id>
-      [/claimedBy: <uid>]
-      [/claimedAt: <timestamp>]
+      [/claimed: { by: uid, at: timestamp }]
+      //REMOVE: [/claimedBy: <uid>]
+      //REMOVE: [/claimedAt: <timestamp>]
       /layer: int
       /shape: "star"      // potentially more shapes
       /size: int
       /fillColor: <color-string>
       /center: {x: <number>, y: <number>}
 ```
-
-<!-- REMOVE???      
-   /claims:C <symbol-id>    // edited or dragged by a certain user
-      /by: uid
-      /since: time-stamp
--->
 
 Spreading things into subcollections is mainly decided by security rules. If one needs to use a collection entry in the rules, such entries need to be in a sub-collection (not a map within a document).
 

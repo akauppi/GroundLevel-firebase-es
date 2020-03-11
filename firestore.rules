@@ -1,14 +1,18 @@
 rules_version = '2';
+
+// Note: When editing the rules, consider using the online Rules Simulator
+//      -> https://console.firebase.google.com/project/ ... /database/firestore/rules
+//
+//      It gives good error messages and has syntax highlighting.
+//
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // In Firestore:
-    //  - reads are allowed/rejected for the whole document
-    //  - writes can be restricted by field contents (comparing 'request.resource.data.X' with 'resource.data.X')
-    //  - if there are overlapping rules, *any* rule allowing access wins
-
     match /projects/{projectId} {
-      allow read: if isAuthorOrCollaborator();
+      // Read
+      //    - allows also removed (archived) projects to be seen
+      //
+      allow read: if isCollaboratorOrAuthor()
 
       // Creation
       //    - the creating user must list themselves as an author
@@ -17,52 +21,57 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && validProject()
         && request.resource.data.created == request.time
-        && getAfter( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"     // creator added as an author, in a sub-collection
+        && request.resource.data.removed == null
+        && request.auth.uid in request.resource.data.authors    // creator added as an author (we could go soft on this..)
 
       // Update
-      //    - must bypass normal object validation
-      //    - not allowed to be changed:
-      //        .created
-      //    - required to be author to change:
-      //        .title
-      //    - any project member may change:
-      //        .symbols
+      //    - must not be changed:              /created
+      //    - required to be author to change:  /title, /authors, /collaborators, /removed
       //
       allow update: if isAuthor()
         && validProject()
+        && resource.data.removed == null
         && request.resource.data.created == resource.data.created
-
-      allow update: if isCollaborator()
-        && validProject()
-        && request.resource.data.title == resource.data.title
-        && request.resource.data.created == resource.data.created
-        && request.resource.removed == null
+        && (request.resource.data.removed == null || request.resource.data.removed == request.time)     // if given, must be current server time
 
       allow delete: if false        // no deletion via web app
 
       // Project consistency:
-      //
       //  - title may not be empty
       //  - created must exist
-      //  - at least one author must remain (NOT CHECKED; WOULD READ TOO MANY DOCUMENTS)
+      //  - at least one author must remain
+      //  - users are either in 'authors' or in 'collaborators' (but not both)
       //
       function validProject() {
           return true
               && request.resource.data.title is string && request.resource.data.title != ''
               && request.resource.data.created is timestamp
               && (request.resource.data.removed == null || request.resource.data.removed is timestamp)
+              && request.resource.data.authors is list && request.resource.data.authors.size() > 0
+              && request.resource.data.collaborators is list
+              && (!request.resource.data.authors.hasAny( request.resource.data.collaborators ))     // note: could skip this (duplicates wouldn't hurt the logic)
+              && (!request.resource.data.collaborators.hasAny( request.resource.data.authors ))     //      -''-
       }
 
+      function isAuthor() {
+        return isSignedIn() &&
+          request.auth.uid in resource.data.authors
+      }
+
+      function isCollaborator() {
+        return isSignedIn() &&
+          request.auth.uid in resource.data.collaborators
+      }
+
+      function isCollaboratorOrAuthor() {
+        return isSignedIn() &&
+          (isCollaborator() || isAuthor())
+      }
 
       //--- Users ---
 
-      // tbd. We would like to make sure there's always at least one author in the users collection, for a project.
-      //    This doesn't seem to match the role ;) of the Security Rules, though - since it is a collection-level
-      //    invariant. #help is appreciated. Currently managed by disallowing an author to remove their own authorship
-      //    (other authors can remove them, or demote to being a collaborator).
-
       match /users/{userId} {
-        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can list and get
+        allow read: if isCollaboratorOrAuthor();        // anyone (within the project) can list and get
 
         allow create: if isAuthorAfter()       // anyone who's author after the request would pass (i.e. allows first time creation, adding the user as an author)
           && validUser()
@@ -99,16 +108,16 @@ service cloud.firestore {
       //--- Symbols ---
 
       match /symbols/{symbolId} {
-        allow read: if isAuthorOrCollaborator();        // anyone (within the project) can read
+        allow read: if isCollaboratorOrAuthor();        // anyone (within the project) can read
 
-        allow create: if isAuthorOrCollaborator()
+        allow create: if isCollaboratorOrAuthor()
             && validSymbol()
             && request.resource.data.claimedBy == request.auth.uid
             && request.resource.data.claimedAt == request.time
 
         // Updates only allowed to shapes claimed by oneself. Claim itself cannot be changed; only cleared.
         //
-        allow update: if isAuthorOrCollaborator()
+        allow update: if isCollaboratorOrAuthor()
             && validSymbol()
             && claimedByMe()
             && (request.resource.data.claimedBy == null || (
@@ -116,7 +125,7 @@ service cloud.firestore {
                 request.resource.data.claimedAt == resource.data.claimedAt
             ))
 
-        allow delete: if isAuthorOrCollaborator()
+        allow delete: if isCollaboratorOrAuthor()
             && claimedByMe()
 
         function claimedByMe() {
@@ -127,49 +136,51 @@ service cloud.firestore {
             return resource.data.claimedBy      // before the change
         }
 
-        function claimedByAfter() {
-            return request.resource.data.claimedBy
-        }
-
         function validSymbol() {
-          let requiredKeys = ['layer','shape','size','fillColor','center'];
-          let possibleKeys = requiredKeys :: ['claimedBy', 'claimedAt'];      // tbd. can we concatenate arrays?
+          let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
+					let possibleKeys = requiredKeys.union( ['claimedBy', 'claimedAt'].toSet() );
 
           return true
-              && (request.resource.data.keys().hasAll(requiredKeys) && possibleKeys.hasAll(request.resource.data.keys()))
+              && (request.resource.data.keys().toSet().hasAll(requiredKeys) && possibleKeys.hasAll(request.resource.data.keys()))
               && (request.resource.data.claimedBy == null || request.resource.data.claimedBy is string)
               && (request.resource.data.claimedAt == null || request.resource.data.claimedAt is timestamp)
               && bothOrNeither(request.resource.data.claimedBy, request.resource.data.claimedAt)
-              && request.resource.data.layer is integer
+              && request.resource.data.layer is int
               && request.resource.data.shape in ['star']      // enum
               && request.resource.data.size > 0
               && request.resource.data.fillColor is string
               && request.resource.data.center.x is number
               && request.resource.data.center.y is number
         }
+
+        function bothOrNeither(a,b) {
+          return ((a == null && b == null) || (a && b))
+        }
+
+        //REMOVE?
+        //function isAuthor() {
+        //  return isSignedIn() &&
+        //    request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
+        //}
+        //
+        //function isCollaborator() {
+        //  return isSignedIn() &&
+        //    request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators
+        //}
+        //
+        //function isCollaboratorOrAuthor() {
+        //  return isSignedIn() &&
+        //    (isCollaborator() || isAuthor())
+        //}
       }   // symbols
 
 
       //--- Authentication ---
 
       function isSignedIn() {
-        return request.auth.uid != null;
-      }
-
-      function isAuthor() {
-        return isSignedIn() &&
-          get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "author"
-      }
-
-      function isCollaborator() {
-        return isSignedIn() &&
-          get( /databases/$(database)/documents/projects/$(projectId)/users/$(request.auth.uid) ).data.role == "collaborator"
-      }
-
-      function isCollaboratorOrAuthor() {
-        return isSignedIn() &&
-          (isCollaborator() || isAuthor())
+        return request.auth != null && request.auth.uid != null;
       }
     }  // project
   } // database
 }
+
