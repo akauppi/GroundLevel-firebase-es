@@ -138,18 +138,6 @@
         ]
       }
     },
-    methods: {
-      signOut() {
-        // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
-        //
-        authSignOut().then( () => {
-          this.$router.push('/signin');
-        });
-      },
-      toggleMenu() {
-        this.isOpen = !this.isOpen;
-      }
-    },
     mounted() {
       const vm = this;
 
@@ -164,6 +152,18 @@
       }, {
         passive: true   // we never will 'preventDefault()' (helps browser optimize)
       })
+    },
+    methods: {
+      signOut() {
+        // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
+        //
+        authSignOut().then( () => {
+          this.$router.push('/signin');
+        });
+      },
+      toggleMenu() {
+        this.isOpen = !this.isOpen;
+      }
     }
   };
 </script>
