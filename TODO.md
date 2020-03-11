@@ -79,7 +79,7 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 - allows multiple root nodes in a `template`
 - use of `ref` to have any values reactive
 
-( ) When we do this, let's take them via `npm` dependencies (not CDN link). Vue 3 is better suited to tree-shaking.
+**( ) When we do this, let's take them via `npm` dependencies (not CDN link). Vue 3 is better suited to tree-shaking.**
 
 
 ## Font Awesome
@@ -98,4 +98,25 @@ Move narrative documents (why we do things in certain way) to the Wiki.
 
 Make it a walk-through or bisection of the project, leaving project itself uncluttered. :)
 
+## Rollup update
+
+Check out 2.0.3 once plugins are available for it:
+
+```
+$ npm install
+...
+npm WARN @rollup/plugin-alias@3.0.1 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
+npm WARN @rollup/plugin-node-resolve@7.1.1 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
+npm WARN @rollup/pluginutils@3.0.8 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
+npm WARN rollup-plugin-livereload@1.0.4 requires a peer of rollup@^1.0.0 but none is installed. You must install peer dependencies yourself.
+```
+
+## Is 'template functional' still a thing in Vue.js 3?
+
+If it is, let's see where it fits in.
+
+If it's not, let's not bother.
+
+- It's largely a dual syntax
+- Compiler doesn't seem to figure out when it has been misused (Vue.js 2.6.11)
 

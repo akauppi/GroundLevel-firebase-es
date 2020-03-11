@@ -86,7 +86,7 @@ export default {
 
       // Vue router
       //    latest versions -> https://cdn.jsdelivr.net/npm/vue-router/
-      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.5/dist/vue-router.esm.browser.js'
+      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.6/dist/vue-router.esm.browser.js'
     },
 
     // tbd. Do we need to use 'globals'?

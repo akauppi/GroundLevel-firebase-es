@@ -11,7 +11,6 @@ import VueRouter from 'vue-router'
 //
 import pageHome from './pages/Home.vue';
 import pageSignIn from './pages/SignIn.vue';
-import pageSomeIn from './pages/SomeIn.vue';
 import page404 from './pages/404.vue';
 
 import { currentFirebaseUserProm } from '@/util/auth.js';
@@ -25,7 +24,6 @@ const reqAuth = { requiresAuth: true }
 const routes = [
   { path: '/',        component: pageHome, meta: reqAuth },
   { path: '/signin',  component: pageSignIn },    // '?final=/somein'
-  { path: '/somein',  component: pageSomeIn, meta: reqAuth },
     //
   { path: '*', component: page404 } //,
 
@@ -39,7 +37,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  assert(to.path !== null);   // "/someIn"
+  assert(to.path !== null);   // "/some"
 
   console.log(`router entering page: ${to.path}`);
 
