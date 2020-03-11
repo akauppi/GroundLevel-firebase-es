@@ -94,3 +94,17 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 - [ ] Consider bringing it in, to replace e.g. the menu down-arrow with an icon from `npm`. 
 
    See https://github.com/FortAwesome/vue-fontawesome
+
+
+## Rollup update
+
+Check out 2.0.3 once plugins are available for it:
+
+```
+$ npm install
+...
+npm WARN @rollup/plugin-alias@3.0.1 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
+npm WARN @rollup/plugin-node-resolve@7.1.1 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
+npm WARN @rollup/pluginutils@3.0.8 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
+npm WARN rollup-plugin-livereload@1.0.4 requires a peer of rollup@^1.0.0 but none is installed. You must install peer dependencies yourself.
+```
