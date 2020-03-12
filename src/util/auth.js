@@ -9,6 +9,7 @@
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
+import { assert } from '@/util/assert.js';
 
 // Note: a stream of user objects (or 'null') would really be the best abstraction for this. :&
 
@@ -43,18 +44,20 @@
 //
 // Based on -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
 //
-const currentFirebaseUserProm = () => new Promise( (resolve, reject) => {   // () => Promise of (firebase user object)
-  console.log("Firebase auth check starting...");
-  const t0 = performance.now();
+function currentFirebaseUserProm() {    // () => Promise of object|falsy
+  return new Promise( (resolve, reject) => {   // () => Promise of (firebase user object)
+    console.log("Firebase auth check starting...");
+    const t0 = performance.now();
 
-  const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-    const dt = performance.now() - t0;
-    console.log(`Checked Firebase auth state (took ${dt} ms): `, user);   // 92ms ... 231ms
+    const unsub = firebase.auth().onAuthStateChanged(user => {
+      const dt = performance.now() - t0;
+      console.log(`Checked Firebase auth state (took ${dt} ms): `, user);   // 92ms ... 231ms
 
-    unsubscribe();
-    resolve(user);
-  }, reject);
-});
+      unsub();
+      resolve(user);
+    }, reject);
+  });
+}
 
 // We cannot feed a 'Promise' to vue HTML template (unfortunate, something like Svelte's '{await}' support would suit
 // nicely, here). To ease the pain, we make some reactive fields that visual components can use, directly.
@@ -70,10 +73,36 @@ function signOut() {    // () => Promise of ()
 
 const onAuthStateChanged = (f) => firebase.auth().onAuthStateChanged(f);    // tbd. without the '(f)'
 
+const onSignOutFs = [];   // array of () => (); functions to be called if the current user signs out
+
+// Gather functions (e.g. unsubscriptions from a Firestore watch) that are called if the current user signs out.
+//
+async function onSignOut(...fs) {
+  assert( firebase.auth().currentUser != null );   // note: *here* we can use '.currentUser' since we know initialization must have happened
+
+  onSignOutFs.push(...fs);
+}
+
+firebase.auth().onAuthStateChanged( (user) => {
+  if (user) {   // user signed in
+    assert(onSignOutFs.length == 0);    // shouldn't have left-overs
+  } else {
+    console.log(`Sign-out detected: calling ${onSignOutFs.length} cleanup functions`);
+
+    // Call the cleanups in reverse order of injection (just a common pattern; shouldn't really matter)
+    while(true) {
+      const f = onSignOutFs.pop();
+      if (f !== undefined) f();
+      else break;
+    }
+  }
+});
+
 // Note: Don't seem to be able to export 'obs.displayName as displayName', in Vue.
 //
 export {
   currentFirebaseUserProm,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  onSignOut
 };

@@ -35,21 +35,33 @@ Collections are marked with `C <id-type>`.
    	  /by: uid
    	  /at: timestamp
 
+   //REMOVE??
    /users:C <uid>
       /lastOpened: time-stamp		// written when starting to track a project's symbols
 
-   /symbols:C <auto-id>
-      [/claimed: { by: uid, at: timestamp }]
-      //REMOVE: [/claimedBy: <uid>]
-      //REMOVE: [/claimedAt: <timestamp>]
-      /layer: int
-      /shape: "star"      // potentially more shapes
-      /size: int
-      /fillColor: <color-string>
-      /center: {x: <number>, y: <number>}
+   /lastUsed:C <uid>   // for users who have visited
+      /at: timestamp
+  
+   /symbols: array of {
+      id: string    // '<uid>-<n>'; last user's id who claimed
+      layer: int
+      shape: "star"      // potentially more shapes
+      size: int
+      fillColor: <color-string>
+      center: {x: <number>, y: <number>}
+   }
+
+   /claimed:C <symbol-id>
+      /by: uid
+      /at: timestamp
 ```
 
-Spreading things into subcollections is mainly decided by security rules. If one needs to use a collection entry in the rules, such entries need to be in a sub-collection (not a map within a document).
+Authors and Collaborators are included in the main project document, because there's no harm in doing so (everyone in the project is allowed to see the roles). This helps keep security rule evaluation pricing down, compared to needing to read another document.
+
+`pendingInvites` is a subcollection because ... (tbd.!)
+
+`users` is a subcollection because ... (tbd.!)
+
 
 
 #### Users sub-collection

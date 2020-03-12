@@ -19,7 +19,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@firebase/testing": "^0.16.13",
+    "@firebase/testing": "^0.16.14",
     "@rollup/plugin-alias": "^3.0.0",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "concurrently": "^5.0.2",

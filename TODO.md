@@ -67,9 +67,7 @@
 
 ## Firebase
 
-- What is the difference between `firebase init` and `firebase use --add`? 
-
-   Could someone with more Firebase experience check out the instructions in `README.md` and `DEVS/Setting up the Firebase project.md`. #help
+- Would someone with more Firebase experience check out the instructions in `README.md`. #help
 
 
 ## Vue 3 beta
@@ -119,4 +117,9 @@ If it's not, let's not bother.
 
 - It's largely a dual syntax
 - Compiler doesn't seem to figure out when it has been misused (Vue.js 2.6.11)
+
+
+## Source map for console errors
+
+The errors now point to the bundle (Safari, Chrome). Can we make them point to the source, instead? #help
 
