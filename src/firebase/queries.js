@@ -9,14 +9,35 @@ const db = firebase.firestore();
 const projectsC = db.collection('projects');
 const invitesC = db.collection('invites');
 
+import { assert } from "@/util/assert";
+
 function informGen(f) {   // ((string, {...}) => ()) => ((QuerySnapshot) => ())
   return function inform(snapshot) {
     snapshot.docs.forEach(doc => {
       const id = doc.id;
-      const data = doc.exists ? doc.data() : null;
+      const data = doc.exists ? convertDateFields( doc.data(), "created" ) : null;
+
       f(id, data);
     })
   };
+}
+
+/*
+* Firestore client provides timestamps as '{ seconds: integer, nanos: 0 }'. Let's convert those to JavaScript 'Date'.
+*/
+function convertDateFields( obj, ...fields ) {
+  const o2 = {};   // collect date fields here
+
+  fields.forEach( (key) => {
+    assert( !(obj[key] instanceof Date) );    // Make sure Firestore does not provide as a 'Date'
+    assert( typeof obj[key].seconds == 'number' );
+
+    const epochSecs = obj[key].seconds;     // sub-second resolution could be reached from '.nanoseconds' (but we don't need it)
+
+    o2[key] = new Date(epochSecs*1000);
+  });
+
+  return { ...obj, ...o2 }    // merge the objects
 }
 
 /*

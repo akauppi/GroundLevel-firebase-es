@@ -28,9 +28,9 @@
     text-align: center;
   }
 
-  <!-- tbd. could do some esthetic grouping: to make the columns grow by the width of the browser window;
-  - to have possibly padding to left and right if there's plentiful space.
-  -->
+  /* tbd. could do some aesthetic grouping: to make the columns grow by the width of the browser window;
+  * to have possibly padding to left and right if there's plentiful space.
+  */
   #grid-container-projects {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;

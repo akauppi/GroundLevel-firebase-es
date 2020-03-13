@@ -5,16 +5,20 @@
 -
 - Props:
 -   project: { title: string, created: datetime, lastUsed: datetime }
+-
+- Todo:
+-   - eventually, we'd have a thumbnail as the background of existing projects' tiles.
 -->
 <template>
   <div class="project-tile" v-bind:class="{ 'new-project-tile': isNewTile }">
-    PROJECT
     <template v-if="isNewTile">
-      <button id="new-project">+ New Project</button>
+      NEW PROJECT
+      <br />
+      <button id="new-project">+ Create</button>
     </template>
     <template v-else>
       {{ project.title }}
-      {{ project.created }}
+      {{ project.created.toLocaleString() }}
       {{ project.lastUsed }}
     </template>
   </div>
