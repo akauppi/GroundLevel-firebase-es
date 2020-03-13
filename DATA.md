@@ -31,17 +31,14 @@ Collections are marked with `C <id-type>`.
    /authors: array of <uid> (>=1)
    /collaborators: array of <uid> (>=0)
 
-   /pendingInvites:C <email>
-   	  /by: uid
-   	  /at: timestamp
+   /lastUsed: {
+      <uid>: timestamp 
+   }
 
    //REMOVE??
    /users:C <uid>
       /lastOpened: time-stamp		// written when starting to track a project's symbols
 
-   /lastUsed:C <uid>   // for users who have visited
-      /at: timestamp
-  
    /symbols: array of {
       id: string    // '<uid>-<n>'; last user's id who claimed
       layer: int
@@ -54,6 +51,20 @@ Collections are marked with `C <id-type>`.
    /claimed:C <symbol-id>
       /by: uid
       /at: timestamp
+```
+
+```
+/invites:C <email>_<project-id>
+   /invitedEmail: string
+   /project: project-id
+   /by: uid
+   /at: timestamp
+```
+
+```
+/userInfo:C <uid>
+   /name: string
+   /photoURL: string
 ```
 
 Authors and Collaborators are included in the main project document, because there's no harm in doing so (everyone in the project is allowed to see the roles). This helps keep security rule evaluation pricing down, compared to needing to read another document.

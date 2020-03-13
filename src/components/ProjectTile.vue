@@ -4,7 +4,7 @@
 - The button to create a new project or open an existing one.
 -
 - Props:
--   project: Vue.observable{ title: ..., ... }      <-- can we even pass objects/classes as props?? tbd.
+-   project: { title: string, created: datetime, lastUsed: datetime }
 -->
 <template>
   <div class="project-tile">
@@ -39,14 +39,14 @@
   export default {
     name: 'ProjectTile',
     props: {
-      project: {    // { title: String, created: time-stamp, lastUsed: time-stamp, ... }    ; for presentation purposes
+      project: {    // { title: String, created: datetime, lastUsed: datetime, ... }    ; for presentation purposes
         type: Object,
         required: false,
         default: null
       }
     },
     mounted() {
-      console.log("MOUNTED", this.project);
+      //console.log("MOUNTED", this.project);
     }
   };
 </script>
