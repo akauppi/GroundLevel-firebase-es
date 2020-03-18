@@ -28,14 +28,11 @@ Collections are marked with `C <id-type>`.
       /at: timestamp 
 
    /symbols:C <symbol-id: automatic> 
-      /_: {
-         //REMOVE: id: string    // '<uid>-<n>'; last user's id who claimed
-         layer: int
-         shape: "star"      // potentially more shapes
-         size: int
-         fillColor: <color-string>
-         center: { x: <number>, y: <number> }
-      }
+      /layer: int
+      /shape: "star"      // potentially more shapes
+      /size: int
+      /fillColor: <color-string>
+      /center: { x: <number>, y: <number> }
       [/claimed: { by: uid, at: timestamp }]
 ```
 

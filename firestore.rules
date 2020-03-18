@@ -117,16 +117,6 @@ service cloud.firestore {
           && request.resource.data.at == request.time
       }
 
-			// We presumably need a second function when checking authority from a sub-collection
-			// (needing 'get'). Can we limit access to the whole collection tree, somehow? #help
-      //
-			function EXT_isCollaboratorOrAuthor() {
-        return isSignedIn() &&
-          (request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
-           request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
-          )
-      }
-
 //--- Symbols ---
 
       match /symbols/{symbolId} {
@@ -197,14 +187,66 @@ service cloud.firestore {
             && request.resource.data.center.y is number
         }
       }   // symbols
+
+      function EXT_isCollaboratorOrAuthor() {
+        return isSignedIn() &&
+          (request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
+           request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
+          )
+      }
     }  // project
 
-//---
+//--- Invites ---
+
+    match /invites/{inviteId} {   // inviteId: '<email>_<projectId>'
+			// Read:
+      //	- only Cloud Functions read invites
+      allow read: if false
+
+      // Create:
+      //	- any collaborator or author of a project may invite more people
+      //  - a previous invite may be overwritten (hmm.. tbd. does that fall onto 'update' or does 'set' always bring here?)
+      //
+      allow create: if GLOBAL_isCollaboratorOrAuthor(request.resource.data.project) &&
+				validInvite()
+
+      allow update, delete: if false
+    }
+
+		function validInvite() {
+      let requiredKeys = ['invitedEmail','project','by','at'].toSet();
+
+      return true
+        && request.resource.data.keys().toSet() == requiredKeys
+        && request.resource.id == request.resource.data.invitedEmail +"_"+ request.resource.data.project	// validate also the id schema
+        && request.resource.data.invitedEmail is string
+        && request.resource.data.project is string
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.at == request.time
+		}
+
+//--- User info ---
+//
+// Fully handled via Cloud Functions
+
+		match /userInfo/{userId} {
+    	allow read, write: if false
+    }
 
 //--- Authentication ---
 
     function isSignedIn() {
       return request.auth != null && request.auth.uid != null;
+    }
+
+    // Checking membership in a project from other collections.
+    // Q: Do we need this also for sub-collections of 'projects'?
+    //
+    function GLOBAL_isCollaboratorOrAuthor(projectId) {
+      return isSignedIn() &&
+        (request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
+         request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
+        )
     }
 
 	} // database
