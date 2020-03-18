@@ -1,7 +1,9 @@
 rules_version = '2';
 
-// Note: When editing the rules, consider using the online Rules Simulator
-//      -> https://console.firebase.google.com/project/ ... /database/firestore/rules
+// Note: When editing the rules, consider using the online Rules Simulator:
+//      Firebase Console > Database > Rules > Rules playground
+//
+//      e.g. https://console.firebase.google.com/u/0/project/vue-rollup-example/database/firestore/rules
 //
 //      It gives good error messages and has syntax highlighting.
 //
@@ -10,47 +12,68 @@ service cloud.firestore {
 
     match /projects/{projectId} {
       // Read
-      //    - allows also removed (archived) projects to be seen
+      //    - authors can see all projects, also removed (archived)
+      //    - collaborators see only active projects
       //
-      allow read: if isCollaboratorOrAuthor()
+      allow read: if isAuthor()
+      	|| isCollaborator() && !isRemoved()
 
       // Creation
       //    - the creating user must list themselves as an author
-      //    - creating time-stamp must be done using 'FieldValue.serverTimestamp()'
+      //    - creating time-stamp must be a 'FieldValue.serverTimestamp()'
       //
       allow create: if isSignedIn()
         && validProject()
         && request.resource.data.created == request.time
-        && request.resource.data.removed == null
+        && !isRemovedAfter()
         && request.auth.uid in request.resource.data.authors    // creator added as an author (we could go soft on this..)
 
       // Update
       //    - must not be changed:              /created
-      //    - required to be author to change:  /title, /authors, /collaborators, /removed
+      //    - required to be author to change:  /title, /removed, /authors, /collaborators
+      //
+      //    In addition, edits to a removed project are not allowed (other than removing the 'removed' field).
       //
       allow update: if isAuthor()
         && validProject()
-        && resource.data.removed == null
         && request.resource.data.created == resource.data.created
-        && (request.resource.data.removed == null || request.resource.data.removed == request.time)     // if given, must be current server time
+				&& (  // case A (active project): can either change other fields, or set '/removed' to server timestamp
+        	!isRemoved() && (
+          	!isRemovedAfter() || noOtherChangesThanRemove()
+          )
+        ) || (  // case B (removed project): can only remove the '/removed' marking
+        	isRemoved() && (
+          	isRemovedAfter()		// 'validProject' checks it is the server time
+            && noOtherChangesThanRemove()
+          )
+        )
+
+				function noOtherChangesThanRemove() {
+          return true
+            && request.resource.data.title == resource.data.title
+            && request.resource.data.authors == resource.data.authors
+            && request.resource.data.collaborators == resource.data.collaborators
+        }
 
       allow delete: if false        // no deletion via web app
 
       // Project consistency:
       //  - title may not be empty
       //  - created must exist
-      //  - at least one author must remain
-      //  - users are either in 'authors' or in 'collaborators' (but not both)
+      //  - removed is optional; if exists, must be the server timestamp
+      //  - at least one author must exist
+      //  - collaborators can be empty
+      //  - users are either in 'authors' or in 'collaborators' (but not in both)
       //
       function validProject() {
-          return true
-              && request.resource.data.title is string && request.resource.data.title != ''
-              && request.resource.data.created is timestamp
-              && (request.resource.data.removed == null || request.resource.data.removed is timestamp)
-              && request.resource.data.authors is list && request.resource.data.authors.size() > 0
-              && request.resource.data.collaborators is list
-              && (!request.resource.data.authors.hasAny( request.resource.data.collaborators ))     // note: could skip this (duplicates wouldn't hurt the logic)
-              && (!request.resource.data.collaborators.hasAny( request.resource.data.authors ))     //      -''-
+        return true
+          && request.resource.data.title is string && request.resource.data.title != ''
+          && request.resource.data.created is timestamp
+          && (!isRemovedAfter() || request.resource.data.removed == request.time)
+          && request.resource.data.authors is list && request.resource.data.authors.size() > 0
+          && request.resource.data.collaborators is list
+          && (!request.resource.data.authors.hasAny( request.resource.data.collaborators ))     // note: could skip this (duplicates wouldn't hurt the logic)
+          && (!request.resource.data.collaborators.hasAny( request.resource.data.authors ))     //      -''-
       }
 
       function isAuthor() {
@@ -68,119 +91,122 @@ service cloud.firestore {
           (isCollaborator() || isAuthor())
       }
 
-      //--- Users ---
-
-      match /users/{userId} {
-        allow read: if isCollaboratorOrAuthor();        // anyone (within the project) can list and get
-
-        allow create: if isAuthorAfter()       // anyone who's author after the request would pass (i.e. allows first time creation, adding the user as an author)
-          && validUser()
-          && request.resource.data.lastOpened == null       // does not exist, until the user visits
-          && request.resource.data.pendingInvite == request.time        // pending since now (in server time)
-
-        allow update: if !isMyUserEntry() && isAuthor()       // other person's user entry
-          && validUser()
-          && request.resource.data.lastOpened == request.data.lastOpened        // only user themselves may change
-          && request.resource.data.pendingInvite == request.data.pendingInvite  // only user themselves may change
-
-        allow update: if isMyUserEntry()        // one's own user entry
-          && validUser()
-          && request.resource.data.role == resource.data.role       // don't allow even an author to downgrade themselves to collaborator (ensures indirectly that at least one author remains)
-          && request.resource.data.lastOpened == resource.time      // updating only to server time allowed (and expected)
-          && request.resource.data.pendingInvite == null            // removal of '.pendingInvite' required
-
-        allow delete: if false      // tbd. we maybe should allow deletion of users, by someone who remains an author?
-
-        function isMyUserEntry() {
-            return isSignedIn() && request.auth.uid == userId
-        }
-
-        function validUser() {
-            return true
-                && request.resource.data.role in ['author', 'collaborator']     // must be either
-                && (    // either of them
-                    (request.resource.data.lastOpened && request.resource.data.lastOpened is timestamp) ||
-                    (request.resource.data.pendingInvite && request.resource.data.pendingInvite is timestamp)
-                )
-        }
+      function isRemoved() {
+				return "removed" in resource.data
       }
 
-      //--- Symbols ---
+			function isRemovedAfter() {
+				return "removed" in request.resource.data
+			}
+
+//--- Visited ---
+
+      match /visited/{userId} {
+        // Read:
+        //	- all project members can read each other's last visit time
+        //
+        allow read: if isCollaboratorOrAuthor()
+
+				// Write:
+        //	- only the user themselves can reset their value
+				//
+        // Note: requiring the 'after' value to be the server time stamp essentially disallows deletes.
+        //
+        allow write: if EXT_isCollaboratorOrAuthor()   // Q: can this reach the parent document, even without 'get'?
+        	&& userId == request.auth.uid
+          && request.resource.data.at == request.time
+      }
+
+			// We presumably need a second function when checking authority from a sub-collection
+			// (needing 'get'). Can we limit access to the whole collection tree, somehow? #help
+      //
+			function EXT_isCollaboratorOrAuthor() {
+        return isSignedIn() &&
+          (request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
+           request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
+          )
+      }
+
+//--- Symbols ---
 
       match /symbols/{symbolId} {
-        allow read: if isCollaboratorOrAuthor();        // anyone (within the project) can read
+				// Read:
+        //	- anyone can read
+        //
+				allow read: if EXT_isCollaboratorOrAuthor();        // anyone (within the project) can read
 
+				// Creation:
+        //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
+        //
         allow create: if isCollaboratorOrAuthor()
-            && validSymbol()
-            && request.resource.data.claimedBy == request.auth.uid
-            && request.resource.data.claimedAt == request.time
+          && validSymbol()
+          && claimedByMe()
+          && request.resource.data.claimed.at == request.time
 
-        // Updates only allowed to shapes claimed by oneself. Claim itself cannot be changed; only cleared.
+        // Updates:
+        // 	- can claim a non-claimed symbol
+        // 	- can do changes to an already claimed symbol
+        // 	- can revoke the claim
+        // 	- claim itself cannot be changed; only revoked
         //
         allow update: if isCollaboratorOrAuthor()
-            && validSymbol()
-            && claimedByMe()
-            && (request.resource.data.claimedBy == null || (
-                request.resource.data.claimedBy == resource.data.claimedBy &&
-                request.resource.data.claimedAt == resource.data.claimedAt
-            ))
+        	&& validSymbol()
+          && ((		// case A: claiming an unclaimed symbol
+            !isClaimed() && (
+            	request.resource.data.claimed.by == request.auth.uid &&		// I make the claim
+              request.resource.data.claimed.at == request.time
+            )
+          ) || (	// case B: revoking the claim
+          	claimedByMe() && (
+            	!("claimed" in request.resource.data)		// claim removed
+            )
+          ))
 
+				// Delete:
+        //	- can delete a symbol claimed to themselves
+        //
         allow delete: if isCollaboratorOrAuthor()
-            && claimedByMe()
+          && claimedByMe()
 
         function claimedByMe() {
-            return claimedBy() == request.auth.uid
+          return resource.data.claimed.by == request.auth.uid
         }
 
-        function claimedBy() {
-            return resource.data.claimedBy      // before the change
+        function isClaimed() {
+          return "claimed" in resource.data
         }
 
         function validSymbol() {
           let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
-					let possibleKeys = requiredKeys.union( ['claimedBy', 'claimedAt'].toSet() );
+					let possibleKeys = requiredKeys.union( ['claimed'].toSet() );
 
           return true
-              && (request.resource.data.keys().toSet().hasAll(requiredKeys) && possibleKeys.hasAll(request.resource.data.keys()))
-              && (request.resource.data.claimedBy == null || request.resource.data.claimedBy is string)
-              && (request.resource.data.claimedAt == null || request.resource.data.claimedAt is timestamp)
-              && bothOrNeither(request.resource.data.claimedBy, request.resource.data.claimedAt)
-              && request.resource.data.layer is int
-              && request.resource.data.shape in ['star']      // enum
-              && request.resource.data.size > 0
-              && request.resource.data.fillColor is string
-              && request.resource.data.center.x is number
-              && request.resource.data.center.y is number
+            && (request.resource.data.keys().toSet().hasAll(requiredKeys) &&
+              possibleKeys.hasAll(request.resource.data.keys()))
+            && ((!isClaimed()) || (
+              request.resource.data.claimed.keys() == ["by","at"] &&   // only these
+              request.resource.data.claimed.by is string &&
+              request.resource.data.claimed.at is timestamp
+            ))
+            && request.resource.data.layer is int
+            && request.resource.data.shape in ['star']      // enum
+            && request.resource.data.size > 0
+            && request.resource.data.fillColor is string
+            && request.resource.data.center.keys() == ["x","y"]
+            && request.resource.data.center.x is number
+            && request.resource.data.center.y is number
         }
-
-        function bothOrNeither(a,b) {
-          return ((a == null && b == null) || (a && b))
-        }
-
-        //REMOVE?
-        //function isAuthor() {
-        //  return isSignedIn() &&
-        //    request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
-        //}
-        //
-        //function isCollaborator() {
-        //  return isSignedIn() &&
-        //    request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators
-        //}
-        //
-        //function isCollaboratorOrAuthor() {
-        //  return isSignedIn() &&
-        //    (isCollaborator() || isAuthor())
-        //}
       }   // symbols
-
-
-      //--- Authentication ---
-
-      function isSignedIn() {
-        return request.auth != null && request.auth.uid != null;
-      }
     }  // project
-  } // database
+
+//---
+
+//--- Authentication ---
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+	} // database
 }
 

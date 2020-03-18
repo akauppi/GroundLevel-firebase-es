@@ -14,3 +14,11 @@ This would be even more valued, since it is not obvious to the user (me), whethe
 
 - Asko 13-Mar-2020 (not suggested to Firebase team)
 
+### Abilitiy to insert "current server data" in a document for Security Rules simulator
+
+I have a rule where creation of a document needs the creation time to be set using `FieldValue.serverTime`. Such a payload cannot be simulated, as far as I see:
+
+>![](.images/rules-simulator-building-document.png)
+
+Any timestamp I enter is bound to be different than the server time, thus always failing the rule.
+

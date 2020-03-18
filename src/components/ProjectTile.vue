@@ -10,7 +10,7 @@
 -   - eventually, we'd have a thumbnail as the background of existing projects' tiles.
 -->
 <template>
-  <div class="project-tile" v-bind:class="{ 'new-project-tile': isNewTile }">
+  <div class="project-tile" :class="{ 'new-project-tile': isNewTile }">
     <template v-if="isNewTile">
       NEW PROJECT
       <br />
