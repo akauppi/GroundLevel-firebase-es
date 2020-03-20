@@ -151,3 +151,14 @@ To go sub-collection:
 >Do you know more guidance for steering database schema design in Firestore? Please share the info at [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) or as a PR. 📝🙂
 <<
 -->
+
+## Security Rules: use `.diff`
+
+According to [tweet](https://twitter.com/puf/status/1237056904154603520?s=20):
+
+```
+allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["a"])
+```
+
+Use that to simplify the rules (once we have TESTS for them).
+

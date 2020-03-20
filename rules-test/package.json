@@ -7,29 +7,11 @@
     "//": "configuration options can be set here"
   },
   "scripts": {
-    "test": "npx jest",
-
-    "testA": "firebase emulators:exec --only firestore 'npm test'",
-    "testB": "start-server-and-test 'firebase emulators:start --only firestore' 6767 'FIRESTORE_EMULATOR_HOST=localhost:6767 npm test'"
-  },
-  "//": {
-    "scripts": {
-      "testA": [
-        "'firebase emulators:exec' runs the tests under the Firebase emulator.",
-        "Pro: simple, just one statement",
-        "Con: cannot see coverage etc. since the emulator doesn't remain up"
-      ],
-      "testB": [
-        "Another way of running the emulator & tests. Allows you to see the parts."
-      ],
-      "test": [
-        "Using 'npx' so we don't need to do 'node_modules/.bin/'."
-      ]
-    }
+    "test": "firebase emulators:exec --only firestore 'npx jest'",
+    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest"
   },
   "devDependencies": {
-    "@firebase/testing": "^0.16.13",
-    "jest": "^25.1.0",
-    "start-server-and-test": "^1.10.8"
+    "@firebase/testing": "^0.17.0",
+    "jest": "^25.1.0"
   }
 }

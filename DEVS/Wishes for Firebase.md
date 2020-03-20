@@ -22,3 +22,13 @@ I have a rule where creation of a document needs the creation time to be set usi
 
 Any timestamp I enter is bound to be different than the server time, thus always failing the rule.
 
+<!-- disregard
+### Firebase emulator could list available project id's
+
+For seeing test coverage, one needs to know the project id to pick. It could provide a list of available id's at:
+
+http://localhost:6767/emulator/v1/projects/
+
+Why? Project id's 
+
+-->

@@ -1,6 +1,6 @@
-/fire*-debug.log
+/firebase-debug.log
+/firestore-debug.log
 /.firebaserc
 
 /node_modules/
 /package-lock.json
-

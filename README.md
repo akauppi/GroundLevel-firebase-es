@@ -38,6 +38,8 @@ Note that we don't use Vue CLI. It's not strictly needed for creating or running
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
+The development has been made using Firebase 7.15.1 on macOS.
+
 
 ### Firebase project
 
@@ -48,12 +50,6 @@ You need to:
   - you can choose the set of authentication providers you like
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
-
-See [DEVS/Setting up the Firebase project](DEVS/Setting%20up%%20the%20Firebase%20project.md) for more details.
-
-<!-- disabled 
->Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
--->
 
 
 ## Getting started

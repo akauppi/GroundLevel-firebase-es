@@ -1,11 +1,7 @@
 rules_version = '2';
 
 // Note: When editing the rules, consider using the online Rules Simulator:
-//      Firebase Console > Database > Rules > Rules playground
-//
 //      e.g. https://console.firebase.google.com/u/0/project/vue-rollup-example/database/firestore/rules
-//
-//      It gives good error messages and has syntax highlighting.
 //
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -251,4 +247,3 @@ service cloud.firestore {
 
 	} // database
 }
-
