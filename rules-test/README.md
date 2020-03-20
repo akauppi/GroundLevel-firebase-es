@@ -97,6 +97,13 @@ $ npm run test-dev
 This is the approach you should use in development. Also, this approach you to get [coverage reports](https://firebase.google.com/docs/firestore/security/test-rules-emulator#generate_test_reports) on the usage of Security Rules.
 
 
+## Reading for developers
+
+Before contributing to the project, please familiarise yourself with:
+
+- [Jest](https://jestjs.io/docs/en/getting-started) Introduction chapters 
+
+
 ## References
 
 - [Testing Firestore Security Rules With the Emulator](https://fireship.io/lessons/testing-firestore-security-rules-with-the-emulator/) (article, Oct 2018)

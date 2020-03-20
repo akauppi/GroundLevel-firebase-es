@@ -54,7 +54,7 @@ const projects = {
 };
 
 const data = {
-  projects: projects
+  ...projects
 };
 
 export { data }
