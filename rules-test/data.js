@@ -38,14 +38,14 @@ const projects = {
   },
 
   // Project 2 - removed (archived)
-  "/projects/2": {
+  "/projects/2-removed": {
     title: "Jack",
     created: Date.parse('01 Jan 1880 00:00:00 GMT'),
     removed: Date.now(),
     authors: ["abc"],
     collaborators: ["def"]
   },
-  "/projects/2/symbols/2": {
+  "/projects/2-removed/symbols/2": {
     layer: 0,
     shape: "star",
     size: 50,

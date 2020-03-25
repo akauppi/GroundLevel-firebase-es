@@ -74,7 +74,7 @@ describe("Project rules", () => {
     //return true;
   });
 
-  test.only('user who is an author or a collaborator can read a project (that is not \'removed\')', async (done) => {
+  test('user who is an author or a collaborator can read a project (that is not \'removed\')', async (done) => {
     await expect( abc_projectsC.doc("1").get() ).toAllow();
     await expect( def_projectsC.doc("1").get() ).toAllow();
 
@@ -82,15 +82,13 @@ describe("Project rules", () => {
     //return true;
   });
 
-  /*** pending
   test('user needs to be an author, to read a \'removed\' project', async (done) => {
-    await expect( abc_projectsC.get("1") ).toAllow();
-    await expect( def_projectsC.get("1") ).toAllow();
+    await expect( abc_projectsC.doc("2-removed").get() ).toAllow();
+    await expect( def_projectsC.doc("2-removed").get() ).toDeny();
 
     done();
     //return true;
   });
-  ***/
 
 
 
