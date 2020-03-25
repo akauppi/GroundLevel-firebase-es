@@ -17,6 +17,7 @@ service cloud.firestore {
       // Creation
       //    - the creating user must list themselves as an author
       //    - creating time-stamp must be a 'FieldValue.serverTimestamp()'
+      //    - may not be created as 'removed'
       //
       allow create: if isSignedIn()
         && validProject()

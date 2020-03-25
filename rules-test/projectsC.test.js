@@ -15,6 +15,8 @@ let emul;
 // HELP! For some reason, not able to make 'beforeAll()' return a promise. Can you do the below without using 'done'?
 // #help
 
+const firebase = require('@firebase/testing');
+
 beforeAll( async (done) => {    // set up all collections
   // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports
   //  -> http://localhost:6767/emulator/v1/projects/<test_id>:ruleCoverage.html
@@ -60,6 +62,8 @@ describe("Project rules", () => {
     }
   });
 
+  //--- ProjectsC read rules ---
+
   test('unauthenticated access should fail', async (done) => {
     await expect( unauth_projectsC.get() ).toDeny();
 
@@ -90,7 +94,41 @@ describe("Project rules", () => {
     //return true;
   });
 
+  //--- ProjectsC create rules ---
 
+  test('any authenticated user may create a project, but must include themselves as an author', async (done) => {
+    // This implies: unauthenticated users cannot create a project, since they don't have a uid.
+
+    const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+    const p3_valid = {
+      title: "Calamity",
+      created: serverTimestamp,
+      // no 'removed'
+      authors: ["abc"],
+      collaborators: []
+    };
+
+    const p3_withoutAuthor = {...p3_valid, authors: [] };
+    const p3_badTime = {...p3_valid, created: Date.now() };
+    const p3_alreadyRemoved = {...p3_valid, removed: serverTimestamp };
+
+    await expect( abc_projectsC.doc("3-fictional").set(p3_valid) ).toAllow();
+    await expect( abc_projectsC.doc("3-fictional").set(p3_withoutAuthor) ).toDeny();
+
+    // Time stamp must be the server time
+    await expect( abc_projectsC.doc("3-fictional").set(p3_badTime) ).toDeny();
+
+    // May not be already 'removed'
+    await expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny();
+
+    done();
+    //return true;
+  });
+
+
+
+  //--- other ---
 
   /*** KEEP AT END
   test('designed to fail!', async (done) => {       // DEBUG
