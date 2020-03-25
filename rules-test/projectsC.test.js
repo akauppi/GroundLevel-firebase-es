@@ -1,11 +1,14 @@
-const { assertFails, assertSucceeds } = require('@firebase/testing');
-
-const assert = require('assert').strict;
-
+/*
+* rules-test/projectsC.test.js
+*
+* Rules tests
+*/
 import { setup } from './tools/setup';
 import './tools/jest-matchers';
 
 import { data } from './data';
+
+const assert = require('assert').strict;
 
 let emul;
 
@@ -15,7 +18,7 @@ beforeAll( async (done) => {    // set up all collections
   // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports
   //  -> http://localhost:6767/emulator/v1/projects/<test_id>:ruleCoverage.html
   //
-  // Note: Sessions persist on a single emulator run. Having the date so that we'll get fresh stuff each run.
+  // Sessions persist on a single emulator run. We use a date so that we'll get fresh stuff each run.
   //
   const sessionId = `test-${Date.now()}`;   // e.g. 'test-1583506734171'
 
@@ -24,16 +27,17 @@ beforeAll( async (done) => {    // set up all collections
   console.info("Emulation session: ", sessionId);
 
   done();
-  //return true;    // return anything, to make Jest get a promise
+  //return true;    // return anything, to make Jest get a promise (did not work)
 });
 
 // Note: We may wish to leave them in the server, to see coverage reports.
 //
-/***
-afterAll( async () => {    // clean up all collections
+afterAll( async (done) => {    // clean up all collections
   await emul.teardown();
+  console.log("Cleaned up!");
+  done();
+  //return true;
 });
-***/
 
 describe("Project rules", () => {
   let unauth_projectsC, abc_projectsC, def_projectsC;
@@ -55,11 +59,17 @@ describe("Project rules", () => {
   });
 
   test('unauthorized access should fail', async (done) => {
-    //assert( Object.keys(projectsC).length > 0 );    // REMOVE
-
     await expect( unauth_projectsC.get() ).toDeny();
 
     done();
     //return true;
   });
+
+  /***
+  test('designed to fail!', async (done) => {       // DEBUG
+    await expect( unauth_projectsC.get() ).toAllow();
+    done();
+    //return true;
+  });
+  ***/
 });

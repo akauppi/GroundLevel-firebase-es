@@ -35,28 +35,23 @@ async function setup(sessionId, data) {    // (string, { <document-path>: { <fie
   });
   await batch.commit();
 
-  // Engage the rules
-  await firebase.loadFirestoreRules({
-    projectId: sessionId,
-    rules: fs.readFileSync(rulesFilename, 'utf8')
-  });
-
-  const apps = [dbAdmin];
+  const dbs = [dbAdmin];
 
   return {
     sessionId: sessionId,
 
     withAuth: (auth) => {
-      const app = firebase.initializeTestApp({
+      const db = firebase.initializeTestApp({
         projectId: sessionId,
         auth
-      });
-      apps.push(app);
+      }).firestore();
+      dbs.push(db);
 
-      return app.firestore();
+      return db;
     },
-    teardown: () => {   // tbd. close the particular apps created, no others
-      apps.forEach( app => app.delete() );
+    teardown: async () => {   // tbd. close the particular apps created, no others
+      const proms = dbs.map( db => db.app.delete() );
+      return Promise.all(proms);
     }
   };
 }
