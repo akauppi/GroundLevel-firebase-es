@@ -44,13 +44,6 @@
    - [ ] Alert IntelliJ to this. It behaves like [this issue from 2016](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207304095-Using-ES6-import-and-node-modules-are-marked-as-Module-is-not-installed-) but is likely different.
 
 
-- Syntax highlighter for Firebase storage rules
-
-   - [StackOverflow](https://stackoverflow.com/questions/59999967/is-there-a-firebase-storage-rules-syntax-highlighter-for-webstorm)
-   - [IntelliJ WebStorm backlog](https://youtrack.jetbrains.com/issue/IDEABKL-7927?p=IDEA-200507)
-
-   
-   
 ## rollup-plugin-vue
 
 - Not able to do dynamic imports in `src/routes.js`.
@@ -152,7 +145,14 @@ To go sub-collection:
 <<
 -->
 
-## Security Rules: use `.diff`
+## Security Rules: using Promises (implementation)
+
+For some reason, use of `async` by itself does not work. 
+
+Can you change the code (`rules-test/*.test.js`) so they don't need to call `done`? Thanks.
+
+
+## Security Rules: use `.diff` ♨️
 
 According to [tweet](https://twitter.com/puf/status/1237056904154603520?s=20):
 

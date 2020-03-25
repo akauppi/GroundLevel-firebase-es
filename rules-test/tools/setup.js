@@ -30,11 +30,20 @@ async function setup(sessionId, data) {    // (string, { <document-path>: { <fie
 
   const batch = dbAdmin.batch();
 
-  Object.entries(data).forEach( ([docPath,value]) => {
+  for (const [docPath,value] of Object.entries(data)) {
+    console.debug("Setting: ", docPath, value);  // DEBUG
     batch.set( dbAdmin.doc(docPath), value );
-  });
+  }
   await batch.commit();
 
+  /* disabled
+  // TEST: did we get it through (yes we did); DEBUG
+  for (const [docPath,_] of Object.entries(data)) {
+    const v = await dbAdmin.doc(docPath).get();
+    console.debug("Read back: ", docPath, v);
+  }
+  */
+  
   const dbs = [dbAdmin];
 
   return {

@@ -12,6 +12,7 @@
 * the parenthood (this is quite suiting Firestore's view).
 */
 const projects = {
+  // Project 1 - active project
   "/projects/1": {
     title: "Jolly Jumper",
     created: Date.parse('01 Jan 1880 00:00:00 GMT'),
