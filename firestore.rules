@@ -33,18 +33,18 @@ service cloud.firestore {
       allow update: if isAuthor()
         && validProject()
         && request.resource.data.created == resource.data.created
-				&& (  // case A (active project): can either change other fields, or set '/removed' to server timestamp
-        	!isRemoved() && (
-          	!isRemovedAfter() || noOtherChangesThanRemove()
+        && (  // case A (active project): can either change other fields, or set '/removed' to server timestamp
+          !isRemoved() && (
+            !isRemovedAfter() || noOtherChangesThanRemove()
           )
         ) || (  // case B (removed project): can only remove the '/removed' marking
-        	isRemoved() && (
-          	isRemovedAfter()		// 'validProject' checks it is the server time
+          isRemoved() && (
+            isRemovedAfter()		// 'validProject' checks it is the server time
             && noOtherChangesThanRemove()
           )
         )
 
-				function noOtherChangesThanRemove() {
+      function noOtherChangesThanRemove() {
           return true
             && request.resource.data.title == resource.data.title
             && request.resource.data.authors == resource.data.authors
@@ -88,12 +88,12 @@ service cloud.firestore {
       }
 
       function isRemoved() {
-				return "removed" in resource.data
+        return "removed" in resource.data
       }
 
-			function isRemovedAfter() {
-				return "removed" in request.resource.data
-			}
+      function isRemovedAfter() {
+        return "removed" in request.resource.data
+      }
 
 //--- Visited ---
 
@@ -103,25 +103,25 @@ service cloud.firestore {
         //
         allow read: if isCollaboratorOrAuthor()
 
-				// Write:
+        // Write:
         //	- only the user themselves can reset their value
-				//
+        //
         // Note: requiring the 'after' value to be the server time stamp essentially disallows deletes.
         //
         allow write: if EXT_isCollaboratorOrAuthor()   // Q: can this reach the parent document, even without 'get'?
-        	&& userId == request.auth.uid
+          && userId == request.auth.uid
           && request.resource.data.at == request.time
       }
 
 //--- Symbols ---
 
       match /symbols/{symbolId} {
-				// Read:
+        // Read:
         //	- anyone can read
         //
-				allow read: if EXT_isCollaboratorOrAuthor();        // anyone (within the project) can read
+        allow read: if EXT_isCollaboratorOrAuthor();        // anyone (within the project) can read
 
-				// Creation:
+        // Creation:
         //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
         //
         allow create: if isCollaboratorOrAuthor()
@@ -136,19 +136,19 @@ service cloud.firestore {
         // 	- claim itself cannot be changed; only revoked
         //
         allow update: if isCollaboratorOrAuthor()
-        	&& validSymbol()
+          && validSymbol()
           && ((		// case A: claiming an unclaimed symbol
             !isClaimed() && (
-            	request.resource.data.claimed.by == request.auth.uid &&		// I make the claim
+              request.resource.data.claimed.by == request.auth.uid &&		// I make the claim
               request.resource.data.claimed.at == request.time
             )
           ) || (	// case B: revoking the claim
-          	claimedByMe() && (
-            	!("claimed" in request.resource.data)		// claim removed
+            claimedByMe() && (
+              !("claimed" in request.resource.data)		// claim removed
             )
           ))
 
-				// Delete:
+        // Delete:
         //	- can delete a symbol claimed to themselves
         //
         allow delete: if isCollaboratorOrAuthor()
@@ -164,7 +164,7 @@ service cloud.firestore {
 
         function validSymbol() {
           let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
-					let possibleKeys = requiredKeys.union( ['claimed'].toSet() );
+          let possibleKeys = requiredKeys.union( ['claimed'].toSet() );
 
           return true
             && (request.resource.data.keys().toSet().hasAll(requiredKeys) &&
@@ -182,7 +182,7 @@ service cloud.firestore {
             && request.resource.data.center.x is number
             && request.resource.data.center.y is number
         }
-      }   // symbols
+      } // symbols
 
       function EXT_isCollaboratorOrAuthor() {
         return isSignedIn() &&
@@ -190,12 +190,12 @@ service cloud.firestore {
            request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
           )
       }
-    }  // project
+    }   // project
 
 //--- Invites ---
 
     match /invites/{inviteId} {   // inviteId: '<email>_<projectId>'
-			// Read:
+      // Read:
       //	- only Cloud Functions read invites
       allow read: if false
 
@@ -204,12 +204,12 @@ service cloud.firestore {
       //  - a previous invite may be overwritten (hmm.. tbd. does that fall onto 'update' or does 'set' always bring here?)
       //
       allow create: if GLOBAL_isCollaboratorOrAuthor(request.resource.data.project) &&
-				validInvite()
+        validInvite()
 
       allow update, delete: if false
     }
 
-		function validInvite() {
+    function validInvite() {
       let requiredKeys = ['invitedEmail','project','by','at'].toSet();
 
       return true
@@ -219,14 +219,14 @@ service cloud.firestore {
         && request.resource.data.project is string
         && request.resource.data.by == request.auth.uid
         && request.resource.data.at == request.time
-		}
+    }
 
 //--- User info ---
 //
 // Fully handled via Cloud Functions
 
-		match /userInfo/{userId} {
-    	allow read, write: if false
+    match /userInfo/{userId} {
+      allow read, write: if false
     }
 
 //--- Authentication ---
@@ -245,5 +245,5 @@ service cloud.firestore {
         )
     }
 
-	} // database
+  } // database
 }

@@ -47,5 +47,9 @@ Cons:
 >I use them [sub-collections] when I have lists of notifications for users. So there will be a users collection, and a notifications subcollection for each user.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
 
 
+## Syntax highlighting of Security Rules on IntelliJ IDEs (kind of...)
 
+See [this answer](https://stackoverflow.com/questions/46600491/what-is-the-name-of-the-language-used-for-cloud-firestore-security-rules/60848863#60848863) (StackOverflow) about setting up "file type associations" in IntelliJ IDEA - may also work in WebStorm.
+
+In addition, set to 2 spaces:
 

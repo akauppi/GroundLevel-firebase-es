@@ -2,14 +2,13 @@
 
 This folder contains the pieces necessary to test Firestore Security Rules. 
 
-The folder is optional and self-sufficient. You can remove it if you don't see value in it. However, the ability to test your rules while you are refining them is awesome.
+**The folder is optional and self-sufficient.** You can remove it if you don't see value in it. However, the ability to test your rules while you are refining them is awesome.
 
 For all of the commands in this document, you are expected to be in the folder:
 
 ```
 $ cd rules-test
 ```
-
 
 ## Requirements
 

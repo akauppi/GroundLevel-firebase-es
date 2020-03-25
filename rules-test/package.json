@@ -11,8 +11,8 @@
     "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.8.7",
-    "@firebase/testing": "^0.17.0",
+    "@babel/preset-env": "^7.9.0",
+    "@firebase/testing": "^0.17.1",
     "babel-jest": "^25.1.0",
     "jest": "^25.1.0"
   },
@@ -23,6 +23,6 @@
     ]
   },
   "dependencies": {
-    "@babel/preset-typescript": "^7.8.3"
+    "@babel/preset-typescript": "^7.9.0"
   }
 }
