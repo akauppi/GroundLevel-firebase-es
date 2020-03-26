@@ -16,9 +16,14 @@ const firebase = require('@firebase/testing');
 
 beforeAll( async () => {    // set up all collections
   // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports
-  //  -> http://localhost:6767/emulator/v1/projects/<test_id>:ruleCoverage.html
+  //  -> http://localhost:6767/emulator/v1/projects/<session_id>:ruleCoverage.html
   //
-  // Sessions persist on a single emulator run. We use a date so that we'll get fresh stuff each run.
+  // Sessions persist on a single emulator run.(*!!) We use a date so that we'll get fresh stuff each run.
+  //
+  // (*!!): This is what Firebase docs say (link, please!), but in practise they seem to survive past
+  //    emulator restarts. What's uP?
+  //
+  // Note: Tried with a static sessionId and got to problems, right away.
   //
   const sessionId = `test-${Date.now()}`;   // e.g. 'test-1583506734171'
 
@@ -27,11 +32,8 @@ beforeAll( async () => {    // set up all collections
   console.info("Emulation session: ", sessionId);
 });
 
-// Note: We may wish to leave them in the server, to see coverage reports.
-//
-afterAll( async () => {    // clean up all collections
+afterAll( async () => {    // clean up all collections (without this, the tests won't finish)
   await emul.teardown();
-  console.log("Cleaned up!");
 });
 
 describe("Project rules", () => {
