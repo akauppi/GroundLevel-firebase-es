@@ -14,6 +14,9 @@ let emul;
 
 const firebase = require('@firebase/testing');
 
+const FieldValue = firebase.firestore.FieldValue;
+const serverTimestamp = FieldValue.serverTimestamp();
+
 beforeAll( async () => {    // set up all collections
   // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports
   //  -> http://localhost:6767/emulator/v1/projects/<session_id>:ruleCoverage.html
@@ -27,12 +30,19 @@ beforeAll( async () => {    // set up all collections
   //
   const sessionId = `test-${Date.now()}`;   // e.g. 'test-1583506734171'
 
-  emul = await setup(sessionId, data);
+  try {
+    emul = await setup(sessionId, data);
+  }
+  catch (err) {
+    console.error( "Failed to initialize the Firebase emulator: ", err );
+    throw err;
+  }
 
   console.info("Emulation session: ", sessionId);
 });
 
 afterAll( async () => {    // clean up all collections (without this, the tests won't finish)
+  assert(emul != undefined);
   await emul.teardown();
 });
 
@@ -40,6 +50,8 @@ describe("Project rules", () => {
   let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
+
+    assert(emul != undefined);
     try {
       unauth_projectsC = await emul.withAuth().collection('projects');
       auth_projectsC = await emul.withAuth( { uid: "_" }).collection('projects');
@@ -48,7 +60,7 @@ describe("Project rules", () => {
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
-      console.error( "Failed to initialize the Firebase database: "+ err );
+      console.error( "Failed to initialize the Firebase database: ", err );
       throw err;
     }
   });
@@ -78,8 +90,6 @@ describe("Project rules", () => {
   test('any authenticated user may create a project, but must include themselves as an author', async () => {
     // This implies: unauthenticated users cannot create a project, since they don't have a uid.
 
-    const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
-
     const p3_valid = {
       title: "Calamity",
       created: serverTimestamp,
@@ -102,13 +112,61 @@ describe("Project rules", () => {
     await expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny();
   });
 
+  //--- ProjectsC update rules ---
 
+  test("An author can change '.title'", async () => {
+    const p1mod = {
+      title: "Calamity 2"
+    };
+    await expect( abc_projectsC.doc("1").update(p1mod) ).toAllow();
+    await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();    // collaborator
+  });
 
-  //--- other ---
+  test("An author can not change the creation time", async () => {
+    const p1mod = {
+      created: serverTimestamp
+    };
+    await expect( abc_projectsC.doc("1").update(p1mod) ).toDeny();
+    await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();  // collaborator
+  });
 
-  /*** KEEP AT END
-  test('designed to fail!', async () => {       // DEBUG
-    await expect( unauth_projectsC.get() ).toAllow();
+  test("An author can mark a project '.removed'", async () => {
+    const p1mod = {
+      removed: serverTimestamp
+    };
+    await expect( abc_projectsC.doc("1").update(p1mod) ).toAllow();
+    await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();  // collaborator
+  });
+
+  test("An author can remove the '.removed' mark", async () => {
+    const p2mod = {
+      removed: FieldValue.delete()
+    };
+    await expect( abc_projectsC.doc("2-removed").update(p2mod) ).toAllow();
+    await expect( def_projectsC.doc("2-removed").update(p2mod) ).toDeny();  // collaborator
+  });
+
+  /***
+  test("An author can add new authors, and remove authors as long as one remains", async () => {
+    const p1mod = {
+      authors:
+    };
+    await expect( abc_projectsC.doc("2").update(p2mod) ).toAllow();
+
+    // removing authors needs a new test case '3'
   });
   ***/
+
+  //--- ProjectsC delete rules ---
+
+  test('no user should be able to delete a project (only cloud functions or manual)', async () => {
+    await expect( abc_projectsC.doc("1").delete() ).toDeny();   // is an author in that project
+  });
 });
+
+
+/*** KEEP AT END
+ test('designed to fail!', async () => {       // DEBUG
+    await expect( unauth_projectsC.get() ).toAllow();
+  });
+ ***/

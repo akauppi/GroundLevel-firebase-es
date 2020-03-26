@@ -56,3 +56,12 @@ Firebase tools v. 7.16.1.
 Also, I was surprised to see the results persist over emulator restarts. Wasn't expecting that, based on documentation.
 
 
+### Firebase emulator
+
+The emulator could have a "watch" mode to help in development.
+
+`firebase emulators:exec` takes some seconds to set up the emulator. It makes sense, for rules development, to have an emulator running in the background.
+
+However.. currently (firebase tools 7.16.1) the emulator does not change its behavior when a rules file is changed.
+
+Could we have a `--watch` mode that would? 🥺

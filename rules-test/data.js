@@ -51,6 +51,15 @@ const projects = {
     size: 50,
     fillColor: "#234324",
     center: { x: 100, y: 100 }
+  },
+
+  // Project 3 - multiple authors
+  "/projects/3-multiple-authors": {
+    title: "Joe",
+    created: Date.parse('01 Jan 1880 00:00:00 GMT'),
+    // no '.removed'
+    authors: ["abc","def"],
+    collaborators: []
   }
 };
 

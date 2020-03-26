@@ -145,13 +145,7 @@ To go sub-collection:
 <<
 -->
 
-## Security Rules: using Promises (implementation)
-
-For some reason, use of `async` by itself does not work. 
-
-Can you change the code (`rules-test/*.test.js`) so they don't need to call `done`? Thanks.
-
-
+<!-- REMOVE (under work)
 ## Security Rules: use `.diff` ♨️
 
 According to [tweet](https://twitter.com/puf/status/1237056904154603520?s=20):
@@ -162,3 +156,4 @@ allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnl
 
 Use that to simplify the rules (once we have TESTS for them).
 
+-->
