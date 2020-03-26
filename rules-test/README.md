@@ -26,13 +26,6 @@ $ firebase setup:emulators:firestore
 
 >Note: Rerun the setup above if you have upgraded `firebase-tools`.
 
-Tie your local folder to a Firebase project (creates `.firebaserc`):
-
-```
-$ firebase use --add
-...
-```
-
 
 <!-- disabled
 ## Internals
