@@ -43,9 +43,6 @@ describe("Project rules", () => {
       auth_projectsC = await emul.withAuth( { uid: "_" }).collection('projects');
       abc_projectsC = await emul.withAuth({ uid: "abc" }).collection('projects');
       def_projectsC = await emul.withAuth( { uid: "def" }).collection('projects');
-
-      console.log("Database initialized for three access patterns");
-      return true;
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help

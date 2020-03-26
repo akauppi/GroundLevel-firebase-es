@@ -102,6 +102,12 @@ Before contributing to the project, please familiarise yourself with:
 
 - [Jest](https://jestjs.io/docs/en/getting-started) Introduction chapters 
 
+### WebStorm shared run configurations
+
+If you are using the WebStorm IDE, you should have a shared Run Configuration in the `/.idea/runConfigurations` folder. This allows you to run the rules tests from the IDE, and/or debug them.
+
+![](.images/webstorm-run-config.png)
+
 
 ## References
 
