@@ -12,12 +12,9 @@ const assert = require('assert').strict;
 
 let emul;
 
-// HELP! For some reason, not able to make 'beforeAll()' return a promise. Can you do the below without using 'done'?
-// #help
-
 const firebase = require('@firebase/testing');
 
-beforeAll( async (done) => {    // set up all collections
+beforeAll( async () => {    // set up all collections
   // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports
   //  -> http://localhost:6767/emulator/v1/projects/<test_id>:ruleCoverage.html
   //
@@ -28,18 +25,13 @@ beforeAll( async (done) => {    // set up all collections
   emul = await setup(sessionId, data);
 
   console.info("Emulation session: ", sessionId);
-
-  done();
-  //return true;    // return anything, to make Jest get a promise (did not work)
 });
 
 // Note: We may wish to leave them in the server, to see coverage reports.
 //
-afterAll( async (done) => {    // clean up all collections
+afterAll( async () => {    // clean up all collections
   await emul.teardown();
   console.log("Cleaned up!");
-  done();
-  //return true;
 });
 
 describe("Project rules", () => {
@@ -64,39 +56,27 @@ describe("Project rules", () => {
 
   //--- ProjectsC read rules ---
 
-  test('unauthenticated access should fail', async (done) => {
+  test('unauthenticated access should fail', async () => {
     await expect( unauth_projectsC.get() ).toDeny();
-
-    done();
-    //return true;
   });
 
-  test('user who is not part of the project shouldn\'t be able to read it', async (done) => {
+  test('user who is not part of the project shouldn\'t be able to read it', async () => {
     await expect( auth_projectsC.get() ).toDeny();
-
-    done();
-    //return true;
   });
 
-  test('user who is an author or a collaborator can read a project (that is not \'removed\')', async (done) => {
+  test('user who is an author or a collaborator can read a project (that is not \'removed\')', async () => {
     await expect( abc_projectsC.doc("1").get() ).toAllow();
     await expect( def_projectsC.doc("1").get() ).toAllow();
-
-    done();
-    //return true;
   });
 
-  test('user needs to be an author, to read a \'removed\' project', async (done) => {
+  test('user needs to be an author, to read a \'removed\' project', async () => {
     await expect( abc_projectsC.doc("2-removed").get() ).toAllow();
     await expect( def_projectsC.doc("2-removed").get() ).toDeny();
-
-    done();
-    //return true;
   });
 
   //--- ProjectsC create rules ---
 
-  test('any authenticated user may create a project, but must include themselves as an author', async (done) => {
+  test('any authenticated user may create a project, but must include themselves as an author', async () => {
     // This implies: unauthenticated users cannot create a project, since they don't have a uid.
 
     const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
@@ -121,9 +101,6 @@ describe("Project rules", () => {
 
     // May not be already 'removed'
     await expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny();
-
-    done();
-    //return true;
   });
 
 
@@ -131,10 +108,8 @@ describe("Project rules", () => {
   //--- other ---
 
   /*** KEEP AT END
-  test('designed to fail!', async (done) => {       // DEBUG
+  test('designed to fail!', async () => {       // DEBUG
     await expect( unauth_projectsC.get() ).toAllow();
-    done();
-    //return true;
   });
   ***/
 });
