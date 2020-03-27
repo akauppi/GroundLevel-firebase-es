@@ -1,0 +1,28 @@
+{
+  "name": "rules-test",
+  "version": "0.0.0",
+  "description": "Rules tests",
+  "private": "true",
+  "jest": {
+    "//": "configuration options can be set here"
+  },
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore 'npx jest'",
+    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.9.0",
+    "@firebase/testing": "^0.17.1",
+    "babel-jest": "^25.1.0",
+    "jest": "^25.1.0"
+  },
+  "//": {
+    "babel*": [
+      "Babel is needed (Mar 2020) to have Jest support ES6 module imports/exports",
+      "see -> https://medium.com/@saplos123456/using-es6-import-and-export-statements-for-jest-testing-in-node-js-b20c8bd9041c"
+    ]
+  },
+  "dependencies": {
+    "@babel/preset-typescript": "^7.9.0"
+  }
+}

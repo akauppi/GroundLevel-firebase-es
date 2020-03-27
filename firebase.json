@@ -2,8 +2,11 @@
   "hosting": {
     "public": "public",
     "ignore": [
-      "firebase.json",
+      "public/dist/README.md"
+    ],
+    "//ignore": [
       "**/.*",
+      "firebase.json",
       "**/node_modules/**"
     ],
     "rewrites": [
@@ -13,5 +16,9 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

@@ -44,20 +44,6 @@
    - [ ] Alert IntelliJ to this. It behaves like [this issue from 2016](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207304095-Using-ES6-import-and-node-modules-are-marked-as-Module-is-not-installed-) but is likely different.
 
 
-- "Contents are identical" between source and `bundle.esm.js`
-
-   For some reason, WebStorm thinks it's a good idea to compare `public/bundle.ems.js` with our source files. It should know that it's an output file, by a) `.gitignore`, b) Rollup config.
-   
-   Folders can be marked as output/ignore, but what about a single file?  If this hurts, we can change the output to be a directory (`public/dist`).   
-
-
-- Syntax highlighter for Firebase storage rules
-
-   - [StackOverflow](https://stackoverflow.com/questions/59999967/is-there-a-firebase-storage-rules-syntax-highlighter-for-webstorm)
-   - [IntelliJ WebStorm backlog](https://youtrack.jetbrains.com/issue/IDEABKL-7927?p=IDEA-200507)
-
-   
-   
 ## rollup-plugin-vue
 
 - Not able to do dynamic imports in `src/routes.js`.
@@ -74,9 +60,7 @@
 
 ## Firebase
 
-- What is the difference between `firebase init` and `firebase use --add`? 
-
-   Could someone with more Firebase experience check out the instructions in `README.md` and `DEVS/Setting up the Firebase project.md`. #help
+- Would someone with more Firebase experience check out the instructions in `README.md`. #help
 
 
 ## Vue 3 beta
@@ -95,6 +79,15 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 
    See https://github.com/FortAwesome/vue-fontawesome
 
+## Firebase Functions
+
+- Consider making a cloud function that periodically looks for projects that were removed a certain time ago (e.g. > 1 month), and completely removes them. (of course making notes to the log)
+
+## Narrative as the Wiki
+
+Move narrative documents (why we do things in certain way) to the Wiki. 
+
+Make it a walk-through or bisection of the project, leaving project itself uncluttered. :)
 
 ## Rollup update
 
@@ -117,4 +110,38 @@ If it's not, let's not bother.
 
 - It's largely a dual syntax
 - Compiler doesn't seem to figure out when it has been misused (Vue.js 2.6.11)
+
+
+## Source map for console errors
+
+The errors now point to the bundle (Safari, Chrome). Can we make them point to the source, instead? #help
+
+
+## Wiki about design of data modeling (document or collection)
+
+<!-- tbd. move this analysis somewhere else, maybe Wiki? Make it GOOD!
+
+Add:
+- fields needed in Security Rules are best to be in the same document (each document read costs for access)
+- how often does the data (need to) change?  Change to an auxiliary field (e.g. 'lastSeen') triggers updates to anyone following the document.
+- do the fields contribute to another (parent) document's Security Rules? If not, they may be okay as a subcollection. (this was already mentioned, in other words)
+...
+
+<<
+With Cloud Firestore, design of data schemas is steered by these considerations:
+
+To go in-document:
+
+- **Billing:** access is charged per document. Avoid sub-collections unless they are really required.
+
+
+To go sub-collection:
+
+- **Access:** you cannot restrict reading of individual fields &mdash; documents are either fully available or not at all. You can restrict write access to individual fields.
+- **Security rules:** you cannot use in-document arrays as part of security rule logic ("allow if `uid` is found within the `authors`"). You can express this with sub-collections.
+- **Document size:** Documents must fit 1MB - 89 bytes. If you think they might grow larger, split something to sub-collections.
+
+>Do you know more guidance for steering database schema design in Firestore? Please share the info at [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) or as a PR. 📝🙂
+<<
+-->
 

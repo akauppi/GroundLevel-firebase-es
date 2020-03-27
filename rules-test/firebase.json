@@ -1,0 +1,11 @@
+{
+  "firestore": {
+    "rules": "dut.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": "6767"
+    }
+  }
+}
+

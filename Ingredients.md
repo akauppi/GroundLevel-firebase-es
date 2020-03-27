@@ -14,12 +14,15 @@ As any template, one has made decisions. These fall into three categories: selec
 Font Awesome may only be used for some individual icons, in the template. Having it included is intended to make creating your app smoother.
 -->
 
-**Does not contain:**
+**Does *not* contain:**
 
-- Vue CLI (not needed) [^1]
+- Vue CLI (not needed)
 - Babel (can be easily added)
+- VueX
 
-[^1]: Instead, we use GitHub for getting started, Rollup for packing and Firebase for deploying.
+Instead of Vue CLI, we use GitHub for getting started, Rollup for packing and Firebase for deploying.
+
+Instead of VueX (state management), we use `Vue.observable`s. They are part of the core.
 
 **Consumed with:**
 

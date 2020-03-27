@@ -1,21 +1,29 @@
-# GroundLevel * Firebase-auth
+# GroundLevel ES6 * Firebase-web
 
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
 
 <!-- Using 'img' to be able to scale from Markdown.
 - Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
 -->
-<img alt="Logo" src="iconart/logo_512x512.png" width=300>
+<img alt="Logo" src="iconart/logo_512x512.png" width=300 align="left" style="margin: 40px">
+
+<br />
+<br />
 
 **A foundation for a web app, using Firebase suite of back-end tools.**
 
 You want a web app and you want it now?
 
-This aims to become the best place to make that happen. We chose and configured the [right tools](Ingredients.md) for the job (so you don't need to read multiple manuals). We aim not only to show how it's done, but also argue why certain approaches were taken. We aim to start with 2020's technology, and stay relevant.
+This aims to become the best place to make that happen. We chose and configured [great tools](Ingredients.md) so you don't need to read multiple manuals. We aim not only to show how it's done, but also argue why certain approaches were taken. We aim to start with 2020's technology (ES6, async/await), and stay relevant.
 
-Welcome.
+Welcome!
 
+<br clear=all />
 >⏱ Before we start, it would be nice if you can time your experience and tell us, how fast you got *your app* rolling. Data based metrics, you know.. 😉
+
+<!-- Statistics reported so far:
+9 mins: 1 user
+-->
 
 Let's start! 🤾‍♀️
 
@@ -28,6 +36,11 @@ Let's start! 🤾‍♀️
 
 Note that we don't use Vue CLI. It's not strictly needed for creating or running a Vue project. Instead, we use rollup.js for building and Firebase Hosting for deployments.
 
+>💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
+
+The development has been made using Firebase 7.15.1 on macOS.
+
+
 ### Firebase project
 
 You need to:
@@ -38,11 +51,6 @@ You need to:
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
 
-See [DEVS/Setting up the Firebase project](DEVS/Setting%20up%%20the%20Firebase%20project.md) for more details.
-
-<!-- disabled 
->Note: `firebase use` when there's a cloned template like this; to create one you'd use `firebase init`.
--->
 
 ## Getting started
 
@@ -77,6 +85,20 @@ $ npm run dev
 Serves the project locally, reacting to source code changes.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
+
+### Testing Security Rules (optional)
+
+If you are serious about development, have a look at the `rules-test` sub-project. It uses the Firestore emulator to check the rules we have in `firestore.rules` behave as intended.
+
+Since this is quite an added complexity (more `npm` dependencies, need to install the emulator), it's been left as a self-sufficient sub-project. At least for now.
+
+You can run the rules-tests also by:
+
+```
+$ npm run rules-test
+```
+
+However, this expects that you have installed the necessary gear in the sub-project first. Please see its [README](rules-test/README.md) file.
 
 
 ## Bring in your App!
@@ -221,3 +243,11 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 
 <!-- Editor's note: Gaute's dev.to blog is slightly different from his gaute.dev entry. The latter is clearer, in some regards, so listing them both.
 -->
+
+### Cloud Firestore
+
+- [Advanced examples of using Cloud Firestore Security Rules](https://medium.com/@khreniak/advanced-examples-of-using-cloud-firestore-security-rules-9e641d023c7e) (blog, Mar 2019)
+
+- [Cloud Firestore Data Modeling (Google I/O'19)](https://www.youtube.com/watch?v=lW7DWV2jST0) (Youtube 40:37, May 2019)
+   - INCREDIBLY GREAT video on essentially all aspects needed to be considered while designing a data model 🔥🔥🔥
+

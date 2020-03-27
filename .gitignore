@@ -1,9 +1,10 @@
 /node_modules/
-/public/bundle.esm.js*
+/public/dist/
 
 # Firebase hosting caches
 /.firebase/
 
 /.firebaserc
 /firebase-debug.log
+/firestore-debug.log
 

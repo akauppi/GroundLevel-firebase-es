@@ -1,5 +1,7 @@
 # Changelog
 
+## latest (`firestorm`)
+
 ## 24-Feb-20
 
 - Proper-looking drop-down menu for the sign-out
