@@ -22,7 +22,7 @@ const projects = {
     authors: ["abc"],
     collaborators: ["def"]
   },
-  "/projects/1/visited/abc": { at: new Date() },
+  //"/projects/1/visited/abc": { at: new Date() },
   "/projects/1/symbols/1": {    // free symbol
     layer: 0,
     shape: "star",
@@ -65,14 +65,8 @@ const projects = {
   }
 };
 
-const visited = {
-  "/visited/abc": {
-    at: new Date('27 Mar 2020 00:00:00 GMT')
-  }
-};
-
 const data = {
-  ...projects, ...visited
+  ...projects
 };
 
 export { data }

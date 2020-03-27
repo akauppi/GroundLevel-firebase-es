@@ -10,17 +10,17 @@ const firebase = require('@firebase/testing');
 
 const FieldValue = firebase.firestore.FieldValue;
 
-describe("'/visited' rules", () => {
+describe.only("'/visited' rules", () => {
   let unauth_visitedC, auth_visitedC, abc_visitedC, def_visitedC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
 
     assert(emul != undefined);
     try {
-      unauth_visitedC = await emul.withAuth().collection('visited');
-      auth_visitedC = await emul.withAuth( { uid: "_" }).collection('visited');
-      abc_visitedC = await emul.withAuth({ uid: "abc" }).collection('visited');
-      def_visitedC = await emul.withAuth( { uid: "def" }).collection('visited');
+      unauth_visitedC = await emul.withAuth().collection('projects/1/visited');
+      auth_visitedC = await emul.withAuth( { uid: "_" }).collection('projects/1/visited');
+      abc_visitedC = await emul.withAuth({ uid: "abc" }).collection('projects/1/visited');
+      def_visitedC = await emul.withAuth( { uid: "def" }).collection('projects/1/visited');
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
@@ -42,6 +42,9 @@ describe("'/visited' rules", () => {
   test('project members may read each other\'s visited status', async () => {
     await expect( abc_visitedC.doc("abc").get() ).toAllow();
     await expect( def_visitedC.doc("abc").get() ).toAllow();   // collaborator
+
+    await expect( abc_visitedC.doc("def").get() ).toAllow();
+    await expect( def_visitedC.doc("def").get() ).toAllow();   // collaborator
   });
 
   //--- VisitedC write rules ---

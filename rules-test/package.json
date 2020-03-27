@@ -7,14 +7,14 @@
     "//": "configuration options can be set here"
   },
   "scripts": {
-    "test": "firebase emulators:exec --only firestore 'npx jest'",
-    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest"
+    "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
+    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.9.0",
-    "@firebase/testing": "^0.17.1",
+    "@firebase/testing": "^0.18.0",
     "babel-jest": "^25.1.0",
-    "jest": "^25.1.0"
+    "jest": "^25.2.3"
   },
   "//": {
     "babel*": [

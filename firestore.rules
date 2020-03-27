@@ -71,10 +71,6 @@ service cloud.firestore {
           && request.resource.data.collaborators is list
           && request.resource.data.authors.toSet().intersection( request.resource.data.collaborators.toSet() ).size() == 0
             // no common entries (could also omit this; logic would work even if a user is listed in both)
-
-          //REMOVE (was):
-          //&& (!request.resource.data.authors.hasAny( request.resource.data.collaborators ))     // note: could skip this (duplicates wouldn't hurt the logic)
-          //&& (!request.resource.data.collaborators.hasAny( request.resource.data.authors ))     //      -''-
       }
 
       function isAuthor() {
@@ -106,7 +102,7 @@ service cloud.firestore {
         // Read:
         //	- all project members can read each other's last visit time
         //
-        allow read: if isCollaboratorOrAuthor()
+        allow read: if EXT_isCollaboratorOrAuthor()
 
         // Write:
         //	- only the user themselves can reset their value

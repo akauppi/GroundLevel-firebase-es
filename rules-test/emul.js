@@ -8,6 +8,7 @@ import { data } from './data';
 
 const assert = require('assert').strict;
 
+// tbd. Should need to initialize the emulator instance only once
 let emul;
 
 const firebase = require('@firebase/testing');
