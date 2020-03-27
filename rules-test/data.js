@@ -10,17 +10,19 @@
 *
 * This means sub-collections are shown at the same level (flat hierarchy) as their logical parent; the path indicates
 * the parenthood (this is quite suiting Firestore's view).
+*
+* WARNING: Do NOT use 'Date.now()' or 'Date.parse()' - they return a number instead of a 'Date' instance!
 */
 const projects = {
   // Project 1 - active project
   "/projects/1": {
     title: "Jolly Jumper",
-    created: Date.parse('01 Jan 1880 00:00:00 GMT'),
+    created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no 'removed'
     authors: ["abc"],
     collaborators: ["def"]
   },
-  "/projects/1/visited/abc": { at: Date.now() },
+  "/projects/1/visited/abc": { at: new Date() },
   "/projects/1/symbols/1": {    // free symbol
     layer: 0,
     shape: "star",
@@ -40,8 +42,8 @@ const projects = {
   // Project 2 - removed (archived)
   "/projects/2-removed": {
     title: "Jack",
-    created: Date.parse('01 Jan 1880 00:00:00 GMT'),
-    removed: Date.now(),
+    created: new Date('01 Jan 1880 00:00:00 GMT'),
+    removed: new Date(),
     authors: ["abc"],
     collaborators: ["def"]
   },
@@ -56,15 +58,21 @@ const projects = {
   // Project 3 - multiple authors
   "/projects/3-multiple-authors": {
     title: "Joe",
-    created: Date.parse('01 Jan 1880 00:00:00 GMT'),
+    created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no '.removed'
     authors: ["abc","def"],
     collaborators: []
   }
 };
 
+const visited = {
+  "/visited/abc": {
+    at: new Date('27 Mar 2020 00:00:00 GMT')
+  }
+};
+
 const data = {
-  ...projects
+  ...projects, ...visited
 };
 
 export { data }

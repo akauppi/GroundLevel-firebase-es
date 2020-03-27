@@ -102,6 +102,21 @@ If you are using the WebStorm IDE, you should have a shared Run Configuration in
 ![](.images/webstorm-run-config.png)
 
 
+### WARNING: Use of dates in `data.js`
+
+Firebase Web client can take JavaScript `Date` objects and convert them to its `Timestamp` automatically. 
+
+HOWEVER, the frequent `Date.now()` and `Date.parse` do <u>not</u> produce Date objects but Unix epoch numbers, instead.
+
+||USE|Don't use!|
+|---|---|---|
+|Current time|`new Date()`|<strike>`Date.now()`</strike>|
+|Specific time|`new Date('27 Mar 2020 14:17:00 EET')`|<strike>`Date.parse('27 Mar 2020 14:17:00 EET')`</strike>|
+
+*Note: We could detect these automatically by applying the access rules also to the admin setup that's currently done. That would catch the discrepancies. Now we don't do it, and we don't test validity of reads, just writes, so these got through.*
+
+
+
 ## References
 
 - [Testing Firestore Security Rules With the Emulator](https://fireship.io/lessons/testing-firestore-security-rules-with-the-emulator/) (article, Oct 2018)

@@ -12,15 +12,12 @@
 const firebase = require('@firebase/testing');
 const fs = require('fs');
 
-// NOTE: Sync this with what's in 'firebase.json'
-const rulesFilename = 'dut.rules';
-
 const assert = require('assert').strict;
 
 /*
 * Set up an emulated Firestore session, with data and security rules.
 */
-async function setup(sessionId, data) {    // (string, { <document-path>: { <field>: any }}) => { sessionId: string, withAuth: ({ uid: string [, email: string] } | undefined) => db }
+async function setup(sessionId, rulesFilename, data) {    // (string, string, { <document-path>: { <field>: any }}) => { sessionId: string, withAuth: ({ uid: string [, email: string] } | undefined) => db }
 
   // Using admin API to set the initial data - bypasses rules (though they are not up, yet, either).
   //

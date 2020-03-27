@@ -7,51 +7,16 @@
 *     (inside the tests, if there are multiple `await`s). #contribute #optimization
 *     ^-- If you do that, check the execution time before and after.
 */
-import { setup } from './tools/setup';
 import './tools/jest-matchers';
-
-import { data } from './data';
+import { emul } from './emul';
 
 const assert = require('assert').strict;
-
-let emul;
 
 const firebase = require('@firebase/testing');
 
 const FieldValue = firebase.firestore.FieldValue;
-const serverTimestamp = FieldValue.serverTimestamp();
 
-beforeAll( async () => {    // set up all collections
-
-  // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports
-  //  -> http://localhost:6767/emulator/v1/projects/<session_id>:ruleCoverage.html
-  //
-  // Sessions persist on a single emulator run.(*!!) We use a date so that we'll get fresh stuff each run.
-  //
-  // (*!!): This is what Firebase docs say (link, please!), but in practise they seem to survive past
-  //    emulator restarts. What's uP?
-  //
-  // Note: Tried with a static sessionId and got to problems, right away.
-  //
-  const sessionId = `test-${Date.now()}`;   // e.g. 'test-1583506734171'
-
-  try {
-    emul = await setup(sessionId, data);
-  }
-  catch (err) {
-    console.error( "Failed to initialize the Firebase emulator: ", err );
-    throw err;
-  }
-
-  console.info("Emulation session: ", sessionId);
-});
-
-afterAll( async () => {    // clean up all collections (without this, the tests won't finish)
-  assert(emul != undefined);
-  await emul.teardown();
-});
-
-describe("Project rules", () => {
+describe("'/projects' rules", () => {
   let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
@@ -95,6 +60,8 @@ describe("Project rules", () => {
   test('any authenticated user may create a project, but must include themselves as an author', async () => {
     // This implies: unauthenticated users cannot create a project, since they don't have a uid.
 
+    const serverTimestamp = FieldValue.serverTimestamp();
+
     const p3_valid = {
       title: "Calamity",
       created: serverTimestamp,
@@ -119,9 +86,7 @@ describe("Project rules", () => {
 
   //--- ProjectsC update rules ---
 
-  // tbd. This seems to pass with the Online Simulator. Weird. 😕
-  //
-  test.skip("An author can change '.title'", async () => {
+  test("An author can change '.title'", async () => {
     const p1mod = {
       title: "Calamity 2"
     };
@@ -131,18 +96,15 @@ describe("Project rules", () => {
 
   test("An author can not change the creation time", async () => {
     const p1mod = {
-      created: serverTimestamp
+      created: FieldValue.serverTimestamp()
     };
     await expect( abc_projectsC.doc("1").update(p1mod) ).toDeny();
     await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();  // collaborator
   });
 
-  // - Fails on local emulator (firebase tools v.7.16.1)
-  // - Not testable with online Simulator (it does not allow setting a value to `FieldValue.*`).
-  //
-  test.skip("An author can mark a project '.removed'", async () => {
+  test("An author can mark a project '.removed'", async () => {
     const p1mod = {
-      removed: serverTimestamp
+      removed: FieldValue.serverTimestamp()
     };
     await expect( abc_projectsC.doc("1").update(p1mod) ).toAllow();
     await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();  // collaborator

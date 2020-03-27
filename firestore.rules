@@ -69,10 +69,12 @@ service cloud.firestore {
           && (!isRemovedAfter() || request.resource.data.removed == request.time)
           && request.resource.data.authors is list && request.resource.data.authors.size() > 0
           && request.resource.data.collaborators is list
-          && (!request.resource.data.authors.hasAny( request.resource.data.collaborators ))     // note: could skip this (duplicates wouldn't hurt the logic)
-          && (!request.resource.data.collaborators.hasAny( request.resource.data.authors ))     //      -''-
+          && request.resource.data.authors.toSet().intersection( request.resource.data.collaborators.toSet() ).size() == 0
+            // no common entries (could also omit this; logic would work even if a user is listed in both)
 
-            // tbd. Replace above duplication check with '.diff'? #refactor
+          //REMOVE (was):
+          //&& (!request.resource.data.authors.hasAny( request.resource.data.collaborators ))     // note: could skip this (duplicates wouldn't hurt the logic)
+          //&& (!request.resource.data.collaborators.hasAny( request.resource.data.authors ))     //      -''-
       }
 
       function isAuthor() {
@@ -112,8 +114,19 @@ service cloud.firestore {
         // Note: requiring the 'after' value to be the server time stamp essentially disallows deletes.
         //
         allow write: if EXT_isCollaboratorOrAuthor()   // Q: can this reach the parent document, even without 'get'?
+          && validVisited()
           && userId == request.auth.uid
           && request.resource.data.at == request.time
+      }
+
+      // Visited consistency:
+      //  - 'at' must be a timestamp
+      //  - no other fields
+      //
+      function validVisited() {
+        return true
+          && request.resource.data.at is timestamp
+          && request.resource.data.keys() == ['at']     // no other fields
       }
 
 //--- Symbols ---
