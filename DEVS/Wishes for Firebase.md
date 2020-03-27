@@ -4,26 +4,27 @@ Dear Firebase. You are awesome. If you ever run out of things to improve, here 
 
 ## Cloud Firestore
 
-### Ability to insert "current server date" in the Firebase console (and rules simulator)
+### Ability to insert "current server date" in the Firebase console (and Rules simulator)
 
->![](.images/firebase-wishes-server-date.png)
+![](.images/firebase-wishes-server-date.png)
 
-The dialog could have a "right now" or "server date" button, like the API allows a client to set a field to current date.
+<!--
+<strike>The dialog could have a "right now" or "server date" button, like the API allows a client to set a field to current date.
 
-This would be even more valued, since it is not obvious to the user (me), whether I should fill in the UTC time, or a time in my local time zone. Having the suggested button would take away this consideration.
-
-- Asko 13-Mar-2020 (not suggested to Firebase team)
+This would be even more valued, since it is not obvious to the user (me), whether I should fill in the UTC time, or a time in my local time zone. Having the suggested button would take away this consideration.</strike>
+-->
 
 >♨️: With the online simulator, lack of this currently (Mar 2020) prevents testing for rules that expect server side timestamp in a field (e.g. `created`, `removed`).
 
-### Ability to insert "current server data" in a document for Security Rules simulator
+INITIAL suggestion:
 
-I have a rule where creation of a document needs the creation time to be set using `FieldValue.serverTime`. Such a payload cannot be simulated, as far as I see:
+A means in the date picker to get the current time. (I don't know of the time zones applied: is it server's time, UCT or my local time zone).
 
->![](.images/rules-simulator-building-document.png)
+ALTERNATIVE suggestion:
 
-Any timestamp I enter is bound to be different than the server time, thus always failing the rule.
+Adding `FieldValue` to the `Type` drop-down would be more in line with the Firestore data model, in general. The user could then choose the server timestamp from there, to get the "current" time.
 
+These two are slightly different ideas. My initial idea was more about usability (the date picker). If the server timestamp feature exists, there will be not so much value in the initial request.
 
 
 ### Firebase emulator API
@@ -67,3 +68,9 @@ The emulator could have a "watch" mode to help in development.
 However.. currently (firebase tools 7.16.1) the emulator does not change its behavior when a rules file is changed.
 
 Could we have a `--watch` mode that would? 🥺
+
+
+## References
+
+- [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)
+
