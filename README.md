@@ -62,7 +62,7 @@ $ npm install
 
 ### Running tests
 
-There are currently no tests for the project. 😢
+There are currently no UI side tests for the project. 😢
 
 <!-- tbd. Once there are:
 ```
@@ -70,6 +70,8 @@ $ npm test
 ...  
 ```
 -->
+
+There are, however, Security Rules tests. They are organized separately in the `rules-test` folder. See the specific `README`.
 
 
 ## Development workflow
@@ -99,7 +101,6 @@ $ npm run rules-test
 ```
 
 However, this expects that you have installed the necessary gear in the sub-project first. Please see its [README](rules-test/README.md) file.
-
 
 ## Bring in your App!
 
@@ -184,7 +185,8 @@ The template aims to cover more ground. It's not enough to get authentication ru
 
 This means:
 
-- Firestore (planned); creating an actual collaborative app behind the authentication
+- Cloud Firestore; creating an actual collaborative app behind the authentication
+  - invitations
 - Performance monitoring
 - Logging
 - A/B testing
