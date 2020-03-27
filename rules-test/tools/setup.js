@@ -28,6 +28,10 @@ async function setup(sessionId, data) {    // (string, { <document-path>: { <fie
     projectId: sessionId
   }).firestore();
 
+  if (!dbAdmin._settings.host.includes('localhost')) {    // just a safety feature, can be omitted
+    throw "Please define 'FIRESTORE_EMULATOR_HOST' to point to a 'localhost' emulator instance"
+  }
+
   const batch = dbAdmin.batch();
 
   for (const [docPath,value] of Object.entries(data)) {

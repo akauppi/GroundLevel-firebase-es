@@ -4,7 +4,7 @@ Dear Firebase. You are awesome. If you ever run out of things to improve, here 
 
 ## Cloud Firestore
 
-### Ability to insert "current server date" in the Firebase console
+### Ability to insert "current server date" in the Firebase console (and rules simulator)
 
 >![](.images/firebase-wishes-server-date.png)
 
@@ -13,6 +13,8 @@ The dialog could have a "right now" or "server date" button, like the API allows
 This would be even more valued, since it is not obvious to the user (me), whether I should fill in the UTC time, or a time in my local time zone. Having the suggested button would take away this consideration.
 
 - Asko 13-Mar-2020 (not suggested to Firebase team)
+
+>♨️: With the online simulator, lack of this currently (Mar 2020) prevents testing for rules that expect server side timestamp in a field (e.g. `created`, `removed`).
 
 ### Ability to insert "current server data" in a document for Security Rules simulator
 

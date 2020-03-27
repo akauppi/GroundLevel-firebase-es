@@ -145,15 +145,3 @@ To go sub-collection:
 <<
 -->
 
-<!-- REMOVE (under work)
-## Security Rules: use `.diff` ♨️
-
-According to [tweet](https://twitter.com/puf/status/1237056904154603520?s=20):
-
-```
-allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["a"])
-```
-
-Use that to simplify the rules (once we have TESTS for them).
-
--->
