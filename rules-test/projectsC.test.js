@@ -3,9 +3,11 @@
 *
 * Rules tests
 *
-* tbd. Waiting for many tests could happen in parallel, maybe speeding up execution
-*     (inside the tests, if there are multiple `await`s). #contribute #optimization
-*     ^-- If you do that, check the execution time before and after.
+* Implementation note:
+*   - use of 'Promise.all' to allow parallelism within a test may not bring much dividend. Jest runs tests in parallel
+*     anyways so core should have things to do, even if within a test there would be waits.
+*
+*     Meaning: use either model ('Promise.all' or individual 'await's).
 */
 import './tools/jest-matchers';
 import { emul } from './emul';
@@ -17,16 +19,20 @@ const firebase = require('@firebase/testing');
 const FieldValue = firebase.firestore.FieldValue;
 
 describe("'/projects' rules", () => {
-  let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC;
+  let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC, ghi_projectsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
 
     assert(emul != undefined);
     try {
+      const t0 = Date.now();
       unauth_projectsC = await emul.withAuth().collection('projects');
       auth_projectsC = await emul.withAuth( { uid: "_" }).collection('projects');
       abc_projectsC = await emul.withAuth({ uid: "abc" }).collection('projects');
       def_projectsC = await emul.withAuth( { uid: "def" }).collection('projects');
+      ghi_projectsC = await emul.withAuth( { uid: "ghi" }).collection('projects');
+
+      //console.debug("Initializing database handles took:", `${Date.now() - t0}ms`);   // 142ms
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
@@ -45,19 +51,23 @@ describe("'/projects' rules", () => {
     await expect( auth_projectsC.get() ).toDeny();
   });
 
-  test('user who is an author or a collaborator can read a project (that is not \'removed\')', async () => {
-    await expect( abc_projectsC.doc("1").get() ).toAllow();
-    await expect( def_projectsC.doc("1").get() ).toAllow();
+  test('user who is an author or a collaborator can read a project (that is not \'removed\')', () => {
+    return Promise.all([
+      expect( abc_projectsC.doc("1").get() ).toAllow(),
+      expect( def_projectsC.doc("1").get() ).toAllow()
+    ]);
   });
 
-  test('user needs to be an author, to read a \'removed\' project', async () => {
-    await expect( abc_projectsC.doc("2-removed").get() ).toAllow();
-    await expect( def_projectsC.doc("2-removed").get() ).toDeny();
+  test('user needs to be an author, to read a \'removed\' project', () => {
+    return Promise.all([
+      expect( abc_projectsC.doc("2-removed").get() ).toAllow(),
+      expect( def_projectsC.doc("2-removed").get() ).toDeny()
+    ]);
   });
 
   //--- ProjectsC create rules ---
 
-  test('any authenticated user may create a project, but must include themselves as an author', async () => {
+  test('any authenticated user may create a project, but must include themselves as an author', () => {
     // This implies: unauthenticated users cannot create a project, since they don't have a uid.
 
     const serverTimestamp = FieldValue.serverTimestamp();
@@ -74,60 +84,99 @@ describe("'/projects' rules", () => {
     const p3_badTime = {...p3_valid, created: Date.now() };
     const p3_alreadyRemoved = {...p3_valid, removed: serverTimestamp };
 
-    await expect( abc_projectsC.doc("3-fictional").set(p3_valid) ).toAllow();
-    await expect( abc_projectsC.doc("3-fictional").set(p3_withoutAuthor) ).toDeny();
+    const proms = [];
+    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_valid) ).toAllow() );
+    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_withoutAuthor) ).toDeny() );
 
     // Time stamp must be the server time
-    await expect( abc_projectsC.doc("3-fictional").set(p3_badTime) ).toDeny();
+    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_badTime) ).toDeny() );
 
     // May not be already 'removed'
-    await expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny();
+    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny() );
+
+    return Promise.all(proms);
   });
 
   //--- ProjectsC update rules ---
 
-  test("An author can change '.title'", async () => {
+  test("An author can change '.title'", () => {
     const p1mod = {
       title: "Calamity 2"
     };
-    await expect( abc_projectsC.doc("1").update(p1mod) ).toAllow();
-    await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();    // collaborator
+    return Promise.all([
+      expect( abc_projectsC.doc("1").update(p1mod) ).toAllow(),
+      expect( def_projectsC.doc("1").update(p1mod) ).toDeny()    // collaborator
+    ]);
   });
 
-  test("An author can not change the creation time", async () => {
+  test("An author can not change the creation time", () => {
     const p1mod = {
       created: FieldValue.serverTimestamp()
     };
-    await expect( abc_projectsC.doc("1").update(p1mod) ).toDeny();
-    await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();  // collaborator
+    return Promise.all([
+      expect( abc_projectsC.doc("1").update(p1mod) ).toDeny(),
+      expect( def_projectsC.doc("1").update(p1mod) ).toDeny()  // collaborator
+    ]);
   });
 
-  test("An author can mark a project '.removed'", async () => {
+  test("An author can mark a project '.removed'", () => {
     const p1mod = {
       removed: FieldValue.serverTimestamp()
     };
-    await expect( abc_projectsC.doc("1").update(p1mod) ).toAllow();
-    await expect( def_projectsC.doc("1").update(p1mod) ).toDeny();  // collaborator
+    return Promise.all([
+      expect( abc_projectsC.doc("1").update(p1mod) ).toAllow(),
+      expect( def_projectsC.doc("1").update(p1mod) ).toDeny()  // collaborator
+    ]);
   });
 
-  test("An author can remove the '.removed' mark", async () => {
+  test("An author can remove the '.removed' mark", () => {
     const p2mod = {
       removed: FieldValue.delete()
     };
-    await expect( abc_projectsC.doc("2-removed").update(p2mod) ).toAllow();
-    await expect( def_projectsC.doc("2-removed").update(p2mod) ).toDeny();  // collaborator
+    return Promise.all([
+      expect( abc_projectsC.doc("2-removed").update(p2mod) ).toAllow(),
+      expect( def_projectsC.doc("2-removed").update(p2mod) ).toDeny()  // collaborator
+    ]);
   });
 
-  /***
-  test("An author can add new authors, and remove authors as long as one remains", async () => {
-    const p1mod = {
-      authors:
+  test.skip("An author can add new authors, and remove authors as long as one remains", () => {
+    const p1_addAuthor = {
+      authors: FieldValue.arrayUnion("zxy")
     };
-    await expect( abc_projectsC.doc("2").update(p2mod) ).toAllow();
+    const p3_removeAuthor = {
+      authors: FieldValue.arrayRemove("def")
+    };
+    const p1_removeAuthor = {
+      authors: FieldValue.arrayRemove("abc")    // only author
+    };
 
-    // removing authors needs a new test case '3'
+    return Promise.all([
+      expect( abc_projectsC.doc("1").update(p1_addAuthor) ).toAllow(),
+      expect( abc_projectsC.doc("3-multiple-authors").update(p3_removeAuthor) ).toAllow(),
+
+      // Possible Firestore emulator bug: if we remove the author with '{ authors: [] }', we are denied.
+      //    If we remove it with 'FieldValue.arrayRemove', we are allowed.
+      //
+      expect( abc_projectsC.doc("1").update(p1_removeAuthor) ).toDeny(),  // only author
+      expect( abc_projectsC.doc("1").update( { authors: [] }) ).toDeny(),  // only author
+
+      expect( ghi_projectsC.doc("3-multiple-authors").update(p3_removeAuthor) ).toDeny()  // collaborator
+    ]);
   });
-  ***/
+
+  /*
+  * Likely gets removed. Adding new users to a project would be the work of Cloud Functions, as part of invites.
+  *
+  test("An author can add or remove collaborators", async () => {
+    const p1_addCollaborator = {
+      collaborators: FieldValue.arrayUnion("xyz")
+    };
+    await expect( abc_projectsC.doc("1").update(p1_addCollaborator) ).toAllow();
+    await expect( def_projectsC.doc("1").update(p1_addCollaborator) ).toDeny();   // collaborator
+
+    // not testing removal - we likely toss this away?
+  });
+  */
 
   //--- ProjectsC delete rules ---
 
@@ -136,9 +185,3 @@ describe("'/projects' rules", () => {
   });
 });
 
-
-/*** KEEP AT END
- test('designed to fail!', async () => {       // DEBUG
-    await expect( unauth_projectsC.get() ).toAllow();
-  });
- ***/

@@ -11,8 +11,13 @@ service cloud.firestore {
       //    - authors can see all projects, also removed (archived)
       //    - collaborators see only active projects
       //
-      allow read: if isAuthor()
-      	|| isCollaborator() && !isRemoved()
+      // Note: Checking for validity at reads is optional. There is no added cost to doing so, however (our validation
+      //        rule does not reference other documents), and doing validation guards against bad data caused by
+      //        manual changes, admin SDK changes, or data written by earlier generations of the security rules.
+      //
+      allow read: if (isAuthor() || isCollaborator() && !isRemoved())
+        //&& validProject()       // optional: enable if you want to guard against bad data instead of letting client cope with it
+            // ^-- tbd. enable. Currently causes 2 tests to fail
 
       // Creation
       //    - the creating user must list themselves as an author
@@ -30,26 +35,34 @@ service cloud.firestore {
       //    |----------|------------|
       //    | /title   | author may change |
       //    | /created | no |
-      //    | /removed | author may remove; no other fields may change |
+      //    | /removed | author may add or remove; no other fields may change; if added, must be the server timestamp |
       //    | /authors | author may change; at least one author must remain |
       //    | /collaborators | author may change |
       //
       allow update: if isAuthor()
         && validProject()
         && (request.resource.data.created == resource.data.created)
-        && (  // case A (active project): can either change other fields, or set '/removed' to server timestamp
-          !isRemoved() && (
-            !isRemovedAfter() || onlyRemovedChanged()
-          )
-        ) || (  // case B (removed project): can only remove the '/removed' marking
-          isRemoved() && (
-            !isRemovedAfter()
-            && onlyRemovedChanged()
-          )
-        )
+        && ((
+          onlyRemovedAdded() && request.resource.data.removed == request.time
+        ) || (
+          onlyRemovedRemoved() && true
+        ) || (
+          removedUnaffected() && true
+        ))
 
-      function onlyRemovedChanged() {
-        return request.resource.data.diff(resource.data).affectedKeys().hasOnly( ["removed"] )
+      function onlyRemovedAdded() {
+        return _onlyRemovedAffected() && isRemovedAfter()
+      }
+      function onlyRemovedRemoved() {
+        return _onlyRemovedAffected() && !isRemovedAfter()
+      }
+      function _onlyRemovedAffected() {
+        return request.resource.data.diff(resource.data).affectedKeys() == ["removed"].toSet()
+      }
+
+      function removedUnaffected() {
+        // Implementation note: if not using '.diff', you must consider the case when there is no '.removed' (it's optional).
+        return !("removed" in request.resource.data.diff(resource.data).affectedKeys())
       }
 
       allow delete: if false        // no deletion via web app
@@ -57,16 +70,19 @@ service cloud.firestore {
       // Project consistency:
       //  - title may not be empty
       //  - created must exist
-      //  - removed is optional; if exists, must be the server timestamp
+      //  - removed is optional; if exists, must be a server time stamp now or in the past
       //  - at least one author must exist
       //  - collaborators can be empty
       //  - users are either in 'authors' or in 'collaborators' (but not in both)
+      //
+      // Note: To allow reads to use the consistency, it is important to mark server time stamp fields as '<='
+      //        instead of '='.
       //
       function validProject() {
         return true
           && request.resource.data.title is string && request.resource.data.title != ''
           && request.resource.data.created is timestamp
-          && (!isRemovedAfter() || request.resource.data.removed == request.time)
+          && (!isRemovedAfter() || (request.resource.data.removed <= request.time))
           && request.resource.data.authors is list && request.resource.data.authors.size() > 0
           && request.resource.data.collaborators is list
           && request.resource.data.authors.toSet().intersection( request.resource.data.collaborators.toSet() ).size() == 0

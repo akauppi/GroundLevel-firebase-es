@@ -61,7 +61,7 @@ const projects = {
     created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no '.removed'
     authors: ["abc","def"],
-    collaborators: []
+    collaborators: ["ghi"]
   }
 };
 

@@ -1,11 +1,5 @@
 # Todo
 
-## Authentication
-
-- [ ] Add Apple auth. See [extra information](https://firebase.google.com/docs/auth/web/apple?authuser=0)
-  - maybe not. Requires an Apple developer account ($99/year); Contributions welcome from people who have it. #help
-
-
 ## Tests
 
 - [ ] Add tests
@@ -144,4 +138,8 @@ To go sub-collection:
 >Do you know more guidance for steering database schema design in Firestore? Please share the info at [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) or as a PR. 📝🙂
 <<
 -->
+
+## Security Rules
+
+Changes due to the invite workflow: Cloud Functions should be the one bringing new users to `collaborators` and/or `authors`. This should be reflected in the docs, security rules, and their tests.
 
