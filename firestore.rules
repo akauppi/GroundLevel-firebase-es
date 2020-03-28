@@ -79,6 +79,8 @@ service cloud.firestore {
       //        instead of '='.
       //
       function validProject() {
+        let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
+
         return true
           && request.resource.data.title is string && request.resource.data.title != ''
           && request.resource.data.created is timestamp
@@ -87,6 +89,8 @@ service cloud.firestore {
           && request.resource.data.collaborators is list
           && request.resource.data.authors.toSet().intersection( request.resource.data.collaborators.toSet() ).size() == 0
             // no common entries (could also omit this; logic would work even if a user is listed in both)
+
+          && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
       }
 
       function isAuthor() {
@@ -129,66 +133,58 @@ service cloud.firestore {
           && validVisited()
           && userId == request.auth.uid
           && request.resource.data.at == request.time
-      }
 
-      // Visited consistency:
-      //  - 'at' must be a timestamp
-      //  - no other fields
-      //
-      function validVisited() {
-        return true
-          && request.resource.data.at is timestamp
-          && request.resource.data.keys() == ['at']     // no other fields
+        // Visited consistency:
+        //  - 'at' must be a timestamp
+        //  - no other fields
+        //
+        function validVisited() {
+          return true
+            && (request.resource.data.at is timestamp && request.resource.data.at <= request.time)
+            && request.resource.data.keys() == ['at']     // no other fields
+        }
       }
 
 //--- Symbols ---
 
       match /symbols/{symbolId} {
         // Read:
-        //	- anyone can read
+        //  - all members of the project can read
         //
         allow read: if EXT_isCollaboratorOrAuthor();        // anyone (within the project) can read
 
         // Creation:
         //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
         //
-        allow create: if isCollaboratorOrAuthor()
+        allow create: if EXT_isCollaboratorOrAuthor()
           && validSymbol()
-          && claimedByMe()
+          && isClaimedByMe()
           && request.resource.data.claimed.at == request.time
 
         // Updates:
-        // 	- can claim a non-claimed symbol
-        // 	- can do changes to an already claimed symbol
-        // 	- can revoke the claim
-        // 	- claim itself cannot be changed; only revoked
+        //  - can claim a non-claimed symbol
+        //  - can do changes to an already claimed symbol
+        //  - can revoke the claim
+        //  - claim itself cannot be changed; only revoked
         //
-        allow update: if isCollaboratorOrAuthor()
+        allow update: if EXT_isCollaboratorOrAuthor()
           && validSymbol()
-          && ((		// case A: claiming an unclaimed symbol
+          && ((     // case A: claiming an unclaimed symbol
             !isClaimed() && (
               request.resource.data.claimed.by == request.auth.uid &&		// I make the claim
               request.resource.data.claimed.at == request.time
             )
-          ) || (	// case B: revoking the claim
-            claimedByMe() && (
-              !("claimed" in request.resource.data)		// claim removed
+          ) || (    // case B: revoking the claim
+            isClaimedByMe() && (
+              !("claimed" in request.resource.data)     // claim removed
             )
           ))
 
         // Delete:
         //	- can delete a symbol claimed to themselves
         //
-        allow delete: if isCollaboratorOrAuthor()
-          && claimedByMe()
-
-        function claimedByMe() {
-          return resource.data.claimed.by == request.auth.uid
-        }
-
-        function isClaimed() {
-          return "claimed" in resource.data
-        }
+        allow delete: if EXT_isCollaboratorOrAuthor()
+          && isClaimedByMe()
 
         function validSymbol() {
           let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
@@ -197,20 +193,35 @@ service cloud.firestore {
           return true
             && (request.resource.data.keys().toSet().hasAll(requiredKeys) &&
               possibleKeys.hasAll(request.resource.data.keys()))
-            && ((!isClaimed()) || (
-              request.resource.data.claimed.keys() == ["by","at"] &&   // only these
-              request.resource.data.claimed.by is string &&
-              request.resource.data.claimed.at is timestamp
-            ))
             && request.resource.data.layer is int
             && request.resource.data.shape in ['star']      // enum
             && request.resource.data.size > 0
             && request.resource.data.fillColor is string
-            && request.resource.data.center.keys() == ["x","y"]
-            && request.resource.data.center.x is number
-            && request.resource.data.center.y is number
+            && (request.resource.data.center.keys() == ["x","y"] &&
+               request.resource.data.center.x is number &&
+               request.resource.data.center.y is number
+            )
+            && (!isClaimed() || ("claimed" in request.resource.data &&
+              request.resource.data.claimed.keys() == ["by","at"] &&   // only these
+              request.resource.data.claimed.by is string &&
+              request.resource.data.claimed.at is timestamp     // and <= request.time
+            ))
+        }
+
+        function isClaimedByMe() {
+          return isClaimed() && resource.data.claimed.by == request.auth.uid
+        }
+
+        function isClaimed() {
+          // Note: 'resource != null' required in the online Rules Playground
+          return resource != null && "claimed" in resource.data
         }
       } // symbols
+
+      // Functions for sub-collections
+      //
+      // While the 'project' documents can address their 'authors' and 'collaborators' fields directly, sub-collection
+      // documents must use 'get'. This also implies an added billing cost for processing those security rules!
 
       function EXT_isCollaboratorOrAuthor() {
         return isSignedIn() &&
@@ -221,14 +232,17 @@ service cloud.firestore {
     }   // project
 
 //--- Invites ---
+//
+// Writable by authors and collaborators, to invite new members to the project. From there, Cloud Functions should
+// do all.
 
     match /invites/{inviteId} {   // inviteId: '<email>_<projectId>'
       // Read:
-      //	- only Cloud Functions read invites
+      //  - only Cloud Functions read invites
       allow read: if false
 
       // Create:
-      //	- any collaborator or author of a project may invite more people
+      //  - any collaborator or author of a project may invite more people
       //  - a previous invite may be overwritten (hmm.. tbd. does that fall onto 'update' or does 'set' always bring here?)
       //
       allow create: if GLOBAL_isCollaboratorOrAuthor(request.resource.data.project) &&
@@ -257,14 +271,15 @@ service cloud.firestore {
       allow read, write: if false
     }
 
-//--- Authentication ---
+//--- Authentication (just functions) ---
 
     function isSignedIn() {
       return request.auth != null && request.auth.uid != null;
     }
 
     // Checking membership in a project from other collections.
-    // Q: Do we need this also for sub-collections of 'projects'?
+    //
+    // This variant is to be used for collections outside of the 'projectsC'.
     //
     function GLOBAL_isCollaboratorOrAuthor(projectId) {
       return isSignedIn() &&

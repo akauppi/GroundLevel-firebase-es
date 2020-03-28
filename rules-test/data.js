@@ -30,7 +30,7 @@ const projects = {
     fillColor: 'peru',
     center: { x: 100, y: 100 }
   },
-  "/projects/1/symbols/2": {    // claimed by 'def'
+  "/projects/1/symbols/2-claimed": {    // claimed by 'def'
     layer: 0,
     shape: "star",
     size: 50,

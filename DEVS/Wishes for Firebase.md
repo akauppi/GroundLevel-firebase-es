@@ -2,6 +2,14 @@
 
 Dear Firebase. You are awesome. If you ever run out of things to improve, here would be some ideas:
 
+Hot list: 🌶
+
+- ability to have immutable Rules evaluation (evaluation not changing the data set)
+- ability to pick up if the rules file changes
+
+🙏
+
+
 ## Cloud Firestore
 
 ### Ability to insert "current server date" in the Firebase console (and Rules simulator)
@@ -59,7 +67,7 @@ Firebase tools v. 7.16.1.
 Also, I was surprised to see the results persist over emulator restarts. Wasn't expecting that, based on documentation.
 
 
-### Firebase emulator
+### 🌶 Firebase emulator to pick up changes to the rules
 
 The emulator could have a "watch" mode to help in development.
 
@@ -68,6 +76,36 @@ The emulator could have a "watch" mode to help in development.
 However.. currently (firebase tools 7.16.1) the emulator does not change its behavior when a rules file is changed.
 
 Could we have a `--watch` mode that would? 🥺
+
+
+### Firebase Rules playground (online) 'Build document' dialog (usability suggestion)
+
+For more complex work, ability to copy-paste a JSON as the document would be welcome.
+
+If we go by the dialog, ability to make changes to the previous document would be welcome.
+
+>![](.images/rules-playground-build.png)
+
+Here, the doc is non-trivial. When I click `Build document`, instead of being able to add or remove fields, I need to start creating it all from scratch.
+
+
+### 🌶 Firestore Security Rules emulator: a "dry run" mode
+
+It took me a while (several days) to realize that the allowed rule evaluations (create, update, delete) actually do change the data they operate on.
+
+This is not necessarily needed, for evaluating security rules. One can build tests with the assumption that changes are not applied. This in fact makes tests more easy to build, in my opinion, since the underlying data model stays untouched.
+
+Even if this were a good idea, for backwards compatibility the current behaviour must of course remain, as a default.
+
+<strike>Would you (Firebase) consider an `--immutable` or `--dry-run` flag to starting the emulator. If used, it would not apply a succesful rule evaluation to the data.</strike>
+
+Edit: The above does not work, since the emulator is a full `--firestore` emulator, not just for rules.
+
+Another alternative for this could be for the `initializeTestApp` call to have a `dryRun: true` option:
+
+![](.images/initializeTestApp.png)
+
+Each project using `@firebase/testing` for rules testing uses this call. It would likely take some collaboration between the emulator and the client side library, to mark "don't take this set/update/delete seriously", but the change in application code would be just one line.
 
 
 ## References
