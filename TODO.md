@@ -96,6 +96,11 @@ npm WARN @rollup/pluginutils@3.0.8 requires a peer of rollup@^1.20.0 but none is
 npm WARN rollup-plugin-livereload@1.0.4 requires a peer of rollup@^1.0.0 but none is installed. You must install peer dependencies yourself.
 ```
 
+Also check breaking changes: [CHANGELOG](https://github.com/rollup/rollup/blob/master/CHANGELOG.md#breaking-changes) 
+
+ #help
+
+
 ## Is 'template functional' still a thing in Vue.js 3?
 
 If it is, let's see where it fits in.
@@ -109,6 +114,12 @@ If it's not, let's not bother.
 ## Source map for console errors
 
 The errors now point to the bundle (Safari, Chrome). Can we make them point to the source, instead? #help
+
+Edit: This may be a Rollup thing, fixed in 2.0.x
+
+>Generate correct sourcemaps when tree-shaking occurs in a multi-file bundle (#3423)
+
+- [ ] Update to Rollup 2.x and test the sourcemaps
 
 
 ## Wiki about design of data modeling (document or collection)

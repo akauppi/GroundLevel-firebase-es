@@ -54,3 +54,48 @@ See [this answer](https://stackoverflow.com/questions/46600491/what-is-the-name-
 In addition, set to 2 spaces:
 
 
+## Understanding `firebase use`
+
+It defines which Firebase project your development terminal and local instance started by, say, `npm run dev`, is connected to.
+
+List the current shortcuts with:
+
+```
+$ firebase use
+Active Project: prod (groundlevel-production)
+
+Project aliases for /Users/asko/Git/GroundLevel-es6-firebase-web:
+
+  dev (vue-rollup-example)
+  default (vue-rollup-example)
+* prod (groundlevel-production)
+
+Run firebase use --add to define a new project alias.
+```
+
+As it says there, to make a new shortcut, run `firebase use --add`.
+
+The shortcuts are folder specific and stored in the `.firebaserc` file:
+
+```
+$ more .firebaserc 
+{
+  "projects": {
+    "dev": "vue-rollup-example",
+    "default": "vue-rollup-example",
+    "prod": "groundlevel-production"
+  }
+}
+```
+
+If you open a new terminal - as long as you are within the project folder - your in-use Firebase project will remain the same.
+
+Doing `firebase use <shortcut>` changes the active project. 
+
+<!-- tbd. Q: Where is the active project stored?  It does not change anything in the `.firebaserc` nor `firebase.json` files
+-->
+
+
+
+
+
