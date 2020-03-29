@@ -14,11 +14,12 @@
     "clean": "(rm public/dist/bundle* 2> /dev/null || true)",
     "rules-test": "(cd rules-test && npm test)"
   },
+  "dependencies": {},
   "//devDependencies": {
     "//@rollup/plugin-commonjs": "^11.0.1"
   },
   "devDependencies": {
-    "@firebase/testing": "^0.18.0",
+    "@firebase/testing": "^0.18.1",
     "@rollup/plugin-alias": "^3.0.0",
     "@rollup/plugin-node-resolve": "^7.0.0",
     "concurrently": "^5.0.2",
