@@ -12,10 +12,8 @@ const FieldValue = firebase.firestore.FieldValue;
 
 // IMPORTANT!
 //
-// Firebase Rules Emulator applies allowed changes to the data. Defining this makes the code revert such changes,
-// where needed for further tests to proceed.
-//
-const ANTIDOTE = true;
+// Firebase Rules Emulator applies allowed changes to the data. This was a surprise - some tests are skipped
+// because of this. We do aim at an immutable-dataset approach.
 
 describe("'/symbols' rules", () => {
   let unauth_symbolsC, auth_symbolsC, abc_symbolsC, def_symbolsC;
@@ -77,44 +75,46 @@ describe("'/symbols' rules", () => {
 
   //--- symbolsC update rules ---
 
-  test.only('members may claim a non-claimed symbol', async () => {
+  test.skip('members may claim a non-claimed symbol', async () => {
     const s1_mod_valid = uid => ({ claimed: { at: FieldValue.serverTimestamp(), by: uid } });
     const s1_mod_otherTime = uid => ({ claimed: { at: new Date(), by: uid } });
 
-    const p1_s1_original = ANTIDOTE && await abc_symbolsC.doc("1").get().then( snap => snap.data() );
-
     await expect( abc_symbolsC.doc("1").update( s1_mod_valid("abc") )).toAllow();     // author
-    console.debug("!!");
-
-    // Reset the data to its original state (would prefer a Rules Emulator that doesn't apply the allowed changes).
-    //
-    if (ANTIDOTE) {
-      await abc_symbolsC.doc("1").set(p1_s1_original);    // restore it
-    }
-
-    console.debug("!!!");
     await expect( def_symbolsC.doc("1").update( s1_mod_valid("def") )).toAllow();     // collaborator
-
-    console.debug("!!!!");
-    if (ANTIDOTE) {
-      await def_symbolsC.doc("1").set(p1_s1_original);    // restore it
-    }
-
-    console.debug("!5");
     await expect( abc_symbolsC.doc("1").update( s1_mod_otherTime("abc") )).toDeny();     // bad time
-
-    console.debug("!6");
     await expect( abc_symbolsC.doc("1").update( s1_mod_valid("def") )).toDeny();     // claiming for another
+
+    //With new approach:  CONCEPT
+    //await expect( abc_symbolsC.doc("1").update( s1_mod_valid("abc") )).toAllow();     // author
+    //await expect( symbolsC.as("abc").doc("1").update( s1_mod_valid("abc") )).toAllow();     // author
   });
 
-  test.skip('members may do changes to an already claimed (by them) symbol', async () => { });
+  test('members may do changes to an already claimed (by them) symbol', async () => {
+    const s2_mod = { size: 999 };
 
-  test.skip('members may revoke a claim', async () => { });
+    await expect( def_symbolsC.doc("2-claimed").update( s2_mod )).toAllow();     // claimed by him
+    await expect( abc_symbolsC.doc("2-claimed").update( s2_mod )).toDeny();     // not claimed by them
+  });
 
-  test.skip('claim cannot be changed (e.g. extended)', async () => { });
+  test('members may revoke a claim', async () => {
+    const s2_revoke = { claimed: FieldValue.delete() };
+
+    await expect( def_symbolsC.doc("2-claimed").update( s2_revoke )).toAllow();     // claimed by him
+    await expect( abc_symbolsC.doc("2-claimed").update( s2_revoke )).toDeny();      // not claimed by them
+  });
+
+  test.skip('claim cannot be changed (e.g. extended)', async () => {
+    const s2_extend = { claimed: FieldValue.serverTimestamp() };
+
+    await expect( def_symbolsC.doc("2-claimed").update( s2_extend )).toDeny();     // claimed by him
+  });
 
   //--- symbolsC delete rules ---
 
-  test.skip('members may delete a symbol claimed to themselves', async () => { });
+  test.skip('members may delete a symbol claimed to themselves', async () => {
+
+    await expect( def_symbolsC.doc("2-claimed").delete()).toAllow();     // claimed by him
+    await expect( abc_symbolsC.doc("2-claimed").delete()).toDeny();     // not claimed by them
+  });
 
 });
