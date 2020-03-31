@@ -1,8 +1,9 @@
 /*
 * rules-test/symbolsC.test.js
 */
-import { emul } from './emul';
 import './tools/jest-matchers';
+
+import { sessionProm } from './setup';
 
 const assert = require('assert').strict;
 
@@ -10,22 +11,18 @@ const firebase = require('@firebase/testing');
 
 const FieldValue = firebase.firestore.FieldValue;
 
-// IMPORTANT!
-//
-// Firebase Rules Emulator applies allowed changes to the data. This was a surprise - some tests are skipped
-// because of this. We do aim at an immutable-dataset approach.
-
 describe("'/symbols' rules", () => {
   let unauth_symbolsC, auth_symbolsC, abc_symbolsC, def_symbolsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
-
-    assert(emul != undefined);
+    const session = await sessionProm;
     try {
-      unauth_symbolsC = await emul.withAuth().collection('projects/1/symbols');
-      auth_symbolsC = await emul.withAuth( { uid: "_" }).collection('projects/1/symbols');
-      abc_symbolsC = await emul.withAuth({ uid: "abc" }).collection('projects/1/symbols');
-      def_symbolsC = await emul.withAuth( { uid: "def" }).collection('projects/1/symbols');
+      const coll = session.collection('projects/1/symbols');
+
+      unauth_symbolsC = coll.as(null);
+      auth_symbolsC = coll.as({uid:'_'});
+      abc_symbolsC = coll.as({uid:'abc'});
+      def_symbolsC = coll.as({uid:'def'});
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
@@ -44,7 +41,7 @@ describe("'/symbols' rules", () => {
     await expect( auth_symbolsC.get() ).toDeny();
   });
 
-  test('project members may read all symbols', async () => {
+  test.only('project members may read all symbols', async () => {
     await expect( abc_symbolsC.doc("1").get() ).toAllow();
     await expect( def_symbolsC.doc("1").get() ).toAllow();   // collaborator
 

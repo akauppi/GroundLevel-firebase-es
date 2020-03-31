@@ -1,28 +1,23 @@
 /*
 * jest-matchers.js
 *
-* Conveniency functions for testing, whether some Firebase action would pass security rules, or fail.
-*
-* Usage:
-*   <<
-*       await expect( ...set,get,update,delete... ).toAllow();    // or '.toDeny()'
-*   <<
+* Conveniency functions for testing, whether some Firebase action passed security rules, or not.
 */
 const { assertFails, assertSucceeds } = require('@firebase/testing');
 
 expect.extend({
-  async toAllow(x) {    // x: expect thing
+  async toAllow(prom) {    // prom: expect thing
     try {
-      await assertSucceeds(x);
+      await assertSucceeds(prom);
       return { pass: true };
     } catch (err) {
       return { pass: false, message: () => 'Expected Firebase operation to be ALLOWED, but it was DENIED. ' + `[${err}]` }
     }
   },
 
-  async toDeny(x) {
+  async toDeny(prom) {
     try {
-      await assertFails(x);
+      await assertFails(prom);
       return { pass: true };
     } catch (err) {
       return { pass: false, message: () => 'Expected Firebase operation to be DENIED, but it was ALLOWED! '+ `[${err}]` }

@@ -4,7 +4,7 @@
   "description": "Rules tests",
   "private": "true",
   "jest": {
-    "//": "configuration options can be set here"
+    "setupFilesAfterEnv": ["./jest.setup.js"]
   },
   "scripts": {
     "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
