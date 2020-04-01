@@ -4,9 +4,7 @@ module.exports = {
       {
         targets: { node: 'current' }
       },
-    ]
-    /* tbd. Typescript currently not enabled
+    ],
     ['@babel/preset-typescript']
-    */
   ]
 };

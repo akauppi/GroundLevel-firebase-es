@@ -13,6 +13,8 @@ const assert = require('assert').strict;
 
 const firebase = require('@firebase/testing');
 
+import { Mutex } from './mutex'
+
 // Remember the created apps for cleanup
 const appsCleanup= [];
 
@@ -34,7 +36,7 @@ async function session(sessionId, data) {    // (string, { <docPath>: { <field>:
     throw "Please define 'FIRESTORE_EMULATOR_HOST' to point to a 'localhost' emulator instance"
   }
 
-  await prime(fsAdmin, data);
+  await primeData(fsAdmin, data);
 
   // Unlike in the Firestore API, we allow authentication to be set after collection.
 
@@ -113,41 +115,43 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
 *
 * Note: Locking has to happen on the global basis - two separate 'emul's may be stepping on each others' toes.
 */
-const locked = new Map();   // { <collectionPath>: true }
+const locked = new Map();   // { <collectionPath>: Mutex }
 
 async function SERIAL_op(opDebug, adminD, realF, restore = true) {   // (string, DocumentReference, () => Promise of any, false|undefined) => Promise of any
   const fullDocPath = adminD.path;
 
-  // In JavaScript, execution is not interrupted until 'await'.
+  // In JavaScript, execution is not interrupted until 'await' so we know this happens atomically.
   //
-  if (locked.has(fullDocPath)) {
-    throw "FAILING GUTS🤦: Two tests stepping on the same doc: "+ fullDocPath
-  }
-  locked.set(fullDocPath,true);
+  const m = locked.get(fullDocPath) || (() => {
+    const tmp = new Mutex();
+    locked.set(fullDocPath, tmp);
+    return tmp;
+  })();
 
-  let was;
-  try {
-    console.debug(`>> IN ${opDebug}: ${fullDocPath}`);
-    was = restore && await docAdmin.get();   // false | firebase.firestore.DocumentSnapshot
-    return await realF();
-  }
-  catch (err) {
-    // tbd.
-    console.error("!! THROWN:", err);
-  }
-  finally {
-    if (was) {
-      await docAdmin.set(was.data());   // restore
+  return m.dispatch( async () => {
+    let was;
+    try {
+      //console.log('>> IN', opDebug, fullDocPath);
+      was = restore && await adminD.get();   // false | firebase.firestore.DocumentSnapshot
+      return await realF();
     }
-    locked.delete(fullDocPath);
-    console.debug(`<< OUT ${fullDocPath}`);
-  }
+    catch (err) {   // exceptions do get reported by the Jest matchers, so we don't need to.
+      throw err;
+    }
+    finally {
+      if (was) {
+        const o = was.data();   // Object | undefined
+        await o ? adminD.set(o) : adminD.delete();
+      }
+      //console.log('<< soon out');
+    }
+  });
 }
 
 /*
 * Prime a database with data
 */
-async function prime(fsAdmin, data) {    // (Firestore, { <document-path>: { <field>: any }}) => ()
+async function primeData(fsAdmin, data) {    // (Firestore, { <document-path>: { <field>: any }}) => ()
   const batch = fsAdmin.batch();
 
   for (const [docPath,value] of Object.entries(data)) {

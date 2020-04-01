@@ -6,11 +6,33 @@ Hot list: 🌶
 
 - ability to have immutable Rules evaluation (evaluation not changing the data set)
 - ability to pick up if the rules file changes
+- online Simulator and local Firestore emulator should have 100% same logic
 
 🙏
 
 
 ## Cloud Firestore
+
+### Uniformity between the online Rules Simulator and the local Firestore emulator
+
+This is mentioned widely on the Internet, but it took me a while before it really bit.
+
+>![](.images/rules-simulator-no-resource.png)
+
+I cannot use the same `validSymbol()` for both reads and writes, in the simulator.
+
+It seems the Simulator tries to say that it has `request` but there is no `request.resource`. The local emulator always has this - even for gets. These two seem to be either from different code base, or from different times.
+
+They are both crucial for development - complementing each other. But if their logic conflicts, it just adds to the pain of Firestore Security Rules development...
+
+Surely something that deserves to get fixed.
+
+i.e. Target:
+
+- there should not need to be any special coding in Security Rules, for having them run on the online Simulator
+- having contrdictory evaluation of rules should always be treated as a bug, by Firebase personnel
+
+
 
 ### Ability to insert "current server date" in the Firebase console (and Rules simulator)
 

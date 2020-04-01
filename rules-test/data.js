@@ -22,7 +22,6 @@ const projects = {
     authors: ["abc"],
     collaborators: ["def"]
   },
-  //"/projects/1/visited/abc": { at: new Date() },
   "/projects/1/symbols/1": {    // free symbol
     layer: 0,
     shape: "star",
@@ -36,7 +35,7 @@ const projects = {
     size: 50,
     fillColor: "peru",
     center: { x: 100, y: 100 },
-    claimed: { by: 'def', at: Date.now() }
+    claimed: { by: 'def', at: new Date() }
   },
 
   // Project 2 - removed (archived)

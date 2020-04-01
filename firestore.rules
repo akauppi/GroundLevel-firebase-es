@@ -103,11 +103,6 @@ service cloud.firestore {
           request.auth.uid in resource.data.collaborators
       }
 
-      function isCollaboratorOrAuthor() {
-        return isSignedIn() &&
-          (isCollaborator() || isAuthor())
-      }
-
       function isRemoved() {
         return "removed" in resource.data
       }
@@ -118,6 +113,10 @@ service cloud.firestore {
 
 //--- Visited ---
 
+      // Access cost:
+      //    read: 2
+      //    write: 2
+      //
       match /visited/{userId} {
         // Read:
         //	- all project members can read each other's last visit time
@@ -147,18 +146,25 @@ service cloud.firestore {
 
 //--- Symbols ---
 
+      // Access cost:
+      //    read: 2
+      //    write: 2
+      //
       match /symbols/{symbolId} {
         // Read:
         //  - all members of the project can read
         //
-        allow read: if EXT_isCollaboratorOrAuthor();        // anyone (within the project) can read
+        allow read: if EXT_isCollaboratorOrAuthor()        // anyone (within the project) can read
+
+          // DISABLED since cannot be used with the Online Simulator (see 'git grep Wishes')
+          //&& validSymbol()      // guards against bad data in test setup, manual Firestore edits or from earlier schemas
 
         // Creation:
         //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
         //
         allow create: if EXT_isCollaboratorOrAuthor()
           && validSymbol()
-          && isClaimedByMe()
+          && isClaimedByMeAfter()
           && request.resource.data.claimed.at == request.time
 
         // Updates:
@@ -174,9 +180,14 @@ service cloud.firestore {
               request.resource.data.claimed.by == request.auth.uid &&		// I make the claim
               request.resource.data.claimed.at == request.time
             )
-          ) || (    // case B: revoking the claim
+          ) || (    // case B: changing while claimed
             isClaimedByMe() && (
-              !("claimed" in request.resource.data)     // claim removed
+                request.resource.claim == resource.claim   // unchanged
+            )
+          ) || (    // case C: revoking the claim
+            isClaimedByMe() && (
+              !("claimed" in request.resource.data) &&     // claim removed
+              onlyClaimedAffected()
             )
           ))
 
@@ -192,7 +203,7 @@ service cloud.firestore {
 
           return true
             && (request.resource.data.keys().toSet().hasAll(requiredKeys) &&
-              possibleKeys.hasAll(request.resource.data.keys()))
+                possibleKeys.hasAll(request.resource.data.keys()))
             && request.resource.data.layer is int
             && request.resource.data.shape in ['star']      // enum
             && request.resource.data.size > 0
@@ -201,7 +212,7 @@ service cloud.firestore {
                request.resource.data.center.x is number &&
                request.resource.data.center.y is number
             )
-            && (!isClaimed() || ("claimed" in request.resource.data &&
+            && (!("claimed" in request.resource.data) || (
               request.resource.data.claimed.keys() == ["by","at"] &&   // only these
               request.resource.data.claimed.by is string &&
               request.resource.data.claimed.at is timestamp     // and <= request.time
@@ -215,6 +226,18 @@ service cloud.firestore {
         function isClaimed() {
           // Note: 'resource != null' required in the online Rules Playground
           return resource != null && "claimed" in resource.data
+        }
+
+        function isClaimedAfter() {
+          return "claimed" in request.resource.data
+        }
+
+        function isClaimedByMeAfter() {
+          return request.resource.data.claimed.by == request.auth.uid
+        }
+
+        function onlyClaimedAffected() {
+          return request.resource.data.diff(resource.data).affectedKeys() == ["claimed"].toSet()
         }
       } // symbols
 
@@ -236,6 +259,10 @@ service cloud.firestore {
 // Writable by authors and collaborators, to invite new members to the project. From there, Cloud Functions should
 // do all.
 
+    // Access cost:
+    //    read: 2
+    //    write: 2
+    //
     match /invites/{inviteId} {   // inviteId: '<email>_<projectId>'
       // Read:
       //  - only Cloud Functions read invites
