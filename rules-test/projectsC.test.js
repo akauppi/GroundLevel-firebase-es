@@ -3,14 +3,14 @@
 *
 * Rules tests
 *
-* Implementation note:
+* Optimization note:
 *   - use of 'Promise.all' to allow parallelism within a test may not bring much dividend. Jest runs tests in parallel
 *     anyways so core should have things to do, even if within a test there would be waits.
-*
-*     Meaning: use either model ('Promise.all' or individual 'await's).
+*     This would need to be measured - e.g. these tests with multiple 'await's or with 'Promise.all'. #help
 */
 import './tools/jest-matchers';
-import { emul } from './emul';
+
+import { sessionProm } from './setup';
 
 const assert = require('assert').strict;
 
@@ -18,21 +18,22 @@ const firebase = require('@firebase/testing');
 
 const FieldValue = firebase.firestore.FieldValue;
 
+const anyDate = new Date();   // a non-server date
+
 describe("'/projects' rules", () => {
   let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC, ghi_projectsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
+    const session = await sessionProm;
 
-    assert(emul != undefined);
     try {
-      const t0 = Date.now();
-      unauth_projectsC = await emul.withAuth().collection('projects');
-      auth_projectsC = await emul.withAuth( { uid: "_" }).collection('projects');
-      abc_projectsC = await emul.withAuth({ uid: "abc" }).collection('projects');
-      def_projectsC = await emul.withAuth( { uid: "def" }).collection('projects');
-      ghi_projectsC = await emul.withAuth( { uid: "ghi" }).collection('projects');
+      const coll = session.collection('projects');
 
-      //console.debug("Initializing database handles took:", `${Date.now() - t0}ms`);   // 142ms
+      unauth_projectsC = coll.as(null);
+      auth_projectsC = coll.as({uid:'_'});
+      abc_projectsC = coll.as({uid:'abc'});
+      def_projectsC = coll.as({uid:'def'});
+      ghi_projectsC = coll.as({uid:'ghi'});
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
@@ -81,7 +82,7 @@ describe("'/projects' rules", () => {
     };
 
     const p3_withoutAuthor = {...p3_valid, authors: [] };
-    const p3_badTime = {...p3_valid, created: Date.now() };
+    const p3_badTime = {...p3_valid, created: anyDate };
     const p3_alreadyRemoved = {...p3_valid, removed: serverTimestamp };
 
     const proms = [];
@@ -139,7 +140,7 @@ describe("'/projects' rules", () => {
     ]);
   });
 
-  test.skip("An author can add new authors, and remove authors as long as one remains", () => {
+  test("An author can add new authors, and remove authors as long as one remains", () => {
     const p1_addAuthor = {
       authors: FieldValue.arrayUnion("zxy")
     };

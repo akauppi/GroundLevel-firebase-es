@@ -11,6 +11,8 @@ const firebase = require('@firebase/testing');
 
 const FieldValue = firebase.firestore.FieldValue;
 
+const anyDate = new Date();   // a non-server date
+
 // Perform extra tests to see the test data isn't changed by other tests (if it is, our guards didn't work!)
 //
 async function HYGIENE( title, snapshotProm, f ) {
@@ -19,9 +21,7 @@ async function HYGIENE( title, snapshotProm, f ) {
   f(o);
 }
 
-const anyDate = new Date();   // a non-server date
-
-describe.skip("'/symbols' rules", () => {
+describe("'/symbols' rules", () => {
   let unauth_symbolsC, auth_symbolsC, abc_symbolsC, def_symbolsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
