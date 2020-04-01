@@ -19,10 +19,10 @@ async function HYGIENE( title, snapshotProm, f ) {
   f(o);
 }
 
-describe("'/symbols' rules", () => {
-  let unauth_symbolsC, auth_symbolsC, abc_symbolsC, def_symbolsC;
+const anyDate = new Date();   // a non-server date
 
-  const anyDate = new Date();   // a non-server date
+describe.skip("'/symbols' rules", () => {
+  let unauth_symbolsC, auth_symbolsC, abc_symbolsC, def_symbolsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
     const session = await sessionProm;
@@ -123,10 +123,11 @@ describe("'/symbols' rules", () => {
 
   //--- symbolsC delete rules ---
 
+  // #BUG Here, the data is not in its expected state when entering the test:
+  //    { ..., size: 999 }, claimed missing. Figure out why. #help
+  //
   test.skip('members may delete a symbol claimed to themselves', async () => {
 
-    // #BUG Here, the data is not in its expected state ('.size' == 999; '.claimed' is missing). Figure out why. #help
-    //
     await HYGIENE( "Before delete", def_symbolsC.doc("2-claimed").get(), o => {
       assert( o.size == 50 );
       assert(o.claimed && o.claimed.by == "def");

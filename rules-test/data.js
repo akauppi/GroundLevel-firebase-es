@@ -22,6 +22,7 @@ const projects = {
     authors: ["abc"],
     collaborators: ["def"]
   },
+  // "/projects/1/visited" used by tests, but does not need to pre-exist
   "/projects/1/symbols/1": {    // free symbol
     layer: 0,
     shape: "star",
