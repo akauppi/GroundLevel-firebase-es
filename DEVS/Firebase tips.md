@@ -98,4 +98,31 @@ Doing `firebase use <shortcut>` changes the active project.
 
 
 
+## Security Rules Online Simulator
+
+The simulator can be very useful, providing detailed information on why a certain rule failed. But you need to know where to look.
+
+### Rule, Evaluated
+
+Scroll to the top right of the window. Here you see how Firebase evaluates your rule:
+
+![](.images/rule-evaluated.png)
+
+You can click each rule fragment open to see what it evaluates to. Any surprises lead you further.
+
+
+### Entering `FieldValue` values
+
+There is no GUI support for building a document with `FieldValue`s (e.g. server time stamp) but maybe we can fool the simulator by:
+
+```
+{
+  _methodName: 'FieldValue.serverTimestamp'
+}
+```
+
+
+
+
+
 

@@ -32,6 +32,11 @@ i.e. Target:
 - there should not need to be any special coding in Security Rules, for having them run on the online Simulator
 - having contrdictory evaluation of rules should always be treated as a bug, by Firebase personnel
 
+### Online Simulator syntax highlighting of `/* ... */`
+
+Block comments are allowed by the Security Rules evaluation, but not reflected in the syntax highlighting.
+
+![](.images/firebase-simulator-block-comments.png)
 
 
 ### Ability to insert "current server date" in the Firebase console (and Rules simulator)

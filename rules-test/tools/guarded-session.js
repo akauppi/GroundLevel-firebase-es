@@ -115,35 +115,55 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
 *
 * Note: Locking has to happen on the global basis - two separate 'emul's may be stepping on each others' toes.
 */
-const locked = new Map();   // { <collectionPath>: Mutex }
+const locks = new Map();   // { <collectionPath>: Mutex }
+
+const DEBUG = false;  // switch tracing on/off
 
 async function SERIAL_op(opDebug, adminD, realF, restore = true) {   // (string, DocumentReference, () => Promise of any, false|undefined) => Promise of any
   const fullDocPath = adminD.path;
 
-  // In JavaScript, execution is not interrupted until 'await' so we know this happens atomically.
+  // In JavaScript, execution is not interrupted unless we use Promises so this should be atomic.
   //
-  const m = locked.get(fullDocPath) || (() => {
+  const m = locks.get(fullDocPath) || (() => {
     const tmp = new Mutex();
-    locked.set(fullDocPath, tmp);
+    locks.set(fullDocPath, tmp);
     return tmp;
   })();
 
   return m.dispatch( async () => {
     let was;
     try {
-      //console.log('>> IN', opDebug, fullDocPath);
+      if (DEBUG) console.trace('>> IN', opDebug, fullDocPath);
       was = restore && await adminD.get();   // false | firebase.firestore.DocumentSnapshot
       return await realF();
     }
     catch (err) {   // exceptions do get reported by the Jest matchers, so we don't need to.
-      throw err;
+
+      // Report non-evaluation exceptions, because they may be the root cause, e.g. (seen in the wild):
+      //  <<
+      //      Response deserialization failed: invalid wire type 7 at offset 8
+      //  <<
+      //
+      if (err instanceof Object && err.code == "denied") {
+        throw err;    // pass on
+      } else {
+        log.error("UNEXPECTED exception within Firebase operation", err);
+        throw err;
+      }
     }
     finally {
       if (was) {
-        const o = was.data();   // Object | undefined
-        await o ? adminD.set(o) : adminD.delete();
+        try {
+          const o = was.data();   // Object | undefined
+          await o ? adminD.set(o) : adminD.delete();
+        }
+        catch (err) {
+          log.error("EXCEPTION within Firebase restore - restore may have failed!", err);
+          locks = null;   // ban further tests!
+          throw err;
+        }
       }
-      //console.log('<< soon out');
+      if (DEBUG) console.trace('<< soon out', fullDocPath);
     }
   });
 }

@@ -182,7 +182,7 @@ service cloud.firestore {
             )
           ) || (    // case B: changing while claimed
             isClaimedByMe() && (
-                request.resource.claim == resource.claim   // unchanged
+                request.resource.data.claimed == resource.data.claimed   // unchanged
             )
           ) || (    // case C: revoking the claim
             isClaimedByMe() && (
@@ -206,14 +206,14 @@ service cloud.firestore {
                 possibleKeys.hasAll(request.resource.data.keys()))
             && request.resource.data.layer is int
             && request.resource.data.shape in ['star']      // enum
-            && request.resource.data.size > 0
+            && request.resource.data['size'] > 0
             && request.resource.data.fillColor is string
-            && (request.resource.data.center.keys() == ["x","y"] &&
+            && (sameKeys( request.resource.data.center.keys(), ["x","y"] ) &&
                request.resource.data.center.x is number &&
                request.resource.data.center.y is number
             )
             && (!("claimed" in request.resource.data) || (
-              request.resource.data.claimed.keys() == ["by","at"] &&   // only these
+              sameKeys( request.resource.data.claimed.keys(), ["by","at"] ) &&
               request.resource.data.claimed.by is string &&
               request.resource.data.claimed.at is timestamp     // and <= request.time
             ))
@@ -228,9 +228,10 @@ service cloud.firestore {
           return resource != null && "claimed" in resource.data
         }
 
+        /* not used; REMOVE
         function isClaimedAfter() {
           return "claimed" in request.resource.data
-        }
+        }*/
 
         function isClaimedByMeAfter() {
           return request.resource.data.claimed.by == request.auth.uid
@@ -298,7 +299,15 @@ service cloud.firestore {
       allow read, write: if false
     }
 
-//--- Authentication (just functions) ---
+//--- Helpers (just functions) ---
+
+    // Test two lists for having the same set of keys.
+    //
+    // Note: We cannot simply '==' the lists, it seems. Maybe the order matters in that comparison.
+    //
+    function sameKeys(a,b) {        // (List, List) => Boolean
+      return a.toSet() == b.toSet()
+    }
 
     function isSignedIn() {
       return request.auth != null && request.auth.uid != null;
