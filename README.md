@@ -38,7 +38,7 @@ Note that we don't use Vue CLI. It's not strictly needed for creating or running
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-The development has been made using Firebase 7.15.1 on macOS.
+Developed with Firebase 8.0.1 on macOS
 
 
 ### Firebase project

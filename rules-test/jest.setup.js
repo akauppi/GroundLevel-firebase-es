@@ -10,3 +10,6 @@ afterAll(() => {
   //console.log("GREETINGS from jest.setup.js");
   globalCleanup();
 });
+
+jest.setTimeout(10000);
+

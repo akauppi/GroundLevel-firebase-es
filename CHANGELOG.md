@@ -1,6 +1,13 @@
 # Changelog
 
-## latest (`firestorm`)
+## 6-Apr-20
+
+- Updated minor dependencies and Firebase tools (global) to version 8.
+
+## 1-Apr-20
+
+- Declaring Rules testing ready!
+  - some failing/ignored tests, but the guarded-session immutable testing framework looks good.
 
 ## 24-Feb-20
 

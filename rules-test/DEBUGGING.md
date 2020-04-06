@@ -24,7 +24,7 @@ Use this to pinpoint the rule that caused the unexpected behaviour.
 
 ## YOU NEED TO RESTART the Emulator
 
-The Firebase emulator (firebase tools v.) does not detect changes to the rules file. If you edit the rules, restart the emulator.
+The Firebase emulator (Mar 2020; version 7 or 8.0) does not detect changes to the rules file. If you edit the rules, restart the emulator.
 
 This provides a case for using the simpler `npm test` target that runs the emulator separately, each time, for each test.
 
