@@ -63,7 +63,8 @@ describe("'/invited' rules", () => {
     await expect( unauth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // unauthenticated cannot invite
   });
 
-  test('one can replace (extend) an existing invite', async () => {
+  // Enable if this behaviour is needed (for now, we ban inviting someone twice)
+  test.skip('one can replace (extend) an existing invite', async () => {
     const d = {
       email: "a@b.com",
       project: "1",

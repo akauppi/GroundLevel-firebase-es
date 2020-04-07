@@ -284,7 +284,11 @@ service cloud.firestore {
         ))
         && validInvite()
 
-      allow update, delete: if false
+      // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an
+      //        existing entry observes it).
+      allow update: if false
+
+      allow delete: if false
     }
 
     function validInvite() {
