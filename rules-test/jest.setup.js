@@ -11,5 +11,6 @@ afterAll(() => {
   globalCleanup();
 });
 
-jest.setTimeout(10000);
+// 5s has been seen to be too short; having too long delays certain faulty tests.
+jest.setTimeout(8000);
 

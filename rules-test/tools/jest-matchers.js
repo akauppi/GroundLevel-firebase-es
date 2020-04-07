@@ -24,7 +24,9 @@ expect.extend({
       await assertFails(prom);
       return { pass: true };
     } catch (err) {
-      if (err instanceof Object && err.code == 'permission-...') {
+      // "Expected request to fail, but it succeeded." (but no 'err.code', 😕)
+
+      if (err.message == "Expected request to fail, but it succeeded.") {   // Firebase tools v.8
         return { pass: false, message: () => format('denied','allowed',err) }
       } else {
         return weird(err)

@@ -140,14 +140,12 @@ async function SERIAL_op(opDebug, adminD, realF, restore = true) {   // (string,
     catch (err) {   // exceptions do get reported by the Jest matchers, so we don't need to.
 
       // Report non-evaluation exceptions, because they may be the root cause, e.g. (seen in the wild):
-      //  <<
-      //      Response deserialization failed: invalid wire type 7 at offset 8
-      //  <<
+      //    >> Response deserialization failed: invalid wire type 7 at offset 8
       //
-      if (err instanceof Object && err.code == "denied") {
+      if (err instanceof Object && err.name == "FirebaseError" && err.code == "permission-denied") {
         throw err;    // pass on
       } else {
-        log.error("UNEXPECTED exception within Firebase operation", err);
+        console.error("UNEXPECTED exception within Firebase operation", err);
         throw err;
       }
     }
@@ -158,7 +156,7 @@ async function SERIAL_op(opDebug, adminD, realF, restore = true) {   // (string,
           await o ? adminD.set(o) : adminD.delete();
         }
         catch (err) {
-          log.error("EXCEPTION within Firebase restore - restore may have failed!", err);
+          console.error("EXCEPTION within Firebase restore - restore may have failed!", err);
           locks = null;   // ban further tests!
           throw err;
         }

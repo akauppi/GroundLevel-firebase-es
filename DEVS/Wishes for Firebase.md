@@ -135,6 +135,58 @@ Another alternative for this could be for the `initializeTestApp` call to have a
 Each project using `@firebase/testing` for rules testing uses this call. It would likely take some collaboration between the emulator and the client side library, to mark "don't take this set/update/delete seriously", but the change in application code would be just one line.
 
 
+## Firestore emulator: evaluate the rules at launch (and complain!)
+
+The Firestore emulator has just a single file of Security Rules. It could evaluate (compile) it at launch, and fail if there are problems. 
+
+It does not currently do so. This is a launch with a syntax error in the rules file:
+
+```
+$ firebase emulators:start --only firestore
+i  emulators: Starting emulators: firestore
+✔  hub: emulator hub started at http://localhost:4400
+i  firestore: firestore emulator logging to firestore-debug.log
+✔  firestore: firestore emulator started at http://localhost:6767
+i  firestore: For testing set FIRESTORE_EMULATOR_HOST=localhost:6767
+✔  emulators: All emulators started, it is now safe to connect.
+...
+```
+
+Making sure rules do compile would reduce the number of times a "watch" mode is needed. If I start the emulator and there are rules, I do want to be notified up front if those rules don't compile.
+
+Now the error happens at runtime and may even get lost somewhere in test code (if it's ignored exceptions).
+
+>![](.images/bad-rules.png)
+
+
+## 🐶 Ternary operator would be nice to Rules Language
+
+It is possible to fake an if-else in the Rules language already know, but it's uncomfortable and not very readable:
+
+```
+allow create: if true
+  && ((      // if (inviting as author) invitor must be an author
+    request.resource.data.asAuthor && (
+      GLOBAL_isAuthor(request.resource.data.project)
+    )
+  ) || (      // else anyone in the project can invite
+    !request.resource.data.asAuthor && (
+      GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
+    )
+  ))
+```
+
+With the C-style ternary operator, this could be:
+
+```
+allow create: if true
+  && request.resource.data.asAuthor ?
+      GLOBAL_isAuthor(request.resource.data.project) :
+      GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
+```
+
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

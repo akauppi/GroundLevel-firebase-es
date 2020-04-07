@@ -27,15 +27,6 @@ $ firebase setup:emulators:firestore
 >Note: Rerun the setup above if you have upgraded `firebase-tools`.
 
 
-<!-- disabled
-## Internals
-
-The rules being tested are symbolic-linked to the main project's `firestore.rule` file (git supports symbolic links). This means if you edit either of the rules, they are both changed.
-
-In your git it looks like the root rules changed, when you edit either.
--->
-
-
 ## Running tests
 
 We'll be using the Firebase emulator to run the tests against.

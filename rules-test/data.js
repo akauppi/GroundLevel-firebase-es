@@ -62,6 +62,15 @@ const projects = {
     // no '.removed'
     authors: ["abc","def"],
     collaborators: ["ghi"]
+  },
+
+  // Invites (just one)
+  "/invites/a@b.com:1": {
+    email: "a@b.com",
+    project: "1",
+    asAuthor: false,
+    by: "abc",
+    at: new Date('07 Apr 2020 15:12:00 GMT')
   }
 };
 
@@ -70,4 +79,3 @@ const data = {
 };
 
 export { data }
-

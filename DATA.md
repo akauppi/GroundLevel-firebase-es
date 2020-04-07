@@ -66,8 +66,9 @@ Some collections were completely cut off from the above.
 
 ```
 /invites:C <email>_<project-id>
-   /invitedEmail: string
+   /email: string
    /project: project-id
+   /asAuthor: boolean
    /by: uid
    /at: timestamp
 ```

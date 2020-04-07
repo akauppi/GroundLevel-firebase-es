@@ -68,7 +68,7 @@ function watchMyProjects(f) {    // (/*id*/ string, { title: string, created: da
   }
   catch (err) {
     debugger;
-    log.error("!!!", err.msg)
+    console.error("!!!", err.msg)
   }
 
   return () => {

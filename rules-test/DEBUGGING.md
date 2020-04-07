@@ -28,3 +28,19 @@ The Firebase emulator (Mar 2020; version 7 or 8.0) does not detect changes to th
 
 This provides a case for using the simpler `npm test` target that runs the emulator separately, each time, for each test.
 
+
+## Run just one `describe` blcok
+
+To be enjoyed while `firebase emulators:start --only firestore` is running.
+
+```
+$ npx jest -f invitesC.test.js -t "'/invited' rules"
+...
+```
+
+Without the `-f` also the other test files would get compiled. With this, they don't even need to be valid JavaScript.
+
+It's a bit cryptic, but works. Copy paste the description of the `describe` block from your code.
+
+>Note: `describe.only` seems to be worth nothing. (would prefer using it)
+

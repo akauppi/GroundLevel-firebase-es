@@ -257,36 +257,45 @@ service cloud.firestore {
 
 //--- Invites ---
 //
-// Writable by authors and collaborators, to invite new members to the project. From there, Cloud Functions should
-// do all.
+// Writable by authors and collaborators, to invite new members to a project. From there, Cloud Functions should do all.
 
     // Access cost:
     //    read: 2
     //    write: 2
     //
-    match /invites/{inviteId} {   // inviteId: '<email>_<projectId>'
+    match /invites/{inviteId} {   // inviteId: '<email>:<projectId>'
       // Read:
       //  - only Cloud Functions read invites
       allow read: if false
 
       // Create:
       //  - any collaborator or author of a project may invite more people
-      //  - a previous invite may be overwritten (hmm.. tbd. does that fall onto 'update' or does 'set' always bring here?)
+      //  - a previous invite may be overwritten (= extended)
       //
-      allow create: if GLOBAL_isCollaboratorOrAuthor(request.resource.data.project) &&
-        validInvite()
+      allow create: if true
+        && ((      // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
+          request.resource.data.asAuthor && (
+            GLOBAL_isAuthor(request.resource.data.project)
+          )
+        ) || (      // else anyone in the project can invite
+          !request.resource.data.asAuthor && (
+            GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
+          )
+        ))
+        && validInvite()
 
       allow update, delete: if false
     }
 
     function validInvite() {
-      let requiredKeys = ['invitedEmail','project','by','at'].toSet();
+      let requiredKeys = ['email','project','asAuthor','by','at'].toSet();
 
       return true
         && request.resource.data.keys().toSet() == requiredKeys
-        && request.resource.id == request.resource.data.invitedEmail +"_"+ request.resource.data.project	// validate also the id schema
-        && request.resource.data.invitedEmail is string
+        && request.resource.id == request.resource.data.email +":"+ request.resource.data.project	// validate the id schema
+        && request.resource.data.email is string
         && request.resource.data.project is string
+        && request.resource.data.asAuthor is bool
         && request.resource.data.by == request.auth.uid
         && request.resource.data.at == request.time
     }
@@ -318,11 +327,15 @@ service cloud.firestore {
     // This variant is to be used for collections outside of the 'projectsC'.
     //
     function GLOBAL_isCollaboratorOrAuthor(projectId) {
-      return isSignedIn() &&
-        (request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
-         request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
-        )
+      return isSignedIn() && (
+        request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
+        GLOBAL_isAuthor(projectId)
+      )
     }
 
+    function GLOBAL_isAuthor(projectId) {
+      return isSignedIn() &&
+        request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
+    }
   } // database
 }
