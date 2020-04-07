@@ -10,7 +10,7 @@
 */
 import './tools/jest-matchers';
 
-import { sessionProm } from './setup';
+import sessionProm from './setup';
 
 const assert = require('assert').strict;
 

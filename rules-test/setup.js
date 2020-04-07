@@ -2,6 +2,8 @@
 * rules-test/setup.js
 *
 * Set up the Rules emulation session, including bringing in data.
+*
+* https://dmitripavlutin.com/javascript-module-import-twice/
 */
 import { session } from './tools/guarded-session';
 import { data } from './data';
@@ -10,9 +12,8 @@ import { data } from './data';
 //
 // The session id (Firebase calls it 'project id') used by the emulator. Also needed for seeing coverage reports.
 //
-// WARNING: Firebase docs (link please!) state that sessions persist on a single emulator run, but this doesn't seem to hold in
-//    practise. They survive an emulator restart. What's up?
-//    ->
+// Note: Once we'd have top level 'await' in the language, consider providing the importer a ready 'session', not just
+//    a promise? #es10
 //
 const sessionId = `test-${Date.now()}`;
 const sessionProm = session(sessionId, data);    // Promise of 'firebase.firestore.CollectionRef' -like
@@ -27,7 +28,7 @@ function globalCleanup() {    // () => Promise of ()
       //.then( _ => { console.debug("Cleaned up:", sessionId); return _; } );   // DEBUG (no more logging in the exit promise :)
 }
 
+export default sessionProm;   // done so to make every importer get the same copy
 export {
-  sessionProm,
   globalCleanup
 }
