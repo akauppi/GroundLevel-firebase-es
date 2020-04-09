@@ -88,8 +88,6 @@ if (typeof afterAll != "undefined") {   // skip in global setup
   afterAll( async () => {   // () => Promise of ()
     const proms = appsToCleanUp.map( app => app.delete() );
     await Promise.all(proms);
-
-    console.log("Cleaned up Firestore emulator");
   });
 }
 
