@@ -34,7 +34,7 @@ This provides a case for using the simpler `npm test` target that runs the emula
 To be enjoyed while `firebase emulators:start --only firestore` is running.
 
 ```
-$ npx jest -f invitesC.test.js -t "'/invited' rules"
+$ npm run test-dev -- -f invitesC.test.js -t "'/invited' rules"
 ...
 ```
 

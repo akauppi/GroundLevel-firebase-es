@@ -3,7 +3,7 @@
 */
 import './tools/jest-matchers';
 
-import sessionProm from './setup';
+import { sessionProm } from './setup';
 
 const assert = require('assert').strict;
 
@@ -17,8 +17,7 @@ describe("'/visited' rules", () => {
   let unauth_visitedC, auth_visitedC, abc_visitedC, def_visitedC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
-
-    const session = await sessionProm;
+    const session = await sessionProm();
     try {
       const coll = session.collection('projects/1/visited');
 
@@ -55,7 +54,7 @@ describe("'/visited' rules", () => {
   //--- VisitedC write rules ---
 
   // Fails, figure out why. #help
-  test.skip('only the user themselves can set their value (to server timestamp)', async () => {
+  test /*.skip*/ ('only the user themselves can set their value (to server timestamp)', async () => {
     const d_serverTime = { at: FieldValue.serverTimestamp() };
     const d_otherTime = { at: anyDate };
 

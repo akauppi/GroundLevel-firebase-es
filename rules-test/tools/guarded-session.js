@@ -8,6 +8,11 @@
 *   two tests don't mess with the same collection, at the same time.
 *
 *   Firebase wish: providing a 'dry-run' mode for running the emulator would simplify things. :) #🛎
+*
+* Usage:
+*   - call 'prime(sessionId, data)' to set up a session
+*   - call 'session(sessionId)' to get a handle to the session (can be called multiple times)
+*   - call 'tearDown(sessionId)' to clean up
 */
 const assert = require('assert').strict;
 
@@ -16,27 +21,52 @@ const firebase = require('@firebase/testing');
 import { Mutex } from './mutex'
 
 // Remember the created apps for cleanup
-const appsCleanup= [];
+//
+// tbd. If there is a way to make Jest cleanup callbacks, we wouldn't need this, or 'tearDown()'. #contribute
+//
+const appsCleanup= new Map();   // <session-id> -> Firebase-app
+
+function stash(sessionId, app) {
+  appsCleanup.get(sessionId).push(app);
+}
 
 /*
-* Make a new immutable session
-*
-* Note: Unlike with normal Firestore testing, you can likely run all tests from one session, since it does
-*   not change.
+* Prime a database with data
 */
-async function session(sessionId, data) {    // (string, { <docPath>: { <field>: <value> } }) => Promise of Firestore-like
+async function prime(sessionId, data) {    // (string, { <docPath>: { <field>: <value> } }) => Promise of ()
 
   const fsAdmin = firebase.initializeAdminApp({
     projectId: sessionId
   }).firestore();
 
-  appsCleanup.push(fsAdmin.app);
-
   if (!fsAdmin._settings.host.includes('localhost')) {    // just a safety feature, can be omitted
     throw "Please define 'FIRESTORE_EMULATOR_HOST' to point to a 'localhost' emulator instance"
   }
 
-  await primeData(fsAdmin, data);
+  const batch = fsAdmin.batch();
+
+  for (const [docPath,value] of Object.entries(data)) {
+    batch.set( fsAdmin.doc(docPath), value );
+  }
+  await batch.commit();
+
+  appsCleanup.set(sessionId, []);   // base for test suite cleanups
+
+  await fsAdmin.app.delete();   // cleans the app; the data remains
+}
+
+/*
+* Make a new immutable session.
+*
+* 'prime' must be called first, with the same session ID.
+*/
+async function session(sessionId) {    // (string) => Promise of Firestore-like
+
+  const fsAdmin = firebase.initializeAdminApp({
+    projectId: sessionId
+  }).firestore();
+
+  stash(sessionId, fsAdmin.app);   // '.tearDown' will clean up
 
   // Unlike in the Firestore API, we allow authentication to be set after collection.
 
@@ -46,14 +76,21 @@ async function session(sessionId, data) {    // (string, { <docPath>: { <field>:
       as: (auth) => {   // ({ uid: string }|null) => firebase.firestore.CollectionReference -like
         return emul(sessionId, collectionPath, auth);
       }
-    }),
-
-    release: () => {   // () => Promise of ()
-      const proms = appsCleanup.map( app => app.delete() );
-      return Promise.all(proms);
-    }
+    })
   };
 }
+
+/*
+* Clean up the apps of a certain session.
+*/
+async function tearDown(sessionId) {    // () => Promise of ()
+  const proms = appsCleanup.get(sessionId).map( app => app.delete() );
+  appsCleanup.delete(sessionId);
+
+  return Promise.all(proms);
+}
+
+//--- Private ---
 
 /*
 * Provide a 'firebase.firestore.DocumentReference'-like object to test Firestore Security Rules - without changing
@@ -72,14 +109,14 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
     projectId: sessionId
   }).firestore().collection(collectionPath);
 
-  appsCleanup.push(collAdmin.firestore.app);
+  stash(sessionId, collAdmin.firestore.app);
 
   const collAuth = firebase.initializeTestApp({
     projectId: sessionId,
     auth
   }).firestore().collection(collectionPath);
 
-  appsCleanup.push(collAuth.firestore.app);
+  stash(sessionId, collAuth.firestore.app);
 
   return {    // firebase.firestore.CollectionReference -like object
     get: () => collAuth.get(),
@@ -166,18 +203,8 @@ async function SERIAL_op(opDebug, adminD, realF, restore = true) {   // (string,
   });
 }
 
-/*
-* Prime a database with data
-*/
-async function primeData(fsAdmin, data) {    // (Firestore, { <document-path>: { <field>: any }}) => ()
-  const batch = fsAdmin.batch();
-
-  for (const [docPath,value] of Object.entries(data)) {
-    batch.set( fsAdmin.doc(docPath), value );
-  }
-  await batch.commit();
-}
-
 export {
-  session
+  prime,
+  session,
+  tearDown
 }

@@ -3,7 +3,7 @@
 */
 import './tools/jest-matchers';
 
-import sessionProm from './setup';
+import { sessionProm } from './setup';
 
 const assert = require('assert').strict;
 
@@ -21,11 +21,16 @@ async function HYGIENE( title, snapshotProm, f ) {
   f(o);
 }
 
+let session;
+
+beforeAll( async () => {         // note: applies only to tests in this describe block
+  session = await sessionProm();
+});
+
 describe("'/symbols' rules", () => {
   let unauth_symbolsC, auth_symbolsC, abc_symbolsC, def_symbolsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
-    const session = await sessionProm;
     try {
       const coll = session.collection('projects/1/symbols');
 
@@ -126,7 +131,7 @@ describe("'/symbols' rules", () => {
   // #BUG Here, the data is not in its expected state when entering the test:
   //    { ..., size: 999 }, claimed missing. Figure out why. #help
   //
-  test.skip('members may delete a symbol claimed to themselves', async () => {
+  test /*.skip*/ ('members may delete a symbol claimed to themselves', async () => {
 
     await HYGIENE( "Before delete", def_symbolsC.doc("2-claimed").get(), o => {
       assert( o.size == 50 );

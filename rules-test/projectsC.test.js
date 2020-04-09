@@ -10,7 +10,7 @@
 */
 import './tools/jest-matchers';
 
-import sessionProm from './setup';
+import { sessionProm } from './setup';
 
 const assert = require('assert').strict;
 
@@ -24,7 +24,7 @@ describe("'/projects' rules", () => {
   let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC, ghi_projectsC;
 
   beforeAll( async () => {         // note: applies only to tests in this describe block
-    const session = await sessionProm;
+    const session = await sessionProm();
 
     try {
       const coll = session.collection('projects');

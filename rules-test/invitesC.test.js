@@ -3,7 +3,7 @@
 */
 import './tools/jest-matchers';
 
-import sessionProm from './setup';
+import { sessionProm } from './setup';
 
 const assert = require('assert').strict;
 
@@ -13,11 +13,11 @@ const FieldValue = firebase.firestore.FieldValue;
 
 const anyDate = new Date();   // a non-server date
 
-describe("'/invited' rules", () => {
+describe("'/invites' rules", () => {
   let unauth_invitesC, auth_invitesC, abc_invitesC, def_invitesC;
 
   beforeAll( async () => {
-    const session = await sessionProm;
+    const session = await sessionProm();
     try {
       const coll = session.collection('invites');   // root collection
 
