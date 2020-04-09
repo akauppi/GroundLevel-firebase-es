@@ -4,6 +4,8 @@
 * Constant data used for the rules test cases
 */
 
+const anyPastDate = new Date();
+
 /*
 * Modeled as:
 *   [<document path>]: { <document field>: <value> }
@@ -22,7 +24,9 @@ const projects = {
     authors: ["abc"],
     collaborators: ["def"]
   },
-  // "/projects/1/visited" used by tests, but does not need to pre-exist
+  "/projects/1/visited/abc": {
+    at: anyPastDate
+  },
   "/projects/1/symbols/1": {    // free symbol
     layer: 0,
     shape: "star",

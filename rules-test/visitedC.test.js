@@ -53,8 +53,7 @@ describe("'/visited' rules", () => {
 
   //--- VisitedC write rules ---
 
-  // Fails, figure out why. #help
-  test /*.skip*/ ('only the user themselves can set their value (to server timestamp)', async () => {
+  test('only the user themselves can set their value (to server timestamp)', async () => {
     const d_serverTime = { at: FieldValue.serverTimestamp() };
     const d_otherTime = { at: anyDate };
 
