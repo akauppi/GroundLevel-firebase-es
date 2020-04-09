@@ -3,7 +3,7 @@
 */
 import './tools/jest-matchers';
 
-import { sessionProm } from './setup';
+import { sessionProm } from './tools/guarded-session';
 
 const assert = require('assert').strict;
 

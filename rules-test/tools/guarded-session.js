@@ -10,9 +10,8 @@
 *   Firebase wish: providing a 'dry-run' mode for running the emulator would simplify things. :) #🛎
 *
 * Usage:
-*   - call 'prime(sessionId, data)' to set up a session
-*   - call 'session(sessionId)' to get a handle to the session (can be called multiple times)
-*   - call 'tearDown(sessionId)' to clean up
+*   - call 'primeFromGlobalSetup(sessionId, data)' from a 'globalSetup' Jest context; once
+*   - call 'session(sessionId)' to get a handle to the session (can be called multiple times; from the test suites)
 */
 const assert = require('assert').strict;
 
@@ -20,21 +19,21 @@ const firebase = require('@firebase/testing');
 
 import { Mutex } from './mutex'
 
-// Remember the created apps for cleanup
+// Remember the created apps during this test suite.
 //
-// tbd. If there is a way to make Jest cleanup callbacks, we wouldn't need this, or 'tearDown()'. #contribute
-//
-const appsCleanup= new Map();   // <session-id> -> Firebase-app
+const appsToCleanUp= [];
 
-function stash(sessionId, app) {
-  appsCleanup.get(sessionId).push(app);
-}
+const MY_KEY = 'SESSION_ID';
 
 /*
 * Prime a database with data
+*
+* Note: It is enough to call this once, per Jest test run (via 'globalSetup').
+*
+* Note: This and 'session' get called in different Jest context. Therefore, it's useless to store a value for 'session'.
+*     If we get called, it won't. If it gets called, this hasn't been.
 */
-async function prime(sessionId, data) {    // (string, { <docPath>: { <field>: <value> } }) => Promise of ()
-
+async function primeFromGlobalSetup(sessionId, data) {    // (string, { <docPath>: { <field>: <value> } }) => Promise of ()
   const fsAdmin = firebase.initializeAdminApp({
     projectId: sessionId
   }).firestore();
@@ -50,26 +49,28 @@ async function prime(sessionId, data) {    // (string, { <docPath>: { <field>: <
   }
   await batch.commit();
 
-  appsCleanup.set(sessionId, []);   // base for test suite cleanups
+  await fsAdmin.app.delete();   // clean the app; data remains
 
-  await fsAdmin.app.delete();   // cleans the app; the data remains
+  // Set env.var. so test suites know it; this way, they all run against one session in Firebase.
+  //
+  process.env[MY_KEY] = sessionId;   // our imports from tests (one per suite) read it from here
 }
 
 /*
-* Make a new immutable session.
-*
-* 'prime' must be called first, with the same session ID.
+* Make a new immutable session to run Jest tests.
 */
-async function session(sessionId) {    // (string) => Promise of Firestore-like
+async function session() {    // () => Promise of Firestore-like
+  const sessionId = process.env[MY_KEY];   // defined for test suites, if 'prime...()' was properly called
+  if (!sessionId) { throw(`Internal problem: '${MY_KEY}' was not set! 😱`) };
 
   const fsAdmin = firebase.initializeAdminApp({
     projectId: sessionId
   }).firestore();
 
-  stash(sessionId, fsAdmin.app);   // '.tearDown' will clean up
+  appsToCleanUp.push(fsAdmin.app);   // '.tearDown' will clean up
 
   // Unlike in the Firestore API, we allow authentication to be set after collection.
-
+  //
   return {  // firebase.firestore.Firestore -like
 
     collection: (collectionPath) => ({   // (string) => { as: ... }
@@ -81,13 +82,15 @@ async function session(sessionId) {    // (string) => Promise of Firestore-like
 }
 
 /*
-* Clean up the apps of a certain session.
+* We know how to clean up after ourselves. Runs after all the tests (once per each suite).
 */
-async function tearDown(sessionId) {    // () => Promise of ()
-  const proms = appsCleanup.get(sessionId).map( app => app.delete() );
-  appsCleanup.delete(sessionId);
+if (typeof afterAll != "undefined") {   // skip in global setup
+  afterAll( async () => {   // () => Promise of ()
+    const proms = appsToCleanUp.map( app => app.delete() );
+    await Promise.all(proms);
 
-  return Promise.all(proms);
+    console.log("Cleaned up Firestore emulator");
+  });
 }
 
 //--- Private ---
@@ -109,14 +112,14 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
     projectId: sessionId
   }).firestore().collection(collectionPath);
 
-  stash(sessionId, collAdmin.firestore.app);
+  appsToCleanUp.push(collAdmin.firestore.app);
 
   const collAuth = firebase.initializeTestApp({
     projectId: sessionId,
     auth
   }).firestore().collection(collectionPath);
 
-  stash(sessionId, collAuth.firestore.app);
+  appsToCleanUp.push(collAuth.firestore.app);
 
   return {    // firebase.firestore.CollectionReference -like object
     get: () => collAuth.get(),
@@ -204,7 +207,6 @@ async function SERIAL_op(opDebug, adminD, realF, restore = true) {   // (string,
 }
 
 export {
-  prime,
-  session,
-  tearDown
+  primeFromGlobalSetup,
+  session as sessionProm
 }

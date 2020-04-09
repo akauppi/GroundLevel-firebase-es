@@ -4,12 +4,11 @@
   "description": "Rules tests",
   "private": "true",
   "jest": {
-    "globalSetup": [ "./jest.setup.js" ],
-    "globalTeardown": [ "./jest.teardown.js" ]
+    "globalSetup": "./setup.jest.js"
   },
   "scripts": {
-    "test": "firebase emulators:exec --only firestore 'SESSION_ID=test-`date` npx jest --verbose'",
-    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 SESSION_ID=test-`date` npx jest --verbose"
+    "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
+    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.9.0",
