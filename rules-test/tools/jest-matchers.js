@@ -26,7 +26,7 @@ expect.extend({
   async toDeny(prom) {
     try {
       await prom;
-      return { pass: false, message: () => format('denied','allowed',err) }
+      return { pass: false, message: () => format('denied','allowed') }   // there is no reason for passing
     } catch (err) {
       if (/*(err instanceof FirebaseError) &&*/ err instanceof Object && err.code == 'permission-denied') {
         return { pass: true }
@@ -37,8 +37,8 @@ expect.extend({
   }
 });
 
-function format(a,b,err) {
-  return `Expected ${a} but the Firebase operation was ${b.toUpperCase()}. [${ err.message.replace('\n','') }]`;
+function format(a,b,reason) {   // (string, string, string | undefined) => string
+  return `Expected ${a} but the Firebase operation was ${b.toUpperCase()}.` + reason ? ` [${reason}]`: "";
 }
 
 function weird(err) {   // assert failed within the code; not allow/deny
