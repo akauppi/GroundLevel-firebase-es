@@ -1,14 +1,18 @@
 /*
-* jest-matchers.js
+* tools/jest-matchers.js
 *
 * Conveniency functions for testing, whether some Firebase action passed security rules, or not.
+*
+* Note: '@firebase/testing' provides 'assertFails' and 'assertSucceeds' but we chose intentionally not to use them.
+*      They are only thin wrappers around the promise, and we gain more control and simplicity of code by dealing
+*      with the promises directly.
+*
+*      Source code of 'assertFails' and 'assertSucceeds' -> https://github.com/firebase/firebase-js-sdk/blob/6b53e0058483c9002d2fe56119f86fc9fb96b56c/packages/testing/src/api/index.ts#L258-L268
 */
-const { assertFails, assertSucceeds } = require('@firebase/testing');
-
 expect.extend({
-  async toAllow(prom) {    // prom: expect thing
+  async toAllow(prom) {
     try {
-      await assertSucceeds(prom);
+      await prom;
       return { pass: true };
     } catch (err) {
       if (/*(err instanceof FirebaseError) &&*/ err instanceof Object && err.code == 'permission-denied') {
@@ -21,13 +25,11 @@ expect.extend({
 
   async toDeny(prom) {
     try {
-      await assertFails(prom);
-      return { pass: true };
+      await prom;
+      return { pass: false, message: () => format('denied','allowed',err) }
     } catch (err) {
-      // "Expected request to fail, but it succeeded." (but no 'err.code', 😕)
-
-      if (err.message == "Expected request to fail, but it succeeded.") {   // Firebase tools v.8
-        return { pass: false, message: () => format('denied','allowed',err) }
+      if (/*(err instanceof FirebaseError) &&*/ err instanceof Object && err.code == 'permission-denied') {
+        return { pass: true }
       } else {
         return weird(err)
       }
@@ -44,4 +46,3 @@ function weird(err) {   // assert failed within the code; not allow/deny
 }
 
 export {}
-
