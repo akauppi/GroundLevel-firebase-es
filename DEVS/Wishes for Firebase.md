@@ -98,11 +98,24 @@ Also, I was surprised to see the results persist over emulator restarts. Wasn't 
 
 The emulator could have a "watch" mode to help in development.
 
-`firebase emulators:exec` takes some seconds to set up the emulator. It makes sense, for rules development, to have an emulator running in the background.
+<strike>`firebase emulators:exec` takes some seconds to set up the emulator. It makes sense, for rules development, to have an emulator running in the background.
 
-However.. currently (firebase tools 7.16.1) the emulator does not change its behavior when a rules file is changed.
+However.. currently (firebase tools 7.16.1) the emulator does not change its behavior when a rules file is changed.</strike>
 
 Could we have a `--watch` mode that would? 🥺
+
+---
+
+Edit: If one codes like this:
+
+```
+firebase.loadFirestoreRules({
+  projectId: sessionId,
+  rules: fs.readFileSync("dut.rules", "utf8")   // name must match that in 'firebase.json'
+});
+```
+
+..in the test setup, the rules are forced to the Firestore emulator. Having a watch mode would simply simplify things (for the developer), not needing to have this code.
 
 
 ### Firebase Rules playground (online) 'Build document' dialog (usability suggestion)
@@ -185,6 +198,21 @@ allow create: if true
       GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
 ```
 
+## Ability to ES6 `import` `@firebase/testing`
+
+It is currently (Apr 2020) exported only as common-JS:
+
+```
+$ ls node_modules/@firebase/testing/dist
+index.cjs.js		index.cjs.js.map	index.d.ts		src			test
+```
+
+```
+const firebase = require('@firebase/testing');   # works
+import firebase from `@firebase/testing`;   # fails
+```
+
+It would be nice to have possibility of using ES6 `import` alongside the common-js `require`. Node.js now supports imports.
 
 
 ## References

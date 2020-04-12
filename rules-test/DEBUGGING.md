@@ -22,12 +22,13 @@ When a test fails, there's a "L15" or similar mention:
 Use this to pinpoint the rule that caused the unexpected behaviour.
 
 
+<!-- hidden: we now have `firebase.loadFirestoreRules` in place to refresh the rules.
 ## YOU NEED TO RESTART the Emulator
 
 The Firebase emulator (Mar 2020; version 7 or 8.0) does not detect changes to the rules file. If you edit the rules, restart the emulator.
 
 This provides a case for using the simpler `npm test` target that runs the emulator separately, each time, for each test.
-
+-->
 
 ## Run just one test file
 

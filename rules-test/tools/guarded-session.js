@@ -131,8 +131,11 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
         // Note: Also gets need to be locked, so that one test wouldn't write to a collection (and succeed) while
         //    another one reads.
         //
+        //    We return 'Promise of ()' from 'get'; the purpose is just to test whether reads are allowed.
+        //    Use '._dump()' to get the actual data (same as normal '.get().then( snap => snap.data() )').
+        //
         get: () => {
-          return SERIAL_op( "GET", adminD, () => authD.get(), false /*no restore needed*/ );   // Promise of firebase.firestore.DocumentSnapshot
+          return SERIAL_op( "GET", adminD, () => authD.get().then( _ => null ), false /*no restore needed*/ );
         },
         set: (o) => {
           return SERIAL_op( "SET", adminD, () => authD.set(o) );
@@ -142,7 +145,11 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
         },
         delete: () => {
           return SERIAL_op( "DELETE", adminD, () => authD.delete() )
-        }
+        },
+
+        _dump: () => {
+          return SERIAL_op( "GET", adminD, () => authD.get().then( snap => snap.data() ), false /*no restore needed*/ );
+        },
       }
     }
   };

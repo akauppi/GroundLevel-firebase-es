@@ -4,7 +4,10 @@
   "description": "Rules tests",
   "private": "true",
   "jest": {
-    "globalSetup": "./setup.jest.js"
+    "globalSetup": "./setup.jest.js",
+    "//": {
+      "//testTimeout": "not needed, default 5000 _per test_ is fine."
+    }
   },
   "scripts": {
     "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
