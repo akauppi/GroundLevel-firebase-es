@@ -24,6 +24,7 @@ const reqAuth = { requiresAuth: true }
 const routes = [
   { path: '/',        component: pageHome, meta: reqAuth },
   { path: '/signin',  component: pageSignIn },    // '?final=/somein'
+  //{ path: '/projects',  component: pageProject },    // '/projects/<project-id>'
     //
   { path: '*', component: page404 } //,
 

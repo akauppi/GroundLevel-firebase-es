@@ -60,6 +60,13 @@ Fetch dependencies:
 $ npm install
 ```
 
+>macOS Note: If you get `gyp: No Xcode or CLT version detected!` error, you can either ignore it or fix by:
+>
+>   ```
+>   $ rm -rf node_modules
+>   $ npm install
+>   ```
+
 ### Running tests
 
 There are currently no UI side tests for the project. 😢

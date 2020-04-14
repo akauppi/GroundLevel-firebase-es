@@ -1,6 +1,7 @@
 import alias from '@rollup/plugin-alias';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
 import { eslint } from 'rollup-plugin-eslint';
 import fileSize from 'rollup-plugin-filesize';
 import livereload from 'rollup-plugin-livereload';
@@ -50,8 +51,10 @@ const plugins = [
     needMap: false
   }),
 
-  // Note: If you bring in Vue via 'npm' (not CDN), you'll need this to tell the bundle whether it's production or not.
-  //replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
+  // Note: If you bring in Vue or vue-router via 'npm' (not CDN), you'll need this to tell the bundle whether it's
+  //    production or not.
+  //
+  replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
 
   watching && livereload({
     watch: 'public/**'
@@ -64,7 +67,7 @@ const plugins = [
 export default {
   external: [
     'vue',
-    'vue-router'
+    //'vue-router'
   ],
   plugins,
   input: 'src/entry.js',
@@ -86,7 +89,7 @@ export default {
 
       // Vue router
       //    latest versions -> https://cdn.jsdelivr.net/npm/vue-router/
-      "vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.6/dist/vue-router.esm.browser.js'
+      //"vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.6/dist/vue-router.esm.browser.js'
     },
 
     // tbd. Do we need to use 'globals'?

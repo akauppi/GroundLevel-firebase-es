@@ -2,10 +2,9 @@
 
 ## Latest
 
-- Updated Rollup to 2.x -> [changelog entry](https://github.com/rollup/rollup/releases/tag/v2.0.0)
-  - some plugins still give warnings
-  - "back to zero dependencies" 🙌
- 
+- Updated all dependencies
+   - including Rollup to 2.x -> [changelog entry](https://github.com/rollup/rollup/releases/tag/v2.0.0)
+- Moved Vue Router to be pulled via `npm` (was via CDN). Bigger bundle but easier to track versions.
 
 ## 6-Apr-20
 
