@@ -19,10 +19,6 @@ const firebase = require('@firebase/testing');
 
 import { Mutex } from './mutex'
 
-// Remember the created apps during this test suite.
-//
-const appsToCleanUp= [];
-
 const MY_KEY = 'SESSION_ID';
 
 /*
@@ -67,8 +63,6 @@ async function session() {    // () => Promise of Firestore-like
     projectId: sessionId
   }).firestore();
 
-  appsToCleanUp.push(fsAdmin.app);   // '.tearDown' will clean up
-
   // Unlike in the Firestore API, we allow authentication to be set after collection.
   //
   return {  // firebase.firestore.Firestore -like
@@ -86,7 +80,7 @@ async function session() {    // () => Promise of Firestore-like
 */
 if (typeof afterAll != "undefined") {   // skip in global setup
   afterAll( async () => {   // () => Promise of ()
-    const proms = appsToCleanUp.map( app => app.delete() );
+    const proms = firebase.apps().map( app => app.delete() );
     await Promise.all(proms);
   });
 }
@@ -110,14 +104,10 @@ function emul(sessionId, collectionPath, auth) {   // (string, string, { uid: st
     projectId: sessionId
   }).firestore().collection(collectionPath);
 
-  appsToCleanUp.push(collAdmin.firestore.app);
-
   const collAuth = firebase.initializeTestApp({
     projectId: sessionId,
     auth
   }).firestore().collection(collectionPath);
-
-  appsToCleanUp.push(collAuth.firestore.app);
 
   return {    // firebase.firestore.CollectionReference -like object
     get: () => collAuth.get(),
