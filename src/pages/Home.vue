@@ -10,28 +10,35 @@
       YOU ARE AT HOME 🏯
     </div>
 
+    <!-- disabled
     <h2>Hi <tt>{{ uid }}</tt></h2>
-
-    <!-- DEBUG
-    <div>Projects: {{ projectsSorted.length }}</div>
     -->
-    <!-- List the projects we have access to -->
-    <div id="grid-container-projects">
+
+    <!-- New button + visited projects (latest first) -->
+    <div class="grid-container-projects">
       <ProjectTile :project="null" />
-      <ProjectTile v-for="p in projectsSorted" :key="p.key" :project="p" />
+      <ProjectTile v-for="o in projectsSorted" :key="o._id" :project="o" />
     </div>
+
+    <!-- Invited --
+    <div class="grid-container-projects">
+      <ProjectTile v-for="p in invitesPending" :key="p._id" :project="p" />
+    </div>
+    -->
   </section>
 </template>
 
 <style scoped>
-  #here {
+  section#here {
     text-align: center;
   }
 
   /* tbd. could do some aesthetic grouping: to make the columns grow by the width of the browser window;
   * to have possibly padding to left and right if there's plentiful space.
+  *
+  * #flexbox
   */
-  #grid-container-projects {
+  .grid-container-projects {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto;
@@ -43,7 +50,7 @@
 
 <script>
   import { userMixin } from '@/mixins/user';   // ignore IDE warning
-  import ProjectTile from '@/components/ProjectTile.vue';
+  import ProjectTile from './Home/ProjectTile.vue';
   import { watchMyProjects } from "@/firebase/queries";
   import { assert } from "@/util/assert";
 
@@ -56,14 +63,13 @@
     data: () => {
       return {
         // Vue 2 note: need to use object ('{}'), not an ES6 map to get reactivity going. With Vue 3, check if we can use a 'Map'.
-        projects: {} /*new Map()*/,    // <project-id>: { title: string, created: datetime, lastVisited: datetime }
-        unsubscribe: null    // () => ();   cleanup of Firestore watchers
+        projects: {},       // <project-id>: { ..projectC doc }
+        unsubscribe: null   // () => ();   cleanup of Firestore watchers
       }
     },
     computed: {
-      projectsSorted: (vm) => {   // array of { id: string, title: string, created: datetime, lastVisited: datetime }
+      projectsSorted: (vm) => {   // array of { _id: string, ..projectsC doc fields }
         const dataRaw = Object.entries(vm.projects);    // from an object
-        //const dataRaw = Array.from( vm.projects.entries() );    // ES6 'Map'
 
         if (dataRaw.length > 0) { // DEBUG
           console.log( "Projects data (still unsorted:", dataRaw);
@@ -71,7 +77,7 @@
 
         const tmp = dataRaw.map( tuple => {    // ([id,data])
           const [id,data] = tuple;
-          return { ...data, key: id };   // key injected to help Vue know which project is which
+          return { _id: id, ...data };
         });
         return tmp.sort( (a,b) => b.created - a.created );
       },
@@ -87,14 +93,10 @@
       //
       vm.unsubscribe = watchMyProjects( (id, data) => {
         if (!data) {
-          //vm.projects.delete(id);   // ES6 'Map'
           vm.$delete(vm.projects, id);
         } else {
-          //vm.projects.set(id, data);  // ES6 'Map'
           vm.$set(vm.projects, id, data);
         }
-
-        console.log( `GOT PROJECT ${id}:`, data );
       })
     },
     beforeDestroy: function () {
