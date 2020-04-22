@@ -29,6 +29,7 @@
 <script>
   import { userMixin } from '@/mixins/user';   // ignore IDE warning
   import { assert } from "@/util/assert";
+  import { watchProject, watchUserInfo } from "@/firebase/queries.js";
 
   export default {
     name: 'Project',      // Vue note: names help in debugging
