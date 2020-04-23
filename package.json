@@ -15,6 +15,7 @@
     "rules-test": "(cd rules-test && npm test)"
   },
   "dependencies": {
+    "vue": "^2.6.11",
     "vue-router": "^3.1.6"
   },
   "//devDependencies": {

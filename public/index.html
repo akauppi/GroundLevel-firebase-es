@@ -15,14 +15,9 @@
     -
     - Note: Firebase docs mention to put this in the 'body' - instead of 'head'. Is there a benefit for doing so?
     -->
-    <script defer src="/__/firebase/7.13.1/firebase-app.js"></script>
-    <script defer src="/__/firebase/7.13.1/firebase-auth.js"></script>
-    <script defer src="/__/firebase/7.13.1/firebase-firestore.js"></script>
-    <!--
-    <script defer src="/__/firebase/7.8.2/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/7.8.2/firebase-storage.js"></script>
-    -->
-    <script defer src="/__/firebase/init.js"></script>  <!-- calls 'firebase.initializeApp({ ... })' -->
+    <script defer src="/__/firebase/7.14.1/firebase-app.js"></script>
+    <script defer src="/__/firebase/7.14.1/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.14.1/firebase-firestore.js"></script>
 
     <!--
     - Firebase UI
@@ -30,11 +25,11 @@
     -
     - Likely this is only needed by 'SignIn' page, but in development it was easiest to have it here. Since it likely
     - gets cached, there's little benefit in injecting it just for that one page. Right? #advice
-    -
-    - tbd. Try 'defer' here as well - does it improve anything?
     -->
-    <script src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css" />
+
+    <script defer src="/__/firebase/init.js"></script>  <!-- calls 'firebase.initializeApp({ ... })' -->
 
     <!--
     - Checking that Firebase loaded properly

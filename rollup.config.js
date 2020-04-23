@@ -65,10 +65,6 @@ const plugins = [
 ];
 
 export default {
-  external: [
-    'vue',
-    //'vue-router'
-  ],
   plugins,
   input: 'src/entry.js',
 
@@ -83,13 +79,8 @@ export default {
     //preserveModules: true,
 
     paths: {
-      // Vue.js
-      //    latest versions -> https://cdn.jsdelivr.net/npm/vue/
-      vue: 'https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.esm.browser.js',
-
-      // Vue router
-      //    latest versions -> https://cdn.jsdelivr.net/npm/vue-router/
-      //"vue-router": 'https://cdn.jsdelivr.net/npm/vue-router@3.1.6/dist/vue-router.esm.browser.js'
+      vue: 'vue/dist/vue.esm.browser.js',
+      "vue-router": 'vue-router/dist/vue-router.esm.browser.js'
     },
 
     // tbd. Do we need to use 'globals'?
