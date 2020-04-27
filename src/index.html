@@ -12,8 +12,6 @@
     -     in development and when deployed via Firebase Hosting. Other CDN-based code is imported via Rollup paths.
     -
     - Include only the Firebase features that you need.
-    -
-    - Note: Firebase docs mention to put this in the 'body' - instead of 'head'. Is there a benefit for doing so?
     -->
     <script defer src="/__/firebase/7.14.1/firebase-app.js"></script>
     <script defer src="/__/firebase/7.14.1/firebase-auth.js"></script>
@@ -24,7 +22,7 @@
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
     - Likely this is only needed by 'SignIn' page, but in development it was easiest to have it here. Since it likely
-    - gets cached, there's little benefit in injecting it just for that one page. Right? #advice
+    - gets cached, there's little benefit in injecting it just for that one page.
     -->
     <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css" />
@@ -34,7 +32,7 @@
     <!--
     - Checking that Firebase loaded properly
     -
-    - tbd. If this only happens once per load, and 'App' initialization also, we can place the code in 'entry.js'.
+    - tbd. If this only happens once per load, and 'App' initialization also, we can place the code in 'main.js'.
     -     It's not bad here, though.
     -->
     <script>
