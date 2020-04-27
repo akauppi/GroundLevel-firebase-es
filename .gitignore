@@ -4,6 +4,8 @@
 # Firebase hosting caches
 /.firebase/
 
+/web_modules/
+
 /.firebaserc
 /firebase-debug.log
 /firestore-debug.log

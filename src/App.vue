@@ -35,6 +35,11 @@
   import { userMixin } from '@/mixins/user.js';   // ignore IDE warning
   import { appTitle } from './config.js';
 
+  // Note: For 'httpVuyLoader', we need to have 'module.exports = ...' instead of 'export default'
+  //    (that would work with Rollup).
+  //
+  //    See -> https://github.com/FranckFreiburger/http-vue-loader/issues/66
+
   export default {
     name: 'App',     // helps in debugging
     components: {

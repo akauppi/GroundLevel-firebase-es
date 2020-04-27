@@ -1,24 +1,27 @@
 /*
-* src/entry.js
+* src/main.js
 *
 * The entry point, pointed to by 'rollup.config.js'.
 *
 * Note: We provide access to Firebase authenticated user, but we *don't* deal with the Firebase-UI;
 *     'src/pages/SignIn.vue' does.
 */
-import Vue from 'vue';    // ignore IDE warning "Module is not installed" (Q: how to disable the warning in WebStorm?) #help
+//import Vue from '/node_modules/vue/dist/vue.esm.browser.js';
+import Vue from 'vue';
 
-import VueRouter from 'vue-router';
+import VueRouter from '/node_modules/vue-router/dist/vue-router.esm.browser.js';
 Vue.use(VueRouter);       // needed before first 'new Vue(...)'
 
-import App from './App.vue';
+//REMOVE
+//import App from './App.vue';
+const App = httpVueLoader('./App.vue');
+
 import router from './router.js';
 
 new Vue({
   el: '#app',
   router,
   render: h => {
-    console.log( "Rendering..." );
     return h(App)
   },
 

@@ -14,7 +14,7 @@ const projectsC = db.collection('projects');
 const invitesC = db.collection('invites');
 const userInfoC = db.collection('userInfo');
 
-import { assert } from "@/util/assert";
+import { assert } from "/@/util/assert";
 
 function informGen(f) {   // ((string, {...}) => ()) => ((QuerySnapshot) => ())
   return function inform(snapshot) {

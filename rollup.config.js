@@ -51,8 +51,7 @@ const plugins = [
     needMap: false
   }),
 
-  // Note: If you bring in Vue or vue-router via 'npm' (not CDN), you'll need this to tell the bundle whether it's
-  //    production or not.
+  // Note: Using Vue or vue-router via 'npm' (not CDN), we need this to tell the bundle whether it's production or not.
   //
   replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
 
@@ -66,7 +65,7 @@ const plugins = [
 
 export default {
   plugins,
-  input: 'src/entry.js',
+  input: 'src/main.js',
 
   // Note: Samples normally use 'iife' format for output, but we target ES6-capable browsers only, so _should_ be able
   //    to use 'esm'.
@@ -79,8 +78,8 @@ export default {
     //preserveModules: true,
 
     paths: {
-      vue: 'vue/dist/vue.esm.browser.js',
-      "vue-router": 'vue-router/dist/vue-router.esm.browser.js'
+      vue: !production ? 'vue/dist/vue.esm.browser.js' : 'vue/dist/vue.esm.browser.min.js',
+      "vue-router": !production ? 'vue-router/dist/vue-router.esm.browser.js' : 'vue-router/dist/vue-router.esm.browser.min.js'
     },
 
     // tbd. Do we need to use 'globals'?

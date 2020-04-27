@@ -34,9 +34,9 @@ Let's start! 🤾‍♀️
 - `firebase`
   - `npm install -g firebase-tools`
 
-Note that we don't use Vue CLI. It's not strictly needed for creating or running a Vue project. Instead, we use rollup.js for building and Firebase Hosting for deployments.
-
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
+
+Note that we DO NOT need: Babel, Vue CLI.
 
 Developed with Firebase 8.0.1 on macOS
 

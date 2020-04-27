@@ -9,7 +9,7 @@
 *     {{ user.displayName }}
 *   <<
 */
-import { onAuthStateChanged } from '@/util/auth.js';
+import { onAuthStateChanged } from '/src/util/auth.js';
 
 const userMixin = ({
   data: () => ({

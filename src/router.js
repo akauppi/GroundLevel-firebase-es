@@ -3,18 +3,22 @@
 *
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
 */
-import VueRouter from 'vue-router'
+import VueRouter from '/node_modules/vue-router/dist/vue-router.esm.browser.js';
 
 // Pages
 // note: not using lazy loading (didn't get it to work). #help
 //      Track -> https://github.com/vuejs/rollup-plugin-vue/issues/328
 //
-import pageHome from './pages/Home.vue';
-import pageSignIn from './pages/SignIn.vue';
-import page404 from './pages/404.vue';
+//REMOVE
+//import pageHome from './pages/Home.vue';
+//import pageSignIn from './pages/SignIn.vue';
+//import page404 from './pages/404.vue';
+const pageHome = httpVueLoader('./pages/Home.vue');
+const pageSignIn = httpVueLoader('./pages/SignIn.vue');
+const page404 = httpVueLoader('./pages/404.vue');
 
-import { currentFirebaseUserProm } from '@/util/auth.js';
-import { assert } from '@/util/assert.js';
+import { currentFirebaseUserProm } from '/src/util/auth.js';
+import { assert } from '/src/util/assert.js';
 
 const reqAuth = { requiresAuth: true }
 
