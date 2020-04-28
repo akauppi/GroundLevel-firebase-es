@@ -8,3 +8,5 @@
 /firebase-debug.log
 /firestore-debug.log
 
+# Firebase dev config
+/__.js

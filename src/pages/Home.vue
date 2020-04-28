@@ -42,10 +42,10 @@
 </style>
 
 <script>
-  import { userMixin } from '@/mixins/user';   // ignore IDE warning
-  import ProjectTile from '@/components/ProjectTile.vue';
-  import { watchMyProjects } from "@/firebase/queries";
-  import { assert } from "@/util/assert";
+  import { userMixin } from '../mixins/user';   // ignore IDE warning
+  import ProjectTile from '../components/ProjectTile.vue';
+  import { watchMyProjects } from "../firebase/queries";
+  import { assert } from "../util/assert";
 
   export default {
     name: 'Home',      // Vue note: names help in debugging

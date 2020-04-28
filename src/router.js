@@ -13,8 +13,8 @@ import pageHome from './pages/Home.vue';
 import pageSignIn from './pages/SignIn.vue';
 import page404 from './pages/404.vue';
 
-import { currentFirebaseUserProm } from '@/util/auth.js';
-import { assert } from '@/util/assert.js';
+import { currentFirebaseUserProm } from './util/auth.js';
+import { assert } from './util/assert.js';
 
 const reqAuth = { requiresAuth: true }
 
@@ -26,13 +26,16 @@ const routes = [
   { path: '/signin',  component: pageSignIn },    // '?final=/somein'
   //{ path: '/projects',  component: pageProject },    // '/projects/<project-id>'
     //
-  { path: '*', component: page404 } //,
+  //{ path: '*', component: page404 },  // Vue router < 4.0 #bygones
+  { path: ':catchAll(.*)', component: page404 } //,   // Vue router 4.0 #vuejs3
 
   //{ path: '/ignore', component: () => import './pages/Home.vue' }   // tbd. Why doesn't this compile?
 ];
 
 const router = new VueRouter({
-  mode: 'history',
+  //mode: 'history',  // Vue router < 4.0 #bygones
+  history: createWebHistory(),  // Vue router 4.0 #vuejs3
+
   //base: ...,    // tbd. what is this used for?  What to place here?
   routes
 });

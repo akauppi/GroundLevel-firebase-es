@@ -21,12 +21,14 @@ const lintOpts = {
 };
 
 const plugins = [
-  // Needed for 'import "@/..."' to point to the source directory (Q: do Vue CLI projects get this, automatically? #help)
+  // Needed for 'import "@/..."' to point to the source directory
+  // note: currently (with Vite) not using them
+  /*
   alias({
     entries: {
       ['@']: __dirname + '/src'
     }
-  }),
+  }),*/
 
   resolve({
     mainFields: ['module'],  // insist on importing ES6, only (pkg.module)

@@ -4,7 +4,7 @@
 - The frame of the application - same for all pages
 -->
 <template>
-  <!-- tbd. Once in Vue 3, remove the single-root-node 'div' -->
+  <!-- tbd. Once firmly in Vue 3, remove the single-root-node 'div' -->
   <div>
     <!-- #Snip
         header-main-footer _may_ be good for accessibility. Use of them doesn't really change anything for normal
@@ -32,7 +32,7 @@
   import AppLogo from './components/AppLogo.vue';
   import AppProfile from './components/AppProfile.vue';
   import AppFooter from './components/AppFooter.vue';
-  import { userMixin } from '@/mixins/user.js';   // ignore IDE warning
+  import { userMixin } from './mixins/user.js';
   import { appTitle } from './config.js';
 
   export default {

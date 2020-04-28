@@ -36,9 +36,7 @@ Let's start! 🤾‍♀️
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-Note that we DO NOT need: Babel, Vue CLI.
-
-Developed with Firebase 8.0.1 on macOS
+Developed with Firebase 8.2.0 on macOS
 
 
 ### Firebase project
@@ -63,8 +61,8 @@ $ npm install
 >macOS Note: If you get `gyp: No Xcode or CLT version detected!` error, you can either ignore it or fix by:
 >
 >   ```
->   $ rm -rf node_modules
->   $ npm install
+>   trash `/Library/Developer/CommandLineTools`
+>   $ xcode-select --install
 >   ```
 
 ### Running tests
@@ -78,7 +76,7 @@ $ npm test
 ```
 -->
 
-There are, however, Security Rules tests. They are organized separately in the `rules-test` folder. See the specific `README`.
+There are, however, Security Rules tests. They are organized separately in the `rules-test` folder. See the specific `README` in that sub-directory.
 
 
 ## Development workflow
@@ -86,14 +84,17 @@ There are, however, Security Rules tests. They are organized separately in the `
 ```
 $ npm run dev
 ...
-[firebase-serve] i  hosting: Serving hosting files from: public
-[firebase-serve] ✔  hosting: Local server: http://localhost:3000
+vite v0.6.0
+Dev server running at:
+  > http://localhost:3000
 ...
 ```
 
 Serves the project locally, reacting to source code changes.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
+
+>Note: [Vite](https://github.com/vuejs/vite) (GitHub) is an awesome tool. It renders changes to `.vue` components on-the-fly, and allows us to not have a change-build step in development mode.
 
 ### Testing Security Rules (optional)
 

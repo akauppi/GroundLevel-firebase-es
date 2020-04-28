@@ -53,8 +53,8 @@
 
 <script>
   import { allowAnonymousAuth } from '../config.js';
-  import { assert } from '@/util/assert';
-  import { userMixin } from '@/mixins/user';
+  import { assert } from '../util/assert';
+  import { userMixin } from '../mixins/user';
 
   const genUiConfig = (goThere) => {     // ( () => () ) => {...}    // 'goThere' changes URL to the target
     assert(firebaseui);

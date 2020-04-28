@@ -9,7 +9,7 @@
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
-import { assert } from '@/util/assert.js';
+import { assert } from '../util/assert.js';
 
 // Note: a stream of user objects (or 'null') would really be the best abstraction for this. :&
 

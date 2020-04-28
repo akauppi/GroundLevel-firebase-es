@@ -19,17 +19,7 @@
 
 *Note: this is not really in the project scope. The author just happens to be using WebStorm.*
 
-- "Module is not installed" in the IDE
- 
-   WebStorm 2019.3 is confused about where `Vue` and `VueRouter` are coming from.
-
-   ```
-   import Vue from 'vue';    // ignore IDE warning "Module is not installed" (Q: how to disable the warning in WebStorm?) #help
-   
-   import VueRouter from 'vue-router';
-   ```
-
-   Separately, it's also confused about the `@/...` routing we've done using `@rollup/plugin-alias`.
+- Is confused about the `@/...` routing we've done using `@rollup/plugin-alias`.  (and maybe via Vite when it supports it)
 
    How to tell it that these paths do exist?
 
@@ -64,8 +54,6 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 - allows multiple root nodes in a `template`
 - use of `ref` to have any values reactive
 
-**( ) When we do this, let's take them via `npm` dependencies (not CDN link). Vue 3 is better suited to tree-shaking.**
-
 
 ## Font Awesome
 
@@ -82,6 +70,10 @@ Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-
 Move narrative documents (why we do things in certain way) to the Wiki. 
 
 Make it a walk-through or bisection of the project, leaving project itself uncluttered. :)
+
+- *Vital ingredients*: what tools/libraries we picked and why
+
+
 
 ## Rollup update
 
@@ -153,4 +145,9 @@ To go sub-collection:
 ## Security Rules
 
 Changes due to the invite workflow: Cloud Functions should be the one bringing new users to `collaborators` and/or `authors`. This should be reflected in the docs, security rules, and their tests.
+
+
+## When Vite allows path mapping
+
+- [ ] Place `@/` back as a route to source level, not needing `./`, `../`.
 

@@ -3,7 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--PROD Favicon
     <link rel="icon" type="image/png" href="favicon.png">
+    -->
+
+    <!-- tbd. make 'set' work if we generate both 'index.dev.html' and 'index.html' (production)
+    -   from the same source.
+    -->
+    <!--SET DEV $FB   https://www.gstatic.com/firebasejs/7.14.2 -->
+    <!--SET PROD $FB  /__/firebase/7.14.2 -->
+    <!--SET DEV,PROD $FB_UI https://www.gstatic.com/firebasejs/ui/4.5.0 -->
 
     <!-- Firebase
     -   - latest versions -> https://firebase.google.com/support/release-notes/js
@@ -13,9 +23,16 @@
     -
     - Include only the Firebase features that you need.
     -->
-    <script defer src="/__/firebase/7.14.1/firebase-app.js"></script>
-    <script defer src="/__/firebase/7.14.1/firebase-auth.js"></script>
-    <script defer src="/__/firebase/7.14.1/firebase-firestore.js"></script>
+    <!--PROD Firebase
+    <script defer src="/__/firebase/7.14.2/firebase-app.js"></script>
+    <script defer src="/__/firebase/7.14.2/firebase-auth.js"></script>
+    <script defer src="/__/firebase/7.14.2/firebase-firestore.js"></script>
+    -->
+    <!--DEV Firebase -->
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.2/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.2/firebase-firestore.js"></script>
+    <!-- -->
 
     <!--
     - Firebase UI
@@ -24,10 +41,20 @@
     - Likely this is only needed by 'SignIn' page, but in development it was easiest to have it here. Since it likely
     - gets cached, there's little benefit in injecting it just for that one page.
     -->
+    <!--DEV,PROD -->
     <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css" />
+    <!-- -->
 
-    <script defer src="/__/firebase/init.js"></script>  <!-- calls 'firebase.initializeApp({ ... })' -->
+    <!--PROD Firebase config
+    <script defer src="/__/firebase/init.js"></script>
+    -->
+    <!--DEV Firebase config -->
+    <script type="module">
+      import config from "./__.js"
+      firebase.initializeApp(config);
+    </script>
+    <!-- -->
 
     <!--
     - Checking that Firebase loaded properly
@@ -35,7 +62,7 @@
     - tbd. If this only happens once per load, and 'App' initialization also, we can place the code in 'main.js'.
     -     It's not bad here, though.
     -->
-    <script>
+    <script type="module">
       document.addEventListener('DOMContentLoaded', () => {   // Q: does this fire just once, or after inside-SPA navidations?
         try {
           console.log("'index.html' loaded");    // DEBUG
@@ -51,9 +78,17 @@
       });
     </script>
 
-    <!-- Application
-    -->
+    <!--PROD Application
     <script type="module" src="/dist/bundle.esm.js"></script>
+    -->
+    <!--DEV Application -->
+    <script type="module">
+      import { createApp } from 'vue'   // Vite provides Vue 📦
+      import App from './src/App.vue'
+
+      createApp(App).mount('#app')
+    </script>
+    <!-- -->
   </head>
 
   <body>

@@ -11,6 +11,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);       // needed before first 'new Vue(...)'
 
+console.log("VueRouter added"); // DEBUG
 import App from './App.vue';
 import router from './router.js';
 
