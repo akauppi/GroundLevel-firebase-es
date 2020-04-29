@@ -1,4 +1,4 @@
-# GroundLevel ES6 * Firebase-web
+# GroundLevel ES6 * Firebase * Web
 
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
 
@@ -35,6 +35,16 @@ Let's start! 🤾‍♀️
   - `npm install -g firebase-tools`
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
+
+### Uses
+
+You may be curious as to our technology choices. There's going to be a separate Wiki section about it, but here is the short list of ingredients.
+
+- Vite - for buildless development flow
+- Vue 3 (beta) - for the UI framework
+- Rollup for production rollups 😉
+
+You don't need to be familiar with any of these technologies, in advance. They may also be changed during the course of the project: the technology choices in the title (ES6, Firebase and Web = SPA) are what remains.
 
 Developed with Firebase 8.2.0 on macOS
 
@@ -220,16 +230,6 @@ In particular:
 Thanks to Jaakko Roppola for wonderful icon art!! 🙌
 
 Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it, then changed a few things.
-
-<!-- things changed (easter egg):
-- Jonatas's code is unlicensed. This is MIT licensed.
-- Simplified `package.json` a bit
-- updated dependencies
-- `package-lock.json` disabled (just a matter of taste...)
-- added `dev` target for "watch" workflow
-- using `public` as the public folder (Firebase Hosting default)
-- targeting "evergreen" ([ES6](https://caniuse.com/#search=ES6%20modules) and [async/await](https://www.caniuse.com/#search=await) capable) browsers; for IE11 support, see [here](https://github.com/akauppi/GroundLevel-firebase-web/issues/5)
--->
 
 Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (blog, Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 

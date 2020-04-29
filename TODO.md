@@ -151,3 +151,9 @@ Changes due to the invite workflow: Cloud Functions should be the one bringing n
 
 - [ ] Place `@/` back as a route to source level, not needing `./`, `../`.
 
+It kind of *does*. Evan published an "API" and it allows before/after filters.  We can use that for the mapping.
+
+Also:
+
+- `import ... from "blah"` -> `import ... from "blah.js"`
+

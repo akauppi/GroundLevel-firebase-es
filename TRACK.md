@@ -22,3 +22,12 @@ The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anythi
 
 
 
+## "Official libraries Vue 3 Support Status" 
+
+https://github.com/vuejs/vue-next#official-libraries-vue-3-support-status
+
+- `vue-router`: alpha
+
+
+
+

@@ -3,7 +3,8 @@
 *
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
 */
-import VueRouter from 'vue-router'
+//import VueRouter from 'vue-router'  // Vue 2.x #bygones
+import { createRouter, createWebHistory } from 'vue-router';
 
 // Pages
 // note: not using lazy loading (didn't get it to work). #help
@@ -27,12 +28,12 @@ const routes = [
   //{ path: '/projects',  component: pageProject },    // '/projects/<project-id>'
     //
   //{ path: '*', component: page404 },  // Vue router < 4.0 #bygones
-  { path: ':catchAll(.*)', component: page404 } //,   // Vue router 4.0 #vuejs3
+  { path: '/:catchAll(.*)', component: page404 } //,   // Vue router 4.0 #vuejs3
 
   //{ path: '/ignore', component: () => import './pages/Home.vue' }   // tbd. Why doesn't this compile?
 ];
 
-const router = new VueRouter({
+const router = createRouter({
   //mode: 'history',  // Vue router < 4.0 #bygones
   history: createWebHistory(),  // Vue router 4.0 #vuejs3
 

@@ -6,15 +6,22 @@
 * Note: We provide access to Firebase authenticated user, but we *don't* deal with the Firebase-UI;
 *     'src/pages/SignIn.vue' does.
 */
-import Vue from 'vue';
+import { createApp } from 'vue';
 
-import VueRouter from 'vue-router';
+/* was (Vue 2.x) #bygones
+import { VueRouter } from 'vue-router';
 Vue.use(VueRouter);       // needed before first 'new Vue(...)'
+*/
 
-console.log("VueRouter added"); // DEBUG
 import App from './App.vue';
 import router from './router.js';
 
+// this or that? tbd.
+createApp(App)
+    .use(router)
+    .mount('#app');
+
+/* was: (Vue 2.x) #bygones
 new Vue({
   el: '#app',
   router,
@@ -27,3 +34,4 @@ new Vue({
     return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
   }
 });
+*/
