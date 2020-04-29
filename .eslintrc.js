@@ -59,6 +59,7 @@ module.exports = {
     ]
     */
 
+    'vue/valid-template-root': 0,   // doesn't apply to Vue 3
     //... add more above
   }
 };

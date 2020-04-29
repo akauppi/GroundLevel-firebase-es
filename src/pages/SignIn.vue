@@ -18,21 +18,19 @@
 -     -> https://firebase.google.com/docs/auth/web/firebaseui
 -->
 <template>
-  <section>
-    <!-- tbd. Replace this with a spinner when signing-in is in process...
-    -->
-    <div id="stranger">
-      <h1>WELCOME STRANGER!</h1>
-      <div>
-        Would you like to log in - you can do it anonymously..?  No login, no app.
-      </div>
-      <div id="firebaseui-auth-container" />
-      <div>
-        <!-- eslint-disable-next-line vue/max-attributes-per-line -->
-        <a href="https://github.com/akauppi/GroundLevel-firebase-web" target="_blank">About the application</a>
-      </div>
+  <!-- tbd. Replace this with a spinner when signing-in is in process...
+  -->
+  <div id="stranger">
+    <h1>WELCOME STRANGER!</h1>
+    <div>
+      Would you like to log in - you can do it anonymously..?  No login, no app.
     </div>
-  </section>
+    <div id="firebaseui-auth-container" />
+    <div>
+      <!-- eslint-disable-next-line vue/max-attributes-per-line -->
+      <a href="https://github.com/akauppi/GroundLevel-firebase-web" target="_blank">About the application</a>
+    </div>
+  </div>
 </template>
 
 <style scoped>

@@ -18,6 +18,8 @@ This is *highly* welcome to us!!! 🎉🎊🍬
 
 It's not detecting the setup.
 
+Also the [beta channel](https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg) doesn't.
+
 The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anything about Vite or Vue 3 beta (28-Apr-20). When they do, add the direct link here.
 
 

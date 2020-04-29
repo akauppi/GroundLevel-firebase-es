@@ -5,16 +5,13 @@
 - Signing in with mere '/signin' leads here.
 -->
 <template>
-  <section id="here">
+  <section id="this">
     <div>
       YOU ARE AT HOME 🏯
     </div>
 
-    <h2>Hi <tt>{{ uid }}</tt></h2>
+    <h2>Hi <span>{{ uid }}</span></h2>
 
-    <!-- DEBUG
-    <div>Projects: {{ projectsSorted.length }}</div>
-    -->
     <!-- List the projects we have access to -->
     <div id="grid-container-projects">
       <ProjectTile :project="null" />
@@ -24,7 +21,7 @@
 </template>
 
 <style scoped>
-  #here {
+  #this {
     text-align: center;
   }
 
@@ -47,6 +44,8 @@
   import { watchMyProjects } from "../firebase/queries.js";
   import { assert } from "../util/assert.js";
 
+  import { ref, reactive } from 'vue';
+
   export default {
     name: 'Home',      // Vue note: names help in debugging
     components: {
@@ -55,18 +54,17 @@
     mixins: [userMixin],
     data: () => {
       return {
-        // Vue 2 note: need to use object ('{}'), not an ES6 map to get reactivity going. With Vue 3, check if we can use a 'Map'.
-        projects: {} /*new Map()*/,    // <project-id>: { title: string, created: datetime, lastVisited: datetime }
+        projects: reactive( new Map() ),    // <project-id>: { title: string, created: datetime, lastVisited: datetime }
         unsubscribe: null    // () => ();   cleanup of Firestore watchers
       }
     },
     computed: {
       projectsSorted: (vm) => {   // array of { id: string, title: string, created: datetime, lastVisited: datetime }
-        const dataRaw = Object.entries(vm.projects);    // from an object
-        //const dataRaw = Array.from( vm.projects.entries() );    // ES6 'Map'
+        //const dataRaw = Object.entries(vm.projects);    // from an object
+        const dataRaw = Array.from( vm.projects.entries() );    // ES6 'Map'
 
         if (dataRaw.length > 0) { // DEBUG
-          console.log( "Projects data (still unsorted:", dataRaw);
+          console.log( "Projects data (still unsorted):", dataRaw);
         }
 
         const tmp = dataRaw.map( tuple => {    // ([id,data])
@@ -87,11 +85,11 @@
       //
       vm.unsubscribe = watchMyProjects( (id, data) => {
         if (!data) {
-          //vm.projects.delete(id);   // ES6 'Map'
-          vm.$delete(vm.projects, id);
+          vm.projects.delete(id);   // ES6 'Map'
+          //delete vm.projects[id];   // removes the key
         } else {
-          //vm.projects.set(id, data);  // ES6 'Map'
-          vm.$set(vm.projects, id, data);
+          vm.projects.set(id, data);  // ES6 'Map'
+          //vm.projects[id] = data;
         }
 
         console.log( `GOT PROJECT ${id}:`, data );
