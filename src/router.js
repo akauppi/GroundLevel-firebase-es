@@ -12,6 +12,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 //
 import pageHome from './pages/Home.vue';
 import pageSignIn from './pages/SignIn.vue';
+import Project from './pages/Project.vue';
 import page404 from './pages/404.vue';
 
 import { currentFirebaseUserProm } from './util/auth.js';
@@ -23,14 +24,14 @@ const reqAuth = { requiresAuth: true }
 //    this, and go for the shorter format (best when there are lots of routes).
 //
 const routes = [
-  { path: '/',        component: pageHome, meta: reqAuth },
+  { path: '/',        component: pageHome, meta: reqAuth, name: 'home' },
   { path: '/signin',  component: pageSignIn },    // '?final=/somein'
-  //{ path: '/projects',  component: pageProject },    // '/projects/<project-id>'
+  { path: '/projects/:id', component: Project, props: true, meta: reqAuth, name: 'projects' },    // '/projects/<project-id>'
     //
   //{ path: '*', component: page404 },  // Vue router < 4.0 #bygones
   { path: '/:catchAll(.*)', component: page404 } //,   // Vue router 4.0 #vuejs3
 
-  //{ path: '/ignore', component: () => import './pages/Home.vue' }   // tbd. Why doesn't this compile?
+  //{ path: '/ignore', component: () => import './pages/Home.vue' }   // tbd. Why doesn't lazy loading compile?
 ];
 
 const router = createRouter({

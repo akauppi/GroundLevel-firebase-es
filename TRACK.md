@@ -31,5 +31,9 @@ https://github.com/vuejs/vue-next#official-libraries-vue-3-support-status
 - `vue-router`: alpha
 
 
+## Bootstrap-Vue on Vue 3 (beta)
+
+https://github.com/bootstrap-vue/bootstrap-vue/issues/5196
+
 
 

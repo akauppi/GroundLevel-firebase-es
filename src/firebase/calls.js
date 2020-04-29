@@ -7,7 +7,7 @@
 /*
 * Get UI information about a certain other user (that we work together with in a given project).
 */
-async function userUIinfo(projectId, uid) {    // (string, string) => Promise of { name: string, photoURL: url }
+async function userUIinfo(projectId, uid) {    // (string, string) => Promise of userInfoC-doc
 
   throw "NOT IMPLEMENTED";
 }

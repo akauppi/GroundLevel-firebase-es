@@ -5,30 +5,39 @@
 - Signing in with mere '/signin' leads here.
 -->
 <template>
-  <section id="this">
+  <section id="here">
     <div>
       YOU ARE AT HOME 🏯
     </div>
 
+    <!-- disabled
     <h2>Hi <span>{{ uid }}</span></h2>
-
-    <!-- List the projects we have access to -->
-    <div id="grid-container-projects">
+    -->
+    <!-- New button + visited projects (latest first) -->
+    <div class="grid-container-projects">
       <ProjectTile :project="null" />
-      <ProjectTile v-for="p in projectsSorted" :key="p.key" :project="p" />
+      <ProjectTile v-for="o in projectsSorted" :key="o._id" :project="o" />
     </div>
+
+    <!-- Invited --
+    <div class="grid-container-projects">
+      <ProjectTile v-for="p in invitesPending" :key="p._id" :project="p" />
+    </div>
+    -->
   </section>
 </template>
 
 <style scoped>
-  #this {
+  #here {
     text-align: center;
   }
 
   /* tbd. could do some aesthetic grouping: to make the columns grow by the width of the browser window;
   * to have possibly padding to left and right if there's plentiful space.
+  *
+  * #flexbox
   */
-  #grid-container-projects {
+  .grid-container-projects {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto;
@@ -40,11 +49,11 @@
 
 <script>
   import { userMixin } from '../mixins/user.js';
-  import ProjectTile from '../components/ProjectTile.vue';
+  import ProjectTile from './Home/ProjectTile.vue';
   import { watchMyProjects } from "../firebase/queries.js";
   import { assert } from "../util/assert.js";
 
-  import { ref, reactive } from 'vue';
+  import { reactive } from 'vue';
 
   export default {
     name: 'Home',      // Vue note: names help in debugging
@@ -59,7 +68,7 @@
       }
     },
     computed: {
-      projectsSorted: (vm) => {   // array of { id: string, title: string, created: datetime, lastVisited: datetime }
+      projectsSorted: (vm) => {   // array of { id: string, ..projectsC doc fields }
         //const dataRaw = Object.entries(vm.projects);    // from an object
         const dataRaw = Array.from( vm.projects.entries() );    // ES6 'Map'
 
@@ -69,7 +78,7 @@
 
         const tmp = dataRaw.map( tuple => {    // ([id,data])
           const [id,data] = tuple;
-          return { ...data, key: id };   // key injected to help Vue know which project is which
+          return { _id: id, ...data };
         });
         return tmp.sort( (a,b) => b.created - a.created );
       },
@@ -91,8 +100,6 @@
           vm.projects.set(id, data);  // ES6 'Map'
           //vm.projects[id] = data;
         }
-
-        console.log( `GOT PROJECT ${id}:`, data );
       })
     },
     beforeDestroy: function () {

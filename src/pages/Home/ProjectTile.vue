@@ -1,13 +1,10 @@
 <!--
-- src/components/ProjectTile.vue
+- src/pages/Home/ProjectTile.vue
 -
 - The button to create a new project or open an existing one.
 -
 - Props:
--   project: { title: string, created: datetime, lastUsed: datetime }
--
-- Todo:
--   - eventually, we'd have a thumbnail as the background of existing projects' tiles.
+-   project: { _id: string, ..projectsC document fields }
 -->
 <template>
   <div class="project-tile" :class="{ 'new-project-tile': isNewTile }">
@@ -17,9 +14,12 @@
       <button id="new-project">+ Create</button>
     </template>
     <template v-else>
-      {{ project.title }}
-      {{ project.created.toLocaleString() }}
-      {{ project.lastUsed }}
+      <router-link :to="`/projects/${project._id}`">
+        {{ project.title }}
+        {{ project.created.toLocaleString() }}
+        Authors: {{ project.authors }}
+        Collaborators: {{ project.collaborators }}
+      </router-link>
     </template>
   </div>
 </template>
@@ -47,11 +47,7 @@
   export default {
     name: 'ProjectTile',
     props: {
-      project: {    // { title: String, created: datetime, lastUsed: datetime, ... }    ; for presentation purposes
-        type: Object,
-        required: false,
-        default: null
-      }
+      project: { type: Object, required: false, default: null }
     },
     computed: {
       isNewTile: (vm) => vm.project == null
