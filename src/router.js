@@ -3,8 +3,7 @@
 *
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
 */
-//import VueRouter from 'vue-router'  // Vue 2.x #bygones
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router/dist/vue-router.esm.js';   // map from 'vue-router' once Vite has it (this is only in one place, so no big deal)
 
 // Pages
 // note: not using lazy loading (didn't get it to work). #help

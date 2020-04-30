@@ -81,8 +81,8 @@ export default {
     //preserveModules: true,
 
     paths: {
-      vue: 'vue/dist/vue.esm.browser.js',
-      "vue-router": 'vue-router/dist/vue-router.esm.browser.js'
+      vue: 'vue/dist/vue.esm-browser.js',   // note: there's also a '.prod.js' version if you fancy (97k vs 430k): 'production ? ... : ...'
+      "vue-router": 'vue-router/dist/vue-router.esm.js'
     },
 
     // tbd. Do we need to use 'globals'?

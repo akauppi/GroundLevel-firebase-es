@@ -14,6 +14,9 @@ Mentioned on the README (0.6.0).
 
 This is *highly* welcome to us!!! 🎉🎊🍬
 
+- Removed from Vite README (0.7.0)
+
+
 ## Support (of Vite and/or Vue 3.0 beta) from Chrome Vue development plugin
 
 It's not detecting the setup.
@@ -34,6 +37,7 @@ https://github.com/vuejs/vue-next#official-libraries-vue-3-support-status
 ## Bootstrap-Vue on Vue 3 (beta)
 
 https://github.com/bootstrap-vue/bootstrap-vue/issues/5196
+
 
 
 
