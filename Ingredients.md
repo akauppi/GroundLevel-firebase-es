@@ -4,25 +4,20 @@ As any template, one has made decisions. These fall into three categories: selec
 
 **Contains:**
 
-- Rollup
-- Vue.js 2 + Vue-router
+- Vite
+- Vue.js 3 beta + Vue-router
 - Firebase-auth and Firebase UI
-
->*We'll consider Vue 3 the moment it's available in beta. It has 🍫🍬🍭 that makes the template simpler. :)*
-
-<!-- Placeholder; not using Font Awesome
-Font Awesome may only be used for some individual icons, in the template. Having it included is intended to make creating your app smoother.
--->
+- Cloud Firestore
 
 **Does *not* contain:**
 
 - Vue CLI (not needed)
-- Babel (can be easily added)
+- Babel (not needed; can be easily added)
 - VueX
 
-Instead of Vue CLI, we use GitHub for getting started, Rollup for packing and Firebase for deploying.
+Instead of Vue CLI, we use GitHub for getting started, Vite for development hosting and Firebase for deploying.
 
-Instead of VueX (state management), we use `Vue.observable`s. They are part of the core.
+Instead of VueX (state management), we use Vue.js 3's reactivity.
 
 **Consumed with:**
 
@@ -32,7 +27,9 @@ Browsers with native ES6 and async/await - [everything](https://www.caniuse.com/
 ## Authentication decisions
 
 - Using [Firebase UI](https://firebase.google.com/docs/auth/web/firebaseui) library
-- Using redirect (not popup) method for sign in. The choice is because of how we want the app to behave.
-- Instead of a 'sign in' menu (in place of the user profile), we require the user to *always* sign in.
+- Having all pages require sign in. This has lead to:
+  - Using redirect method for sign in (not popup).
+  - There's no 'sign in' menu; you're either signed in, or you are at the sign-in page.
 
-You can tinker with the code if you don't feel these choices match your needs.
+Your app needs may be different. Hopefully the code is easy enough to adapt. Please ask for help at e.g. Gitter - but the template itself will proceed with above app focus.
+

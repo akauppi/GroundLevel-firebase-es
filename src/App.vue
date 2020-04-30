@@ -4,25 +4,22 @@
 - The frame of the application - same for all pages
 -->
 <template>
-  <!-- tbd. Once firmly in Vue 3, remove the single-root-node 'div' -->
-  <div>
-    <!-- #Snip
-        header-main-footer _may_ be good for accessibility. Use of them doesn't really change anything for normal
-        rendering. (Q: is this correct? #advice)
+  <!-- #Snip
+      header-main-footer _may_ be good for accessibility. Use of them doesn't really change anything for normal
+      rendering. (Q: is this correct? #advice)
 
-        See -> https://stackoverflow.com/questions/4781077/html5-best-practices-section-header-aside-article-elements
-    -->
-    <header>
-      <app-logo />
-      <app-profile v-if="user" />
-    </header>
-    <main>
-      <router-view />
-    </main>
-    <footer>
-      <app-footer />
-    </footer>
-  </div>
+      See -> https://stackoverflow.com/questions/4781077/html5-best-practices-section-header-aside-article-elements
+  -->
+  <header>
+    <app-logo />
+    <app-profile v-if="user" />
+  </header>
+  <main>
+    <router-view />
+  </main>
+  <footer>
+    <app-footer />
+  </footer>
 </template>
 
 <style scoped>

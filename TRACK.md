@@ -26,14 +26,6 @@ Also the [beta channel](https://chrome.google.com/webstore/detail/vuejs-devtools
 The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anything about Vite or Vue 3 beta (28-Apr-20). When they do, add the direct link here.
 
 
-
-## "Official libraries Vue 3 Support Status" 
-
-https://github.com/vuejs/vue-next#official-libraries-vue-3-support-status
-
-- `vue-router`: alpha
-
-
 ## Bootstrap-Vue on Vue 3 (beta)
 
 https://github.com/bootstrap-vue/bootstrap-vue/issues/5196

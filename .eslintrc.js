@@ -1,13 +1,10 @@
 module.exports = {
-  //extends: ['plugin:vue/recommended', 'jwalker'],   // as in jwalker's template
-  extends: ['plugin:vue/recommended'],
+  extends: ['plugin:vue/vue3-recommended'],
 
   /* 'eslint-plugin-vue' is the base line. Here are deviations to it
   *
-  * See -> https://vuejs.org/v2/style-guide/
-  *
+  * See -> https://vuejs.org/v2/style-guide/    <-- tbd. update to Vue 3
   */
-  // Note: Compare these
   rules: {
     // see -> https://github.com/vuejs/eslint-plugin-vue/blob/master/docs/rules/mustache-interpolation-spacing.md
     //
@@ -27,39 +24,6 @@ module.exports = {
 
     'vue/singleline-html-element-content-newline': 0, // AK (could also let it be enabled?)
 
-    /*
-    'no-console': 0,
-    // 'vue/html-self-closing': 1,
-    'vue/max-attributes-per-line': [2, {
-      singleline: 3,
-      multiline: {
-        max: 1,
-        allowFirstLine: false
-      }
-    }],
-
-    // AK 30-Jan-20
-    'max-len': [1, {    // 1: warning
-      code: 100,
-      tabWidth: 2,
-      ignoreUrls: true,
-      ignoreComments: true  // AK
-    }],
-
-    // AK 30-Jan-20
-    'no-multi-spaces': [2,
-      {
-        ignoreEOLComments: true,    // AK
-        exceptions: {
-          VariableDeclarator: true,
-          ImportDeclaration: true,
-          AssignmentExpression: true,
-        },
-      },
-    ]
-    */
-
-    'vue/valid-template-root': 0,   // doesn't apply to Vue 3
     //... add more above
   }
 };
