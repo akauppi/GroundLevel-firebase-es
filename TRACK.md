@@ -31,5 +31,15 @@ The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anythi
 https://github.com/bootstrap-vue/bootstrap-vue/issues/5196
 
 
+## Import maps (in browser)
+
+https://wicg.github.io/import-maps/
+
+State: no browser support?
+
+>not a W3C Standard nor is it on the W3C Standards Track
+
+
+
 
 

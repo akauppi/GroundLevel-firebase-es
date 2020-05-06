@@ -5,6 +5,9 @@
 *
 * We should handle Firebase auth API; pages don't need to know it ('SignIn' page being excepted).
 *
+* This code is independent of a project. Thus it's kept under 'utils' (and not in 'firebase' which has project specific
+* Firebase details).
+*
 * References:
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth

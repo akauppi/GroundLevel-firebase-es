@@ -10,9 +10,6 @@
       YOU ARE AT HOME 🏯
     </div>
 
-    <!-- disabled
-    <h2>Hi <span>{{ uid }}</span></h2>
-    -->
     <!-- New button + visited projects (latest first) -->
     <div class="grid-container-projects">
       <ProjectTile :project="null" />
@@ -48,7 +45,7 @@
 </style>
 
 <script>
-  import { userMixin } from '../mixins/user.js';
+  import { user } from '../refs/user.js';
   import ProjectTile from './Home/ProjectTile.vue';
   import { watchMyProjects } from "../firebase/queries.js";
   import { assert } from "../util/assert.js";
@@ -60,7 +57,7 @@
     components: {
       ProjectTile
     },
-    mixins: [userMixin],
+    //mixins: [userMixin],
     data: () => {
       return {
         projects: reactive( new Map() ),    // <project-id>: { title: string, created: datetime, lastVisited: datetime }
@@ -84,7 +81,8 @@
       },
       uid: (vm) => {
         return vm.user ? vm.user.uid : '...';
-      }
+      },
+      user: () => user
     },
     created: function () {
       const vm = this;

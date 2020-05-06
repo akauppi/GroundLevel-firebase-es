@@ -27,13 +27,12 @@
 </style>
 
 <script>
-  import { userMixin } from '../mixins/user';   // ignore IDE warning
+  import { user } from '../refs/user';
   import { assert } from "../util/assert";
   //import { watchProject, watchUserInfo } from "../firebase/queries.js";
 
   export default {
     name: 'Project',      // Vue note: names help in debugging
-    mixins: [userMixin],
     props: {
       id: { type: String, required: true }
     },
@@ -49,7 +48,8 @@
       }
     },
     computed: {
-      projectId: vm => vm.id    // alias
+      projectId: vm => vm.id,    // alias
+      user: () => user
     },
     created: function () {
       const vm = this;

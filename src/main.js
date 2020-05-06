@@ -12,13 +12,14 @@ import router from './router.js';
 //import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
 createApp(App)
-    .use(router)
-    //.use(BootstrapVue)    // not quite yet
-    //.use(IconsPlugin)
-    .mount('#app');
+  .use(router)
+  //.use(BootstrapVue)    // not quite yet
+  //.use(IconsPlugin)
+  .mount('#app');
 
 
-/*** Note: with Vue 2.x we had this - what's a similar way with Vue 3 (beta)?
+/*** Note: with Vue 2.x we had this - what's a similar way with Vue 3 (beta)? Do we need this?
+ *
   renderError: (h, err) => {  // pour runtime problems on the screen, if we have them (may help in development);
                               // in production we may want to pour these to central monitoring
     return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
