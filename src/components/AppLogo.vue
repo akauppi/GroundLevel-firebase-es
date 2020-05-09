@@ -1,7 +1,7 @@
 <!--
 - src/components/AppLogo.vue
 -
-- The logo in top left corner.
+- The logo in top left corner
 -->
 <template>
   <div class="app-logo fixed-top-left">

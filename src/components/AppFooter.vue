@@ -2,9 +2,6 @@
 - src/components/AppFooter.vue
 -
 - Line at the bottom of the application.
--
-- Signed in: can show status or something
-- Signed out: (not used)
 -->
 <template>
   <div class="app-footer fixed-bottom">

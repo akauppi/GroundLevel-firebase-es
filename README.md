@@ -261,3 +261,9 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 - [Cloud Firestore Data Modeling (Google I/O'19)](https://www.youtube.com/watch?v=lW7DWV2jST0) (Youtube 40:37, May 2019)
    - INCREDIBLY GREAT video on essentially all aspects needed to be considered while designing a data model 🔥🔥🔥
 
+<!-- enable once we have Typescript in
+### Typescript
+
+- [Configuring ESLint on a TypeScript project](https://www.jackfranklin.co.uk/blog/typescript-eslint/) (blog, Jan 2019)
+- [Using Typescript with Vue Single File Components](https://www.digitalocean.com/community/tutorials/vuejs-using-typescript-with-vue)
+-->

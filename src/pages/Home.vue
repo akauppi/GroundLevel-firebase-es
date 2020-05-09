@@ -11,13 +11,13 @@
     </div>
 
     <!-- New button + visited projects (latest first) -->
-    <div class="grid-container-projects">
+    <div class="flex-container">
       <ProjectTile :project="null" />
       <ProjectTile v-for="o in projectsSorted" :key="o._id" :project="o" />
     </div>
 
     <!-- Invited --
-    <div class="grid-container-projects">
+    <div class="flex-container">
       <ProjectTile v-for="p in invitesPending" :key="p._id" :project="p" />
     </div>
     -->
@@ -29,11 +29,24 @@
     text-align: center;
   }
 
-  /* tbd. could do some aesthetic grouping: to make the columns grow by the width of the browser window;
-  * to have possibly padding to left and right if there's plentiful space.
-  *
-  * #flexbox
-  */
+  .flex-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px;
+  }
+  .flex-container > div {
+    margin: 10px;
+
+    /* 😁 https://www.cssmatic.com/box-shadow */
+    -webkit-box-shadow: 10px 10px 25px -13px rgba(0,0,0,0.5);
+    -moz-box-shadow: 10px 10px 25px -13px rgba(0,0,0,0.5);
+    box-shadow: 10px 10px 25px -13px rgba(0,0,0,0.5);
+  }
+
+  /* disabled (used flex instead)
   .grid-container-projects {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -41,7 +54,7 @@
     justify-items: center;
 
     grid-gap: 10px;
-  }
+  }*/
 </style>
 
 <script>
@@ -57,7 +70,6 @@
     components: {
       ProjectTile
     },
-    //mixins: [userMixin],
     data: () => {
       return {
         projects: reactive( new Map() ),    // <project-id>: { title: string, created: datetime, lastVisited: datetime }
@@ -65,7 +77,7 @@
       }
     },
     computed: {
-      projectsSorted: (vm) => {   // array of { id: string, ..projectsC doc fields }
+      projectsSorted(vm) {   // array of { id: string, ..projectsC doc fields }
         //const dataRaw = Object.entries(vm.projects);    // from an object
         const dataRaw = Array.from( vm.projects.entries() );    // ES6 'Map'
 
@@ -84,7 +96,7 @@
       },
       user: () => user
     },
-    created: function () {
+    created() {
       const vm = this;
       assert(vm);
 
@@ -93,10 +105,8 @@
       vm.unsubscribe = watchMyProjects( (id, data) => {
         if (!data) {
           vm.projects.delete(id);   // ES6 'Map'
-          //delete vm.projects[id];   // removes the key
         } else {
           vm.projects.set(id, data);  // ES6 'Map'
-          //vm.projects[id] = data;
         }
       })
     },

@@ -4,8 +4,6 @@
 - Information about the user. Possibility to sign out.
 - Only visible when signed in.
 -
-- NOTE: It would be so nice if Vue had built-in Promise support, like Svelte 3's '{await}'.
--
 - References:
 -   - TylerPottsDev / vue-dropdown (GitHub) -> https://github.com/TylerPottsDev/vue-dropdown
 -     - adapted dropdown menu approach
@@ -17,10 +15,7 @@
   -->
   <nav class="app-profile fixed-top-right">
     <div id="user-name" @click.stop="toggleMenu">
-      {{ user ? user.displayName : '...' }}
-      <!-- tbd. Bring in Font Awesome, at some point?
-      <font-awesome-icon :icon="appIcon" />
-      -->
+      {{ user.value ? user.value.displayName : '...' }}   <!-- Vue.js 3 'ref' in ?: -->
       <!-- triangle -->
       <svg viewBox="0 0 1030 638" width="10">
         <path d="M1017 68L541 626q-11 12-26 12t-26-12L13 68Q-3 49 6 24.5T39 0h952q24 0 33 24.5t-7 43.5z" />
@@ -44,7 +39,7 @@
 
 <style scoped>
   /* Vue Note: CSS within Vue single-file-component declaration doesn't seem to allow inner objects, so there's some
-  *       repetition.
+  *       repetition. tbd. can SASS do that?
   */
   .app-profile {
     display: flex;
@@ -74,11 +69,11 @@
     transition: 0.2s;
   }
 
-  .user-name,
+  /*#user-name,*/
   .menu-item {
     border-bottom: 3px solid transparent;   /* underlining when hovered on */
   }
-  .user-name:hover,
+  /*#user-name:hover,*/
   .menu-item:hover {
     background-color: #444 !important;
     border-bottom-color: #FF5858 !important;
