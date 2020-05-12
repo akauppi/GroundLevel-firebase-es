@@ -17,8 +17,8 @@ import { createRouter, createWebHistory } from 'vue-router/dist/vue-router.esm.j
 //
 //    [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 //
-import pageHome from './pages/Home.vue';
-import pageSignIn from './pages/SignIn.vue';
+import Home from './pages/Home.vue';
+import SignIn from './pages/SignIn.vue';
 import Project from './pages/Project.vue';
 import page404 from './pages/404.vue';
 
@@ -32,11 +32,11 @@ const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipA
 //                not to do this, and go for the shorter format (best when there are lots of routes).
 //
 const routes = [
-  r('/', pageHome, { name: 'home' }),
-  skipAuth('/signin',  pageSignIn),    // '?final=/somein'
+  r('/', Home, { name: 'home' }),
+  skipAuth('/signin',  SignIn),    // '?final=/somein'
   r('/projects/:id', Project, { props: true, name: 'projects' }),    // '/projects/<project-id>'
     //
-  r('/dynamic', () => import('./pages/Home.vue')),    // Q: why ESLint colors it red? #help
+  //r('/dynamic', () => import('./pages/Home.vue')),    // Q: why ESLint colors it red? #help
     //
   skipAuth('/:catchAll(.*)', page404 )
 ];

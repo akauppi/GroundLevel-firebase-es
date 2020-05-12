@@ -12,7 +12,7 @@
   -->
   <h1>WELCOME STRANGER!</h1>
   <div>
-    Would you like to log in - <strike>you can do it anonymously</strike>..?  No login, no app.
+    Would you like to log in - you can do it anonymously..?  No login, no app.
   </div>
   <div id="firebaseui-container" />
   <div>
@@ -43,7 +43,7 @@
   * This was made to be a function, in case we would inject 'firebaseui' to just this page.. Which we don't do;
   * see 'index.html'.
   */
-  function uiConfig(successUrl) {     // (string) => {...}
+  function uiConfigF(successUrl) {     // (string) => {...}
     assert(firebaseui);
 
     return {
@@ -111,7 +111,7 @@
       //tosUrl: '<your-tos-url>',     // Terms of Service
       //privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
     };
-  };
+  }
 
   /*** DISABLED (but keep)
   /*
@@ -162,41 +162,51 @@
    const injectedProm = Promise.resolve(); //injectFirebaseUI();
   ***/
 
-  export default {
-    name: 'SignIn',
+  function setup() {
+    // tbd. Do we get here (called again) for each visit of the '/signin' page?
 
-    created() {
-      const toPath = this.$route.query.final || '/';
+    // Note: Didn't find a way the new (4.x) vue-router would expose query parameters. Does it? #help
 
-      console.log("Once signed in, we'd 🛵 to: "+ toPath);
+    const toPath = new URLSearchParams(window.location.search).get('final');    // "some..."|null
 
-      // Decision: what auth state persistence does your app favor?
-      // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi
-      //
-      // tbd. This could be driven from 'config.js'
-      //
-      // 'Persistence.SESSION': "Existing and future Auth states are now persisted in the current session only.
-      //                        Closing the window would clear any existing state even if a user forgets to sign out."
-      //                        (source: FirebaseUI sources)
-      //
-      firebase.auth().setPersistence( firebase.auth.Auth.Persistence.SESSION )
+    // SOUVENIR
+    //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
+
+    console.log("Once signed in, we'd 🛵 to: " + toPath);
+
+    // Decision: what auth state persistence does your app favor?
+    // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi
+    //
+    // tbd. This could be driven from 'config.js'
+    //
+    // 'Persistence.SESSION': "Existing and future Auth states are now persisted in the current session only.
+    //                        Closing the window would clear any existing state even if a user forgets to sign out."
+    //                        (source: FirebaseUI sources)
+    //
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
         .then(
-          console.debug("Persistence changed")    // we don't really care, do we?
+            console.debug("Persistence changed")    // we don't really care, do we?
         )
-        .catch( error => {
+        .catch(error => {
           console.error('Error in \'.setPersistence\'', error.code, error.message);
         });
 
-      // If using the injection, bring the rest in once that Promise has succeeded.
+    // If using the injection, bring the rest in once that Promise has succeeded.
 
-      // Note: There's no harm in not moving as 'this.$route.push(toPath)', right? Think not. #help
+    // Note: There's no harm in not moving as 'this.$route.push(toPath)', right? Think not. #help
+    //
+    const uiConfig = uiConfigF("http://localhost:3000")  //(toPath | "/");
+    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+    ui.start("#firebaseui-container", uiConfig);
       //
-      const uiConfig = uiConfig(toPath);
-      const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
 
-      ui.start("#firebaseui-container", uiConfig);
-        //
-        // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
-    }
-  };
+    return {}   // nothing needs to be exposed
+  }
+
+  export default {
+    name: 'SignIn',
+    setup
+  }
 </script>

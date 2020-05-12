@@ -47,20 +47,6 @@
 - Would someone with more Firebase experience check out the instructions in `README.md`. #help
 
 
-## Vue 3 beta
-
-Once it reaches beta, let's make a `vue3-beta` branch that uses them (Vue + vue-router). Many things how it can simplify code:
-
-- allows multiple root nodes in a `template`
-- use of `ref` to have any values reactive
-
-
-## Font Awesome
-
-- [ ] Consider bringing it in, to replace e.g. the menu down-arrow with an icon from `npm`. 
-
-   See https://github.com/FortAwesome/vue-fontawesome
-
 ## Firebase Functions
 
 - Consider making a cloud function that periodically looks for projects that were removed a certain time ago (e.g. > 1 month), and completely removes them. (of course making notes to the log)
@@ -156,4 +142,30 @@ It kind of *does*. Evan published an "API" and it allows before/after filters.  
 Also:
 
 - `import ... from "blah"` -> `import ... from "blah.js"`
+
+
+## Bootcamp-vue
+
+When it's supported in Vue.js 3.
+
+Better looks.
+
+
+## Firebase UI - or not???
+
+There's an unnecessary re-rendering of the SignUp page, when using Google sign-in with Firebase UI.
+
+Why does that exist?
+
+We likely need to read the Firebase UI code base. And if we do, doing the same as part of `SignIn.vue` might become a tempting idea.
+
+FirebaseUI is just a veneer on top of Firebase auth. If we are better off without it, why not?
+
+
+## Upgrading an anonymous user
+
+How is that done?  Should we have a menu item if a user has logged in, anonymously?
+
+See [Convert an anonymous account to a permanent account](https://firebase.google.com/docs/auth/web/anonymous-auth#convert-an-anonymous-account-to-a-permanent-account) (Firebase docs)
+
 
