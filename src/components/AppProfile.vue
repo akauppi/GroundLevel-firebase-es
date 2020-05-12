@@ -37,10 +37,11 @@
   </nav>
 </template>
 
-<style scoped>
-  /* Vue Note: CSS within Vue single-file-component declaration doesn't seem to allow inner objects, so there's some
-  *       repetition. tbd. can SASS do that?
-  */
+/* Note: Using 'lang="scss"' to have nested CSS
+*
+* Track CSS standard support for nesting (draft) -> https://drafts.csswg.org/css-nesting/
+*/
+<style lang="scss" scoped>
   .app-profile {
     display: flex;
 
@@ -49,15 +50,15 @@
     background-color: #222;
     color: #ddd;
     /*border-radius: 0px 0px 0 16px;*/    /*uncomment to curve the lower left corner*/
-  }
 
-  .app-profile svg {
-    width: 10px;
-    margin-left: 10px;
-  }
+    svg {
+      width: 10px;
+      margin-left: 10px;
 
-  .app-profile svg path {
-    fill: #888;
+      path {
+        fill: #888;
+      }
+    }
   }
 
   .menu-item {

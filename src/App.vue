@@ -6,7 +6,7 @@
 <template>
   <header>
     <app-logo />
-    <app-profile v-if="user" />
+    <app-profile v-if="user.value" />
   </header>
   <main>
     <router-view />

@@ -43,8 +43,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-
-  //base: ...,    // tbd. what is this used for?  What to place here?
+  //base: process.env.BASE_URL,    // tbd. what is this used for?
   routes
 });
 

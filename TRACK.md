@@ -1,13 +1,5 @@
 # Track
 
-## vite - Vue source map support
-
-```
-Vue SFC Source Map support
-```
-
-Mentioned on the README (0.6.0). Interested.
-
 ## vite - Custom imports map (alias) support
 
 Mentioned on the README (0.6.0). 
@@ -40,6 +32,18 @@ State: no browser support?
 >not a W3C Standard nor is it on the W3C Standards Track
 
 
+## CSS standard support for nesting
+
+https://drafts.csswg.org/css-nesting/
+
+Once implemented in browsers, we don't need the `lang="scss"` any more.
+
+Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
 
 
+## Vite 0.13.x has `process.env.NODE_ENV` catcha
+
+Updating to it causes an error in console.
+
+Try with next version.
 

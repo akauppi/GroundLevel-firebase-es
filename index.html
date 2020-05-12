@@ -33,17 +33,20 @@
     <script defer src="/__/firebase/7.14.2/firebase-firestore.js"></script>
     -->
     <!--DEV Firebase -->
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.2/firebase-auth.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.2/firebase-firestore.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.3/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.3/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.3/firebase-firestore.js"></script>
     <!-- -->
 
     <!--
     - Firebase UI
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
-    - Likely this is only needed by 'SignIn' page, but in development it was easiest to have it here. Since it likely
-    - gets cached, there's little benefit in injecting it just for that one page.
+    - This is only needed in 'SignIn.vue', but there's no injection to 'head' in Vue.js (seems, by design?) so in
+    - development it was easiest to have it here. It likely gets cached, and everyone needs to come through the
+    - signin at some point, so there's little benefit in injecting it just for that one page.
+    -
+    - See discussion -> https://stackoverflow.com/questions/41710898/injecting-into-head-in-vue-js
     -->
     <!--DEV,PROD -->
     <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
