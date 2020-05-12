@@ -85,6 +85,19 @@
       });
     </script>
 
+    <!--
+    - Vite 11..14 have a bug/feature that check of 'process.env.NODE_ENV' is not handled. It doesn't show in Vite 10.3.
+    -->
+    <!--PROD env
+    <script></script>
+    -->
+    <!-- DEV env -->
+    <script>
+      if (window.process) alert("Unexpected: 'process.env' exists!");
+      window.process = { env: { NODE_ENV: '' } }
+    </script>
+    <!-- -->
+
     <!--PROD Application
     <script type="module" src="/dist/bundle.esm.js"></script>
     -->
