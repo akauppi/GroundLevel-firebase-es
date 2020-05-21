@@ -20,7 +20,7 @@ The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anythi
 
 ## Bootstrap-Vue on Vue 3 (beta)
 
-https://github.com/bootstrap-vue/bootstrap-vue/issues/5196
+[Vue 3 support](https://github.com/bootstrap-vue/bootstrap-vue/issues/5196)
 
 
 ## Import maps (in browser)
@@ -41,7 +41,7 @@ Once implemented in browsers, we don't need the `lang="scss"` any more.
 Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
 
 
-## Vite 0.13.x has `process.env.NODE_ENV` catcha
+## Vite 0.11.. 0.14.2 has `process.env.NODE_ENV` catcha
 
 Updating to it causes an error in console.
 

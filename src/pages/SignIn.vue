@@ -39,6 +39,8 @@
   import { allowAnonymousAuth } from '../config.js';
   import { assert } from '../util/assert.js';
 
+  import { useRoute } from 'vue-router';
+
   /*
   * This was made to be a function, in case we would inject 'firebaseui' to just this page.. Which we don't do;
   * see 'index.html'.
@@ -165,8 +167,9 @@
   function setup() {
     // tbd. Do we get here (called again) for each visit of the '/signin' page?
 
-    // Note: Didn't find a way the new (4.x) vue-router would expose query parameters. Does it? #help
-
+    // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Maybe try it? (we're anyways
+    //    Vue bound, so feels better to keep navigation in one jar 🍯).
+    //
     const toPath = new URLSearchParams(window.location.search).get('final');    // "some..."|null
 
     // SOUVENIR

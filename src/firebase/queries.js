@@ -15,9 +15,83 @@ const userInfoC = db.collection('userInfo');
 
 import { assert } from '../util/assert.js';
 
+import { reactive, watchEffect } from 'vue';
+import { user } from '../refs/user.js';
 
 //--- Projects ---
 
+// The same reactive table is for all users. We just wipe it like a restaurante table. 🍽
+//
+// Used by: Home.vue for populating the grid of projects
+//
+// Projects marked 'removed' are not included.
+//
+const projects = reactive( new Map() );      // <project-id>: { title: string, created: datetime, lastVisited: datetime }
+
+/*
+* Maintain the 'projects' map, mirroring changes in the database and observing user sign-in/sign-out.
+*/
+{
+  function shot(ss) {   // one snapshot may have 1..n doc changes
+    ss.docs.forEach(doc => {
+      const id = doc.id;
+
+      // Projects don't get directly deleted (unless someone does it manually); they get a '.removed' field added
+      // to them (or removed, to resurrect).
+      //
+      const tmp = doc.exists ? convertDateFields(doc.data(), "created") : null;  // with optional '.removed'
+
+      if (tmp && !('removed' in tmp)) {
+        projects.set(id, tmp);
+      } else {
+        projects.delete(id);
+      }
+    })
+  }
+
+  function wipe() {
+    projects.clear();
+  }
+
+  watchEffect(() => {    // when the 'uid' changes
+
+    // Firestore notes:
+    //  - Need to start two watches - there is no 'or' compound query.
+    //  - Cannot do a '.where()' on missing fields (Apr 2020) (we want projects without '.removed'). Can let them
+    //    come and then skip.
+    //
+    //    tbd. This may be reason enough to place removed projects to a separate collection.
+
+    let unsub;  // () => ()
+
+    if (user.value) {   // new user, start tracking
+      assert(unsub == null);
+      let a, b;
+      try {
+        a = projectsC.where('authors', 'array-contains', uid).onSnapshot(shot);
+        b = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(shot);
+        unsub = () => {
+          a();
+          b()
+        }
+      } catch (err) {
+        console.error("!!!", err.msg);
+      }
+
+    } else {  // user signed out - wipe the projects and stop tracking!
+      // we get called here initially, as well
+      assert( unsub !== null );
+      wipe()
+
+      if (unsub) {
+        unsub();
+      }
+      unsub = null;
+    }
+  });
+}
+
+/*** DEPRECATED in favor of 'myProjects'
 /*
 * Watch the projects the current user has access to and has visited.
 *
@@ -26,7 +100,9 @@ import { assert } from '../util/assert.js';
 * The caller is expected to call the returned (unsubscribe) function, once watching is no longer needed.
 *
 * Projects marked 'removed' are not shown.
-*/
+*
+* tbd. instead of callbacks, make a 'reactive' Map that gets returned, for the uid.
+*_/
 function watchMyProjects(f) {    // ((id: string, { ..projectC-doc } | null) => ()) => (() => ())
   const uid = firebase.auth().currentUser.uid;    // exists, i.e. '.currentUser' is non-null
 
@@ -68,6 +144,7 @@ function watchMyProjects(f) {    // ((id: string, { ..projectC-doc } | null) => 
     unsub2();
   }
 }
+***/
 
 /*
 * Remove a project (needs to be an author)
@@ -322,7 +399,8 @@ function convertDateFields( obj, ...fields ) {
 }
 
 export {
-  watchMyProjects,
+  //REMOVE: watchMyProjects,
+  projects,
   watchMyInvites
 }
 

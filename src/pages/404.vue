@@ -4,15 +4,13 @@
 - Fallback page. Good to have one in Single Page App.
 -->
 <template>
-  <section id="here">
-    <div>
-      THAT PAGE DOES NOT EXIST 🗺
-    </div>
-  </section>
+  <div>
+    THAT PAGE DOES NOT EXIST 🗺
+  </div>
 </template>
 
 <style scoped>
-  #here {
+  * {
     text-align: center;
   }
 </style>
