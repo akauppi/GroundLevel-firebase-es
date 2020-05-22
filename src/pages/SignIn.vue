@@ -36,84 +36,81 @@
 </style>
 
 <script>
+  import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
   import { assert } from '../util/assert.js';
 
-  import { useRoute } from 'vue-router';
+  import { useRoute, parseQuery } from 'vue-router';
 
   /*
   * This was made to be a function, in case we would inject 'firebaseui' to just this page.. Which we don't do;
   * see 'index.html'.
   */
-  function uiConfigF(successUrl) {     // (string) => {...}
-    assert(firebaseui);
+  const uiConfig = {
+    signInFlow: 'redirect',     // default
+    signInSuccessUrl: "http://localhost:3000",
+    signInOptions: [
+      // OAuth providers
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      //firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+      //firebase.auth.GithubAuthProvider.PROVIDER_ID,
 
-    return {
-      signInFlow: 'redirect',     // default
-      signInSuccessUrl: successUrl,
-      signInOptions: [
-        // OAuth providers
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        //firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-        //firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      // Email auth is pretty complex, and we didn't really care for it.
 
-        // Email auth is pretty complex, and we didn't really care for it.
+      // tbd. Enable this later. NOTE: it uses 'firebaseui'
+      allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+    ],
 
-        // tbd. Enable this later. NOTE: it uses 'firebaseui'
-        allowAnonymousAuth && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
-      ],
+    // tbd. not tested...
+    autoUpgradeAnonymousUsers: allowAnonymousAuth,
 
-      // tbd. not tested...
-      autoUpgradeAnonymousUsers: allowAnonymousAuth,
-
-      callbacks: {
-        signInSuccessWithAuthResult: (authResult, redirectUrl) => {
-          // authResult: {
-          //    credential: { ..., token: string, ... }
-          //    operationType: "signIn"
-          //    user: { displayName: string, ... }    // normal Firebase user object
-          //    additionalUserInfo: { isNewUser: boolean, profile: { name: ..., granted_scopes: string }
-          // }
-          //
-          // redirectUrl: undefined
-          //
-          // User successfully signed in.
-          //
-          // Return type determines whether we continue the redirect automatically or whether we leave that to the developer.
-
-          console.log("In a callback.", authResult, redirectUrl);
-          return true;
-        },
-
-        // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
-        // an existing credential is linked to an anonymous user.
+    callbacks: {
+      signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+        // authResult: {
+        //    credential: { ..., token: string, ... }
+        //    operationType: "signIn"
+        //    user: { displayName: string, ... }    // normal Firebase user object
+        //    additionalUserInfo: { isNewUser: boolean, profile: { name: ..., granted_scopes: string }
+        // }
         //
-        signInFailure: (error) => {
-          if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
-            return Promise.resolve();
-          }
+        // redirectUrl: undefined
+        //
+        // User successfully signed in.
+        //
+        // Return type determines whether we continue the redirect automatically or whether we leave that to the developer.
 
-          // The credential the user tried to sign in with.
-          const cred = error.credential;
-
-          // Copy data from anonymous user to permanent user and delete anonymous user.
-          // ... (this part would be application specific, i.e. rearranging user data in database) ...
-          //    see -> https://firebase.google.com/docs/auth/web/anonymous-auth?hl=fi
-          //
-          //    "If the call to link succeeds, the user's new account can access the anonymous account's Firebase data."
-          //
-          // Finish sign-in after data is copied.
-
-          return firebase.auth().signInWithCredential(cred);
-        }
+        console.log("In a callback.", authResult, redirectUrl);
+        return true;
       },
 
-      //disabled
-      //tosUrl: '<your-tos-url>',     // Terms of Service
-      //privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
-    };
-  }
+      // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
+      // an existing credential is linked to an anonymous user.
+      //
+      signInFailure: (error) => {
+        if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
+          return Promise.resolve();
+        }
+
+        // The credential the user tried to sign in with.
+        const cred = error.credential;
+
+        // Copy data from anonymous user to permanent user and delete anonymous user.
+        // ... (this part would be application specific, i.e. rearranging user data in database) ...
+        //    see -> https://firebase.google.com/docs/auth/web/anonymous-auth?hl=fi
+        //
+        //    "If the call to link succeeds, the user's new account can access the anonymous account's Firebase data."
+        //
+        // Finish sign-in after data is copied.
+
+        return firebase.auth().signInWithCredential(cred);
+      }
+    },
+
+    //disabled
+    //tosUrl: '<your-tos-url>',     // Terms of Service
+    //privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
+  };
 
   /*** DISABLED (but keep)
   /*
@@ -164,52 +161,48 @@
    const injectedProm = Promise.resolve(); //injectFirebaseUI();
   ***/
 
-  function setup() {
-    // tbd. Do we get here (called again) for each visit of the '/signin' page?
+  // tbd. Do we get here (called again) for each visit of the '/signin' page?
+  console.debug("HEY! GREETINGS FROM SIGNIN SETUP!")
 
-    // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Maybe try it? (we're anyways
-    //    Vue bound, so feels better to keep navigation in one jar 🍯).
-    //
-    const toPath = new URLSearchParams(window.location.search).get('final');    // "some..."|null
+  // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Can you make it work? #help
+  //    (makes sense to do all router/URL specific with Vue-router).
+  //
+  //const toPath = parseQuery(window.location.search).get('final');    // "some..."|null
+  const toPath = new URLSearchParams(window.location.search).get('final');    // "some..."|null
 
-    // SOUVENIR
-    //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
+  // SOUVENIR
+  //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
 
-    console.log("Once signed in, we'd 🛵 to: " + toPath);
+  console.log("Once signed in, we'd 🛵 to: " + toPath);
 
-    // Decision: what auth state persistence does your app favor?
-    // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi
-    //
-    // tbd. This could be driven from 'config.js'
-    //
-    // 'Persistence.SESSION': "Existing and future Auth states are now persisted in the current session only.
-    //                        Closing the window would clear any existing state even if a user forgets to sign out."
-    //                        (source: FirebaseUI sources)
-    //
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
-        .then(
-            console.debug("Persistence changed")    // we don't really care, do we?
-        )
-        .catch(error => {
-          console.error('Error in \'.setPersistence\'', error.code, error.message);
-        });
+  // Decision: what auth state persistence does your app favor?
+  // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi
+  //
+  // tbd. This could be driven from 'config.js'
+  //
+  // 'Persistence.SESSION': "Existing and future Auth states are now persisted in the current session only.
+  //                        Closing the window would clear any existing state even if a user forgets to sign out."
+  //                        (source: FirebaseUI sources)
+  //
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+      .then(
+          console.debug("Persistence changed")    // we don't really care, do we?
+      )
+      .catch(error => {
+        console.error('Error in \'.setPersistence\'', error.code, error.message);
+      });
 
-    // If using the injection, bring the rest in once that Promise has succeeded.
+  // If using the injection, bring the rest in once that Promise has succeeded.
 
-    // Note: There's no harm in not moving as 'this.$route.push(toPath)', right? Think not. #help
-    //
-    const uiConfig = uiConfigF("http://localhost:3000")  //(toPath | "/");
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-    ui.start("#firebaseui-container", uiConfig);
-      //
-      // Note: This is not the place for 'ui.isPendingRedirect()' - and it's for email auth only, anyhow.
-
-    return {}   // nothing needs to be exposed
-  }
+  const ui = new firebaseui.auth.AuthUI( firebase.auth() );
 
   export default {
     name: 'SignIn',
-    setup
+    setup() {
+      onMounted(() => {
+        ui.start("#firebaseui-container", uiConfig);
+      })
+      return {}   // nothing to expose
+    }
   }
 </script>

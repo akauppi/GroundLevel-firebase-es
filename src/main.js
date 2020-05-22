@@ -8,13 +8,14 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router.js';
 
-// not quite yet
-//import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+/* not yet...
+import 'jquery';    // for Bootstrap, before it
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+*/
 
 createApp(App)
   .use(router)
-  //.use(BootstrapVue)    // not quite yet
-  //.use(IconsPlugin)
   .mount('#app');
 
 

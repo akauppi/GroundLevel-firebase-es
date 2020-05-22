@@ -9,6 +9,15 @@
     YOU ARE AT HOME 🏯
   </div>
 
+  <!-- Bootstrap show-off
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    With Bootstrap!
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  -->
+
   <!-- New button + visited projects (latest first) -->
   <div class="flex-container">
     <ProjectTile :project="null" />
@@ -57,7 +66,7 @@
 
 <script>
   import ProjectTile from './Home/ProjectTile.vue';
-  import { projects } from "../firebase/queries.js";
+  import { projects } from "../refs/projects.js";
 
   import { computed } from 'vue';
 

@@ -9,8 +9,6 @@
 -     - adapted dropdown menu approach
 -->
 <template>
-  <!-- #Snip: Using 'nav' like 'App.vue' uses 'header' etc. (either embrace this HTML5 or just remove them as unneeded)
-  -->
   <!-- Using 'nav' simply as the container. '#user-name' holds the top menu, '.sub-menu' the sub-menu (it could be an id).
   -->
   <nav class="app-profile fixed-top-right">

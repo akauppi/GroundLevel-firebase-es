@@ -23,13 +23,11 @@ import { onAuthStateChanged } from '../util/auth.js';
 
 import { ref } from 'vue';
 
-console.debug("Loading 'user.js'");   // this should happen just once - REMOVE when ensured
-
 const user = ref(null);   // until auth has been established: like Schrödinger's feline
 
 onAuthStateChanged(o => {   // (firebase user object) => ()
   if (o !== null) {
-    if (true) {   // expose *all* of the Firebase user object to the application (may be initially good, bad later
+    if (false) {   // expose *all* of the Firebase user object to the application (may be initially good, bad later
                   // since we don't know which fields the caller really is using?)
       console.log(o);   // DEBUG
 

@@ -1,7 +1,7 @@
 /*
 * src/firebase/queries.js
 *
-* These are the use cases we have against the Firestore data. Having them in one place helps in modeling the data.
+* These are the use cases we have against the Firestore data. Having them in one place helps modeling the data.
 */
 const db = firebase.firestore();
 
@@ -20,9 +20,9 @@ import { user } from '../refs/user.js';
 
 //--- Projects ---
 
-// The same reactive table is for all users. We just wipe it like a restaurante table. 🍽
+// The same reactive table is for all users. We just wipe it like a restaurant table. 🍽
 //
-// Used by: Home.vue for populating the grid of projects
+// Used by: 'Home.vue' for populating the grid of projects
 //
 // Projects marked 'removed' are not included.
 //
@@ -53,7 +53,7 @@ const projects = reactive( new Map() );      // <project-id>: { title: string, c
     projects.clear();
   }
 
-  watchEffect(() => {    // when the 'uid' changes
+  watchEffect(() => {    // when the user changes
 
     // Firestore notes:
     //  - Need to start two watches - there is no 'or' compound query.
@@ -64,8 +64,15 @@ const projects = reactive( new Map() );      // <project-id>: { title: string, c
 
     let unsub;  // () => ()
 
+    console.debug("User changed: ", user.value);
+
     if (user.value) {   // new user, start tracking
       assert(unsub == null);
+
+      const uid = firebase.auth().currentUser;    // tbd. could also take 'user.value.uid'?
+
+      assert(uid == user.value.uid);
+
       let a, b;
       try {
         a = projectsC.where('authors', 'array-contains', uid).onSnapshot(shot);
@@ -75,7 +82,8 @@ const projects = reactive( new Map() );      // <project-id>: { title: string, c
           b()
         }
       } catch (err) {
-        console.error("!!!", err.msg);
+        console.error("!!!", err);  // undefined
+        debugger;
       }
 
     } else {  // user signed out - wipe the projects and stop tracking!

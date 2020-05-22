@@ -2,10 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <!-- disabled
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    -->
-    <!-- For Bootstrap-vue -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!--PROD Favicon
@@ -85,7 +82,7 @@
       });
     </script>
 
-    <!--
+    <!-- REMOVE: fixed in 16.x
     - Vite 11..14 have a bug/feature that check of 'process.env.NODE_ENV' is not handled. It doesn't show in Vite 10.3.
     -->
     <!--PROD env
@@ -93,8 +90,8 @@
     -->
     <!-- DEV env -->
     <script>
-      if (window.process) alert("Unexpected: 'process.env' exists!");
-      window.process = { env: { NODE_ENV: '' } }
+      //if (window.process) alert("Unexpected: 'process.env' exists!");
+      //window.process = { env: { NODE_ENV: '' } }
     </script>
     <!-- -->
 
