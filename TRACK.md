@@ -15,7 +15,11 @@ It's not detecting the setup.
 
 Also the [beta channel](https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg) doesn't.
 
+<!--
 The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anything about Vite or Vue 3 beta (28-Apr-20). When they do, add the direct link here.
+-->
+
+There's a new [vue 3/ vue next](https://github.com/vuejs/vue-devtools/issues/1199) issue that brings this up (May 20).
 
 
 ## Bootstrap-Vue on Vue 3 (beta)
@@ -46,4 +50,5 @@ Note: The ideology of the repo is to work close to what plain browsers offer. Th
 Updating to it causes an error in console.
 
 Try with next version.
+
 

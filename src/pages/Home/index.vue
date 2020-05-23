@@ -1,5 +1,5 @@
 <!--
-- src/pages/Home.vue
+- src/pages/Home[/.vue]
 -
 - The default page (URL /). Needs authentication.
 - Signing in with mere '/signin' leads here.
@@ -8,15 +8,6 @@
   <div>
     YOU ARE AT HOME 🏯
   </div>
-
-  <!-- Bootstrap show-off
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    With Bootstrap!
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  -->
 
   <!-- New button + visited projects (latest first) -->
   <div class="flex-container">
@@ -65,8 +56,8 @@
 </style>
 
 <script>
-  import ProjectTile from './Home/ProjectTile.vue';
-  import { projects } from "../refs/projects.js";
+  import ProjectTile from './ProjectTile.vue';
+  import { projects } from "../../refs/projects.js";
 
   import { computed } from 'vue';
 

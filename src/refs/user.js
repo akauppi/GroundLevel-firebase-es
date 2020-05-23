@@ -19,25 +19,17 @@
 *   - Firebase User object documentation
 *     -> https://firebase.google.com/docs/reference/js/firebase.User.html
 */
-import { onAuthStateChanged } from '../util/auth.js';
-
+import { onAuthStateChanged } from '../firebase/auth.js';
 import { ref } from 'vue';
 
-const user = ref(null);   // until auth has been established: like Schrödinger's feline
+const user = ref(null);   // until auth has been established
 
 onAuthStateChanged(o => {   // (firebase user object) => ()
   if (o !== null) {
-    if (false) {   // expose *all* of the Firebase user object to the application (may be initially good, bad later
-                  // since we don't know which fields the caller really is using?)
-      console.log(o);   // DEBUG
-
-      user.value = { ...o };
-    } else {      // expose a controlled subset (minimalistic)
-      user.value = {
-        displayName: o.displayName,
-        uid: o.uid
-      };
-    }
+    user.value = {    // expose a controlled subset (minimalistic)
+      displayName: o.displayName,
+      uid: o.uid
+    };
   } else {
     user.value = false
   }

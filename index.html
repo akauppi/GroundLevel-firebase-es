@@ -19,8 +19,10 @@
     <!-- Firebase
     -   - latest versions -> https://firebase.google.com/support/release-notes/js
     -
-    - Note: Firebase is loaded in 'index.html' because the '/__/' method allows us to get configuration nicely, both
-    -     in development and when deployed via Firebase Hosting. Other CDN-based code is imported via Rollup paths.
+    - Note: Firebase is loaded in 'index.html' (and not via 'npm') because the '/__/' method allowed us to get
+    -     configuration nicely, both in development and when deployed via Firebase Hosting.
+    -
+    -     ^-- THIS IS NO LONGER THE CASE, using 'vite' instead of firebase serving, for development.
     -
     - Include only the Firebase features that you need.
     -->
@@ -30,9 +32,9 @@
     <script defer src="/__/firebase/7.14.2/firebase-firestore.js"></script>
     -->
     <!--DEV Firebase -->
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.3/firebase-app.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.3/firebase-auth.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.3/firebase-firestore.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
     <!-- -->
 
     <!--

@@ -117,7 +117,7 @@
 <script>
   // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
 
-  import { signOut as authSignOut } from '../util/auth.js';
+  import { signOut as authSignOut } from '../firebase/auth.js';
   import { user } from '../refs/user.js';
 
   export default {

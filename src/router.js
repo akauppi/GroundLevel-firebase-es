@@ -5,10 +5,10 @@
 */
 
 // ⛑ needed for Vite 0.7.0 .. 0.10.2+?
-import { createRouter, createWebHistory } from 'vue-router/dist/vue-router.esm.js';   // map from 'vue-router' once Vite has it (this is only in one place, so no big deal)
+//import { createRouter, createWebHistory } from 'vue-router/dist/vue-router.esm.js';   // map from 'vue-router' once Vite has it (this is only in one place, so no big deal)
 
 // Gives 'process is not defined' (tries to load 'vue-router.esm-bundler.js')
-//import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 
 // Pages
 //
@@ -17,12 +17,12 @@ import { createRouter, createWebHistory } from 'vue-router/dist/vue-router.esm.j
 //
 //    [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 //
-import Home from './pages/Home.vue';
+import Home from './pages/Home/index.vue';
 import SignIn from './pages/SignIn.vue';
 import Project from './pages/Project.vue';
 import page404 from './pages/404.vue';
 
-import { currentFirebaseUserProm } from './util/auth.js';
+import { currentFirebaseUserProm } from './firebase/auth.js';
 import { assert } from './util/assert.js';
 
 const r = (path, component, o) => ({ ...o, path, component });

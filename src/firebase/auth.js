@@ -1,13 +1,9 @@
-// tbd. #revise
 /*
-* src/util/auth.js
+* src/firebase/auth.js
 *
 * Application interfacing to the authentication: is the user signed in, information about them.
 *
-* We should handle Firebase auth API; pages don't need to know it ('SignIn' page being excepted).
-*
-* This code is independent of a project. Thus it's kept under 'utils' (and not in 'firebase' which has project specific
-* Firebase details).
+* We should handle Firebase auth API; pages don't need to know it ('SignIn' page being an exception).
 *
 * References:
 *   - firebase.auth.Auth (Firebase docs)

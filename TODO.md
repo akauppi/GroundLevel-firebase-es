@@ -8,13 +8,6 @@
   - Coming to the site with a URL path, going through sign-in, one should land in the original intended path.
 -->
 
-## Firebaseui
-
-- [ ] It should depend directly on `@firebase/app` and `@firebase/auth`, instead of `firebase` - as it now does.
-  - [ ] Track this (link here, if none, make one)
-
-  - Only applies to `npm`. We are currently getting Firebase and FirebaseUI from CDN in `index.html`.
-
 ## WebStorm IDE
 
 *Note: this is not really in the project scope. The author just happens to be using WebStorm.*
@@ -28,23 +21,9 @@
    - [ ] Alert IntelliJ to this. It behaves like [this issue from 2016](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207304095-Using-ES6-import-and-node-modules-are-marked-as-Module-is-not-installed-) but is likely different.
 
 
-## rollup-plugin-vue
-
-- Not able to do dynamic imports in `src/routes.js`.
-
-   The [sample code](https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication/blob/master/src/router/index.js#L15) does it. Difference is we're using `rollup-plugin-vue` (or something else??).
-
-   Track -> https://github.com/vuejs/rollup-plugin-vue/issues/328
-
-
 ## deployment
 
 - [ ] Change the Firebase project name so URL is no longer: `https://vue-rollup-example.firebaseapp.com`.
-
-
-## Firebase
-
-- Would someone with more Firebase experience check out the instructions in `README.md`. #help
 
 
 ## Firebase Functions
@@ -58,46 +37,6 @@ Move narrative documents (why we do things in certain way) to the Wiki.
 Make it a walk-through or bisection of the project, leaving project itself uncluttered. :)
 
 - *Vital ingredients*: what tools/libraries we picked and why
-
-
-
-## Rollup update
-
-Check out 2.0.3 once plugins are available for it:
-
-```
-$ npm install
-...
-npm WARN @rollup/plugin-alias@3.0.1 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
-npm WARN @rollup/plugin-node-resolve@7.1.1 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
-npm WARN @rollup/pluginutils@3.0.8 requires a peer of rollup@^1.20.0 but none is installed. You must install peer dependencies yourself.
-npm WARN rollup-plugin-livereload@1.0.4 requires a peer of rollup@^1.0.0 but none is installed. You must install peer dependencies yourself.
-```
-
-Also check breaking changes: [CHANGELOG](https://github.com/rollup/rollup/blob/master/CHANGELOG.md#breaking-changes) 
-
- #help
-
-
-## Is 'template functional' still a thing in Vue.js 3?
-
-If it is, let's see where it fits in.
-
-If it's not, let's not bother.
-
-- It's largely a dual syntax
-- Compiler doesn't seem to figure out when it has been misused (Vue.js 2.6.11)
-
-
-## Source map for console errors
-
-The errors now point to the bundle (Safari, Chrome). Can we make them point to the source, instead? #help
-
-Edit: This may be a Rollup thing, fixed in 2.0.x
-
->Generate correct sourcemaps when tree-shaking occurs in a multi-file bundle (#3423)
-
-- [ ] Update to Rollup 2.x and test the sourcemaps
 
 
 ## Wiki about design of data modeling (document or collection)
@@ -144,11 +83,11 @@ Also:
 - `import ... from "blah"` -> `import ... from "blah.js"`
 
 
-## Bootcamp-vue
+## Bootcamp 4.5
 
-When it's supported in Vue.js 3.
+Bootcamp has great docs and version 5 is no longer dependent on jQuery. We'll use it as our make-up layer.
 
-Better looks.
+- [ ] Start section in the Wiki, describing why this
 
 
 ## Firebase UI - or not???
@@ -168,4 +107,19 @@ How is that done?  Should we have a menu item if a user has logged in, anonymous
 
 See [Convert an anonymous account to a permanent account](https://firebase.google.com/docs/auth/web/anonymous-auth#convert-an-anonymous-account-to-a-permanent-account) (Firebase docs)
 
+
+## Firebase from `npm`
+
+There is no real reason to get Firebase (and Firebase UI) via `index.html`. 
+
+For tracking updates, moving it to `npm` may make sense.
+
+- See https://www.npmjs.com/package/firebase
+
+Note: There is no real downside in the way we are now bringing the modules from CDN.
+
+
+# A fade/transition at signout
+
+It's now a bit too fast. 
 
