@@ -5,14 +5,19 @@
 */
 import { createApp } from 'vue';
 
+import { logCloud } from './util/logCloud';
+
 import App from './App.vue';
 import router from './router.js';
+import c from './config.js'; const { analytics } = c;
 
 /* not yet...
 import 'jquery';    // for Bootstrap, before it
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 */
+
+logCloud('getting_started');
 
 createApp(App)
   .use(router)

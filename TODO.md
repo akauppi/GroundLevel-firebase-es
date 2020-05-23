@@ -118,8 +118,15 @@ For tracking updates, moving it to `npm` may make sense.
 
 Note: There is no real downside in the way we are now bringing the modules from CDN.
 
+Edit: One benefit would be that the IDE starts showing implementation of the Firebase functions (`Cmd-B` works in IntelliJ).
 
-# A fade/transition at signout
+
+## A fade/transition at signout
 
 It's now a bit too fast. 
+
+
+## Sentry integration
+
+Once their [Vue integration](https://docs.sentry.io/platforms/javascript/vue/) becomes available to Vue 3 (beta), move to it.
 

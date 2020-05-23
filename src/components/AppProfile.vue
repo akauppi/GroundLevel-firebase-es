@@ -117,7 +117,6 @@
 <script>
   // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
 
-  import { signOut as authSignOut } from '../firebase/auth.js';
   import { user } from '../refs/user.js';
 
   export default {
@@ -153,7 +152,7 @@
       signOut() {
         // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
         //
-        authSignOut().then( () => {
+        firebase.auth().signOut().then( () => {
           this.$router.push('/signin');
         });
       },

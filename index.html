@@ -33,6 +33,7 @@
     -->
     <!--DEV Firebase -->
     <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-analytics.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
     <!-- -->
@@ -59,6 +60,10 @@
     <script type="module">
       import config from "./__.js"
       firebase.initializeApp(config);
+
+      if (config.measurementId) {
+        firebase.analytics();
+      }
     </script>
     <!-- -->
 

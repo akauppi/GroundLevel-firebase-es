@@ -37,7 +37,7 @@
 
 <script>
   import { onMounted } from 'vue';
-  import { allowAnonymousAuth } from '../config.js';
+  import c from '../config.js'; const { allowAnonymousAuth } = c;
   import { assert } from '../util/assert.js';
 
   import { useRoute, parseQuery } from 'vue-router';
@@ -161,9 +161,6 @@
    const injectedProm = Promise.resolve(); //injectFirebaseUI();
   ***/
 
-  // tbd. Do we get here (called again) for each visit of the '/signin' page?
-  console.debug("HEY! GREETINGS FROM SIGNIN SETUP!")
-
   // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Can you make it work? #help
   //    (makes sense to do all router/URL specific with Vue-router).
   //
@@ -184,13 +181,15 @@
   //                        Closing the window would clear any existing state even if a user forgets to sign out."
   //                        (source: FirebaseUI sources)
   //
-  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
-      .then(
-          console.debug("Persistence changed")    // we don't really care, do we?
-      )
-      .catch(error => {
-        console.error('Error in \'.setPersistence\'', error.code, error.message);
-      });
+  (async function () {
+    try {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+    }
+    catch (err) {
+      console.error('Error in \'.setPersistence\'', error.code, error.message);
+    }
+    console.debug("Persistence changed")    // we don't really care, do we?
+  })();
 
   // If using the injection, bring the rest in once that Promise has succeeded.
 

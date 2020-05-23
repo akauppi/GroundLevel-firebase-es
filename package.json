@@ -15,6 +15,7 @@
     "clean": "(rm public/dist/bundle* 2> /dev/null || true)"
   },
   "dependencies": {
+    "@sentry/browser": "^5.15.5",
     "bootstrap": "^4.5.0",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",

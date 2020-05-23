@@ -24,7 +24,7 @@
   import AppProfile from './components/AppProfile.vue';
   import AppFooter from './components/AppFooter.vue';
   import { user } from './refs/user.js';
-  import { appTitle } from './config.js';
+  import c from './config.js'; const { appTitle } = c;
 
   export default {
     name: 'App',     // helps in debugging

@@ -51,9 +51,6 @@
     },
     computed: {
       isNewTile: (vm) => vm.project == null
-    },
-    mounted() {
-      //console.log("MOUNTED", this.project);
     }
   };
 </script>

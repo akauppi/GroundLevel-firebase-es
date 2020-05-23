@@ -3,10 +3,8 @@
 *
 * Application configuration
 */
-const allowAnonymousAuth = true;
-const appTitle = "GroundLevel for Firebase-web";   // your title here
 
-export {
-  allowAnonymousAuth,
-  appTitle
+export default {
+  allowAnonymousAuth: true,
+  appTitle: "GroundLevel - sample app"
 }

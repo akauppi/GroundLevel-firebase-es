@@ -4,10 +4,6 @@
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
 */
 
-// ⛑ needed for Vite 0.7.0 .. 0.10.2+?
-//import { createRouter, createWebHistory } from 'vue-router/dist/vue-router.esm.js';   // map from 'vue-router' once Vite has it (this is only in one place, so no big deal)
-
-// Gives 'process is not defined' (tries to load 'vue-router.esm-bundler.js')
 import { createRouter, createWebHistory } from 'vue-router';
 
 // Pages
@@ -22,7 +18,7 @@ import SignIn from './pages/SignIn.vue';
 import Project from './pages/Project.vue';
 import page404 from './pages/404.vue';
 
-import { currentFirebaseUserProm } from './firebase/auth.js';
+import { isSignedInRightNow } from './firebase/auth.js';
 import { assert } from './util/assert.js';
 
 const r = (path, component, o) => ({ ...o, path, component });
@@ -59,11 +55,14 @@ router.beforeEach(async (to, from, next) => {
   //
   const skipAuth = to.matched.some(record => record.meta.skipAuth);
 
-  if (skipAuth || await currentFirebaseUserProm() !== null) {
+  if (skipAuth) {
+    next();   // just proceed
+
+  } else if (await isSignedInRightNow()) {
     next();   // just proceed
 
   } else {    // need auth but user is not signed in
-    console.log("Wanting to go to (but not signed in): ", to);  // DEBUG
+    console.log("Wanting to go to (but not signed in): "+ to);  // DEBUG
 
     if (to.path === '/') {
       next('/signin')   // no need to clutter the URL
