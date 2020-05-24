@@ -5,7 +5,7 @@
 */
 import { createApp } from 'vue';
 
-import { logCloud } from './util/logCloud';
+//import { logSome } from './sentry/logSome.js';
 
 import App from './App.vue';
 import router from './router.js';
@@ -17,7 +17,7 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 */
 
-logCloud('getting_started');
+//logSome( "Launching" );
 
 createApp(App)
   .use(router)

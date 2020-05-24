@@ -15,7 +15,6 @@
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
 import { ref } from 'vue';
-import { assert } from '../util/assert.js';
 
 const fbUser = ref(null);   // until auth has been established
 

@@ -1,0 +1,27 @@
+// NOT CURRENTLY ACTIVE - USING SENTRY
+/*
+* src/firebase/logEvent.js
+*
+* Log events to Firebase Analytics (if enabled).
+*
+* Note: Logging to Firebase Analytics needs certain event types. To facilitate this, we're exposing such types as
+*     functions to the app, so the app cannot use them wrong (they either exist or don't). Add your own event types,
+*     as you see fit.
+*
+* See 'README' for details on how to prepare the logging back-ends.
+*/
+import config from "../../__.js"
+
+if (config.measurementId) {
+  firebase.analytics();
+} else {
+  console.warn("Firebase 'logEvent' used, but '.measurementId' config not provided. The logs will be ignored."
+}
+
+function logEvent(eventId, params) {
+  if (config.measurementId) firebase.analytics.logEvent(eventId, params);
+}
+
+function logDebugEvent(msg) { logEvent('debug', { msg }) }
+
+export { logDebugEvent };

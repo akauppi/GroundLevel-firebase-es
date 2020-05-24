@@ -5,12 +5,9 @@
 *
 * Usage:
 *   <<
-*     <x v-if="user">    <-- if user is signed in
+*     <x v-if="user.value">    <-- if user is signed in
 *       {{ user.displayName }}
 *     </x>
-*   <<
-*   <<
-*       {{ user.value ? (user.value.displayName || 'anonymous user') : '...' }}   // some kind of use needs '.value'
 *   <<
 *
 *   'user' is either:

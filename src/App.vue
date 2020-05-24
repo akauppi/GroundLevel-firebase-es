@@ -6,7 +6,9 @@
 <template>
   <header>
     <app-logo />
-    <app-profile v-if="user.value" />
+    <!-- Note: 'user' can be 'null' at first, then either an object (signed in) or 'false' (signed out).
+    -->
+    <app-profile v-if="user" />
   </header>
   <main>
     <router-view />
@@ -20,10 +22,14 @@
 </style>
 
 <script>
+  import { onMounted } from 'vue';
+
   import AppLogo from './components/AppLogo.vue';
   import AppProfile from './components/AppProfile.vue';
   import AppFooter from './components/AppFooter.vue';
+
   import { user } from './refs/user.js';
+
   import c from './config.js'; const { appTitle } = c;
 
   export default {
@@ -31,13 +37,13 @@
     components: {
       AppLogo, AppProfile, AppFooter
     },
-    computed: {
-      user: () => user
-    },
-    // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
-    mounted() {
-      console.log("Houston, App is mounted");
-      document.title = appTitle;
+    setup() {
+      // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
+      onMounted(() => {
+        console.log("Houston, App is mounted");
+        document.title = appTitle;
+      });
+      return { user }
     }
   }
 </script>
