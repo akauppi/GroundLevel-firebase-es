@@ -15,7 +15,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 //
 import Home from './pages/Home/index.vue';
 import SignIn from './pages/SignIn.vue';
-import Project from './pages/Project.vue';
+import Project from './pages/Project/index.vue';
 import page404 from './pages/404.vue';
 
 import { isSignedInRightNow } from './firebase/auth.js';

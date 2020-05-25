@@ -1,23 +1,19 @@
 /*
-* src/refs/projects.js
+* src/pages/Project/projectSub.js
 *
-* Reactive 'projects' map, reflecting both database and sign-in/out changes.
+* Subscription of a certain 'projectsC' document.
 */
 const db = firebase.firestore();
 
-import { assert } from '../util/assert.js';
 
-import { reactive, watchEffect } from 'vue';
-import { user } from '../refs/user.js';
-import { convertDateFields } from "../firebase/utils";
 
-// The same reactive table is for all users. We just wipe it like a restaurant table. 🍽
+//--- Project
+
+// The same reactive table is for all projects
 //
-// Used by: 'Home.vue' for populating the grid of projects
-//
-// Projects marked 'removed' are not included.
-//
-const projects = reactive( new Map() );      // <project-id>: { title: string, created: datetime, lastVisited: datetime }
+import {reactive, watchEffect} from "vue";
+
+const project = reactive( new Map() );      // { ..projectC-doc }
 
 function handleShot(ss) {   // one snapshot may have 1..n doc changes
   ss.docs.forEach(doc => {
@@ -43,7 +39,7 @@ let unsub = null;  // () => () | null
 const projectsC = db.collection('projects');
 
 /*
-* Watch the 'user' changes.
+* Watch the 'project' changes.
 */
 watchEffect(() => {    // when the user changes
 
@@ -81,6 +77,37 @@ watchEffect(() => {    // when the user changes
   }
 });
 
-export {
-  projects
-}
+
+// Snapshot of all the matching documents, when something changes. Update 'projects' accordingly.
+//
+const unsubscribeProject = watchProject( projectId, data => {   // (projectDoc | null) =>
+  if (!data) {
+    alert("Hey, we lost the project!!!");   // tbd. inform to Sentry
+
+    $this.router.go(-1);    // tbd. how to do that with 4.x?
+    return;
+  }
+
+  console.debug( `CHANGES TO PROJECT ${projectId}:`, data );
+
+  /* not yet
+  // If there's a new user, add tracking their name etc.
+  //
+  // Note: This may be "expensive" since each user starts to track N others, separately. Solution would be
+  //    to shadow the current users (in a project) as a project field.
+  //
+  [...data.authors, ...data.collaborators].forEach( uid => {
+    if (! (uid in userInfo)) {
+      const unsub = watchUserInfo(uid, data => {
+        console.debug( `CHANGES TO USER ${uid}:`, data );
+
+        vm.userInfo[uid] = data;
+      });
+
+      vm._unsubs.push(unsub)
+    }
+  });
+  */
+
+  project.value = data;   // replace all fields; tbd. what is the optimal way for Vue.js to update things? (only some fields change)
+});

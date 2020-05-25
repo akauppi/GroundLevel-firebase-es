@@ -16,7 +16,8 @@
     <!--SET PROD $FB  /__/firebase/7.14.2 -->
     <!--SET DEV,PROD $FB_UI https://www.gstatic.com/firebasejs/ui/4.5.0 -->
 
-    <!-- Firebase
+    <!-- REMOVE
+    <!_-- Firebase
     -   - latest versions -> https://firebase.google.com/support/release-notes/js
     -
     - Note: Firebase is loaded in 'index.html' (and not via 'npm') because the '/__/' method allowed us to get
@@ -25,18 +26,18 @@
     -     ^-- THIS IS NO LONGER THE CASE, using 'vite' instead of firebase serving, for development.
     -
     - Include only the Firebase features that you need.
-    -->
-    <!--PROD Firebase
+    --_>
+    <!_--PROD Firebase
     <script defer src="/__/firebase/7.14.2/firebase-app.js"></script>
     <script defer src="/__/firebase/7.14.2/firebase-auth.js"></script>
     <script defer src="/__/firebase/7.14.2/firebase-firestore.js"></script>
-    -->
-    <!--DEV Firebase -->
+    --_>
+    <!_--DEV Firebase --_>
     <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-analytics.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/7.14.5/firebase-firestore.js"></script>
-    <!-- -->
+    <!_-- --_>
+    -->
 
     <!--
     - Firebase UI
@@ -56,12 +57,12 @@
     <!--PROD Firebase config
     <script defer src="/__/firebase/init.js"></script>
     -->
-    <!--DEV Firebase config -->
+    <!--DEV Firebase config --_>
     <script type="module">
       import config from "./__.js"
       firebase.initializeApp(config);
     </script>
-    <!-- -->
+    <!_-- -->
 
     <!--
     - Checking that Firebase loaded properly
@@ -70,6 +71,13 @@
     -     It's not bad here, though.
     -->
     <script type="module">
+      import firebase from 'firebase/app';
+      import 'firebase/auth';
+      import 'firebase/firestore';
+
+      import config from "/__.js"
+      firebase.initializeApp(config);
+
       document.addEventListener('DOMContentLoaded', () => {   // Q: does this fire just once, or after inside-SPA navidations?
         try {
           console.log("'index.html' loaded");    // DEBUG
@@ -85,24 +93,11 @@
       });
     </script>
 
-    <!-- REMOVE: fixed in 16.x
-    - Vite 11..14 have a bug/feature that check of 'process.env.NODE_ENV' is not handled. It doesn't show in Vite 10.3.
-    -->
-    <!--PROD env
-    <script></script>
-    -->
-    <!-- DEV env -->
-    <script>
-      //if (window.process) alert("Unexpected: 'process.env' exists!");
-      //window.process = { env: { NODE_ENV: '' } }
-    </script>
-    <!-- -->
-
     <!--PROD Application
     <script type="module" src="/dist/bundle.esm.js"></script>
     -->
     <!--DEV Application -->
-    <script type="module" src="src/main.js"></script>
+    <script type="module" src="/src/main.js"></script>
     <!-- -->
   </head>
 
