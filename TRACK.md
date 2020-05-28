@@ -8,6 +8,8 @@ This is *highly* welcome to us!!! 🎉🎊🍬
 
 - Removed from Vite README (0.7.0)
 
+Track [https://github.com/vitejs/vite/issues/279](https://github.com/vitejs/vite/issues/279)
+
 
 ## Support (of Vite and/or Vue 3.0 beta) from Chrome Vue development plugin
 
@@ -22,9 +24,10 @@ The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anythi
 There's a new [vue 3/ vue next](https://github.com/vuejs/vue-devtools/issues/1199) issue that brings this up (May 20).
 
 
+<strike>
 ## Bootstrap-Vue on Vue 3 (beta)
 
-[Vue 3 support](https://github.com/bootstrap-vue/bootstrap-vue/issues/5196)
+[Vue 3 support](https://github.com/bootstrap-vue/bootstrap-vue/issues/5196)</strike>
 
 
 ## Import maps (in browser)
@@ -43,12 +46,5 @@ https://drafts.csswg.org/css-nesting/
 Once implemented in browsers, we don't need the `lang="scss"` any more.
 
 Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
-
-
-## Vite 0.11.. 0.14.2 has `process.env.NODE_ENV` catcha
-
-Updating to it causes an error in console.
-
-Try with next version.
 
 

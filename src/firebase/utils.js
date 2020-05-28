@@ -3,7 +3,6 @@
 *
 * Utilities for working with Firebase
 */
-import {assert} from "../util/assert";
 
 /*
 * Firestore client provides timestamps as '{ seconds: integer, nanos: 0 }'. Let's convert those to JavaScript 'Date'.
@@ -23,6 +22,14 @@ function convertDateFields(obj, ...fields ) {
   return { ...obj, ...o2 }    // merge the objects
 }
 
+/*
+* Firebase wraps 1..n documents into a snapshot. This helps unwrap them, and handle one at a time.
+*/
+function unshot(f) {    // (doc => ()) => (snapshot => ())
+  return ss => ss.docs.forEach(f);
+}
+
 export {
-  convertDateFields
+  convertDateFields,
+  unshot
 }

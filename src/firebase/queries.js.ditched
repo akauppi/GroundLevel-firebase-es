@@ -13,8 +13,6 @@ const projectsC = db.collection('projects');
 const invitesC = db.collection('invites');
 const userInfoC = db.collection('userInfo');
 
-import { assert } from '../util/assert.js';
-
 import { reactive, watchEffect } from 'vue';
 import { user } from '../refs/user.js';
 

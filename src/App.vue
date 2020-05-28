@@ -30,8 +30,6 @@
 
   import { user } from './refs/user.js';
 
-  import c from './config.js'; const { appTitle } = c;
-
   export default {
     name: 'App',     // helps in debugging
     components: {
@@ -41,7 +39,19 @@
       // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
       onMounted(() => {
         console.log("Houston, App is mounted");
-        document.title = appTitle;
+
+        assert(firebase);
+
+        // Check Firebase health
+        try {
+          const app = firebase.app();
+          const features = ['auth'].filter(feature => typeof app[feature] === 'function');
+          console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
+        } catch (e) {
+          // tbd. we might have some error banner UI, later
+          console.error(e);
+          alert('Error loading the Firebase SDK, check the console.');
+        }
       });
       return { user }
     }

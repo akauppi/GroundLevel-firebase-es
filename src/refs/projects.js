@@ -5,11 +5,9 @@
 */
 const db = firebase.firestore();
 
-import { assert } from '../util/assert.js';
-
 import { reactive, watchEffect } from 'vue';
 import { user } from '../refs/user.js';
-import { convertDateFields } from "../firebase/utils";
+import { convertDateFields, unshot } from "../firebase/utils";
 
 // The same reactive table is for all users. We just wipe it like a restaurant table. 🍽
 //
@@ -19,21 +17,19 @@ import { convertDateFields } from "../firebase/utils";
 //
 const projects = reactive( new Map() );      // <project-id>: { title: string, created: datetime, lastVisited: datetime }
 
-function handleShot(ss) {   // one snapshot may have 1..n doc changes
-  ss.docs.forEach(doc => {
-    const id = doc.id;
+function handleDoc(doc) {
+  const id = doc.id;
 
-    // Projects don't get directly deleted (unless someone does it manually); they get a '.removed' field added
-    // to them (or removed, to resurrect).
-    //
-    const tmp = doc.exists ? convertDateFields(doc.data(), "created") : null;  // with optional '.removed'
+  // Projects don't get directly deleted (unless someone does it manually); they get a '.removed' field added
+  // to them (or removed, to resurrect).
+  //
+  const tmp = doc.exists ? convertDateFields(doc.data(), "created") : null;  // with optional '.removed'
 
-    if (tmp && !('removed' in tmp)) {
-      projects.set(id, tmp);
-    } else {
-      projects.delete(id);
-    }
-  })
+  if (tmp && !('removed' in tmp)) {
+    projects.set(id, tmp);
+  } else {
+    projects.delete(id);
+  }
 }
 
 // State from earlier user change
@@ -63,8 +59,8 @@ watchEffect(() => {    // when the user changes
 
     const uid = user.value.uid;
     try {
-      const a = projectsC.where('authors', 'array-contains', uid).onSnapshot(handleShot);
-      const b = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(handleShot);
+      const a = projectsC.where('authors', 'array-contains', uid).onSnapshot(unshot(handleDoc));
+      const b = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(unshot(handleDoc));
       unsub = () => { a(); b() }
     } catch (err) {
       console.error("!!!", err);

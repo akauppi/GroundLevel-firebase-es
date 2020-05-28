@@ -5,24 +5,23 @@
 */
 import { createApp } from 'vue';
 
-//import { logSome } from './sentry/logSome.js';
+import c from './config.js'; const { appTitle /*, sentryDSN*/ } = c;
 
-import App from './App.vue';
-import router from './router.js';
-import c from './config.js'; const { analytics } = c;
-
+//--- Make-up 💄
 /* not yet...
 import 'jquery';    // for Bootstrap, before it
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 */
 
-//logSome( "Launching" );
+document.title = appTitle;
+
+import App from './App.vue';
+import router from './router.js';
 
 createApp(App)
   .use(router)
   .mount('#app');
-
 
 /*** Note: with Vue 2.x we had this - what's a similar way with Vue 3 (beta)? Do we need this?
  *

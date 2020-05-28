@@ -19,7 +19,6 @@ import Project from './pages/Project/index.vue';
 import page404 from './pages/404.vue';
 
 import { isSignedInRightNow } from './firebase/auth.js';
-import { assert } from './util/assert.js';
 
 const r = (path, component, o) => ({ ...o, path, component });
 const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipAuth: true } })

@@ -34,6 +34,8 @@
 
   import { projectSub } from './projectSub.js';
 
+  let unsubProject = null;    // () => ()
+
   export default {
     name: 'Project',      // Vue note: names help in debugging
     props: {
@@ -52,12 +54,13 @@
         console.debug(`New Project props: ${props.id}`);  // TEMP
         const { id } = props;
 
-        const [projects, unsubProject] = projectSub(id);
+        let project;
+        [project, unsubProject] = projectSub(id);
 
         return {
-          projects,
+          project //,
           //symbols,    // tbd.
-          userInfo: {}  // tbd.
+          //userInfo: {}  // tbd.
         }
       }
     }
