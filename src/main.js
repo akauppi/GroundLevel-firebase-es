@@ -14,6 +14,17 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 */
 
+// Check Firebase health
+try {
+  const app = firebase.app();
+  const features = ['auth'].filter(feature => typeof app[feature] === 'function');
+  console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
+} catch (e) {
+  // tbd. we might have some error banner UI, later
+  console.error(e);
+  alert('Error loading the Firebase SDK, check the console.');
+}
+
 document.title = appTitle;
 
 import App from './App.vue';

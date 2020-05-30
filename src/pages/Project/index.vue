@@ -51,11 +51,12 @@
       // Vue note: for 'props' to work dynamically, returning a generator is needed. (initial comment; edit when understand it better!)
       //
       return () => {
-        console.debug(`New Project props: ${props.id}`);  // TEMP
         const { id } = props;
 
         let project;
         [project, unsubProject] = projectSub(id);
+        console.debug(project.value);
+        debugger;
 
         return {
           project //,

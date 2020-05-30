@@ -4,50 +4,45 @@
 * Follow a certain project. This feeds changes from Firestore to the UI.
 */
 const db = firebase.firestore();
+import {ref} from "vue";
+import {convertDateFields, unshot} from '/src/firebase/utils.js';
 
-import {reactive} from "vue";
-import {unshot} from '/src/firebase/utils.js'
+const projectsC = db.collection("projects");
 
-function projectSub(id, uid) {   // (id: string, uid: string) => [ reactive( { ..projectC-doc } ), unsub: () => () ]
+// tbd. Should we use 'ref' or 'reactive'??? STUDY.
 
-  const project = reactive( new Map() );   // reactive( { ..projectC-doc } )
+/*
+* Watch a certain project (as a 'ref').
+*
+* The user is expected to be logged in.
+*
+* tbd. Can we do clean when the 'ref' would be GC'ed? That way, there may not be a need for explicit unsubscribe
+*     by the caller. #study #vue3
+*/
+function projectSub(id) {   // (id: string) => [ reactive( { ..projectC-doc } ), unsub: () => () ]
+
+  const project = ref(null);  // 'null until intialized - can we tell Vue3 when it is, or make 'Promise of ref'? tbd.
 
   function handleDoc(doc) {
-    const id = doc.id;
-
-    console.debug(doc);
-    debugger;
-
-    // tbd. Shovel changes to 'project'
-    const tmp = doc.exists ? convertDateFields(doc.data(), "created") : null;  // with optional '.removed'
+    const tmp = doc.exists ? doc.data() : null;  // with optional '.removed'
 
     if (tmp && !('removed' in tmp)) {
-      projects.set(id, tmp);
+      project.value = tmp;    // how does it handle non-changing fields (mostly just one would change)
     } else {
-      projects.delete(id);
+      console.warning("Project was removed while we're working on it.");
+      project.value = null;
     }
   }
 
-  // Firestore notes:
-  //  - Need to start two watches - there is no 'or' compound query.
-  //  - Cannot do a '.where()' on missing fields (Apr 2020) (we want projects without '.removed'). Can let them
-  //    come and then skip.
-  //
-  //    This may be reason enough to place removed projects to a separate collection. #rework #data
-
   let unsub;  // () => ()
   try {
-    const a = projectsC.where('authors', 'array-contains', uid).onSnapshot(unshot(handleDoc));
-    const b = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(unshot(handleDoc));
-    unsub = () => { a(); b() }
+    unsub = projectsC.doc(id).onSnapshot(unshot(handleDoc));
   } catch (err) {
     console.error("!!!", err);
     debugger;
   }
 
-  // tbd. Is there a way in Javascript to bind to the 'delete' of an object. If so, we could do the 'unsub'
-  //    when 'project' is deleted (and only return one thing). #js #advice
-  //
+  // tbd. can we bind to '.delete' of project??
   return [project, unsub];
 }
 
