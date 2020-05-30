@@ -50,16 +50,14 @@
 
       // Vue note: for 'props' to work dynamically, returning a generator is needed. (initial comment; edit when understand it better!)
       //
-      return () => {
+      return async () => {
         const { id } = props;
 
-        let project;
-        [project, unsubProject] = projectSub(id);
-        console.debug(project.value);
-        debugger;
+        let projectProm;
+        [projectProm, unsubProject] = projectSub(id);
 
         return {
-          project //,
+          project: projectProm //,    // tbd. can I feed a Promise to Vue 3 template?
           //symbols,    // tbd.
           //userInfo: {}  // tbd.
         }
