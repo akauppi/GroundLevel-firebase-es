@@ -128,5 +128,7 @@ It's now a bit too fast.
 
 ## Sentry integration
 
-Once their [Vue integration](https://docs.sentry.io/platforms/javascript/vue/) becomes available to Vue 3 (beta), move to it.
+Once their [Vue integration](https://docs.sentry.io/platforms/javascript/vue/) becomes available to Vue 3 (beta), consider it.
+
+Note: It's not so important, if we can do cloud logging via Firebase Functions - as it seems. :)
 

@@ -5,7 +5,7 @@
 */
 import { createApp } from 'vue';
 
-import c from './config.js'; const { appTitle /*, sentryDSN*/ } = c;
+import c from './config.js'; const { appTitle } = c;
 
 //--- Make-up 💄
 /* not yet...

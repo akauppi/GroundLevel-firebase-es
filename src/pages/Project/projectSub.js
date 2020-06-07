@@ -31,23 +31,17 @@ function projectSub(id) {   // (id: string) => [ Ref( null | { ..projectsC-doc }
   const projectD = db.doc(`projects/${id}`);
 
   // Using 'ref' since our fields are dynamic
+  // tbd. We don't need deep reactivity - just the top level
+  //
   const project = ref();
 
-  function handleDoc(doc) {
-    const d = (() => {    // {...projectsC-doc } if exists and not '.removed' | null
-      if (doc.exists) {
-        const tmp = doc.data();
-        return !('removed' in tmp) ? tmp : null;
-      } else {
-        return null;
-      }
-    })();
-
+  function handleSnapshot(ss) {
+    const d = ss.exists ? ss.data() : null;    // {...projectsC-doc } if exists and not '.removed' | null
     if (d) {
       console.debug("Setting 'project' to:", d);
       project.value = {...d};   // Q: how efficient is this for non-changing fields? #vueJs
 
-      /***
+      /*** If we were to use reactive
       // Vue.js 3 advice: this is way too cumbersome. We want 'project' to reflect the fields in 'tmp'. The fields are
       // dynamic, as far as we care. Is 'reactive' unsuitable and better to use 'ref'?  If so, does 'ref' efficiently
       // skip copying values that did not change (which is most of them)? #help
@@ -75,12 +69,17 @@ function projectSub(id) {   // (id: string) => [ Ref( null | { ..projectsC-doc }
 
   let unsub;  // () => ()
   try {
-    unsub = projectD.onSnapshot(unshot(handleDoc));
+    unsub = projectD.onSnapshot(handleSnapshot,
+      err =>
+        console.error("Error is subscription to project:", err)
+    );
+
   } catch (err) {
     console.error("!!!", err);
     debugger;
   }
 
+  // 'project' is initially 'undefined', until we get the first snapshot
   return [project, unsub];
 }
 

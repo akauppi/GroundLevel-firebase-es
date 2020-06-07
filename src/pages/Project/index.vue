@@ -37,9 +37,9 @@
 
   import { projectSub } from './projectSub.js';
 
-  function setup(props) {
-    const id = toRefs(props).id   // keep 'id' reactive
-
+  // Note: We don't need 'id' to be reactive (won't be changed while on the page) <-- is this correct?
+  //
+  function setup({ id }) {
     // Vue.js 3 note: refs/reactive within a 'setup' function are cleaned up by the system, but is there a way
     //    for us to tap to that? (i.e. not needing 'unsubProject')
 
@@ -55,21 +55,6 @@
       //symbols,
       //userInfo
     }
-
-    /***REMOVE is it so? (in Vue3?)
-     // Vue note: for us to pick up prop changes dynamically (not really required in the app logic but might be a
-     //        good general practice), a generator is needed.
-     //
-     return () => {
-        const { id } = props;
-
-        return {
-          project //,
-          //symbols,    // tbd.
-          //userInfo: {}  // tbd.
-        }
-      }
-     ***/
   }
 
   export default {
