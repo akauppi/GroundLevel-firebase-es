@@ -22,19 +22,24 @@
     - development it was easiest to have it here. It likely gets cached, and everyone needs to come through the
     - signin at some point, so there's little benefit in injecting it just for that one page.
     -
+    - NOTE: It's not unlikely that one day we'd read the source of the Firebase UI project and implement the parts
+    -     needed (we don't use/need all authentication flows) as a Vue-specific component. This a) does not seem to
+    -     be as great quality as other tools we use and b) we're not getting it from npm.
+    -
     - See discussion -> https://stackoverflow.com/questions/41710898/injecting-into-head-in-vue-js
     -->
     <!--DEV,PROD -->
-    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css" />
+    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
     <!-- -->
 
     <!--
     - Set up globals
     -
     - Some things don't need to come via the 'import' mechanism. These are better to set up already here, since
-    - 'import's get evaluated at once for a module, and modules neeeding the globals would faint.
+    - 'import's get evaluated at once for a module, and modules needing the globals would faint.
     -->
+    <!--DEV,PROD -->
     <script type="module">
       function assert(cond) {
         if (!cond) {
@@ -48,18 +53,44 @@
       import firebase from 'firebase/app';
       import 'firebase/auth';
       import 'firebase/firestore';
-
-      /* tbd. if PRODUCTION, read config from here (presuming we use Firebase hosting):
-      "/__/firebase/init.js"
-      */
-      import config from "/__.js"
-
-      firebase.initializeApp(config);
+      import 'firebase/functions';
 
       //--- Globals
       window.assert = assert
       window.firebase = firebase
     </script>
+    <!-- -->
+
+    <!--PROD Firebase initialization
+    <script type="module">
+      // Presuming Firebase hosting:
+      import config from "/__/firebase/init.js"
+      firebase.initializeApp(config);
+    </script>
+    -->
+    <!--DEV Firebase initialization -->
+    <script type="module">
+      import config from "/__.js"
+      firebase.initializeApp(config);
+
+      // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
+      //
+      // Note: Using a port numbering convention. We'd want the 'vite' command to be able to pass us a boolean.
+      //
+      if (location.port == "3001") {
+        firebase.functions().useFunctionsEmulator("http://localhost:5001");
+
+        firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
+          host: "localhost:8080",
+          ssl: false
+        });
+
+        window.LOCAL = true;    // inform the UI
+
+        console.info("Running against Firebase local emulators.")
+      }
+    </script>
+    <!-- -->
 
     <!--PROD Application
     <script type="module" src="/dist/bundle.esm.js"></script>

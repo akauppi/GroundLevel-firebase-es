@@ -6,6 +6,7 @@
 import { createApp } from 'vue';
 
 import c from './config.js'; const { appTitle } = c;
+import { logs } from './firebase/logs.js';
 
 //--- Make-up 💄
 /* not yet...
@@ -25,10 +26,13 @@ try {
   alert('Error loading the Firebase SDK, check the console.');
 }
 
+// Exercise central logging
+logs.info("We got up!");
+
 document.title = appTitle;
 
 import App from './App.vue';
-import router from './router.js';
+import { router } from './router.js';
 
 createApp(App)
   .use(router)

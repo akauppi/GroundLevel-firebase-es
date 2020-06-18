@@ -118,6 +118,23 @@
   // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
 
   import { user } from '../refs/user.js';
+  import { router } from '../router.js';
+
+  /*
+  * Sign out.
+  */
+  async function signOut() {
+    const fa = firebase.auth();
+    await fa.signOut();
+
+    // Picked up somewhere that signing out could be done such (not sure if the later '.onAuthStateChanged' is needed).
+    //
+    const unsub = fa.onAuthStateChanged(() => {
+      unsub();
+      // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
+      router.push('/signin');
+    });
+  }
 
   export default {
     name: 'AppProfile',
@@ -149,13 +166,7 @@
       })
     },
     methods: {
-      signOut() {
-        // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
-        //
-        firebase.auth().signOut().then( () => {
-          this.$router.push('/signin');
-        });
-      },
+      signOut,
       toggleMenu() {
         this.isOpen = !this.isOpen;
       }

@@ -4,6 +4,6 @@
 	- [FR: Immutability when testing Firestore Security Rules](https://github.com/firebase/firebase-js-sdk/issues/2895) 
 
    - let's see what Firebase authors reply
-
+		- no reply in 2 months #sniff 😢
    
    

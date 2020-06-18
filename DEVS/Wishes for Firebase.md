@@ -215,6 +215,15 @@ import firebase from `@firebase/testing`;   # fails
 It would be nice to have possibility of using ES6 `import` alongside the common-js `require`. Node.js now supports imports.
 
 
+## Local emulator UI
+
+..could hide the UI modules that aren't active. 
+
+E.g. if we start 
+
+!
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

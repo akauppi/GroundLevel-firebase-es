@@ -1,4 +1,4 @@
-# GroundLevel ES6 * Firebase * Web
+# GroundLevel * ES6 * Firebase
 
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
 
@@ -14,19 +14,24 @@
 
 You want a web app and you want it now?
 
-This aims to become the best place to make that happen. We chose and configured [great tools](Ingredients.md) so you don't need to read multiple manuals. We aim not only to show how it's done, but also argue why certain approaches were taken. We aim to start with 2020's technology (ES6, async/await), and stay relevant.
+This aims to become the best place to make that happen. 
 
-Welcome!
-
-<br clear=all />
->⏱ Before we start, it would be nice if you can time your experience and tell us, how fast you got *your app* rolling. Data based metrics, you know.. 😉
-
-<!-- Statistics reported so far:
-9 mins: 1 user
--->
+- great tools, selected for you
+- background on the approaches taken (to be done in the Wiki)
+- built on 2020's technology (ES6, async/await), aiming to stay up to date
 
 Let's start! 🤾‍♀️
 
+<!-- removed (we have a sticky start...)
+<br/>
+
+>It would be nice if you time your journey from here to a running installation. 
+>Then let us know the time. ⏱
+>
+>|||
+>|---|---|
+>|1|9 minutes|
+-->
 
 ## Requirements
 
@@ -36,28 +41,23 @@ Let's start! 🤾‍♀️
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-### Uses
-
-You may be curious as to our technology choices. There's going to be a separate Wiki section about it, but here is the short list of ingredients.
-
-- Vite - for buildless development flow
-- Vue 3 (beta) - for the UI framework
-- Rollup for production rollups 😉
-
-You don't need to be familiar with any of these technologies, in advance. They may also be changed during the course of the project: the technology choices in the title (ES6, Firebase and Web = SPA) are what remains.
-
-Developed with Firebase 8.2.0 on macOS
-
+<!--
+Developed with Firebase 8.4.3 on macOS
+-->
 
 ### Firebase project
 
 You need to:
 
-- create a Firebase project
-- enable hosting and authentication
+- create a Firebase project at the [Firebase console](https://console.firebase.google.com/)
+  - enable hosting and authentication
   - you can choose the set of authentication providers you like
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
+
+>Note: You don't need to use `firebase init` - that one is for creating a repo from scratch. `firebase use --add` is all that's needed.
+
+There are two development workflows you can use, either directly to the cloud data or by using emulators, locally. In both ways you do need the Firebase project for user authentication.
 
 
 ## Getting started
@@ -71,7 +71,7 @@ $ npm install
 >macOS Note: If you get `gyp: No Xcode or CLT version detected!` error, you can either ignore it or fix by:
 >
 >   ```
->   trash `/Library/Developer/CommandLineTools`
+>   # trash `/Library/Developer/CommandLineTools`
 >   $ xcode-select --install
 >   ```
 
@@ -100,11 +100,34 @@ Dev server running at:
 ...
 ```
 
-Serves the project locally, reacting to source code changes.
+Serves the project locally, reacting to source code changes. 
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
 
+<!--
 >Note: [Vite](https://github.com/vuejs/vite) (GitHub) is an awesome tool. It renders changes to `.vue` components on-the-fly, and allows us to not have a change-build step in development mode.
+-->
+
+### Using emulators (optional)
+
+In the above workflow (`npm run dev`), you are working directly towards the Firebase project. Changes you make to data are persisted in the cloud, and you can reach them with the Firebase console.
+
+Another way is to run Firebase emulator suite, locally, and aim the front end to use it.
+
+```
+$ npm run dev:local
+...
+```
+
+In this mode, changes to the data are local. The emulators themselves lose any data each time they are started, but you can create initial data by storing it in `preload.json`. 
+
+Use local mode when:
+
+- you want to experiment with things and don't wish your data changes to persist
+
+<!-- tbd. revise, when we've worked with it for a while
+-->
+
 
 ### Testing Security Rules (optional)
 
@@ -134,14 +157,13 @@ Three steps to brand your own app:
 2. Change the `name`, `version` and `author` fields in `package.json`, to match your application.
 3. Change the `
 
+<!-- disabled (revise when we see whether we need Rollup; Vite handles commonjs right)
 ### You need `npm` modules?
 
 No problem.
 
 If your modules provide ES6 exports, you may be able to use them, as is (let us know!). If they need `plugin-commonjs`, enable it in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
-
-Maybe we should add an `npm` dependency, just to show how it works?
-
+-->
 
 ## Support
 

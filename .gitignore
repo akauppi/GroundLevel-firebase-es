@@ -1,12 +1,18 @@
 /node_modules/
 /public/dist/
 
+/functions/node_modules/
+/functions/ui-debug.log
+
 # Firebase hosting caches
 /.firebase/
 
 /.firebaserc
-/firebase-debug.log
-/firestore-debug.log
+
+# These occur at /, /functions/, /rules-test
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Firebase dev config
 /__.js

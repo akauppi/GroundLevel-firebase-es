@@ -2,7 +2,7 @@
   "name": "rules-test",
   "version": "0.0.0",
   "description": "Rules tests",
-  "private": "true",
+  "private": true,
   "jest": {
     "globalSetup": "./setup.jest.js",
     "//": {
@@ -15,14 +15,17 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.9.0",
-    "@firebase/testing": "^0.19.0",
-    "babel-jest": "^25.2.6",
+    "@firebase/testing": "^0.20.1",
+    "babel-jest": "^25.2.7",
     "jest": "^25.2.7"
   },
   "//": {
     "babel*": [
       "Babel is needed (Mar 2020) to have Jest support ES6 module imports/exports",
       "see -> https://medium.com/@saplos123456/using-es6-import-and-export-statements-for-jest-testing-in-node-js-b20c8bd9041c"
+    ],
+    "@firebase/testing": [
+      "see -> https://github.com/firebase/firebase-js-sdk/tree/master/packages/testing"
     ]
   },
   "dependencies": {

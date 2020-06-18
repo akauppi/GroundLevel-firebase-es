@@ -41,13 +41,25 @@
 
   import { useRoute, parseQuery } from 'vue-router';
 
+  // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Can you make it work? #help
+  //    (makes sense to do all router/URL specific with Vue-router).
+  //
+  //const tmp = parseQuery(window.location.search).get('final');    // "some..."|null
+  const tmp = new URLSearchParams(window.location.search).get('final');    // "some..."|null
+  const toPath = tmp || '/';
+
+  // SOUVENIR
+  //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
+
+  console.log("Once signed in, we'd 🛵 to: " + toPath);
+
   /*
   * This was made to be a function, in case we would inject 'firebaseui' to just this page.. Which we don't do;
   * see 'index.html'.
   */
   const uiConfig = {
     signInFlow: 'redirect',     // default
-    signInSuccessUrl: "http://localhost:3000",
+    signInSuccessUrl: toPath,
     signInOptions: [
       // OAuth providers
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -159,17 +171,6 @@
    //
    const injectedProm = Promise.resolve(); //injectFirebaseUI();
   ***/
-
-  // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Can you make it work? #help
-  //    (makes sense to do all router/URL specific with Vue-router).
-  //
-  //const toPath = parseQuery(window.location.search).get('final');    // "some..."|null
-  const toPath = new URLSearchParams(window.location.search).get('final');    // "some..."|null
-
-  // SOUVENIR
-  //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
-
-  console.log("Once signed in, we'd 🛵 to: " + toPath);
 
   // Decision: what auth state persistence does your app favor?
   // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi

@@ -8,7 +8,9 @@
   "author": "<akauppi@gmail.com>",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000",
+    "dev:local": "firebase emulators:exec --only functions,firestore \"vite --port 3001\"",
+    "__dev:local": "concurrently --restart-tries 0 --names emul,vite \"firebase emulators:start --only firebase\" \"vite --port 3001\"",
     "build": "vite build --target public",
     "clean": "(rm public/dist/bundle* 2> /dev/null || true)"
   },
@@ -17,12 +19,14 @@
     "rollup:dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\""
   },
   "dependencies": {
-    "bootstrap": "^4.5.0",
     "firebase": "^7.14.5",
-    "jquery": "^3.5.1",
-    "popper.js": "^1.16.1",
-    "vue": "^3.0.0-beta.14",
+    "vue": "^3.0.0-beta.15",
     "vue-router": "^4.0.0-alpha.12"
+  },
+  "//dependencies": {
+    "bootstrap": "^4.5.0",
+    "jquery": "^3.5.1",
+    "popper.js": "^1.16.1"
   },
   "//devDependencies": {
     "//@firebase/testing": "^0.19.5",
@@ -41,13 +45,13 @@
     "rollup-plugin-vue": "^6.0.0-alpha.5"
   },
   "devDependencies": {
-    "@vue/compiler-sfc": "^3.0.0-beta.14",
+    "@vue/compiler-sfc": "^3.0.0-beta.15",
     "concurrently": "^5.0.2",
-    "eslint": "^7.1.0",
+    "eslint": "^7.2.0",
     "eslint-plugin-vue": "^7.0.0-alpha.6",
     "jest": "^25.3.0",
-    "sass": "^1.26.5",
-    "vite": "0.20.5"
+    "sass": "^1.26.8",
+    "vite": "0.20.8"
   },
   "//comments": {
     "devDependencies": {

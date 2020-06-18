@@ -108,27 +108,20 @@ How is that done?  Should we have a menu item if a user has logged in, anonymous
 See [Convert an anonymous account to a permanent account](https://firebase.google.com/docs/auth/web/anonymous-auth#convert-an-anonymous-account-to-a-permanent-account) (Firebase docs)
 
 
-## Firebase from `npm`
-
-There is no real reason to get Firebase (and Firebase UI) via `index.html`. 
-
-For tracking updates, moving it to `npm` may make sense.
-
-- See https://www.npmjs.com/package/firebase
-
-Note: There is no real downside in the way we are now bringing the modules from CDN.
-
-Edit: One benefit would be that the IDE starts showing implementation of the Firebase functions (`Cmd-B` works in IntelliJ).
-
-
 ## A fade/transition at signout
 
 It's now a bit too fast. 
 
 
+<!-- noooope?
 ## Sentry integration
 
 Once their [Vue integration](https://docs.sentry.io/platforms/javascript/vue/) becomes available to Vue 3 (beta), consider it.
 
 Note: It's not so important, if we can do cloud logging via Firebase Functions - as it seems. :)
+-->
+
+## README: mention production project
+
+Discuss in suitable place about using just one project, or separate staging/production.
 

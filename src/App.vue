@@ -6,6 +6,9 @@
 <template>
   <header>
     <app-logo />
+    <div id="emul" v-if="LOCAL">
+      EMULATION MODE
+    </div>
     <!-- Note: 'user' can be 'null' at first, then either an object (signed in) or 'false' (signed out).
     -->
     <app-profile v-if="user" />
@@ -19,6 +22,14 @@
 </template>
 
 <style scoped>
+  #emul {
+    padding: 10px;
+    background-color: dodgerblue;
+
+    position: fixed;
+    top: 40px;
+    left: 0;
+  }
 </style>
 
 <script>
@@ -30,6 +41,8 @@
 
   import { user } from './refs/user.js';
 
+  const LOCAL = window.LOCAL;   // true if we run against emulators (HTML cannot directly access 'window')
+
   export default {
     name: 'App',     // helps in debugging
     components: {
@@ -40,7 +53,8 @@
       onMounted(() => {
         console.log("Houston, App is mounted");
       });
-      return { user }
+
+      return { user, LOCAL }
     }
   }
 </script>
