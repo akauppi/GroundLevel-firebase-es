@@ -41,7 +41,7 @@
 
   import { user } from './refs/user.js';
 
-  const LOCAL = window.LOCAL;   // true if we run against emulators (HTML cannot directly access 'window')
+  const LOCAL = !! window.LOCAL;    // true if using local Firebase emulation
 
   export default {
     name: 'App',     // helps in debugging

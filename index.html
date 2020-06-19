@@ -73,15 +73,21 @@
       import config from "/__.js"
       firebase.initializeApp(config);
 
+      // Launching with 'npm run dev:local' sets these:
+      //
+      //    process.env.DEV_FUNCTIONS_URL: "http://localhost:5001"
+      //    process.env.DEV_FIRESTORE_HOST: "localhost:8080"
+      //
+      const { DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST } = process.env;
+
       // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
       //
-      // Note: Using a port numbering convention. We'd want the 'vite' command to be able to pass us a boolean.
-      //
-      if (location.port == "3001") {
-        firebase.functions().useFunctionsEmulator("http://localhost:5001");
+      if (DEV_FUNCTIONS_URL) {
+        firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
 
+        assert(DEV_FIRESTORE_HOST);
         firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
-          host: "localhost:8080",
+          host: DEV_FIRESTORE_HOST,
           ssl: false
         });
 
@@ -92,7 +98,6 @@
     </script>
     <!-- -->
 
-    <!-- DISABLED - loading conditionally based on Firebase auth being started. -->
     <!--PROD Application
     <script type="module" src="/dist/bundle.esm.js"></script>
     -->

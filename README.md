@@ -104,44 +104,75 @@ Serves the project locally, reacting to source code changes.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
 
-<!--
->Note: [Vite](https://github.com/vuejs/vite) (GitHub) is an awesome tool. It renders changes to `.vue` components on-the-fly, and allows us to not have a change-build step in development mode.
--->
+The code is served by [Vite](https://github.com/vuejs/vite) (GitHub). It renders changes to your sources on-the-fly (this is called Hot Module Replacement), speeding up development and experimentation. It's great! 
 
-### Using emulators (optional)
+Try making some changes and see that they are reflected in the browser.
 
-In the above workflow (`npm run dev`), you are working directly towards the Firebase project. Changes you make to data are persisted in the cloud, and you can reach them with the Firebase console.
 
-Another way is to run Firebase emulator suite, locally, and aim the front end to use it.
+### Local mode: emulating the back-end
+
+In the above workflow, front end is developed locally but the Firebase back-ends are run in the cloud.
+
+When developing those back-end features - Firestore security rules or Cloud Functions - the work is better done locally. This speeds up the development loop (essentially providing Hot Module Replacement for back-end features), but also makes it less likely that you break the cloud project. Instead of treating it as a development playground, it can now be a staging deployment.
+
+This matters even more, if you work as a group. Break things locally. 🔨
+
+To run in local mode:
 
 ```
 $ npm run dev:local
+
+> groundlevel-es6-firebase-web@0.0.0 dev:local /.../Git/GroundLevel-es6-firebase-web
+> firebase emulators:exec --only functions,firestore "vite --port 3001"
+
+i  emulators: Starting emulators: functions, firestore
+⚠  emulators: It seems that you are running multiple instances of the emulator suite for project vue-rollup-example. This may result in unexpected behavior.
+⚠  Your requested "node" version "10" doesn't match your global version "14"
+i  firestore: Firestore Emulator logging to firestore-debug.log
+i  functions: Watching "/.../Git/GroundLevel-es6-firebase-web/functions" for Cloud Functions...
+✔  functions[logs]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs).
+✔  functions[logs2]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs2).
+i  Running script: vite --port 3001
+vite v0.20.8
+
+  Dev server running at:
+  > Local:    http://localhost:3001/
+  > Network:  http://192.168.1.62:3001/
+  > Network:  http://169.254.122.162:3001/
+
 ...
 ```
 
-In this mode, changes to the data are local. The emulators themselves lose any data each time they are started, but you can create initial data by storing it in `preload.json`. 
+With local mode, authentication still happens online so you do need to have the Firebase project set up.
 
-Use local mode when:
+Data is not persisted. Once you stop the server and restart it, all your data is gone. This is intentional. If you wish to have a certain ground zero data available to start with, place it in `local.data.js`.
 
-- you want to experiment with things and don't wish your data changes to persist
+Here's a summary of the differences of normal and local mode:
 
-<!-- tbd. revise, when we've worked with it for a while
--->
+||cloud based|local emulation|
+|---|---|---|
+|authentication|cloud|cloud|
+|authorization|cloud|local|
+|Cloud Firestore|cloud|local|
+|Cloud Functions|cloud|local|
+|persistence|yes|no|
+
+### When to use emulation?
+
+If you develop Cloud Functions, or Firestore access rules, it's easier to do this locally. It also means that your changes will not harm other developers as they would if you deployed work-in-progress to the cloud.
+
+For a single developer, the faster feedback loop (no deployment to cloud) is likely enough to entice you to work locally - when working with functions and security rules.
 
 
-### Testing Security Rules (optional)
+## Testing Security Rules (optional)
 
 If you are serious about development, have a look at the `rules-test` sub-project. It uses the Firestore emulator to check the rules we have in `firestore.rules` behave as intended.
 
-Since this is quite an added complexity (more `npm` dependencies, need to install the emulator), it's been left as a self-sufficient sub-project. At least for now.
+Since this is quite an added complexity (more `npm` dependencies, need to install the emulator), it's been left as a self-sufficient sub-project.
 
-You can run the rules-tests also by:
+Please see its [README](rules-test/README.md) file.
 
-```
-$ npm run rules-test
-```
-
-However, this expects that you have installed the necessary gear in the sub-project first. Please see its [README](rules-test/README.md) file.
+---
 
 ## Bring in your App!
 
@@ -155,24 +186,13 @@ Three steps to brand your own app:
 
 1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
 2. Change the `name`, `version` and `author` fields in `package.json`, to match your application.
+
+<!-- hmm... wonder what was meant to be:
 3. Change the `
-
-<!-- disabled (revise when we see whether we need Rollup; Vite handles commonjs right)
-### You need `npm` modules?
-
-No problem.
-
-If your modules provide ES6 exports, you may be able to use them, as is (let us know!). If they need `plugin-commonjs`, enable it in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
 -->
 
-## Support
-
-If you have suggestions or bugs, [GitHub Issues](https://github.com/akauppi/GroundLevel-firebase-web/issues) is the way. 
-
-For general questions and casual chat, visit the project's [Gitter stream](https://gitter.im/akauppi/GroundLevel-firebase-web).
-
-<!-- Editor's note:
-Slack channel might be justified, but that's later.. (Asko)
+<!-- disabled (revise when we see whether we need Rollup)
+If we still use Rollup, and you need CommonJS dependencies, enable `plugin-commonjs` in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
 -->
 
 
@@ -184,13 +204,21 @@ Once you've got your app together, you want to roll it out to the world. There a
 
 ```
 $ npm run build
-$ firebase serve
 ...
 ```
 
 >Note: The output bundle sizes shown on the console are not quite what's in the file system. #help
 
-The reason the output bundle can be pretty small (e.g. 8kB) is that Firebase, Firebase UI and Vue are brought in from CDN at `index.html`, instead of `npm`.
+This builds a production mode front end under `dist/`.
+
+To check it's working, we can serve it (don't try opening the `index.html` from the file system).
+
+```
+$ firebase serve --only hosting
+```
+
+><font color=red>BROKEN GLASS AHEAD!! Production build with Vite still needs work. The output (index.html) is broken!
+
 
 ### Deploy
 
@@ -218,34 +246,39 @@ Visit the stated URL. :)
 
 Note: These instructions are no-where complete, and you should really visit the Firebase documentation (it being awesome!! 🥳). Check e.g. [Test locally then deploy to your site](https://firebase.google.com/docs/hosting/deploying)
 
+</font>
 
+<!-- disabled, to keep things short-ish
 ## Digging deeper...
 
-The template aims to cover more ground. It's not enough to get authentication running. You need to manage the data behind your application. Firebase provides solutions to these, and it makes sense to show them in action.
-
-This means:
-
-- Cloud Firestore; creating an actual collaborative app behind the authentication
-  - invitations
-- Performance monitoring
-- Logging
-- A/B testing
+The template aims to cover more ground:
+ 
+- [x] Authentication
+- [ ] Cloud Firestore; creating an actual collaborative app behind the authentication
+  - [ ] invitations
+- [ ] Logging
+- [ ] Performance monitoring
+- [ ] A/B testing
 
 Stay tuned for these developments, or chime in to make them happen!!! 🏅
-
+-->
 
 ## Help needed!
 
 If you wish to help, check out:
 
 - [TODO.md](TODO.md)
-- [Issues](https://github.com/akauppi/vue-rollup-example-with-firebase-auth/issues)
+- [Issues](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues)
 
 Issues has more formal definition of shortcomings and plans, and is the main forum of contributions and discussion. `TODO` is a shorthand for authors.
 
+For a more permanent role, please check:
+
 In particular:
 
-- help from Vue and/or Rollup aficiados, to check the configs are Best in class ☺️
+- help to debug why after sign-in the "strager" page still flashes, instead of diving directly in
+- [graphics designer](JOBS.md) is looked for!!!
+
 
 ## Credits
 
@@ -253,9 +286,7 @@ Thanks to Jaakko Roppola for wonderful icon art!! 🙌
 
 Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it, then changed a few things.
 
-Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (blog, Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
-
-   - btw. most material online gets that wrong. Using `firebase.auth.currentUser` in route guards is _not_ the correct way, and should be discouraged!
+Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 
 
 ## References

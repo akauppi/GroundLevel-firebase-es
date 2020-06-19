@@ -3,6 +3,7 @@
 ## 19-Jun-20
 
 - Firebase authentication delay handled within `router.js`. Good.
+- Front-end running against emulators with 'npm run dev:local'.
 
 ## 14-Apr-20
 
