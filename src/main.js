@@ -32,11 +32,15 @@ logs.info("We got up!");
 document.title = appTitle;
 
 import App from './App.vue';
-import { router } from './router.js';
+import { routerProm } from './router.js';
 
-createApp(App)
-  .use(router)
-  .mount('#app');
+routerProm.then( router => {
+  createApp(App)
+    .use(router)
+    .mount('#app');
+}).catch( ex => {
+  console.error("Unable to get router:", ex);
+});
 
 /*** Note: with Vue 2.x we had this - what's a similar way with Vue 3 (beta)? Do we need this?
  *

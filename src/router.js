@@ -2,6 +2,14 @@
 * src/router.js
 *
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
+*
+* We do a delayed (async) router generator, based on the 'firebase.auth().currentUser' being known. This delays about
+* 300..500ms but ensures the authentication system is up, when the router needs it. No need for promises, later.
+*
+* Note: tried multiple approaches before this. Initializing Firebase before Vue (and Vue router), dealing with auth
+*     info as a promise always. Each of them has down sides (and the delay is inevitable somewhere). The router is
+*     the _only_ place where the info really needs to be (since if the user ends up on a protected page, we already
+*     know authentication happened). Thus, embedding a part of Firebase in here. :)
 */
 
 import { createRouter, createWebHistory } from 'vue-router';
@@ -18,7 +26,17 @@ import SignIn from './pages/SignIn.vue';
 import Project from './pages/Project/index.vue';
 import page404 from './pages/404.vue';
 
-import { isSignedInRightNow } from './firebase/auth.js';
+// Turning Firebase subscription model into a Promise based on
+//    -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
+//
+function currentFirebaseUserProm() {    // () => Promise of object|null
+  return new Promise( (resolve, reject) => {   // () => Promise of (firebase user object)
+    const unsub = firebase.auth().onAuthStateChanged(user => {
+      unsub();
+      resolve(user);
+    }, reject);
+  });
+}
 
 const r = (path, component, o) => ({ ...o, path, component });
 const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipAuth: true } })
@@ -36,39 +54,59 @@ const routes = [
   skipAuth('/:catchAll(.*)', page404 )
 ];
 
-const router = createRouter({
-  history: createWebHistory(),
-  //base: process.env.BASE_URL,    // tbd. what is this used for?
-  routes
-});
+// Note: Until JavaScript "top-level await" proposal, we export both a promise (for creating the route) and a
+//    'route' value (which remains 'undefined' until the route is created - but users of it are behind routes so
+//    they will never see that).
+//
+//    When the proposal has passed, and implemented in evergreen browsers, we can turn to just having 'router'
+//    exposed.
+//
+//    See -> https://github.com/tc39/proposal-top-level-await
+//
+let router;
 
-router.beforeEach(async (to, from, next) => {
-  assert(to.path !== null);   // "/some"
+const routerProm = currentFirebaseUserProm().then( _ => {
 
-  console.log(`router entering page: ${to.path}`);
+  router = createRouter({
+    history: createWebHistory(),
+    //base: process.env.BASE_URL,    // tbd. what is this used for?
+    routes
+  });
 
-  // tbd. Describe exactly what the 'to.matched.some(record => ...);' does.
-  //    Some samples also have simpler: ...(paste here when coming across it)...
-  //
-  // Based on -> https://router.vuejs.org/guide/advanced/meta.html
-  //
-  const skipAuth = to.matched.some(record => record.meta.skipAuth);
+  router.beforeEach(async (to, from, next) => {
+    assert(to.path !== null);   // "/some"
 
-  if (skipAuth) {
-    next();   // just proceed
+    console.log(`router entering page: ${to.path}`);
 
-  } else if (await isSignedInRightNow()) {
-    next();   // just proceed
+    // 'to.matched' likely has the routes (including parent levels) leading to our page. We don't use route levels
+    // (parent/children) (Jun 2020), so the array is always just one entry long. (Note: This is guesswork, '.matched'
+    // does not have documentation in its source).
+    //
+    // For this, it is irrelevant whether we use '.every' or what not. Maybe we should use '.last' (the actual page).
+    // Check this out properly, one day (samples use '.some' but they also use '.requiresAuth' when we have changed that
+    // to '.skipAuth').
+    //
+    // Based on -> https://router.vuejs.org/guide/advanced/meta.html
+    //
+    console.debug("Before route, to.matched:", to.matched);    // DEBUG (could use central logging here!!! tbd.!!)
 
-  } else {    // need auth but user is not signed in
-    console.log("Wanting to go to (but not signed in): "+ to);  // DEBUG
+    const skipAuth = to.matched.every(r => r.meta.skipAuth);
 
-    if (to.path === '/') {
-      next('/signin')   // no need to clutter the URL
-    } else {
-      next(`/signin?final=${to.path}`);
+    if (skipAuth || firebase.auth().currentUser) {    // we can now rely on 'firebase.auth().currentuser'==null to mean not signed in
+      next();   // just proceed
+
+    } else {    // need auth but user is not signed in
+      console.log("Wanting to go to (but not signed in): " + to);  // DEBUG
+
+      if (to.path === '/') {
+        next('/signin')   // no need to clutter the URL
+      } else {
+        next(`/signin?final=${to.path}`);
+      }
     }
-  }
+  });
+
+  return router;
 });
 
-export { router }
+export { routerProm, router }

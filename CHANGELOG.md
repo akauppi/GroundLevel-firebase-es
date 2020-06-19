@@ -1,6 +1,10 @@
 # Changelog
 
-## Latest
+## 19-Jun-20
+
+- Firebase authentication delay handled within `router.js`. Good.
+
+## 14-Apr-20
 
 - Updated all dependencies
    - including Rollup to 2.x -> [changelog entry](https://github.com/rollup/rollup/releases/tag/v2.0.0)

@@ -6,15 +6,25 @@
 * We handle Firebase API; pages don't need to know it ('SignIn' and 'AppProfile' being exceptions).
 *
 * Note:
-*     When loading, this module will delay until authentication information is acquired (90..370ms). This means
-*     we can guarantee the 'fbUser' field to always have valid information. Another ways could be to provide
-*     'null' as a token of "working on it", or to provide a Promise as the value. tbd. Let's see what works.
+*     Module loading cannot be delayed, until the "top-level await" proposal is in. We try to handle this in the router
+*     implementation - making sure pages don't get accessed before Firebase knows whether the user is "in" our "out".
+*
+*     For our users, this means:
+*       - 'fbUser.value' may be 'null' in certain circumstances but it will shortly (~ 300..500ms) turn to 'false' or
+*         an object.
+*
+*     Note: We CAN make a custom 'ref' that would warn when authentication is not known. :)  (see comments below)
 *
 * References:
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
 import { ref } from 'vue';
+
+// tbd. Consider making a custom Vue 3 reference that fails with noise if authentication isn't determined, yet (or
+//    better yet, waits for it). :)
+//
+//    See -> https://composition-api.vuejs.org/api.html#customref
 
 const fbUser = ref(null);   // until auth has been established
 
@@ -39,19 +49,6 @@ const fbUser = ref(null);   // until auth has been established
 // Signed out:
 //    false
 
-//
-// Turning Firebase subscription model into a Promise based on
-//    -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
-//
-function currentFirebaseUserProm() {    // () => Promise of object|falsy
-  return new Promise( (resolve, reject) => {   // () => Promise of (firebase user object)
-    const unsub = firebase.auth().onAuthStateChanged(user => {
-      unsub();
-      resolve(user);
-    }, reject);
-  });
-}
-
 console.log("Starting auth checking...");
 const t0 = performance.now();
 let reported = false;
@@ -74,26 +71,6 @@ firebase.auth().onAuthStateChanged( (o) => {
 
 console.log("Started auth checking...", performance.now() - t0);
 
-/*
-* Is the user signed in, right now.
-*
-* Used by 'router.js'.
-*
-* We do get here before the initial '.onAuthStateChanged' callback has been able to set '.fbUser.value'
-* so making it in another way.
-*/
-async function isSignedInRightNow() {    // () => Promise of boolean
-  if (fbUser.value === null) {
-    console.log("'fbUser' not initialized - providing a Promise")
-    return currentFirebaseUserProm().then( (o) => o !== null );
-
-  } else {
-    console.log("'fbUser' known: "+ fbUser.value);
-    return !! fbUser.value;   // cast to boolean
-  }
-}
-
 export {
-  fbUser,
-  isSignedInRightNow
+  fbUser
 };
