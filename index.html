@@ -5,9 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!--PROD Favicon
     <link rel="icon" type="image/png" href="favicon.png">
-    -->
 
     <!-- tbd. make 'set' work if we generate both 'index.dev.html' and 'index.html' (production)
     -   from the same source.
@@ -73,12 +71,17 @@
       import config from "/__.js"
       firebase.initializeApp(config);
 
+      /*** this worked with '.env' files, but not from config.
       // Launching with 'npm run dev:local' sets these:
       //
       //    process.env.DEV_FUNCTIONS_URL: "http://localhost:5001"
       //    process.env.DEV_FIRESTORE_HOST: "localhost:8080"
       //
       const { DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST } = process.env;
+      ***/
+
+      // Detect from port (3001 means using emulator)
+      const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = (location.port == "3001") ? ["http://localhost:5001", "localhost:8080"] : [];
 
       // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
       //

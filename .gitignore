@@ -1,5 +1,6 @@
 /node_modules/
-/public/dist/
+#/public/dist/
+/dist/
 
 /functions/node_modules/
 /functions/ui-debug.log

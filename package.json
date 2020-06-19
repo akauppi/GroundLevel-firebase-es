@@ -9,18 +9,18 @@
   "private": true,
   "scripts": {
     "dev": "vite --port 3000",
-    "dev:local": "firebase emulators:exec --only functions,firestore \"vite --port 3001 --config vite.emul.config.js\"",
+    "dev:local": "firebase emulators:exec --only functions,firestore \"vite --port 3001\"",
     "build": "vite build",
     "clean": "(rm public/dist/bundle* 2> /dev/null || true)"
   },
   "//scripts": {
-    "rollup:build": "rollup -c",
-    "rollup:dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\""
+    "rollup:dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
+    "rollup:build": "rollup -c"
   },
   "dependencies": {
     "firebase": "^7.14.5",
     "vue": "^3.0.0-beta.15",
-    "vue-router": "^4.0.0-alpha.12"
+    "vue-router": "^4.0.0-alpha.13"
   },
   "//dependencies": {
     "bootstrap": "^4.5.0",
@@ -46,11 +46,11 @@
   "devDependencies": {
     "@vue/compiler-sfc": "^3.0.0-beta.15",
     "concurrently": "^5.0.2",
-    "eslint": "^7.2.0",
+    "eslint": "^7.3.0",
     "eslint-plugin-vue": "^7.0.0-alpha.6",
     "jest": "^25.3.0",
     "sass": "^1.26.8",
-    "vite": "0.20.8"
+    "vite": "0.20.10"
   },
   "//comments": {
     "devDependencies": {
