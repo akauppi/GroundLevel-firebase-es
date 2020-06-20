@@ -2,7 +2,7 @@
   "hosting": {
     "public": "public",
     "ignore": [
-      "public/dist/README.md"
+      "**/.*"
     ],
     "//ignore": [
       "**/.*",

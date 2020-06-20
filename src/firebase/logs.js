@@ -4,10 +4,9 @@
 * Create central logs. Used for being able to detect what's going on - and sometimes for debugging cases where
 * the page refreshes (e.g. authentication flow).
 */
+import { functionsRegion } from '../config';
 
-// tbd. Should we use 'callables' or HTTPS?
-
-const log = firebase.functions().httpsCallable('logs2');
+const log = firebase.app().functions(functionsRegion).httpsCallable('logs_v1');
 
 function logGen(level) {    // (string) => (string) => ()
   return (msg) => {

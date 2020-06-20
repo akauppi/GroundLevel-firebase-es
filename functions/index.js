@@ -6,17 +6,23 @@
 *   Also, path parameters cannot be defined. To do these, an Express API could be used, but we go with the
 *   simple model, for now.
 *
-* "With callables, Firebase Authentication and FCM tokens, when available, are automatically included in requests."
+* Design note:
+*   We choose "callable functions" (over REST API) since there is no extra benefit of using REST in our use case.
+*   With callables, parsing is done for us and authentication information is included in the requests.
+*
+* Note:
+*   'HttpsError' 'code' values must be from a particular set
+*     -> https://firebase.google.com/docs/reference/js/firebase.functions#functionserrorcode
 *
 * References:
-*   - Call functions via HTTP requests (Firebase docs)
-*     -> https://firebase.google.com/docs/functions/http-events
+*   - Call functions from your app (Firebase docs)
+*     -> https://firebase.google.com/docs/functions/callable
 */
 const functions = require('firebase-functions');
 
 const myRegion = 'europe-west3';  // Frankfurt
 
-// Firebase Admin SDK to access Cloud Firestore
+// Firebase Admin SDK
 //const admin = require('firebase-admin');
 //admin.initializeApp();
 
@@ -52,6 +58,7 @@ exports.makeUppercase = functions.firestore.document('/messages/{documentId}')
   });
 ***/
 
+/***
 // Logging
 //
 // POST /logs
@@ -89,15 +96,13 @@ exports.logs = functions
 
   resp.status(200).send("");
 });
+***/
 
-// Same, as a "callable function"
+// Logs, as "callable function"
 //
-exports.logs2 = functions
+exports.logs_v1 = functions
   .region(myRegion)
-  .https.onCall((data, context) => {
-
-    const level = req.body.level;
-    const msg = req.body.msg;
+  .https.onCall(({ level, msg }, context) => {
 
     switch (level) {
       case "debug":
@@ -113,9 +118,8 @@ exports.logs2 = functions
         console.error(msg);
         break;
       default:
-        resp.status(400).send("Unknown level: "+level);
-        return;
+        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
     }
 
-    resp.status(200).send("");
+    return "";
   });

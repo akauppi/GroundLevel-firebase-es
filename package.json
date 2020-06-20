@@ -18,7 +18,7 @@
     "rollup:build": "rollup -c"
   },
   "dependencies": {
-    "firebase": "^7.14.5",
+    "firebase": "^7.15.2",
     "vue": "^3.0.0-beta.15",
     "vue-router": "^4.0.0-alpha.13"
   },
@@ -50,7 +50,7 @@
     "eslint-plugin-vue": "^7.0.0-alpha.6",
     "jest": "^25.3.0",
     "sass": "^1.26.8",
-    "vite": "0.20.10"
+    "vite": "1.0.0-beta.1"
   },
   "//comments": {
     "devDependencies": {

@@ -57,7 +57,32 @@ You need to:
 
 >Note: You don't need to use `firebase init` - that one is for creating a repo from scratch. `firebase use --add` is all that's needed.
 
-There are two development workflows you can use, either directly to the cloud data or by using emulators, locally. In both ways you do need the Firebase project for user authentication.
+**Note on billing (optional)**
+
+When this repo was started, all the necessary features were covered by the Spark ("free") plan. Then, on 20-Jun-20, this showed up:
+
+>`⚠  functions: Cloud Functions will soon require the pay-as-you-go (Blaze) billing plan to deploy. To avoid service disruption, upgrade before 2020-08-17. For more information, see: https://firebase.google.com/support/faq#functions-runtime`
+
+That's fine - Google may change their pricing and the Blaze just means you have to provide a credit card. The free usage is still there also when using Blaze.
+
+But it seems fair to provide a short list here, before proceeding to the Fun part.
+
+1. You can get started with Spark plan ("free"; no credit card). The repo works fully when run locally. Use the `dev:local` to run emulators for Cloud Functions.
+2. If you decide to upgrade to Blaze plan, likely your use will be free even there. If in doubt, place a [budget alert](https://cloud.google.com/billing/docs/how-to/budgets). Note that it's not a ceiling - just a notification.
+3. You can also switch your Cloud Billing off when not needing the service.
+
+The purpose of this repo is to REMAIN USEFUL FOR PEOPLE ALSO IN THE SPARK PLAN.
+
+See:
+
+- Firebase [pricing plans](https://firebase.google.com/pricing) 
+- More [information on the Aug 17th change](https://firebase.google.com/support/faq#functions-pricing)
+
+>The Spark plan is going to be unavailable for Cloud Functions after March 15, 2021.
+
+The change seems to be due to internal technical roadmaps. This happens. Cost-wise it'll mean some cents (and a further incentive to use the emulators for development).
+
+The big thing is after Aug 17th 2020, you need to provide the credit card info to Google.
 
 
 ## Getting started
@@ -159,9 +184,9 @@ Here's a summary of the differences of normal and local mode:
 
 ### When to use emulation?
 
-If you develop Cloud Functions, or Firestore access rules, it's easier to do this locally. It also means that your changes will not harm other developers as they would if you deployed work-in-progress to the cloud.
+If you develop Cloud Functions, or Firestore access rules, it's easier to do this locally. You see logs from the function directly at the terminal. Also, your experiments will not harm other developers as they would if you deployed work-in-progress to the cloud and you shared the Firebase project.
 
-For a single developer, the faster feedback loop (no deployment to cloud) is likely enough to entice you to work locally - when working with functions and security rules.
+For a single developer, the faster feedback loop (no deployment to cloud) is likely enough to entice you to work locally.
 
 
 ## Testing Security Rules (optional)

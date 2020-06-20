@@ -5,7 +5,7 @@
 */
 import { createApp } from 'vue';
 
-import c from './config.js'; const { appTitle } = c;
+import { appTitle } from './config.js';
 import { logs } from './firebase/logs.js';
 
 //--- Make-up 💄

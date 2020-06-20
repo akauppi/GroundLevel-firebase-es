@@ -1,5 +1,9 @@
 # Changelog
 
+## latest
+
+- Logging via Cloud Functions
+
 ## 19-Jun-20
 
 - Firebase authentication delay handled within `router.js`. Good.

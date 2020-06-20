@@ -37,7 +37,7 @@
 
 <script>
   import { onMounted } from 'vue';
-  import c from '../config.js'; const { allowAnonymousAuth } = c;
+  import { allowAnonymousAuth } from '../config.js';
 
   import { useRoute, parseQuery } from 'vue-router';
 
