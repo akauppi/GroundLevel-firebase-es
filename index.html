@@ -68,8 +68,21 @@
     -->
     <!--DEV Firebase initialization -->
     <script type="module">
-      import config from "/__.js"
-      firebase.initializeApp(config);
+      /*** REMOVE
+      const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+      const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      const locationId = import.meta.env.VITE_FIREBASE_LOCATION_ID;
+      ***/
+
+      import { dev } from './src/config.js'; const { apiKey, projectId, locationId } = dev;
+      assert(apiKey && projectId && locationId);
+
+      firebase.initializeApp({
+        apiKey,
+        projectId,
+        locationId,
+        authDomain: projectId +".firebaseapp.com"
+      });
 
       // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
       //

@@ -106,66 +106,6 @@ $ npm install
 >   ```
 -->
 
-### Configuration
-
-Before running the UI, there is one thing we need to do.
-
-The UI part needs to know some Firebase configuration information. If one uses Firebase hosting for development, this is injected by the tool. We use Vite, and need to take this small step to bring the info to its attention.
-
->Note: These information are not secret. They are needed for the Firebase JavaScript client to communicate with the cloud counterparts.
-
-```
-$ firebase emulators:start --only hosting
-i  emulators: Starting emulators: hosting
-i  hosting: Serving hosting files from: public
-✔  hosting: Local server: http://localhost:5000
-...
-```
-
-Open a browser as [http://localhost:5000/__/firebase/init.js](http://localhost:5000/__/firebase/init.js):
-
-```
-if (typeof firebase === 'undefined') throw new Error('hosting/init-error: Firebase SDK not detected. You must include it before /__/firebase/init.js');
-var firebaseConfig = {
-  "projectId": "vue-rollup-example",
-  "appId": "1:990...bf7",
-  "databaseURL": "https://vue-rollup-example.firebaseio.com",
-  "storageBucket": "vue-rollup-example.appspot.com",
-  "locationId": "europe-west3",
-  "apiKey": "AIz...rsk",
-  "authDomain": "vue-rollup-example.firebaseapp.com",
-  "messagingSenderId": "990...646",
-  "measurementId": "G-VJS...X1"
-};
-if (firebaseConfig) {
-  firebase.initializeApp(firebaseConfig);
-}
-```
-
-These values are not really secrets. Anyone having access to your front end will be able to uncover them. However, we chose not to place them in the version control (this may change).
-
-Pick the values you see, and place them in `__.js` as such:
-
-```
-export default {
-  apiKey: "AIz...rsk",
-  authDomain: "vue-rollup-example.firebaseapp.com",
-  databaseURL: "https://vue-rollup-example.firebaseio.com",
-  projectId: "vue-rollup-example",
-  storageBucket: "vue-rollup-example.appspot.com",
-  messagingSenderId: "990...646",
-  appId: "1:990...bf7",
-  locationId: "europe-west3"
-
-  // Enabling this would enable Firebase 'logEvent' collection (on hold)
-  //measurementId: "G-VJSH9D5HX1"
-}
-```
-
-This file is needed only for development. When deployed, we use Firebase hosting and the front end gets this information directly.
-
->Note: We could do a script to automate this file generation! +1
-
 <!--
 ### Running tests
 -->
@@ -178,15 +118,6 @@ $ npm test
 ```
 -->
 
-
-## Development workflow
-
->Note: Firebase is pushing for use of the local emulator. It is likely we'll change that workflow to be the default one, during 2020.
-
-### `dev[:online]`
-
-The "online" workflow is recommended when you are working with the UI code.
-
 ```
 $ npm run dev
 ...
@@ -196,13 +127,22 @@ Dev server running at:
 ...
 ```
 
-Serves the UI locally, reacting to source code changes. Back end is on the cloud.
+This serves the UI locally, reacting to source code changes. Back end is on the cloud.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
 
 The code is served by [Vite](https://github.com/vuejs/vite) (GitHub). It renders changes to your sources on-the-fly (this is called Hot Module Replacement), speeding up development and experimentation. It's great! 
 
 Try making some changes and see that they are reflected in the browser.
+
+
+## Development workflow
+
+The above command started an "online" development workflow. You can also start it with `npm run dev:online`. In it, changes to the front-end are reflected in the browser but back-end features (database, Cloud Functions) are run online.
+
+The "online" workflow is recommended when you are working with the UI code, but the full story is a bit longer. Next, we'll look into the "local" workflow.
+
+>Note: Firebase is pushing for use of the local emulator. It is likely we'll change that workflow to be the default one, during 2020.
 
 
 ### `dev:local`
@@ -282,6 +222,57 @@ You can also run these modes simultaneously, in different terminals. By default,
 >Note: Differentiating the modes in the UI is currently (Jun 2020) done by the port. This is not ideal, and may change at some point. Essentially, we have two dev modes whereas Vite assumes there's always just one.
 
 
+## Configuration
+
+Above steps worked against the existing cloud deployment - not your own project.
+
+To change this, edit the files:
+
+- `.env.dev_online`
+- `.env.dev_local`
+
+They are duplicates of each other. Vite does not really provide us a good way (1.0 beta) of handling two different dev configurations.[^2]
+
+[^2]: We could have them in a separate `firebase.dev.config.js` file. Should we?
+
+```
+VITE_FIREBASE_API_KEY = "AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk"
+VITE_FIREBASE_PROJECT_ID = vue-rollup-example
+VITE_FIREBASE_LOCATION_ID = europe-west3
+```
+
+These values are not secrets. They are often kept in the `index.html` but we keep them in separate configuration files. Production builds do not need them, since we use Firebase hosting there.
+
+### Finding your project's values
+
+```
+$ firebase emulators:start --only hosting
+...
+```
+
+Visit [http://localhost:5000/__/firebase/init.js](http://localhost:5000/__/firebase/init.js) and pick the values you need:
+
+```
+if (typeof firebase === 'undefined') throw new Error('hosting/init-error: Firebase SDK not detected. You must include it before /__/firebase/init.js');
+var firebaseConfig = {
+  "projectId": "vue-rollup-example",
+  "appId": "1:990...bf7",
+  "databaseURL": "https://vue-rollup-example.firebaseio.com",
+  "storageBucket": "vue-rollup-example.appspot.com",
+  "locationId": "europe-west3",
+  "apiKey": "AIz...rsk",
+  "authDomain": "vue-rollup-example.firebaseapp.com",
+  "messagingSenderId": "990...646",
+  "measurementId": "G-VJS...X1"
+};
+if (firebaseConfig) {
+  firebase.initializeApp(firebaseConfig);
+}
+```
+
+We'll probably do a script to show these, at some point. #help
+
+
 ## Testing Security Rules
 
 If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
@@ -311,7 +302,7 @@ Three steps to brand your own app:
 
 1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
 2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
-3. Change the `CHANGELOG` and other such, obviously...
+3. Visit the `src/config.js` and suit it to your project (title etc.).
 
 <!-- disabled (revise when we see whether we need Rollup)
 If we still use Rollup, and you need CommonJS dependencies, enable `plugin-commonjs` in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
