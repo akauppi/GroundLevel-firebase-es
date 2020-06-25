@@ -134,3 +134,14 @@ Try Docker for the security rules testing.
 
 The idea is to keep Docker as an optional requirement. Heavy lifters will likely not mind it, and it makes their own repo clones lighter. 
 
+## Can we develop without `__.js`?
+
+In the local mode, we are using emulator. 
+
+What happens if we don't provide the `__.js` file - would things still work?? :)
+
+( Check especially after authentication has become part of emulation. )
+
+
+
+

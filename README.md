@@ -106,6 +106,66 @@ $ npm install
 >   ```
 -->
 
+### Configuration
+
+Before running the UI, there is one thing we need to do.
+
+The UI part needs to know some Firebase configuration information. If one uses Firebase hosting for development, this is injected by the tool. We use Vite, and need to take this small step to bring the info to its attention.
+
+>Note: These information are not secret. They are needed for the Firebase JavaScript client to communicate with the cloud counterparts.
+
+```
+$ firebase emulators:start --only hosting
+i  emulators: Starting emulators: hosting
+i  hosting: Serving hosting files from: public
+✔  hosting: Local server: http://localhost:5000
+...
+```
+
+Open a browser as [http://localhost:5000/__/firebase/init.js](http://localhost:5000/__/firebase/init.js):
+
+```
+if (typeof firebase === 'undefined') throw new Error('hosting/init-error: Firebase SDK not detected. You must include it before /__/firebase/init.js');
+var firebaseConfig = {
+  "projectId": "vue-rollup-example",
+  "appId": "1:990...bf7",
+  "databaseURL": "https://vue-rollup-example.firebaseio.com",
+  "storageBucket": "vue-rollup-example.appspot.com",
+  "locationId": "europe-west3",
+  "apiKey": "AIz...rsk",
+  "authDomain": "vue-rollup-example.firebaseapp.com",
+  "messagingSenderId": "990...646",
+  "measurementId": "G-VJS...X1"
+};
+if (firebaseConfig) {
+  firebase.initializeApp(firebaseConfig);
+}
+```
+
+These values are not really secrets. Anyone having access to your front end will be able to uncover them. However, we chose not to place them in the version control (this may change).
+
+Pick the values you see, and place them in `__.js` as such:
+
+```
+export default {
+  apiKey: "AIz...rsk",
+  authDomain: "vue-rollup-example.firebaseapp.com",
+  databaseURL: "https://vue-rollup-example.firebaseio.com",
+  projectId: "vue-rollup-example",
+  storageBucket: "vue-rollup-example.appspot.com",
+  messagingSenderId: "990...646",
+  appId: "1:990...bf7",
+  locationId: "europe-west3"
+
+  // Enabling this would enable Firebase 'logEvent' collection (on hold)
+  //measurementId: "G-VJSH9D5HX1"
+}
+```
+
+This file is needed only for development. When deployed, we use Firebase hosting and the front end gets this information directly.
+
+>Note: We could do a script to automate this file generation! +1
+
 <!--
 ### Running tests
 -->

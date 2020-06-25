@@ -9,16 +9,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "dev:online",
-    "dev:online": "vite --port 3000",
-    "dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001\"",
-    "__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\"",
+    "dev": "npm run dev:online",
+    "dev:online": "vite --port 3000 --mode dev_online",
+    "dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001 --mode dev_local\"",
     "build": "vite build --outDir dist.vite",
     "clean": "(rm public/dist/bundle* 2> /dev/null || true)"
   },
   "//scripts": {
     "rollup:dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
-    "rollup:build": "rollup -c"
+    "rollup:build": "rollup -c",
+    "__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\""
   },
   "dependencies": {
     "firebase": "^7.15.2",

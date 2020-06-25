@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Rules tests",
   "private": true,
+  "type": "module",
   "jest": {
     "globalSetup": "./setup.jest.js",
     "//": {

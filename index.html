@@ -71,32 +71,19 @@
       import config from "/__.js"
       firebase.initializeApp(config);
 
-      /*** this worked with '.env' files, but not from config.
-      // Launching with 'npm run dev:local' sets these:
-      //
-      //    process.env.DEV_FUNCTIONS_URL: "http://localhost:5001"
-      //    process.env.DEV_FIRESTORE_HOST: "localhost:8080"
-      //
-      const { DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST } = process.env;
-      ***/
-
-      // Detect from port (3001 means using emulator)
-      const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = (location.port == "3001") ? ["http://localhost:5001", "localhost:8080"] : [];
-
       // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
       //
-      if (DEV_FUNCTIONS_URL) {
+      if (import.meta.env.MODE == "dev_local") {
+        const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = ["http://localhost:5001", "localhost:8080"];
+
         firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
 
-        assert(DEV_FIRESTORE_HOST);
         firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
           host: DEV_FIRESTORE_HOST,
           ssl: false
         });
 
         window.LOCAL = true;    // inform the UI
-
-        console.info("Running against Firebase local emulators.")
       }
     </script>
     <!-- -->

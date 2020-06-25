@@ -4,6 +4,7 @@
 
 - Seeding data to `npm run dev:local`
 - `README` revised, covers two dev modes
+- Local mode selection by `--mode dev_local`
 
 ## 20-Jun-20
 
