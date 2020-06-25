@@ -172,7 +172,7 @@ Now the error happens at runtime and may even get lost somewhere in test code (i
 >![](.images/bad-rules.png)
 
 
-## 🐶 Ternary operator would be nice to Rules Language
+<strike>## 🐶 Ternary operator would be nice to Rules Language
 
 It is possible to fake an if-else in the Rules language already know, but it's uncomfortable and not very readable:
 
@@ -197,6 +197,10 @@ allow create: if true
       GLOBAL_isAuthor(request.resource.data.project) :
       GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
 ```
+</strike>
+
+Available since ~May 2020. Use it.
+
 
 ## Ability to ES6 `import` `@firebase/testing`
 
@@ -219,10 +223,89 @@ It would be nice to have possibility of using ES6 `import` alongside the common-
 
 ..could hide the UI modules that aren't active. 
 
-E.g. if we start 
+E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
 
-!
 
+## Cloud Functions: ability to configure the region in one place
+
+If one wants to specify a region, it needs to be separately specified for both the server and the client. This specification happens in the code.
+
+Instead, couldn't this be part of the project configuration? Then, the server (and emulator) would get it directly and the client (browser) via `/__/firebase/init.js`.
+
+Note: Having the error message about CORS makes this especially nasty for developers.
+
+See [SO 62042554](https://stackoverflow.com/questions/50278537/firebase-callable-function-cors/61725395#62042554). 
+
+Also relevant: 
+
+- [firebase deploy to custom region (eu-central1)](https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1) (StackOverflow)
+
+---
+
+**Opinion:**
+
+This complexity is against the aim for simplicity that is the main selling argument of Firebase (you can do back-end without being a wizard class security specialist! ).
+
+There may be a need for overriding the region on a function-by-function basis, but there should also be a way to change the default (in configuration). This would be the way most people change their region. Such a change would not break code that currently uses the in-code settings.
+
+---
+
+**Firebase answers**
+
+Firebase says (@puf on Twitter) that the `__` configuration is only for hosting.
+
+To a user, it does not really seem that way, having `storageBucket`, `messagingSenderId` etc. How would `functionsDefaultRegion` be different of those?
+
+---
+
+
+## `firebase emulators:exec` does not enable the UI
+
+The new (as of Jun 2020) emulator UI only occurs with `emulators:start` but not with `emulators:exec`.
+
+This likely is due to Firebase staff thinking of `:start` as interactive and `:exec` as CI/CD faceless testing tool. But it's an artificial watershed. `:exec` is useful also for launching a dev mode command (avoids a package like `start-server-and-test`.
+
+Compare:
+
+```
+# Provides emulator UI
+"dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001\""
+
+# Shorter & simpler
+"__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\"",
+``` 
+
+Suggestion:
+
+Bring the `:exec` and `:start` commands closer. Maybe they both can use a `--ui [on|off|<port>]` flag (that can be on in one, by default, and off in another, to provide compatibility with current behavior).
+
+
+## Loading initial data - from JSON
+
+The import/export mechanism ([#1167](https://github.com/firebase/firebase-tools/issues/1167)) works on a binary data format that humans cannot directly read or edit.
+
+That's one use case. Another is to prime an emulator with JSON data, instead of a snapshot. This is useful when one wants to tune the data by hand, and there is not too much of it.
+
+Our current approach uses `local/init.js` to prime such data. It works, but is clumsy in the `package.json` command:
+
+```
+"__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\"",
+```
+
+This could be:
+
+```
+"__dev:local": "firebase emulators:exec --only functions,firestore local/init.js \"vite --port 3001\"",
+```
+
+Here, `emulators:exec` would run the provided file, at launch, before starting the provided command. Cloud Function emulation would be switched off during the run of the init file.
+
+Pros:
+- Firebase does not need to take stand as to the data format (opposed to if loading JSON)
+
+Cons:
+- Separate loading file (`local/init.js`) needs to be provided
+  
 
 ## References
 

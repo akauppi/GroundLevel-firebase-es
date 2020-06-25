@@ -1,14 +1,14 @@
 /*
 * functions/index.js
 *
-* Note:
-*   When defining functions with Firebase short syntax, methods (e.g. POST) are not defined. Anything goes.
-*   Also, path parameters cannot be defined. To do these, an Express API could be used, but we go with the
-*   simple model, for now.
+* REST API note:
+*   When defining REST functions with Firebase syntax, methods (e.g. POST) are not defined. Anything goes.
+*   Also, path parameters cannot be defined. To do these, an Express API could be used. We use "callable functions"
+*   instead.
 *
 * Design note:
 *   We choose "callable functions" (over REST API) since there is no extra benefit of using REST in our use case.
-*   With callables, parsing is done for us and authentication information is included in the requests.
+*   With callables (think: RPC!), parsing is done for us and authentication information is included in the requests.
 *
 * Note:
 *   'HttpsError' 'code' values must be from a particular set

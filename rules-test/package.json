@@ -6,7 +6,7 @@
   "jest": {
     "globalSetup": "./setup.jest.js",
     "//": {
-      "//testTimeout": "not needed, default 5000 _per test_ is fine."
+      "//testTimeout": "default 5000 _per test_ is mostly fine. After updates of dependencies, it still was too slooow."
     }
   },
   "scripts": {
@@ -14,8 +14,8 @@
     "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.9.0",
-    "@firebase/testing": "^0.20.1",
+    "@babel/preset-env": "^7.10.3",
+    "@firebase/testing": "^0.20.4",
     "babel-jest": "^25.2.7",
     "jest": "^25.2.7"
   },

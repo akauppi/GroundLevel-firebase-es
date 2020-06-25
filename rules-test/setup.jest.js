@@ -3,7 +3,7 @@
 *
 * Global setup, imported once per run.
 */
-import { data } from './data';
+import { docs } from './data';
 import { primeFromGlobalSetup } from './tools/guarded-session';
 import fs from 'fs';
 
@@ -16,12 +16,12 @@ const firebase = require('@firebase/testing');
 
 async function setup(_) {
   const sessionId = `test-${Date.now()}`;   // e.g. 'test-1586358763978'
-  await primeFromGlobalSetup(sessionId, data);    // write the data contents only once
+  await primeFromGlobalSetup(sessionId, docs);    // write the data contents only once
 
   // Without this, the emulator would read the rules at startup, but not change its behaviour if they change. Having
   // a watch mode would render this unneeded.
   //
-  firebase.loadFirestoreRules({
+  await firebase.loadFirestoreRules({
     projectId: sessionId,
     rules: fs.readFileSync("dut.rules", "utf8")   // name must match that in 'firebase.json'
   });

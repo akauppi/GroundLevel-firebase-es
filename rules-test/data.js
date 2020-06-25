@@ -15,7 +15,7 @@ const anyPastDate = new Date();
 *
 * WARNING: Do NOT use 'Date.now()' or 'Date.parse()' - they return a number instead of a 'Date' instance!
 */
-const projects = {
+const docs = {
   // Project 1 - active project
   "/projects/1": {
     title: "Jolly Jumper",
@@ -78,8 +78,4 @@ const projects = {
   }
 };
 
-const data = {
-  ...projects
-};
-
-export { data }
+export { docs }

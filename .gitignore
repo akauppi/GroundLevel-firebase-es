@@ -1,6 +1,7 @@
 /node_modules/
 #/public/dist/
-/dist/
+#/dist/
+/dist.vite/
 
 /functions/node_modules/
 /functions/ui-debug.log

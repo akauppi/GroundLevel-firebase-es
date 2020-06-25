@@ -1,8 +1,13 @@
 # Changelog
 
-## latest
+## 25-Jun-20
 
-- Logging via Cloud Functions
+- Seeding data to `npm run dev:local`
+- `README` revised, covers two dev modes
+
+## 20-Jun-20
+
+- Logging via Cloud Functions (not documented)
 
 ## 19-Jun-20
 

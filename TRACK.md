@@ -48,3 +48,23 @@ Once implemented in browsers, we don't need the `lang="scss"` any more.
 Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
 
 
+## Firebase Auth emulator
+
+>An Auth Emulator is on our roadmap.
+
+Firebase Live chat 23-Jun-2020.  Happy!  🦋
+
+
+## Making Emulator and Firestore-admin have a date
+
+[https://github.com/googleapis/google-cloud-go/issues/1978](https://github.com/googleapis/google-cloud-go/issues/1978)
+
+It's strange this would be a problem.. Let's keep an eye on the:
+
+>going to be larger than any one client to be improved.
+
+(comment 15-May-20)
+
+
+
+

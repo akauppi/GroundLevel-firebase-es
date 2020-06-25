@@ -125,3 +125,12 @@ Note: It's not so important, if we can do cloud logging via Firebase Functions -
 
 Discuss in suitable place about using just one project, or separate staging/production.
 
+## Docker?
+
+Try Docker for the security rules testing.
+
+- no two `node_modules` - make a generic Docker image (maybe in a separate repo?) that we can use for running the tests
+- running security tests from the project root
+
+The idea is to keep Docker as an optional requirement. Heavy lifters will likely not mind it, and it makes their own repo clones lighter. 
+

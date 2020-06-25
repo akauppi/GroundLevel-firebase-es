@@ -16,14 +16,14 @@ You want a web app and you want it now?
 
 This aims to become the best place to make that happen. 
 
-- great tools, selected for you
-- background on the approaches taken (to be done in the Wiki)
+- great tools, selected for you: Vite, Firebase, Vue.js 3 (beta), Rollup
 - built on 2020's technology (ES6, async/await), aiming to stay up to date
 
 Let's start! 🤾‍♀️
 
-<!-- removed (we have a sticky start...)
 <br/>
+
+<!-- removed (we have a sticky start...)
 
 >It would be nice if you time your journey from here to a running installation. 
 >Then let us know the time. ⏱
@@ -32,6 +32,28 @@ Let's start! 🤾‍♀️
 >|---|---|
 >|1|9 minutes|
 -->
+
+## Tools selected
+
+Focus on Firebase and ES6 are something this repo is about. Those will remain. Other tools may be changed.
+
+- Vue.js 3 as the UI framework
+- [Vite](https://github.com/vitejs/vite) for ultra-fast development
+- [Vue Router](https://github.com/vuejs/vue-router-next) 4
+
+<!--
+- [Rollup](https://rollupjs.org/guide/en/) for production builds
+-->
+
+Note the omissions: 
+
+|instead of...|...this|
+|---|---|
+|Vue CLI|Firebase and Vite|
+|central state management|Vue.js 3 `reactive` and `ref` with component-level state|
+
+<!-- tbd. add Vue.js link when 3 officially out -->
+
 
 ## Requirements
 
@@ -42,8 +64,17 @@ Let's start! 🤾‍♀️
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
 <!--
-Developed with Firebase 8.4.3 on macOS
+Developed with Firebase 8.4.3 on macOS; Node 14
 -->
+
+### Firebase plan
+
+From Aug 2020 onwards, Firebase requires you to sign up to the "Blaze" plan, in order to deploy Cloud Functions. This means you need to give a credit card but does not necessarily introduce cost.
+
+You can still use this repo for local development and training with the "Spark" (free) plan, and an emulator.
+
+More details in [BILLING](./BILLING.md).
+
 
 ### Firebase project
 
@@ -57,33 +88,6 @@ You need to:
 
 >Note: You don't need to use `firebase init` - that one is for creating a repo from scratch. `firebase use --add` is all that's needed.
 
-**Note on billing (optional)**
-
-When this repo was started, all the necessary features were covered by the Spark ("free") plan. Then, on 20-Jun-20, this showed up:
-
->`⚠  functions: Cloud Functions will soon require the pay-as-you-go (Blaze) billing plan to deploy. To avoid service disruption, upgrade before 2020-08-17. For more information, see: https://firebase.google.com/support/faq#functions-runtime`
-
-That's fine - Google may change their pricing and the Blaze just means you have to provide a credit card. The free usage is still there also when using Blaze.
-
-But it seems fair to provide a short list here, before proceeding to the Fun part.
-
-1. You can get started with Spark plan ("free"; no credit card). The repo works fully when run locally. Use the `dev:local` to run emulators for Cloud Functions.
-2. If you decide to upgrade to Blaze plan, likely your use will be free even there. If in doubt, place a [budget alert](https://cloud.google.com/billing/docs/how-to/budgets). Note that it's not a ceiling - just a notification.
-3. You can also switch your Cloud Billing off when not needing the service.
-
-The purpose of this repo is to REMAIN USEFUL FOR PEOPLE ALSO IN THE SPARK PLAN.
-
-See:
-
-- Firebase [pricing plans](https://firebase.google.com/pricing) 
-- More [information on the Aug 17th change](https://firebase.google.com/support/faq#functions-pricing)
-
->The Spark plan is going to be unavailable for Cloud Functions after March 15, 2021.
-
-The change seems to be due to internal technical roadmaps. This happens. Cost-wise it'll mean some cents (and a further incentive to use the emulators for development).
-
-The big thing is after Aug 17th 2020, you need to provide the credit card info to Google.
-
 
 ## Getting started
 
@@ -93,15 +97,18 @@ Fetch dependencies:
 $ npm install
 ```
 
->macOS Note: If you get `gyp: No Xcode or CLT version detected!` error, you can either ignore it or fix by:
+<!-- disabled (but keep)
+>macOS Note: If you get `gyp: No Xcode or CLT version detected!` error:
 >
 >   ```
 >   # trash `/Library/Developer/CommandLineTools`
 >   $ xcode-select --install
 >   ```
+-->
 
+<!--
 ### Running tests
-
+-->
 There are currently no UI side tests for the project. 😢
 
 <!-- tbd. Once there are:
@@ -111,10 +118,14 @@ $ npm test
 ```
 -->
 
-There are, however, Security Rules tests. They are organized separately in the `rules-test` folder. See the specific `README` in that sub-directory.
-
 
 ## Development workflow
+
+>Note: Firebase is pushing for use of the local emulator. It is likely we'll change that workflow to be the default one, during 2020.
+
+### `dev[:online]`
+
+The "online" workflow is recommended when you are working with the UI code.
 
 ```
 $ npm run dev
@@ -125,7 +136,7 @@ Dev server running at:
 ...
 ```
 
-Serves the project locally, reacting to source code changes. 
+Serves the UI locally, reacting to source code changes. Back end is on the cloud.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
 
@@ -134,31 +145,58 @@ The code is served by [Vite](https://github.com/vuejs/vite) (GitHub). It renders
 Try making some changes and see that they are reflected in the browser.
 
 
-### Local mode: emulating the back-end
+### `dev:local`
 
-In the above workflow, front end is developed locally but the Firebase back-ends are run in the cloud.
+When working on Firestore security rules, or Cloud Functions, you are better off running locally:
 
-When developing those back-end features - Firestore security rules or Cloud Functions - the work is better done locally. This speeds up the development loop (essentially providing Hot Module Replacement for back-end features), but also makes it less likely that you break the cloud project. Instead of treating it as a development playground, it can now be a staging deployment.
+- faster change cycle (no deployments)
+- no costs
+- from Aug 2020 onwards, only possible mode for Spark plan users
 
-This matters even more, if you work as a group. Break things locally. 🔨
+Local mode means that even with back-end features, you only start deploying working stuff. This changes the role of the cloud project to be more of a staging environment than a development hot-pot.
 
-To run in local mode:
+Especially important for working in a team. Developers can now separately develop the UI (using either dev mode) or the back-end features (local mode) and commit their changes once they are already tested.
+
+( We'll come back to this with production tier, later. )
 
 ```
 $ npm run dev:local
 
-> groundlevel-es6-firebase-web@0.0.0 dev:local /.../Git/GroundLevel-es6-firebase-web
-> firebase emulators:exec --only functions,firestore "vite --port 3001"
+> groundlevel-es6-firebase@0.0.0 dev:local /Users/asko/Git/GroundLevel-es6-firebase-web
+> start-server-and-test "firebase emulators:start --only functions,firestore" 4000 "node ./local/init.js && npx vite --port 3001"
+
+1: starting server using command "firebase emulators:start --only functions,firestore"
+and when url "[ 'http://localhost:4000' ]" is responding with HTTP status code 200
+running tests using command "node ./local/init.js && npx vite --port 3001"
 
 i  emulators: Starting emulators: functions, firestore
 ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project vue-rollup-example. This may result in unexpected behavior.
 ⚠  Your requested "node" version "10" doesn't match your global version "14"
 i  firestore: Firestore Emulator logging to firestore-debug.log
-i  functions: Watching "/.../Git/GroundLevel-es6-firebase-web/functions" for Cloud Functions...
-✔  functions[logs]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs).
-✔  functions[logs2]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs2).
-i  Running script: vite --port 3001
-vite v0.20.8
+i  ui: Emulator UI logging to ui-debug.log
+i  functions: Watching "/Users/asko/Git/GroundLevel-es6-firebase-web/functions" for Cloud Functions...
+✔  functions[logs_v1]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs_v1).
+
+┌───────────────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! View status and logs at http://localhost:4000 │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4000/functions │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Firestore │ localhost:8080 │ http://localhost:4000/firestore │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Other reserved ports: 4400, 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+Priming...
+Primed :)
+vite v1.0.0-beta.1
+[vite] Optimizable dependencies detected:
+firebase, vue
 
   Dev server running at:
   > Local:    http://localhost:3001/
@@ -168,64 +206,69 @@ vite v0.20.8
 ...
 ```
 
+When loading, the Firestore data is primed from `local/data.js`. You can edit this data to your liking. It is by design that the emulator suite does not persist any data changes. When you Ctrl-C the process, the changes to the data are lost. (This is also a feature, to start afresh, do exactly that).
+
 With local mode, authentication still happens online so you do need to have the Firebase project set up.
 
-Data is not persisted. Once you stop the server and restart it, all your data is gone. This is intentional. If you wish to have a certain ground zero data available to start with, place it in `local.data.js`.
-
-Here's a summary of the differences of normal and local mode:
-
-||cloud based|local emulation|
-|---|---|---|
-|authentication|cloud|cloud|
-|authorization|cloud|local|
-|Cloud Firestore|cloud|local|
-|Cloud Functions|cloud|local|
-|persistence|yes|no|
-
-### When to use emulation?
-
-If you develop Cloud Functions, or Firestore access rules, it's easier to do this locally. You see logs from the function directly at the terminal. Also, your experiments will not harm other developers as they would if you deployed work-in-progress to the cloud and you shared the Firebase project.
-
-For a single developer, the faster feedback loop (no deployment to cloud) is likely enough to entice you to work locally.
+>Note: Firebase has mentioned 24-Jun-20 (Firebase live's comments) that they aim to bring also auth into the local emulation. This should allow fully offline development! 🎉
 
 
-## Testing Security Rules (optional)
+### When to use local mode?
 
-If you are serious about development, have a look at the `rules-test` sub-project. It uses the Firestore emulator to check the rules we have in `firestore.rules` behave as intended.
+We provide you both. As mentioned above, for just developing the UI, it may be nice to work against real (well, staging) data. For back-end work, local mode rocks!
 
-Since this is quite an added complexity (more `npm` dependencies, need to install the emulator), it's been left as a self-sufficient sub-project.
+You can also run these modes simultaneously, in different terminals. By default, online uses port 3000 and local port 3001.
+
+>Note: Differentiating the modes in the UI is currently (Jun 2020) done by the port. This is not ideal, and may change at some point. Essentially, we have two dev modes whereas Vite assumes there's always just one.
+
+
+## Testing Security Rules
+
+If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
+
+Since this is quite an added complexity (more `npm` dependencies), it's been left as a self-sufficient sub-project.
+
+```
+$ cd rules-test
+$ npm install
+...
+$ npm test
+```
 
 Please see its [README](rules-test/README.md) file.
 
+>Plan: We may turn into Docker in the future, to better integrate testing security rules as part of the repo, itself (no sub-project, no second `node_modules´), yet not bring the complexity of the tools to the main project.
+
 ---
 
-## Bring in your App!
+## Adopting into Your App!
 
 This is where You can code.
 
 We presume you have a suitable IDE, and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
 
-The code is under `src`. 
-
 Three steps to brand your own app:
 
 1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
-2. Change the `name`, `version` and `author` fields in `package.json`, to match your application.
-
-<!-- hmm... wonder what was meant to be:
-3. Change the `
--->
+2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
+3. Change the `CHANGELOG` and other such, obviously...
 
 <!-- disabled (revise when we see whether we need Rollup)
 If we still use Rollup, and you need CommonJS dependencies, enable `plugin-commonjs` in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
 -->
 
 
-## Production build
+## Deployment
 
 Once you've got your app together, you want to roll it out to the world. There are many ways, either manually or using a CI/CD pipeline.
 
->*We've not come to setting up CI/CD for this template, but that could be feasible. It's anyways best to start with a working, manual process, and doing CI/CD without tests is.. not a good idea. So, tests first.*
+We'll walk you through the manual steps. You can build the CI/CD pipeline based on them - people's taste often differs on those so we don't want to enforce certain way (except for production - see later).
+
+>NOTE TO SELF: *CI/CD without tests is a bad idea. We (read: You :) ) should have `npm test` test your UI before even thinking of automating deployment. Time better used.*
+
+><font color=red>`npm run build` implementation will likely change. Vite bundles everything together (including scripts from `index.html`) and the author doesn't like that. 
+>
+>Instead, we may go with Rollup directly, and configure it to just collect ES6 modules instead of bundling. The reason Vite insists on bundling is a claimed "avalanche" of module dependencies, but we'll need to see that for ourselves. The end user (you) should have a choice, here.</font>
 
 ```
 $ npm run build
@@ -236,13 +279,14 @@ $ npm run build
 
 This builds a production mode front end under `dist/`.
 
+><font color=red>BROKEN GLASS!! Production build with Vite still needs work. The output (index.html) is broken!
+
 To check it's working, we can serve it (don't try opening the `index.html` from the file system).
 
 ```
-$ firebase serve --only hosting
+$ firebase serve --only hosting --port 3002
 ```
 
-><font color=red>BROKEN GLASS AHEAD!! Production build with Vite still needs work. The output (index.html) is broken!
 
 
 ### Deploy
@@ -279,16 +323,37 @@ Note: These instructions are no-where complete, and you should really visit the 
 The template aims to cover more ground:
  
 - [x] Authentication
-- [ ] Cloud Firestore; creating an actual collaborative app behind the authentication
+- [x] Cloud Firestore; creating an actual collaborative app behind the authentication
   - [ ] invitations
-- [ ] Logging
+- [x] Logging
 - [ ] Performance monitoring
 - [ ] A/B testing
 
 Stay tuned for these developments, or chime in to make them happen!!! 🏅
 -->
 
-## Help needed!
+<!--
+## Production tier
+
+//using CI/CD; not manually; once there are tests
+...
+-->
+
+<!--
+## Monitoring
+
+- about Logging (already set up)
+-->
+
+## Back-tracking changes
+
+We need to develop / think of ways to allow a derivative of this repo to gain updates, if they so wish.
+
+If you keep the Git history, you should be able to `git pull` changes, but how messy that becomes in practise remains to be seen.
+
+
+
+## Help welcome!
 
 If you wish to help, check out:
 
@@ -297,12 +362,7 @@ If you wish to help, check out:
 
 Issues has more formal definition of shortcomings and plans, and is the main forum of contributions and discussion. `TODO` is a shorthand for authors.
 
-For a more permanent role, please check:
-
-In particular:
-
-- help to debug why after sign-in the "strager" page still flashes, instead of diving directly in
-- [graphics designer](JOBS.md) is looked for!!!
+For a more permanent role, please check [JOBS.md](JOBS.md).
 
 
 ## Credits
@@ -339,7 +399,7 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 - [Cloud Firestore Data Modeling (Google I/O'19)](https://www.youtube.com/watch?v=lW7DWV2jST0) (Youtube 40:37, May 2019)
    - INCREDIBLY GREAT video on essentially all aspects needed to be considered while designing a data model 🔥🔥🔥
 
-<!-- enable once we have Typescript in
+<!-- enable once/if we have Typescript in
 ### Typescript
 
 - [Configuring ESLint on a TypeScript project](https://www.jackfranklin.co.uk/blog/typescript-eslint/) (blog, Jan 2019)
