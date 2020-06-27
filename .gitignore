@@ -17,4 +17,4 @@ firestore-debug.log
 ui-debug.log
 
 # Firebase dev config
-/__.js
+/.__.js
