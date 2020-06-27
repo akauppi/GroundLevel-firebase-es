@@ -82,11 +82,32 @@ You need to:
 
 - create a Firebase project at the [Firebase console](https://console.firebase.google.com/)
   - enable hosting and authentication
-  - you can choose the set of authentication providers you like
+  - choose the set of authentication providers you like (Google, anonymous recommended)
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
 
 >Note: You don't need to use `firebase init` - that one is for creating a repo from scratch. `firebase use --add` is all that's needed.
+
+#### Development configuration 
+
+`firebase use --add` sets `.firebaserc` and maybe some other files not in the version control. This is not enough for the front end to tie to your project. For that, there is a `.__.js` file that needs to be changed.
+
+>Note: This only matters for development, and is needed because we use Vite (not Firebase hosting) as the development platform. The name `__` comes from Firebase - it hosts this data as `__/firebase/init.js`.
+
+We've done a script that starts Firebase hosting momentarily, and lists the settings for you. You can see them also in Firebase console.
+
+```
+$ npm run __
+...
+{
+  "projectId": "your-project-name",  
+  ...
+}
+```
+
+Edit `.__.js` and transport the required keys there.
+
+Now we're finally ready to get started...!
 
 
 ## Getting started
@@ -127,7 +148,7 @@ Dev server running at:
 ...
 ```
 
-This serves the UI locally, reacting to source code changes. Back end is on the cloud.
+This serves the UI locally, reacting to source code changes. Back end is your Firebase project in the cloud.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
 
@@ -222,55 +243,11 @@ You can also run these modes simultaneously, in different terminals. By default,
 >Note: Differentiating the modes in the UI is currently (Jun 2020) done by the port. This is not ideal, and may change at some point. Essentially, we have two dev modes whereas Vite assumes there's always just one.
 
 
+<!-- tbd.
 ## Configuration
 
-Above steps worked against the existing cloud deployment - not your own project.
-
-To change this, edit the files:
-
-- `.env.dev_online`
-- `.env.dev_local`
-
-They are duplicates of each other. Vite does not really provide us a good way (1.0 beta) of handling two different dev configurations.[^2]
-
-[^2]: We could have them in a separate `firebase.dev.config.js` file. Should we?
-
-```
-VITE_FIREBASE_API_KEY = "AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk"
-VITE_FIREBASE_PROJECT_ID = vue-rollup-example
-VITE_FIREBASE_LOCATION_ID = europe-west3
-```
-
-These values are not secrets. They are often kept in the `index.html` but we keep them in separate configuration files. Production builds do not need them, since we use Firebase hosting there.
-
-### Finding your project's values
-
-```
-$ firebase emulators:start --only hosting
-...
-```
-
-Visit [http://localhost:5000/__/firebase/init.js](http://localhost:5000/__/firebase/init.js) and pick the values you need:
-
-```
-if (typeof firebase === 'undefined') throw new Error('hosting/init-error: Firebase SDK not detected. You must include it before /__/firebase/init.js');
-var firebaseConfig = {
-  "projectId": "vue-rollup-example",
-  "appId": "1:990...bf7",
-  "databaseURL": "https://vue-rollup-example.firebaseio.com",
-  "storageBucket": "vue-rollup-example.appspot.com",
-  "locationId": "europe-west3",
-  "apiKey": "AIz...rsk",
-  "authDomain": "vue-rollup-example.firebaseapp.com",
-  "messagingSenderId": "990...646",
-  "measurementId": "G-VJS...X1"
-};
-if (firebaseConfig) {
-  firebase.initializeApp(firebaseConfig);
-}
-```
-
-We'll probably do a script to show these, at some point. #help
+...discuss `src/config.js`
+-->
 
 
 ## Testing Security Rules

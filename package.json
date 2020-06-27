@@ -12,8 +12,9 @@
     "dev": "npm run dev:online",
     "dev:online": "vite --port 3000 --mode dev_online",
     "dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001 --mode dev_local\"",
-    "build": "vite build --outDir dist.vite",
-    "clean": "(rm public/dist/bundle* 2> /dev/null || true)"
+    "//build:vite": "vite build --outDir dist.vite",
+    "clean": "(rm public/dist/bundle* 2> /dev/null || true)",
+    "__": "firebase emulators:exec --only hosting \"node ./tools/__.js\""
   },
   "//scripts": {
     "rollup:dev": "concurrently --restart-tries 3 --names rollup,firebase-serve \"rollup -c -w\" \"firebase serve --port 3000\"",
