@@ -40,10 +40,8 @@ Focus on Firebase and ES6 are something this repo is about. Those will remain. O
 - Vue.js 3 as the UI framework
 - [Vite](https://github.com/vitejs/vite) for ultra-fast development
 - [Vue Router](https://github.com/vuejs/vue-router-next) 4
-
-<!--
 - [Rollup](https://rollupjs.org/guide/en/) for production builds
--->
+- [Firebase hosting]() for hosting
 
 Note the omissions: 
 
@@ -267,26 +265,61 @@ Please see its [README](rules-test/README.md) file.
 
 >Plan: We may turn into Docker in the future, to better integrate testing security rules as part of the repo, itself (no sub-project, no second `node_modules´), yet not bring the complexity of the tools to the main project.
 
----
 
 ## Adopting into Your App!
 
 This is where You can code.
 
-We presume you have a suitable IDE, and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
+We presume you have a suitable IDE (WebStorm, VS Code), and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
 
-Three steps to brand your own app:
+Three steps to remove GroundLevel branding:
 
 1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
 2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
 3. Visit the `src/config.js` and suit it to your project (title etc.).
 
-<!-- disabled (revise when we see whether we need Rollup)
-If we still use Rollup, and you need CommonJS dependencies, enable `plugin-commonjs` in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).
--->
+You may mention using this repo as your starting point, but are not obliged to do so.
 
 
-## Deployment
+## Production workflow
+
+For production builds, we use Rollup. You find the configuration in [rollup.config.js](rollup.config.js).
+
+>Reasons not to use Vite for production:
+> 
+>- we wish to keep HTML unmodified, but Vite insist in bunding even scripts within it (!)
+>- we wish to experiment with ES6 modules all the way (vs. bundle)
+>- Rollup simply gives a better feeling of control
+
+### Production build
+
+```
+$ npm run prod:build
+```
+
+This creates the deployables at `public/`.
+
+You can tune the settings to your liking. There is no one single best set, and tastes differ.
+
+Default setup has:
+
+- only ES6 modules from npm (no CommonJS)
+- preserve modules (no bundling)
+
+>Hint: To enable support for CommonJS modules[^1-cjs], uncomment `//import commonjs from '@rollup/plugin-commonjs';` and `//commonjs()` lines (not tested!).
+
+
+### Testing production build
+
+```
+$ npm run prod:serve
+```
+
+Local Firebase serving of the production build.
+
+
+
+### Deployment
 
 Once you've got your app together, you want to roll it out to the world. There are many ways, either manually or using a CI/CD pipeline.
 

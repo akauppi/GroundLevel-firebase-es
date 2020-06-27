@@ -1,24 +1,11 @@
-import alias from '@rollup/plugin-alias';
+//import alias from '@rollup/plugin-alias';
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import { eslint } from 'rollup-plugin-eslint';
 import fileSize from 'rollup-plugin-filesize';
-import livereload from 'rollup-plugin-livereload';
-import { terser } from "rollup-plugin-terser";
+//import { terser } from "rollup-plugin-terser";
 import vue from 'rollup-plugin-vue';
-
-// Taking production from lack of 'rollup -w'.
-//
-const watching = process.env.ROLLUP_WATCH;
-const production = !watching;
-
-const lintOpts = {
-  extensions: ['.js', '.vue'],
-  exclude: ['**/*.json'],
-  cache: true,
-  throwOnError: true
-};
 
 const plugins = [
   // Needed for 'import "@/..."' to point to the source directory
@@ -32,38 +19,38 @@ const plugins = [
 
   resolve({
     mainFields: ['module'],  // insist on importing ES6, only (pkg.module)
-    modulesOnly: true        // ES6 imports, only. Disable if you need to import CommonJS modules (you'll need 'commonjs', as well)
+    modulesOnly: true        // ES6 imports, only. Disable if you need to import CommonJS modules (you'll need 'plugin-commonjs' and 'commonjs()', as well)
   }),
   //commonjs(),
 
-  eslint(lintOpts),
+  eslint({
+    extensions: ['.js', '.vue'],
+    //exclude: ['**/*.json'],
+    cache: true,
+    throwOnError: true
+  }),
 
   // Compiles '.vue' files.
   // For options, see -> https://rollup-plugin-vue.vuejs.org/options.html#include
   //
   vue({
     template: {
-      isProduction: production,   // note: could trust defaults to do the same, via 'process.env.NODE_ENV'
+      isProduction: true,
       compilerOptions: { preserveWhitespace: false }
     },
     //css: false,   // note: 'false' extracts styles as a separate '.css' file
 
+    // disabled (no watching; can we leave it out?)
     // Avoid sourcemap errors when watching
     //    -> https://github.com/vuejs/rollup-plugin-vue/issues/238
-    needMap: false
+    //needMap: false
   }),
 
-  // Note: If you bring in Vue or vue-router via 'npm' (not CDN), you'll need this to tell the bundle whether it's
-  //    production or not.
-  //
-  replace({ 'process.env.NODE_ENV': production ? '"production"':'""' }),
+  // needed
+  replace({ 'process.env.NODE_ENV': '"production"' }),
 
-  watching && livereload({
-    watch: 'public/**'
-  }),
-
-  production && fileSize(),   // tbd. where does this pick the minimized etc. sizes?  (could we just print out from terser?)
-  production && terser()
+  fileSize(),   // tbd. is it useful?
+  //terser()
 ];
 
 export default {
@@ -74,11 +61,11 @@ export default {
   //    to use 'esm'.
   //
   output: {
-    file: 'public/dist/bundle.esm.js',
-    //dir: 'public/dist',
+    //file: 'public/dist/bundle.esm.js',
+    dir: 'public/dist',
     format: 'esm',
     // EXPERIMENTAL: testing '.preserveModules' (disable '.file' if you use this)
-    //preserveModules: true,
+    preserveModules: true,
 
     paths: {
       vue: 'vue/dist/vue.esm-browser.js',   // note: there's also a '.prod.js' version if you fancy (97k vs 430k): 'production ? ... : ...'

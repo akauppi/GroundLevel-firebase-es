@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- production variant
+  -->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
+
+    <!--
+    - Set up globals
+    -->
+    <script type="module">
+      function assert(cond) {
+        if (!cond) {
+          alert("Assertion failed!");   // tbd. should use central log
+        }
+      }
+
+      import firebase from 'firebase/app';
+      import 'firebase/auth';
+      import 'firebase/firestore';
+      import 'firebase/functions';
+
+      window.assert = assert
+      window.firebase = firebase
+    </script>
+
+    <!--PROD Firebase initialization-->
+    <script type="module">
+      // Presuming Firebase hosting:
+      import config from "/__/firebase/init.js"
+      firebase.initializeApp(config);
+    </script>
+
+    <script type="module" src="/src/main.js"></script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+  </body>
+</html>

@@ -4,11 +4,6 @@
     "ignore": [
       "**/.*"
     ],
-    "//ignore": [
-      "**/.*",
-      "firebase.json",
-      "**/node_modules/**"
-    ],
     "rewrites": [
       {
         "//": "Single-page application setup, as indicated by vue-router docs. (also default)",
