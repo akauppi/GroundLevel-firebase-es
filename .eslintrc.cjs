@@ -1,27 +1,29 @@
+/*
+* References:
+*   - Configuring ESLint
+*     -> https://eslint.org/docs/user-guide/configuring
+*/
 module.exports = {
   extends: ['plugin:vue/vue3-recommended'],
 
-  // tbd. Not sure what settings and package.json contents to have. This happens:
-  //  <<
-  //    $ npm run build
-  //    ...
-  //      /Users/asko/Git/GroundLevel-es6-firebase-web/src/App.vue?vue&type=style&index=0&id=7ba5bd90&scoped=true&lang.css
-  //        25:3  error  Parsing error: Unexpected character '#'
-  //  <<
-  //
-  /*parserOptions: {
-    sourceType: "module",
-    //ecmaVersion: 2018,
-  },*/
+  env: {
+    "es6": true   // also sets 'parserOptions.ecmaVersion: "6"'
+  },
 
+  parserOptions: {
+    sourceType: 'module',
+    ecmaVersion: 2018
+  },
+
+  // tbd. adjust the overrides. They likely are from Vue 2 era.
   rules: {
+    // Allow comments in Vue component HTML
+    'vue/comment-directive': 0,
+
     // see -> https://github.com/vuejs/eslint-plugin-vue/blob/master/docs/rules/mustache-interpolation-spacing.md
     //
     //'vue/mustache-interpolation-spacing': 0,
     //'vue/no-multi-spaces': 1,    // 0: off, 1: warn, 2: error
-
-    // Allow comments in Vue component HTML (0: quiet)
-    'vue/comment-directive': 0,
 
     /*'vue/max-attributes-per-line': ['error', {
       'singleline': 99,  // AK

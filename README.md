@@ -247,8 +247,17 @@ You can also run these modes simultaneously, in different terminals. By default,
 ...discuss `src/config.js`
 -->
 
+## Tests and Linting
 
-## Testing Security Rules
+```
+$ npm run lint
+...
+```
+
+This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
+
+
+### Testing Security Rules
 
 If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
 
@@ -267,6 +276,10 @@ Please see its [README](rules-test/README.md) file.
 
 
 ## Adopting into Your App!
+
+<!-- Editor's note
+This text suits pretty badly to where it currently is. Should we move it to "Branding" at the end???  (this is a dinosaur, and the doc developed around it)
+-->
 
 This is where You can code.
 
