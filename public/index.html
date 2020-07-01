@@ -8,11 +8,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="icon" type="image/png" href="favicon.png">
-    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
 
     <!--
-    - Set up globals
+    - Preloads - the import waterfall can be avoided, with a little work.
+    -->
+    <link rel="modulepreload" href="/dist/main.js">
+    <!-- ... -->
+
+    <!--
+    - Set up globals; load Firebase
     -->
     <script type="module">
       function assert(cond) {
@@ -31,13 +37,13 @@
     </script>
 
     <!--PROD Firebase initialization-->
-    <script type="module">
-      // Presuming Firebase hosting:
-      import config from "/__/firebase/init.js"
-      firebase.initializeApp(config);
-    </script>
+    <script type="module" src="/__/firebase/init.js"></script>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/dist/main.js"></script>
+
+    <script nomodule>
+      alert("ES6 capable browser is needed");
+    </script>
   </head>
 
   <body>

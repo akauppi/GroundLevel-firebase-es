@@ -23,15 +23,6 @@ Let's start! 🤾‍♀️
 
 <br/>
 
-<!-- removed (we have a sticky start...)
-
->It would be nice if you time your journey from here to a running installation. 
->Then let us know the time. ⏱
->
->|||
->|---|---|
->|1|9 minutes|
--->
 
 ## Tools selected
 
@@ -479,3 +470,8 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 - [Configuring ESLint on a TypeScript project](https://www.jackfranklin.co.uk/blog/typescript-eslint/) (blog, Jan 2019)
 - [Using Typescript with Vue Single File Components](https://www.digitalocean.com/community/tutorials/vuejs-using-typescript-with-vue)
 -->
+
+### Serving ES6 modules, HTTP/2 etc.
+
+- [Using ES Modules in the Browser Today](https://www.sitepoint.com/using-es-modules/) (blog, May 2018)
+

@@ -1,7 +1,8 @@
 /node_modules/
-#/public/dist/
+/public/dist/
+
 #/dist/
-/dist.vite/
+#/dist.vite/
 
 /functions/node_modules/
 /functions/ui-debug.log
@@ -18,3 +19,4 @@ ui-debug.log
 
 # Firebase dev config
 /.__.js
+

@@ -42,8 +42,9 @@
     "@vue/compiler-sfc": "^3.0.0-beta.15",
     "eslint": "^7.3.1",
     "eslint-plugin-vue": "next",
-    "rollup": "^2.18.1",
+    "rollup": "^2.16.1",
     "rollup-plugin-filesize": "^9.0.1",
+    "rollup-plugin-scss": "^2.5.0",
     "rollup-plugin-vue": "^6.0.0-beta.6",
     "sass": "^1.26.9",
     "start-server-and-test": "^1.11.0",
@@ -52,7 +53,6 @@
   },
   "//devDependencies": {
     "//@rollup/plugin-alias": "^3.1.0",
-    "//rollup-plugin-css-only": "^2.1.0",
     "//@rollup/plugin-commonjs": "^11.0.1",
     "//rollup-plugin-terser": "^6.1.0",
     "//concurrently": "^5.0.2",
@@ -70,25 +70,23 @@
       "rollup-plugin-vue@next": [
         "https://github.com/vuejs/rollup-plugin-vue/tree/next"
       ],
-      "rollup-plugin-css-only": [
-        "Trying it, because mentioned here -> https://github.com/vuejs/rollup-plugin-vue/issues/322"
+      "rollup-plugin-scss": [
+        "Needed only as an antidote, until 'rollup-plugin-vue' does things right.",
+        "See -> https://github.com/vuejs/rollup-plugin-vue/issues/322#issuecomment-586371970"
       ]
     },
     "scripts": {
       "build": [
-        "Builds production code"
+        "Builds production code.",
+        "Linting is separated from 'npm run build' intentionally. CI/CD can easily do them both (as it should) but",
+        "for developer being able to run them separately is considered good."
       ],
       "dev:local": {
-        "Signaling emulator to UI": [
-          "Currently using port (3001) to signal to UI that emulation is on (another way being to develop against the cloud instance)",
-          "Env.values would be nicer - but Vite is limited to '--mode development' and '--mode production'. Unfinished..."
-        ],
         "emulator:exec": [
           "Firebase shows the new local emulator UI only with 'emulator:start', not with 'emulator:exec'. Not sure if this is intentional.",
           "We use 'start-server-and-test' to allow people to benefit from the emulator UI."
         ]
-      },
-      "_lint": "Nice to have separate lint step (not involving Rollup). Undocumented, thus '_'."
+      }
     },
     "engines": [
       "'>=13' for loading '*.js' as ES6 (without renaming to '*.mjs')"

@@ -72,37 +72,8 @@ Keep an eye on this, but we don't need it.
 
 ## Rollup bundling of Vue.js 3 seems buggy.. 
 
-https://github.com/vuejs/rollup-plugin-vue/issues/322
+https://github.com/vuejs/rollup-plugin-vue/issues/364
 
-https://stackoverflow.com/questions/62384191/rollup-vue-and-buble-unexpected-token-in-scss-file
+Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 
-Would like to:
-
-`rollup -c` just to work
-
-Actual:
-
-```
-$ npx rollup -c
-
-src/main.js → public/dist/...
-[!] Error: Unexpected token (Note that you need plugins to import files that are not JavaScript)
-src/App.vue?vue&type=style&index=0&id=7ba5bd90&scoped=true&lang.css (2:0)
-Error: Unexpected token (Note that you need plugins to import files that are not JavaScript)
-    at error (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:5154:30)
-    at Module.error (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:9592:16)
-    at tryParse (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:9506:23)
-    at Module.setSource (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:9890:30)
-    at ModuleLoader.addModuleSource (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:17749:20)
-    at ModuleLoader.fetchModule (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:17803:9)
-    at async Promise.all (index 2)
-    at ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:17827:34)
-    at async Promise.all (index 0)
-    at ModuleLoader.fetchModule (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:17804:9)
-    at async Promise.all (index 3)
-    at ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:17827:34)
-    at async Promise.all (index 0)
-    at ModuleLoader.fetchModule (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:17804:9)
-    at async Promise.all (index 0)
-```
-
+Check if it becomes moot, at some point.
