@@ -7,7 +7,7 @@ import { docs } from './data';
 import { primeFromGlobalSetup } from './tools/guarded-session';
 import fs from 'fs';
 
-const firebase = require('@firebase/testing');
+import * as firebase from '@firebase/testing';
 
 // Note: Cannot share a JavaScript value between Jest test files [1]. However, we can set the OS level environment
 //    variable for the Jest process. This way, we can create an id and pass it to the suites. Sweet! 🥞🍺🍦🍫🍮

@@ -58,7 +58,7 @@
     "rollup-plugin-vue": "^6.0.0-alpha.5"
   },
   "engines": {
-    "node": ">=13"
+    "node": ">=13.2"
   },
   "//comments": {
     "devDependencies": {
