@@ -1,8 +1,6 @@
 <!--
 - src/pages/SignIn.vue
 -
-- Note: Only this page needs 'firebaseui'. Maybe we should bring it here, one day (now in 'index.html'). Not urgent.
--
 - References:
 -   - Easily add sign-in to your Web app with FirebaseUI (Firebase docs)
 -     -> https://firebase.google.com/docs/auth/web/firebaseui
@@ -36,6 +34,12 @@
 </style>
 
 <script>
+  import firebase from 'firebase/app';
+  import 'firebase/auth';
+
+  // tbd. If we do this, what causes "undefined is not a function"?
+  //import * as firebaseui from 'firebaseui';
+
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
 

@@ -44,14 +44,16 @@ const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipA
 // Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose
 //                not to do this, and go for the shorter format (best when there are lots of routes).
 //
+// Note: When coming here, the server has already tossed 200 to the client. If you wish proper 404 pages, do that at
+//      the server config.
+//
 const routes = [
   r('/', Home, { name: 'home' }),
+  //r('/index.html', Home, { name: 'home' }),   // tbd. was there an alias for this? (at least developers will try it)
   skipAuth('/signin',  SignIn),    // '?final=/somein'
   r('/projects/:id', Project, { props: true, name: 'projects' }),    // '/projects/<project-id>'
     //
-  //r('/dynamic', () => import('./pages/Home.vue')),    // Q: why ESLint colors it red? #help
-    //
-  skipAuth('/:catchAll(.*)', page404 )
+  skipAuth('/:catchAll(.*)', page404 )    // NOTE: will be seen with 200 return code (we could redirect to a proper 404 page)
 ];
 
 // Note: Until JavaScript "top-level await" proposal, we export both a promise (for creating the route) and a

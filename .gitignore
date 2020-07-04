@@ -1,8 +1,8 @@
 /node_modules/
 /public/dist/
 
-#/dist/
-#/dist.vite/
+# Rollup likely creates this ('npm run build')
+/.cache/
 
 /functions/node_modules/
 /functions/ui-debug.log

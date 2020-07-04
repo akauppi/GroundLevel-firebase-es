@@ -1,12 +1,12 @@
 /*
 * Rollup config
 *
-* Note: Linting is done separately. This helps separate concerns and allows easier exchange of the bundling tool,
-*     if we so choose.
-*
 * Strategy:
 *   Provide ES6 modules. Firebase hosting uses HTTP/2. Let's measure how slow or fast the initial load is, without
 *   bundling.
+*
+* HUGE thanks to Phil Walker for showing how it can be done!  Go Phil! :)
+*   -> https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/
 */
 
 // To support CommonJS dependencies, enable any lines mentioning 'commonjs'.
@@ -15,8 +15,11 @@
 //import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
-import fileSize from 'rollup-plugin-filesize';
+//import { terser } from 'rollup-plugin-terser';
 import vue from 'rollup-plugin-vue';
+
+import path from 'path';
+import fs from 'fs';
 
 // Antidote to these:
 //  <<
@@ -24,25 +27,48 @@ import vue from 'rollup-plugin-vue';
 //      src/components/AppProfile.vue?vue&type=style&index=0&id=6f40e678&scoped=true&lang.scss (2:0)
 //  <<
 //
-//import css from 'rollup-plugin-css-only';
 import scss from 'rollup-plugin-scss';      // handles '.css' and '.scss'
+
+const publicDir = 'public';
+
+/*** disabled (make BIGGER, BETTER)
+/ **
+ * A Rollup plugin to generate a list of import dependencies for each entry
+ * point in the module graph. This is then used by the template to generate
+ * the necessary `<link rel="modulepreload">` tags.
+ * @return {Object}
+ * /
+const modulepreloadPlugin = () => {
+  return {
+    name: 'modulepreload',
+    generateBundle(options, bundle) {
+      // A mapping of entry chunk names to their full dependency list.
+      const modulepreloadMap = {};
+
+      // Loop through all the chunks to detect entries.
+      for (const [fileName, chunkInfo] of Object.entries(bundle)) {
+        if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
+          modulepreloadMap[chunkInfo.name] = [fileName, ...chunkInfo.imports];
+        }
+      }
+
+      fs.writeFileSync(
+        path.join(publicDir, 'modulepreload.json'),
+        JSON.stringify(modulepreloadMap, null,2)
+      );
+    },
+  };
+};
+***/
 
 /*
 * Note: The order of the plugins does sometimes matter.
 */
 const plugins = [
-  // Needed for 'import "@/..."' to point to the source directory
-  // note: currently (with Vite) not using them
-  /*
-  alias({
-    entries: {
-      ['@']: __dirname + '/src'
-    }
-  }),*/
 
   resolve({
     mainFields: ['module'],  // insist on importing ES6, only (pkg.module)
-    //modulesOnly: true        // ES6 imports, only. Disable if you need to import CommonJS modules (you'll need 'commonjs', as well)
+    modulesOnly: true        // ES6 imports, only. Disable if you need to import CommonJS modules (you'll need 'commonjs', as well)
   }),
   //commonjs(),
 
@@ -61,37 +87,43 @@ const plugins = [
   }),
 
   replace({ 'process.env.NODE_ENV': '"production"' }),
-  scss(),   // NOTE: antidote for rollup-vue-plugin or Vue.js 3 (beta) problem; see TRACK.md
 
-  fileSize()   // tbd. is it useful?
+  scss({    // Should not be needed in the long run!
+    output: publicDir +'/dist/bundle.css'
+  }),
+
+  // enable for minified output (~600 vs. ~2090 kB)
+  //terser(),
+
+  //modulepreloadPlugin()
 ];
 
 export default {
   plugins,
-  input: 'src/main.js',
+  input: {
+    main: 'src/main.js'
+  },
 
   output: {
-    //file: 'public/dist/bundle.js',
-    dir: 'public/dist/',
+    dir: 'public/dist',
     format: 'es',
+    entryFileNames: '[name].[hash].js',
 
-    // tbd. this gives error:
+    // Pack imports within each node package, together. See Phil Walker's blog (README.md > References) for more details.
     //
-    // EXPERIMENTAL: testing '.preserveModules' (disable '.file' if you use this)
-    //
-    // PROBLEM: Enabling this causes:
-    //  <<
-    //    [!] Error: Invalid substitution ".vue?vue&type=template&id=7ba5bd90&scoped=true" for placeholder "[extname]" in "output.entryFileNames" pattern, can be neither absolute nor relative path.
-    //  <<
-    preserveModules: true,
+    manualChunks(id) {
+      if (id.includes('node_modules')) {
+        // Return the directory name following the last `node_modules`.
+        // Usually this is the package, but it could also be the scope.
+        const arr = id.split(path.sep);
+        const tmp = arr[arr.lastIndexOf('node_modules') + 1];
 
-    // tbd. Do we need to use 'globals'?
-    //
-    // Note: "If I remember correctly globals only works on iife modules and by extension umd ones"
-    //    -> https://stackoverflow.com/questions/49947250/how-do-rollup-externals-and-globals-work-with-esm-targets/50427603#50427603
-    //
-    globals: {
-      firebaseui: "firebaseui"
+        // Pack '@firebase' and 'firebase' to the same chunk.
+        // Also possible: to leave something in the default chunk, return empty.
+        //
+        return tmp.match(/^@?firebase$/) ? 'firebase'
+          : tmp;
+      }
     },
 
     sourcemap: true   // have source map even for production

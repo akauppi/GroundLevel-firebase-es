@@ -12,12 +12,14 @@
     "dev": "npm run dev:online",
     "dev:online": "vite --port 3000 --mode dev_online",
     "dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001 --mode dev_local\"",
+    "test": "echo \"Sorry, no tests yet! 🙁\" && exit 55",
     "lint": "eslint --ext .js,.vue src",
     "build": "npm run prod:build",
     "prod:build": "rollup -c rollup.config.prod.js",
-    "prod:serve": "firebase emulators:start --only hosting",
-    "clean": "(rm public/dist/bundle* 2> /dev/null || true)",
+    "prod:serve": "firebase serve --only hosting --port 3010",
+    "clean": "(rm public/dist/* 2> /dev/null || true)",
     "__": "firebase emulators:exec --only hosting \"node ./tools/__.js\"",
+    "preprod:build": "npm run clean",
     "preprod:serve": "npm run prod:build"
   },
   "//scripts": {
@@ -27,8 +29,9 @@
   },
   "dependencies": {
     "firebase": "^7.15.5",
-    "vue": "^3.0.0-beta.15",
-    "vue-router": "^4.0.0-alpha.13"
+    "firebaseui": "^4.5.1",
+    "vue": "^3.0.0-beta.18",
+    "vue-router": "^4.0.0-beta.1"
   },
   "//dependencies": {
     "bootstrap": "^4.5.0",
@@ -39,22 +42,23 @@
     "@firebase/testing": "^0.20.5",
     "@rollup/plugin-node-resolve": "^8.1.0",
     "@rollup/plugin-replace": "^2.3.3",
-    "@vue/compiler-sfc": "^3.0.0-beta.15",
+    "@vue/compiler-sfc": "^3.0.0-beta.18",
     "eslint": "^7.3.1",
-    "eslint-plugin-vue": "next",
-    "rollup": "^2.16.1",
-    "rollup-plugin-filesize": "^9.0.1",
+    "eslint-plugin-vue": "^7.0.0-alpha.8",
+    "rollup": "^2.18.2",
     "rollup-plugin-scss": "^2.5.0",
+    "rollup-plugin-terser": "^6.1.0",
     "rollup-plugin-vue": "^6.0.0-beta.6",
     "sass": "^1.26.9",
     "start-server-and-test": "^1.11.0",
-    "vite": "1.0.0-beta.1",
-    "vue-eslint-parser": "^7.1.0"
+    "vite": "1.0.0-beta.10",
+    "vue-eslint-parser": "^7.1.0",
+    "vue-template-compiler": "^2.6.11"
   },
   "//devDependencies": {
     "//@rollup/plugin-alias": "^3.1.0",
     "//@rollup/plugin-commonjs": "^11.0.1",
-    "//rollup-plugin-terser": "^6.1.0",
+    "//rollup-plugin-filesize": "^9.0.2",
     "//concurrently": "^5.0.2",
     "//jest": "^26.1.0"
   },

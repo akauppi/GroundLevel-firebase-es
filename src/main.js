@@ -8,6 +8,12 @@ import { createApp } from 'vue';
 import { appTitle } from './config.js';
 import { logs } from './firebase/logs.js';
 
+import firebase from 'firebase/app';
+
+import 'firebase/auth';
+import 'firebase/firestore';
+import 'firebase/functions';
+
 //--- Make-up 💄
 /* not yet...
 import 'jquery';    // for Bootstrap, before it

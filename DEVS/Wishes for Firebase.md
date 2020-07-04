@@ -305,7 +305,77 @@ Pros:
 
 Cons:
 - Separate loading file (`local/init.js`) needs to be provided
+
+
+## Firebase hosting could provide `__.mjs`
+
+Firebase hosting makes it easy to initialize project identity via `/__/firebase/init.js`. This file is supposed to be read in as a `script` tag.
+
+To be friendly towards ES modules use in browsers, hosting could provide the same information in a way readable by `import`.
+
+```
+import config from "/__/firebase/init.mjs"
+```
+
+However, in ES modules world, I'd rather take in a config and do initialization myself. If Firebase is interested in discussing an approach to this, be in touch..
   
+## Firebase hosting BUG: wrong MIME type for `.js`
+
+Firebase hosting defaults to `application/json` for JavaScript files, instead of `text/javascript`. This disallows their use in a browser (error from Chrome).
+
+```
+Failed to load module script: The server responded with a non-JavaScript MIME type of "application/json". Strict MIME type checking is enforced for module scripts per HTML spec.
+```
+
+Launched by:
+
+```
+$ firebase serve --only hosting --port 3010
+```
+
+`firebase.json`:
+
+```
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.prod.html"
+      }
+    ]
+  },
+  ...
+}
+```
+
+First aid: specify the correct content type in `firebase.json`:
+
+```
+{
+  "hosting": {
+    ...
+    "headers": [
+      {
+        "source": "**/*.js",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/javascript"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Firebase tools v. 8.4.3.
+
+- [ ] Report to Firebase
+ 
 
 ## References
 

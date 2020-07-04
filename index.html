@@ -5,13 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
 
-    <!-- tbd. make 'set' work if we generate both 'index.dev.html' and 'index.html' (production)
-    -   from the same source.
-    -->
-    <!--SET DEV,PROD $FB_UI https://www.gstatic.com/firebasejs/ui/4.5.0 -->
-
+    <!-- tbd. take via npm, as the rest -->
     <!--
     - Firebase UI
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
@@ -31,6 +27,10 @@
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
     <!-- -->
 
+    <!--DEV --
+    {PRE_MODULES}
+    -->
+
     <!--
     - Set up globals
     -
@@ -46,30 +46,42 @@
         }
       }
 
-      //--- Firebase
-      //
-      import firebase from 'firebase/app';
-      import 'firebase/auth';
-      import 'firebase/firestore';
-      import 'firebase/functions';
-
       //--- Globals
       window.assert = assert
-      window.firebase = firebase
     </script>
     <!-- -->
 
     <!--PROD Firebase initialization
     <script type="module">
-      // Presuming Firebase hosting:
-      import config from "/__/firebase/init.js"
-      firebase.initializeApp(config);
+      import { f as firebase } from '/dist/firebase-#.js';
+      window.firebase = firebase;
+
+      // tbd. Make 'window.loadedProm' that gets set when Firebase is initialized (and 'main.js' reads it).
+      //    This would allow us to use Fetch API to read the '/__/firebase/init.js' and chop it to our liking.
+
+      /* For any static hosting, just place config here:
+      * <<
+      *   const config = { ... };
+      *   firebase.initializeApp(config);
+      * <<
+      */
+    </script>
+    <script type="module" src="/__/firebase/init.js"></script>
+    <script type="module">
+      delete window.firebase;   // don't want to leave it as globals - app uses 'import'
     </script>
     -->
     <!--DEV Firebase initialization -->
     <script type="module">
       import { __ } from './.__.js'; const { apiKey, projectId, locationId, authDomain } = __;
       assert(apiKey && projectId && locationId);
+
+      import firebase from 'firebase/app';  // Firebase UI needs it
+      import 'firebase/firestore';  // for lcoal mode
+      import 'firebase/functions';  // -''-
+
+      // This is needed for 'firebaseui' only.   <-- tbd. remove once we get 'firebaseui' via npm
+      window.firebase = firebase;
 
       firebase.initializeApp({
         apiKey,
@@ -96,7 +108,7 @@
     <!-- -->
 
     <!--PROD Application
-    <script type="module" src="/dist/bundle.esm.js"></script>
+    <script type="module" src="/dist/main.#.js"></script>
     -->
     <!--DEV Application -->
     <script type="module" src="/src/main.js"></script>

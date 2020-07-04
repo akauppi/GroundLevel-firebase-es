@@ -1,0 +1,38 @@
+/*
+* src/premain.prod.js
+*
+* Layer between PRODUCTION 'index.html' and 'main.js'.
+*
+* This is needed, because
+*
+* we use ES modules from index.html, and get 'firebase' from npm.  The Rollup starting point needs to cover all
+*
+* Q: Why is this here?
+*
+* A: If we load 'firebase' in 'index.html', and scripts in that file don't get bundled, the browser doesn't know where
+*   to pick Firebase up.
+*
+*   Options:
+*   - load from CDN.  This means development and production versions could be different. Not good, but considerable.
+*   - suck it up. Use Vite for production. :?  Easy, but we wish to avoid bundling. If Vite allows ES6 modules to
+*     remain as such, we can consider it.
+*
+* All in all, CONSIDER THIS A TEMPORARY ARRANGEMENT. (yeah, right!)
+*/
+
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
+import 'firebase/functions';
+
+window.assert = assert
+window.firebase = firebase
+  </script>
+
+  <!--PROD Firebase initialization-->
+  <script type="module" src="/__/firebase/init.js"></script>
+
+
+
+import 'src/main.js';
+

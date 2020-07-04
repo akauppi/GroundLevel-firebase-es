@@ -474,4 +474,5 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 ### Serving ES6 modules, HTTP/2 etc.
 
 - [Using ES Modules in the Browser Today](https://www.sitepoint.com/using-es-modules/) (blog, May 2018)
-
+- [Using Native JavaScript Modules in Production Today](https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/) (blog, Aug 2019)
+   - this step-by-step guidance was instrumental in making the production build work with ES modules. Brilliant write!!! 💎

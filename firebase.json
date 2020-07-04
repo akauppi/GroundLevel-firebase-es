@@ -1,14 +1,26 @@
 {
   "hosting": {
     "public": "public",
-    "ignore": [
-      "**/.*"
-    ],
+    "ignore": [],
     "rewrites": [
       {
-        "//": "Single-page application setup, as indicated by vue-router docs. (also default)",
+        "//": [
+          "Serve the same page for everything '.html' or postfixless: client does the routing.",
+          "Note: if we let pass here, it's going to be a 200. Handle obvious 404's like wrong path to scripts or CSS here."
+        ],
         "source": "**",
-        "destination": "/index.html"
+        "destination": "/index.prod.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.js",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/javascript"
+          }
+        ]
       }
     ]
   },
