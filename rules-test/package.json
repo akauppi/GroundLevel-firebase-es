@@ -3,21 +3,23 @@
   "version": "0.0.0",
   "description": "Rules tests",
   "private": true,
-  "jest": {
-    "globalSetup": "./setup.jest.js",
-    "//": {
-      "//testTimeout": "default 5000 _per test_ is mostly fine. After updates of dependencies, it still was too slooow."
-    }
-  },
+  "type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
-    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
+    "test4": "firebase emulators:exec --only firestore 'npx jest --config jest.config.js'",
+    "test3": "firebase emulators:exec --only firestore 'npx --node-arg --experimental-vm-modules jest --config jest.config.js'",
+    "test2": "firebase emulators:exec --only firestore 'node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js'",
+    "//test": "firebase emulators:exec --only firestore 'npx jest --config jest.config.js'",
+    "//test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --config jest.config.js"
+  },
+  "dependencies": {
+    "@babel/preset-typescript": "^7.9.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.10.3",
     "@firebase/testing": "^0.20.4",
+    "@jest/globals": "^26.1.0",
     "babel-jest": "^25.5.1",
-    "jest": "^25.5.4"
+    "jest": "^26.1.0"
   },
   "engines": {
     "node": ">=13.2"
@@ -30,9 +32,11 @@
     "@firebase/testing": [
       "see -> https://github.com/firebase/firebase-js-sdk/tree/master/packages/testing"
     ],
-    "Node 13.2+": [ "Needed for native ES module support" ]
-  },
-  "dependencies": {
-    "@babel/preset-typescript": "^7.9.0"
+    "test": [
+      "Once Node doesn't need the '--experimental-vm-modules', change the 'engines' requirement and run with 'npx jest'."
+    ],
+    "Node 13.2+": [
+      "Needed for native ES module support"
+    ]
   }
 }

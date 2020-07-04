@@ -5,6 +5,7 @@
 */
 import { docs } from './data';
 import { primeFromGlobalSetup } from './tools/guarded-session';
+
 import fs from 'fs';
 
 import * as firebase from '@firebase/testing';
