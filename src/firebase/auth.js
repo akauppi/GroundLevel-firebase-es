@@ -19,11 +19,6 @@
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
-/* disabled until the official way works
-//import * as firebase from 'firebase/app';   // DOES NOT WORK
-import firebase from 'firebase/app';   // works
-import 'firebase/auth';
-*/
 assert(firebase.auth);
 
 import { ref } from 'vue';

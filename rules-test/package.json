@@ -17,8 +17,11 @@
   "devDependencies": {
     "@babel/preset-env": "^7.10.3",
     "@firebase/testing": "^0.20.4",
-    "babel-jest": "^25.2.7",
-    "jest": "^25.2.7"
+    "babel-jest": "^25.5.1",
+    "jest": "^25.5.4"
+  },
+  "engines": {
+    "node": ">=13.2"
   },
   "//": {
     "babel*": [
@@ -27,6 +30,9 @@
     ],
     "@firebase/testing": [
       "see -> https://github.com/firebase/firebase-js-sdk/tree/master/packages/testing"
+    ],
+    "Node 13.2+": [
+      "Needed for native ES module support"
     ]
   },
   "dependencies": {

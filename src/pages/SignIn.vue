@@ -30,10 +30,6 @@
 </style>
 
 <script>
-  /* disabled until the official way works
-  import * as firebase from 'firebase/app';   // NOTE: do NOT use 'import firebase from ...' (does not work: "undefined as function" when importing Firebase UI)
-  import 'firebase/auth';
-  */
   assert(firebase && firebase.auth);
 
   import { onMounted } from 'vue';

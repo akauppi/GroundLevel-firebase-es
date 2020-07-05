@@ -53,6 +53,7 @@ const routes = [
   skipAuth('/signin',  SignIn),    // '?final=/somein'
   r('/projects/:id', Project, { props: true, name: 'projects' }),    // '/projects/<project-id>'
     //
+  //r('/dynamic', () => import('./pages/Home.vue')),    // dynamic loading NOT part of ES modules - cannot use such without Babel?
   skipAuth('/:catchAll(.*)', page404 )    // NOTE: will be seen with 200 return code
 ];
 

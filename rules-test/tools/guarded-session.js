@@ -13,7 +13,7 @@
 *   - call 'primeFromGlobalSetup(sessionId, data)' from a 'globalSetup' Jest context; once
 *   - call 'session(sessionId)' to get a handle to the session (can be called multiple times; from the test suites)
 */
-const firebase = require('@firebase/testing');
+import * as firebase from '@firebase/testing';
 
 import { Mutex } from './mutex'
 

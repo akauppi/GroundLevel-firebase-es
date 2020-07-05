@@ -3,11 +3,6 @@
 *
 * Reactive 'projects' map, reflecting both database and sign-in/out changes.
 */
-/* disabled until the official way works
-//import * as firebase from 'firebase/app';   // DOES NOT WORK
-import firebase from 'firebase/app';   // works
-import 'firebase/firestore';
-*/
 assert(firebase.firestore);
 
 const db = firebase.firestore();

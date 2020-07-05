@@ -12,7 +12,10 @@ import './tools/jest-matchers';
 
 import { sessionProm } from './tools/guarded-session';
 
-const firebase = require('@firebase/testing');
+//const assert = require('assert').strict;
+import { strict as assert } from 'assert';
+
+import * as firebase from '@firebase/testing';
 
 const FieldValue = firebase.firestore.FieldValue;
 
