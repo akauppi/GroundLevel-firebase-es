@@ -143,5 +143,22 @@ What happens if we don't provide the `__.js` file - would things still work?? :)
 ( Check especially after authentication has become part of emulation. )
 
 
+## Re-implement auth flow as Vue 3 component
 
+Firebase UI is not as great as it could.
+
+As part of debugging the auth flow, we might end up just studying the source code and implementing necessary pieces again, as a Vue 3 component.
+
+It just doesn't seem to have the same quality and clarity of documentation as the other components we use.
+
+<!-- tbd. list here actual shortcomings we have -->
+
+**Shortcomings experienced:**
+
+- Not fully ES module compatible: insists in `firebase` being provided as a global.
+- Has [over 100 Issues open](https://github.com/firebase/firebaseui-web/issues)
+- Could use promises
+- ...
+
+While it makes sense to have a centralized library to "do auth right", this one is getting out of hand as to the number of features - and not getting enough care at the same time. By focusing on a smaller feature set, and not needing to be generic web (i.e. we can be ES6 and Vue 3 specific), we likely will be able to do a better job.
 

@@ -15,7 +15,6 @@ module.exports = {
     ecmaVersion: 2018
   },
 
-  // tbd. adjust the overrides. They likely are from Vue 2 era.
   rules: {
     // Allow comments in Vue component HTML
     'vue/comment-directive': 0,

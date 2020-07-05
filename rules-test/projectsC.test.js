@@ -12,13 +12,13 @@ import './tools/jest-matchers';
 
 import { sessionProm } from './tools/guarded-session';
 
-const assert = require('assert').strict;
-
 const firebase = require('@firebase/testing');
 
 const FieldValue = firebase.firestore.FieldValue;
 
 const anyDate = new Date();   // a non-server date
+
+import { expect, describe, beforeAll } from '@jest/globals';
 
 describe("'/projects' rules", () => {
   let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC, ghi_projectsC;
@@ -45,14 +45,17 @@ describe("'/projects' rules", () => {
   //--- ProjectsC read rules ---
 
   test('unauthenticated access should fail', async () => {
+    expect.assertions(1);
     await expect( unauth_projectsC.get() ).toDeny();
   });
 
   test('user who is not part of the project shouldn\'t be able to read it', async () => {
+    expect.assertions(1);
     await expect( auth_projectsC.get() ).toDeny();
   });
 
   test('user who is an author or a collaborator can read a project (that is not \'removed\')', () => {
+    expect.assertions(2);
     return Promise.all([
       expect( abc_projectsC.doc("1").get() ).toAllow(),
       expect( def_projectsC.doc("1").get() ).toAllow()
@@ -60,6 +63,7 @@ describe("'/projects' rules", () => {
   });
 
   test('user needs to be an author, to read a \'removed\' project', () => {
+    expect.assertions(2);
     return Promise.all([
       expect( abc_projectsC.doc("2-removed").get() ).toAllow(),
       expect( def_projectsC.doc("2-removed").get() ).toDeny()
@@ -85,17 +89,17 @@ describe("'/projects' rules", () => {
     const p3_badTime = {...p3_valid, created: anyDate };
     const p3_alreadyRemoved = {...p3_valid, removed: serverTimestamp };
 
-    const proms = [];
-    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_valid) ).toAllow() );
-    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_withoutAuthor) ).toDeny() );
+    expect.assertions(4);
+    return Promise.all([
+      expect( abc_projectsC.doc("3-fictional").set(p3_valid) ).toAllow(),
+      expect( abc_projectsC.doc("3-fictional").set(p3_withoutAuthor) ).toDeny(),
 
-    // Time stamp must be the server time
-    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_badTime) ).toDeny() );
+      // Time stamp must be the server time
+      expect( abc_projectsC.doc("3-fictional").set(p3_badTime) ).toDeny(),
 
-    // May not be already 'removed'
-    proms.push( expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny() );
-
-    return Promise.all(proms);
+      // May not be already 'removed'
+      expect( abc_projectsC.doc("3-fictional").set(p3_alreadyRemoved) ).toDeny()
+    ]);
   });
 
   //--- ProjectsC update rules ---
@@ -104,6 +108,7 @@ describe("'/projects' rules", () => {
     const p1mod = {
       title: "Calamity 2"
     };
+    expect.assertions(2);
     return Promise.all([
       expect( abc_projectsC.doc("1").update(p1mod) ).toAllow(),
       expect( def_projectsC.doc("1").update(p1mod) ).toDeny()    // collaborator
@@ -114,6 +119,7 @@ describe("'/projects' rules", () => {
     const p1mod = {
       created: FieldValue.serverTimestamp()
     };
+    expect.assertions(2);
     return Promise.all([
       expect( abc_projectsC.doc("1").update(p1mod) ).toDeny(),
       expect( def_projectsC.doc("1").update(p1mod) ).toDeny()  // collaborator
@@ -124,20 +130,21 @@ describe("'/projects' rules", () => {
     const p1mod = {
       removed: FieldValue.serverTimestamp()
     };
+    expect.assertions(2);
     return Promise.all([
       expect( abc_projectsC.doc("1").update(p1mod) ).toAllow(),
       expect( def_projectsC.doc("1").update(p1mod) ).toDeny()  // collaborator
     ]);
   });
 
-  test("An author can remove the '.removed' mark", () => {
+  test("An author can remove the '.removed' mark", async () => {
     const p2mod = {
       removed: FieldValue.delete()
     };
-    return Promise.all([
-      expect( abc_projectsC.doc("2-removed").update(p2mod) ).toAllow(),
-      expect( def_projectsC.doc("2-removed").update(p2mod) ).toDeny()  // collaborator
-    ]);
+
+    expect.assertions(2);
+    await expect( abc_projectsC.doc("2-removed").update(p2mod) ).toAllow();
+    await expect( def_projectsC.doc("2-removed").update(p2mod) ).toDeny();  // collaborator
   });
 
   test("An author can add new authors, and remove authors as long as one remains", () => {
@@ -151,6 +158,7 @@ describe("'/projects' rules", () => {
       authors: FieldValue.arrayRemove("abc")    // only author
     };
 
+    expect.assertions(5);
     return Promise.all([
       expect( abc_projectsC.doc("1").update(p1_addAuthor) ).toAllow(),
       expect( abc_projectsC.doc("3-multiple-authors").update(p3_removeAuthor) ).toAllow(),
@@ -182,6 +190,7 @@ describe("'/projects' rules", () => {
   //--- ProjectsC delete rules ---
 
   test('no user should be able to delete a project (only cloud functions or manual)', async () => {
+    expect.assertions(1);
     await expect( abc_projectsC.doc("1").delete() ).toDeny();   // is an author in that project
   });
 });

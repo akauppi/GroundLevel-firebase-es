@@ -8,29 +8,12 @@ import { createApp } from 'vue';
 import { appTitle } from './config.js';
 import { logs } from './firebase/logs.js';
 
-import firebase from 'firebase/app';
-
-import 'firebase/auth';
-import 'firebase/firestore';
-import 'firebase/functions';
-
 //--- Make-up 💄
 /* not yet...
 import 'jquery';    // for Bootstrap, before it
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 */
-
-// Check Firebase health
-try {
-  const app = firebase.app();
-  const features = ['auth'].filter(feature => typeof app[feature] === 'function');
-  console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
-} catch (e) {
-  // tbd. we might have some error banner UI, later
-  console.error(e);
-  alert('Error loading the Firebase SDK, check the console.');
-}
 
 // Exercise central logging
 logs.info("We got up!");

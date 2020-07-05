@@ -32,7 +32,6 @@ Focus on Firebase and ES6 are something this repo is about. Those will remain. O
 - [Vite](https://github.com/vitejs/vite) for ultra-fast development
 - [Vue Router](https://github.com/vuejs/vue-router-next) 4
 - [Rollup](https://rollupjs.org/guide/en/) for production builds
-- [Firebase hosting]() for hosting
 
 Note the omissions: 
 
@@ -274,7 +273,7 @@ This text suits pretty badly to where it currently is. Should we move it to "Bra
 
 This is where You can code.
 
-We presume you have a suitable IDE (WebStorm, VS Code), and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
+We presume you have a suitable IDE, and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
 
 Three steps to remove GroundLevel branding:
 

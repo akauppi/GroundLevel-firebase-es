@@ -4,6 +4,14 @@
     "ignore": [],
     "rewrites": [
       {
+        "//": [ "Does this work? From -> https://stackoverflow.com/questions/38619572/set-file-mime-type-on-firebase-hosting"],
+        "source": "**.js",
+        "code": 404
+      },
+      {
+        "//tbd.": [
+          "try this: { source: \"!**.{js|css}\" }"
+        ],
         "//": [
           "Serve the same page for everything '.html' or postfixless: client does the routing.",
           "Note: if we let pass here, it's going to be a 200. Handle obvious 404's like wrong path to scripts or CSS here."
@@ -14,6 +22,7 @@
     ],
     "headers": [
       {
+        "//": "Firebase (7.15.5) provides wrong default MIME type for '.js' (application/json)",
         "source": "**/*.js",
         "headers": [
           {

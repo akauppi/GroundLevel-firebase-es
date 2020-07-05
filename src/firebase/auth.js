@@ -19,8 +19,13 @@
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
-import firebase from 'firebase/app';
+/* disabled until the official way works
+//import * as firebase from 'firebase/app';   // DOES NOT WORK
+import firebase from 'firebase/app';   // works
 import 'firebase/auth';
+*/
+assert(firebase.auth);
+
 import { ref } from 'vue';
 
 // tbd. Consider making a custom Vue 3 reference that fails with noise if authentication isn't determined, yet (or

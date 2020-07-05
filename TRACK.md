@@ -72,8 +72,11 @@ Keep an eye on this, but we don't need it.
 
 ## Rollup bundling of Vue.js 3 seems buggy.. 
 
-https://github.com/vuejs/rollup-plugin-vue/issues/364
+[https://github.com/vuejs/rollup-plugin-vue/issues/364](https://github.com/vuejs/rollup-plugin-vue/issues/364)
 
 Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 
 Check if it becomes moot, at some point.
+
+
+

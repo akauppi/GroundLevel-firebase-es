@@ -19,23 +19,18 @@ The reason this is not default is just avoiding any complexity. The template aim
 Which is more customary, in Firestore?
 
 
-## Importing Firebase
+## Can we import Firebase from `@firebase/app`, directly?
 
 The official [npm page](https://www.npmjs.com/package/firebase) shows this use pattern (for ES modules):
 
 ```
 import * as firebase from 'firebase/app';
- 
-// These imports load individual services into the firebase namespace.
 import 'firebase/auth';
 import 'firebase/database';
 ```
 
-However, the `firebase` imports internally import from `@firebase`. 
+However, the `firebase` imports internally import from `@firebase`. This would work also for us, but we are not doing it since it’s not according to documentation.
 
-Would it be safe (supported) to import directly as `@firebase/app` (it does work).
+Q: Is Firebase moving to that direction (@firebase), or is the current vaneer going to remain?
 
-Is this a problem? Not really. `npm run build` outputs two different bundles, because of the two namespaces. But if Firebase is aiming towards the `@firebase` for ES module imports, could just as well move there now. 
-
-Note: we solve this in chunk merging, to make just one output bundle for both Firebase namespaces.
-
+This is not a problem. `npm run build` outputs two different bundles, because of the two namespaces, but we solve this in chunk merging.
