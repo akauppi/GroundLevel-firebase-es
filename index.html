@@ -5,14 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="icon" type="image/png" href="/favicon.png">
-
-    <!-- tbd. make 'set' work if we generate both 'index.dev.html' and 'index.html' (production)
-    -   from the same source.
-    -->
-    <!--SET DEV,PROD $FB_UI https://www.gstatic.com/firebasejs/ui/4.5.0 -->
+    <link rel="icon" type="image/png" href="favicon.png">
 
     <!--
+    - See [#18](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/18), why this is needed.
+    -
     - Firebase UI
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
@@ -23,11 +20,9 @@
     - NOTE: It's not unlikely that one day we'd read the source of the Firebase UI project and implement the parts
     -     needed (we don't use/need all authentication flows) as a Vue-specific component. This a) does not seem to
     -     be as great quality as other tools we use and b) we're not getting it from npm.
-    -
-    - See discussion -> https://stackoverflow.com/questions/41710898/injecting-into-head-in-vue-js
     -->
     <!--DEV,PROD -->
-    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
     <!-- -->
 
@@ -46,16 +41,8 @@
         }
       }
 
-      //--- Firebase
-      //
-      import firebase from 'firebase/app';
-      import 'firebase/auth';
-      import 'firebase/firestore';
-      import 'firebase/functions';
-
       //--- Globals
       window.assert = assert
-      window.firebase = firebase
     </script>
     <!-- -->
 
@@ -71,12 +58,44 @@
       import { __ } from './.__.js'; const { apiKey, projectId, locationId, authDomain } = __;
       assert(apiKey && projectId && locationId);
 
+      // This DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions:
+      //
+      //import * as firebase from 'firebase/app';
+      //assert(firebase.initializeApp);   // fails
+
+      import firebase from 'firebase/app';    // works
+      import 'firebase/auth';
+      import 'firebase/firestore';  // for lcoal mode
+      import 'firebase/functions';  // -''-
+
+      // As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-beta.11 in dev mode),
+      // let's place it as a global.
+      //
+      // Once we know the official way ('import * as firebase from 'firebase/app') works, we can go back to having
+      // modules read them as imports.
+      //
+      window.firebase = firebase;
+
       firebase.initializeApp({
         apiKey,
         projectId,
         locationId,
         authDomain
       });
+
+      // Check Firebase health
+      // Note: This needs to be done here, not in 'main.js'. In there, the components will import Firebase before the
+      //    main code.
+      //
+      try {
+        const app = firebase.app();
+        const features = ['auth','firestore','functions'].filter(feature => typeof app[feature] === 'function');
+        console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
+      } catch (e) {
+        // tbd. we might have some error banner UI, later
+        console.error(e);
+        alert('Error loading the Firebase SDK, check the console.');
+      }
 
       // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
       //

@@ -65,6 +65,10 @@ It's strange this would be a problem.. Let's keep an eye on the:
 
 (comment 15-May-20)
 
+Status: Using `@firebase/testing` to prime the emulator (in `npm run dev:local`). Works.
+
+Keep an eye on this, but we don't need it.
+
 
 
 

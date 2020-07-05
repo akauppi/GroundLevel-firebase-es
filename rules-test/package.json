@@ -30,7 +30,9 @@
     "@firebase/testing": [
       "see -> https://github.com/firebase/firebase-js-sdk/tree/master/packages/testing"
     ],
-    "Node 13.2+": [ "Needed for native ES module support" ]
+    "Node 13.2+": [
+      "Needed for native ES module support"
+    ]
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.9.0"

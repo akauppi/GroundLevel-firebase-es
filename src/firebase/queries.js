@@ -3,6 +3,8 @@
 *
 * These are the use cases we have against the Firestore data. Having them in one place helps modeling the data.
 */
+assert(firebase.firestore && firebase.auth);
+
 const db = firebase.firestore();
 
 // Tokens that Firestore uses:
@@ -271,7 +273,6 @@ function convertDateFields( obj, ...fields ) {
 }
 
 export {
-  //REMOVE: watchMyProjects,
   projects,
   watchMyInvites
 }

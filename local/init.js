@@ -20,8 +20,8 @@
 
 /* ES6 loading - 'type': "module" in package.json */
 import { docs } from './data.js';
-import firebase from '@firebase/testing';
-import tmp from '../__.js'; const { projectId } = tmp;
+import * as firebase from '@firebase/testing';
+import { __ } from '../.__.js'; const { projectId } = __;
 
 /* CommonJS - for error messages! *
 *

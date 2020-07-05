@@ -4,7 +4,7 @@
 * Follow a certain project. This feeds changes from Firestore to the UI.
 */
 import {reactive, ref} from "vue";
-import {/*convertDateFields,*/ unshot} from '/src/firebase/utils.js';
+//import {/*convertDateFields,*/ unshot} from '/src/firebase/utils.js';
 
 const db = firebase.firestore();
 

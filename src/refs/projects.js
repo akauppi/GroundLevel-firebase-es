@@ -3,6 +3,7 @@
 *
 * Reactive 'projects' map, reflecting both database and sign-in/out changes.
 */
+assert(firebase.firestore);
 const db = firebase.firestore();
 
 import { reactive, watchEffect } from 'vue';

@@ -23,15 +23,6 @@ Let's start! 🤾‍♀️
 
 <br/>
 
-<!-- removed (we have a sticky start...)
-
->It would be nice if you time your journey from here to a running installation. 
->Then let us know the time. ⏱
->
->|||
->|---|---|
->|1|9 minutes|
--->
 
 ## Tools selected
 
@@ -64,7 +55,7 @@ Note the omissions:
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
 <!--
-Developed with Firebase 8.4.3 on macOS; Node 14
+Developed with Firebase 8.4.3 on macOS; Node 14.4
 -->
 
 ### Firebase plan
@@ -90,11 +81,13 @@ You need to:
 
 #### Development configuration 
 
-`firebase use --add` sets `.firebaserc` and maybe some other files not in the version control. This is not enough for the front end to tie to your project. For that, there is a `.__.js` file that needs to be changed.
+`firebase use --add` sets `.firebaserc` and maybe some other files not in the version control. This is not enough for the front end to tie to your project. For that, we create a `.__.js` file.
 
->Note: This only matters for development, and is needed because we use Vite (not Firebase hosting) as the development platform. The name `__` comes from Firebase - it hosts this data as `__/firebase/init.js`.
+>Note: This file *can* be in the version control. The contents are not secret, and they are anyways needed by the browser client, one way or the other. Once you have created the file, you can add it to version control so other people working with you don't need to recreate it.
 
-We've done a script that starts Firebase hosting momentarily, and lists the settings for you. You can see them also in Firebase console.
+>Note: The file only matters for development. If you use Firebase hosting for deployments, it provides such data in a `__/firebase/init.js` URL (this is where we'll now pick it from).
+
+We've done a script that starts Firebase hosting momentarily, and lists the settings for you.
 
 ```
 $ npm run __
@@ -105,7 +98,16 @@ $ npm run __
 }
 ```
 
-Edit `.__.js` and transport the required keys there.
+Create `.__.js` with these keys:
+
+```
+const __ = {
+  apiKey: ...,
+  projectId: ...,
+  authDomain: '...'
+}
+export { __ }
+```
 
 Now we're finally ready to get started...!
 
@@ -249,8 +251,17 @@ You can also run these modes simultaneously, in different terminals. By default,
 ...discuss `src/config.js`
 -->
 
+## Tests and Linting
 
-## Testing Security Rules
+```
+$ npm run lint
+...
+```
+
+This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
+
+
+### Testing Security Rules
 
 If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
 
@@ -271,15 +282,21 @@ Please see its [README](rules-test/README.md) file.
 
 ## Adopting into Your App!
 
+<!-- Editor's note
+This text suits pretty badly to where it currently is. Should we move it to "Branding" at the end???  (this is a dinosaur, and the doc developed around it)
+-->
+
 This is where You can code.
 
 We presume you have a suitable IDE, and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
 
-Three steps to brand your own app:
+Three steps to remove GroundLevel branding:
 
 1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
 2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
 3. Visit the `src/config.js` and suit it to your project (title etc.).
+
+You may mention using this repo as your starting point, but are not obliged to do so.
 
 <!-- disabled (revise when we see whether we need Rollup)
 If we still use Rollup, and you need CommonJS dependencies, enable `plugin-commonjs` in `rollup.config.js` and `package.json` (just uncomment or move around certain lines of code).

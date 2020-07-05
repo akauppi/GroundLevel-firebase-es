@@ -6,6 +6,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // tbd. removed projects likely to get their own collection (simpler)
+
     match /projects/{projectId} {
       // Read
       //    - authors can see all projects, also removed (archived)
@@ -16,8 +18,7 @@ service cloud.firestore {
       //        manual changes, admin SDK changes, or data written by earlier generations of the security rules.
       //
       allow read: if (isAuthor() || isCollaborator() && !isRemoved())
-        //&& validProject()       // optional: enable if you want to guard against bad data instead of letting client cope with it
-            // ^-- tbd. enable. Currently causes 2 tests to fail
+        && validProject()       // optional: enable if you want to guard against bad data instead of letting client cope with it
 
       // Creation
       //    - the creating user must list themselves as an author
@@ -68,9 +69,9 @@ service cloud.firestore {
       allow delete: if false        // no deletion via web app
 
       // Project consistency:
-      //  - title may not be empty
-      //  - created must exist
-      //  - removed is optional; if exists, must be a server time stamp now or in the past
+      //  - title (string) may not be empty
+      //  - created (timestamp) must exist
+      //  - removed (timestamp) is optional; if exists, must be a server time stamp now or in the past
       //  - at least one author must exist
       //  - collaborators can be empty
       //  - users are either in 'authors' or in 'collaborators' (but not in both)
@@ -273,6 +274,7 @@ service cloud.firestore {
       //  - a previous invite may be overwritten (= extended)
       //
       allow create: if true
+      /* REMOVE
         && ((      // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
           request.resource.data.asAuthor && (
             GLOBAL_isAuthor(request.resource.data.project)
@@ -282,6 +284,10 @@ service cloud.firestore {
             GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
           )
         ))
+        */      // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
+        && request.resource.data.asAuthor
+            ? GLOBAL_isAuthor(request.resource.data.project)
+            : GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)      // else anyone in the project can invite
         && validInvite()
 
       // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an

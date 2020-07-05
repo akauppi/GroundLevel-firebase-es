@@ -1,8 +1,6 @@
 <!--
 - src/pages/SignIn.vue
 -
-- Note: Only this page needs 'firebaseui'. Maybe we should bring it here, one day (now in 'index.html'). Not urgent.
--
 - References:
 -   - Easily add sign-in to your Web app with FirebaseUI (Firebase docs)
 -     -> https://firebase.google.com/docs/auth/web/firebaseui
@@ -12,13 +10,9 @@
   -->
   <h1>WELCOME STRANGER!</h1>
   <div>
-    Would you like to log in - you can do it anonymously..?  No login, no app.
+    Would you like to log in - you can do it anonymously..?
   </div>
   <div id="firebaseui-container" />
-  <div>
-    <!-- eslint-disable-next-line vue/max-attributes-per-line -->
-    Built upon <a href="https://github.com/akauppi/GroundLevel-firebase-web" target="_blank">GroundLevel ♠️ ES6</a> (source)
-  </div>
 </template>
 
 <style scoped>
@@ -36,6 +30,8 @@
 </style>
 
 <script>
+  assert(firebase && firebase.auth);
+
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
 
@@ -122,55 +118,6 @@
     //tosUrl: '<your-tos-url>',     // Terms of Service
     //privacyPolicyUrl: '<your-privacy-policy-url>',    // Privacy policy
   };
-
-  /*** DISABLED (but keep)
-  /*
-  * Inject FirebaseUI to the current page. (see comments at the top for why)
-  *
-  * Note: Svelte 3 has header directives. We could do all this declaratively, there. #just-saying
-  *
-  * Crafted based on:
-  *   -> https://stackoverflow.com/questions/8578617/inject-a-script-tag-with-remote-src-and-wait-for-it-to-execute#answer-39008859
-  *_/
-  // NOT USED!!!
-  function injectFirebaseUI() {   // () -> Promise of something ('firebaseui' is set as a global)
-    console.log("INJECTING FIREBASE UI");   // DEBUG
-
-    // For what we need, see -> https://github.com/firebase/firebaseui-web#option-1-cdn
-    //  <<
-    //    <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"> < /script>
-    //    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
-    //  <<
-
-    const a = document.createElement('script');
-      //
-      a.async = true;
-      a.src = 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js';
-
-    const b = document.createElement('link');
-      //
-      b.type = 'text/css';
-      b.rel = 'stylesheet';
-      b.href = 'https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css';
-
-    return new Promise((resolve, reject) => {
-      a.addEventListener('load', resolve, { once: true } );
-      a.addEventListener('error', () => reject('Error loading script'));    // tbd. can we get an error description in the listener, and pass it on?
-      a.addEventListener('abort', () => reject('Script loading aborted'));  //    -''-
-
-      // see -> https://stackoverflow.com/questions/14910196/how-to-add-multiple-divs-with-appendchild/19759120#answer-14910308
-      const tmp = document.createDocumentFragment();
-        //
-        tmp.appendChild(a);
-        tmp.appendChild(b);
-
-      document.head.appendChild(tmp);
-    });
-  }
-   // Inject right here (not dependent on Vue component lifespan). Once the promise is fulfilled, 'firebaseui' should exist.
-   //
-   const injectedProm = Promise.resolve(); //injectFirebaseUI();
-  ***/
 
   // Decision: what auth state persistence does your app favor?
   // See -> https://firebase.google.com/docs/auth/web/auth-state-persistence?hl=fi

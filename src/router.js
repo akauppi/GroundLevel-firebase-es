@@ -11,6 +11,8 @@
 *     the _only_ place where the info really needs to be (since if the user ends up on a protected page, we already
 *     know authentication happened). Thus, embedding a part of Firebase in here. :)
 */
+// tbd. import, one day.. see #18
+assert(firebase && firebase.auth);
 
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -44,14 +46,16 @@ const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipA
 // Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose
 //                not to do this, and go for the shorter format (best when there are lots of routes).
 //
+// Note: When coming here, the server has already tossed 200 to the client. If you wish proper 404 pages, do that at
+//      the server config.
+//
 const routes = [
   r('/', Home, { name: 'home' }),
   skipAuth('/signin',  SignIn),    // '?final=/somein'
   r('/projects/:id', Project, { props: true, name: 'projects' }),    // '/projects/<project-id>'
     //
-  //r('/dynamic', () => import('./pages/Home.vue')),    // Q: why ESLint colors it red? #help
-    //
-  skipAuth('/:catchAll(.*)', page404 )
+  //r('/dynamic', () => import('./pages/Home.vue')),    // dynamic loading NOT part of ES modules - cannot use such without Babel?
+  skipAuth('/:catchAll(.*)', page404 )    // NOTE: will be seen with 200 return code
 ];
 
 // Note: Until JavaScript "top-level await" proposal, we export both a promise (for creating the route) and a
@@ -96,7 +100,7 @@ const routerProm = currentFirebaseUserProm().then( _ => {
       next();   // just proceed
 
     } else {    // need auth but user is not signed in
-      console.log("Wanting to go to (but not signed in): " + to);  // DEBUG
+      console.log("Wanting to go to (but not signed in):", to);  // DEBUG
 
       if (to.path === '/') {
         next('/signin')   // no need to clutter the URL
