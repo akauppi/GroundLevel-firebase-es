@@ -18,7 +18,7 @@
     "@babel/preset-env": "^7.10.3",
     "@firebase/testing": "^0.20.4",
     "@jest/globals": "^26.1.0",
-    "babel-jest": "^25.5.1",
+    "babel-jest": "^26.1.0",
     "jest": "^26.1.0"
   },
   "engines": {

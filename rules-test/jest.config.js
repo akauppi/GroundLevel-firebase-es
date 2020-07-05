@@ -11,6 +11,7 @@ export default {
   testEnvironment: 'jest-environment-node',
   transform: {},
 
+  // NOTE: 'globalSetup' DOES NOT WORK with ES modules, yet (Jest 26.1.0)
   globalSetup: "./setup.jest.js",
   verbose: true,
 

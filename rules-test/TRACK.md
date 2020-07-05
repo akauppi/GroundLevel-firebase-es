@@ -14,6 +14,8 @@ Looks splendid!
 
 - [ ] Need `globalSetup` to be supported. Currently:
 
+>It seems to me that the flow for the global setup has not been updated to work with ESM.
+
 ```
 $ npm run test3
 ...
