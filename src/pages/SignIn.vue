@@ -34,36 +34,15 @@
 
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
-
-  //import { parseQuery } from 'vue-router';
-
-  // Importing 'router.js' leads to a cyclic import - don't do it.   Other ways out (getting Vue Router's current route?)
-  //import { /*routerProm,*/ router } from '../router.js';
-
-  // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Can you make it work? #help
-  //    (makes sense to do all router/URL specific with Vue-router).
-  //
-  //const tmp = parseQuery(window.location.search).get('final');    // "some..."|null
-  const tmp = new URLSearchParams(window.location.search).get('final');    // "some..."|null
-  const toPath = tmp || '/';
+  import { routerProm } from '../router.js';
 
   // SOUVENIR
   //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
 
-  console.log("Once signed in, we'd 🛵 to: " + toPath);
-
-  // A promise, until one is able to use top level await (to get the route).
-  //
-  const uiConfigProm = (async () => {
-    //const router = await RouterProm;
-    //debugger;
-
-    const router = window.router;
-    assert(router);
-
-    const uiConfig = {
+  function uiConfig(router, toPath) {   // (Router, String) => { ...firebaseui config }
+    const cfg = {
       signInFlow: 'redirect',     // default (not popup)
-      //signInSuccessUrl: toPath,   // nope: we are SPA and want to avoid page refreshes
+      signInSuccessUrl: toPath,   // nope: we are SPA and want to avoid page refreshes
       signInOptions: [
         // OAuth providers
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -97,13 +76,13 @@
           console.log(toPath);
 
           // Q: How to move to 'toPath', with Vue Router 4.0?
-
-          window.router.replace(toPath).catch( reason => {
+          /***
+          router.replace(toPath).catch( reason => {
             console.error("Redirect failed!", reason);
           });
           return false;   // false: Firebase UI should not redirect
-
-          //return true;    // get us there, with the URL :/ #bummer!!!!!!!!
+          ***/
+          return true;    // get us there, with the URL :/ #bummer!!!!!!!!
         },
 
         // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
@@ -153,15 +132,22 @@
     console.debug("Persistence changed")    // we don't really care, do we?
     ***/
 
-    return uiConfig;
-  });
+    return cfg;
+  }
 
   export default {
     name: 'SignIn',
     setup() {
       onMounted(async () => {
+        const router = await routerProm;
+
+        const tmp = new URLSearchParams(window.location.search).get('final');    // "some..."|null
+        const toPath = tmp || '/';
+
+        console.log("Once signed in, we'd 🛵 to: " + toPath);
+
         const ui = new firebaseui.auth.AuthUI( firebase.auth() );
-        ui.start("#firebaseui-container", await uiConfigProm);
+        ui.start("#firebaseui-container", uiConfig(router, toPath));
       })
       return {}   // nothing to expose
     }

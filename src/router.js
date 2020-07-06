@@ -118,9 +118,6 @@ const routerProm = currentFirebaseUserProm().then( _ => {
     }
   });
 
-  // Expose globally, for now. SignIn needs to have access to it. tbd. #cleanup
-  window.router = router;
-
   return router;
 });
 
