@@ -30,36 +30,55 @@ import fs from 'fs';
 import scss from 'rollup-plugin-scss';      // handles '.css' and '.scss'
 
 const publicDir = 'public';
+const indexDevFile = 'index.html';
+const indexProdFile = 'public/index.prod.html';
 
-/*** disabled (make BIGGER, BETTER)
-/ **
- * A Rollup plugin to generate a list of import dependencies for each entry
- * point in the module graph. This is then used by the template to generate
- * the necessary `<link rel="modulepreload">` tags.
- * @return {Object}
- * /
-const modulepreloadPlugin = () => {
+import { productize } from './tools/prod-index-filter'
+
+/*
+* Rollup plugin to get the chunks and their hashes (as by the 'manualChunks' policy), pass it on to a tool script
+* that creates production index.html from the 'index.html' template.
+*
+* Based on 'modulepreloadPlugin' by Philip Walton
+*   -> https://github.com/philipwalton/rollup-native-modules-boilerplate/blob/master/rollup.config.js#L63-L84
+*/
+const prodIndexPlugin = () => {
   return {
-    name: 'modulepreload',
+    name: 'prodIndex',
     generateBundle(options, bundle) {
-      // A mapping of entry chunk names to their full dependency list.
-      const modulepreloadMap = {};
+      const files = new Array();   // e.g. ['main.e40530d8.js', ...]
+      const modulepreloadMap = {};    // mapping of entry chunk names to their full dependency list
 
       // Loop through all the chunks to detect entries.
       for (const [fileName, chunkInfo] of Object.entries(bundle)) {
         if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
+
+          files.push(fileName)
           modulepreloadMap[chunkInfo.name] = [fileName, ...chunkInfo.imports];
         }
       }
 
-      fs.writeFileSync(
-        path.join(publicDir, 'modulepreload.json'),
-        JSON.stringify(modulepreloadMap, null,2)
-      );
+      const hashes = new Map();
+      files.forEach( x => {
+        const [_,c1,c2] = x.match(/^(.+)\.([a-fA-F0-9]+).js$/);
+        hashes.set(c1,c2);
+      });
+
+      console.debug( "Working with module hashes:", hashes );
+
+      const indexDev = fs.readFileSync(indexDevFile, 'utf8');
+      const indexProd = productize(indexDev, hashes);
+
+      // Q: Is this a suitable way to create 'public/index.html', from within Rollup?
+      //
+      this.emitFile({
+        type: 'asset',
+        fileName: 'index.prod.html',
+        source: indexProd
+      });
     },
   };
 };
-***/
 
 /*
 * Note: The order of the plugins does sometimes matter.
@@ -95,7 +114,7 @@ const plugins = [
   // enable for minified output (~600 vs. ~2090 kB)
   //terser(),
 
-  //modulepreloadPlugin()
+  prodIndexPlugin()
 ];
 
 export default {
@@ -119,7 +138,6 @@ export default {
         const tmp = arr[arr.lastIndexOf('node_modules') + 1];
 
         // Pack '@firebase' and 'firebase' to the same chunk.
-        // Also possible: to leave something in the default chunk, return empty.
         //
         return tmp.match(/^@?firebase$/) ? 'firebase'
           : tmp;

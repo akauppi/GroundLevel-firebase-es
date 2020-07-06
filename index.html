@@ -7,6 +7,7 @@
 
     <link rel="icon" type="image/png" href="favicon.png">
 
+    <!--DEV -->
     <!--
     - See [#18](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/18), why this is needed.
     -
@@ -21,22 +22,21 @@
     -     needed (we don't use/need all authentication flows) as a Vue-specific component. This a) does not seem to
     -     be as great quality as other tools we use and b) we're not getting it from npm.
     -->
-    <!--DEV,PROD -->
     <script src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
     <!-- -->
 
-    <!--PROD --
-    ${PRELOAD_MODULES}
+    <!--PROD
+    ${PRELOADS}
     -->
 
+    <!--DEV,PROD -->
     <!--
     - Set up globals
     -
     - Some things don't need to come via the 'import' mechanism. These are better to set up already here, since
     - 'import's get evaluated at once for a module, and modules needing the globals would faint.
     -->
-    <!--DEV,PROD -->
     <script type="module">
       function assert(cond) {
         if (!cond) {
@@ -74,15 +74,15 @@
       import { __ } from './.__.js'; const { apiKey, projectId, locationId, authDomain } = __;
       assert(apiKey && projectId && locationId);
 
-      // This DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions:
-      //
-      //import * as firebase from 'firebase/app';
-      //assert(firebase.initializeApp);   // fails
+      //import * as firebase from 'firebase/app';   // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
+      import firebase from 'firebase/app';    // works (but does not allow firebaseui from npm :( )
 
-      import firebase from 'firebase/app';    // works
       import 'firebase/auth';
       import 'firebase/firestore';  // for lcoal mode
       import 'firebase/functions';  // -''-
+
+      console.debug("firebase.initializeApp:", firebase.initializeApp);
+      assert(firebase.initializeApp);
 
       // As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-beta.11 in dev mode),
       // let's place it as a global.
@@ -134,7 +134,7 @@
     <script type="module" src="/dist/main.#.js"></script>
     -->
     <!--DEV Application -->
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="src/main.js"></script>
     <!-- -->
   </head>
 

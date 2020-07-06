@@ -25,9 +25,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from './pages/Home/index.vue';
 import SignIn from './pages/SignIn.vue';
 import Project from './pages/Project/index.vue';
-import page404 from './pages/404.vue';
+import Page404 from './pages/404.vue';
 
-// Turning Firebase subscription model into a Promise based on
+// Turning Firebase subscription model into a Promise, based on:
 //    -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
 //
 function currentFirebaseUserProm() {    // () => Promise of object|null
@@ -39,8 +39,8 @@ function currentFirebaseUserProm() {    // () => Promise of object|null
   });
 }
 
-const r = (path, component, o) => ({ ...o, path, component });
-const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipAuth: true } })
+const rLocked = (path, component, o) => ({ ...o, path, component, meta: { ...(o && o.meta || {}), needAuth: true }});
+const rOpen = (path, component, o) => ({ ...o, path, component });
 
 // Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose
 //                not to do this, and go for the shorter format (best when there are lots of routes).
@@ -49,12 +49,21 @@ const skipAuth = (path, component, o) => ({ ...o, path, component, meta: { skipA
 //      the server config.
 //
 const routes = [
-  r('/', Home, { name: 'home' }),
-  skipAuth('/signin',  SignIn),    // '?final=/somein'
-  r('/projects/:id', Project, { props: true, name: 'projects' }),    // '/projects/<project-id>'
-    //
-  //r('/dynamic', () => import('./pages/Home.vue')),    // dynamic loading NOT part of ES modules - cannot use such without Babel?
-  skipAuth('/:catchAll(.*)', page404 )    // NOTE: will be seen with 200 return code
+  rLocked('/', Home /*, { name: 'home' }*/),
+  rOpen('/signin',  SignIn),    // '?final=/somein'
+  rLocked('/projects/:id', Project, { props: true /*, name: 'projects'*/ }),    // '/projects/<project-id>'
+
+  // Dynamic loading *should* be possible but depends on Vite and Rollup. It's not an ES6 feature, and the both would
+  // change this to some function.
+  //
+  rOpen('/easter', async () => {    // we just need to return a Promise to a component (vue-router's side)
+    import('./pages/Easter🥚.vue')   // keep knocking, it might work one day
+  }),
+
+  // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
+  //    and it is 200 (not 404). Check server configuration for actual 404 handling.
+  //
+  rOpen('/:catchAll(.*)', Page404 )
 ];
 
 // Note: Until JavaScript "top-level await" proposal, we export both a promise (for creating the route) and a
@@ -85,29 +94,32 @@ const routerProm = currentFirebaseUserProm().then( _ => {
     // (parent/children) (Jun 2020), so the array is always just one entry long. (Note: This is guesswork, '.matched'
     // does not have documentation in its source).
     //
-    // For this, it is irrelevant whether we use '.every' or what not. Maybe we should use '.last' (the actual page).
-    // Check this out properly, one day (samples use '.some' but they also use '.requiresAuth' when we have changed that
-    // to '.skipAuth').
+    // For this, it is irrelevant whether we use '.some' or what not. Maybe we should use '.last' (the actual page).
+    // Check this out properly, one day.
     //
     // Based on -> https://router.vuejs.org/guide/advanced/meta.html
     //
     console.debug("Before route, to.matched:", to.matched);    // DEBUG (could use central logging here!!! tbd.!!)
 
-    const skipAuth = to.matched.every(r => r.meta.skipAuth);
+    const needAuth = to.matched.some(r => r.meta.needAuth);
 
-    if (skipAuth || firebase.auth().currentUser) {    // we can now rely on 'firebase.auth().currentuser'==null to mean not signed in
+    if ((!needAuth) || firebase.auth().currentUser) {    // since we waited for 'currentFirebaseUserProm', we can now trust '.currentuser'
       next();   // just proceed
 
     } else {    // need auth but user is not signed in
       console.log("Wanting to go to (but not signed in):", to);  // DEBUG
 
-      if (to.path === '/') {
-        next('/signin')   // no need to clutter the URL
+      if (to.path === '/') {    // no need to clutter the URL with '?final=/'
+        // WARN: "No match for undefined" - why??
+        next('/signin')
       } else {
         next(`/signin?final=${to.path}`);
       }
     }
   });
+
+  // Expose globally, for now. SignIn needs to have access to it. tbd. #cleanup
+  window.router = router;
 
   return router;
 });

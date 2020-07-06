@@ -35,8 +35,10 @@
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
 
-  import { parseQuery } from 'vue-router';
-  import { /*routerProm,*/ router } from '../router.js';
+  //import { parseQuery } from 'vue-router';
+
+  // Importing 'router.js' leads to a cyclic import - don't do it.   Other ways out (getting Vue Router's current route?)
+  //import { /*routerProm,*/ router } from '../router.js';
 
   // tbd. Vue-router 4.x has 'parseQuery' that's supposed to "work as URLSearchParams". Can you make it work? #help
   //    (makes sense to do all router/URL specific with Vue-router).
@@ -55,6 +57,9 @@
   const uiConfigProm = (async () => {
     //const router = await RouterProm;
     //debugger;
+
+    const router = window.router;
+    assert(router);
 
     const uiConfig = {
       signInFlow: 'redirect',     // default (not popup)
@@ -90,12 +95,15 @@
           // Return type determines whether we continue the redirect automatically or whether we leave that to the developer.
 
           console.log(toPath);
-          debugger;
 
-          router.push(toPath).catch( reason => {
+          // Q: How to move to 'toPath', with Vue Router 4.0?
+
+          window.router.replace(toPath).catch( reason => {
             console.error("Redirect failed!", reason);
           });
           return false;   // false: Firebase UI should not redirect
+
+          //return true;    // get us there, with the URL :/ #bummer!!!!!!!!
         },
 
         // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when

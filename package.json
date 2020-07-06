@@ -9,11 +9,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "echo \"Sorry, no tests yet! 🙁\" && exit 55",
+    "lint": "eslint --ext .js,.vue src",
     "dev": "npm run dev:online",
     "dev:online": "vite --port 3000 --mode dev_online",
     "dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001 --mode dev_local\"",
-    "test": "echo \"Sorry, no tests yet! 🙁\" && exit 55",
-    "lint": "eslint --ext .js,.vue src",
     "build": "npm run prod:build",
     "prod:build": "rollup -c rollup.config.prod.js",
     "prod:serve": "firebase serve --only hosting --port 3010",
@@ -44,21 +44,19 @@
     "@vue/compiler-sfc": "^3.0.0-beta.18",
     "eslint": "^7.4.0",
     "eslint-plugin-vue": "^7.0.0-alpha.9",
-    "rollup": "^2.18.2",
+    "rollup": "^2.19.0",
     "rollup-plugin-scss": "^2.5.0",
     "rollup-plugin-terser": "^6.1.0",
     "rollup-plugin-vue": "^6.0.0-beta.6",
     "sass": "^1.26.9",
     "start-server-and-test": "^1.11.0",
     "vite": "1.0.0-beta.11",
-    "vue-eslint-parser": "^7.1.0",
+    "vue-eslint-parser": "^7.1.0"
   },
   "//devDependencies": {
     "//@rollup/plugin-alias": "^3.1.0",
     "//@rollup/plugin-commonjs": "^11.0.1",
-    "//rollup-plugin-filesize": "^9.0.2",
-    "//concurrently": "^5.0.2",
-    "//jest": "^26.1.0"
+    "//rollup-plugin-filesize": "^9.0.2"
   },
   "engines": {
     "node": ">=13.2"

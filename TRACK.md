@@ -78,3 +78,11 @@ Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 If they react on the issue, we can remove the extra plugin.
 
 
+## Firebase "release as ES(2015) modules"
+
+[https://github.com/firebase/firebase-js-sdk/issues/3315](https://github.com/firebase/firebase-js-sdk/issues/3315)
+
+Do we get any advice on the Vite/Firebase loading mystery?
+
+
+
