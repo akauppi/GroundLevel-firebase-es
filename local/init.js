@@ -3,36 +3,32 @@
 *
 * Prime the emulator with data.
 *
+* Firebase's solutions for backup deal with a compact, binary data format (import/export)[1]. This is suitable for
+* production backups but less so for development.
+*
+* Instead, this code reads JSON from a file. It allows you to view and edit the data, as a human. 👐
+*
+* [1]: "Firestore and Database Emulator: Initialization of an instance with a dataset" (Firebase Issues)
+*       -> https://github.com/firebase/firebase-tools/issues/1167
+*
 * Note:
-*   The official solution by Firebase is to use the export/import features (see https://github.com/firebase/firebase-tools/issues/1167 ).
-*   This stores the data in a compact but unreadable (for humans) format.
+*   When coding this, also tried with Firebase admin library ('firebase-admin'), but got this working first
+*   ('@firebase/testing').
 *
-* Our approach is to read JSON data from a file. This allows you to hand edit it to your liking.
-*
-* Note:
-*   When coding this, also tried with Firebase admin library ('firebase-admin'). Got it working first with
-*   '@firebase/testing' - which may be more suitable to development.
-*
-* !WARNING!
+* ‼️ WARNING ‼️
 *   If using ES6 imports ('package.json' having 'type': "module"), YOU WON'T GET ERROR MESSAGES. Switch to 'require'
 *   (elaborate) if there are quirks.
 */
 
 /* ES6 loading - 'type': "module" in package.json */
 import { docs } from './data.js';
-import * as firebase from '@firebase/testing';
+import firebase from '@firebase/testing';     // note: must be imported like this, not 'import * as firebase ..'
 import { __ } from '../.__.js'; const { projectId } = __;
 
 /* CommonJS - for error messages! *
-*
 const docs = require('./data.js');
 const projectId = "vue-rollup-example"    // must match that in '.firebaserc'
-
 const firebase = require('@firebase/testing');
-*/
-
-/*
-* tbd. Wait until emulator has started - allows us to use 'concurrently' instead of 'start-server-and-test'.
 */
 
 const adminApp = firebase.initializeAdminApp({
