@@ -25,7 +25,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from './pages/Home/index.vue';
 import SignIn from './pages/SignIn.vue';
 import Project from './pages/Project/index.vue';
-import Page404 from './pages/404.vue';
+import NotFound from './pages/_NotFound.vue';
 
 // Turning Firebase subscription model into a Promise, based on:
 //    -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
@@ -42,6 +42,8 @@ function currentFirebaseUserProm() {    // () => Promise of object|null
 const rLocked = (path, component, o) => ({ ...o, path, component, meta: { ...(o && o.meta || {}), needAuth: true }});
 const rOpen = (path, component, o) => ({ ...o, path, component });
 
+let routerProm;   // available for 'routes'??? (trying to work around a cyclic dependency)
+
 // Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose
 //                not to do this, and go for the shorter format (best when there are lots of routes).
 //
@@ -50,20 +52,35 @@ const rOpen = (path, component, o) => ({ ...o, path, component });
 //
 const routes = [
   rLocked('/', Home /*, { name: 'home' }*/),
-  rOpen('/signin',  SignIn),    // '?final=/somein'
+
+  // Notes:
+  //    - 'final': we provide the query parameter as a property so the component does not need to do parsing.
+  //    - 'routerProm': avoids a cyclical dependency
+  //
+  rOpen('/signin', SignIn, { props: route => ({ final: route.query.final, routerProm }) }),  // '?final=/somein'
+
   rLocked('/projects/:id', Project, { props: true /*, name: 'projects'*/ }),    // '/projects/<project-id>'
 
   // Dynamic loading *should* be possible but depends on Vite and Rollup. It's not an ES6 feature, and the both would
   // change this to some function.
   //
+  // Vite ('npm run dev') gives a runtime error:
+  //  <<
+  //    Unexpected error when starting the router:
+  //      Error: Couldn't resolve component "default" for the following record with path "/easter"
+  //        at vue-router.esm-bundler.js:1742
+  //  <<
+  //
+  // Rollup: tbd. report
+  //
   rOpen('/easter', async () => {    // we just need to return a Promise to a component (vue-router's side)
-    import('./pages/Easter🥚.vue')   // keep knocking, it might work one day
+    import('./pages/_EasterEGG.vue')   // keep knocking, it might work one day
   }),
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.
   //
-  rOpen('/:catchAll(.*)', Page404 )
+  rOpen('/:catchAll(.*)', NotFound )
 ];
 
 // Note: Until JavaScript "top-level await" proposal, we export both a promise (for creating the route) and a
@@ -75,11 +92,9 @@ const routes = [
 //
 //    See -> https://github.com/tc39/proposal-top-level-await
 //
-let router;
+routerProm = currentFirebaseUserProm().then( _ => {
 
-const routerProm = currentFirebaseUserProm().then( _ => {
-
-  router = createRouter({
+  const router = createRouter({
     history: createWebHistory(),
     //base: process.env.BASE_URL,    // tbd. what is this used for?
     routes
@@ -121,4 +136,4 @@ const routerProm = currentFirebaseUserProm().then( _ => {
   return router;
 });
 
-export { routerProm, router }
+export { routerProm /*, router*/ }

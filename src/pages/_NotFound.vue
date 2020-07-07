@@ -1,5 +1,5 @@
 <!--
-- src/pages/404.vue
+- src/pages/_NotFound.vue
 -
 - Fallback page. Good to have one in Single Page App.
 -->
@@ -17,6 +17,6 @@
 
 <script>
   export default {
-    name: 'NotFound404'      // Vue note: names help in debugging
+    name: 'NotFound'      // Vue note: names help in debugging
   }
 </script>

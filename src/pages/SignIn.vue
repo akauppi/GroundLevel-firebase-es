@@ -34,10 +34,6 @@
 
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
-  import { routerProm } from '../router.js';
-
-  // SOUVENIR
-  //const toPath = this.$route.query.final || '/';    // well that doesn't work any more #vuejs2
 
   function uiConfig(router, toPath) {   // (Router, String) => { ...firebaseui config }
     const cfg = {
@@ -135,19 +131,25 @@
     return cfg;
   }
 
+  // Note: Getting 'routerProm' as a property (instead of importing) is vital for avoiding a cyclic dependency
+  //    between 'router.js' and this module. While those are not illegal in ES, they do cause (unnecessary) warnings
+  //    in Rollup, and are generally a source of unnecessary complexity.
+
   export default {
     name: 'SignIn',
-    setup() {
+    props: {
+      final: String,        // URL query parameter: e.g. "..." | undefined
+      routerProm: Object    // Promise of Router
+    },
+    setup(props) {
       onMounted(async () => {
-        const router = await routerProm;
+        const {routerProm, final} = props;    // no need for reactivity: can use object destructuring
 
-        const tmp = new URLSearchParams(window.location.search).get('final');    // "some..."|null
-        const toPath = tmp || '/';
-
+        const toPath = final || '/';
         console.log("Once signed in, we'd 🛵 to: " + toPath);
 
         const ui = new firebaseui.auth.AuthUI( firebase.auth() );
-        ui.start("#firebaseui-container", uiConfig(router, toPath));
+        ui.start("#firebaseui-container", uiConfig(await routerProm, toPath));
       })
       return {}   // nothing to expose
     }

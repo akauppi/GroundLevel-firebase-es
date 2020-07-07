@@ -47,20 +47,26 @@ const prodIndexPlugin = () => {
     name: 'prodIndex',
     generateBundle(options, bundle) {
       const files = new Array();   // e.g. ['main.e40530d8.js', ...]
-      const modulepreloadMap = {};    // mapping of entry chunk names to their full dependency list
+      //const modulepreloadMap = {};    // mapping of entry chunk names to their full dependency list
 
-      // Loop through all the chunks to detect entries.
+      // Loop through all the chunks
       for (const [fileName, chunkInfo] of Object.entries(bundle)) {
         if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
 
+          //console.debug("Referenced files:", [fileName, chunkInfo.referencedFiles]);    // undefined
+          //console.debug("Asset filenames:", [fileName, chunkInfo.assetFileNames]);  // undefined
+          //console.debug("Entry filenames:", [fileName, chunkInfo.entryFileNames]);  // undefined
+          //console.debug("Chunk filenames:", [fileName, chunkInfo.chunkFileNames]);  // undefined
+          console.debug("Chunk imports:", [fileName, chunkInfo.imports]);   // dependent modules
+
           files.push(fileName)
-          modulepreloadMap[chunkInfo.name] = [fileName, ...chunkInfo.imports];
+          //modulepreloadMap[chunkInfo.name] = [fileName, ...chunkInfo.imports];
         }
       }
 
       const hashes = new Map();
       files.forEach( x => {
-        const [_,c1,c2] = x.match(/^(.+)\.([a-fA-F0-9]+).js$/);
+        const [_,c1,c2] = x.match(/^(.+)[.-](.+)\.js$/);
         hashes.set(c1,c2);
       });
 
@@ -69,13 +75,11 @@ const prodIndexPlugin = () => {
       const indexDev = fs.readFileSync(indexDevFile, 'utf8');
       const indexProd = productize(indexDev, hashes);
 
-      // Q: Is this a suitable way to create 'public/index.html', from within Rollup?
-      //
-      this.emitFile({
-        type: 'asset',
-        fileName: 'index.prod.html',
-        source: indexProd
-      });
+      // Note: Rollup has 'this.emitFile' but is there any benefit / reason to use it over 'fs'? We don't need
+      //    anything to be triggered by the creation of the HTML file.
+
+      fs.writeFileSync(indexProdFile, indexProd);
+      console.debug("HTML written:", indexProdFile);
     },
   };
 };

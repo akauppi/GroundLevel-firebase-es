@@ -118,7 +118,7 @@
   // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
 
   import { user } from '../refs/user.js';
-  import { router } from '../router.js';
+  import { routerProm } from '../router.js';
 
   /*
   * Sign out.
@@ -127,6 +127,7 @@
     const fa = firebase.auth();
     await fa.signOut();
 
+    /*** REMOVE??
     // Picked up somewhere that signing out could be done such (not sure if the later '.onAuthStateChanged' is needed).
     //
     const unsub = fa.onAuthStateChanged(() => {
@@ -134,6 +135,9 @@
       // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
       router.push('/signin');
     });
+    ***/
+
+    (await routerProm).push('/signin');
   }
 
   export default {

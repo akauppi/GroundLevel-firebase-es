@@ -1,8 +1,8 @@
 /node_modules/
 /public/dist/
 
-# Rollup likely creates this ('npm run build')
-/.cache/
+# Created by 'npm run build'
+/public/index.prod.html
 
 /functions/node_modules/
 /functions/ui-debug.log
