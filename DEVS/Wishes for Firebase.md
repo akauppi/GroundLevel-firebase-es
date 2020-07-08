@@ -396,6 +396,15 @@ Property resource is undefined on object. for 'list' @ L19
 ```
 
 
+## Would like to control, whether Firebase hosting emulation changes the port if taken, or fails
+
+Using port 3000 for `dev` (online) and 3001 for `dev:local` gets blurred, if a `npm run dev` is launched twice. Firebase emulator automatically looks for the next available port, and we just see the warning:
+
+```
+Port 3000 is in use, trying another one...
+```
+
+It would be nice to have a flag/config setting to disallow changing ports. It can even be the port entry itself, with "!3000" meaning we mean business - don't allow any other than 3000, ok?!
 
 
 ## References

@@ -78,11 +78,16 @@ Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 If they react on the issue, we can remove the extra plugin.
 
 
-## Firebase "release as ES(2015) modules"
+## FirebaseUI from `npm`
+
+[https://github.com/firebase/firebaseui-web/issues/674](https://github.com/firebase/firebaseui-web/issues/674)
+
+Once a fix is available, let's bring in FirebaseUI via `npm` (`pr-issue-7-firebaseui`).
+
+[https://github.com/firebase/firebaseui-web/issues/612](https://github.com/firebase/firebaseui-web/issues/612)
+
+That is also connected.
 
 [https://github.com/firebase/firebase-js-sdk/issues/3315](https://github.com/firebase/firebase-js-sdk/issues/3315)
 
-Do we get any advice on the Vite/Firebase loading mystery?
-
-
-
+That could be closed.
