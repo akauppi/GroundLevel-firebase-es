@@ -307,17 +307,24 @@ Cons:
 - Separate loading file (`local/init.js`) needs to be provided
 
 
-## Firebase hosting could provide `__.mjs`
+## Firebase hosting could provide config as ES module
 
 Firebase hosting makes it easy to initialize project identity via `/__/firebase/init.js`. This file is supposed to be read in as a `script` tag.
 
-To be friendly towards ES modules use in browsers, hosting could provide the same information in a way readable by `import`.
+This belongs to the bygone era, and should be complemented by an `import` friendly way of getting such configuration.
+
+One could serve a module exporting the config object (and `init` if one wants to be compatible with the earlier way). Let's say the url for this would be `/__/firebase/init.mjs`.
+
+This would allow: 
 
 ```
-import config from "/__/firebase/init.mjs"
+import * as firebase from 'firebase/app'
+import { default as __ } from "/__/firebase/init.mjs"
+firebase.initializeApp(__);
 ```
 
-However, in ES modules world, I'd rather take in a config and do initialization myself. If Firebase is interested in discussing an approach to this, be in touch..
+It feels a lot more module friendly that the app does the initialization.
+
   
 ## Firebase hosting BUG: wrong MIME type for `.js`
 

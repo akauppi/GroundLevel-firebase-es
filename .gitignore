@@ -1,6 +1,8 @@
 /node_modules/
 /public/dist/
 
+/dist.vite/
+
 # Created by 'npm run build'
 /public/index.prod.html
 

@@ -5,24 +5,26 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <!--PROD
+    <link type="text/css" rel="stylesheet" href="dist/bundle.css" />
+    -->
 
-    <!--DEV -->
+    <!--DEV,PROD -->
     <!--
     - See [#18](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/18), why this is needed.
     -
     - Firebase UI
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
-    - This is only needed in 'SignIn.vue', but there's no injection to 'head' in Vue.js (seems, by design?) so in
-    - development it was easiest to have it here. It likely gets cached, and everyone needs to come through the
-    - signin at some point, so there's little benefit in injecting it just for that one page.
+    - This is only needed in 'SignIn.vue'. Ideally, it would merely 'import' it, but that doesn't work until Firebase
+    - can be read the way it wants ('import * as firebase from ...'). See 'src/init.dev-vite.js'.
     -
     - NOTE: It's not unlikely that one day we'd read the source of the Firebase UI project and implement the parts
     -     needed (we don't use/need all authentication flows) as a Vue-specific component. This a) does not seem to
     -     be as great quality as other tools we use and b) we're not getting it from npm.
     -->
-    <script src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
     <!-- -->
 
@@ -30,111 +32,47 @@
     ${PRELOADS}
     -->
 
-    <!--DEV,PROD -->
-    <!--
-    - Set up globals
-    -
-    - Some things don't need to come via the 'import' mechanism. These are better to set up already here, since
-    - 'import's get evaluated at once for a module, and modules needing the globals would faint.
-    -->
+    <!--PROD
     <script type="module">
-      function assert(cond) {
-        if (!cond) {
-          debugger;   // allows us to see the 'call stack' in browser
-          throw "Assertion failed!";
-        }
-      }
+      import { init } from './dist/main.#.js'
 
-      //--- Globals
-      window.assert = assert
-    </script>
-    <!-- -->
-
-    <!--PROD Firebase initialization
-    <script type="module">
-      import { f as firebase } from '/dist/firebase-#.js';
-
-      // Loading '/__/firebase/init.js' as a script requires this as a global.
-      window.firebase = firebase;
-
-      // tbd. Make 'window.loadedProm' that gets set when Firebase is initialized (and 'main.js' reads it).
-      //    This would allow us to use Fetch API to read the '/__/firebase/init.js' and chop it to our liking.
-
-      /* For any static hosting, just place config here:
-      * <<
-      *   const config = { ... };
-      *   firebase.initializeApp(config);
-      * <<
-      */
-    </script>
-    <script type="module" src="/__/firebase/init.js"></script>
-    -->
-    <!--DEV Firebase initialization -->
-    <script type="module">
-      import { __ } from './.__.js'; const { apiKey, projectId, locationId, authDomain } = __;
-      assert(apiKey && projectId && locationId);
-
-      //import * as firebase from 'firebase/app';   // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
-      import firebase from 'firebase/app';    // works (but does not allow firebaseui from npm :( )
-
-      import 'firebase/auth';
-      import 'firebase/firestore';  // for lcoal mode
-      import 'firebase/functions';  // -''-
-
-      console.debug("firebase.initializeApp:", firebase.initializeApp);
-      assert(firebase.initializeApp);
-
-      // As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-beta.11 in dev mode),
-      // let's place it as a global.
+      // On Firebase hosting, we can get the configuration from the server:
       //
-      // Once we know the official way ('import * as firebase from 'firebase/app') works, we can go back to having
-      // modules read them as imports.
+      // <<
+      //    if (typeof firebase === 'undefined') throw new Error('hosting/init-error: Firebase SDK not detected. You must include it before /__/firebase/init.js');
+      //    var firebaseConfig = {
+      //      "projectId": "vue-rollup-example",
+      //      "appId": ...,
+      //      ...
       //
-      window.firebase = firebase;
-
-      firebase.initializeApp({
-        apiKey,
-        projectId,
-        locationId,
-        authDomain
-      });
-
-      // Check Firebase health
-      // Note: This needs to be done here, not in 'main.js'. In there, the components will import Firebase before the
-      //    main code.
+      //    };
+      //    if (firebaseConfig) {
+      //      firebase.initializeApp(firebaseConfig);
+      //    }
+      // <<
       //
-      try {
-        const app = firebase.app();
-        const features = ['auth','firestore','functions'].filter(feature => typeof app[feature] === 'function');
-        console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
-      } catch (e) {
-        // tbd. we might have some error banner UI, later
-        console.error(e);
-        alert('Error loading the Firebase SDK, check the console.');
-      }
-
-      // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
+      // The values are NOT secrets. You can safely place a config right here, as on object (faster loading). For
+      // ease of code sharing, we prefer fetching it.
       //
-      if (import.meta.env.MODE == "dev_local") {
-        const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = ["http://localhost:5001", "localhost:8080"];
-
-        firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
-
-        firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
-          host: DEV_FIRESTORE_HOST,
-          ssl: false
+      fetch('/__/firebase/init.js')
+        .then(resp => {    // returns JavaScript; parse away the program parts
+          if (!resp.ok) {
+            console.fatal("Unable to read Firebase config:", resp);
+            throw Error("Unable to read Firebase config (see console)");
+          }
+          resp.text().then( s => {
+            const s2 = s.replace(/^[\s\S]+ firebaseConfig = ({[\s\S]+\n});\s+if [\s\S]+$/gm, "$1");
+            init( JSON.parse(s2) );
+          });
         });
-
-        window.LOCAL = true;    // inform the UI
-      }
     </script>
-    <!-- -->
-
-    <!--PROD Application
-    <script type="module" src="/dist/main.#.js"></script>
     -->
-    <!--DEV Application -->
-    <script type="module" src="src/main.js"></script>
+    <!--DEV -->
+    <script type="module">
+      import { __ } from './.__.js';
+      import { init } from './src/init.dev-vite.js'
+      init(__);
+    </script>
     <!-- -->
   </head>
 

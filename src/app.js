@@ -1,7 +1,7 @@
 /*
-* src/main.js
+* src/app.js
 *
-* The entry point.
+* Application entry point.
 */
 import { createApp } from 'vue';
 
@@ -23,17 +23,10 @@ document.title = appTitle;
 import App from './App.vue';
 import { routerProm } from './router.js';
 
-routerProm.then( router => {
-  createApp(App)
+routerProm.then(router => {
+  createApp(App, {localMode: window.LOCAL})
     .use(router)
     .mount('#app');
-}).catch( ex => {
+}).catch(ex => {
   console.error("Unable to get router:", ex);
 });
-
-/*** Note: with Vue 2.x we had this - what's a similar way with Vue 3 (beta)? Do we need this?
- *
-  renderError: (h, err) => {  // pour runtime problems on the screen, if we have them (may help in development);
-                              // in production we may want to pour these to central monitoring
-    return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
-*/

@@ -27,7 +27,10 @@ import fs from 'fs';
 //      src/components/AppProfile.vue?vue&type=style&index=0&id=6f40e678&scoped=true&lang.scss (2:0)
 //  <<
 //
+// Reported -> https://github.com/vuejs/rollup-plugin-vue/issues/364
+//
 import scss from 'rollup-plugin-scss';      // handles '.css' and '.scss'
+const scssHackNeeded = true;    // still needed with: vue 3.0.0-beta.18, rollup-plugin-vue 6.0.0-beta.6
 
 const publicDir = 'public';
 const indexDevFile = 'index.html';
@@ -46,21 +49,15 @@ const prodIndexPlugin = () => {
   return {
     name: 'prodIndex',
     generateBundle(options, bundle) {
-      const files = new Array();   // e.g. ['main.e40530d8.js', ...]
-      //const modulepreloadMap = {};    // mapping of entry chunk names to their full dependency list
+      const files = new Set();   // Set of e.g. 'main.e40530d8.js', ...
 
       // Loop through all the chunks
       for (const [fileName, chunkInfo] of Object.entries(bundle)) {
         if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
+          //console.debug(`Chunk imports of ${fileName}:`, chunkInfo.imports);   // dependent modules
 
-          //console.debug("Referenced files:", [fileName, chunkInfo.referencedFiles]);    // undefined
-          //console.debug("Asset filenames:", [fileName, chunkInfo.assetFileNames]);  // undefined
-          //console.debug("Entry filenames:", [fileName, chunkInfo.entryFileNames]);  // undefined
-          //console.debug("Chunk filenames:", [fileName, chunkInfo.chunkFileNames]);  // undefined
-          console.debug("Chunk imports:", [fileName, chunkInfo.imports]);   // dependent modules
-
-          files.push(fileName)
-          //modulepreloadMap[chunkInfo.name] = [fileName, ...chunkInfo.imports];
+          [fileName, ...chunkInfo.imports]    // others than 'main' only show up in the imports
+            .forEach( x => files.add(x) );
         }
       }
 
@@ -75,11 +72,8 @@ const prodIndexPlugin = () => {
       const indexDev = fs.readFileSync(indexDevFile, 'utf8');
       const indexProd = productize(indexDev, hashes);
 
-      // Note: Rollup has 'this.emitFile' but is there any benefit / reason to use it over 'fs'? We don't need
-      //    anything to be triggered by the creation of the HTML file.
-
+      // Note: Not using Rollup's 'this.emitFile' since there's no need (Q: what would be the use case for it?).
       fs.writeFileSync(indexProdFile, indexProd);
-      console.debug("HTML written:", indexProdFile);
     },
   };
 };
@@ -111,7 +105,7 @@ const plugins = [
 
   replace({ 'process.env.NODE_ENV': '"production"' }),
 
-  scss({    // Should not be needed in the long run!
+  scssHackNeeded && scss({    // Should not be needed in the long run!
     output: publicDir +'/dist/bundle.css'
   }),
 
@@ -124,7 +118,7 @@ const plugins = [
 export default {
   plugins,
   input: {
-    main: 'src/main.js'
+    main: 'src/init.prod-rollup.js'   // becomes the 'main' chunk
   },
 
   output: {
@@ -136,14 +130,15 @@ export default {
     //
     manualChunks(id) {
       if (id.includes('node_modules')) {
-        // Return the directory name following the last `node_modules`.
-        // Usually this is the package, but it could also be the scope.
+
+        // Find the directory name following the last `node_modules`. Usually this is the package, but it could also be the scope.
         const arr = id.split(path.sep);
         const tmp = arr[arr.lastIndexOf('node_modules') + 1];
 
-        // Pack '@firebase' and 'firebase' to the same chunk.
+        // Pack '@firebase' and 'firebase' in the same chunk.
         //
         return tmp.match(/^@?firebase$/) ? 'firebase'
+          : tmp.match(/^@?vue$/) ? 'vue'    // avoids a "(!) Generated an empty chunk" warning, by Rollup
           : tmp;
       }
     },

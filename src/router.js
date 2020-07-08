@@ -61,8 +61,7 @@ const routes = [
 
   rLocked('/projects/:id', Project, { props: true /*, name: 'projects'*/ }),    // '/projects/<project-id>'
 
-  // Dynamic loading *should* be possible but depends on Vite and Rollup. It's not an ES6 feature, and the both would
-  // change this to some function.
+  // Dynamic loading *should* be possible but depends on Vite and Rollup.
   //
   // Vite ('npm run dev') gives a runtime error:
   //  <<
@@ -71,10 +70,13 @@ const routes = [
   //        at vue-router.esm-bundler.js:1742
   //  <<
   //
-  // Rollup: tbd. report
+  // Rollup:
+  //  <<
+  //    ...
+  //  <<
   //
   rOpen('/easter', async () => {    // we just need to return a Promise to a component (vue-router's side)
-    import('./pages/_EasterEGG.vue')   // keep knocking, it might work one day
+    await import('./pages/_EasterEGG.vue')   // keep knocking, it might work one day
   }),
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent

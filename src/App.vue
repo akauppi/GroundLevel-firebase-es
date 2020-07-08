@@ -6,7 +6,7 @@
 <template>
   <header>
     <app-logo />
-    <div id="emul" v-if="LOCAL">
+    <div id="emul" v-if="localMode">
       EMULATION MODE
     </div>
     <!-- Note: 'user' can be 'null' at first, then either an object (signed in) or 'false' (signed out).
@@ -41,12 +41,13 @@
 
   import { user } from './refs/user.js';
 
-  const LOCAL = !! window.LOCAL;    // true if using local Firebase emulation
-
   export default {
     name: 'App',     // helps in debugging
     components: {
       AppLogo, AppProfile, AppFooter
+    },
+    props: {
+      localMode: Boolean    // 'true' if running against the local Firebase emulator
     },
     setup() {
       // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
@@ -54,7 +55,7 @@
         console.log("Houston, App is mounted");
       });
 
-      return { user, LOCAL }
+      return { user }
     }
   }
 </script>

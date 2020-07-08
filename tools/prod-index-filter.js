@@ -44,9 +44,6 @@ function preloadsArr(modFiles) {   // array of "dist/{mod}[-.]{hash}.js" -> arra
 *
 */
 function productize(contents, hashes) {    // (String, Map<String,String>) -> String    // may throw
-  console.debug(hashes);
-  console.debug(hashes.get("main"));
-
   const errors = new Array();
 
   const modFiles = Array.from( hashes.entries() ).map( ([key,value]) => `dist/${key}${key !== "main" ? '-':'.'}${value}.js` );
@@ -79,14 +76,17 @@ function productize(contents, hashes) {    // (String, Map<String,String>) -> St
 
   // Hashes
   //
-  // Any '/{file}[.-]#.js' to be filled in the hash.
+  // Any '{file}.#.js' to be filled in the hash.
   //
-  // Example: <script type="module" src="/dist/main.#.js"></script>
+  // Example:
+  //  <<
+  //    import { init } from './main.#.js'
+  //  <<
   //
-  // Note: For some reason, Rollup uses '.' for main but '-' for others. We act as we don't mind.. :? (maybe it's us..)
+  // Note: For some reason, Rollup uses '.' for main but '-' for others. We only need to support 'main.#.js'.
   //
-  const s5 = s4.replace(/(?<=<script [^>]*src=")[^>]*\/([\w\d]+)[.-]#.js(?=")/gm,  // yay for anchorbacks and -forwards! ⚓️
-    (match,c1) => {   // c1: e.g. "main"
+  const s5 = s4.replace(/'[^']+\/([\w\d]+)[.-]#\.js'/gm,
+    (match,c1) => {   // e.g. match="'/main.#.js'", c1="main"
       const hash = hashes.get(c1)
       if (!hash) throw new Error( "No hash for: "+c1 );
 
@@ -97,42 +97,5 @@ function productize(contents, hashes) {    // (String, Map<String,String>) -> St
   return errors.length == 0 ? s5
     : new Error( `ERROR(s) in filtering: ${errors.join()}` );
 }
-
-/*** EARLY WORK
-// If run from command line:
-//
-// Usage:
-//  <<
-//    $ node tools/prod-index-filter.js index.js     # picks up hashes from public/dist/*-{hash}.js
-//  <<
-//
-const index = process.argv[2];
-
-if (index) {
-  // Provide some (fake) hashes
-  //
-  const hashes = new Map([
-    ["@vue", "6ed1e3f4"],
-    ["firebase", "1a5e90d9"],
-    ["main", "586873f5"],
-    ["tslib", "42f2fcab"],
-    ["vue", "77959f83"],
-    ["vue-router", "7aecbdce"]
-  ]);
-
-  const contents = fs.readFileSync(index, 'utf8');
-
-  let out;
-  try {
-    out = productize(contents, hashes);
-  }
-  catch(err) {
-    console.error(err.message);
-    process.exit(-10);
-  }
-
-  process.stdout.write(out);
-}
-***/
 
 export { productize }

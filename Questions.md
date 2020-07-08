@@ -34,3 +34,15 @@ However, the `firebase` imports internally import from `@firebase`. This would w
 Q: Is Firebase moving to that direction (@firebase), or is the current vaneer going to remain?
 
 This is not a problem. `npm run build` outputs two different bundles, because of the two namespaces, but we solve this in chunk merging.
+
+
+## Does Vue.js 3 have a corresponding thing to `renderError`?
+
+Vue.js 2 had this this - what's a similar way with Vue 3 (beta)? Do we need this?
+
+```
+  renderError: (h, err) => {  // pour runtime problems on the screen, if we have them (may help in development);
+                              // in production we may want to pour these to central monitoring
+    return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
+```
+

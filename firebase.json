@@ -1,13 +1,9 @@
 {
   "hosting": {
-    "public": "public",
+    "//public": "public",
+    "public": "dist.vite",
     "ignore": [],
     "rewrites": [
-      {
-        "//": [ "Does this work? From -> https://stackoverflow.com/questions/38619572/set-file-mime-type-on-firebase-hosting"],
-        "source": "**.js",
-        "code": 404
-      },
       {
         "//tbd.": [
           "try this: { source: \"!**.{js|css}\" }"
@@ -18,6 +14,13 @@
         ],
         "source": "**",
         "destination": "/index.prod.html"
+      },
+      {
+        "//": [ "Does this work? From -> https://stackoverflow.com/questions/38619572/set-file-mime-type-on-firebase-hosting",
+          "Nope. Still gives HTML and likely 200."
+        ],
+        "source": "**.js",
+        "code": 404
       }
     ],
     "headers": [
