@@ -10,6 +10,7 @@
 <br />
 <br />
 
+<!-- dismantled
 **A foundation for a web app, using Firebase suite of back-end tools.**
 
 You want a web app and you want it now?
@@ -20,27 +21,55 @@ This aims to become the best place to make that happen.
 - built on 2020's technology (ES6, async/await), aiming to stay up to date
 
 Let's start! 🤾‍♀️
+-->
+
+**A modern (ES modules based) Web App template**
+
+We use Vite for development workflow, and ES modules for partitioning the code. Vue.js 3 (beta) for defining the front end. Vue Router for client side routing.
+
+No central state management - Vue.js 3 `ref`s and `reactive`s make each component perfectly capable of handling their state, and exposing it.
+
+Module-sized bundling for production.
 
 <br/>
 
+## Easy for beginners
 
-## Tools selected
+If the above distilled list of contents surpasses your current level of knowledge, don't turn back, yet. This repo is intended for professionals and beginners, alike. Its main point is to showcase how easy, and effective, making Web Applications in the 2020's is, when (only) modern tools are used.
 
-Focus on Firebase and ES6 are something this repo is about. Those will remain. Other tools may be changed.
+One learns best by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't feature a to-do list ;). It does (intend to) feature:
 
-- Vue.js 3 as the UI framework
-- [Vite](https://github.com/vitejs/vite) for ultra-fast development
-- [Vue Router](https://github.com/vuejs/vue-router-next) 4
-- [Rollup](https://rollupjs.org/guide/en/) for production builds
+- social invites
+- collaboration
+- interactive graphics
 
-Note the omissions: 
+This hopefully makes the app not only easy, but interesting as well.
 
-|instead of...|...this|
-|---|---|
-|Vue CLI|Firebase and Vite|
-|central state management|Vue.js 3 `reactive` and `ref` with component-level state|
+Below, you'll find instructions on how to get started. You are encouraged to use this template as a basis for your own special Web App, but please observe the points (later) about removing the branding.
 
-<!-- tbd. add Vue.js link when 3 officially out -->
+Let's get started! 😀
+
+
+
+
+## Firebase
+
+Forgot to mention Firebase.
+
+This repo uses the Firebase serverless framework for a lot of things. Authentication, running background functions and storing data in the cloud.
+
+Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers, or have a separate repository for "back end code". You don't need to make interface definitions (between the front and the back ends). With Firebase, the front end interacts directly with the Cloud Firestore database, and the database access rules become the de facto interface definition.
+
+<!-- tbd. picture about front/REST/backend/database (left) vs. front/database (and cloud functions) (right) -->
+
+![](.images/backend-vs-firebase.png)
+
+*Figure 1. Traditional cloud vs. Firebase approach <sub>[source](https://docs.google.com/drawings/d/15_rPDZDOCHwdL0RIX8Rg3Der1tb4mx2tMi9asQ_aegw)</sub>*
+
+You can still make REST API's if you want. But also those get defined within this same repo, as Cloud Functions.
+
+There are other similar offerings from other companies, but they are years behind, in the ease of use, based on the author's opinion.
+
 
 
 ## Requirements
@@ -61,8 +90,6 @@ From Aug 2020 onwards, Firebase requires you to sign up to the "Blaze" plan, in 
 
 You can still use this repo for local development and training with the "Spark" (free) plan, and an emulator.
 
-More details in [BILLING](./BILLING.md).
-
 
 ### Firebase project
 
@@ -70,19 +97,22 @@ You need to:
 
 - create a Firebase project at the [Firebase console](https://console.firebase.google.com/)
   - enable hosting and authentication
+  - create an app (needed for ...)
   - choose the set of authentication providers you like (Google, anonymous recommended)
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
+
+<!-- tbd. what was the app necessary for? -->
 
 >Note: You don't need to use `firebase init` - that one is for creating a repo from scratch. `firebase use --add` is all that's needed.
 
 #### Development configuration 
 
-`firebase use --add` sets `.firebaserc` and maybe some other files not in the version control. This is not enough for the front end to tie to your project. For that, we create a `.__.js` file.
+When using Firebase hosting for development, one's project configuration is offered at a certain URL (`/__/firebase/init.js`). However, we use Vite so we need to catch the config and expose it in a file.
 
->Note: This file *can* be in the version control. The contents are not secret, and they are anyways needed by the browser client, one way or the other. Once you have created the file, you can add it to version control so other people working with you don't need to recreate it.
+>Note: You can also see the project configuration in the Firebase Console. `Settings` > `Your apps`.
 
->Note: The file only matters for development. If you use Firebase hosting for deployments, it provides such data in a `__/firebase/init.js` URL (this is where we'll now pick it from).
+The values are *not* secrets. You may place the file in version control, if you want. Anyone having access to your Web App will be able to see the parameters, if they want to.
 
 We've done a script that starts Firebase hosting momentarily, and lists the settings for you.
 
@@ -99,12 +129,14 @@ Create `.__.js` with these keys:
 
 ```
 const __ = {
-  apiKey: ...,
-  projectId: ...,
+  apiKey: '...',
+  projectId: '...',
   authDomain: '...'
 }
 export { __ }
 ```
+
+If you use Firebase hosting for deployments (default), this file only matters for the development work.
 
 Now we're finally ready to get started...!
 
@@ -117,7 +149,7 @@ Fetch dependencies:
 $ npm install
 ```
 
-<!-- disabled (but keep)
+<!-- hidden because noisy and not relevant for most
 >macOS Note: If you get `gyp: No Xcode or CLT version detected!` error:
 >
 >   ```
@@ -126,9 +158,8 @@ $ npm install
 >   ```
 -->
 
-<!--
 ### Running tests
--->
+
 There are currently no UI side tests for the project. 😢
 
 <!-- tbd. Once there are:
@@ -137,6 +168,8 @@ $ npm test
 ...  
 ```
 -->
+
+### Dev mode
 
 ```
 $ npm run dev
@@ -147,16 +180,14 @@ Dev server running at:
 ...
 ```
 
-This serves the UI locally, reacting to source code changes. Back end is your Firebase project in the cloud.
+This serves the UI locally, against your Firebase project in the cloud. You can edit the UI sources and changes should be reflected in the application. This is called Hot Module Replacement.
 
-Try it out at [http://localhost:3000](http://localhost:3000). Sign in.
-
-The code is served by [Vite](https://github.com/vuejs/vite) (GitHub). It renders changes to your sources on-the-fly (this is called Hot Module Replacement), speeding up development and experimentation. It's great! 
+Try it out at [http://localhost:3000](http://localhost:3000). Can you sign in?
 
 Try making some changes and see that they are reflected in the browser.
 
 
-## Development workflow
+## Two development workflows
 
 The above command started an "online" development workflow. You can also start it with `npm run dev:online`. In it, changes to the front-end are reflected in the browser but back-end features (database, Cloud Functions) are run online.
 
@@ -171,75 +202,113 @@ When working on Firestore security rules, or Cloud Functions, you are better off
 
 - faster change cycle (no deployments)
 - no costs
-- from Aug 2020 onwards, only possible mode for Spark plan users
+- from Aug 2020 onwards, only possible mode for users on Spark plan (free)
 
-Local mode means that even with back-end features, you only start deploying working stuff. This changes the role of the cloud project to be more of a staging environment than a development hot-pot.
+With local mode, you can develop back-end features locally, and only deploy working stuff. This changes the role of the cloud project to be more of a staging environment than a development hot-pot. This is good.
 
 Especially important for working in a team. Developers can now separately develop the UI (using either dev mode) or the back-end features (local mode) and commit their changes once they are already tested.
 
-( We'll come back to this with production tier, later. )
+We'll come back to deployments with the production tier, later. 
+
+Let's start the app in local mode:
 
 ```
 $ npm run dev:local
 
 > groundlevel-es6-firebase@0.0.0 dev:local /Users/asko/Git/GroundLevel-es6-firebase-web
-> start-server-and-test "firebase emulators:start --only functions,firestore" 4000 "node ./local/init.js && npx vite --port 3001"
+> concurrently -n emul,dev-local "firebase emulators:start --only functions,firestore" "npm run _dev_local_2"
 
-1: starting server using command "firebase emulators:start --only functions,firestore"
-and when url "[ 'http://localhost:4000' ]" is responding with HTTP status code 200
-running tests using command "node ./local/init.js && npx vite --port 3001"
+[dev-local] 
+[dev-local] > groundlevel-es6-firebase@0.0.0 _dev_local_2 /Users/asko/Git/GroundLevel-es6-firebase-web
+[dev-local] > wait-on http://localhost:4000 && node ./local/init.js && npx vite --port 3001 --mode dev_local
+[dev-local] 
+[emul] i  emulators: Starting emulators: functions, firestore
+[emul] ⚠  Your requested "node" version "10" doesn't match your global version "14"
+[emul] i  firestore: Firestore Emulator logging to firestore-debug.log
+[emul] i  ui: Emulator UI logging to ui-debug.log
+[emul] i  functions: Watching "/Users/asko/Git/GroundLevel-es6-firebase-web/functions" for Cloud Functions...
+[emul] ✔  functions[logs_v1]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs_v1).
+[emul] 
+[emul] ┌───────────────────────────────────────────────────────────────────────┐
+[emul] │ ✔  All emulators ready! View status and logs at http://localhost:4000 │
+[emul] └───────────────────────────────────────────────────────────────────────┘
+[emul] 
+[emul] ┌───────────┬────────────────┬─────────────────────────────────┐
+[emul] │ Emulator  │ Host:Port      │ View in Emulator UI             │
+[emul] ├───────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Functions │ localhost:5001 │ http://localhost:4000/functions │
+[emul] ├───────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Firestore │ localhost:8080 │ http://localhost:4000/firestore │
+[emul] └───────────┴────────────────┴─────────────────────────────────┘
+[emul]   Other reserved ports: 4400, 4500
+[emul] 
+[emul] Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+[emul]  
+```
 
-i  emulators: Starting emulators: functions, firestore
-⚠  emulators: It seems that you are running multiple instances of the emulator suite for project vue-rollup-example. This may result in unexpected behavior.
-⚠  Your requested "node" version "10" doesn't match your global version "14"
-i  firestore: Firestore Emulator logging to firestore-debug.log
-i  ui: Emulator UI logging to ui-debug.log
-i  functions: Watching "/Users/asko/Git/GroundLevel-es6-firebase-web/functions" for Cloud Functions...
-✔  functions[logs_v1]: http function initialized (http://localhost:5001/vue-rollup-example/europe-west3/logs_v1).
+The emulators are started in the background. A `wait-on` module waits for them to be up and then launches a script that primes the emulated Firestore instance with data:
 
-┌───────────────────────────────────────────────────────────────────────┐
-│ ✔  All emulators ready! View status and logs at http://localhost:4000 │
-└───────────────────────────────────────────────────────────────────────┘
+```
+[dev-local] Priming...
+[dev-local] Primed :)
+```
 
-┌───────────┬────────────────┬─────────────────────────────────┐
-│ Emulator  │ Host:Port      │ View in Emulator UI             │
-├───────────┼────────────────┼─────────────────────────────────┤
-│ Functions │ localhost:5001 │ http://localhost:4000/functions │
-├───────────┼────────────────┼─────────────────────────────────┤
-│ Firestore │ localhost:8080 │ http://localhost:4000/firestore │
-└───────────┴────────────────┴─────────────────────────────────┘
-  Other reserved ports: 4400, 4500
+The command then proceeds to serve the files, using Vite:
 
-Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
- 
-Priming...
-Primed :)
-vite v1.0.0-beta.1
-[vite] Optimizable dependencies detected:
-firebase, vue
-
-  Dev server running at:
-  > Local:    http://localhost:3001/
-  > Network:  http://192.168.1.62:3001/
-  > Network:  http://169.254.122.162:3001/
-
+```
+[dev-local] vite v1.0.0-beta.11
+[dev-local] 
+[dev-local]   Dev server running at:
+[dev-local]   > Local:    http://localhost:3001/
+[dev-local]   > Network:  http://192.168.1.62:3001/
+[dev-local]   > Network:  http://169.254.160.107:3001/
+[dev-local] 
 ...
 ```
 
-When loading, the Firestore data is primed from `local/data.js`. You can edit this data to your liking. It is by design that the emulator suite does not persist any data changes. When you Ctrl-C the process, the changes to the data are lost. (This is also a feature, to start afresh, do exactly that).
+You can now access the app in [localhost:3001](localhost:3001). 
 
-With local mode, authentication still happens online so you do need to have the Firebase project set up.
+>Note: We intentionally keep the ports separate for the two dev modes. You can launch them simultaneously, if you want.
 
+WARNING: Changes you make while in "local" mode are LOST WHEN YOU STOP the server. This is intentional. It's a nice way of starting again, afresh.
+
+The primed data is located in `local/data.js`. You should customize this data to your/your team's liking. At the least update the user ids in the beginning:
+
+```
+// Change the user id's to match your own. Check them from Firestore console.
+//
+const abc = "7wo7MczY0mStZXHQIKnKMuh1V3Y2"
+const def = "def"
+```
+
+Replace the users with some people from your team, and you should be able to see the sample data in the UI.
+
+To pick up your Firebase user id, either:
+
+- use the "online" mode first, create some data and find the user id's in Firebase Console > `Database`
+
+   >![](.images/uid-from-cloud.png)
+  
+- sign in in the browser, open the developer console and check `firebase.auth().currentUser.uid`.
+
+   ![](.images/uid-from-browser.png)
+
+Then insert such a UID in `local/data.js`, restart the server and you should have some data to play with.
+
+
+<!-- stashed; too much
 >Note: Firebase has mentioned 24-Jun-20 (Firebase live's comments) that they aim to bring also auth into the local emulation. This should allow fully offline development! 🎉
+-->
 
+#### When to develop in local mode?
 
-### When to use local mode?
+As mentioned above, for just developing the UI, it may be nice to work against real (changing) data. It just feels more normal. 
 
-We provide you both. As mentioned above, for just developing the UI, it may be nice to work against real (well, staging) data. For back-end work, local mode rocks!
+If you intend to test things like removal of data, local mode may be better, since changes are not permanent.
+
+For back-end work, local mode rocks!
 
 You can also run these modes simultaneously, in different terminals. By default, online uses port 3000 and local port 3001.
-
->Note: Differentiating the modes in the UI is currently (Jun 2020) done by the port. This is not ideal, and may change at some point. Essentially, we have two dev modes whereas Vite assumes there's always just one.
 
 
 <!-- tbd.
@@ -257,7 +326,8 @@ $ npm run lint
 
 This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
 
-### Testing Security Rules
+
+## Security Rules
 
 If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
 
@@ -270,32 +340,14 @@ $ npm install
 $ npm test
 ```
 
-Please see its [README](rules-test/README.md) file.
+Please see its own [README](rules-test/README.md) file.
 
->Plan: We may turn into Docker in the future, to better integrate testing security rules as part of the repo, itself (no sub-project, no second `node_modules´), yet not bring the complexity of the tools to the main project.
+>Plan: We may turn to Docker in the future, to better integrate testing security rules as part of the repo, itself (no sub-project, no second `node_modules`), yet not bring the complexity of the tools to the main project. `package.json` should carry only the dependencies the main project needs.
 
-
-## Adopting into Your App!
-
-<!-- Editor's note
-This text suits pretty badly to where it currently is. Should we move it to "Branding" at the end???  (this is a dinosaur, and the doc developed around it)
--->
-
-This is where You can code.
-
-We presume you have a suitable IDE, and know web programming (JavaScript, HTML, CSS). If you are new to programming, just study the existing code and tinker with it.
-
-Three steps to remove GroundLevel branding:
-
-1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
-2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
-3. Visit the `src/config.js` and suit it to your project (title etc.).
-
-You may mention using this repo as your starting point, but are not obliged to do so.
 
 ## Production workflow
 
-For production builds, we use Rollup. You find the configuration in [rollup.config.js](rollup.config.js).
+<strike>For production builds, we use Rollup. You find the configuration in [rollup.config.js](rollup.config.js).</strike>
 
 >Reasons not to use Vite for production:
 > 
@@ -424,6 +476,16 @@ We need to develop / think of ways to allow a derivative of this repo to gain up
 
 If you keep the Git history, you should be able to `git pull` changes, but how messy that becomes in practise remains to be seen.
 
+
+## Removing branding
+
+Three steps to remove GroundLevel branding:
+
+1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
+2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
+3. Visit the `src/config.js` and suit it to your project (title etc.).
+
+You may mention using this repo as your starting point, but are not obliged to do so.
 
 
 ## Help welcome!
