@@ -1,7 +1,20 @@
+//import replace from "@rollup/plugin-replace";
+
 module.exports = {
   alias: {
-    // does not work. #later
-    //'/@components': path.resolve(__dirname,'.')    // aim: '@' or '/@/' to point to source root
+    // key "must start and end with a slash" (Vite)
+    //'/@/': path.resolve(__dirname, 'src')
   },
-  minify: false,
+  minify: false
+
+  /* tbd. try out rollup replace options, some day
+  rollupOutputOptions: {
+    plugins: [
+      // Does this affect the contents of imported modules, as well?
+      replace({
+        'abc': '"ABC"',
+        'import * as firebase from': 'import firebase from'
+      })
+    ]
+  }*/
 }

@@ -32,6 +32,30 @@
 <script>
   assert(firebase && firebase.auth);
 
+  /* HACK *_/
+  // FirebaseUI issue #674 -> https://github.com/firebase/firebaseui-web/issues/674
+  //
+  // Let's see if we can work around it (we don't even use the dialog feature of FirebaseUI).
+  //
+  console.debug("A");
+  import dialogPolyfill from 'dialog-polyfill'
+  assert(dialogPolyfill);
+  console.debug("B", dialogPolyfill);
+  window.dialogPolyfill = dialogPolyfill;   // FirebaseUI finds it here (we checked its code..)
+  debugger;
+
+  // Then, load 'firebaseui' lazily, so the above code happened first.
+  //
+  const firebaseUiProm = import('firebaseui');
+  /_* !else */
+
+  import * as firebaseui from 'firebaseui'    // this should work, once FirebaseUI #674 is fixed
+
+  //import * as firebaseui from 'firebaseui/dist/firebaseui.js'    // load CommonJS, until FirebaseUI #674 is fixed
+  //console.debug("D", firebaseui.auth);
+  //assert(firebaseui.auth);
+  /* !HACK */
+
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
 

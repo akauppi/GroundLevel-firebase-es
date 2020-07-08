@@ -22,15 +22,21 @@
     "__": "firebase emulators:exec --only hosting \"node ./tools/__.js\"",
     "preprod:build": "npm run clean",
     "preprod:serve": "npm run prod:build",
-    "_vite:build": "vite build --outDir dist.vite"
+    "_vite:build": "vite build --outDir dist.vite",
+    "preinstall": "npx npm-force-resolutions"
   },
   "//scripts": {
     "__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\""
   },
   "dependencies": {
+    "dialog-polyfill": "^0.5.1",
     "firebase": "^7.15.5",
+    "firebaseui": "^4.5.1",
     "vue": "^3.0.0-beta.19",
     "vue-router": "^4.0.0-beta.2"
+  },
+  "resolutions": {
+    "dialog-polyfill": "0.5.1"
   },
   "//dependencies": {
     "bootstrap": "^4.5.0",
