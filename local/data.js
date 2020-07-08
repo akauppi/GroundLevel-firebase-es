@@ -18,7 +18,7 @@ const def = "def"
 * WARNING: Do NOT use 'Date.now()' or 'Date.parse()' - they return a number instead of a 'Date' instance!
 */
 const docs = {
-  // Project 1 - active project
+  // Project 1 - active
   "/projects/1": {
     title: "Jolly Jumper",
     created: new Date('01 Jan 1880 00:00:00 GMT'),

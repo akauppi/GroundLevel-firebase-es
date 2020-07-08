@@ -382,7 +382,21 @@ First aid: specify the correct content type in `firebase.json`:
 Firebase tools v. 8.4.3.
 
 - [ ] Report to Firebase
- 
+
+
+## Emulator should behave exactly as the online
+
+Currently (Jul 2020, Firebase tools 8.4.3) the emulator chokes on something that is okay for the online implementation.
+
+In browser console:
+
+```
+database.ts:2096 Uncaught Error in onSnapshot: FirebaseError: 
+Property resource is undefined on object. for 'list' @ L19
+```
+
+
+
 
 ## References
 
