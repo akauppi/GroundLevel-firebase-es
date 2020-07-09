@@ -5,13 +5,14 @@
 -->
 <template>
   <div>
+    <br /><br />
     🐣🐥
   </div>
 </template>
 
 <style scoped>
   div {
-    font-size: 20px;
+    font-size: 50px;
   }
 </style>
 

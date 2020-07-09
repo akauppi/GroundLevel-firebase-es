@@ -46,3 +46,24 @@ Vue.js 2 had this this - what's a similar way with Vue 3 (beta)? Do we need this
     return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
 ```
 
+## Vue.js 3: is the renderer optimized for changing object but fields remaining the same?
+
+`project` is a `ref({})`. 
+
+When we get database updates, normally only one of the fields changes, but we replace them all:
+
+```
+project.value = {...d};
+```
+
+This means, Vue.js gets a new object, with most fields the same as in the one it carried before.
+
+Should it be done in a different way?
+
+
+## JavaScript / Vue.js 3: is there a way to know when a `ref` is no longer listened to?
+
+- [ ] Make a case of this on StackOverflow, one day?
+
+If there is, we can take away the explicit `.unsub()`.
+

@@ -12,12 +12,16 @@ module.exports = {
 
   parserOptions: {
     sourceType: 'module',
-    ecmaVersion: 2018
+    //ecmaVersion: 2018,  // 9 (we use: object spread)
+    ecmaVersion: 2020   // disables the dynamic import warning/error
   },
 
   rules: {
     // Allow comments in Vue component HTML
     'vue/comment-directive': 0,
+
+    // tbd. check 'npm lint' output and tune/clean these
+    //    - use 'warn'
 
     // see -> https://github.com/vuejs/eslint-plugin-vue/blob/master/docs/rules/mustache-interpolation-spacing.md
     //

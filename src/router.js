@@ -61,23 +61,11 @@ const routes = [
 
   rLocked('/projects/:id', Project, { props: true /*, name: 'projects'*/ }),    // '/projects/<project-id>'
 
-  // Dynamic loading *should* be possible but depends on Vite and Rollup.
+  // Note: Not really important for us, just showing off dynamic component import.
   //
-  // Vite ('npm run dev') gives a runtime error:
-  //  <<
-  //    Unexpected error when starting the router:
-  //      Error: Couldn't resolve component "default" for the following record with path "/easter"
-  //        at vue-router.esm-bundler.js:1742
-  //  <<
-  //
-  // Rollup:
-  //  <<
-  //    ...
-  //  <<
-  //
-  rOpen('/easter', async () => {    // we just need to return a Promise to a component (vue-router's side)
-    await import('./pages/_EasterEGG.vue')   // keep knocking, it might work one day
-  }),
+  rOpen( '/easter',
+() => import('./pages/_EasterEGG.vue')    // tbd. How to make IDE (WebStorm) not red-underline 'import'?
+  ),
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.

@@ -13,9 +13,11 @@
 
     <h2>Members:</h2>
     <ul>
-      <!-- Note: Does the 'userInfo[uid].name' work reactively, even when 'userInfo' doesn't yet have the info but will? #vuejs? #vuejs
+      <!-- Note: Does the 'userInfo[uid].name' work reactively, even when 'userInfo' doesn't yet have the info but will? #vuejs
       -->
-      <li v-for="uid in [...project.authors, ...project.collaborators]" :key="uid">{{ uid in userInfo ? userInfo[uid].name : "💫" }} {{ uid in project.authors ? "is author" : "" }}</li>
+      <li v-for="uid in [...project.authors, ...project.collaborators]" :key="uid">
+        {{ userInfo[uid] ? userInfo[uid].name : "💫" }} {{ uid in project.authors ? "is author" : "" }}
+      </li>
     </ul>
   </template>
   <template v-else>
@@ -33,37 +35,39 @@
 </style>
 
 <script>
-  import { onBeforeUnmount, ref, toRefs } from 'vue';
+  import { onUnmounted, ref, toRefs } from 'vue';
 
-  import { projectSub } from './projectSub.js';
+  import { projectSub } from '../../refs/project.js';
 
-  // Note: We don't need 'id' to be reactive (won't be changed while on the page) <-- is this correct?
+  const userInfoFAKE = {
+    '7wo7MczY0mStZXHQIKnKMuh1V3Y2': {
+      name: "asko"
+    }
+  }
+
+  // Note: We don't need 'id' to be reactive (won't be changed while on the page)
   //
   function setup({ id }) {
-    // Vue.js 3 note: refs/reactive within a 'setup' function are cleaned up by the system, but is there a way
-    //    for us to tap to that? (i.e. not needing 'unsubProject')
+    console.debug("Entering project page: subscribing to project:", id);
 
-    const [project, unsubProject] = projectSub(id);
+    const [project, unsub] = projectSub(id);
 
-    onBeforeUnmount( () => {
-      console.debug("Leaving project page: unmounting Firebase subscriptions")
-      unsubProject();
+    onUnmounted( () => {
+      console.debug("Leaving project page: unmounting Firebase subscriptions");
+      unsub();
     });
 
     return {
-      project //,
+      project,
       //symbols,
-      //userInfo
+      userInfo: userInfoFAKE
     }
   }
 
   export default {
     name: 'Project',      // Vue note: names help in debugging
     props: {
-      id: {
-        type: String,
-        required: true
-      }
+      id: { type: String, required: true }
     },
     setup
   }

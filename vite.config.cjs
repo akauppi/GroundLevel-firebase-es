@@ -1,7 +1,12 @@
+const path = require('path');
+
 module.exports = {
   alias: {
-    // does not work. #later
-    //'/@components': path.resolve(__dirname,'.')    // aim: '@' or '/@/' to point to source root
+    // Note: path anchors must "begin and end with a slash" (Vite)
+    // BUG #19: It still doesn't work. How to use this??
+    '/@/': path.resolve(__dirname,'src'),
+    '/@refs/': path.resolve(__dirname,'src/refs')
+    //...
   },
   minify: false,
 }

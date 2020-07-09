@@ -32,6 +32,9 @@
 <script>
   assert(firebase && firebase.auth);
 
+  // tbd. Import FirebaseUI here, locally, one day. See -> https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/18
+  //import * as firebaseui from 'firebaseui'
+
   import { onMounted } from 'vue';
   import { allowAnonymousAuth } from '../config.js';
 
@@ -55,36 +58,28 @@
       autoUpgradeAnonymousUsers: allowAnonymousAuth,
 
       callbacks: {
-        signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+        signInSuccessWithAuthResult(authResult, redirectUrl) {
           // authResult: {
           //    credential: { ..., token: string, ... }
           //    operationType: "signIn"
           //    user: { displayName: string, ... }    // normal Firebase user object
           //    additionalUserInfo: { isNewUser: boolean, profile: { name: ..., granted_scopes: string }
           // }
-          //
           // redirectUrl: undefined
-          //
-          // User successfully signed in.
-          //
-          // Return type determines whether we continue the redirect automatically or whether we leave that to the developer.
 
+          // User successfully signed in
           console.log(toPath);
 
-          // Q: How to move to 'toPath', with Vue Router 4.0?
-          /***
           router.replace(toPath).catch( reason => {
             console.error("Redirect failed!", reason);
           });
           return false;   // false: Firebase UI should not redirect
-          ***/
-          return true;    // get us there, with the URL :/ #bummer!!!!!!!!
         },
 
         // Anonymous user upgrade: 'signInFailure' callback must be provided to handle merge conflicts which occur when
         // an existing credential is linked to an anonymous user.
         //
-        signInFailure: (error) => {
+        signInFailure(error) {
           if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
             return Promise.resolve();
           }
@@ -131,6 +126,10 @@
     return cfg;
   }
 
+  // Important this is in the root of the module, so 'AuthUI' gets initialized only once (instead of per page visit).
+  //
+  const ui = new firebaseui.auth.AuthUI( firebase.auth() );
+
   // Note: Getting 'routerProm' as a property (instead of importing) is vital for avoiding a cyclic dependency
   //    between 'router.js' and this module. While those are not illegal in ES, they do cause (unnecessary) warnings
   //    in Rollup, and are generally a source of unnecessary complexity.
@@ -148,8 +147,8 @@
         const toPath = final || '/';
         console.log("Once signed in, we'd 🛵 to: " + toPath);
 
-        const ui = new firebaseui.auth.AuthUI( firebase.auth() );
         ui.start("#firebaseui-container", uiConfig(await routerProm, toPath));
+          // seems to be okay that we do '.start' multiple times (re-visiting the page)
       })
       return {}   // nothing to expose
     }
