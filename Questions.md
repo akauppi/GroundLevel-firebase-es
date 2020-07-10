@@ -67,3 +67,15 @@ Should it be done in a different way?
 
 If there is, we can take away the explicit `.unsub()`.
 
+
+## Vue.js 3: do I need `:key` when iterating an object?
+
+```
+<li v-for="(m,uid) in members" :key="uid">
+```
+
+Can the `:key` just be left out (but the key still picked):
+
+```
+<li v-for="m in members">
+```

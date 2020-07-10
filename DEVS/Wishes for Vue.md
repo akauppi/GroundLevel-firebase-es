@@ -10,24 +10,38 @@ Your fan. 🌺🌺
 
 ---
 
-## Having an async way to initiate 'reactive' (and 'ref') so that it's never at an uninitialized value
+## Having an async way to initiate `reactive` (and `ref`) so that it's never at an uninitialized value
 
-If one tracks an async value, there are no meaningful initial values until the first values arrive.
+If one tracks an async value, there should be a normal-feeling way to mark "we're still on it". This is normally the realm of Promises, but in this case that may be overkill (makes downstream code harder).
 
-However, the `reactive`/`ref` coding seems to demand that we place some initial value. Ideally:
+### `ref`
 
-- one could initialize `reactive`/`ref` without a value
-- reading such would wait until a value is provided
-
-This would turn every `.value` and get into a Promise operation. Maybe that's not appropriate. 
-
-In that case, a helper for easy creation of an explicit Promise could do the job:
+For a `ref`, one can already:
 
 ```
-const prom = await reactive().setOnce();    // promise succeeds when the value is first time set
+const r = ref();		// undefined
 ```
 
-Maybe people knowing Vue.js 3 deeper can come up with better solutions?
+### `reactive`
+
+For `reactive`, default value is `{}`, not `undefined`. The problem is that checking for an empty object is a bit clumsy in JavaScript, and one "needs to know" what's going on. `undefined` is the normal way to show something's not been initialized, yet.
+
+```
+const r = reactive.undefined();
+```
+
+This could create a normal `reactive`, except one that provides `undefined` as the value if it's not been initialized, yet.
+
+**Current ways around**
+
+The author doesn't know of a way to make `reactive` evaluate to anything but an object, or Map. This leaves:
+
+- using the empty object `{}` meaning "undefined"
+- using a special field `{ ready: false }` to show the value is not ready, yet
+
+One can provide a Promise of a `reactive`. This could be ideal. Let's see how clumsy using such would be...
+
+tbd.
 
 
 ## Tapping to end-of-life of `ref`/`reactive`?
@@ -43,5 +57,21 @@ This is within a `setup` block so the `project` will be ended, automatically. Ca
 If so, it could unsubscribe from Firestore whereas now the upper level needs to explicitly ask it to do that (in `onBeforeUnmount`).
 
 
+## `computed` with an async payload
 
+There is [a plugin](https://github.com/foxbenjaminfox/vue-async-computed) for this for Vue.js 2.
+
+Would be nice to have native support, so that this just works:
+
+```
+const members = computed(async () => {
+
+  // fetches info about users, may take time
+  return ...;
+}	  
+```
+
+The `members` reactive value should change, once the Promise fulfills.
+
+This can be done using `.watch`, but that feels slightly wrong.
 

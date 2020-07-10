@@ -38,17 +38,14 @@ function symbolsSub(projectId) {    // (string) => [reactive of { <symbol-id>: {
   //    - 'ref' generally felt lighter and since our use would be in Vue templates, having to type '.value' is not an issue.
   //    - Vue.js Composition API docs recommends "reactive whenever possible" -> https://composition-api.vuejs.org/#ref-vs-reactive
   //      Having the wrapping object ('symbols') around is not a problem.
+  //    - the same recommends 'reactive' when there's an object with many fields, and that's what we have.
   //
-  //    However, how does one enumerate the keys of a 'reactive'?
-  //
-  const symbols = reactive( new Map() );  // REACTIVE
-  //const symbols = ref( new Map() );  // REF
+  const symbols = reactive( new Map() );
 
   function handleDoc(doc) {
     const [id, data] = [doc.id, doc.exists ? doc.data() : null];
 
     console.debug("Handling symbols doc:", doc);
-    console.debug("claimed", data.claimed);
 
     if (data) {
       console
