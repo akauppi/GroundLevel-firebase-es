@@ -17,7 +17,7 @@ service cloud.firestore {
       //       changes, admin SDK changes, or data written by earlier generations of the security rules.
       //
       allow read: if (isAuthor() || isCollaborator() && !isRemoved())
-        && validProject()       // optional: enable if you want to guard against bad data instead of letting client cope with it
+        //&& validProject()       // optional: enable if you want to guard against bad data instead of letting client cope with it
 
       // Creation
       //    - the creating user must list themselves as an author

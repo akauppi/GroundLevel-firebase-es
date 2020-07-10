@@ -1,5 +1,5 @@
 /*
-* src/refs/symbols.js
+* src/refs/projectSymbols.js
 *
 * Watch symbols of a certain project.
 *
