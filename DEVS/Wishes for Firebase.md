@@ -21,7 +21,9 @@ This is mentioned widely on the Internet, but it took me a while before it reall
 
 I cannot use the same `validSymbol()` for both reads and writes, in the simulator.
 
-It seems the Simulator tries to say that it has `request` but there is no `request.resource`. The local emulator always has this - even for gets. These two seem to be either from different code base, or from different times.
+It seems the Simulator tries to say that it has `request` but there is no `request.resource`. The local emulator always has this (*) - even for gets. These two seem to be either from different code base, or from different times.
+
+>(*) Jul 10th, local emulator is (`firebase` 8.4.3) is giving "Property resource is undefined on object. for 'list' @ L19" if `validProject` is enabled for reads. This may have changed, but consistency across all: cloud server, local emulation, cloud simulation would be HIGHLY APPRECIATED!
 
 They are both crucial for development - complementing each other. But if their logic conflicts, it just adds to the pain of Firestore Security Rules development...
 
@@ -29,8 +31,8 @@ Surely something that deserves to get fixed.
 
 i.e. Target:
 
-- there should not need to be any special coding in Security Rules, for having them run on the online Simulator
-- having contrdictory evaluation of rules should always be treated as a bug, by Firebase personnel
+- there should not need to be any special coding in Security Rules, for having them run on the online Simulator (or the local emulator)
+- having contradictory evaluation of rules should always be treated as a bug, by Firebase personnel
 
 ### Online Simulator syntax highlighting of `/* ... */`
 
@@ -405,6 +407,18 @@ Port 3000 is in use, trying another one...
 ```
 
 It would be nice to have a flag/config setting to disallow changing ports. It can even be the port entry itself, with "!3000" meaning we mean business - don't allow any other than 3000, ok?!
+
+
+## Firestore JavaScript client could provide `Date`s?
+
+Timestamps in the Firestore data are provided as: `{ seconds: int, nanos: int }`.
+
+There is a native JavaScript presentation for dates, `Date`. It would make sense that the client provides such data, automatically, as `Date`s (in `.onSnapshot` and what not). Now the application code must convert individual fields.
+
+Two ways to make such a change:
+
+1. Derive from `Date` (or make a class that behaves the same), and have it also provide the `.seconds` and `.nanos` for backwards compatibility.
+2. Have a global switch somewhere (initialization of the `.firebase.firestore`?), so application programmers can select the "old" or the "native" way.
 
 
 ## References
