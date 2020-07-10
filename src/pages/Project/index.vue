@@ -13,8 +13,9 @@
 
     <h2>Members:</h2>
     <ul v-if="userInfo">
-      <li v-for="uid in [...project.authors, ...project.collaborators]" :key="uid">
-        {{ userInfo[uid] ? userInfo[uid].name : "💫" }} {{ uid in project.authors ? "is author" : "" }}
+      <li v-for="m in members" :key="m._id">
+        {{ m.name }} {{ m.isAuthor ? "is author" : "" }}
+        <img src="{{ m.photoURL }}"/>
       </li>
     </ul>
 
@@ -38,7 +39,7 @@
 </style>
 
 <script>
-  import { onUnmounted, ref, computed, toRaw, watch } from 'vue';
+  import { onUnmounted, ref, computed } from 'vue';
 
   import { projectSub } from '../../refs/project.js';
   import { symbolsSub } from '../../refs/projectSymbols.js';
@@ -53,6 +54,25 @@
     console.debug("Entering project page: ", id);
     const [project, unsub1] = projectSub(id);
     const [symbols, unsub2] = symbolsSub(id);
+
+    // Track members of the project
+    //  - reflect new/left members
+    //  - fetch more information about the members (changes to this info are not real time, since they change seldom and are not critical)
+    //  - some added fields ('.isAuthor'), adapting the database model (UI does not need to know of the '.authors', '.collaborators').
+    //
+    const members = computed(() => {  // () => Array of { _id: string, isAuthor: boolean, ..userInfoC-fields }
+
+      const arr = [...project.authors.map(uid => ({_id: uid, isAuthor: true})),
+                   ...project.collaborators.map(uid => ({_id: uid, isAuthor: false}))
+      ];
+
+      // Complete with information from the 'userInfo' collection (cached).
+      //
+      return arr.map( o => {
+        const o2 = userInfoCached(o._id);   // { ..userInfoC-fields }
+        return {...o2, ...o};
+      });
+    });
 
     const symbolsSortedByLayer = computed(() => {   // () => [ {...symbolsD, _id: index } ]   // sorted by layer
 
