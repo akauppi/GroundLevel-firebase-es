@@ -6,10 +6,9 @@
 
 /*
 * Firestore client provides timestamps as '{ seconds: integer, nanos: 0 }'. Let's convert those to JavaScript 'Date'.
-*
-* TO BE DEPRACATED, in favor of field by field 'convertDateValue'.
 */
-function convertDateFields(obj, ...fields ) {
+// DEPRECATED: use 'convertDataValue' instead (field by field)
+function convertDateFieldsDEPRECATED(obj, ...fields ) {
   const o2 = {};   // collect date fields here
 
   fields.forEach( (key) => {
@@ -29,12 +28,11 @@ function convertDateFields(obj, ...fields ) {
 *
 * Like 'convertDateFields' but for a single value. THIS IS NEWER.
 */
-function convertDateValue(o) {    // { seconds: integer, nanos: 0 } => Date
-
+function convertDateValue(o) {    // { seconds: integer, nanoseconds: 0 } => Date
   console.debug("Firestore date being converted:", o);
   assert( typeof o.seconds == 'number' );
 
-  return new Date(o.seconds*1000 + o.nanos/1000000 /*ms since epoch*/);
+  return new Date(o.seconds*1000 + o.nanoseconds/1000000 /*ms since epoch*/);
 }
 
 /*
@@ -45,7 +43,7 @@ function unshot(f) {    // (doc => ()) => (snapshot => ())
 }
 
 export {
-  convertDateFields,
+  convertDateFieldsDEPRECATED,
   convertDateValue,
   unshot
 }

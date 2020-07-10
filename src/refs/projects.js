@@ -9,7 +9,7 @@ const db = firebase.firestore();
 
 import { reactive, watchEffect } from 'vue';
 import { user } from '../refs/user.js';
-import { convertDateFields, unshot } from "../firebase/utils";
+import { convertDateFieldsDEPRECATED, unshot } from "../firebase/utils";
 
 // The same reactive table is for all users. We just wipe it like a restaurant table. 🍽
 //
@@ -25,7 +25,7 @@ function handleDoc(doc) {
   // Projects don't get directly deleted (unless someone does it manually); they get a '.removed' field added
   // to them (or removed, to resurrect).
   //
-  const tmp = doc.exists ? convertDateFields(doc.data(), "created") : null;  // with optional '.removed'
+  const tmp = doc.exists ? convertDateFieldsDEPRECATED(doc.data(), "created") : null;  // with optional '.removed'
 
   if (tmp && !('removed' in tmp)) {
     projects.set(id, tmp);

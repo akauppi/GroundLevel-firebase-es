@@ -3,6 +3,8 @@
 *   - Configuring ESLint
 *     -> https://eslint.org/docs/user-guide/configuring
 */
+const [off,warn,error] = ['off','warn','error'];
+
 module.exports = {
   extends: ['plugin:vue/vue3-recommended'],
 
@@ -18,10 +20,10 @@ module.exports = {
 
   rules: {
     // Allow comments in Vue component HTML
-    'vue/comment-directive': 0,
+    'vue/comment-directive': off,
 
     // tbd. check 'npm lint' output and tune/clean these
-    //    - use 'warn'
+    //    - use 'off'/'warn'/'error' as the values
 
     // see -> https://github.com/vuejs/eslint-plugin-vue/blob/master/docs/rules/mustache-interpolation-spacing.md
     //

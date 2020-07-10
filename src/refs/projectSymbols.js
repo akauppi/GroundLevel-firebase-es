@@ -8,7 +8,7 @@
 */
 assert(firebase.firestore);
 
-import { reactive } from 'vue';
+import { reactive, shallowRef, shallowReactive } from 'vue';
 import { convertDateValue, unshot } from "../firebase/utils";
 
 const db = firebase.firestore();
@@ -34,18 +34,28 @@ function symbolsSub(projectId) {    // (string) => [reactive of { <symbol-id>: {
 
   const symbolsC = db.collection(`projects/${projectId}/symbols`);
 
-  // Note: We likely only need one level of reactivity (depends on the application code)
+  // Note: Thought really hard whether this should be 'ref' or 'reactive'.
+  //    - 'ref' generally felt lighter and since our use would be in Vue templates, having to type '.value' is not an issue.
+  //    - Vue.js Composition API docs recommends "reactive whenever possible" -> https://composition-api.vuejs.org/#ref-vs-reactive
+  //      Having the wrapping object ('symbols') around is not a problem.
   //
-  // tbd. limit the reactivity to be shallow (for performance?)
+  //    However, how does one enumerate the keys of a 'reactive'?
   //
-  const symbols = reactive( new Map() );
+  const symbols = reactive( new Map() );  // REACTIVE
+  //const symbols = ref( new Map() );  // REF
 
   function handleDoc(doc) {
     const [id, data] = [doc.id, doc.exists ? doc.data() : null];
 
+    console.debug("Handling symbols doc:", doc);
+    console.debug("claimed", data.claimed);
+
     if (data) {
-      // Note: We could just pass 'data' but it's seen useful to passport check the schema in the code (adding more
-      //      fields in the data does not automatically expose them to the application).
+      console
+      // Note: We could just pass 'data' but it's seen useful to passport check the schema in the code.
+      //    Also, we can:
+      //      - control the depth of reactivity ('shallowReactive')
+      //      - transform time stamps to 'Date' (Firestore JavaScript client must have a good excuse, why it is not doing it!!)
       //
       symbols.set(id, {
         layer: data.layer,
@@ -55,8 +65,12 @@ function symbolsSub(projectId) {    // (string) => [reactive of { <symbol-id>: {
         center: data.center,    // { x: number, y: number }
         claimed: data.claimed ? { ...data.claimed, at: convertDateValue(data.claimed.at) } : undefined   // { by: uid, at: Date } | undefined
       });
+
+      console.debug(`Symbol ${id} updated`);
     } else {
       symbols.delete(id);
+
+      console.debug(`Symbol ${id} removed`);
     }
   }
 
