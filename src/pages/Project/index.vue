@@ -39,10 +39,10 @@
 </style>
 
 <script>
-  import { onUnmounted, computed, watch, shallowReactive } from 'vue';
+  import { onUnmounted, computed } from 'vue';
 
-  import { projectSub } from '../../refs/project.js';
-  import { symbolsSub } from '../../refs/projectSymbols.js';
+  import { projectSub } from '../../refs/projectSub'
+  import { symbolsSub } from '../../refs/projectSymbols'
   import { membersGen } from '../../refs/projectMembers'
 
   function setup({ id }) {    // Note: We don't need 'id' to be reactive (won't be changed while on the page)
@@ -51,7 +51,12 @@
     console.debug("Entering project page: ", projectId);
     const [project, unsub1] = projectSub(projectId);
     const [symbols, unsub2] = symbolsSub(projectId);
-    const members = membersGen(projectId, project);
+
+    function unsub() {
+      unsub1(); unsub2();
+    }
+
+    const members = membersGen(projectId, projectRef);
 
     const symbolsSortedByLayer = computed(() => {   // () => [ {...symbolsD, _id: index } ]   // sorted by layer
 
@@ -64,11 +69,10 @@
 
     onUnmounted( () => {
       console.debug("Leaving project page: unmounting Firebase subscriptions");
-      unsub1();
-      unsub2();
+      unsub();
     });
 
-    const projectReady = computed(() => Object.keys(project).length > 0);
+    const projectReady = computed( () => Object.keys(project).length > 0 );
     const membersReady = computed( () => Object.keys(members).length > 0 );
 
     return {

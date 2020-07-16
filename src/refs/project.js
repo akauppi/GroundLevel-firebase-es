@@ -1,15 +1,25 @@
 /*
-* src/refs/project.js
+* src/rs/project.js
 *
-* Follow a certain project. This feeds changes from Firestore to the UI.
+* Reactive tracking of a certain project.
 */
-import { ref, reactive } from "vue";
+import { shallowReactive } from 'vue';
+
 import { convertDateValue } from "../firebase/utils"
 
 const db = firebase.firestore();
 
-// Control that only one active subscription, at a time
-let activeSubscription = false;
+// Allow just one project to be subscribed, at a time. This is a safeguard against resource leak.
+//
+let unsub;
+
+if (unsub) {
+  // Happens because of Hot Module Reload, in development.
+
+  // tbd. In development, WARN (and call 'unsub').
+  //    In production, FAIL
+  throw Error("Already subscribing to a project (did the code call '.unsub'?)")
+}
 
 /*
 * Watch a certain project.
@@ -22,20 +32,15 @@ let activeSubscription = false;
 *   JavaScript does not allow tapping to the garbage collection cycle of an object. This is why we need the explicit
 *   'unsub' to be returned, to limit the number of database consumption a single client can create.
 */
-function projectSub(id) {   // (id: string) => [Promise of reactive( {} | { title: string, ... } ), unsub: () => () ]
+function projectSub(id) {   // (id: string) => [shallowReactive of { title: string, ... }, unsub: () => ()]
   const projectD = db.doc(`projects/${id}`);
 
-  if (activeSubscription) {
-    throw Error("Already subscribing to a project (did the code call '.unsub'?)")
-  }
-  activeSubscription = true;
-
-  const project = reactive({});
+  const project = shallowReactive();
 
   function handleSnapshot(ss) {
     const d = ss.exists ? ss.data() : null;
     if (d && !d.removed) {
-      console.debug("Setting 'project' to:", d);
+      console.debug(`Reading project '${id}':`, d);
 
       // Side note:
       //    It's kind of cool that we enforce the data schema here. Means application code does not need to go all the
@@ -43,32 +48,32 @@ function projectSub(id) {   // (id: string) => [Promise of reactive( {} | { titl
       //
       //    Also, we want to change date fields to JavaScript native presentation, and this allows a good place.
 
-      Object.assign(project, {
+      Object.assign( project, {
         title: d.title,
-        created: new Date(d.created),
+        created: convertDateValue(d.created),
         authors: d.authors,
         collaborators: d.collaborators
       });
 
     } else {
       console.warning("Project was removed while we're working on it.");
-      Object.assign(project,{});
+      Object.assign( project, {} );
     }
   }
 
-  // Note: using the observer '{}' prototype. Without it, WebStorm IDE picks the wrong one and hints 'onError' as 'onNext'.
+  // Note: using the observer '{next:, error:, ...}' prototype. Without it, WebStorm IDE picks the wrong one.
   //
-  const unsubInner = projectD.onSnapshot({
+  const innerUnsub = projectD.onSnapshot({
     next: handleSnapshot,
     error: err => { console.error("Error in subscription to project:", err); }
   });
 
-  // 'ref.value' is initially 'undefined', until we get the first snapshot
-  return [project, () => {
-    assert(activeSubscription);
-    activeSubscription = false;
-    unsubInner();
-  }];
+  unsub = () => {
+    innerUnsub();
+    unsub = null;
+  }
+
+  return [project, unsub];
 }
 
 export {

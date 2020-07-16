@@ -15,7 +15,7 @@ import {userUIinfoProm} from "../firebase/calls";
 
 // Note: Seems Vue.js (1.0.0-beta.20) doesn't work with async 'computed'. We'll use watch and imperative setting, instead.
 
-function membersGen(projectId, project) {   // (string, shallowReactive | reactive of { ...projectC-fields }) => shallowReactive of Map({ <uid>: { ...userInfoC-fields, isAuthor: boolean } }
+function membersGen(projectId, project) {   // (string, reactive of { ...projectC-fields }) => shallowReactive of Map({ <uid>: { ...userInfoC-fields, isAuthor: boolean } }
 
   /***
    //WHAT IF: computed async
