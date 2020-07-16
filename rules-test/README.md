@@ -55,12 +55,12 @@ i  Running script: npx jest
 ...
 ```
 
-This variant takes slightly longer (~6 sec) but is simple. It's best suited for CI work where the tests need to be run only once (thus it's the default `test` target).
+This variant takes slightly longer (~6 sec) but is simple to run. It's best suited for CI work where the tests need to be run only once (thus it's the default `test` target).
 
 
 ### DEV: Against the emulator running in the background (good for dev)
 
-Here, you keep the emulator running in a separate terminal. This cuts the time the test framework is set up by ~4 sec for each run, so it's good for test-and-change work.
+You keep the emulator running in a separate terminal. This cuts the time the test framework is set up by ~4 sec for each run, so it's good for test-and-change work.
 
 In a separate terminal:
 
@@ -77,20 +77,24 @@ Then, run test with:
 $ npm run test-dev
 ```
 
-This is the approach you should use in development. Also, this approach you to get [coverage reports](https://firebase.google.com/docs/firestore/security/test-rules-emulator#generate_test_reports) on the usage of Security Rules.
+Also, with this approach you get [coverage reports](https://firebase.google.com/docs/firestore/security/test-rules-emulator#generate_test_reports) on the usage of Security Rules (though the author hasn't really found them useful).
 
 
-## Reading for developers
+## Developer notes
+
+### Jest introduction
 
 Before contributing to the project, please familiarise yourself with:
 
-- [Jest](https://jestjs.io/docs/en/getting-started) Introduction chapters 
+- [Jest](https://jestjs.io/docs/en/getting-started) > Introduction chapters 
 
 ### WebStorm shared run configurations
 
-If you are using the WebStorm IDE, you should have a shared Run Configuration in the `/.idea/runConfigurations` folder. This allows you to run the rules tests from the IDE, and/or debug them.
+If you are using the WebStorm IDE, you should have a shared Run Configuration in the `/.idea/runConfigurations` folder. This allows you to run the tests from the IDE, and/or debug them.
 
 ![](.images/webstorm-run-config.png)
+
+Launch the Firebase emulator on the background, as mentioned earlier.
 
 
 ### WARNING: Use of dates in `data.js`
@@ -99,13 +103,34 @@ Firebase Web client can take JavaScript `Date` objects and convert them to its `
 
 HOWEVER, the frequent `Date.now()` and `Date.parse` do <u>not</u> produce Date objects but Unix epoch numbers, instead.
 
-||USE|Don't use!|
+||Use|<font color=red>Don't use!</font>|
 |---|---|---|
 |Current time|`new Date()`|<strike>`Date.now()`</strike>|
 |Specific time|`new Date('27 Mar 2020 14:17:00 EET')`|<strike>`Date.parse('27 Mar 2020 14:17:00 EET')`</strike>|
 
-*Note: We could detect these automatically by applying the access rules also to the admin setup that's currently done. That would catch the discrepancies. Now we don't do it, and we don't test validity of reads, just writes, so these got through.*
+*Note: We could detect these automatically by applying the access rules also to the admin setup. That would catch the discrepancies. Now we don't do it, and we don't test validity of reads, just writes, so these got through.*
 
+
+## Using with Dockerfile
+
+The Dockerfile is there, to allow customer projects to check their rules, without needing to pull our `npm` dependencies.
+
+Build the Docker image:
+
+```
+$ docker build .
+...
+Successfully built ca23750c9cb9
+```
+
+Use as: 
+
+```
+$ docker run -v $(pwd):/app $(pwd)/dut.rules:/app/dut.rules ca23750c9cb9
+...
+```
+
+>Note: The `dut.rules` is separately mentioned, since it's a symbolic link in our case.
 
 
 ## References

@@ -4,21 +4,29 @@
   "description": "Rules tests",
   "private": true,
   "//type": "module",
-  "jest": {
-    "globalSetup": "./setup.jest.js",
-    "//": {
-      "//testTimeout": "default 5000 _per test_ is mostly fine. After updates of dependencies, it still was too slooow."
-    }
-  },
   "scripts": {
     "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
-    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
+    "test-projects": "firebase emulators:exec --only firestore 'npm run _test-projects-npx'",
+    "_test-projects-npx": "npx jest -f projectsC.test.js -t \"'/projects' rules\"",
+    "test-symbols": "firebase emulators:exec --only firestore 'npm run _test-symbols-npx'",
+    "_test-symbols-npx": "npx jest -f symbolsC.test.js -t \"'/symbols' rules\"",
+    "test-invites": "firebase emulators:exec --only firestore 'npm run _test-invites-npx'",
+    "_test-invites-npx": "npx jest -f invitesC.test.js -t \"'/invites' rules\"",
+    "test-projects:dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f projectsC.test.js -t \"'/projects' rules\" --detectOpenHandles",
+    "test-symbols:dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f symbolsC.test.js -t \"'/symbols' rules\" --detectOpenHandles",
+    "test-invites:dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f invitesC.test.js -t \"'/invites' rules\" --detectOpenHandles",
+    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose",
+    "_start": "firebase emulators:start --only firestore"
+  },
+  "dependencies": {
+    "@babel/preset-typescript": "^7.10.4"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.10.3",
-    "@firebase/testing": "^0.20.4",
-    "babel-jest": "^25.5.1",
-    "jest": "^25.5.4"
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
+    "@firebase/testing": "^0.20.6",
+    "babel-jest": "^26.1.0",
+    "jest": "^26.1.0"
   },
   "engines": {
     "node": ">=13.2"
@@ -34,8 +42,5 @@
     "Node 13.2+": [
       "Needed for native ES module support"
     ]
-  },
-  "dependencies": {
-    "@babel/preset-typescript": "^7.9.0"
   }
 }

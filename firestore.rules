@@ -17,7 +17,7 @@ service cloud.firestore {
       //       changes, admin SDK changes, or data written by earlier generations of the security rules.
       //
       allow read: if (isAuthor() || isCollaborator() && !isRemoved())
-        //&& validProject()       // optional: enable if you want to guard against bad data instead of letting client cope with it
+        //&& validProject2()       // optional: enable if you want to guard against bad data instead of letting client cope with it
 
       // Creation
       //    - the creating user must list themselves as an author
@@ -67,6 +67,10 @@ service cloud.firestore {
 
       allow delete: if false        // no deletion via web app
 
+      // Aliases
+      function prior() { return resource.data; }
+      function after() { return request.resource.data; }
+
       // Project consistency:
       //  - title (string) may not be empty
       //  - created (timestamp) must exist
@@ -74,9 +78,6 @@ service cloud.firestore {
       //  - at least one author must exist
       //  - collaborators can be empty
       //  - users are either in 'authors' or in 'collaborators' (but not in both)
-      //
-      // Note: To allow reads to use the consistency, it is important to mark server time stamp fields as '<='
-      //        instead of '='.
       //
       function validProject() {
         let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
@@ -87,7 +88,23 @@ service cloud.firestore {
           && (!isRemovedAfter() || (request.resource.data.removed <= request.time))
           && request.resource.data.authors is list && request.resource.data.authors.size() > 0
           && request.resource.data.collaborators is list
-          && request.resource.data.authors.toSet().intersection( request.resource.data.collaborators.toSet() ).size() == 0
+          && request.resource.data.authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
+            // no common entries (could also omit this; logic would work even if a user is listed in both)
+
+          && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
+      }
+
+      // DEBUG for seeing, what causes reads to have a problem!
+      function validProject2() {
+        let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
+
+        return true
+          //&& request.resource.data.title is string && request.resource.data.title != ''
+          //&& request.resource.data.created is timestamp
+          //&& (!isRemovedAfter() || (request.resource.data.removed <= request.time))
+          //&& request.resource.data.authors is list && request.resource.data.authors.size() > 0
+          //&& request.resource.data.collaborators is list
+          //&& request.resource.data.authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
             // no common entries (could also omit this; logic would work even if a user is listed in both)
 
           && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
@@ -95,12 +112,12 @@ service cloud.firestore {
 
       function isAuthor() {
         return isSignedIn() &&
-          request.auth.uid in resource.data.authors
+          request.auth.uid in prior().authors    // resource.data.authors
       }
 
       function isCollaborator() {
         return isSignedIn() &&
-          request.auth.uid in resource.data.collaborators
+          request.auth.uid in prior().collaborators
       }
 
       function isRemoved() {
