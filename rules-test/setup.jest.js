@@ -5,9 +5,9 @@
 */
 import { docs } from './data';
 import { primeFromGlobalSetup } from './tools/guarded-session';
-import fs from 'fs';
+//import fs from 'fs';
 
-import * as firebase from '@firebase/testing';
+//import * as firebase from '@firebase/testing';
 
 // Note: Cannot share a JavaScript value between Jest test files [1]. However, we can set the OS level environment
 //    variable for the Jest process. This way, we can create an id and pass it to the suites. Sweet! 🥞🍺🍦🍫🍮
@@ -18,13 +18,14 @@ async function setup(_) {
   const sessionId = `test-${Date.now()}`;   // e.g. 'test-1586358763978'
   await primeFromGlobalSetup(sessionId, docs);    // write the data contents only once
 
-  // Without this, the emulator would read the rules at startup, but not change its behaviour if they change. Having
-  // a watch mode would render this unneeded.
+  /***
+  // No longer needed, IF we use 8.6.0 and IF the rules file is not a symbolic link.
   //
   await firebase.loadFirestoreRules({
     projectId: sessionId,
     rules: fs.readFileSync("dut.rules", "utf8")   // name must match that in 'firebase.json'
   });
+  ***/
 
   // Use this for seeing coverage reports: http://localhost:6767/emulator/v1/projects/<project_id>:ruleCoverage.html
   //  ^-- Note, that functionality seems to be broken. See DEVS/Wishes for Firebase.md

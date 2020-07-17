@@ -96,6 +96,7 @@ Firebase tools v. 7.16.1.
 Also, I was surprised to see the results persist over emulator restarts. Wasn't expecting that, based on documentation.
 
 
+<!-- 8.6.0 has, but it's not ideal (more about it later)
 ### 🌶 Firebase emulator to pick up changes to the rules
 
 The emulator could have a "watch" mode to help in development.
@@ -118,7 +119,7 @@ firebase.loadFirestoreRules({
 ```
 
 ..in the test setup, the rules are forced to the Firestore emulator. Having a watch mode would simply simplify things (for the developer), not needing to have this code.
-
+-->
 
 ### Firebase Rules playground (online) 'Build document' dialog (usability suggestion)
 
@@ -152,9 +153,9 @@ Each project using `@firebase/testing` for rules testing uses this call. It woul
 
 ## Firestore emulator: evaluate the rules at launch (and complain!)
 
-The Firestore emulator has just a single file of Security Rules. It could evaluate (compile) it at launch, and fail if there are problems. 
+The Firestore emulator has just a single file of Security Rules. It could evaluate (compile) it at launch, fail if there are problems and show warnings if there are any.
 
-It does not currently do so. This is a launch with a syntax error in the rules file:
+It does not currently (8.6.0) do so. This is a launch with a syntax error in the rules file:
 
 ```
 $ firebase emulators:start --only firestore
@@ -167,46 +168,26 @@ i  firestore: For testing set FIRESTORE_EMULATOR_HOST=localhost:6767
 ...
 ```
 
-Making sure rules do compile would reduce the number of times a "watch" mode is needed. If I start the emulator and there are rules, I do want to be notified up front if those rules don't compile.
-
 Now the error happens at runtime and may even get lost somewhere in test code (if it's ignored exceptions).
 
->![](.images/bad-rules.png)
+![](.images/bad-rules.png)
 
-
-<strike>## 🐶 Ternary operator would be nice to Rules Language
-
-It is possible to fake an if-else in the Rules language already know, but it's uncomfortable and not very readable:
+Warnings are shown only if the file is edited:
 
 ```
-allow create: if true
-  && ((      // if (inviting as author) invitor must be an author
-    request.resource.data.asAuthor && (
-      GLOBAL_isAuthor(request.resource.data.project)
-    )
-  ) || (      // else anyone in the project can invite
-    !request.resource.data.asAuthor && (
-      GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
-    )
-  ))
+i  firestore: Change detected, updating rules...
+⚠  ../firestore.rules:98:16 - WARNING Unused function: validProject2.
+⚠  ../firestore.rules:110:35 - WARNING Invalid variable name: request.
+✔  firestore: Rules updated.
 ```
 
-With the C-style ternary operator, this could be:
+It would be useful and fair to show these already at the launch.
 
-```
-allow create: if true
-  && request.resource.data.asAuthor ?
-      GLOBAL_isAuthor(request.resource.data.project) :
-      GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
-```
-</strike>
-
-Available since ~May 2020. Use it.
 
 
 ## Ability to ES6 `import` `@firebase/testing`
 
-It is currently (Apr 2020) exported only as common-JS:
+It is currently (Apr 2020, Jul 2020 8.6.0) exported only as common-JS:
 
 ```
 $ ls node_modules/@firebase/testing/dist
@@ -419,6 +400,39 @@ Two ways to make such a change:
 
 1. Derive from `Date` (or make a class that behaves the same), and have it also provide the `.seconds` and `.nanos` for backwards compatibility.
 2. Have a global switch somewhere (initialization of the `.firebase.firestore`?), so application programmers can select the "old" or the "native" way.
+
+
+## Firestore emulator does not detect changes via symbolic links
+
+This is a minor thing, and can be simply mentioned in the documents.
+
+The change detection of the Rules file does not work, if the file (mentioned in `firebase.json`) is a symbolic link (8.6.0, macOS).
+
+
+## Firebase emulator configuration from a `.js` file
+
+It is nowadays customary (jest, babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have e.g. comments in there.
+
+Firebase (8.6.0) seems to be fixed on `firebase.json` and providing a `firebase.js` (or `firebase.cjs`) is ignored.
+
+Furthermore, the emulator should fail to start if there is no configuration available. Currently, it proceeds and gives a runtime error when one tries to use it.
+
+
+## Firestore emulator: ability to load rules from multiple files
+
+Currently (8.6.0), all rules must be in a single file, defined in `firebase.json`:
+
+```
+"rules": "../firestore.rules",
+```
+
+I would prefer a freedom to place separate collections' rules in separate files. This makes the source code more managable, as you can imagine (my project is small, yet has separate "projects", "symbols" and "invites" collections).
+
+Implementation could allow an array in addition to the current string entry:
+
+```
+"rules": ["../firestore.rules", ...]
+```
 
 
 ## References

@@ -1,11 +1,18 @@
 {
   "firestore": {
-    "rules": "dut.rules"
+    "rules": "../firestore.rules",
+    "//rules": "dut.rules"
   },
   "emulators": {
     "firestore": {
       "port": "6767"
     }
+  },
+  "//": {
+    "firestore": [
+      "If we use 'dut.rules' (a symbolic link), change detection of rules, and listing warnings in them, does not work (firebase 8.6.0).",
+      "Thus pointing straight to the parent."
+    ]
   }
 }
 
