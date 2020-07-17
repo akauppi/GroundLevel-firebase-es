@@ -4,7 +4,7 @@
 * Global setup, imported once per run.
 */
 import { docs } from './data';
-import { primeFromGlobalSetup } from './tools/guarded-session';
+import { primeSession } from './tools/guarded-session';
 //import fs from 'fs';
 
 //import * as firebase from '@firebase/testing';
@@ -16,7 +16,8 @@ import { primeFromGlobalSetup } from './tools/guarded-session';
 
 async function setup(_) {
   const sessionId = `test-${Date.now()}`;   // e.g. 'test-1586358763978'
-  await primeFromGlobalSetup(sessionId, docs);    // write the data contents only once
+
+  await primeSession(sessionId, docs);    // write the data contents only once
 
   /*** KEEP for a while
   // No longer needed, IF we use 8.6.0 and IF the rules file is not a symbolic link.

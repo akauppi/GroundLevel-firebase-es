@@ -47,7 +47,7 @@ describe("'/invites' rules", () => {
 
   //--- InvitesC create rules ---
 
-  test('only a user within a project can invite others to it; only author can invite as-author', async done => {
+  test('only a user within a project can invite others to it; only author can invite as-author', async () => {
     const template = { email: "aa@b.com", project: "1" };
     const dGen = (uid, asAuthor) => ({ ...template,
       asAuthor: asAuthor, by: uid, at: FieldValue.serverTimestamp()
@@ -62,7 +62,6 @@ describe("'/invites' rules", () => {
 
     await expect( auth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // user not in the project cannot invite to it
     await expect( unauth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // unauthenticated cannot invite
-    done();
   });
 
   /*** disabled
