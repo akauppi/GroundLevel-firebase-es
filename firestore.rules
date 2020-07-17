@@ -25,7 +25,7 @@ service cloud.firestore {
       //    - may not be created as 'removed'
       //
       allow create: if isSignedIn()
-        && validProject()
+        && validProjectWrite()
         && request.resource.data.created == request.time
         && !isRemovedAfter()
         && request.auth.uid in request.resource.data.authors    // creator added as an author (we could go soft on this..)
@@ -40,36 +40,24 @@ service cloud.firestore {
       //    | /collaborators | author may change |
       //
       allow update: if isAuthor()
-        && validProject()
-        && (request.resource.data.created == resource.data.created)
-        && ((
-          onlyRemovedAdded() && request.resource.data.removed == request.time
-        ) || (
-          onlyRemovedRemoved() && true
-        ) || (
-          removedUnaffected() && true
-        ))
+        && validProjectWrite()
+        && request.resource.data.created == resource.data.created
+        && removedUnaffected() || (
+            onlyRemovedAffected() && (
+              diff().addedKeys() == ["removed"].toSet() ? request.resource.data.removed == request.time :
+              diff().removedKeys() == ["removed"].toSet() ? true :
+              false
+            ))
 
-      function onlyRemovedAdded() {
-        return _onlyRemovedAffected() && isRemovedAfter()
+      function onlyRemovedAffected() {
+        return diff().affectedKeys() == ["removed"].toSet()
       }
-      function onlyRemovedRemoved() {
-        return _onlyRemovedAffected() && !isRemovedAfter()
-      }
-      function _onlyRemovedAffected() {
-        return request.resource.data.diff(resource.data).affectedKeys() == ["removed"].toSet()
-      }
-
       function removedUnaffected() {
         // Implementation note: if not using '.diff', you must consider the case when there is no '.removed' (it's optional).
-        return !("removed" in request.resource.data.diff(resource.data).affectedKeys())
+        return !( "removed" in diff().affectedKeys() )
       }
 
       allow delete: if false        // no deletion via web app
-
-      // Aliases
-      function prior() { return resource.data; }
-      function after() { return request.resource.data; }
 
       // Project consistency:
       //  - title (string) may not be empty
@@ -79,13 +67,13 @@ service cloud.firestore {
       //  - collaborators can be empty
       //  - users are either in 'authors' or in 'collaborators' (but not in both)
       //
-      function validProject() {
+      function validProjectWrite() {
         let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
 
         return true
           && request.resource.data.title is string && request.resource.data.title != ''
           && request.resource.data.created is timestamp
-          && (!isRemovedAfter() || (request.resource.data.removed <= request.time))
+          && (!isRemovedAfter() || (request.resource.data.removed == request.time))
           && request.resource.data.authors is list && request.resource.data.authors.size() > 0
           && request.resource.data.collaborators is list
           && request.resource.data.authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
@@ -94,12 +82,13 @@ service cloud.firestore {
           && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
       }
 
+      /*** SCRAP. Making a read version of validity is very hard.
       // DEBUG for seeing, what causes reads to have a problem!
       function validProject2() {
         let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
 
         return true
-          //&& request.resource.data.title is string && request.resource.data.title != ''
+          //&& resource.data.title is string && resource.data.title != ''
           //&& request.resource.data.created is timestamp
           //&& (!isRemovedAfter() || (request.resource.data.removed <= request.time))
           //&& request.resource.data.authors is list && request.resource.data.authors.size() > 0
@@ -107,8 +96,9 @@ service cloud.firestore {
           //&& request.resource.data.authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
             // no common entries (could also omit this; logic would work even if a user is listed in both)
 
-          && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
+          //&& possibleKeys.hasAll( resource.data.keys() )        // no unexpected keys
       }
+      ***/
 
       function isAuthor() {
         return isSignedIn() &&
@@ -225,12 +215,12 @@ service cloud.firestore {
             && request.resource.data.shape in ['star']      // enum
             && request.resource.data['size'] > 0
             && request.resource.data.fillColor is string
-            && (sameKeys( request.resource.data.center.keys(), ["x","y"] ) &&
+            && (sameKeysDEPRECATE( request.resource.data.center.keys(), ["x","y"] ) &&
                request.resource.data.center.x is number &&
                request.resource.data.center.y is number
             )
             && (!("claimed" in request.resource.data) || (
-              sameKeys( request.resource.data.claimed.keys(), ["by","at"] ) &&
+              sameKeysDEPRECATE( request.resource.data.claimed.keys(), ["by","at"] ) &&
               request.resource.data.claimed.by is string &&
               request.resource.data.claimed.at is timestamp     // and <= request.time
             ))
@@ -255,7 +245,7 @@ service cloud.firestore {
         }
 
         function onlyClaimedAffected() {
-          return request.resource.data.diff(resource.data).affectedKeys() == ["claimed"].toSet()
+          return diff().affectedKeys() == ["claimed"].toSet()
         }
       } // symbols
 
@@ -302,8 +292,8 @@ service cloud.firestore {
         ))
         */      // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
         && request.resource.data.asAuthor
-            ? GLOBAL_isAuthor(request.resource.data.project)
-            : GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)      // else anyone in the project can invite
+            ? GLOBAL_isAuthor_COST1(request.resource.data.project)
+            : GLOBAL_isCollaboratorOrAuthor_COST1(request.resource.data.project)      // else anyone in the project can invite
         && validInvite()
 
       // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an
@@ -334,13 +324,17 @@ service cloud.firestore {
       allow read, write: if false
     }
 
-//--- Helpers (just functions) ---
+//--- Helpers (visible to all matches) ---
+
+    // Aliases
+    function prior() { return resource.data; }
+    function after() { return request.resource.data; }
+    function diff()  { return request.resource.data.diff(resource.data) }
 
     // Test two lists for having the same set of keys.
     //
-    // Note: We cannot simply '==' the lists, it seems. Maybe the order matters in that comparison.
-    //
-    function sameKeys(a,b) {        // (List, List) => Boolean
+    // @deprecate - use '.toSet()' in the rules
+    function sameKeysDEPRECATE(a,b) {        // (List, List) => Boolean
       return a.toSet() == b.toSet()
     }
 
@@ -350,16 +344,20 @@ service cloud.firestore {
 
     // Checking membership in a project from other collections.
     //
-    // This variant is to be used for collections outside of the 'projectsC'.
+    // For collections outside of the 'projectsC'. Adds billable cost to evaluation of such rule.
     //
-    function GLOBAL_isCollaboratorOrAuthor(projectId) {
+    // Note: Below is optimized for just one external 'get' per rule evaluation, but it is possible this is not
+    //      necessary. This is about how the billing of rule evaluation happens.
+    //
+    function GLOBAL_isCollaboratorOrAuthor_COST1(projectId) {
+      let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
+
       return isSignedIn() && (
-        request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
-        GLOBAL_isAuthor(projectId)
+        request.auth.uid in data.collaborators || request.auth.uid in data.authors
       )
     }
 
-    function GLOBAL_isAuthor(projectId) {
+    function GLOBAL_isAuthor_COST1(projectId) {
       return isSignedIn() &&
         request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
     }

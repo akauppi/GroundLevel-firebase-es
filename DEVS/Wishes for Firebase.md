@@ -434,6 +434,56 @@ Implementation could allow an array in addition to the current string entry:
 "rules": ["../firestore.rules", ...]
 ```
 
+## Firebase emulator: ability to check in tests whether Security Rules are healthy
+
+When editing security rules, I normally have the IDE and the test output visible - not the terminal running the Firebase emulator.
+
+If security rules are broken, the test output is garbage:
+
+```
+  ● '/projects' rules › user needs to be an author, to read a 'removed' project
+
+    expect.assertions(2)
+
+    Expected two assertions to be called but received one assertion call.
+
+      67 | 
+      68 |   test('user needs to be an author, to read a \'removed\' project', () => {
+    > 69 |     expect.assertions(2);
+         |            ^
+      70 |     return Promise.all([
+      71 |       expect( abc_projectsC.doc("2-removed").get() ).toAllow(),
+      72 |       expect( def_projectsC.doc("2-removed").get() ).toDeny()
+
+      at Object.<anonymous> (projectsC.test.js:69:12)
+```
+
+The Firebase testing library could provide a function to check the validity of the current Security Rules, from the emulator. I can then use this in a "before all" hook, and not run the tests if they are not going to work.
+
+
+## Firebase Security Rules: could allow set comparison without `.toSet()`
+
+Sets are great. However, their use is a little verbose, at the moment (8.6.0).
+
+It's a very common practise (shown also in Firebase samples) to compare the outcome of a `diff` to a constant set. This requires a `.toSet()` at the end:
+
+```
+diff().removedKeys() == ["removed"].toSet()
+```
+
+If the `.toSet()` is removed, one gets a warning:
+
+```
+⚠  ../firestore.rules:53:73 - WARNING The sub-expressions are not comparable, so this comparison will always return false.
+```
+
+Instead, the Firebase parser could imply a `.toSet()` when a set is compared with a constant array. This would make people's rules less verbose, and not break any existing code. So this would work:
+
+```
+diff().removedKeys() == ["removed"]
+```
+
+More readable? :)
 
 ## References
 
