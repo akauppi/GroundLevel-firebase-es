@@ -8,6 +8,10 @@ service cloud.firestore {
 
     // tbd. removed projects likely to get their own collection (simpler)
 
+    // Access cost:
+    //    read: 1
+    //    write: 1
+    //
     match /projects/{projectId} {
       // Read
       //    - authors can see all projects, also removed (archived)
@@ -71,12 +75,12 @@ service cloud.firestore {
         let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
 
         return true
-          && request.resource.data.title is string && request.resource.data.title != ''
-          && request.resource.data.created is timestamp
-          && (!isRemovedAfter() || (request.resource.data.removed == request.time))
-          && request.resource.data.authors is list && request.resource.data.authors.size() > 0
-          && request.resource.data.collaborators is list
-          && request.resource.data.authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
+          && after().title is string && after().title != ''
+          && after().created is timestamp
+          && (!isRemovedAfter() || (after().removed == request.time))
+          && after().authors is list && after().authors.size() > 0
+          && after().collaborators is list
+          && after().authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
             // no common entries (could also omit this; logic would work even if a user is listed in both)
 
           && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
@@ -149,7 +153,7 @@ service cloud.firestore {
         function validVisitedWrite() {
           return true
             && (after().at is timestamp && after().at == request.time)
-            && request.resource.data.keys() == ["at"].toSet()     // no other fields
+            && afterKeysEq(["at"])      // no other fields
         }
       }
 
@@ -159,22 +163,23 @@ service cloud.firestore {
       //    read: 2
       //    write: 2
       //
+      // tbd. Observe access cost in real world scenerio: user tracking changes to all symbols, within a project.
+      //      Is it acceptable?
+      //
       match /symbols/{symbolId} {
         // Read:
         //  - all members of the project can read
         //
-        allow read: if EXT_isCollaboratorOrAuthor()        // anyone (within the project) can read
-
-          // DISABLED since cannot be used with the Online Simulator (see 'git grep Wishes')
+        allow read: if EXT_isCollaboratorOrAuthor()
           //&& validSymbol()      // guards against bad data in test setup, manual Firestore edits or from earlier schemas
 
         // Creation:
         //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
         //
         allow create: if EXT_isCollaboratorOrAuthor()
-          && validSymbol()
-          && isClaimedByMeAfter()
-          && request.resource.data.claimed.at == request.time
+          && validSymbolWrite()
+          && after().claimed.by == request.auth.uid
+          && after().claimed.at == request.time
 
         // Updates:
         //  - can claim a non-claimed symbol
@@ -183,22 +188,18 @@ service cloud.firestore {
         //  - claim itself cannot be changed; only revoked
         //
         allow update: if EXT_isCollaboratorOrAuthor()
-          && validSymbol()
-          && ((     // case A: claiming an unclaimed symbol
-            !isClaimed() && (
-              request.resource.data.claimed.by == request.auth.uid &&		// I make the claim
-              request.resource.data.claimed.at == request.time
+          && validSymbolWrite()
+          && (      // case A: claiming an unclaimed symbol
+            !isClaimed() ? (
+              after().claimed.by == request.auth.uid &&		// I make the claim
+              after().claimed.at == request.time
+            ) : isClaimedByMe() && (  // case B: changing other fields while claimed
+                  after().claimed == prior().claimed
+                ) || (   // case C: revoking the claim
+                  diff().affectedKeys() == ["claimed"].toSet() &&     // only '.claimed' affected
+                  !("claimed" in after())                             // ..and it is removed
+                )
             )
-          ) || (    // case B: changing while claimed
-            isClaimedByMe() && (
-                request.resource.data.claimed == resource.data.claimed   // unchanged
-            )
-          ) || (    // case C: revoking the claim
-            isClaimedByMe() && (
-              !("claimed" in request.resource.data) &&     // claim removed
-              onlyClaimedAffected()
-            )
-          ))
 
         // Delete:
         //	- can delete a symbol claimed to themselves
@@ -206,48 +207,35 @@ service cloud.firestore {
         allow delete: if EXT_isCollaboratorOrAuthor()
           && isClaimedByMe()
 
-        function validSymbol() {
+        function validSymbolWrite() {
           let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
           let possibleKeys = requiredKeys.union( ['claimed'].toSet() );
 
           return true
-            && (request.resource.data.keys().toSet().hasAll(requiredKeys) &&
-                possibleKeys.hasAll(request.resource.data.keys()))
-            && request.resource.data.layer is int
-            && request.resource.data.shape in ['star']      // enum
-            && request.resource.data['size'] > 0
-            && request.resource.data.fillColor is string
-            && (sameKeysDEPRECATE( request.resource.data.center.keys(), ["x","y"] ) &&
-               request.resource.data.center.x is number &&
-               request.resource.data.center.y is number
+            && (after().keys().toSet().hasAll(requiredKeys) &&
+                possibleKeys.hasAll(after().keys()))
+            && after().layer is int
+            && after().shape in ['star']      // enum
+            && after()['size'] > 0
+            && after().fillColor is string
+            && (keysEq( after().center, ["x","y"] ) &&
+               after().center.x is number &&
+               after().center.y is number
             )
-            && (!("claimed" in request.resource.data) || (
-              sameKeysDEPRECATE( request.resource.data.claimed.keys(), ["by","at"] ) &&
-              request.resource.data.claimed.by is string &&
-              request.resource.data.claimed.at is timestamp     // and <= request.time
+            && (!("claimed" in after()) || (
+              keysEq( after().claimed, ["by","at"] ) &&
+              after().claimed.by is string &&
+              after().claimed.at is timestamp // and <= request.time
             ))
         }
 
         function isClaimedByMe() {
-          return isClaimed() && resource.data.claimed.by == request.auth.uid
+          return isClaimed() && prior().claimed.by == request.auth.uid
         }
 
         function isClaimed() {
-          // Note: 'resource != null' required in the online Rules Playground
-          return resource != null && "claimed" in resource.data
-        }
-
-        /* not used; REMOVE
-        function isClaimedAfter() {
-          return "claimed" in request.resource.data
-        }*/
-
-        function isClaimedByMeAfter() {
-          return request.resource.data.claimed.by == request.auth.uid
-        }
-
-        function onlyClaimedAffected() {
-          return diff().affectedKeys() == ["claimed"].toSet()
+          // Note: 'resource != null' required in the online Rules Playground (was it; is it still?); not worth it: keep rules alike for all environments!!!
+          return /*resource != null &&*/ "claimed" in resource.data
         }
       } // symbols
 
@@ -284,41 +272,51 @@ service cloud.firestore {
       //  - a previous invite may be overwritten (= extended)
       //
       allow create: if true
-      /* REMOVE
-        && ((      // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
-          request.resource.data.asAuthor && (
-            GLOBAL_isAuthor(request.resource.data.project)
-          )
-        ) || (      // else anyone in the project can invite
-          !request.resource.data.asAuthor && (
-            GLOBAL_isCollaboratorOrAuthor(request.resource.data.project)
-          )
-        ))
-        */      // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
-        && request.resource.data.asAuthor
-            ? GLOBAL_isAuthor_COST1(request.resource.data.project)
-            : GLOBAL_isCollaboratorOrAuthor_COST1(request.resource.data.project)      // else anyone in the project can invite
-        && validInvite()
+        // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
+        && after().asAuthor ?
+            PROJ_isAuthor_COST1( after().project ) :
+            PROJ_isCollaboratorOrAuthor_COST1( after().project )      // else anyone in the project can invite
+        && validInviteWrite()
 
       // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an
       //        existing entry observes it).
       allow update: if false
 
       allow delete: if false
-    }
 
-    function validInvite() {
-      let requiredKeys = ['email','project','asAuthor','by','at'].toSet();
+      function validInviteWrite() {
+        let requiredKeys = ['email','project','asAuthor','by','at'];
 
-      return true
-        && request.resource.data.keys().toSet() == requiredKeys
-        && request.resource.id == request.resource.data.email +":"+ request.resource.data.project	// validate the id schema
-        && request.resource.data.email is string
-        && request.resource.data.project is string
-        && request.resource.data.asAuthor is bool
-        && request.resource.data.by == request.auth.uid
-        && request.resource.data.at == request.time
-    }
+        return true
+          && afterKeysEq(requiredKeys)
+          && request.resource.id == after().email +":"+ after().project	  // validate the id schema
+          && after().email is string
+          && after().project is string
+          && after().asAuthor is bool
+          && after().by == request.auth.uid
+          && after().at == request.time
+      }
+
+      // Checking membership in a project from other collections.
+      //
+      // Unlike 'symbols' etc., 'invites' is not a sub-collection of 'projectC'. Thus, the project ID comes as a param,
+      // not from the 'match'.
+      //
+      // Note: Below is optimized for just one external 'get' per rule evaluation, but it is possible this is not
+      //      necessary (do two gets to the same entry count as 1 or 2 in rule evaluation billing?).
+      //
+      function _PROJ_isMember_COST1(projectId, mustBeAuthor) {  // (string, bool) => bool
+        let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
+
+        return isSignedIn() && (
+          request.auth.uid in data.authors ||
+          ((!mustBeAuthor) && request.auth.uid in data.collaborators)
+        )
+      }
+      function PROJ_isAuthor_COST1(projectId) { return _PROJ_isMember_COST1(projectId, true); }
+      function PROJ_isCollaboratorOrAuthor_COST1(projectId) { return _PROJ_isMember_COST1(projectId, false); }
+
+    } // invites
 
 //--- User info ---
 //
@@ -335,36 +333,20 @@ service cloud.firestore {
     function after() { return request.resource.data; }
     function diff()  { return request.resource.data.diff(resource.data) }
 
-    // Test two lists for having the same set of keys.
+    // Compare root level keys with 'arr'; those and only those keys should exist.
     //
-    // @deprecate - use '.toSet()' in the rules
-    function sameKeysDEPRECATE(a,b) {        // (List, List) => Boolean
-      return a.toSet() == b.toSet()
+    function afterKeysEq(arr) {
+      return keysEq( request.resource.data, arr );
+    }
+
+    // Test two lists for equality.
+    //
+    function keysEq(a,b) {        // ({.keys(): List}, List|Set) => Boolean
+      return a.keys().toSet() == b.toSet();
     }
 
     function isSignedIn() {
       return request.auth != null && request.auth.uid != null;
-    }
-
-    // Checking membership in a project from other collections.
-    //
-    // For collections outside of the 'projectsC'. Adds billable cost to evaluation of such rule.
-    //
-    // Note: Below is optimized for just one external 'get' per rule evaluation, but it is possible this is not
-    //      necessary. This is about how the billing of rule evaluation happens.
-    //
-    function GLOBAL_isCollaboratorOrAuthor_COST1(projectId) {
-      let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
-
-      return isSignedIn() && (
-        request.auth.uid in data.collaborators ||
-        request.auth.uid in data.authors
-      )
-    }
-
-    function GLOBAL_isAuthor_COST1(projectId) {
-      return isSignedIn() &&
-        request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
     }
   } // database
 }

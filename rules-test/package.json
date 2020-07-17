@@ -6,17 +6,11 @@
   "//type": "module",
   "scripts": {
     "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
-    "test-projects": "firebase emulators:exec --only firestore 'npm run _test-projects-npx'",
-    "_test-projects-npx": "npx jest -f projectsC.test.js -t \"'/projects' rules\"",
-    "test-symbols": "firebase emulators:exec --only firestore 'npm run _test-symbols-npx'",
-    "_test-symbols-npx": "npx jest -f symbolsC.test.js -t \"'/symbols' rules\"",
-    "test-invites": "firebase emulators:exec --only firestore 'npm run _test-invites-npx'",
-    "_test-invites-npx": "npx jest -f invitesC.test.js -t \"'/invites' rules\"",
-    "test-projects:dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f projectsC.test.js -t \"'/projects' rules\" --detectOpenHandles",
-    "test-symbols:dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f symbolsC.test.js -t \"'/symbols' rules\" --detectOpenHandles",
-    "test-invites:dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f invitesC.test.js -t \"'/invites' rules\" --detectOpenHandles",
-    "test-dev": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose",
-    "_start": "firebase emulators:start --only firestore"
+    "_start": "firebase emulators:start --only firestore",
+    "test:projects": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f projectsC.test.js -t \"'/projects' rules\" --detectOpenHandles",
+    "test:symbols": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f symbolsC.test.js -t \"'/symbols' rules\" --detectOpenHandles",
+    "test:invites": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f invitesC.test.js -t \"'/invites' rules\" --detectOpenHandles",
+    "test:all": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.10.4"

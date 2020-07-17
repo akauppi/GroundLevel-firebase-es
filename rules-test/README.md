@@ -26,17 +26,48 @@ $ firebase setup:emulators:firestore
 
 >Note: Rerun the setup above if you have upgraded `firebase-tools`.
 
+### Still using Babel
+
+Unlike in the rest of the project, we cannot currently (Jul 2020; Jest 26.1.0) enable native Node.js ES module support. Jest is not up to it, yet, and needs Babel. Once we can, we will abandon Babel here, as well.
+
 
 ## Running tests
 
 We'll be using the Firebase emulator to run the tests against.
 
-There are two ways to run these tests, each with their pros and cons. We'll brief you here on the commands so that you can choose what best suits your needs, and maybe edit the `package.json`, accordingly. ☺️
+There are two ways to run these tests, each with their pros and cons. We'll start with the one where a server is manually started.
+
+### Dev: Start an emulator
+
+When developing security rules, this is the mode to use. We start a Firebase emulator in one terminal, and run the tests in another - or in an IDE.
+
+**Starting the emulator**
+
+```
+$ firebase emulators:start --only firestore
+```
+
+Once we run tests, the emulator shows warnings of the rules in its terminal output. Glance it, occasionally.
+
+**Running tests**
+
+```
+$ npm run test:projects
+$ npm run test:symbols
+$ npm run test:invites
+$ npm run test:all
+```
+
+These are prepared for you in `package.json`. When working, it's meaningful to run only one suit, at a time.
+
+The emulator picks up changes to the rules automatically, so you don't need to restart it.
 
 
-### CI: As a single command (good for getting started and CI)
+### CI: As a single command
 
-With this variant, you run a single command. It starts the emulator in the background, executes the tests, and cleans up the emulator.
+Once tests pass, you'll likely be just running them over and over, e.g. from a CI script.
+
+This command starts the emulator in the background, for the duration of running the tests. It adds ~5..6s to the execution time of the tests.
 
 ```
 $ npm test
@@ -55,42 +86,19 @@ i  Running script: npx jest
 ...
 ```
 
-This variant takes slightly longer (~6 sec) but is simple to run. It's best suited for CI work where the tests need to be run only once (thus it's the default `test` target).
 
-
-### DEV: Against the emulator running in the background (good for dev)
-
-You keep the emulator running in a separate terminal. This cuts the time the test framework is set up by ~4 sec for each run, so it's good for test-and-change work.
-
-In a separate terminal:
-
-```
-$ firebase emulators:start --only firestore
-...
-✔  emulators: All emulators started, it is now safe to connect.
-...
-```
-
-Then, run test with:
-
-```
-$ npm run test-dev
-```
-
-Also, with this approach you get [coverage reports](https://firebase.google.com/docs/firestore/security/test-rules-emulator#generate_test_reports) on the usage of Security Rules (though the author hasn't really found them useful).
-
-
-## Developer notes
+## Deeper dive details 🤿
 
 ### Jest introduction
 
-Before contributing to the project, please familiarise yourself with:
+Before digging into the code, it's really worth checking the Introduction chapters of:
 
-- [Jest](https://jestjs.io/docs/en/getting-started) > Introduction chapters 
+- [Jest](https://jestjs.io/docs/en/getting-started)
+
 
 ### WebStorm shared run configurations
 
-If you are using the WebStorm IDE, you should have a shared Run Configuration in the `/.idea/runConfigurations` folder. This allows you to run the tests from the IDE, and/or debug them.
+If you are using the WebStorm IDE, you should have a shared run configurations (`../.idea/runConfigurations`). This allows you to run the tests from the IDE, and/or debug them.
 
 ![](.images/webstorm-run-config.png)
 
@@ -99,18 +107,19 @@ Launch the Firebase emulator on the background, as mentioned earlier.
 
 ### WARNING: Use of dates in `data.js`
 
-Firebase Web client can take JavaScript `Date` objects and convert them to its `Timestamp` automatically. 
+Firebase Web client can take JavaScript `Date` objects and convert them to its `Timestamp` automatically.
 
-HOWEVER, the frequent `Date.now()` and `Date.parse` do <u>not</u> produce Date objects but Unix epoch numbers, instead.
+HOWEVER, `Date.now()` and `Date.parse` do <u>not</u> produce Date objects but Unix epoch numbers, so be warned.
 
 ||Use|<font color=red>Don't use!</font>|
 |---|---|---|
 |Current time|`new Date()`|<strike>`Date.now()`</strike>|
 |Specific time|`new Date('27 Mar 2020 14:17:00 EET')`|<strike>`Date.parse('27 Mar 2020 14:17:00 EET')`</strike>|
 
-*Note: We could detect these automatically by applying the access rules also to the admin setup. That would catch the discrepancies. Now we don't do it, and we don't test validity of reads, just writes, so these got through.*
+*Note: We could detect these automatically by applying the access rules also to the admin setup. That would catch the discrepancies. Now we don't do it, and we don't test validity of reads, either, so these go through.*
 
 
+<!-- experimental, disabled...
 ## Using with Dockerfile
 
 The Dockerfile is there, to allow customer projects to check their rules, without needing to pull our `npm` dependencies.
@@ -131,7 +140,13 @@ $ docker run -v $(pwd):/app $(pwd)/dut.rules:/app/dut.rules ca23750c9cb9
 ```
 
 >Note: The `dut.rules` is separately mentioned, since it's a symbolic link in our case.
+-->
 
+<!-- disabled, those are not useful (8.6.0)
+### Firebase coverage analysis
+
+With the "against-a-standalone-emulator" approach, one can get [coverage reports](https://firebase.google.com/docs/firestore/security/test-rules-emulator#generate_test_reports) on the usage of Security Rules. This sounds great, but the author hasn't really found much use in them (the implementation is messy).
+-->
 
 ## References
 

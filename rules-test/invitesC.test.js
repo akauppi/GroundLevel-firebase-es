@@ -5,11 +5,9 @@ import './tools/jest-matchers';
 
 import { sessionProm } from './tools/guarded-session';
 
-//const assert = require('assert').strict;
 import { strict as assert } from 'assert';
 
-//const firebase = require('@firebase/testing');
-import * as firebase from '@firebase/testing';    // later
+import * as firebase from '@firebase/testing';
 
 const FieldValue = firebase.firestore.FieldValue;
 
@@ -28,7 +26,7 @@ describe("'/invites' rules", () => {
       abc_invitesC = coll.as({uid:'abc'});
       def_invitesC = coll.as({uid:'def'});
 
-      assert(unauth_invitesC && auth_invitesC && abc_invitesC && def_invitesC);   // DEBUG
+      assert(unauth_invitesC && auth_invitesC && abc_invitesC && def_invitesC);
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
@@ -37,18 +35,19 @@ describe("'/invites' rules", () => {
     }
   });
 
-  //--- VisitedC read rules ---
+  //--- InvitesC read rules ---
 
-  test('no-one should be able to read', async () => {
+  test('no-one should be able to read', async done => {
     await expect( unauth_invitesC.get() ).toDeny();   // unauthenticated
     await expect( auth_invitesC.get() ).toDeny();   // valid user (trying to list the invites)
 
     await expect( abc_invitesC.get("a@b.com:1") ).toDeny();   // the one who's created an invite
+    done();
   });
 
-  //--- VisitedC create rules ---
+  //--- InvitesC create rules ---
 
-  test('only a user within a project can invite others to it; only author can invite as-author', async () => {
+  test('only a user within a project can invite others to it; only author can invite as-author', async done => {
     const template = { email: "aa@b.com", project: "1" };
     const dGen = (uid, asAuthor) => ({ ...template,
       asAuthor: asAuthor, by: uid, at: FieldValue.serverTimestamp()
@@ -63,8 +62,10 @@ describe("'/invites' rules", () => {
 
     await expect( auth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // user not in the project cannot invite to it
     await expect( unauth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // unauthenticated cannot invite
+    done();
   });
 
+  /*** disabled
   // Enable if this behaviour is needed (for now, we ban inviting someone twice)
   test.skip('one can replace (extend) an existing invite', async () => {
     const d = {
@@ -78,8 +79,9 @@ describe("'/invites' rules", () => {
 
     await expect( abc_invitesC.doc(id).set(d) ).toAllow();   // overwrites earlier such
   });
+  ***/
 
-  test('validity: server time; identifying oneself; \'email:project\' as id', async () => {
+  test('validity: server time; identifying oneself; \'email:project\' as id', async done => {
     const d = {
       email: "aaa@b.com",
       project: "1",
@@ -97,17 +99,14 @@ describe("'/invites' rules", () => {
     await expect( abc_invitesC.doc(id).set(dBadTime) ).toDeny();
     await expect( abc_invitesC.doc(id).set(dNotMe) ).toDeny();
     await expect( abc_invitesC.doc(badId).set(d) ).toDeny();
+    done();
   });
 
-  //--- VisitedC update rules ---
+  //--- InvitesC update rules ---
   //
   // not allowed; not tested
 
-  //--- VisitedC delete rules ---
+  //--- InvitesC delete rules ---
   //
   // not allowed; not tested
 });
-
-
-const d_serverTime = { at: FieldValue.serverTimestamp() };
-const d_otherTime = { at: anyDate };

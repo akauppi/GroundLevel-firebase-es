@@ -5,6 +5,7 @@
 ## 16-Jul-20
 
 - Updated to Jest 26.x. Possible with this [work-around](https://github.com/facebook/jest/issues/7780#issuecomment-615890410).
+- Rules revised and modernized
 
 ## 4-Jul-20
 
