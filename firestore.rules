@@ -82,7 +82,7 @@ service cloud.firestore {
           && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
       }
 
-      /*** SCRAP. Making a read version of validity is very hard.
+      /*** DELAYED. Making a read version of validity is very hard.
       // DEBUG for seeing, what causes reads to have a problem!
       function validProject2() {
         let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
@@ -135,19 +135,21 @@ service cloud.firestore {
         //
         // Note: requiring the 'after' value to be the server time stamp essentially disallows deletes.
         //
-        allow write: if EXT_isCollaboratorOrAuthor()   // Q: can this reach the parent document, even without 'get'?
-          && validVisited()
+        allow write: if EXT_isCollaboratorOrAuthor()
+          && validVisitedWrite()
           && userId == request.auth.uid
-          && request.resource.data.at == request.time
+          && after().at == request.time
+
+        allow delete: if false
 
         // Visited consistency:
         //  - 'at' must be a timestamp
         //  - no other fields
         //
-        function validVisited() {
+        function validVisitedWrite() {
           return true
-            && (request.resource.data.at is timestamp && request.resource.data.at <= request.time)
-            && request.resource.data.keys() == ['at']     // no other fields
+            && (after().at is timestamp && after().at == request.time)
+            && request.resource.data.keys() == ["at"].toSet()     // no other fields
         }
       }
 
@@ -252,13 +254,15 @@ service cloud.firestore {
       // Functions for sub-collections
       //
       // While the 'project' documents can address their 'authors' and 'collaborators' fields directly, sub-collection
-      // documents must use 'get'. This also implies an added billing cost for processing those security rules!
+      // documents must use 'get'. This also implies an added billing cost for processing those security rules.
 
       function EXT_isCollaboratorOrAuthor() {
-        return isSignedIn() &&
-          (request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.collaborators ||
-           request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.authors
-          )
+        let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
+
+        return isSignedIn() && (
+          request.auth.uid in data.collaborators ||
+          request.auth.uid in data.authors
+        )
       }
     }   // project
 
@@ -353,7 +357,8 @@ service cloud.firestore {
       let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
 
       return isSignedIn() && (
-        request.auth.uid in data.collaborators || request.auth.uid in data.authors
+        request.auth.uid in data.collaborators ||
+        request.auth.uid in data.authors
       )
     }
 
