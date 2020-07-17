@@ -12,6 +12,8 @@ const FieldValue = firebase.firestore.FieldValue;
 
 const anyDate = new Date();   // a non-server date
 
+import { test, expect, describe, beforeAll } from '@jest/globals'
+
 // Perform extra tests to see the test data isn't changed by other tests (if it is, our guards didn't work!)
 //
 async function HYGIENE( title, doc, f ) {

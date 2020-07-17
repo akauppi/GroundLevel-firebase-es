@@ -13,6 +13,8 @@ const FieldValue = firebase.firestore.FieldValue;
 
 const anyDate = new Date();   // a non-server date
 
+import { test, expect, describe, beforeAll } from '@jest/globals'
+
 describe("'/invites' rules", () => {
   let unauth_invitesC, auth_invitesC, abc_invitesC, def_invitesC;
 
