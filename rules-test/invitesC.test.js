@@ -15,6 +15,14 @@ const anyDate = new Date();   // a non-server date
 
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
+/*
+* Run provided tests either after each other, or in parallel. Here to see whether this matters, at all.
+*
+* Note:
+*   - replace by 'Promise.all' once we know the results
+*/
+const SEQ = false;
+
 describe("'/invites' rules", () => {
   let unauth_invitesC, auth_invitesC, abc_invitesC, def_invitesC;
 
@@ -39,12 +47,22 @@ describe("'/invites' rules", () => {
 
   //--- InvitesC read rules ---
 
-  test('no-one should be able to read', async done => {
-    await expect( unauth_invitesC.get() ).toDeny();   // unauthenticated
-    await expect( auth_invitesC.get() ).toDeny();   // valid user (trying to list the invites)
+  test('no-one should be able to read', async () => {
 
-    await expect( abc_invitesC.get("a@b.com:1") ).toDeny();   // the one who's created an invite
-    done();
+    if (SEQ) {
+      await expect( unauth_invitesC.get() ).toDeny()   // unauthenticated
+      await expect( auth_invitesC.get() ).toDeny()     // valid user (trying to list the invites)
+
+      await expect( abc_invitesC.get("a@b.com:1") ).toDeny()   // the one who's created an invite
+
+    } else {
+      await Promise.all([
+        expect( unauth_invitesC.get() ).toDeny(),   // unauthenticated
+        expect( auth_invitesC.get() ).toDeny(),     // valid user (trying to list the invites)
+
+        expect( abc_invitesC.get("a@b.com:1") ).toDeny()   // the one who's created an invite
+      ]);
+    }
   });
 
   //--- InvitesC create rules ---
@@ -56,14 +74,28 @@ describe("'/invites' rules", () => {
     });
     const id = `${template.email}:${template.project}`;
 
-    await expect( abc_invitesC.doc(id).set( dGen("abc",true )) ).toAllow();   // author can invite as-author
-    await expect( abc_invitesC.doc(id).set( dGen("abc",false )) ).toAllow();  // ..or as collaborator
+    if (SEQ) {
+      await expect( abc_invitesC.doc(id).set( dGen("abc",true )) ).toAllow()   // author can invite as-author
+      await expect( abc_invitesC.doc(id).set( dGen("abc",false )) ).toAllow()  // ..or as collaborator
 
-    await expect( def_invitesC.doc(id).set( dGen("def",true )) ).toDeny();    // collaborator cannot invite as-author
-    await expect( def_invitesC.doc(id).set( dGen("def",false )) ).toAllow();  // ..but can as collaborator
+      await expect( def_invitesC.doc(id).set( dGen("def",true )) ).toDeny()    // collaborator cannot invite as-author
+      await expect( def_invitesC.doc(id).set( dGen("def",false )) ).toAllow()  // ..but can as collaborator
 
-    await expect( auth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // user not in the project cannot invite to it
-    await expect( unauth_invitesC.doc(id).set( dGen("_",false )) ).toDeny();    // unauthenticated cannot invite
+      await expect( auth_invitesC.doc(id).set( dGen("_",false )) ).toDeny()    // user not in the project cannot invite to it
+      await expect( unauth_invitesC.doc(id).set( dGen("_",false )) ).toDeny()    // unauthenticated cannot invite
+
+    } else {
+      await Promise.all([
+        expect( abc_invitesC.doc(id).set( dGen("abc",true )) ).toAllow(),   // author can invite as-author
+        expect( abc_invitesC.doc(id).set( dGen("abc",false )) ).toAllow(),  // ..or as collaborator
+
+        expect( def_invitesC.doc(id).set( dGen("def",true )) ).toDeny(),    // collaborator cannot invite as-author
+        expect( def_invitesC.doc(id).set( dGen("def",false )) ).toAllow(),  // ..but can as collaborator
+
+        expect( auth_invitesC.doc(id).set( dGen("_",false )) ).toDeny(),    // user not in the project cannot invite to it
+        expect( unauth_invitesC.doc(id).set( dGen("_",false )) ).toDeny()    // unauthenticated cannot invite
+      ]);
+    }
   });
 
   /*** disabled
@@ -82,7 +114,7 @@ describe("'/invites' rules", () => {
   });
   ***/
 
-  test('validity: server time; identifying oneself; \'email:project\' as id', async done => {
+  test('validity: server time; identifying oneself; \'email:project\' as id', async () => {
     const d = {
       email: "aaa@b.com",
       project: "1",
@@ -96,11 +128,20 @@ describe("'/invites' rules", () => {
     const dBadTime = { ...d, at: anyDate };
     const dNotMe = { ...d, by: "zwho" };
 
-    await expect( abc_invitesC.doc(id).set(d) ).toAllow();   // re-check valid data gets through
-    await expect( abc_invitesC.doc(id).set(dBadTime) ).toDeny();
-    await expect( abc_invitesC.doc(id).set(dNotMe) ).toDeny();
-    await expect( abc_invitesC.doc(badId).set(d) ).toDeny();
-    done();
+    if (SEQ) {
+      await expect( abc_invitesC.doc(id).set(d) ).toAllow()   // re-check valid data gets through
+      await expect( abc_invitesC.doc(id).set(dBadTime) ).toDeny()
+      await expect( abc_invitesC.doc(id).set(dNotMe) ).toDeny()
+      await expect( abc_invitesC.doc(badId).set(d) ).toDeny()
+
+    } else {
+      await Promise.all([
+        expect( abc_invitesC.doc(id).set(d) ).toAllow(),   // re-check valid data gets through
+        expect( abc_invitesC.doc(id).set(dBadTime) ).toDeny(),
+        expect( abc_invitesC.doc(id).set(dNotMe) ).toDeny(),
+        expect( abc_invitesC.doc(badId).set(d) ).toDeny()
+      ]);
+    }
   });
 
   //--- InvitesC update rules ---

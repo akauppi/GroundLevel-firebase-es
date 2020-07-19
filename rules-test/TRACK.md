@@ -17,6 +17,8 @@
 >Honestly though at this point it's not quite ready for prime time so if you are needing your project to work I might stick with Babel. (in the above ticket, 7-Jul-20)
 
 
+<!-- hide: solved by adding `testEnvironment: 'node'` in Jest config.
+
 ## Jest: anomaly in handling `Uint8Array`
 
 Well described [here](https://github.com/firebase/firebase-js-sdk/issues/3096#issuecomment-637176584) (Firebase Issues, 2-Jun-20): 
@@ -38,3 +40,4 @@ Once closed, try removing the workardound by:
 - removing line about `__test-utils__` in `jest.config.cjs`
   - if still works, say farewell to `__test-utils__`
 
+-->

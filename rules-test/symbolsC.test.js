@@ -55,11 +55,13 @@ describe("'/symbols' rules", () => {
   });
 
   test('project members may read all symbols', async () => {
-    await expect( abc_symbolsC.doc("1").get() ).toAllow();
-    await expect( def_symbolsC.doc("1").get() ).toAllow();   // collaborator
+    await Promise.all([
+      expect( abc_symbolsC.doc("1").get() ).toAllow(),
+      expect( def_symbolsC.doc("1").get() ).toAllow(),   // collaborator
 
-    await expect( abc_symbolsC.doc("2-claimed").get() ).toAllow();
-    await expect( def_symbolsC.doc("2-claimed").get() ).toAllow();   // collaborator
+      expect( abc_symbolsC.doc("2-claimed").get() ).toAllow(),
+      expect( def_symbolsC.doc("2-claimed").get() ).toAllow()   // collaborator
+    ]);
   });
 
   //--- symbolsC create rules ---
@@ -72,14 +74,16 @@ describe("'/symbols' rules", () => {
     const d_claimed = uid => ({ ...d, claimed: { at: FieldValue.serverTimestamp(), by: uid } });
     const d_claimed_otherTime = uid => ({ ...d, claimed: { at: anyDate, by: uid } });
 
-    await expect( abc_symbolsC.doc("99").set( d )).toDeny();          // author, not claimed
+    await Promise.all([
+      expect( abc_symbolsC.doc("99").set( d )).toDeny(),          // author, not claimed
 
-    await expect( abc_symbolsC.doc("99").set( d_claimed("abc") )).toAllow();     // author, claimed
-    await expect( def_symbolsC.doc("99").set( d_claimed("def") )).toAllow();     // collaborator, claimed
+      expect( abc_symbolsC.doc("99").set( d_claimed("abc") )).toAllow(),     // author, claimed
+      expect( def_symbolsC.doc("99").set( d_claimed("def") )).toAllow(),     // collaborator, claimed
 
-    await expect( abc_symbolsC.doc("99").set( d_claimed_otherTime("abc") )).toDeny();     // author, claimed, not server time
+      expect( abc_symbolsC.doc("99").set( d_claimed_otherTime("abc") )).toDeny(),     // author, claimed, not server time
 
-    await expect( abc_symbolsC.doc("99").set( d_claimed("def") )).toDeny();     // author, claimed to another user
+      expect( abc_symbolsC.doc("99").set( d_claimed("def") )).toDeny()     // author, claimed to another user
+    ]);
   });
 
   //--- symbolsC update rules ---
@@ -88,10 +92,12 @@ describe("'/symbols' rules", () => {
     const s1_mod_valid = uid => ({ claimed: { by: uid, at: FieldValue.serverTimestamp() } });
     const s1_mod_otherTime = uid => ({ claimed: { by: uid, at: anyDate } });
 
-    await expect( abc_symbolsC.doc("1").update( s1_mod_valid("abc") )).toAllow();     // author
-    await expect( def_symbolsC.doc("1").update( s1_mod_valid("def") )).toAllow();     // collaborator
-    await expect( abc_symbolsC.doc("1").update( s1_mod_otherTime("abc") )).toDeny();     // bad time
-    await expect( abc_symbolsC.doc("1").update( s1_mod_valid("def") )).toDeny();     // claiming for another
+    await Promise.all([
+      expect( abc_symbolsC.doc("1").update( s1_mod_valid("abc") )).toAllow(),     // author
+      expect( def_symbolsC.doc("1").update( s1_mod_valid("def") )).toAllow(),     // collaborator
+      expect( abc_symbolsC.doc("1").update( s1_mod_otherTime("abc") )).toDeny(),     // bad time
+      expect( abc_symbolsC.doc("1").update( s1_mod_valid("def") )).toDeny()      // claiming for another
+    ]);
   });
 
   test('members may do changes to an already claimed (by them) symbol', async () => {
@@ -102,8 +108,10 @@ describe("'/symbols' rules", () => {
       assert(o.claimed.by == "def");
     });
 
-    await expect( def_symbolsC.doc("2-claimed").update( s2_mod )).toAllow();     // claimed by him
-    await expect( abc_symbolsC.doc("2-claimed").update( s2_mod )).toDeny();     // not claimed by them
+    await Promise.all([
+      expect( def_symbolsC.doc("2-claimed").update( s2_mod )).toAllow(),     // claimed by him
+      expect( abc_symbolsC.doc("2-claimed").update( s2_mod )).toDeny()      // not claimed by them
+    ]);
 
     await HYGIENE( "After setting to 999", def_symbolsC.doc("2-claimed"), o => {
       assert( o.size == 50 );
@@ -114,8 +122,10 @@ describe("'/symbols' rules", () => {
   test.skip('members may revoke a claim', async () => {
     const s2_revoke = { claimed: FieldValue.delete() };
 
-    await expect( def_symbolsC.doc("2-claimed").update( s2_revoke )).toAllow();     // claimed by him
-    await expect( abc_symbolsC.doc("2-claimed").update( s2_revoke )).toDeny();      // not claimed by them
+    await Promise.all([
+      expect( def_symbolsC.doc("2-claimed").update( s2_revoke )).toAllow(),     // claimed by him
+      expect( abc_symbolsC.doc("2-claimed").update( s2_revoke )).toDeny()       // not claimed by them
+    ]);
   });
 
   test('claim cannot be changed (e.g. extended)', async () => {
@@ -134,8 +144,10 @@ describe("'/symbols' rules", () => {
       assert(o.claimed && o.claimed.by == "def");
     });
 
-    await expect( def_symbolsC.doc("2-claimed").delete()).toAllow();     // claimed by him
-    await expect( abc_symbolsC.doc("2-claimed").delete()).toDeny();     // not claimed by them
+    await Promise.all([
+      expect( def_symbolsC.doc("2-claimed").delete()).toAllow(),     // claimed by him
+      expect( abc_symbolsC.doc("2-claimed").delete()).toDeny()      // not claimed by them
+    ]);
 
     await HYGIENE( "After delete", def_symbolsC.doc("2-claimed"), o => {
       assert( o.size == 50 );
