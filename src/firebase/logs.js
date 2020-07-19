@@ -3,16 +3,24 @@
 *
 * Create central logs. Used for being able to detect what's going on - and sometimes for debugging cases where
 * the page refreshes (e.g. authentication flow).
+*
+* Reference:
+*   - Write and view logs (Firebase functions docs)
+*     -> https://firebase.google.com/docs/functions/writing-and-viewing-logs
 */
+//import {functionsRegion} from "../config";
+
 assert(firebase.functions);
 
-import { functionsRegion } from '../config';
+const log = firebase.functions()
+  .httpsCallable('logs_v200719');
+  //
+  // in local dev: "http://localhost:5001/vue-rollup-example/europe-west3/logs_v200719"
+  // in prod: ...
 
-const log = firebase.app().functions(functionsRegion).httpsCallable('logs_v1');
-
-function logGen(level) {    // (string) => (string) => ()
-  return (msg) => {
-    log({level, msg})   // tbd. catch errors and report to the user
+function logGen(level) {    // (string) => (string [, object]) => ()
+  return (msg, opt) => {
+    log({level, msg, payload: opt})   // tbd. catch errors and report to the user
   }
 }
 

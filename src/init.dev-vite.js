@@ -15,6 +15,8 @@ import 'firebase/auth';
 import 'firebase/firestore';  // for lcoal mode
 import 'firebase/functions';  // -''-
 
+import { functionsRegion } from './config'
+
 // As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-beta.11 in dev mode),
 // let's place it as a global.
 //
@@ -66,11 +68,20 @@ function init({ apiKey, projectId, locationId, authDomain }) {    // called by '
 
   // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
   //
-  const localMode = import.meta.env.MODE == "dev_local";
-  if (localMode) {
-    const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = ["http://localhost:5001", "localhost:8080"];
+  const LOCAL = import.meta.env.MODE == "dev_local";
+  if (LOCAL) {
+    console.info("Initializing for LOCAL EMULATION");
+    const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = ["http://localhost:5001", "localhost:8080"];    // #cleanup
 
-    firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
+    // This is NOT a global, but only applies to this instance!
+    //
+    // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
+    //
+    // tbd. Author's expectation is that this is a one-time call, and applies to subsequent 'firebase.functions()'
+    //    instances.
+    //
+    firebase.functions()
+      .useFunctionsEmulator(DEV_FUNCTIONS_URL);
 
     firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
       host: DEV_FIRESTORE_HOST,

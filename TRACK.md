@@ -91,3 +91,16 @@ That is also connected.
 [https://github.com/firebase/firebase-js-sdk/issues/3315](https://github.com/firebase/firebase-js-sdk/issues/3315)
 
 That could be closed.
+
+
+## Firebase Functions: ES modules support?
+
+- [https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement](https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement)
+
+Note: We want to use node's native ES support. It's likely coming soon (Cloud functions have Node.js 12 in beta - if that is important Jul-2020), and there's little to win with playing with Babel.
+
+So ⛔️ to [this](https://codeburst.io/cloud-functions-for-firebase-with-compiled-code-e234e83462dc). 
+
+
+
+

@@ -1,5 +1,7 @@
 {
   "name": "functions",
+  "private": true,
+  "//type": "module",
   "//scripts": {
     "//serve": "firebase emulators:start --only functions",
     "//shell": "firebase functions:shell",
@@ -11,11 +13,10 @@
     "node": "10"
   },
   "dependencies": {
-    "firebase-admin": "^8.10.0",
-    "firebase-functions": "^3.7.0"
+    "firebase-admin": "^8.13.0",
+    "firebase-functions": "^3.8.0"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.0"
-  },
-  "private": true
+  }
 }

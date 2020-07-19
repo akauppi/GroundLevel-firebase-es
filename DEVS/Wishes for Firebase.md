@@ -485,6 +485,35 @@ diff().removedKeys() == ["removed"]
 
 More readable? :)
 
+## Firebase functions emulation: please print out the logging severity
+
+Logging with four different severities gives this on the local emulator:
+
+```
+[emul] >  We got up! { d: 42000 }		// error
+[emul] i  functions: Finished "logs_v200719" in ~1s
+[emul] i  functions: Finished "logs_v200719" in ~1s
+[emul] i  functions: Beginning execution of "logs_v200719"
+[emul] >  We got up! { b: 2 }   // info
+[emul] i  functions: Finished "logs_v200719" in ~1s
+[emul] i  functions: Beginning execution of "logs_v200719"
+[emul] i  functions: Beginning execution of "logs_v200719"
+[emul] >  We got up! { a: 1 }   // debug
+[emul] >  We got up! { c: 3 }   // warning
+```
+
+Wouldn't it be nice to show the severities, like this:
+
+```
+[emul] > ERROR: We got up! { d: 42000 }		// error
+[emul] > INFO: We got up! { b: 2 }   // info
+[emul] > DEBUG: We got up! { a: 1 }   // debug
+[emul] > WARN: We got up! { c: 3 }   // warning
+```
+
+You can allow people to pick their template in the `firebase.json` but this would do. Color coding (green/blue/orange/red) would be fantastic!
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

@@ -19,59 +19,110 @@
 *     -> https://firebase.google.com/docs/functions/callable
 */
 const functions = require('firebase-functions');
+//import * as functions from 'firebase-functions'   // tried with firebase 8.6.0
+/*
+$ npm run dev
+...
+⚠  Error [ERR_REQUIRE_ESM]: Must use import to load ES Module: /Users/asko/Git/GroundLevel-es6-firebase-web/functions/index.js
+  [emul] require() of ES modules is not supported.
+*/
 
 const myRegion = 'europe-west3';  // Frankfurt
+
+// Tell local emulation from being run in the cloud
+//
+const LOCAL = process.env["FUNCTIONS_EMULATOR"] == "true";    // "true" | ??? tbd. what's it in the cloud
+
+//console.log("ENV:", process.env);
 
 // Firebase Admin SDK
 //const admin = require('firebase-admin');
 //admin.initializeApp();
 
-/***
-// SAMPLE
-// Take the text parameter passed to this HTTP endpoint and insert it into
-// Cloud Firestore under the path /messages/:documentId/original
+// Logs, as "callable function"
 //
-exports.addMessage = functions.https.onRequest(async (req, res) => {
-  const original = req.query.text;
-
-  const writeResult = await admin.firestore().collection('messages').add({original: original});
-
-  res.json({result: `Message with ID: ${writeResult.id} added.`});
-});
-
-// SAMPLE
-// Listens for new messages added to /messages/:documentId/original and creates an
-// uppercase version of the message to /messages/:documentId/uppercase
-//
-exports.makeUppercase = functions.firestore.document('/messages/{documentId}')
-  .onCreate((snap, context) => {
-    // Grab the current value of what was written to Cloud Firestore
-    const original = snap.data().original;
-
-    // Access the parameter `{documentId}` with `context.params`
-    console.log('Uppercasing', context.params.documentId, original);
-
-    const uppercase = original.toUpperCase();
-
-    // Setting an 'uppercase' field in Cloud Firestore document returns a Promise.
-    return snap.ref.set({uppercase}, {merge: true});
-  });
-***/
-
-/***
-// Logging
-//
-// POST /logs
-//    body: { level: "debug"|"info"|"warn"|"error", msg: string }
-//
-// Usage:
-//    <<
-//      curl -X POST -H "Content-Type:application/json" $ENDPOINT -d '{"level":"debug", "msg":"Hey Earth!"}'
-//    <<
-//
-exports.logs = functions
+// {
+//    level: "debug"|"info"|"warn"|"error"
+//    msg: string
+//    payload: object   //optional
+// }
+exports.logs_v200719 = functions
+//const logs_v200719 = functions
   .region(myRegion)
-  .https.onRequest((req, resp) => {
+  .https.onCall(({ level, msg, payload }, context) => {
+
+    if (LOCAL) {
+      msg = `[${level.toUpperCase()}] ${msg}`;
+    }
+
+    switch (level) {
+      case "debug":
+        console.debug(msg, payload);
+        break;
+      case "info":
+        console.info(msg, payload);
+        break;
+      case "warn":
+        console.warn(msg, payload);
+        break;
+      case "error":
+        console.error(msg, payload);
+        break;
+      default:
+        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
+    }
+
+    return "";
+  });
+
+// Legacy
+//
+// Sample on how to keep old versions.
+//
+// {
+//    level: "debug"|"info"|"warn"|"error"
+//    msg: string
+// }
+// DEPRECATED 19-Jul-2020
+exports.logs_v1 = functions
+//const logs_v1 = functions
+  .region(myRegion)
+  .https.onCall(({ level, msg }, context) => {
+
+    console.warn("Deprecated function called: 'logs_v1'");
+    switch (level) {
+      case "debug":
+        console.debug(msg);
+        break;
+      case "info":
+        console.info(msg);
+        break;
+      case "warn":
+        console.warn(msg);
+        break;
+      case "error":
+        console.error(msg);
+        break;
+      default:
+        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
+    }
+
+    return "";
+  });
+
+
+/***  // keep as sample of using REST API
+ // POST /logs
+ //    body: { level: "debug"|"info"|"warn"|"error", msg: string }
+ //
+ // Usage:
+ //    <<
+ //      curl -X POST -H "Content-Type:application/json" $ENDPOINT -d '{"level":"debug", "msg":"Hey Earth!"}'
+ //    <<
+ //
+ exports.logs = functions
+ .region(myRegion)
+ .https.onRequest((req, resp) => {
 
   const level = req.body.level;
   const msg = req.body.msg;
@@ -96,30 +147,11 @@ exports.logs = functions
 
   resp.status(200).send("");
 });
+ ***/
+
+/*** ES6 to-come
+export {
+  logs_v200719,
+  logs_v1
+}
 ***/
-
-// Logs, as "callable function"
-//
-exports.logs_v1 = functions
-  .region(myRegion)
-  .https.onCall(({ level, msg }, context) => {
-
-    switch (level) {
-      case "debug":
-        console.debug(msg);
-        break;
-      case "info":
-        console.info(msg);
-        break;
-      case "warn":
-        console.warn(msg);
-        break;
-      case "error":
-        console.error(msg);
-        break;
-      default:
-        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
-    }
-
-    return "";
-  });

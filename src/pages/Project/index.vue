@@ -41,7 +41,7 @@
 <script>
   import { onUnmounted, computed } from 'vue';
 
-  import { projectSub } from '../../refs/projectSub'
+  import { projectSub } from '../../refs/project'
   import { symbolsSub } from '../../refs/projectSymbols'
   import { membersGen } from '../../refs/projectMembers'
 
