@@ -67,6 +67,7 @@ function getSessionId() {
 */
 async function session() {    // () => Promise of Firestore-like
   const sessionId = getSessionId();
+  console.debug("Using session: ", sessionId);
 
   // Unlike in the Firestore API, we allow authentication to be set after collection.
   //

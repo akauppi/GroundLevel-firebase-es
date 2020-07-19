@@ -9,5 +9,6 @@ module.exports = {
   //
   testEnvironment: 'node',
 
-  //testTimeout: 8000,    // default 5000 _per test_ is mostly fine
+  // Default is 5000. None of our tests take that long; fail fast.
+  testTimeout: 2000
 };

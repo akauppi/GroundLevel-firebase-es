@@ -18,6 +18,10 @@ import { test, expect, describe, beforeAll } from '@jest/globals'
 /*
 * Run provided tests either after each other, or in parallel. Here to see whether this matters, at all.
 *
+* Results:
+*   - 'Promise.all' (parallel) is slightly (-10%) faster than sequential. We should keep using that, since conceptually
+*     the test steps are always unrelated (since we don't intend to modify the database).
+*
 * Note:
 *   - replace by 'Promise.all' once we know the results
 */
