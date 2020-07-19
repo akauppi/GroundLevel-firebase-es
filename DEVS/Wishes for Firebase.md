@@ -485,33 +485,72 @@ diff().removedKeys() == ["removed"]
 
 More readable? :)
 
-## Firebase functions emulation: please print out the logging severity
+## Firebase functions: please print out the logging severity
 
-Logging with four different severities gives this on the local emulator:
+Logging with four different severities gives this on the local emulator (and same online):
 
 ```
-[emul] >  We got up! { d: 42000 }		// error
+[emul] >  We got up! { d: 42000 }		// <-- console.error()
 [emul] i  functions: Finished "logs_v200719" in ~1s
 [emul] i  functions: Finished "logs_v200719" in ~1s
 [emul] i  functions: Beginning execution of "logs_v200719"
-[emul] >  We got up! { b: 2 }   // info
+[emul] >  We got up! { b: 2 }   // <-- console.info()
 [emul] i  functions: Finished "logs_v200719" in ~1s
 [emul] i  functions: Beginning execution of "logs_v200719"
 [emul] i  functions: Beginning execution of "logs_v200719"
-[emul] >  We got up! { a: 1 }   // debug
-[emul] >  We got up! { c: 3 }   // warning
+[emul] >  We got up! { a: 1 }   // <-- console.debug()
+[emul] >  We got up! { c: 3 }   // <-- console.warn()
 ```
 
 Wouldn't it be nice to show the severities, like this:
 
 ```
-[emul] > ERROR: We got up! { d: 42000 }		// error
-[emul] > INFO: We got up! { b: 2 }   // info
-[emul] > DEBUG: We got up! { a: 1 }   // debug
-[emul] > WARN: We got up! { c: 3 }   // warning
+[emul] > ERROR: We got up! { d: 42000 }	
+[emul] > INFO: We got up! { b: 2 }
+[emul] > DEBUG: We got up! { a: 1 }
+[emul] > WARN: We got up! { c: 3 }
 ```
 
 You can allow people to pick their template in the `firebase.json` but this would do. Color coding (green/blue/orange/red) would be fantastic!
+
+## Firebase functions: custom logs don't get stored with their levels?
+
+Here are some logs from Firebase console > Functions > Logs:
+
+>![](.images/logs-online.png)
+
+These logs (the "We got up!") are produced with different severity levels. When using the filters, however:
+
+>![](.images/logs-filters.png)
+
+Only the last "Debug (all levels)" shows the custom entries.
+
+Isn't this weird? 
+
+(19-Jul-20)
+
+
+## Firebase functions emulation: please allow region parameter (BUG)
+
+```
+const fns = window.LOCAL ? firebase.app().functions(/*functionsRegion*/) :
+  firebase.app().functions(functionsRegion);
+```
+
+Application code now needs to have the above condition (firebase-tools 8.6.0, JavaScript client 7.16.1).
+
+- With the region parameter, emulated call just disappears (no logging, no invocation)
+
+This seems to have been tested only with default region, in which case identical code can be used.
+
+
+## Firebase emulation: expose in the client, whether it's running against local emulator
+
+We now jump through hoops to get the front end know that it's running against an emulator.
+
+The JavaScript library probably knows this. Can it somehow tell it to us?
+
+This would mean the `window.LOCAL` mode can be taken from the library, instead of the build system and `import.meta.env.MODE`.
 
 
 ## References

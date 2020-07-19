@@ -51,9 +51,8 @@ exports.logs_v200719 = functions
   .region(myRegion)
   .https.onCall(({ level, msg, payload }, context) => {
 
-    if (LOCAL) {
-      msg = `[${level.toUpperCase()}] ${msg}`;
-    }
+    // also in the cloud, the level is not marked to the logs, why? tbd.
+    msg = `[${level.toUpperCase()}] ${msg}`;
 
     switch (level) {
       case "debug":

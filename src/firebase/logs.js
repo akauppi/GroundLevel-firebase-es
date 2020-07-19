@@ -8,12 +8,20 @@
 *   - Write and view logs (Firebase functions docs)
 *     -> https://firebase.google.com/docs/functions/writing-and-viewing-logs
 */
-//import {functionsRegion} from "../config";
+import {functionsRegion} from "../config";
 
 assert(firebase.functions);
 
-const log = firebase.functions()
-  .httpsCallable('logs_v200719');
+// In order for local emulation to work, there must NOT be any regions.
+//
+// NOTE: If you give emulated a region, things will just silently stop working! (would be appropriate to get browser
+//    console errors)
+//
+const fns = window.LOCAL ? firebase.app().functions(/*functionsRegion*/) :
+  firebase.app().functions(functionsRegion);
+
+const log = fns.httpsCallable('logs_v200719');
+
   //
   // in local dev: "http://localhost:5001/vue-rollup-example/europe-west3/logs_v200719"
   // in prod: ...

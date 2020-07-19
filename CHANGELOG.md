@@ -1,5 +1,9 @@
 # Changelog
 
+## 19-Jul-20
+
+- Central logging works both under local emulation and online.
+
 ## 25-Jun-20
 
 - Seeding data to `npm run dev:local`

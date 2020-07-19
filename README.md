@@ -86,10 +86,9 @@ Developed with Firebase 8.4.3 on macOS; Node 14.4
 
 ### Firebase plan
 
-From Aug 2020 onwards, Firebase requires you to sign up to the "Blaze" plan, in order to deploy Cloud Functions. This means you need to give a credit card but does not necessarily introduce cost.
+Firebase requires you to sign up to the "Blaze" plan, in order to deploy Cloud Functions. This means you need to give a credit card but does not necessarily introduce cost.
 
 You can still use this repo for local development and training with the "Spark" (free) plan, and an emulator.
-
 
 ### Firebase project
 

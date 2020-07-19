@@ -101,6 +101,4 @@ Note: We want to use node's native ES support. It's likely coming soon (Cloud fu
 
 So ⛔️ to [this](https://codeburst.io/cloud-functions-for-firebase-with-compiled-code-e234e83462dc). 
 
-
-
-
+- [ ] Try `engines: { node: "12" }` in `functions/package.json`
