@@ -93,12 +93,15 @@ That is also connected.
 That could be closed.
 
 
-## Firebase Functions: ES modules support?
+## Firebase Functions: ES modules support (node.js >= 13.2)
 
-- [https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement](https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement)
+At the moment (Jul 2020), one can use ECMAscript modules in Firebase Functions with Babel.
 
-Note: We want to use node's native ES support. It's likely coming soon (Cloud functions have Node.js 12 in beta - if that is important Jul-2020), and there's little to win with playing with Babel.
+Node.js 12 is in "beta". 
 
-So ⛔️ to [this](https://codeburst.io/cloud-functions-for-firebase-with-compiled-code-e234e83462dc). 
+When node.js >= 13.2 is available, we can transition `functions` code to use ES modules. Don't feel like playing with Babel, in the mean time.
 
-- [ ] Try `engines: { node: "12" }` in `functions/package.json`
+- [https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement]()
+
+
+  
