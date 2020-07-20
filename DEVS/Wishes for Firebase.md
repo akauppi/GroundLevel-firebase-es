@@ -543,6 +543,15 @@ Application code now needs to have the above condition (firebase-tools 8.6.0, Ja
 
 This seems to have been tested only with default region, in which case identical code can be used.
 
+---
+
+The current (20-Jul-20) recommended way for initializing Firebase Functions for emulation is yet different (will report this to them): <sub>[source](https://firebase.google.com/docs/functions/callable#initialize_the_client_sdk)</sub>
+
+```
+var functions = firebase.functions();
+```
+
+
 
 ## Firebase emulation: expose in the client, whether it's running against local emulator
 

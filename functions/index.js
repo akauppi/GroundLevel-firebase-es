@@ -20,20 +20,19 @@
 */
 const functions = require('firebase-functions');
 //import * as functions from 'firebase-functions'   // tried with firebase 8.6.0
-/*
-$ npm run dev
-...
-⚠  Error [ERR_REQUIRE_ESM]: Must use import to load ES Module: /Users/asko/Git/GroundLevel-es6-firebase-web/functions/index.js
-  [emul] require() of ES modules is not supported.
-*/
-
-const myRegion = 'europe-west3';  // Frankfurt
 
 // Tell local emulation from being run in the cloud
 //
 const LOCAL = process.env["FUNCTIONS_EMULATOR"] == "true";    // "true" | ??? tbd. what's it in the cloud
 
 //console.log("ENV:", process.env);
+
+// Note: You can run functions in multiple regions, and some functions in some etc. But for a start, it's likely best
+//    to keep them in one, near you.
+//
+// Sad that the default region needs to be in the code. There is no configuration for it. 😢
+//
+const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 
 // Firebase Admin SDK
 //const admin = require('firebase-admin');
@@ -46,26 +45,24 @@ const LOCAL = process.env["FUNCTIONS_EMULATOR"] == "true";    // "true" | ??? tb
 //    msg: string
 //    payload: object   //optional
 // }
-exports.logs_v200719 = functions
-//const logs_v200719 = functions
-  .region(myRegion)
+exports.logs_v200719 = regionalFunctions
+//const logs_v200719 = regionalFunctions
   .https.onCall(({ level, msg, payload }, context) => {
 
-    // also in the cloud, the level is not marked to the logs, why? tbd.
-    msg = `[${level.toUpperCase()}] ${msg}`;
+    const { debug, info, warn, error } = functions.logger;
 
     switch (level) {
       case "debug":
-        console.debug(msg, payload);
+        debug(msg, payload);
         break;
       case "info":
-        console.info(msg, payload);
+        info(msg, payload);
         break;
       case "warn":
-        console.warn(msg, payload);
+        warn(msg, payload);
         break;
       case "error":
-        console.error(msg, payload);
+        error(msg, payload);
         break;
       default:
         throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
@@ -83,9 +80,8 @@ exports.logs_v200719 = functions
 //    msg: string
 // }
 // DEPRECATED 19-Jul-2020
-exports.logs_v1 = functions
-//const logs_v1 = functions
-  .region(myRegion)
+exports.logs_v1 = regionalFunctions
+//const logs_v1 = regionalFunctions
   .https.onCall(({ level, msg }, context) => {
 
     console.warn("Deprecated function called: 'logs_v1'");

@@ -123,6 +123,19 @@ There is no GUI support for building a document with `FieldValue`s (e.g. server 
 
 
 
+## Viewing logs online
 
+Easiest to get to the online logs:
 
+```
+$ firebase functions:log --only logs_v200719 --open
+```
+
+Click `Preview`.
+
+![](.images/logs-viewer-preview.png)
+
+Nice! 😀
+
+See filtering info -> [Logs Based Metrics](https://firebase.google.com/docs/functions/writing-and-viewing-logs#logs-based_metrics) (Firebase docs)
 
