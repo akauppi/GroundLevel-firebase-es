@@ -21,11 +21,9 @@
 const functions = require('firebase-functions');
 //import * as functions from 'firebase-functions'   // tried with firebase 8.6.0
 
-// Tell local emulation from being run in the cloud
+// Tell local emulation from being run in the cloud. This is exposed to the front end.
 //
-const LOCAL = process.env["FUNCTIONS_EMULATOR"] == "true";    // "true" | ??? tbd. what's it in the cloud
-
-//console.log("ENV:", process.env);
+const LOCAL = !! process.env["FUNCTIONS_EMULATOR"];    // "true" | undefined
 
 // Note: You can run functions in multiple regions, and some functions in some etc. But for a start, it's likely best
 //    to keep them in one, near you.
@@ -150,3 +148,16 @@ export {
   logs_v1
 }
 ***/
+
+
+/*
+* Expose the emulated or not to the front end (called at app launch)
+*
+* Note: Only used in dev mode (not production).
+*/
+exports.isDevLocal = regionalFunctions
+  //const isLocal = regionalFunctions
+  .https.onCall(( context) => {
+
+    return LOCAL;   // 'true' if under local emulation
+  });

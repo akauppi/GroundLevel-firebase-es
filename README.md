@@ -415,6 +415,9 @@ $ firebase serve --only hosting --port 3002
 
 ### Deploy
 
+Deploying Cloud Functions uses the `functions/package-lock.json`. While we don't keep the file for the main project, it seemed like a good thing, not to supress it there. The idea is to make sure local emulation and Cloud Function run with the same node.js dependencies.
+
+
 ```
 $ firebase deploy
 
@@ -545,3 +548,19 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 - [Using ES Modules in the Browser Today](https://www.sitepoint.com/using-es-modules/) (blog, May 2018)
 - [Using Native JavaScript Modules in Production Today](https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/) (blog, Aug 2019)
    - this step-by-step guidance was instrumental in making the production build work with ES modules. Brilliant write!!! 💎
+
+### Online forums
+
+- [Firebase developers](https://discord.gg/BN2cgc3) (Discord server)
+
+### Other Firebase/Vue application templates
+
+- [Firelayer](https://firelayer.io)
+  - seems visually pleasing!
+  - likely Vue.js 2
+  - likely uses bundling
+
+<!-- tbd. When someone has checked Firelayer in detail, and can make a brief (2 sentence!) summary on how it differs from GroundLevel, that is a welcome #contribution!
+-->
+
+ 

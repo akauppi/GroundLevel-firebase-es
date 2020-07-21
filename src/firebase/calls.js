@@ -3,6 +3,7 @@
 *
 * Calls we can do to cloud functions.
 */
+import {fns} from './_common'
 
 /*
 * Get UI information about a certain other user (that we work together with in a given project).
@@ -24,3 +25,21 @@ async function userUIinfoPromFAKE(projectId, uid) {    // (string, string) => Pr
 export {
   userUIinfoPromFAKE as userUIinfoProm
 }
+
+/***REMOVE
+/*
+* Is the back-end emulated, or genuine?
+*
+* Used for showing the "EMULATION MODE" banner. Only used in dev mode.
+*_/
+function isDevLocal() {
+  return fns.httpsCallable('isDevLocal');
+}
+***/
+
+export {
+  userUIinfoPromFAKE,
+  //isDevLocal
+}
+
+
