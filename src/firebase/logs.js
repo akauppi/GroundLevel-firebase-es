@@ -8,9 +8,9 @@
 *   - Write and view logs (Firebase functions docs)
 *     -> https://firebase.google.com/docs/functions/writing-and-viewing-logs
 */
-import {fns} from './_common'
+import {fns} from './fns'
 
-const log = fns.httpsCallable('logs_v200719');
+const log = fns.httpsCallable('logs_v190720');
 
   //
   // in local dev: "http://localhost:5001/vue-rollup-example/europe-west3/logs_v200719"

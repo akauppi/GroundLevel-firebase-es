@@ -19,18 +19,21 @@
 *   - Firebase User object documentation
 *     -> https://firebase.google.com/docs/reference/js/firebase.User.html
 */
-import { fbUser } from '../firebase/auth.js';
 import { computed } from 'vue';
 
-const user = computed( () => {   // { displayName: string, uid: string }
-  if (fbUser.value) {
-    const o = fbUser.value;
-    return  {    // expose a controlled subset (minimalistic)
+import { authRef } from '../firebase/authRef.js';
+
+const user = computed( () => {   // undefined | false | { displayName: string, uid: string }
+  const a = authRef.value;  // undefined | false | { displayName: string, uid: string, ... }
+
+  if (a) {
+    const o = a;
+    return {    // expose a controlled subset (minimalistic)
       displayName: o.displayName,
       uid: o.uid
     };
   } else {
-    return fbUser.value;    // false|null
+    return a;    // undefined|false
   }
 });
 

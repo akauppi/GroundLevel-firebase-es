@@ -217,6 +217,15 @@ const members = reactive();
 -->
 
 
+## An `async setup()`?
+
+Vue implementation (3.0.0) requires the `setup` function to be synchronous.
+
+There are likely reasons for this. However, could it be possible to allow `async` and then just wait for that Promise, until proceeding further?
+
+This would simplify certain use cases, e.g. the access of Router in `AppProfile`.
+
+
 
 
 

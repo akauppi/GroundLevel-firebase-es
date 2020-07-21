@@ -3,18 +3,16 @@
 *
 * Reactive tracking of a certain project.
 */
-import { shallowReactive } from 'vue';
+import { shallowReactive } from 'vue'
 
 import { convertDateValue } from "../firebase/utils"
 
 const db = firebase.firestore();
 
-// Allow just one project to be subscribed, at a time. This is a safeguard against resource leak.
+// Allow just one project to be subscribed, at a time. Safeguard against unnecessarily watching Firestore data.
 //
 let unsub;
-
-if (unsub) {
-  // Happens because of Hot Module Reload, in development.
+if (unsub) {  // Happens because of Hot Module Reload, in development.
 
   // tbd. In development, WARN (and call 'unsub').
   //    In production, FAIL

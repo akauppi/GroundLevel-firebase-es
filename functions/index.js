@@ -43,8 +43,8 @@ const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 //    msg: string
 //    payload: object   //optional
 // }
-exports.logs_v200719 = regionalFunctions
-//const logs_v200719 = regionalFunctions
+exports.logs_v190720 = regionalFunctions
+//const logs_v190720 = regionalFunctions
   .https.onCall(({ level, msg, payload }, context) => {
 
     const { debug, info, warn, error } = functions.logger;
@@ -65,8 +65,6 @@ exports.logs_v200719 = regionalFunctions
       default:
         throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
     }
-
-    return "";
   });
 
 // Legacy
@@ -99,12 +97,28 @@ exports.logs_v1 = regionalFunctions
       default:
         throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
     }
-
-    return "";
   });
 
 
-/***  // keep as sample of using REST API
+// Something went awfully wrong.
+//
+// A central place to catch unexpected circumstances in already deployed code.
+//
+// Consider this a relay. We can change where to inform, e.g. devops monitoring tools directly with their APIs.
+//
+// {
+//    msg: string
+//    ex: exception object
+// }
+//
+exports.fatal_v210720 = regionalFunctions
+  .https.onCall(({ msg, ex }, context) => {
+
+    functions.logger.error(`FATAL: ${msg}`, ex);    // keep an eye - is that good?
+  });
+
+
+/***  // sample of using REST API
  // POST /logs
  //    body: { level: "debug"|"info"|"warn"|"error", msg: string }
  //
@@ -150,14 +164,17 @@ export {
 ***/
 
 
+/*** UNNEEDED: was chicken-egg
 /*
 * Expose the emulated or not to the front end (called at app launch)
 *
 * Note: Only used in dev mode (not production).
-*/
+*_/
 exports.isDevLocal = regionalFunctions
   //const isLocal = regionalFunctions
   .https.onCall(( context) => {
 
     return LOCAL;   // 'true' if under local emulation
   });
+***/
+

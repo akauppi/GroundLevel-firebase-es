@@ -13,7 +13,7 @@
   -->
   <nav class="app-profile fixed-top-right">
     <div id="user-name" @click.stop="toggleMenu">
-      {{ user.value ? (user.value.displayName || 'anonymous user') : '...' }}
+      {{ user ? (user.displayName || 'anonymous user') : '...' }}
       <!-- triangle -->
       <svg viewBox="0 0 1030 638" width="10">
         <path d="M1017 68L541 626q-11 12-26 12t-26-12L13 68Q-3 49 6 24.5T39 0h952q24 0 33 24.5t-7 43.5z" />
@@ -115,48 +115,22 @@
 </style>
 
 <script>
-  // We expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
+  import { ref, onMounted } from 'vue'
 
-  import { user } from '../refs/user.js';
-  import { routerProm } from '../router.js';
+  import { user } from '../refs/user.js'
+  import { routerProm } from '../router.js'
+  import {reportFatal} from "../monitoring/reportFatal";
 
-  /*
-  * Sign out.
-  */
-  async function signOut() {
-    const fa = firebase.auth();
-    await fa.signOut();
+  // Expect the user to be signed in and not to change, during our lifespan (there's no UI option to change the user).
 
-    /*** REMOVE??
-    // Picked up somewhere that signing out could be done such (not sure if the later '.onAuthStateChanged' is needed).
-    //
-    const unsub = fa.onAuthStateChanged(() => {
-      unsub();
-      // Note: We need to fly directly to sign-in page (not e.g. '/'). Pushing like this seems to bypass route guards.
-      router.push('/signin');
-    });
-    ***/
+  const isOpen = ref(false);
 
-    (await routerProm).push('/signin');
+  function toggleMenu() {
+    isOpen.value = !isOpen.value;
   }
 
-  export default {
-    name: 'AppProfile',
-    data() {
-      return {
-        isOpen: false,
-
-        items: [    // read-only constant   (tbd. is there a better way, in Vue 2? #help)
-          { title: "Sign out", to: this.signOut }
-        ]
-      }
-    },
-    computed: {
-      user: () => user
-    },
-    mounted() {
-      const vm = this;
-
+  function setup() {
+    onMounted(() => {
       // If taps/clicks are found at the body level, close the menu. This relies on rest of the app letting such clicks
       // flow through.
       //
@@ -164,16 +138,32 @@
       //    throughout the app's life span. #help
       //
       document.addEventListener("click", (ev) => {
-        vm.isOpen = false;
+        isOpen.value = false;
       }, {
         passive: true   // we never will 'preventDefault()' (helps browser optimize)
       })
-    },
-    methods: {
-      signOut,
-      toggleMenu() {
-        this.isOpen = !this.isOpen;
-      }
+    });
+
+    async function signOut() {
+      firebase.auth().signOut().catch( ex => {
+        reportFatal("Sign out failed", ex);
+      });
+
+      const router = await routerProm;    // must wait for it here -> 'setup' must be synchronous (Vue.js 3.0)
+      router.push('/signin');
     }
+
+    return {
+      isOpen,
+      items: [{ title: "Sign out", to: signOut }],
+      signOut,
+      toggleMenu,
+      user
+    }
+  }
+
+  export default {
+    name: 'AppProfile',
+    setup
   };
 </script>

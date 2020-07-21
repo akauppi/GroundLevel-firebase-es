@@ -16,10 +16,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 */
 
 // Exercise central logging - trial ALL levels
-logs.debug("We got up!", {a:1});
+if (false) {  // they all get to the logs
+  logs.debug("We got up!", {a:1});
+  logs.info("We got up!", {b:2});
+  logs.warn("We got up!", {c:3});
+  logs.error("We got up!", {d:42000});
+}
 logs.info("We got up!", {b:2});
-logs.warn("We got up!", {c:3});
-logs.error("We got up!", {d:42000});
 
 document.title = appTitle;
 

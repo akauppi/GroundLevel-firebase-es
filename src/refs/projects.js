@@ -3,21 +3,25 @@
 *
 * Reactive 'projects' map, reflecting both database and sign-in/out changes.
 */
+import {reportFatal} from "../monitoring/reportFatal"
+
 assert(firebase.firestore);
 
 const db = firebase.firestore();
 
-import { reactive, watchEffect } from 'vue';
-import { user } from '../refs/user.js';
-import { convertDateFieldsDEPRECATED, unshot } from "../firebase/utils";
+import { shallowReactive, watchEffect } from 'vue'
+import { authRef } from '../firebase/authRef'
+import { convertDateValue, unshot } from "../firebase/utils"
 
-// The same reactive table is for all users. We just wipe it like a restaurant table. 🍽
+// The same reactive table is for all logins. We just wipe it like a restaurant table. 🍽
 //
 // Used by: 'Home.vue' for populating the grid of projects
 //
 // Projects marked 'removed' are not included.
 //
-const projects = reactive( new Map() );      // <project-id>: { title: string, created: datetime, lastVisited: datetime }
+const projects = shallowReactive( new Map() );
+  //
+  // { <project-id>: { title: string, created: Date, lastVisited: Date, authors: Array of uid (>=1), collaborators: Array of uid (>=1) }
 
 function handleDoc(doc) {
   const id = doc.id;
@@ -25,10 +29,17 @@ function handleDoc(doc) {
   // Projects don't get directly deleted (unless someone does it manually); they get a '.removed' field added
   // to them (or removed, to resurrect).
   //
-  const tmp = doc.exists ? convertDateFieldsDEPRECATED(doc.data(), "created") : null;  // with optional '.removed'
+  const raw = doc.exists ? doc.data() : null;  // with optional '.removed'
 
-  if (tmp && !('removed' in tmp)) {
-    projects.set(id, tmp);
+  if (raw && !('removed' in raw)) {
+    const o = {
+      title: raw.title,
+      created: convertDateValue(raw.created),
+      //lastVisited: null,    // not there, yet
+      authors: raw.authors,
+      collaborators: raw.authors
+    };
+    projects.set(id, o);
   } else {
     projects.delete(id);
   }
@@ -36,14 +47,12 @@ function handleDoc(doc) {
 
 // State from earlier user change
 //
-let unsub = null;  // () => () | null
+let unsub;    // undefined | () => () | null
 
 const projectsC = db.collection('projects');
 
-/*
-* Watch the 'user' changes.
-*/
 watchEffect(() => {    // when the user changes
+  const auth = authRef.value;
 
   // Firestore notes:
   //  - Need to start two watches - there is no 'or' compound query.
@@ -52,30 +61,28 @@ watchEffect(() => {    // when the user changes
   //
   //    This may be reason enough to place removed projects to a separate collection. #rework #data
 
-  console.debug("User change seen in 'projects': ", user, user.value);
+  console.debug("User change seen in 'projects': ", auth);
 
-  if (user.value === null) {    // initial call (authentication unknown)
+  if (auth) {   // new user, start tracking
+    assert(!unsub);   // no ongoing watch
 
-  } else if (user.value) {   // new user, start tracking
-    assert(unsub === null);   // initial call never takes here
-
-    const uid = user.value.uid;
+    const uid = auth.uid;
     try {
-      const a = projectsC.where('authors', 'array-contains', uid).onSnapshot(unshot(handleDoc));
-      const b = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(unshot(handleDoc));
-      unsub = () => { a(); b() }
-    } catch (err) {
-      console.error("!!!", err);
-      debugger;
+      const unsub1 = projectsC.where('authors', 'array-contains', uid).onSnapshot(unshot(handleDoc));
+      const unsub2 = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(unshot(handleDoc));
+      unsub = () => { unsub1(); unsub2() }
+    } catch (ex) {
+      reportFatal("Subscribing to 'projectsC' failed:", ex)
     }
 
-  } else {  // user signed out - wipe the projects and stop tracking!
-    assert( user.value === false );
-
+  } else if (auth === false) {  // user signed out - wipe the projects and stop tracking!
     // 'unsub' can be 'null' or non-null.
     projects.clear()
     if (unsub) unsub();
     unsub = null;
+
+  } else {
+    assert(auth === undefined);   // initial call (ignore)
   }
 });
 

@@ -1,5 +1,5 @@
 /*
-* src/firebase/auth.js
+* src/firebase/authRef.js
 *
 * Application interfacing to the authentication: is the user signed in, information about them.
 *
@@ -10,10 +10,8 @@
 *     implementation - making sure pages don't get accessed before Firebase knows whether the user is "in" our "out".
 *
 *     For our users, this means:
-*       - 'fbUser.value' may be 'null' in certain circumstances but it will shortly (~ 300..500ms) turn to 'false' or
+*       - 'userRef.value' may be 'null' in certain circumstances but it will shortly (~ 300..500ms) turn to 'false' or
 *         an object.
-*
-*     Note: We CAN make a custom 'ref' that would warn when authentication is not known. :)  (see comments below)
 *
 * References:
 *   - firebase.auth.Auth (Firebase docs)
@@ -28,7 +26,7 @@ import { ref } from 'vue';
 //
 //    See -> https://composition-api.vuejs.org/api.html#customref
 
-const fbUser = ref(null);   // until auth has been established
+const authRef = ref();   // '.value' is 'undefined', until auth has been established
 
 // Signed in:   (as documented in -> https://firebase.google.com/docs/reference/js/firebase.User.html#displayname )
 //  {
@@ -63,9 +61,9 @@ firebase.auth().onAuthStateChanged( (o) => {
   }
 
   if (o !== null) {   // user signed in
-    fbUser.value = o
+    authRef.value = o
   } else {
-    fbUser.value = false    // no active user
+    authRef.value = false    // no active user
   }
 }, (err) => {
   console.error("Error in Firebase auth", err);   // tbd. is this enough or we want some error banner?
@@ -74,5 +72,5 @@ firebase.auth().onAuthStateChanged( (o) => {
 console.log("Started auth checking...", performance.now() - t0);
 
 export {
-  fbUser
+  authRef
 };

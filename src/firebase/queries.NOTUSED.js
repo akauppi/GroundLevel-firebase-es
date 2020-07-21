@@ -3,6 +3,8 @@
 *
 * These are the use cases we have against the Firestore data. Having them in one place helps modeling the data.
 */
+assert(firebase.firestore && firebase.auth);
+
 const db = firebase.firestore();
 
 // Tokens that Firestore uses:
@@ -60,22 +62,6 @@ function promoteToAuthor(projID, targetUid) {
     collaborators: FieldValue.arrayRemove(targetUid)
   });
   return prom;
-}
-
-/*
-* Watch a particular project
-*
-* If the project is removed, a 'null' will be passed to the watcher.
-*/
-function watchProject(projID, f) {  // (string, ({ ..project-doc } | null) => ()) => () => ()
-
-  const unsub = projectsC.doc(projID).onSnapshot( docSnapshot => {
-    const tmp = doc.exists ? convertDateFields( doc.data(), "created" ) : null;
-    const data = tmp && (! 'removed' in tmp) ? tmp : null;
-    f(data);
-  });
-
-  return unsub;
 }
 
 /*
@@ -252,9 +238,10 @@ function informWithoutIdGen(f) {   // ((string, {...}) => ()) => ((QuerySnapshot
   };
 }
 
+/***REMOVE
 /*
 * Firestore client provides timestamps as '{ seconds: integer, nanos: 0 }'. Let's convert those to JavaScript 'Date'.
-*/
+*_/
 function convertDateFields( obj, ...fields ) {
   const o2 = {};   // collect date fields here
 
@@ -269,10 +256,9 @@ function convertDateFields( obj, ...fields ) {
 
   return { ...obj, ...o2 }    // merge the objects
 }
+***/
 
 export {
-  //REMOVE: watchMyProjects,
-  projects,
   watchMyInvites
 }
 

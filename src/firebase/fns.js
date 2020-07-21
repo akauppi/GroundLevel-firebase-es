@@ -1,7 +1,8 @@
 /*
-* src/firebase/_common.js
+* src/firebase/fns.js
 *
-* Code used by any cloud function modules.
+* Code because Firebase 'functions' needs to be set up differently for local emulation, or working against cloud
+* (when regions are used).
 */
 import {functionsRegion} from "../config"
 

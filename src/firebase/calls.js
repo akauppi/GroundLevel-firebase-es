@@ -3,7 +3,7 @@
 *
 * Calls we can do to cloud functions.
 */
-import {fns} from './_common'
+import {fns} from './fns'
 
 /*
 * Get UI information about a certain other user (that we work together with in a given project).
