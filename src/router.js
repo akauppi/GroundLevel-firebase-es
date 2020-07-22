@@ -115,7 +115,6 @@ routerProm = currentFirebaseUserProm().then( _ => {
       console.log("Wanting to go to (but not signed in):", to);  // DEBUG
 
       if (to.path === '/') {    // no need to clutter the URL with '?final=/'
-        // WARN: "No match for undefined" - why??
         next('/signin')
       } else {
         next(`/signin?final=${to.path}`);

@@ -13,9 +13,16 @@
 import {computed, shallowReactive, watch} from "vue";
 import {userUIinfoProm} from "../firebase/calls";
 
-// Note: Seems Vue.js (1.0.0-beta.20) doesn't work with async 'computed'. We'll use watch and imperative setting, instead.
+// Note: Seems Vue.js (3.0.0-beta.20) doesn't work with async 'computed'. We'll use watch and imperative setting, instead.
 
-function membersGen(projectId, project) {   // (string, reactive of { ...projectC-fields }) => shallowReactive of Map({ <uid>: { ...userInfoC-fields, isAuthor: boolean } }
+/*
+* Sets 'members', with a potential delay (if fetching UI info is needed), when 'project.authors' or 'project.collaborators' change
+*
+* The returned 'reactive' contains information of the members of the current project, and may contain info of people
+* who have recently (while the web page is open) been in the project (if people leave, their info is not cleared, other
+* parts of the app just won't need it).
+*/
+function membersGen(projectId, project) {   // (string, reactive of { ...projectC-fields }) => shallowReactive of Map({ <uid>: { ..userInfoC-fields, isAuthor: boolean } }
 
   /***
    //WHAT IF: computed async
@@ -41,18 +48,37 @@ function membersGen(projectId, project) {   // (string, reactive of { ...project
   //***WHAT IF: reactive + watch
   const members = shallowReactive( new Map() );    // { <uid>: { ..userInfoC-fields, isAuthor: boolean } }
 
-  watch( async () => {  // () => ();   sets 'members', with a potential delay (if fetching UI info is needed), when 'project.authors' or 'project.collaborators' change
-    if (Object.keys(project).length == 0) return;
+  watch( async () => {  // () => Promise of ()
+    if (Object.keys(project).length == 0) {   // no active project
+      members.clear();
+      return;
+    }
 
     const uids = [...project.authors, ...project.collaborators];
-    console.debug("uids", uids);
+    console.debug("Members update uids:", uids);
 
-    // Note: Set of users, and their author/collaborator status are best kept up-to-date, always. Changes to the UI
-    //    specific information (name, photo) may lack behind (browser refresh will apply changes). This reduces the
-    //    number of Firestore function calls.
+    const newUids = [];
+    for (const uid of uids) {
+      if (members[uid]) {
+        members[uid].isAuthor = uid in project.authors;   // maintain author/collaborator status of existing entries
+      } else {
+        newUids.push(uid);    // will fetch this
+      }
+    }
 
-    // Copy of the earlier contents - for the UI side caching
-    const was = {...members};
+    // Fetch the username, picture of new entries.
+    //
+    // Note: This is an effort to keep using Firestore function calls low, but if we make one call pass multiple
+    //    users' info, we could refresh everyone. Maybe it's simplest not to do that though (refresh updates).
+    //
+    if (newUids.length > 0) {
+      const info = await fnUserInfo(projectId, newUids);  // { <uid>: { ..userInfoC-fields }
+
+      for (const uid of newUids) {
+        ...
+      }
+    }
+
 
     const proms = uids.map( async uid => {    // Array of Promise of [<uid>, {..userInfoC-fields, isAuthor: boolean}]
 

@@ -39,9 +39,9 @@
 </style>
 
 <script>
-  import { onUnmounted, computed } from 'vue';
+  import { onUnmounted, computed } from 'vue'
 
-  import { projectSub } from '../../refs/project'
+  import { projectSub } from '../../rves/project'
   import { symbolsSub } from '../../refs/projectSymbols'
   import { membersGen } from '../../refs/projectMembers'
 
@@ -56,7 +56,7 @@
       unsub1(); unsub2();
     }
 
-    const members = membersGen(projectId, projectRef);
+    const members = membersGen(projectId, project);
 
     const symbolsSortedByLayer = computed(() => {   // () => [ {...symbolsD, _id: index } ]   // sorted by layer
 

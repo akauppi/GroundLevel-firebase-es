@@ -11,15 +11,13 @@ This is *highly* welcome to us!!! 🎉🎊🍬
 Track [https://github.com/vitejs/vite/issues/279](https://github.com/vitejs/vite/issues/279)
 
 
-## Support (of Vite and/or Vue 3.0 beta) from Chrome Vue development plugin
+## Support of Vue 3.0 from Chrome Vue development plugin
 
 It's not detecting the setup.
 
-Also the [beta channel](https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg) doesn't.
+<strike>Also the [beta channel](https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg) doesn't.</strike> Dev tools 6.0 is now in beta. Does not show up with 3.0.0-rc2.
 
-<!--
-The [issues](https://github.com/vuejs/vue-devtools/issues) do not mention anything about Vite or Vue 3 beta (28-Apr-20). When they do, add the direct link here.
--->
+- [issues](https://github.com/vuejs/vue-devtools/issues)
 
 There's a new [vue 3/ vue next](https://github.com/vuejs/vue-devtools/issues/1199) issue that brings this up (May 20).
 
