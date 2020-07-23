@@ -75,6 +75,13 @@ const docs = {
     asAuthor: false,
     by: "abc",
     at: new Date('07 Apr 2020 15:12:00 GMT')
+  },
+
+  // Userinfo (just one)
+  "/userinfo/def": {
+    name: "William D.",
+    photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"
+      // photo in public domain: "image created 1887-1889 over 120 years ago" [source: Wikipedia]
   }
 };
 

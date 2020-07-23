@@ -289,7 +289,7 @@ service cloud.firestore {
 
         return true
           && afterKeysEq(requiredKeys)
-          && request.resource.id == after().email +":"+ after().project	  // validate the id schema
+          && inviteId /*request.resource.id*/ == after().email +":"+ after().project	  // validate the id schema
           && after().email is string
           && after().project is string
           && after().asAuthor is bool
@@ -320,10 +320,37 @@ service cloud.firestore {
 
 //--- User info ---
 //
-// Fully handled via Cloud Functions
-
+// Written by the user themselves. Read by Cloud Functions when there are changes.
+//
+    // Access cost:
+    //    read: 1
+    //    write: 1
+    //
     match /userInfo/{userId} {
-      allow read, write: if false
+      // Read:
+      //  - only by Cloud Function trigger
+      allow read: if false
+
+      allow write: if true
+        && isSignedIn() && request.auth.uid == userId
+        && debug(validUserInfoWrite())
+
+      function validUserInfoWrite() {
+        let requiredKeys = ['name','photoURL'];
+
+        return true
+          && afterKeysEq(requiredKeys)
+          && after().name is string
+          && after().photoURL is string
+      }
+    }
+
+//--- Temp ---
+//
+// Collection for various tests. No schema. Used only under emulation.
+
+    match /temp {
+      allow read, write: if true
     }
 
 //--- Helpers (visible to all matches) ---

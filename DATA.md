@@ -88,9 +88,11 @@ A Cloud Function should be made, to occasionally clean away expired invites (the
    /photoURL: string
 ```
 
-This allows people in a project to present other users with human friendly name and picture instead of a uid (which would be perfectly enough for a robot).
+Users have write access to update their user information. This can be made e.g. adjacent each login.
 
-The idea is to have a Cloud Function write these when people sign in and a dedicated API that checks whether certain user's information can be shared with another (they need to work in the same project). Having such a check using Security Rules would likely turn out to be unnecessarily complex.
+This info is then shadowed to all projects where the user is an active member, and other users (of the same project) get access to the info via these shadow tables (name and photo).
+
+The idea is that user information changes get propagated to all projects.
 
 
 <!-- not yet

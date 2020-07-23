@@ -10,6 +10,7 @@
     "test:projects": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f projectsC.test.js --detectOpenHandles",
     "test:symbols": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f symbolsC.test.js --detectOpenHandles",
     "test:invites": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f invitesC.test.js --detectOpenHandles",
+    "test:userInfo": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f userInfoC.test.js --detectOpenHandles",
     "test:all": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
   },
   "dependencies": {
