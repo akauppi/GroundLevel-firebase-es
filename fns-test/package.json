@@ -1,15 +1,14 @@
 {
-  "name": "rules-test",
+  "name": "fns-test",
   "version": "0.0.0",
-  "description": "Rules tests",
+  "description": "Cloud Functions tests",
   "private": true,
   "//type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore 'npx jest --verbose'",
-    "start": "firebase emulators:start --only firestore",
-    "test:projects": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f projectsC.test.js --detectOpenHandles",
-    "test:symbols": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f symbolsC.test.js --detectOpenHandles",
-    "test:invites": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f invitesC.test.js --detectOpenHandles",
+    "test": "firebase emulators:exec --only firestore,functions 'npx jest --verbose'",
+    "---": "",
+    "start": "firebase emulators:start --only firestore,functions",
+    "test:monitoring": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f monitoring.test.js --detectOpenHandles",
     "test:all": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
   },
   "dependencies": {
@@ -20,6 +19,7 @@
     "@babel/preset-env": "^7.10.4",
     "@firebase/testing": "^0.20.7",
     "babel-jest": "^26.1.0",
+    "firebase": "^7.16.1",
     "jest": "^26.1.0"
   },
   "engines": {

@@ -1,0 +1,27 @@
+{
+  "firestore": {
+    "rules": ".no.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": "6767"
+    }
+  },
+  "//": {
+    "firestore": [
+      "Using a rules file does not really matter, since we test things in the Cloud Functions level (behind rules)",
+      "Providing a dummy allow-all to supress a warning at starting the emulator."
+    ],
+    "": [
+      "This file _could_ provide configuration for all Firebase components, things like:",
+      "- emulators.functions.path: '../functions'",
+      "",
+      "However, part of Firebase thinks this is only for hosting (as it likely used to be). But there _is_ already",
+      "'firestore.rules' and the name of the file doesn't have hosting in it. Please make it a general config file,",
+      "and (stretch goal) make the configs available as command line flags, as well (sometimes handy)."
+    ]
+  },
+  "x-custom": {
+    "tbd. server side values that could be in a configuration file": ""
+  }
+}

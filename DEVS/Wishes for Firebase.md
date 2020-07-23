@@ -209,6 +209,22 @@ It would be nice to have possibility of using ES6 `import` alongside the common-
 E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
 
 
+<!-- tbd. is it?
+## Config in config files - not code!
+
+The configuration story for Firebase seems unclear (Jul 2020). 
+
+While there is a config file (`firebase.json`), a Firebase employee mentions that is only for hosting (reference missing). That's not true. It contains entries for `firestore` and `emulation`, but it does not consistently collect all Firebase configuration into itself, as it could.
+
+Note:
+
+>We *can* help this by using it with extended fields, and picking those up in code. Maybe we should... };)
+
+In code, currently:
+
+...tbd. fill. Remember to keep server and client separate.
+-->
+
 ## Cloud Functions: ability to configure the region in one place
 
 If one wants to specify a region, it needs to be separately specified for both the server and the client. This specification happens in the code.
@@ -516,6 +532,46 @@ We now jump through hoops to get the front end know that it's running against an
 The JavaScript library probably knows this. Can it somehow tell it to us?
 
 This would mean the `window.LOCAL` mode can be taken from the library, instead of the build system and `import.meta.env.MODE`.
+
+
+## Testable billing for Security Rules
+
+Asking about how many "reads" a certain security rule causes has been mentioned in community forums (especially newcomers).
+
+Would you be able to add this to the emulator / `@firebase/testing` so that we can compare the reported "reads" count automatically to expected ones. I would add this as part of the security rules tests.
+
+This makes the billing explicit, and confirmable.
+
+
+## Why do I need an active project for emulation??
+
+If all parts of a project are emulated, why would one need to point to an (online) Firebase project?
+
+If there is not `.firebaserc`:
+
+**Actual:**
+
+```
+$ npm run start
+
+> fns-test@0.0.0 start /Users/asko/Git/GroundLevel-es6-firebase-web/fns-test
+> firebase emulators:start --only firestore,functions
+
+i  emulators: Starting emulators: functions, firestore
+i  emulators: Shutting down emulators.
+
+Error: No currently active project.
+To run this command, you need to specify a project. You have two options:
+- Run this command with --project <alias_or_project_id>.
+- Set an active project by running firebase use --add, then rerun this command.
+To list all the Firebase projects to which you have access, run firebase projects:list.
+To learn about active projects for the CLI, visit https://firebase.google.com/docs/cli#project_aliases
+```
+
+**Expected:**
+
+Functions and Firestore emulators start. 
+
 
 
 ## References

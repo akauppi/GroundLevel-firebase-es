@@ -32,10 +32,6 @@ const LOCAL = !! process.env["FUNCTIONS_EMULATOR"];    // "true" | undefined
 //
 const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 
-// Firebase Admin SDK
-//const admin = require('firebase-admin');
-//admin.initializeApp();
-
 // Logs, as "callable function"
 //
 // {

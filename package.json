@@ -9,7 +9,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "echo \"Sorry, no tests yet! 🙁\" && exit 55",
+    "test": "npm run test:all",
+    "test:app": "echo \"Sorry, no application tests yet! 🙁\" (but letting you pass)",
+    "test:rules": "(cd rules-test && npm test)",
+    "test:fns": "(cd fns-test && npm test)",
+    "test:all": "npm run test:rules && npm run test:fns && npm run test:app",
+    "--": "",
     "lint": "eslint --ext .js,.vue src",
     "dev": "npm run dev:local",
     "dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",

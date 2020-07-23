@@ -102,4 +102,18 @@ When node.js >= 13.2 is available, we can transition `functions` code to use ES 
 - [https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement]()
 
 
+## Firebase Auth Emulation
+
+Discussed at [#1677](https://github.com/firebase/firebase-tools/issues/1677).
+
+
+## Cloud Functions as a private package
+
+- [Cannot deploy private packages with Node 10](https://github.com/firebase/firebase-functions/issues/607) (firebase-functions)
   
+Seems some people are using the `functions` folder as private.
+
+We didn't, but until this is fixed we likely also cannot.
+
+- [ ] keep an eye on. Having `package-lock.json` there is okay.
+

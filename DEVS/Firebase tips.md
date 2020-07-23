@@ -139,3 +139,8 @@ Nice! 😀
 
 See filtering info -> [Logs Based Metrics](https://firebase.google.com/docs/functions/writing-and-viewing-logs#logs-based_metrics) (Firebase docs)
 
+
+## You can `debug()` security rules! (undocumented)
+
+See [https://github.com/firebase/firebase-tools/issues/1166#issuecomment-472063944](https://github.com/firebase/firebase-tools/issues/1166#issuecomment-472063944)
+

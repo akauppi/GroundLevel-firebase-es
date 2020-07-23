@@ -15,7 +15,13 @@ import { primeSession } from './tools/guarded-session';
 //    [1] -> https://stackoverflow.com/questions/54654040/how-to-share-an-object-between-multiple-test-suites-in-jest
 
 async function setup(_) {
-  const sessionId = `test-${Date.now()}`;   // e.g. 'test-1586358763978'
+  // tbd. DEBUG: using a stable session id (where does the data get initialized???)
+
+  // note: MUST BE in lower case. Otherwise priming data never gets through.
+  //    mentioned here -> https://github.com/firebase/firebase-tools/issues/1147 so likely we do something wrong in
+  //    not seeing such an error message?
+  //
+  const sessionId = "abc";   // `rules-test-${Date.now()}`;   // e.g. 'rules-test-1586358763978'
 
   await primeSession(sessionId, docs);    // write the data contents only once
 

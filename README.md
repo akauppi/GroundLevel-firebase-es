@@ -159,14 +159,19 @@ $ npm install
 
 ### Running tests
 
-There are currently no UI side tests for the project. 😢
-
-<!-- tbd. Once there are:
 ```
 $ npm test
 ...  
 ```
--->
+
+This runs tests for:
+
+- security rules
+- Cloud Functions
+- front-end APP
+
+>Note: There are currently no UI side tests for the project, but this is intended to change, eventually. You should look into [Cypress](https://www.cypress.io) if you don't already have a favourite app level testing toolkit.
+
 
 ### Dev mode
 
