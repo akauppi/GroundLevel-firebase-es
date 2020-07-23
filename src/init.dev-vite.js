@@ -100,7 +100,7 @@ function init({ apiKey, projectId, locationId, authDomain }) {    // called by '
   import('./app.js');
 }
 
-import { __ } from './.__.js'
+import { __ } from '../.__.js'
 init(__);
 
 export { };
