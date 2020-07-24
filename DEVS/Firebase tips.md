@@ -155,3 +155,11 @@ INFO: operation failed:
 Function not found error: Name: [validUserInfoWrite]. for 'create' @ L334
 ...
 ```
+
+
+## See the data used in Security Rules tests
+
+Set the `projectId` to the same as your active project (see `.firebaserc`).
+
+The `@firebase/testing` library allows writing to any projects (which is handy), but the emulator UI only shows the active one.
+

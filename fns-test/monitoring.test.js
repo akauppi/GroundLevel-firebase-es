@@ -24,22 +24,7 @@ const [FUNCTIONS_URL, FIRESTORE_HOST] = ["http://localhost:5001", "localhost:808
 
 firebase.functions().useFunctionsEmulator(FUNCTIONS_URL);   // must be *after* '.initializeApp'
 
-let fns;
-
-/*
-* Initialize Firebase
-*/
-beforeAll( () => {
-
-  fns = firebase.app().functions(/*"europe-west3"*/);
-  assert(fns);
-});
-
-/*** not needed???
-afterAll( () => {
-  firebase.app().delete();
-})
-***/
+const fns = firebase.app().functions(/*"europe-west3"*/);
 
 describe("monitoring functions", () => {
   let fnLogs, fnFatal;

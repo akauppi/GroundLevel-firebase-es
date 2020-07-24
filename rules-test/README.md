@@ -55,6 +55,7 @@ Once we run tests, the emulator shows warnings of the rules in its terminal outp
 $ npm run test:projects
 $ npm run test:symbols
 $ npm run test:invites
+$ npm run test:userInfo
 $ npm run test:all
 ```
 

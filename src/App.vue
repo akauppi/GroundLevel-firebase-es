@@ -42,6 +42,18 @@
 
   import { user } from './refs/user.js';
 
+  // Start maintaining 'userInfo' collection when the logged in user changes
+  import './firebase/userInfo'
+
+  function setup() {
+    // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
+    onMounted(() => {
+      console.log("Houston, App is mounted");
+    });
+
+    return { user }
+  }
+
   export default {
     name: 'App',     // helps in debugging
     components: {
@@ -50,13 +62,6 @@
     props: {
       localMode: Boolean    // 'true' if running against the local Firebase emulator
     },
-    setup() {
-      // Note: We rather take the title from here than in 'public/index.html', keeping it application agnostic.
-      onMounted(() => {
-        console.log("Houston, App is mounted");
-      });
-
-      return { user }
-    }
+    setup
   }
 </script>

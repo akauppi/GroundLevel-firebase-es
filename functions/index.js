@@ -17,9 +17,16 @@
 * References:
 *   - Call functions from your app (Firebase docs)
 *     -> https://firebase.google.com/docs/functions/callable
+*   - Add the Firebase Admin SDK to your server (Firebase docs)
+*     -> https://firebase.google.com/docs/admin/setup
 */
 const functions = require('firebase-functions');
 //import * as functions from 'firebase-functions'   // tried with firebase 8.6.0
+
+const admin = require('firebase-admin');
+//import * as admin from 'firebase-admin';    // ..once node.js >= 13.2 is supported
+
+admin.initializeApp();
 
 // Tell local emulation from being run in the cloud. This is exposed to the front end.
 //
@@ -107,12 +114,46 @@ exports.logs_v1 = regionalFunctions
 //    ex: exception object
 // }
 //
-exports.fatal_v210720 = regionalFunctions
-  .https.onCall(({ msg, ex }, context) => {
+exports.fatal_v210720 = regionalFunctions.https
+  .onCall(({ msg, ex }, context) => {
 
     functions.logger.error(`FATAL: ${msg}`, ex);    // keep an eye - is that good?
   });
 
+
+// Temp function, for helping learn fns/firestore testability.
+//
+// Mirrors changes to 'temp.in' (string) in 'temp.out' (string).
+//
+exports.temp = regionalFunctions.firestore
+  .document('/temp/A')
+  .onWrite( async (event, context) => {
+
+    const [before,after] = [event.before, event.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
+
+    if (after.get("in") != before.get("in")) {
+      const v = after.get("in");
+
+      // Write to '.out' of the same document
+      //
+      // Note: Alternative 'after.ref.set(...)' would work as well.
+      //
+      await admin.firestore().doc("/temp/A").set({ out: v }, { merge: true });
+
+      console.debug("/temp '.in' -> '.out':", v);
+    }
+  })
+
+/*** REMOVE (works)
+// TEMP to debug
+exports.addMessage = functions.https.onRequest (async (req, res) => {
+  const original = req.query.text;
+  const writeResult = await admin.firestore().collection ('messages').add ({text: original});
+  const docSnap = await writeResult.get();
+  const writtenText = docSnap.get ('text');
+  res.send (`Message with text: ${writtenText} added.`);
+});
+***/
 
 /***  // sample of using REST API
  // POST /logs
