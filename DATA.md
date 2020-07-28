@@ -34,6 +34,10 @@ Collections are marked with `C <id-type>`.
       /fillColor: <color-string>
       /center: { x: <number>, y: <number> }
       [/claimed: { by: uid, at: timestamp }]
+
+   /userInfo:C <uid>   // shadow from main /userInfo:C
+      /name: string
+      /photoURL: string
 ```
 
 The design of the above data model has been tedious. There are so many ways one can model such data, but only few that match the way Firebase works. Let's discuss the design, briefly.

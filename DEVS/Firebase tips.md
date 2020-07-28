@@ -163,3 +163,46 @@ Set the `projectId` to the same as your active project (see `.firebaserc`).
 
 The `@firebase/testing` library allows writing to any projects (which is handy), but the emulator UI only shows the active one.
 
+
+
+## Changes are different in server triggers vs. Firestore client
+
+Listening to changes to a document, using Cloud Firestore triggers (server):
+
+```
+exports.blah = regionalFunctions.firestore
+  .document('/userInfo/{uid}')
+  .onWrite( async (change, context) => {
+    // no change types
+    // change.before: QueryDocumentSnapshot 
+    // change.after: -''-
+    //
+    const uid = change.after.id;   // document id
+```
+
+
+Doing the same in client code:
+
+```
+db.collection("userInfo/{uid}")
+  .onSnapshot( snapshot => {
+    snapshot.docChanges().forEach( change => {
+      // change.type: "added"|"modified"|...
+      // change.doc.data(): 
+```
+
+References:
+
+- [Cloud Firestore function triggers](https://firebase.google.com/docs/functions/firestore-events#function_triggers)
+- [View changes between snapshots](https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots)
+
+
+||Cloud Functions trigger (server)|Firestore client|
+|---|---|---|
+|Change type|implied by one's choice of listener method: `.onCreate`,`.onUpdate`,`.onWrite`,`.onDelete`|change indicated by `change.type` (enum: "added"\|"modified"\|"removed")|
+|Document id|`change.after.id`|...|
+|Previous contents|`change.before.data()`|n/a|
+|New contents|`change.after.data()`|`change.doc.data()`|
+
+These are essentially two wholly separate APIs and there are likely reasons why they are so. The first happens **on demand** at the server, whereas the client approach is an ongoing watcher for data changes.
+

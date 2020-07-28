@@ -11,8 +11,15 @@ import { primeSession } from './tools/session'
 //
 //    [1] -> https://stackoverflow.com/questions/54654040/how-to-share-an-object-between-multiple-test-suites-in-jest
 
+// Session id (project id):
+//
+// Needed by the clients and the emulator.
+//
+// You want to see data in UI?  -->  use the same project id as in '.firebaserc'
+//
+const sessionId = "vue-rollup-example";   // `fns-test-${Date.now()}`;   // e.g. 'fns-test-1586358763978'
+
 async function setup(_) {
-  const sessionId = `fns-test-${Date.now()}`;   // e.g. 'fns-test-1586358763978'
 
   await primeSession(sessionId, docs);    // write the data
 }

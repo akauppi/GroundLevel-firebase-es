@@ -2,35 +2,38 @@
 
 # Billing
 
+When this repo was started, all the necessary features were covered by the Spark ("free") plan. Then, on 20-Jun-20, Google [announced](https://firebase.google.com/support/faq#functions-pricing) they'll require customers to move to Blaze plan, by 17-Aug-20.
 
-When this repo was started, all the necessary features were covered by the Spark ("free") plan. Then, on 20-Jun-20, this showed up:
+That actually.. seems fine. :)
 
->⚠  functions: Cloud Functions will soon require the pay-as-you-go (Blaze) billing plan to deploy. To avoid service disruption, upgrade before 2020-08-17. For more information, see: https://firebase.google.com/support/faq#functions-runtime
+There are technical reasons for this, and the Blaze plan can still be "free" (as in no payments). It's just that you have to provide payment information.
 
-That's fine - Google may change their terms and the Blaze just means you have to provide a credit card. The free usage is still there and this change does not necessarily incur cost to you. It does, however, incur complexity and raises the bar to just try out Firebase.
+We bring this up under Deployments, because you **won't be affected, unless you deploy Cloud Functions.** 
 
-The purpose of this repo is to REMAIN USEFUL FOR PEOPLE ALSO IN THE SPARK PLAN. 
+We try to make clear, what the implied costs of deploying this project might be, but of course you are responsible for them, in the end, and should double check the information from [Firebase pricing](https://firebase.google.com/pricing).
 
-However, Cloud Functions are too important to leave out, so if you wish to *deploy* using the Spark plan, you need to scrape them out of your copy.
+## Cloud Functions
 
-Otherwise, you can develop with Spark but once you intend to deploy to cloud (starting 17-Aug-2020), you will need to upgrade to Blaze.
+As of Jul 2020:
 
-What this means:
+|what|how much?|free tier|
+|---|---|---|
+|Cloud functions, `.pubsub.schedule`|0.10 USD per function per month|3 free scheduled jobs per Google account|
 
-1. The repo works fully when run locally. Use `npm run dev:local` to run emulators for Cloud Functions.
-2. If you decide to upgrade to Blaze plan, likely your use will be free even there. 
-  - You can place a [budget alert](https://cloud.google.com/billing/docs/how-to/budgets). Note that it's not a hard ceiling - just a way to get notified!
-3. You can also switch your Cloud Billing off for the Google project when not needing the service. (tbd. haven't tried this)
+Note: The `.pubsub.schedule` is not mentioned on the pricing page. It's based on [Cloud Scheduler > Pricing](https://cloud.google.com/scheduler) (GCP docs).
+
+
+## Budget alerts
+
+You can place a [budget alert](https://cloud.google.com/billing/docs/how-to/budgets) to get notified if your Firebase (Google Cloud Platform?) costs are rising to some level. But notice it's not a ceiling, and there's no way (Jul 2020) to limit costs per month to a fixed amount.[^1]
+
+[^1]: Well, one could take a credit card that has a rediculously low monthly limit, but Google likely will still keep the account holder responsible. No knowledge - if you try this, let us know.
+
+
+## Temporarily switching off Cloud Billing
+
+You can switch your Cloud Billing off for the Google project when not needing the service. (tbd. haven't tried this)
 
 <!-- tbd. provide more info about the switching billing off, once there
 -->
-
----
-
-**References**
-
-- Firebase [pricing plans](https://firebase.google.com/pricing) 
-- More [information on the Aug 17th change](https://firebase.google.com/support/faq#functions-pricing)
-
-The change seems to be due to internal technical roadmaps. This happens. Cost-wise it'll mean some cents and an incentive to use the emulators for development.
 

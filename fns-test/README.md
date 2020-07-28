@@ -2,7 +2,7 @@
 
 Test Cloud Functions for the application.
 
-We test against a locally running emulator, using normal JavaScript Firebase client. This differs from the Firebase suggested model ([here](https://firebase.google.com/docs/functions/unit-testing)).
+We test against a locally running emulator, using normal JavaScript Firebase client. This differs from the Firebase suggested model of [unit testing](https://firebase.google.com/docs/functions/unit-testing).
 
 Benefits:
 

@@ -15,8 +15,9 @@
 *       - [ ] When to use "admin SDK", "@firebase/testing", "firebase-functions"?  Why do their npm names differ?
 *       - [ ] What is the right way to import 'firebase' as ES module? One is recommended. Another works. :/
 *       - [ ] What is the role of the "project id", when 100% is locally emulated?
-*       - [ ] Why cannot I see my data, placed into Firestore via '@firebase/testing', in the emulator UI?
-*             - there is no "project ID" concept in the emulator; yet we are expected to provide one.
+*       - [x] Why cannot I see my data, placed into Firestore via '@firebase/testing', in the emulator UI?
+*             - A: Emulator shows one project, the one active in '.firebaserc'. Others work and are emulated, but
+*                  invisible in the Emulator UI.
 *       - [ ] Can I use '.initializeApp' in node.js (here), or should I always use '@firebase/testing' and its
 *             '.initializeAdminApp' / '.initializeTestApp'? If either, when is one suitable over the other?
 *       - [ ] What is the role of 'firebase-admin' and when should that be used?

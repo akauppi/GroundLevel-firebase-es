@@ -8,9 +8,10 @@
     "test": "firebase emulators:exec --only firestore,functions 'npx jest --verbose'",
     "---": "",
     "start": "firebase emulators:start --only firestore,functions",
-    "test:monitoring": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f monitoring.test.js --detectOpenHandles",
-    "test:temp": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f temp.test.js --detectOpenHandles",
-    "test:all": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest --verbose"
+    "test:monitoring": "npx jest -f monitoring.test.js --detectOpenHandles",
+    "test:userInfo": "npx jest -f userInfo.test.js --detectOpenHandles",
+    "//test:temp": "npx jest -f temp.test.js --detectOpenHandles",
+    "test:all": "npx jest --verbose"
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.10.4"
@@ -18,9 +19,8 @@
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
-    "@firebase/testing": "^0.20.7",
     "babel-jest": "^26.1.0",
-    "firebase": "^7.16.1",
+    "firebase": "^7.17.1",
     "jest": "^26.1.0"
   },
   "engines": {
@@ -30,9 +30,6 @@
     "babel*": [
       "Babel is needed (Mar 2020) to have Jest support ES6 module imports/exports",
       "see -> https://medium.com/@saplos123456/using-es6-import-and-export-statements-for-jest-testing-in-node-js-b20c8bd9041c"
-    ],
-    "@firebase/testing": [
-      "see -> https://github.com/firebase/firebase-js-sdk/tree/master/packages/testing"
     ],
     "Node 13.2+": [
       "Needed for native ES module support"

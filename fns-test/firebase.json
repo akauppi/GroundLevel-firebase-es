@@ -4,7 +4,7 @@
   },
   "emulators": {
     "firestore": {
-      "port": "6767"
+      "port": "6768"
     }
   },
   "//": {

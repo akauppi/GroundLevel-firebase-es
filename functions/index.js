@@ -144,6 +144,85 @@ exports.temp = regionalFunctions.firestore
     }
   })
 
+
+// UserInfo shadowing
+//
+// Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
+// renewed user info.
+//
+exports.userInfoShadow = regionalFunctions.firestore
+  .document('/userInfo/{uid}')
+  .onWrite( async (change, context) => {
+    const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
+
+    const db = admin.firestore();
+    const FieldPath = admin.firestore.FieldPath;
+
+    log.debug(`Global userInfo/${uid} change detected: `, before.data(), after.data());
+
+    if (change.type == "ADDED" || change.type == "MODIFIED") {
+
+      // Search projects where the person is a member and update those 'userInfo' objects.
+      //
+      // Note: A collection group query is needed for this.
+      //
+      // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
+      //    cheaper. #later #monitoring
+      //
+      const qss = await db.collectionGroup('userInfo')   // note: this picks up the global 'userInfo' as well
+        .where( FieldPath.documentId(), "==", uid )   // pick the documents with 'uid' as their id
+        //.where( ...is not root userInfoC )    // Q: can we do this?
+        .get();
+
+      if (!qss.empty) {
+        qss.docs.forEach( qdss => {
+          console.debug(`Project to trim (that has 'uid'='${uid}':`, qdss.ids );
+
+        });
+      }
+
+      /*** tbd. implement
+      // Can we directly affect the documents received from 'projectsToTrim'???
+      // -> remove their 'uid' fields
+
+      if ()
+      const qss = await db.collectionGroup("projects")
+        .where("userInfo", 'array-contains', uid)
+        .get();
+
+       ***/
+
+    } else if (change.type == "REMOVED") {
+      log.debug( "We're not prepared for removal of '/userInfo/{uid}' - leaving projects unchanged.")
+    } else {
+      log.error("Unexpected 'change.type':", change.type);
+      throw new Error("Unexpected 'change.type': "+ change.type);
+    }
+  })
+
+// UserInfo cleanup
+//
+// Occasionally, see if there are projects where users have left, but their userInfo sticks around.
+//
+/** tbd. likely not doing it so. Could track all changes to '.members'. If a uid is removed, remove the data
+*     immediately also from 'userInfo'. Or... the removal of a user can do that. :)
+*
+exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // tbd. syntax?
+  .onRun( async context => {
+
+    /*** tbd. continue:
+     * will likely need to scan through all projects, no 'where' that could do:
+     *
+     * - find projects where
+     *    - /userInfo/{uid} exists
+     *        - where the 'uid' is not within '.admins' or '.collaborators'
+     *
+    await admin.firestore().collection("/projects").where(
+
+     ***_/
+  })
+*/
+
 /*** REMOVE (works)
 // TEMP to debug
 exports.addMessage = functions.https.onRequest (async (req, res) => {

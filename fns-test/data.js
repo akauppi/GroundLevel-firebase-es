@@ -26,6 +26,7 @@ const docs = {
   "/projects/1/visited/abc": {
     at: anyPastDate
   },
+  //"/projects/1/userInfo/{uid}": initially empty
 
   // Invites (just one)
   "/invites/a@b.com:1": {
@@ -35,6 +36,12 @@ const docs = {
     by: "abc",
     at: new Date('07 Apr 2020 15:12:00 GMT')
   }
+
+  // UserInfo (initially empty)
+  //"/userInfo/abc": {
+  //  name: "...",
+  //  photoURL: "..."
+  //}
 };
 
 export { docs }
