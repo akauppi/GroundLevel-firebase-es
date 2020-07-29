@@ -1,7 +1,8 @@
 /*
-* fns-test/tools/session.js
+* fns-test/tools/session.cjs
 *
-* ES 6 (main) VARIANT. Use by the Jest tests.
+* COMMON JS VARIANT. NEEDED by the initialization script (run by plain 'node'). WHEN JEST ALLOWS US TO USE 'type: module',
+* we can SCRAP THIS!!!
 *
 * Tools to:
 *   - dig current Firestore projectId from '../.firebaserc' (needed for showing data in the Emulator UI)
@@ -11,10 +12,15 @@
 *   - import 'projectId' to get the project ID
 *   - import 'db' to get a handle to the primed data
 */
-import { strict as assert } from 'assert'
-import fs from 'fs'
+//import { strict as assert } from 'assert'
+//import fs from 'fs'
 
-import * as firebase from 'firebase'
+//import * as firebase from 'firebase'
+
+const assert = require('assert').strict;
+const fs = require('fs');
+
+const firebase = require('firebase');
 
 // tbd. take this from a fake '../firebase.json' field (or env.var set in 'package.json')
 const FIRESTORE_HOST = "localhost:6768";
@@ -49,7 +55,9 @@ db.settings({         // affects all subsequent use (and can be done only once)
 assert( db.close === undefined );
 db.close = async () => { await app.delete(); }
 
-export {
+/*export {
   //projectId,
   db
-}
+}*/
+
+module.exports = db

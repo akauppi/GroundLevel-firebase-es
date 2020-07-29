@@ -87,6 +87,13 @@ $ npm test
 -->
 
 
+## Developer notes
+
+### Changes to `functions/index.js` are not watched
+
+Firebase emulator (`firebase-tools` 8.6.0) does not seem to pick up changes to the functions sources. You must restart the emulator.
+
+
 ## References
 
 - Cloud Functions > [Get Started](https://firebase.google.com/docs/functions/get-started) (Firebase docs)

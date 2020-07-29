@@ -158,47 +158,41 @@ exports.userInfoShadow = regionalFunctions.firestore
     const db = admin.firestore();
     const FieldPath = admin.firestore.FieldPath;
 
-    log.debug(`Global userInfo/${uid} change detected: `, before.data(), after.data());
+    const uid = change.after.id;
 
-    if (change.type == "ADDED" || change.type == "MODIFIED") {
+    const newValue = after.data();      // { ... } (| undefined; hypothetically)
+    console.debug(`Global userInfo/${uid} change detected: `, newValue);
 
-      // Search projects where the person is a member and update those 'userInfo' objects.
-      //
-      // Note: A collection group query is needed for this.
-      //
-      // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
-      //    cheaper. #later #monitoring
-      //
-      const qss = await db.collectionGroup('userInfo')   // note: this picks up the global 'userInfo' as well
-        .where( FieldPath.documentId(), "==", uid )   // pick the documents with 'uid' as their id
-        //.where( ...is not root userInfoC )    // Q: can we do this?
-        .get();
+    // Find the projects where the person is a member.
+    //
+    // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
+    //    cheaper. #rework #monitoring #billing
+    //
+    const qss1 = await db.collection('projects')
+      .where('authors', 'array-contains', uid)
+      .select()   // don't ship the fields, just matching ref
+      .get();
 
-      if (!qss.empty) {
-        qss.docs.forEach( qdss => {
-          console.debug(`Project to trim (that has 'uid'='${uid}':`, qdss.ids );
+    const qss2 = await db.collection('projects')
+      .where('collaborators', 'array-contains', uid)
+      .select()
+      .get();
 
-        });
-      }
+    const tmp = [...qss1.docs, ...qss2.docs];   // Array of QueryDocumentSnapshot
 
-      /*** tbd. implement
-      // Can we directly affect the documents received from 'projectsToTrim'???
-      // -> remove their 'uid' fields
+    if (tmp.length == 0) {
+      console.debug(`User '${uid}' not found in any of the projects.`);
 
-      if ()
-      const qss = await db.collectionGroup("projects")
-        .where("userInfo", 'array-contains', uid)
-        .get();
-
-       ***/
-
-    } else if (change.type == "REMOVED") {
-      log.debug( "We're not prepared for removal of '/userInfo/{uid}' - leaving projects unchanged.")
     } else {
-      log.error("Unexpected 'change.type':", change.type);
-      throw new Error("Unexpected 'change.type': "+ change.type);
+      const proms = tmp.map( qdss => {
+        console.debug(`Updating userInfo for: projects/${qdss.id}/userInfo/${uid}`);
+
+        return qdss.ref.collection("userInfo").doc(uid).set(newValue);    // Promise of WriteResult
+      });
+      await Promise.all(proms);
     }
-  })
+  });
+
 
 // UserInfo cleanup
 //

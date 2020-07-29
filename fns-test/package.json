@@ -5,9 +5,11 @@
   "private": true,
   "//type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore,functions 'npx jest --verbose'",
+    "test": "firebase emulators:exec --only firestore,functions 'npm run _init && npx jest --verbose'",
     "---": "",
-    "start": "firebase emulators:start --only firestore,functions",
+    "start": "concurrently -n emul,init \"firebase emulators:start --only functions,firestore\" \"npm run _start_2\"",
+    "_start_2": "wait-on http://localhost:4000 && npm run _init",
+    "_init": "node prime-with-data.cjs",
     "test:monitoring": "npx jest -f monitoring.test.js --detectOpenHandles",
     "test:userInfo": "npx jest -f userInfo.test.js --detectOpenHandles",
     "//test:temp": "npx jest -f temp.test.js --detectOpenHandles",
@@ -20,8 +22,10 @@
     "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
     "babel-jest": "^26.1.0",
+    "concurrently": "^5.2.0",
     "firebase": "^7.17.1",
-    "jest": "^26.1.0"
+    "jest": "^26.1.0",
+    "wait-on": "^5.1.0"
   },
   "engines": {
     "node": ">=13.2"
@@ -33,6 +37,12 @@
     ],
     "Node 13.2+": [
       "Needed for native ES module support"
-    ]
+    ],
+    "scripts": {
+      "start": [
+        "Must use 'firebase emulators:start' so that the Emulators UI shows the data. This causes 'concurrently'",
+        "and 'wait-on' to be needed, as dependencies."
+      ]
+    }
   }
 }

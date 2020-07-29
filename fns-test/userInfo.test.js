@@ -40,7 +40,7 @@ describe("userInfo shadowing", () => {
     const william = {
       name: "William D.",
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"
-    }
+    };
 
     (async () => {
       // Check that 'abc' currently doesn't have user information
@@ -51,18 +51,21 @@ describe("userInfo shadowing", () => {
       // Prepare a watch
       //
       const unsub = db.collection("projects/1/userInfo").doc("abc")
-        .onSnapshot( ss => {
-          console.debug("Noticed: ", ss);   // DEBUG
+        .onSnapshot({
+          includeMetadataChanges: false    // enough to see the intention (write to cache)
+        }, dss => {
+          const o = dss.data();
+          console.debug("Noticed: ", o);   // DEBUG
 
-          expect( ss.exists );
-          assert( ss.size == 1 );
-          const o = ss.data();
-          expect( Object.keys(o) == ["name", "photoURL"] );
-          expect( o.name == william.name );
-          expect( o.photoURL == william.photoURL );
+          if (o) {   // 'undefined' on first call (initially no doc)
+            assert( Object.keys(o).sort().toString() === '["name","photoURL"]' );
 
-          unsub();
-          done();
+            expect( o.name == william.name );
+            expect( o.photoURL == william.photoURL );
+
+            unsub();
+            done();
+          }
         });
 
       // Write in central

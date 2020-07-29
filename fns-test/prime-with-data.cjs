@@ -44,4 +44,20 @@ const docs = {
   //}
 };
 
-export { docs }
+// NOTE!!!
+//
+// Using CommonJS ('require') since we cannot make the package 'type: module', yet (Jest 26 is not fine with that).
+// Once Jest allows it, let's take these to ES modules.
+
+//import { prime } from './tools/prime'
+const prime = require('./tools/prime.cjs');
+
+// note: we don't mind if the return is earlier than data actually has been written, but once top-level await is
+//    available (Node 14.3 has it with '--harmony-top-level-await'), use it here.
+//
+(async () => {
+  //console.info("Priming...");
+  await prime(docs);
+  console.info("Primed :)");
+})();
+

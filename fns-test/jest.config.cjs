@@ -1,7 +1,7 @@
 // jest.config.cjs
 
 module.exports = {
-  globalSetup: "./setup.jest.js",
+  //REMOVE: globalSetup: "./setup.jest.js",
 
   // needed, otherwise bad things happen -> https://github.com/facebook/jest/issues/7780
   testEnvironment: 'node',
