@@ -17,7 +17,7 @@ async function prime(data) {    // ({ <docPath>: { <field>: <value> } }) => Prom
   }
   await batch.commit();
 
-  db.close();
+  db.app.delete();
 }
 
 //export { prime }

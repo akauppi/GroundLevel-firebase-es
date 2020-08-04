@@ -52,8 +52,10 @@ db.settings({         // affects all subsequent use (and can be done only once)
   ssl: false
 });
 
+/*** remove; using 'db.app.delete()', instead
 assert( db.close === undefined );
 db.close = async () => { await app.delete(); }
+***/
 
 /*export {
   //projectId,

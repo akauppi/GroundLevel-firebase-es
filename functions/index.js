@@ -160,36 +160,41 @@ exports.userInfoShadow = regionalFunctions.firestore
 
     const uid = change.after.id;
 
-    const newValue = after.data();      // { ... } (| undefined; hypothetically)
+    const newValue = after.data();      // { ... } | undefined
     console.debug(`Global userInfo/${uid} change detected: `, newValue);
 
-    // Find the projects where the person is a member.
+    // Removal of userInfo is not propagated. Only tests do it, as 'beforeAll'.
     //
-    // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
-    //    cheaper. #rework #monitoring #billing
-    //
-    const qss1 = await db.collection('projects')
-      .where('authors', 'array-contains', uid)
-      .select()   // don't ship the fields, just matching ref
-      .get();
+    if (newValue !== undefined) {
 
-    const qss2 = await db.collection('projects')
-      .where('collaborators', 'array-contains', uid)
-      .select()
-      .get();
+      // Find the projects where the person is a member.
+      //
+      // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
+      //    cheaper. #rework #monitoring #billing
+      //
+      const qss1 = await db.collection('projects')
+        .where('authors', 'array-contains', uid)
+        .select()   // don't ship the fields, just matching ref
+        .get();
 
-    const tmp = [...qss1.docs, ...qss2.docs];   // Array of QueryDocumentSnapshot
+      const qss2 = await db.collection('projects')
+        .where('collaborators', 'array-contains', uid)
+        .select()
+        .get();
 
-    if (tmp.length == 0) {
-      console.debug(`User '${uid}' not found in any of the projects.`);
+      const tmp = [...qss1.docs, ...qss2.docs];   // Array of QueryDocumentSnapshot
 
-    } else {
-      const proms = tmp.map( qdss => {
-        console.debug(`Updating userInfo for: projects/${qdss.id}/userInfo/${uid}`);
+      if (tmp.length == 0) {
+        console.debug(`User '${uid}' not found in any of the projects.`);
 
-        return qdss.ref.collection("userInfo").doc(uid).set(newValue);    // Promise of WriteResult
-      });
-      await Promise.all(proms);
+      } else {
+        const proms = tmp.map( qdss => {
+          console.debug(`Updating userInfo for: projects/${qdss.id}/userInfo/${uid} ->`, newValue);
+
+          return qdss.ref.collection("userInfo").doc(uid).set(newValue);    // Promise of WriteResult
+        });
+        await Promise.all(proms);
+      }
     }
   });
 

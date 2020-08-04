@@ -19,14 +19,13 @@ import * as firebase from 'firebase'
 // tbd. take this from a fake '../firebase.json' field (or env.var set in 'package.json')
 const FIRESTORE_HOST = "localhost:6768";
 
-const projectId = (function parseDotFirebaseRc() {
+const projectId = (() => {
   const fn = "./.firebaserc";
 
   const raw = fs.readFileSync(fn);
   const o = JSON.parse(raw);
 
   const vs = Object.values(o["projects"]);
-  //console.debug(vs);
   assert(vs.length === 1);
 
   return vs[0];
@@ -46,10 +45,11 @@ db.settings({         // affects all subsequent use (and can be done only once)
   ssl: false
 });
 
+/*** not needed; use 'db.app.delete'
 assert( db.close === undefined );
 db.close = async () => { await app.delete(); }
+***/
 
 export {
-  //projectId,
   db
 }

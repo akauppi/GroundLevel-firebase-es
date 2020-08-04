@@ -8,6 +8,12 @@ Benefits:
 
 - less things to learn: same APIs we use elsewhere
 
+**Approach**
+
+The emulated Firestore database is primed at server start (not as part of the tests). Tests run using normal Firebase clients.
+
+We do **not** use Security Rules. All access is available, during the tests. This applies "separation of concerns" to testing and helps keep the tests simple.
+
 
 ## Requirements
 
