@@ -37,7 +37,7 @@ function handleDoc(doc) {
       created: convertDateValue(raw.created),
       //lastVisited: null,    // not there, yet
       authors: raw.authors,
-      collaborators: raw.authors
+      members: raw.members ?? [...raw.authors, ...raw.collaborators]    // prepared for either data model
     };
     projects.set(id, o);
   } else {

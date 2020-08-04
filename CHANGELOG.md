@@ -1,5 +1,9 @@
 # Changelog
 
+## 4-Aug-20
+
+- Setup dialog replaces signout menu
+
 ## 19-Jul-20
 
 - Central logging works both under local emulation and online.

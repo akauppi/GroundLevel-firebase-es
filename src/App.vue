@@ -34,13 +34,13 @@
 </style>
 
 <script>
-  import { onMounted } from 'vue';
+  import { onMounted } from 'vue'
 
-  import AppLogo from './components/AppLogo.vue';
-  import AppProfile from './components/AppProfile.vue';
-  import AppFooter from './components/AppFooter.vue';
+  import AppLogo from './components/AppLogo.vue'
+  import AppProfile from './components/AppProfile/index.vue'
+  import AppFooter from './components/AppFooter.vue'
 
-  import { user } from './refs/user.js';
+  import { user } from './refs/user.js'
 
   // Start maintaining 'userInfo' collection when the logged in user changes
   import './firebase/userInfo'

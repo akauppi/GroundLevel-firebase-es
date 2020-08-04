@@ -18,7 +18,7 @@
         {{ project.title }}
         {{ project.created.toLocaleString() }}
         Authors: {{ project.authors }}
-        Collaborators: {{ project.collaborators }}
+        Members: {{ project.members }}
       </router-link>
     </template>
   </div>

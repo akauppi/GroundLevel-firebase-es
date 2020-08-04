@@ -5,13 +5,13 @@
 *
 * Usage:
 *   <<
-*     <x v-if="user.value">    <-- if user is signed in
-*       {{ user.displayName }}
+*     <x v-if="user">    <-- if user is signed in
+*       {{ user.displayName }}
 *     </x>
 *   <<
 *
 *   'user' is either:
-*     - null  // auth has not been established (initial state, should not last long)
+*     - null    // auth has not been established (initial state, should not last long)
 *     - { displayName: string, uid: string }   // authenticated
 *     - false   // not signed in
 *
@@ -19,9 +19,9 @@
 *   - Firebase User object documentation
 *     -> https://firebase.google.com/docs/reference/js/firebase.User.html
 */
-import { computed } from 'vue';
+import { computed } from 'vue'
 
-import { authRef } from '../firebase/authRef.js';
+import { authRef } from '../firebase/authRef'
 
 const user = computed( () => {   // undefined | false | { displayName: string, uid: string }
   const a = authRef.value;  // undefined | false | { displayName: string, uid: string, ... }

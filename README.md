@@ -477,22 +477,32 @@ Stay tuned for these developments, or chime in to make them happen!!! 🏅
 - about Logging (already set up)
 -->
 
-## Back-tracking changes
+
+## Developing *your* app
+
+The repo is intended to be used as an application template. By doing so, you make its purpose come true!
+
+### Back-tracking changes
 
 We need to develop / think of ways to allow a derivative of this repo to gain updates, if they so wish.
 
+<font color=red>
 If you keep the Git history, you should be able to `git pull` changes, but how messy that becomes in practise remains to be seen.
+</font>
 
+### Remove branding
 
-## Removing branding
+Please remove all "GroundLevel" branding, once you turn this into something else. In particular:
 
-Three steps to remove GroundLevel branding:
-
-1. Please remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
-2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json`, to match your application.
+1. Remove the `iconart` and `public/favicon*` files. They are not licensed for other use than this template. Thanks!
+2. Change the `name`, `version`, `repository.url` and `author` fields in `package.json` to match your application.
 3. Visit the `src/config.js` and suit it to your project (title etc.).
 
-You may mention using this repo as your starting point, but are not obliged to do so.
+```
+$ git grep "[gG]round[Ll]evel"
+```
+
+Please remove/edit those files, to remove any mention. You may mention using this repo as your starting point, but are not obliged to do so.
 
 
 ## Help welcome!
@@ -514,6 +524,8 @@ Thanks to Jaakko Roppola for wonderful icon art!! 🙌
 Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it, then changed a few things.
 
 Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
+
+Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 
 
 ## References
