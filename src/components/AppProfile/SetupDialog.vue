@@ -70,7 +70,7 @@
   border-radius: 50%;   /* shows as round button */
 }
 
-.close:hover, .close:focus {
+.close:hover, .close.fakeHover {
   color: #000;
   background-color: #eee;
   text-decoration: none;
@@ -108,7 +108,8 @@
   //
   function escListener(evt) {
     if (evt.key === "Escape") {
-      closeEl.value.click();    // that enough???
+      closeEl.value.classList.add("fakeHover");
+      setTimeout( () => closeEl.value.click(), 20);   // just enough to notice it
     }
   }
 
