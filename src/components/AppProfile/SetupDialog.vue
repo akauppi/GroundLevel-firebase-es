@@ -10,7 +10,7 @@
   -->
   <div id="dialog" @click.stop="">
     Personal settings
-    <div class="close" @click.stop="closeMe">
+    <div ref="closeEl" class="close" @click.stop="closeMe">
       <!--
       - Close; from -> https://icons.getbootstrap.com/icons/x/
       -->
@@ -25,11 +25,11 @@
       <label>Your setting here:</label>
       <input list="holidays" placeholder="your favourite holiday destination"/>
       <datalist id="holidays">
-        <option value="Greece">
-        <option value="Spain">
-        <option value="Italy">
-        <option value="Madagascar">
-        <option value="Moon">
+        <option value="Greece" />
+        <option value="Spain" />
+        <option value="Italy" />
+        <option value="Madagascar" />
+        <option value="Moon" />
       </datalist>
     </div>
     <hr />
@@ -97,11 +97,31 @@
 
 <script>
   //assert(firebase);
+  import { ref, onMounted, onUnmounted } from 'vue'
 
   import { routerProm } from '../../router.js'
   import { reportFatal } from "../../monitoring/reportFatal"
 
-  function setup(props, { emit }) {
+  const closeEl = ref(null);    // DOM element, gets set during mounting
+
+  // If 'esc' pressed while dialog is visible, flash the close button visually.
+  //
+  function escListener(evt) {
+    if (evt.key === "Escape") {
+      closeEl.value.click();    // that enough???
+    }
+  }
+
+  function setup(_, { emit, refs }) {
+    // 'closeEl' is valid only after mounting, so safest to activate the listener only then.
+    onMounted( () => {
+      document.addEventListener('keyup', escListener);
+    });
+
+    onUnmounted( () => {
+      document.removeEventListener('keyup', escListener);
+    });
+
     async function signOut() {
       try {
         await firebase.auth().signOut();
@@ -115,6 +135,7 @@
     }
 
     return {
+      closeEl,
       closeMe: () => emit('closeMe'),
       signOut
     }

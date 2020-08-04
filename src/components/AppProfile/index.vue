@@ -116,23 +116,6 @@
     isOpen.value = false;
   }
 
-  /*
-  * When the overlay is on, make 'esc' close it.
-  */
-  watch(isOpen, v => {
-    function escListener(evt) {
-      if (evt.key === "Escape") {
-        isOpen.value = false;
-      }
-    }
-
-    if (v) {
-      document.addEventListener('keyup', escListener);
-    } else {
-      document.removeEventListener('keyup', escListener);
-    }
-  });
-
   function setup() {
     return {
       isOpen,
