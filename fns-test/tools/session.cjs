@@ -22,8 +22,10 @@ const fs = require('fs');
 
 const firebase = require('firebase');
 
-// tbd. take this from a fake '../firebase.json' field (or env.var set in 'package.json')
-const FIRESTORE_HOST = "localhost:6768";
+const firebaseJson = require('../firebase.json');
+const FIRESTORE_HOST = `localhost:${ firebaseJson.emulators.firestore.port }`    // "6768"
+
+console.debug("!!! FIRESTORE_HOST", FIRESTORE_HOST)
 
 const projectId = (function parseDotFirebaseRc() {
   const fn = "./.firebaserc";

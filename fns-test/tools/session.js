@@ -16,8 +16,10 @@ import fs from 'fs'
 
 import * as firebase from 'firebase'
 
-// tbd. take this from a fake '../firebase.json' field (or env.var set in 'package.json')
-const FIRESTORE_HOST = "localhost:6768";
+import firebaseJson from '../firebase.json'
+const FIRESTORE_HOST = `localhost:${ firebaseJson.emulators.firestore.port }`    // "6768"
+
+console.debug("!!! FIRESTORE_HOST", FIRESTORE_HOST)
 
 const projectId = (() => {
   const fn = "./.firebaserc";

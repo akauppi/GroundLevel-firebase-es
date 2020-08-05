@@ -1,7 +1,0 @@
-{
-  "type": "module",
-  "//": [
-    "The purpose of this file is to make 'init.js' load as ES6. Did not want to bother the root file.",
-    "Also, not liking '.mjs' since for us, all the sources are ES6. Which is JavaScript."
-  ]
-}

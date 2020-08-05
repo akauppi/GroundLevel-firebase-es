@@ -1,17 +1,15 @@
 /*
 * fns-test/tools/extPromise.js
 *
-* A 'Promise' that can time out, and be resolved from the outside.
-*
 * Based on:
 *   - "Resolve Javascript Promise outside function scope" (StackOverflow)
 *     -> https://stackoverflow.com/questions/26150232/resolve-javascript-promise-outside-function-scope
 */
 
 /*
-* Promise that provides a test certain time to '.resolve' from outside.
+* A 'Promise'-look-alike that can time out, and be resolved or rejected from the outside.
 *
-* Times out with '.resolve(undefined)'. Does not reject.
+* Times out with '.resolve(undefined)'. Use other values in your code to differ from a timeout.
 */
 function bestBeforePromise({ timeoutMs }) {   // ({ timeoutMs: <int> }) => Promise-like
   assert(timeoutMs > 0);
@@ -29,7 +27,7 @@ function bestBeforePromise({ timeoutMs }) {   // ({ timeoutMs: <int> }) => Promi
     resolve() { clearTimeout(h); resLeak(); },
     reject() { clearTimeout(h); rejLeak(); },
       //
-    then: promise.then.bind(promise),
+    then: promise.then.bind(promise),   // these should make it look like 'Promise' in JavaScript
     catch: promise.catch.bind(promise),
     [Symbol.toStringTag]: 'Promise'
   }

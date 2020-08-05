@@ -9,10 +9,12 @@ import { strict as assert } from 'assert'
 import { test, expect, describe, beforeAll, afterAll, jest } from '@jest/globals'
 
 import { db } from './tools/session.js'
+import { extTimeoutPromise } from "./tools/extPromise"
 
 import './matchers/toContainObject'
 
 import { performance } from 'perf_hooks'    // node.js
+
 
 // Clear '/projects/1/userInfo/abc'
 //
@@ -58,7 +60,9 @@ describe("userInfo shadowing", () => {
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"
     };
 
-    const tickle = jest.fn();
+    const exProm = bestBeforePromise({ timeoutMs: 500 });    // { promise: Promise, resolve: () => (), reject: () => () }
+
+    expect.assertions(1);
 
     // Prepare a watch
     //
@@ -69,8 +73,7 @@ describe("userInfo shadowing", () => {
 
         if (o) {   // 'undefined' on first call (initially no doc)
           expect(o).toContainObject(william);
-          unsub();
-          tickle();
+          exProm.resolve();   // stop the wait
         }
       });
 
@@ -78,14 +81,16 @@ describe("userInfo shadowing", () => {
     //
     await db.collection("userInfo").doc("abc").set(william);
 
-    // keep rolling.. (Jest waits for the 'done')
-    await waitMs(500);    // tbd. could be made a loop, or even a wait that waits until either timeout, or the 'tickle' has been called
-
-    expect(tickle).toHaveBeenCalled();    // within...
+    try {
+      await exProm.promise;   // resolved by the database change; or timeout
+    }
+    finally {
+      unsub();    // tbd. is this the best place? (does it always get called?)
+    }
   });
 
   test('Central user information is not distributed to a project where the user is not a member', async () => {
-    const pleaseNo = jest.fn();
+    const exProm = bestBeforePromise({ timeoutMs: 500 });
 
     // Prepare a watch (should NOT get called!)
     //
@@ -94,7 +99,7 @@ describe("userInfo shadowing", () => {
         const o = dss.data();
 
         if (o) {
-          pleaseNo();   // should NOT take place
+          exProm.resolve(false);    // shouldn't have reached here
         }
       });
 
@@ -102,10 +107,13 @@ describe("userInfo shadowing", () => {
     //
     await db.collection("userInfo").doc("no-such").set({ name: "blah", photoURL: "https://hoax.png" });
 
-    await waitMs(500);    // tbd. see above; don't wait full time is 'pleaseNo' *has* been called (i.e. give expect as a parameter!)
-    unsub();
-
-    expect(pleaseNo).not.toHaveBeenCalled();
+    try {
+      const v = await exProm.promise;   // rejected by (unwanted) database change (leads to failure of test) or resolved by timeout
+      expect( v === undefined );    // timed out
+    }
+    finally {
+      unsub();
+    }
   });
 });
 
