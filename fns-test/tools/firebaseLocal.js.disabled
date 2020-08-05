@@ -18,9 +18,12 @@
 *       - [x] Why cannot I see my data, placed into Firestore via '@firebase/testing', in the emulator UI?
 *             - A: Emulator shows one project, the one active in '.firebaserc'. Others work and are emulated, but
 *                  invisible in the Emulator UI.
-*       - [ ] Can I use '.initializeApp' in node.js (here), or should I always use '@firebase/testing' and its
+*       - [x] Can I use '.initializeApp' in node.js (here), or should I always use '@firebase/testing' and its
 *             '.initializeAdminApp' / '.initializeTestApp'? If either, when is one suitable over the other?
-*       - [ ] What is the role of 'firebase-admin' and when should that be used?
+*             - A: Can use normal JavaScript client. '@firebase/testing' is only for testing of access rights.
+*       - [x] What is the role of 'firebase-admin' and when should that be used?
+*             - A: Only on server side. For desktop node.js use (like testing), use the normal JavaScript client.
+*                  This is now clearly mentioned in Firebase documents (as info boxes).
 *
 *         [1]: https://firebase.google.com/docs/web/setup#namespace
 */

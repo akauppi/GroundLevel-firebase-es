@@ -117,3 +117,32 @@ We didn't, but until this is fixed we likely also cannot.
 
 - [ ] keep an eye on. Having `package-lock.json` there is okay.
 
+
+## Jest: native ES6 support
+
+- In StackOverflow: [https://stackoverflow.com/questions/60372790/node-v13-jest-es6-native-support-for-modules-without-babel-or-esm](https://stackoverflow.com/questions/60372790/node-v13-jest-es6-native-support-for-modules-without-babel-or-esm)
+
+  - [ ] write a solution if we get one
+
+- In Jest GitHub Issues: [#9430](https://github.com/facebook/jest/issues/9430)
+  - has a useful per-subfeature list about the support
+
+   Note especially (not supported): 
+   
+   - "Detect if a file is supposed to be ESM or CJS mode"
+   
+
+## Firebase: proper native ES modules support
+
+So this isn't needed (in `fns-test/tools/session.js`):
+
+```
+import firebase from 'firebase/app/dist/index.cjs.js'
+import "firebase/firestore/dist/index.cjs.js"
+```
+
+Track:
+
+- [ ] Find an issue to track this
+
+

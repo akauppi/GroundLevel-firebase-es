@@ -3,40 +3,38 @@
   "version": "0.0.0",
   "description": "Cloud Functions tests",
   "private": true,
-  "//type": "module",
+  "type": "module",
   "scripts": {
     "test": "firebase emulators:exec --only firestore,functions 'npm run _init && npx jest --verbose'",
     "---": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --only functions,firestore\" \"npm run _start_2\"",
-    "_start_2": "wait-on http://localhost:4000 && npm run _init",
-    "_init": "node prime-with-data.cjs",
+    "_start_2": "wait-on http://localhost:4000 && node prime-docs.js",
     "test:monitoring": "npx jest -f monitoring.test.js --detectOpenHandles",
     "test:userInfo": "npx jest -f userInfo.test.js --detectOpenHandles",
-    "//test:temp": "npx jest -f temp.test.js --detectOpenHandles",
-    "test:all": "npx jest --verbose"
+    "test:all": "npx jest --verbose",
+    "----": "",
+    "test:temp": "npx --node-arg=--experimental-vm-modules jest -f temp.test.js --detectOpenHandles"
   },
-  "dependencies": {
-    "@babel/preset-typescript": "^7.10.4"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@babel/core": "^7.10.5",
-    "@babel/preset-env": "^7.10.4",
-    "babel-jest": "^26.1.0",
     "concurrently": "^5.2.0",
     "firebase": "^7.17.1",
-    "jest": "^26.1.0",
+    "jest": "^26.2.2",
     "wait-on": "^5.1.0"
   },
   "engines": {
     "node": ">=13.2"
   },
   "//": {
-    "babel*": [
-      "Babel is needed (Mar 2020) to have Jest support ES6 module imports/exports",
-      "see -> https://medium.com/@saplos123456/using-es6-import-and-export-statements-for-jest-testing-in-node-js-b20c8bd9041c"
+    "--experimental-vm-modules": [
+      "Needed for now (Aug 2020), to use native ES6 modules with Jest"
     ],
-    "Node 13.2+": [
-      "Needed for native ES module support"
+    "jest-environment-node": [
+      "Needed for native ES6 modules. NOT SURE what it really is, but it comes from Jest repo and is told to be required."
+    ],
+    "engines.node": [
+      ">=14.3: has --harmony-top-level-await",
+      ">=13.2: native ES module support"
     ],
     "scripts": {
       "start": [

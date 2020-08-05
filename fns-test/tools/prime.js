@@ -1,10 +1,10 @@
 /*
-* fns-test/prime.cjs
+* fns-test/prime.js
 *
 * Write data to the emulated Firestore.
 */
-//import { db } from './session'
-const db = require('./session.cjs');
+import { db } from './session.js'
+//REMOVE: const db = require('./session.cjs');
 
 /*
 * Prime a database with data
@@ -17,8 +17,8 @@ async function prime(data) {    // ({ <docPath>: { <field>: <value> } }) => Prom
   }
   await batch.commit();
 
-  db.app.delete();
+  const ignore = db.app.delete();   // tail free-roaming
 }
 
-//export { prime }
-module.exports = prime
+export { prime }
+//REMOVE: module.exports = prime
