@@ -5,17 +5,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore,functions 'npm run _init && npx jest --verbose'",
+    "test": "firebase emulators:exec --only firestore,functions 'npm run _init && npx --node-arg=--experimental-vm-modules jest --verbose'",
     "---": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --only functions,firestore\" \"npm run _start_2\"",
     "_start_2": "wait-on http://localhost:4000 && node prime-docs.js",
-    "test:monitoring": "npx jest -f monitoring.test.js --detectOpenHandles",
-    "test:userInfo": "npx jest -f userInfo.test.js --detectOpenHandles",
-    "test:all": "npx jest --verbose",
+    "test:monitoring": "npx --node-arg=--experimental-vm-modules jest -f monitoring.test.js --detectOpenHandles",
+    "test:userInfo": "npx --node-arg=--experimental-vm-modules jest -f userInfo.test.js --detectOpenHandles",
+    "test:all": "npx --node-arg=--experimental-vm-modules jest --verbose",
     "----": "",
     "test:temp": "npx --node-arg=--experimental-vm-modules jest -f temp.test.js --detectOpenHandles"
   },
-  "dependencies": {},
   "devDependencies": {
     "concurrently": "^5.2.0",
     "firebase": "^7.17.1",

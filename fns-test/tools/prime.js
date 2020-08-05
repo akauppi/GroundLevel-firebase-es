@@ -3,8 +3,7 @@
 *
 * Write data to the emulated Firestore.
 */
-import { db } from './session.js'
-//REMOVE: const db = require('./session.cjs');
+import { db } from './firebase.js'
 
 /*
 * Prime a database with data
@@ -21,4 +20,3 @@ async function prime(data) {    // ({ <docPath>: { <field>: <value> } }) => Prom
 }
 
 export { prime }
-//REMOVE: module.exports = prime

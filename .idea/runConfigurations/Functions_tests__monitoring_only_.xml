@@ -1,14 +1,14 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Functions tests (monitoring only)" type="JavaScriptTestRunnerJest">
     <node-interpreter value="project" />
-    <node-options value="" />
+    <node-options value="--experimental-vm-modules" />
     <jest-package value="$PROJECT_DIR$/fns-test/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$/fns-test" />
     <envs>
       <env name="FIRESTORE_EMULATOR_HOST" value="localhost:6768" />
     </envs>
     <scope-kind value="TEST_FILE" />
-    <test-file value="monitoring.test.js" />
+    <test-file value="$PROJECT_DIR$/fns-test/monitoring.test.js" />
     <method v="2" />
   </configuration>
 </component>

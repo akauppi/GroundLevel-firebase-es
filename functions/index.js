@@ -222,6 +222,11 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
   })
 */
 
+exports.addMessage = regionalFunctions    // EXPERIMENTAL only
+  .https.onCall((msg, context) => {
+    return `${msg} added.`;
+  });
+
 /*** REMOVE (works)
 // TEMP to debug
 exports.addMessage = functions.https.onRequest (async (req, res) => {

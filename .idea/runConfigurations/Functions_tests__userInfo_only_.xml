@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Functions tests (userInfo only)" type="JavaScriptTestRunnerJest">
     <node-interpreter value="project" />
-    <node-options value="" />
+    <node-options value="--experimental-vm-modules" />
     <jest-package value="$PROJECT_DIR$/fns-test/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$/fns-test" />
     <envs>

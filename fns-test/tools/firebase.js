@@ -1,17 +1,13 @@
 /*
-* fns-test/tools/session.js
+* fns-test/tools/firebase.js
 *
-* ES 6 (main) VARIANT. Use by the Jest tests.
+* Provide access to an emulator-facing Firebase client (Firestore, Cloud Functions, ...).
 *
-* Tools to:
-*   - dig current Firestore projectId from '../.firebaserc' (needed for showing data in the Emulator UI)
-*   - access the emulated Firestore data in Jest tests
-*
-* Usage:
-*   - import 'projectId' to get the project ID
-*   - import 'db' to get a handle to the primed data
+* - digs current Firestore projectId from '../.firebaserc' (needed for showing data in the Emulator UI)
 */
 import { strict as assert } from 'assert'
+
+// Note: Importing JSON is still experimental (behind '--experimental-json-modules'). We read JSON as files, until it's unflagged.
 import fs from 'fs'
 
 // This gives:
@@ -20,21 +16,19 @@ import fs from 'fs'
 // <<
 //import * as firebase from 'firebase/app'
 //import "firebase/firestore"
+//import "firebase/functions"
 
 import firebase from 'firebase/app/dist/index.cjs.js'
 import "firebase/firestore/dist/index.cjs.js"
+import "firebase/functions/dist/index.cjs.js"
 
-assert(firebase.initializeApp);
-assert(firebase.firestore);
-
-// Note: Importing JSON is still experimental (Node 14.7); can be enabled with '--experimental-json-modules'
-//
 //import firebaseJson from './firebase.json'
 const firebaseJson = JSON.parse(
   fs.readFileSync('./firebase.json', 'utf8')
 );
 
 const FIRESTORE_HOST = `localhost:${ firebaseJson.emulators.firestore.port }`    // "6768"
+const FUNCTIONS_URL = "http://localhost:5001";    // not available in any Firebase config, to read. :(
 
 const projectId = (() => {
   const o = JSON.parse(
@@ -60,6 +54,11 @@ db.settings({         // affects all subsequent use (and can be done only once)
   ssl: false
 });
 
+firebase.functions().useFunctionsEmulator(FUNCTIONS_URL);   // must be *after* '.initializeApp'
+
+const fns = firebase.app().functions(/*"europe-west3"*/);
+
 export {
-  db
+  db,
+  fns
 }

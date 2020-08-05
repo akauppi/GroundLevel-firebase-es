@@ -10,11 +10,16 @@
     "//logs": "firebase functions:log"
   },
   "engines": {
-    "node": "12",
-    "//node": ">=13.2"
+    "node": "12"
   },
   "dependencies": {
     "firebase-admin": "^8.13.0",
     "firebase-functions": "^3.8.0"
+  },
+  "//": {
+    "engines.node": [
+      "Cloud Functions only use LTS versions (even) of Node, e.g. 12,14,...",
+      "Native ES module support has been opened in Node.js 12.x.x  (tbd!!!!!!!!!!)"
+    ]
   }
 }

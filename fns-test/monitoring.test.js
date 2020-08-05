@@ -3,28 +3,9 @@
 *
 * Test the central monitoring functions (logs etc.)
 */
-import { strict as assert } from 'assert'
-
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { __ } from '../.__.js'; const { projectId } = __;
-
-// ONLY for Firestore
-//import * as firebase from '@firebase/testing'
-
-import * as firebase from 'firebase/app';   // according to npm firebase instructions
-
-import 'firebase/functions';
-
-firebase.initializeApp({
-  projectId    // must match what you have in '.firebaserc'
-});
-
-const [FUNCTIONS_URL, FIRESTORE_HOST] = ["http://localhost:5001", "localhost:8080"];
-
-firebase.functions().useFunctionsEmulator(FUNCTIONS_URL);   // must be *after* '.initializeApp'
-
-const fns = firebase.app().functions(/*"europe-west3"*/);
+import { fns } from './tools/firebase.js'
 
 describe("monitoring functions", () => {
   let fnLogs, fnFatal;
