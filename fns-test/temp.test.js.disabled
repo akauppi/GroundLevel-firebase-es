@@ -1,0 +1,21 @@
+/*
+* fns-test/temp.test.js
+*
+* EXPERIMENTAL test. Can be removed when things work. :)
+*/
+import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
+
+import { fns } from './tools/firebase.js'
+
+describe ('addMessage()', () => {
+  test ('returns a greeting', async () => {
+    const msg = 'Howdy';
+
+    const fnAddMessage = fns.httpsCallable("addMessage");
+
+    const data = (await fnAddMessage(msg)).data;
+    console.debug("Got:", data);
+
+    expect(data).toBe("Howdy added.");
+  });
+});

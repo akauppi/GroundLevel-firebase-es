@@ -4,8 +4,9 @@
 
 ## 5-Aug-20
 
-- Using native ES modules
+- Using native ES modules; Babel is gone!!!
 - userInfo testing works! 😀
+- all fns tests work. 
 
 ## 22-Jul-20
 

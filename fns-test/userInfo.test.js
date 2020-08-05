@@ -4,9 +4,7 @@
 * Test that '/projectsC/.../userInfoC' gets updated, by cloud functions, when the global '/userInfoC' changes (if
 * users are in the project).
 */
-import { strict as assert } from 'assert'
-
-import { test, expect, describe, beforeAll, afterAll, jest } from '@jest/globals'
+import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
 import { db } from './tools/firebase.js'
 import { bestBeforePromise } from "./tools/promiseTools.js"
@@ -32,6 +30,9 @@ beforeAll( async () => {    // takes about 456, 419 ms
   }
 });
 
+/*
+* Cleanup
+*/
 afterAll( async () => {
   await db.app.delete();
 });
@@ -47,7 +48,7 @@ describe("userInfo shadowing", () => {
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"
     };
 
-    const exProm = bestBeforePromise({ timeoutMs: 200 });    // { promise: Promise, resolve: () => (), reject: () => () }
+    const exProm = bestBeforePromise({ timeoutMs: 2000 });    // { promise: Promise, resolve: () => (), reject: () => () }
 
     // Prepare a watch
     //

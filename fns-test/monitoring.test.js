@@ -8,12 +8,8 @@ import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 import { fns } from './tools/firebase.js'
 
 describe("monitoring functions", () => {
-  let fnLogs, fnFatal;
-
-  beforeAll( () => {
-    fnLogs = fns.httpsCallable('logs_v190720');
-    fnFatal = fns.httpsCallable('fatal_v210720');
-  });
+  const fnLogs = fns.httpsCallable('logs_v190720');
+  const fnFatal = fns.httpsCallable('fatal_v210720');
 
   //--- Logs ---
 

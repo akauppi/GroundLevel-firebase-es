@@ -44,8 +44,6 @@ function bestBeforePromise({ timeoutMs, onTimeout }) {   // ({ timeoutMs: <int>,
       clearTimeout(timer);
       resLeak(v);
     },
-    //reject,
-      //
     then: promise.then.bind(promise),   // these should make it look like 'Promise' in JavaScript
     catch: promise.catch.bind(promise),
     [Symbol.toStringTag]: 'Promise'

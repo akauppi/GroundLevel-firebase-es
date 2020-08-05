@@ -4,6 +4,11 @@
 * Provide access to an emulator-facing Firebase client (Firestore, Cloud Functions, ...).
 *
 * - digs current Firestore projectId from '../.firebaserc' (needed for showing data in the Emulator UI)
+*
+* Usage: On applications where 'db' is used, the caller must release the Firebase app as such:
+*   <<
+*     db.app.delete();
+*   <<
 */
 import { strict as assert } from 'assert'
 
