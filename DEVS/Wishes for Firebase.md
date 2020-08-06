@@ -584,6 +584,15 @@ Work-around:
 - we could architect automatic restart using `npm`, but that adds complexity. Let's see what Firebase people say, first..
 
 
+## Cloud Functions: start node.js with `--experimental-modules` flag
+
+Why? This would allow projects (like this) to be able to use `import` instead of `require` if they so choose.
+
+Why not? Is there any down side?
+
+Work-around: wait for Node.js 14 support, in Cloud Functions.
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

@@ -19,9 +19,9 @@
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
-    "@firebase/testing": "^0.20.7",
-    "babel-jest": "^26.1.0",
-    "jest": "^26.1.0"
+    "@firebase/testing": "^0.20.9",
+    "babel-jest": "^26.2.2",
+    "jest": "^26.2.2"
   },
   "engines": {
     "node": ">=13.2"
@@ -30,9 +30,6 @@
     "babel*": [
       "Babel is needed (Mar 2020) to have Jest support ES6 module imports/exports",
       "see -> https://medium.com/@saplos123456/using-es6-import-and-export-statements-for-jest-testing-in-node-js-b20c8bd9041c"
-    ],
-    "@firebase/testing": [
-      "see -> https://github.com/firebase/firebase-js-sdk/tree/master/packages/testing"
     ],
     "Node 13.2+": [
       "Needed for native ES module support"
