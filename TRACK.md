@@ -91,15 +91,19 @@ That is also connected.
 That could be closed.
 
 
-## Firebase Functions: ES modules support (node.js >= 13.2)
+## Firebase Functions: ES modules support
 
-At the moment (Jul 2020), one can use ECMAscript modules in Firebase Functions with Babel.
+At the moment (<strike>Jul</strike> Aug 2020), one can use ECMAscript modules in Firebase Functions with Babel.
 
-Node.js 12 is in "beta". 
+Node.js 12 for Cloud Functions is in "beta".
 
 When node.js >= 13.2 is available, we can transition `functions` code to use ES modules. Don't feel like playing with Babel, in the mean time.
 
 - [https://stackoverflow.com/questions/42739539/cloud-functions-for-firebase-using-es6-import-statement]()
+
+**Alternative**
+
+Firebase could launch node.js (version 12) with `--experimental-modules` flag, and make sure we can try ES modules support, already now.
 
 
 ## Firebase Auth Emulation
