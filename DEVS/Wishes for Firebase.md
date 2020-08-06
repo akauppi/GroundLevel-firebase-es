@@ -573,6 +573,16 @@ To learn about active projects for the CLI, visit https://firebase.google.com/do
 Functions and Firestore emulators start. 
 
 
+## Cloud Functions emulator: could watch for changes
+
+Firebase emulator (firebase-tools 8.6.0) does not pick up changes to the functions sources.
+
+Since the Security Rules emulator does watch for changes, this is at the least an inconsistency in the development experience.
+
+Work-around:
+
+- we could architect automatic restart using `npm`, but that adds complexity. Let's see what Firebase people say, first..
+
 
 ## References
 
