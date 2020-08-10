@@ -5,7 +5,7 @@
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { fns } from './tools/firebase.js'
+import { fns } from './tools/fns.js'
 
 describe("monitoring functions", () => {
   const fnLogs = fns.httpsCallable('logs_v190720');

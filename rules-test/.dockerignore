@@ -1,4 +1,0 @@
-# Important to optimize 'docker build .' 
-#
-/node_modules/
-

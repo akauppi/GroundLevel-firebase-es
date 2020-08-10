@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore,functions 'npm run _init && npx --node-arg=--experimental-vm-modules jest --verbose --detectOpenHandles'",
+    "test": "firebase emulators:exec --only firestore,functions 'npm run _init && npm run _test_2'",
+    "_test_2": "npx --node-arg=--experimental-vm-modules jest --verbose --detectOpenHandles",
     "_init": "node prime-docs.js",
     "---": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --only functions,firestore\" \"npm run _start_2\"",

@@ -1,14 +1,7 @@
 /*
-* fns-test/tools/firebase.js
+* fns-test/tools/fns.js
 *
-* Provide access to an emulator-facing Firebase client (Firestore, Cloud Functions, ...).
-*
-* - digs current Firestore projectId from '../.firebaserc' (needed for showing data in the Emulator UI)
-*
-* Usage: On applications where 'db' is used, the caller must release the Firebase app as such:
-*   <<
-*     db.app.delete();
-*   <<
+* Provide access to an emulator-facing Firebase client (Cloud Functions).
 */
 import { strict as assert } from 'assert'
 
@@ -27,23 +20,14 @@ import firebase from 'firebase/app/dist/index.cjs.js'
 import "firebase/firestore/dist/index.cjs.js"
 import "firebase/functions/dist/index.cjs.js"
 
+import { projectId } from './projectId.js'
+
 //import firebaseJson from './firebase.json'
 const firebaseJson = JSON.parse(
   fs.readFileSync('./firebase.json', 'utf8')
 );
 
-const FIRESTORE_HOST = `localhost:${ firebaseJson.emulators.firestore.port }`    // "6768"
 const FUNCTIONS_URL = "http://localhost:5001";    // not available in any Firebase config, to read. :(
-
-const projectId = (() => {
-  const o = JSON.parse(
-    fs.readFileSync('./.firebaserc', 'utf8')
-  );
-  const vs = Object.values(o["projects"]);
-  assert(vs.length === 1);
-
-  return vs[0];
-})();
 
 /*
 * Initialize access to Firestore and provide a handle.
@@ -53,17 +37,10 @@ const app = firebase.initializeApp({
   auth: null    // unauth is enough
 });
 
-const db = firebase.firestore();
-db.settings({         // affects all subsequent use (and can be done only once)
-  host: FIRESTORE_HOST,
-  ssl: false
-});
-
 firebase.functions().useFunctionsEmulator(FUNCTIONS_URL);   // must be *after* '.initializeApp'
 
 const fns = firebase.app().functions(/*"europe-west3"*/);
 
 export {
-  db,
   fns
 }

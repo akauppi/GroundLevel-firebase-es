@@ -4,7 +4,7 @@
     <node-options value="" />
     <jest-package value="$PROJECT_DIR$/rules-test/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$/rules-test" />
-    <jest-options value="-f symbolsC.test.js -t &quot;'/symbols' rules&quot;" />
+    <jest-options value="-f symbolsC.test.js" />
     <envs>
       <env name="FIRESTORE_EMULATOR_HOST" value="localhost:6767" />
     </envs>

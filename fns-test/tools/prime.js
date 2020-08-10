@@ -3,7 +3,7 @@
 *
 * Write data to the emulated Firestore.
 */
-import { db } from './firebase.js'
+import { db } from './db.js'
 
 /*
 * Prime a database with data

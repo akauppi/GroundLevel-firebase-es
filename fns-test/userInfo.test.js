@@ -6,7 +6,7 @@
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { db } from './tools/firebase.js'
+import { db } from './tools/db.js'
 import { bestBeforePromise } from "./tools/promiseTools.js"
 
 import './matchers/toContainObject'
