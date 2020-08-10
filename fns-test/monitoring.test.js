@@ -3,9 +3,9 @@
 *
 * Test the central monitoring functions (logs etc.)
 */
-import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
+import { test, describe } from '@jest/globals'
 
-import { fns } from './tools/fns.js'
+import { fns } from 'firebase-jest-testing'
 
 describe("monitoring functions", () => {
   const fnLogs = fns.httpsCallable('logs_v190720');

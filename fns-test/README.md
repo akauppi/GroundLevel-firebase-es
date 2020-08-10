@@ -1,47 +1,14 @@
 # Functions test
 
-Test Cloud Functions for the application.
+This folder tests the Cloud Functions.
+
+You run the tests at the project root directory.
 
 **Approach**
 
 The emulated Firestore database is primed at server start (not as part of the tests).
 
-Tests run using normal Firebase clients.
-
-We do **not** use Security Rules. All access is allowed, during the tests.
-
-Benefits:
-
-- We can use the normal APIs - no need for separate test-only library.
-- Separation of concerns to testing security vs. functionality. Helps keep both sides simple.
-
->Note: This approach differs from the [one suggested](https://firebase.google.com/docs/functions/unit-testing) in Firebase documentation, which focuses on unit testing Cloud Functions. We test them at the integration level.
-
-
-## Requirements
-
-As `rules-test`, also this is arranged as a self-sufficient sub-folder, having its own dependencies.
-
-```
-$ npm install
-```
- 
-Set up the Firebase project:
-
-```
-firebase use --add
-```
-
->Note: It shouldn't matter which project you choose, since we are running against an emulator and there is no authentication. It's a bit weird that Firebase insists on this step (see `../DEVS/Wishes for Firebase.md`).
-
- 
-Set up the Firestore emulator:
-
-```
-$ firebase setup:emulators:firestore
-```
-
->Note: Rerun the setup above if you have upgraded `firebase-tools`.
+We do **not** use Security Rules. All access is allowed, during the tests. Access rights are tested separately.
 
 
 ## Running tests

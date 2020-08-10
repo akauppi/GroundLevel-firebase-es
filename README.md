@@ -80,9 +80,19 @@ There are other similar offerings from other companies, but they are years behin
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-<!--
-Developed with Firebase 8.4.3 on macOS; Node 14.4
+Set up the Firestore emulator:
+
+```
+$ firebase setup:emulators:firestore
+```
+
+>Note: Rerun the setup above if you have upgraded `firebase-tools`.
+
+<!-- tbd. is setting up (and re-running the setup) needed; does `firebase` do those automatically? 8.6.0)
 -->
+
+Developed with latest `firebase` (8.7.0) and Node.js (14.7.0) on macOS.
+
 
 ### Firebase plan
 
@@ -146,6 +156,12 @@ Fetch dependencies:
 
 ```
 $ npm install
+```
+
+You also need to do this separately for the emulated Cloud Functions:
+
+```
+$ (cd functions && npm install)
 ```
 
 <!-- hidden because noisy and not relevant for most

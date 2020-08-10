@@ -1,14 +1,17 @@
 /*
 * functions/index.js
 *
-* REST API note:
-*   When defining REST functions with Firebase syntax, methods (e.g. POST) are not defined. Anything goes.
-*   Also, path parameters cannot be defined. To do these, an Express API could be used. We use "callable functions"
-*   instead.
+* Cloud Functions for our app.
 *
-* Design note:
-*   We choose "callable functions" (over REST API) since there is no extra benefit of using REST in our use case.
-*   With callables (think: RPC!), parsing is done for us and authentication information is included in the requests.
+* Some of these do back-end chores like moving data when triggered. Others are for monitoring (getting central logging).
+* Yet others can be "callables" (like RPC), to interact with the backend.
+*
+* Note! If one's front end code uses callables, it is no longer tolerant to offline work. Using Firestore with the
+*     official client is; thus rather deal with database as the interface.
+*
+* Cloud Functions note:
+*   - until Cloud Functions supports node.js, we're stuck using 'require' (no prob there, just hang on). Decided not
+*     to use Babel but just wait until the native ES modules support surfaces (2024).
 *
 * Note:
 *   'HttpsError' 'code' values must be from a particular set
@@ -28,14 +31,12 @@ const admin = require('firebase-admin');
 
 admin.initializeApp();
 
-// Tell local emulation from being run in the cloud. This is exposed to the front end.
+// Tell local emulation from being run in the cloud.
 //
 const LOCAL = !! process.env["FUNCTIONS_EMULATOR"];    // "true" | undefined
 
 // Note: You can run functions in multiple regions, and some functions in some etc. But for a start, it's likely best
 //    to keep them in one, near you.
-//
-// Sad that the default region needs to be in the code. There is no configuration for it. 😢
 //
 const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 
@@ -46,6 +47,10 @@ const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 //    msg: string
 //    payload: object   //optional
 // }
+//
+// NOTE!!! Since callables require online connection, WE SHOULD RETHINK THIS APPROACH. Use Firestore, or a logging
+//      provider that provides a client tolerant of offline moments.
+//
 exports.logs_v190720 = regionalFunctions
 //const logs_v190720 = regionalFunctions
   .https.onCall(({ level, msg, payload }, context) => {
@@ -70,38 +75,6 @@ exports.logs_v190720 = regionalFunctions
     }
   });
 
-// Legacy
-//
-// Sample on how to keep old versions.
-//
-// {
-//    level: "debug"|"info"|"warn"|"error"
-//    msg: string
-// }
-// DEPRECATED 19-Jul-2020
-exports.logs_v1 = regionalFunctions
-//const logs_v1 = regionalFunctions
-  .https.onCall(({ level, msg }, context) => {
-
-    console.warn("Deprecated function called: 'logs_v1'");
-    switch (level) {
-      case "debug":
-        console.debug(msg);
-        break;
-      case "info":
-        console.info(msg);
-        break;
-      case "warn":
-        console.warn(msg);
-        break;
-      case "error":
-        console.error(msg);
-        break;
-      default:
-        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
-    }
-  });
-
 
 // Something went awfully wrong.
 //
@@ -114,6 +87,8 @@ exports.logs_v1 = regionalFunctions
 //    ex: exception object
 // }
 //
+// NOTE!!! As with logging, should rethink the approach, for offline.
+//
 exports.fatal_v210720 = regionalFunctions.https
   .onCall(({ msg, ex }, context) => {
 
@@ -121,28 +96,15 @@ exports.fatal_v210720 = regionalFunctions.https
   });
 
 
-// Temp function, for helping learn fns/firestore testability.
-//
-// Mirrors changes to 'temp.in' (string) in 'temp.out' (string).
-//
-exports.temp = regionalFunctions.firestore
-  .document('/temp/A')
-  .onWrite( async (event, context) => {
-
-    const [before,after] = [event.before, event.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
-
-    if (after.get("in") != before.get("in")) {
-      const v = after.get("in");
-
-      // Write to '.out' of the same document
-      //
-      // Note: Alternative 'after.ref.set(...)' would work as well.
-      //
-      await admin.firestore().doc("/temp/A").set({ out: v }, { merge: true });
-
-      console.debug("/temp '.in' -> '.out':", v);
-    }
-  })
+/*
+* Just for testing.
+*
+* { msg: string } -> string
+*/
+exports.greet = regionalFunctions.https
+  .onCall((msg, context) => {
+    return `Greetings, ${msg}.`;
+  });
 
 
 // UserInfo shadowing
@@ -172,23 +134,16 @@ exports.userInfoShadow = regionalFunctions.firestore
       // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
       //    cheaper. #rework #monitoring #billing
       //
-      const qss1 = await db.collection('projects')
-        .where('authors', 'array-contains', uid)
+      const qss = await db.collection('projects')
+        .where('members', 'array-contains', uid)
         .select()   // don't ship the fields, just matching ref
         .get();
 
-      const qss2 = await db.collection('projects')
-        .where('collaborators', 'array-contains', uid)
-        .select()
-        .get();
-
-      const tmp = [...qss1.docs, ...qss2.docs];   // Array of QueryDocumentSnapshot
-
-      if (tmp.length == 0) {
+      if (qss.size === 0) {
         console.debug(`User '${uid}' not found in any of the projects.`);
 
       } else {
-        const proms = tmp.map( qdss => {
+        const proms = qss.docs.map( qdss => {
           console.debug(`Updating userInfo for: projects/${qdss.id}/userInfo/${uid} ->`, newValue);
 
           return qdss.ref.collection("userInfo").doc(uid).set(newValue);    // Promise of WriteResult
@@ -222,25 +177,11 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
   })
 */
 
-/*** REMOVE
-exports.addMessage = regionalFunctions    // EXPERIMENTAL only
-  .https.onCall((msg, context) => {
-    return `${msg} added.`;
-  });
-***/
-
-/*** REMOVE (works)
-// TEMP to debug
-exports.addMessage = functions.https.onRequest (async (req, res) => {
-  const original = req.query.text;
-  const writeResult = await admin.firestore().collection ('messages').add ({text: original});
-  const docSnap = await writeResult.get();
-  const writtenText = docSnap.get ('text');
-  res.send (`Message with text: ${writtenText} added.`);
-});
-***/
 
 /***  // sample of using REST API
+ * Note: There's little benefit for making REST API for the client (use 'callables' instead). If you wish to do those
+ *      for other integrations, that's another case (i.e. not requiring the user to have a Firebase client). /AK
+ *
  // POST /logs
  //    body: { level: "debug"|"info"|"warn"|"error", msg: string }
  //
@@ -249,9 +190,8 @@ exports.addMessage = functions.https.onRequest (async (req, res) => {
  //      curl -X POST -H "Content-Type:application/json" $ENDPOINT -d '{"level":"debug", "msg":"Hey Earth!"}'
  //    <<
  //
- exports.logs = functions
- .region(myRegion)
- .https.onRequest((req, resp) => {
+ exports.logs = regionalFunctions
+  .https.onRequest((req, resp) => {
 
   const level = req.body.level;
   const msg = req.body.msg;
@@ -260,15 +200,6 @@ exports.addMessage = functions.https.onRequest (async (req, res) => {
     case "debug":
       console.debug(msg);
       break;
-    case "info":
-      console.info(msg);
-      break;
-    case "warn":
-      console.warn(msg);
-      break;
-    case "error":
-      console.error(msg);
-      break;
     default:
       resp.status(400).send("Unknown level: "+level);
       return;
@@ -276,27 +207,4 @@ exports.addMessage = functions.https.onRequest (async (req, res) => {
 
   resp.status(200).send("");
 });
- ***/
-
-/*** ES6 to-come
-export {
-  logs_v200719,
-  logs_v1
-}
 ***/
-
-
-/*** UNNEEDED: was chicken-egg
-/*
-* Expose the emulated or not to the front end (called at app launch)
-*
-* Note: Only used in dev mode (not production).
-*_/
-exports.isDevLocal = regionalFunctions
-  //const isLocal = regionalFunctions
-  .https.onCall(( context) => {
-
-    return LOCAL;   // 'true' if under local emulation
-  });
-***/
-

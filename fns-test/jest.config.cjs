@@ -1,9 +1,6 @@
 // jest.config.cjs
 
 module.exports = {
-  // Needed. Use if we don't need 'jest-environment-node'
-  //testEnvironment: 'node',
-
   // Default is 5000. None of our tests take that long; fail fast.
   testTimeout: 2000,
 

@@ -17,17 +17,13 @@ const anyPastDate = new Date();
 const docs = {
   // Project 1 - active project
   "/projects/1": {
-    title: "Jolly Jumper",
-    created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no 'removed'
     authors: ["abc"],
-    collaborators: ["def"]
-  },
-  "/projects/1/visited/abc": {
-    at: anyPastDate
+    members: ["abc","def"]
   },
   //"/projects/1/userInfo/{uid}": initially empty
 
+  /*** not implemented
   // Invites (just one)
   "/invites/a@b.com:1": {
     email: "a@b.com",
@@ -36,6 +32,7 @@ const docs = {
     by: "abc",
     at: new Date('07 Apr 2020 15:12:00 GMT')
   }
+  ***/
 
   // UserInfo (initially empty)
   //"/userInfo/abc": {
