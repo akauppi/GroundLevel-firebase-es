@@ -69,7 +69,7 @@ To go sub-collection:
 
 ## Security Rules
 
-Changes due to the invite workflow: Cloud Functions should be the one bringing new users to `collaborators` and/or `authors`. This should be reflected in the docs, security rules, and their tests.
+Changes due to the invite workflow: Cloud Functions should be the one bringing new users to `members` and/or `authors`. This should be reflected in the docs, security rules, and their tests.
 
 
 ## When Vite allows path mapping
@@ -83,7 +83,7 @@ Also:
 - `import ... from "blah"` -> `import ... from "blah.js"`
 
 
-## Bootcamp 4.5
+## Bootcamp 5
 
 Bootcamp has great docs and version 5 is no longer dependent on jQuery. We'll use it as our make-up layer.
 
@@ -112,14 +112,6 @@ See [Convert an anonymous account to a permanent account](https://firebase.googl
 
 It's now a bit too fast. 
 
-
-<!-- noooope?
-## Sentry integration
-
-Once their [Vue integration](https://docs.sentry.io/platforms/javascript/vue/) becomes available to Vue 3 (beta), consider it.
-
-Note: It's not so important, if we can do cloud logging via Firebase Functions - as it seems. :)
--->
 
 ## README: mention production project
 

@@ -22,7 +22,7 @@ Collections are marked with `C <id-type>`.
    [/removed: time-stamp] 	// keep data resurrectable from the database console for a while; who removed is in the logs
 
    /authors: array of <uid> (>=1)
-   /collaborators: array of <uid> (>=0)
+   /members: array of <uid> (>=1); includes all authors
 
    /visited:C <uid>
       /at: timestamp 
@@ -48,7 +48,7 @@ The design of the above data model has been tedious. There are so many ways one 
 
    Of course.. if you *want* to be informed when someone joins the project online, that's another issue, but we'll likely do it via Firebase messaging, not the database tables.
 
-- `/authors` and `/collaborators` are in the main document. This is mainly because they are crucial for the access rights of the project and having them in the same document reduces the cost of Security Rules checks. This may change, though (there may be reasons to place them in subcollections). 
+- `/authors` and `/members` are in the main document. This is mainly because they are crucial for the access rights of the project and having them in the same document reduces the cost of Security Rules checks. This may change, though (there may be reasons to place them in subcollections). 
 
 - `/symbols:C` is a subcollection and each symbol on the infinite canvas is its own document. 
 
@@ -61,8 +61,11 @@ The design of the above data model has been tedious. There are so many ways one 
 I wrote these **before** actually implementing the data model.  Had tossed different points of view for ages, and of course also started to craft queries, and security rules.
 
 Seems getting to good data modeling in Firebase needs experience. Hopefully this description helps you speed up that learning curve. It might be a very instinctive process, in the end... Good luck!! 🍀
-  
 
+
+#### Terminology  
+
+collaborator: a member who is not an admin
 
 ### Invites
 

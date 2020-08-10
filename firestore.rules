@@ -41,7 +41,7 @@ service cloud.firestore {
       //    | /created | no |
       //    | /removed | author may add or remove; no other fields may change; if added, must be the server timestamp |
       //    | /authors | author may change; at least one author must remain |
-      //    | /collaborators | author may change |
+      //    | /members | author may change; must include authors |
       //
       allow update: if isAuthor()
         && validProjectWrite()
@@ -68,20 +68,20 @@ service cloud.firestore {
       //  - created (timestamp) must exist
       //  - removed (timestamp) is optional; if exists, must be a server time stamp now or in the past
       //  - at least one author must exist
-      //  - collaborators can be empty
+      //  - members must contain all authors (and thus is >= 1)
       //  - users are either in 'authors' or in 'collaborators' (but not in both)
       //
+      // Deprecated keys: "collaborators" 4-Aug-20
+      //
       function validProjectWrite() {
-        let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
+        let possibleKeys = ["title", "created", "removed", "authors", "members"].toSet();
 
         return true
           && after().title is string && after().title != ''
           && after().created is timestamp
           && (!isRemovedAfter() || (after().removed == request.time))
           && after().authors is list && after().authors.size() > 0
-          && after().collaborators is list
-          && after().authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
-            // no common entries (could also omit this; logic would work even if a user is listed in both)
+          && after().members is list && after().members.toSet().hasAll( after().authors().toSet() )
 
           && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
       }
@@ -111,7 +111,7 @@ service cloud.firestore {
 
       function isCollaborator() {
         return isSignedIn() &&
-          request.auth.uid in prior().collaborators
+          request.auth.uid in prior().members.toSet().difference( prior().authors.toSet() )   // in 'members' but not in 'authors'
       }
 
       function isRemoved() {
@@ -132,14 +132,14 @@ service cloud.firestore {
         // Read:
         //	- all project members can read each other's last visit time
         //
-        allow read: if EXT_isCollaboratorOrAuthor()
+        allow read: if EXT_isMember_COST1()
 
         // Write:
         //	- only the user themselves can reset their value
         //
         // Note: requiring the 'after' value to be the server time stamp essentially disallows deletes.
         //
-        allow write: if EXT_isCollaboratorOrAuthor()
+        allow write: if EXT_isMember_COST1()
           && validVisitedWrite()
           && userId == request.auth.uid
           && after().at == request.time
@@ -170,13 +170,13 @@ service cloud.firestore {
         // Read:
         //  - all members of the project can read
         //
-        allow read: if EXT_isCollaboratorOrAuthor()
+        allow read: if EXT_isMember_COST1()
           //&& validSymbol()      // guards against bad data in test setup, manual Firestore edits or from earlier schemas
 
         // Creation:
         //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
         //
-        allow create: if EXT_isCollaboratorOrAuthor()
+        allow create: if EXT_isMember_COST1()
           && validSymbolWrite()
           && after().claimed.by == request.auth.uid
           && after().claimed.at == request.time
@@ -187,7 +187,7 @@ service cloud.firestore {
         //  - can revoke the claim
         //  - claim itself cannot be changed; only revoked
         //
-        allow update: if EXT_isCollaboratorOrAuthor()
+        allow update: if EXT_isMember_COST1()
           && validSymbolWrite()
           && (      // case A: claiming an unclaimed symbol
             !isClaimed() ? (
@@ -204,7 +204,7 @@ service cloud.firestore {
         // Delete:
         //	- can delete a symbol claimed to themselves
         //
-        allow delete: if EXT_isCollaboratorOrAuthor()
+        allow delete: if EXT_isMember_COST1()
           && isClaimedByMe()
 
         function validSymbolWrite() {
@@ -241,22 +241,20 @@ service cloud.firestore {
 
       // Functions for sub-collections
       //
-      // While the 'project' documents can address their 'authors' and 'collaborators' fields directly, sub-collection
+      // While the 'project' documents can address their 'authors' and 'members' fields directly, sub-collection
       // documents must use 'get'. This also implies an added billing cost for processing those security rules.
 
-      function EXT_isCollaboratorOrAuthor() {
-        let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
-
+      function EXT_isMember_COST1() {
         return isSignedIn() && (
-          request.auth.uid in data.collaborators ||
-          request.auth.uid in data.authors
+          request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.members
         )
       }
     }   // project
 
 //--- Invites ---
 //
-// Writable by authors and collaborators, to invite new members to a project. From there, Cloud Functions should do all.
+// Writable by members, to invite new members to a project (authors can invite either category; members can only invite
+// as members). From there, Cloud Functions should do all.
 
     // Access cost:
     //    read: 2
@@ -275,7 +273,7 @@ service cloud.firestore {
         // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
         && after().asAuthor ?
             PROJ_isAuthor_COST1( after().project ) :
-            PROJ_isCollaboratorOrAuthor_COST1( after().project )      // else anyone in the project can invite
+            PROJ_isMember_COST1( after().project )      // else anyone in the project can invite
         && validInviteWrite()
 
       // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an
@@ -309,12 +307,12 @@ service cloud.firestore {
         let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
 
         return isSignedIn() && (
-          request.auth.uid in data.authors ||
-          ((!mustBeAuthor) && request.auth.uid in data.collaborators)
+          mustBeAuthor ? request.auth.uid in data.authors
+            : request.auth.uid in data.members
         )
       }
       function PROJ_isAuthor_COST1(projectId) { return _PROJ_isMember_COST1(projectId, true); }
-      function PROJ_isCollaboratorOrAuthor_COST1(projectId) { return _PROJ_isMember_COST1(projectId, false); }
+      function PROJ_isMember_COST1(projectId) { return _PROJ_isMember_COST1(projectId, false); }
 
     } // invites
 
