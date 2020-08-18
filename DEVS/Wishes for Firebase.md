@@ -584,6 +584,75 @@ Work-around:
 - we could architect automatic restart using `npm`, but that adds complexity. Let's see what Firebase people say, first..
 
 
+## Emulator: if you cannot deliver, please fail.
+
+```
+$ npm run start:rest
+
+...
+> concurrently -n emul,init "firebase emulators:start --config firebase.norules.json --only functions,firestore" "npm run _start_rest_2"
+
+[init] 
+[init] > firebase-jest-testing@0.0.1-alpha.2 _start_rest_2 /Users/asko/Git/firebase-jest-testing
+[init] > wait-on http://localhost:4000 && FIREBASE_JSON=firebase.norules.json node --harmony-top-level-await sample/prime-docs.js
+[init] 
+[emul] i  emulators: Starting emulators: firestore
+[emul] ⚠  functions: Not starting the functions emulator, make sure you have run firebase init.
+[emul] ⚠  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file.
+[emul] ⚠  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
+[emul] i  firestore: Firestore Emulator logging to firestore-debug.log
+[emul] i  ui: Emulator UI logging to ui-debug.log
+[emul] 
+...
+```
+
+Above, the emulators are clearly started with `--only functions,firestore` parameter.
+
+The log output states (as a warning):
+
+>[emul] ⚠  functions: Not starting the functions emulator, make sure you have run firebase init.
+
+It's like. I know you want Cloud Functions, but I don't know how to. But I'll keep on going anyhow. (maybe you won't notice)
+
+PLEASE NO‼️‼️
+
+It drains developers' time that something *seems* to launch, but doesn't do its job. The only meaningful way out when required features are explicitly requested is **to fail with a non-zero return code**. This would make the developer instantly understand something went wrong.
+
+`firebase` 8.7.0
+
+### Similar
+
+```
+> firebase emulators:start --config firebase.json --only firestore
+
+⚠  Could not find config (firebase.json) so using defaults.
+i  emulators: Starting emulators: firestore
+⚠  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file.
+⚠  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
+i  firestore: Firestore Emulator logging to firestore-debug.log
+i  ui: Emulator UI logging to ui-debug.log
+
+┌───────────────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! View status and logs at http://localhost:4000 │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Firestore │ localhost:8080 │ http://localhost:4000/firestore │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Other reserved ports: 4400, 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+```
+
+>⚠  Could not find config (firebase.json) so using defaults.
+
+I'd prefer a failed launch, when the config file is explicitly stated: `--config firebase.json` and not found.
+
+In this case, the file *was there* but it wasn't valid JSON. Please strive to make the error messages precise. The file **was found** but its contents were not valid. I don't want line-wise error message, just "not valid JSON" is enough to get one fast on the right bug. 🏹🐞
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)
