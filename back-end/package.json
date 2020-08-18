@@ -1,0 +1,45 @@
+{
+  "name": "back-end",
+  "description": "Back-end features",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ci": "firebase emulators:exec --only firestore,functions 'npm run _init && npm run _ci_fns_2'",
+    "_ci_fns_2": "npx --node-arg=--experimental-vm-modules jest --config fns-test/jest.config.cjs --verbose --detectOpenHandles",
+    "_init": "node --harmony-top-level-await fns-test/prime-docs.js",
+    "--- ": "",
+    "start": "firebase emulators:start --only firestore,functions",
+    "_start_2": "wait-on http://localhost:4000 && npm run _init",
+    "test:fns:monitoring": "npx --node-arg=--experimental-vm-modules jest --config fns-test/jest.config.cjs -f monitoring.test.js --detectOpenHandles",
+    "test:callables": "npx --node-arg=--experimental-vm-modules jest --config fns-test/jest.config.cjs -f callables.test.js --detectOpenHandles",
+    "test:userInfo": "npx --node-arg=--experimental-vm-modules jest --config fns-test/jest.config.cjs -f userInfoC.test.js --detectOpenHandles",
+    "test:fns-all": "npx --node-arg=--experimental-vm-modules jest --verbose --detectOpenHandles",
+    "---  ": "",
+    "//test:rules:projects": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f projectsC.test.js --detectOpenHandles",
+    "//test:rules:symbols": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f symbolsC.test.js --detectOpenHandles",
+    "//test:rules:invites": "FIRESTORE_EMULATOR_HOST=localhost:6767 npx jest -f invitesC.test.js --detectOpenHandles"
+  },
+  "dependencies": {
+    "firebase": "^7.17.2"
+  },
+  "devDependencies": {
+    "firebase-jest-testing": "^0.0.1-alpha.1",
+    "jest": "^26.2.2"
+  },
+  "engines": {
+    "node": ">=14.3"
+  },
+  "//": {
+    "--experimental-vm-modules": [
+      "Needed for now (Aug 2020), to use native ES6 modules with Jest"
+    ],
+    "--detectOpenHandles speeds up tests": [
+      "This is weird, but consistent. If we keep it in 'npm test', the test execution is ~2x faster (as reported, per test).",
+      "Doing this, since it means our timeouts can be smaller."
+    ],
+    "engines.node": [
+      ">=14.3: has --harmony-top-level-await",
+      ">=13.2: native ES module support"
+    ]
+  }
+}

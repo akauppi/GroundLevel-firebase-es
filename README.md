@@ -60,13 +60,9 @@ This repo uses the Firebase serverless framework for a lot of things. Authentica
 
 Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers, or have a separate repository for "back end code". You don't need to make interface definitions (between the front and the back ends). With Firebase, the front end interacts directly with the Cloud Firestore database, and the database access rules become the de facto interface definition.
 
-<!-- tbd. picture about front/REST/backend/database (left) vs. front/database (and cloud functions) (right) -->
-
-![](.images/backend-vs-firebase.png)
+>![](.images/backend-vs-firebase.png)
 
 *Figure 1. Traditional cloud vs. Firebase approach <sub>[source](https://docs.google.com/drawings/d/15_rPDZDOCHwdL0RIX8Rg3Der1tb4mx2tMi9asQ_aegw)</sub>*
-
-You can still make REST API's if you want. But also those get defined within this same repo, as Cloud Functions.
 
 There are other similar offerings from other companies, but they are years behind, in the ease of use, based on the author's opinion.
 
@@ -88,11 +84,12 @@ $ firebase setup:emulators:firestore
 
 >Note: Rerun the setup above if you have upgraded `firebase-tools`.
 
-<!-- tbd. is setting up (and re-running the setup) needed; does `firebase` do those automatically? 8.6.0)
+<!-- tbd. is setting up (and re-running the setup) needed; does `firebase` do those automatically? try)
 -->
 
-Developed with latest `firebase` (8.7.0) and Node.js (14.7.0) on macOS.
-
+<!--
+The repo is developed with latest `firebase` (8.7.0) and Node.js (14.7.0) on macOS.
+-->
 
 ### Firebase plan
 
@@ -105,15 +102,16 @@ You can still use this repo for local development and training with the "Spark" 
 You need to:
 
 - create a Firebase project at the [Firebase console](https://console.firebase.google.com/)
-  - enable hosting and authentication
-  - create an app (needed for ...)
+  - enable hosting, authentication, Cloud Firestore and Cloud Functions
+  - create an app (needed for authentication)
   - choose the set of authentication providers you like (Google, anonymous recommended)
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
 
-<!-- tbd. what was the app necessary for? -->
+<!-- tbd. what was the app necessary for? (guessed auth) 
+-->
 
->Note: You don't need to use `firebase init` - that one is for creating a repo from scratch. `firebase use --add` is all that's needed.
+>Note: You don't need to use `firebase init` - that one is for creating a repo from scratch.
 
 #### Development configuration 
 
@@ -158,13 +156,24 @@ Fetch dependencies:
 $ npm install
 ```
 
-You also need to do this separately for the emulated Cloud Functions:
+Back-end features (Cloud Firestore Security Rules and Cloud Functions) have their own directory. This is just a convention followed in this repo, but feels useful.
+
+You need two more `npm install`s:
+
+```
+$ cd back-end
+$ firebase use --add   # pick same project as for the front-end. This is for emulation.
+$ npm install
+```
+
+One more for the implementation (server side) of Cloud Functions:
 
 ```
 $ (cd functions && npm install)
+$ cd ..
 ```
 
-<!-- hidden because noisy and not relevant for most
+<!-- disabled (noisy and not relevant for most)
 >macOS Note: If you get `gyp: No Xcode or CLT version detected!` error:
 >
 >   ```
@@ -175,6 +184,8 @@ $ (cd functions && npm install)
 
 ### Running tests
 
+Back at the root level:
+
 ```
 $ npm test
 ...  
@@ -182,12 +193,13 @@ $ npm test
 
 This runs tests for:
 
-- security rules
-- Cloud Functions
+- back end / security rules
+- back end / Cloud Functions
 - front-end APP
 
 >Note: There are currently no UI side tests for the project, but this is intended to change, eventually. You should look into [Cypress](https://www.cypress.io) if you don't already have a favourite app level testing toolkit.
 
+>Interestingly, we use [Jest](https://jestjs.io) for the back-end tests but [Cypress](https://www.cypress.io) for the front end.
 
 ### Dev mode
 
@@ -200,7 +212,7 @@ Dev server running at:
 ...
 ```
 
-This serves the UI locally, against your Firebase project in the cloud. You can edit the UI sources and changes should be reflected in the application. This is called Hot Module Replacement.
+This serves the UI locally, against an emulated Firebase back-end. You can edit the UI sources and changes should be reflected in the application. This is called Hot Module Replacement.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Can you sign in?
 
@@ -209,11 +221,13 @@ Try making some changes and see that they are reflected in the browser.
 
 ## Two development workflows
 
-The above command started an "online" development workflow. You can also start it with `npm run dev:online`. In it, changes to the front-end are reflected in the browser but back-end features (database, Cloud Functions) are run online.
+The above command started a local, emulated version of Firebase. You can also start it with `npm run dev:local`. 
 
-The "online" workflow is recommended when you are working with the UI code, but the full story is a bit longer. Next, we'll look into the "local" workflow.
+The other way is `npm run dev:online`. This works against your cloud Firebase project. Try it!
 
->Note: Firebase is pushing for use of the local emulator. It is likely we'll change that workflow to be the default one, during 2020.
+The "online" workflow is recommended when you are working with the UI code, but the full story is a bit longer. Let's start with the "local" workflow.
+
+>Note: Firebase is gently nudging developers towards the local emulator. You don't e.g. cause any payments when using it.
 
 
 ### `dev:local`
@@ -269,7 +283,6 @@ $ npm run dev:local
 The emulators are started in the background. A `wait-on` module waits for them to be up and then launches a script that primes the emulated Firestore instance with data:
 
 ```
-[dev-local] Priming...
 [dev-local] Primed :)
 ```
 
@@ -316,10 +329,6 @@ To pick up your Firebase user id, either:
 Then insert such a UID in `local/data.js`, restart the server and you should have some data to play with.
 
 
-<!-- stashed; too much
->Note: Firebase has mentioned 24-Jun-20 (Firebase live's comments) that they aim to bring also auth into the local emulation. This should allow fully offline development! 🎉
--->
-
 #### When to develop in local mode?
 
 As mentioned above, for just developing the UI, it may be nice to work against real (changing) data. It just feels more normal. 
@@ -328,14 +337,8 @@ If you intend to test things like removal of data, local mode may be better, sin
 
 For back-end work, local mode rocks!
 
-You can also run these modes simultaneously, in different terminals. By default, online uses port 3000 and local port 3001.
+You can also run these modes simultaneously, in different terminals. By default, local uses port 3000 and online port 3001.
 
-
-<!-- tbd.
-## Configuration
-
-...discuss `src/config.js`
--->
 
 ## Tests and Linting
 
@@ -347,6 +350,16 @@ $ npm run lint
 This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
 
 
+## Back-end
+
+We first told you don't need a back end but then there's such a directory. What's up?
+
+What you don't need is deploying, managing and *scaling* your *servers*. That is automatic by Firebase. But you need to define the functionality that the back-end will do - it's still there.
+
+We've placed this part behind a corner, almost as a sub-project of its own. This for example keeps the Node.js dependencies separate for the two. Check out [back-end/README](back-end/README.md) at your will.
+
+
+<!-- REMOVE (into back-end/README?)
 ## Security Rules
 
 If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
@@ -361,11 +374,14 @@ $ npm test
 ```
 
 Please see its own [README](rules-test/README.md) file.
-
->Plan: We may turn to Docker in the future, to better integrate testing security rules as part of the repo, itself (no sub-project, no second `node_modules`), yet not bring the complexity of the tools to the main project. `package.json` should carry only the dependencies the main project needs.
-
+-->
 
 ## Production workflow
+
+<font color=red>THIS IS STILL HUGELY IN FLUX. DON*T BELIEVE WHAT YOU READ!!!</font>
+
+<!-- In fact, we're liking to do all with Vite. Would be simpler.
+-->
 
 <strike>For production builds, we use Rollup. You find the configuration in [rollup.config.js](rollup.config.js).</strike>
 
@@ -375,6 +391,7 @@ Please see its own [README](rules-test/README.md) file.
 >- we wish to experiment with ES6 modules all the way (vs. bundle)
 >- Rollup simply gives a better feeling of control
 
+<!-- FLUX FLUX FLUX
 ### Production build
 
 ```
@@ -401,7 +418,7 @@ $ npm run prod:serve
 
 Local Firebase serving of the production build.
 
-
+-- tbd. place deployment into a separate directory; INCLUDING documentation. --
 
 ### Deployment
 
@@ -432,13 +449,6 @@ To check it's working, we can serve it (don't try opening the `index.html` from 
 $ firebase serve --only hosting --port 3002
 ```
 
-
-
-### Deploy
-
-Deploying Cloud Functions uses the `functions/package-lock.json`. While we don't keep the file for the main project, it seemed like a good thing, not to supress it there. The idea is to make sure local emulation and Cloud Function run with the same node.js dependencies.
-
-
 ```
 $ firebase deploy
 
@@ -464,6 +474,7 @@ Visit the stated URL. :)
 Note: These instructions are no-where complete, and you should really visit the Firebase documentation (it being awesome!! 🥳). Check e.g. [Test locally then deploy to your site](https://firebase.google.com/docs/hosting/deploying)
 
 </font>
+-->
 
 <!-- disabled, to keep things short-ish
 ## Digging deeper...
