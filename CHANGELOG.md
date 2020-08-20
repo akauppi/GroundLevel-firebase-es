@@ -1,5 +1,9 @@
 # Changelog
 
+## 20-Aug-20
+
+- Using `firebase-jest-testing` for the back-end testing frames
+ 
 ## 4-Aug-20
 
 - Setup dialog replaces signout menu

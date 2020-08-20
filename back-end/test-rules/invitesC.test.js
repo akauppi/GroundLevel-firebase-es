@@ -3,13 +3,10 @@
 */
 import { strict as assert } from 'assert'
 
-//import { dbAuth } from 'firebase-jest-testing/firestoreTestingReadOnly'
-import { dbAuth } from 'firebase-jest-testing/src/firestoreTesting/readOnly.js'
-
-//import { FieldValue } from 'firebase-jest-testing/firestoreTesting'
-import { FieldValue } from 'firebase-jest-testing/src/firestoreTesting/index'
-
 import { test, expect, describe, beforeAll } from '@jest/globals'
+
+import { dbAuth } from 'firebase-jest-testing/firestoreTestingReadOnly'
+import { FieldValue } from 'firebase-jest-testing/firestoreTesting'
 
 const anyDate = new Date();   // a non-server date
 

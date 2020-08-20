@@ -19,7 +19,7 @@
     "_ci_init": "FIREBASE_JSON=firebase.norules.json node --harmony-top-level-await back-end/test/prime-docs.js",
     "--- ": "",
     "ci:rules": "firebase emulators:exec --config firebase.json --only firestore 'npm run _ci_rules'",
-    "_ci_rules": "npx --node-arg=--experimental-vm-modules jest --config sample/test-rules/jest.config.cjs --verbose --detectOpenHandles",
+    "_ci_rules": "npx --node-arg=--experimental-vm-modules jest --config back-end/test-rules/jest.config.cjs --verbose --detectOpenHandles",
     "---  ": "",
     "start:rest": "concurrently -n emul,init \"firebase emulators:start --config firebase.norules.json --only functions,firestore\" \"npm run _start_rest_2\"",
     "_start_rest_2": "wait-on http://localhost:4000 && GCLOUD_PROJECT=$(firebase use) FIREBASE_JSON=firebase.norules.json node --harmony-top-level-await back-end/test/prime-docs.js",

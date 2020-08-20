@@ -22,7 +22,7 @@ const docs = {
     created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no 'removed'
     authors: ["abc"],
-    collaborators: ["def"]
+    members: ["abc","def"]
   },
   "/projects/1/visited/abc": {
     at: anyPastDate
@@ -49,7 +49,7 @@ const docs = {
     created: new Date('01 Jan 1880 00:00:00 GMT'),
     removed: anyPastDate,
     authors: ["abc"],
-    collaborators: ["def"]
+    members: ["abc","def"]
   },
   "/projects/2-removed/symbols/2": {
     layer: 0,
@@ -65,7 +65,7 @@ const docs = {
     created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no '.removed'
     authors: ["abc","def"],
-    collaborators: ["ghi"]
+    members: ["abc","def","ghi"]
   },
 
   // Invites (just one)
