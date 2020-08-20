@@ -7,6 +7,7 @@
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
 import { db } from 'firebase-jest-testing'
+import { eventually } from "firebase-jest-testing/eventually"
 
 import './matchers/toContainObject'
 

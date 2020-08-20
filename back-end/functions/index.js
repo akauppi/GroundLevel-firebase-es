@@ -138,6 +138,17 @@ exports.userInfoShadow = regionalFunctions.firestore
   });
 
 
+/*
+* Just for testing
+*
+* { msg: string } -> string
+*/
+exports.greet = regionalFunctions.https
+  .onCall((msg, context) => {
+    return `Greetings, ${msg}.`;
+  });
+
+
 // UserInfo cleanup
 //
 // Occasionally, see if there are projects where users have left, but their userInfo sticks around.
