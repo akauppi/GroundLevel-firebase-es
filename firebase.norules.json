@@ -1,0 +1,15 @@
+{
+  "firestore": {
+    "//rules": "no rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": "6768"
+    }
+  },
+  "//": {
+    "": [
+      "For other testing than security rules. Uses normal 'firebase' JavaScript client."
+    ]
+  }
+}

@@ -1,27 +1,19 @@
 /*
-* rules-test/visitedC.test.js
+* back-end/test-rules-test/visitedC.test.js
 */
-import './tools/jest-matchers';
+import { dbAuth } from 'firebase-jest-testing/firestoreTestingReadOnly';
+import { FieldValue } from 'firebase-jest-testing/firestoreTesting';
 
-import { sessionProm } from './tools/guarded-session';
-
-import { strict as assert } from 'assert';
-//const assert = require('assert').strict;
-
-//const firebase = require('@firebase/testing');
-import * as firebase from '@firebase/testing';
-
-const FieldValue = firebase.firestore.FieldValue;
+import { describe, expect, beforeAll } from '@jest/globals'
 
 const anyDate = new Date();   // a non-server date
 
 describe("'/visited' rules", () => {
   let unauth_visitedC, auth_visitedC, abc_visitedC, def_visitedC;
 
-  beforeAll( async () => {         // note: applies only to tests in this describe block
-    const session = await sessionProm();
+  beforeAll(  () => {         // note: applies only to tests in this describe block
     try {
-      const coll = session.collection('projects/1/visited');
+      const coll = dbAuth.collection('projects/1/visited');
 
       unauth_visitedC = coll.as(null);
       auth_visitedC = coll.as({uid:'_'});
@@ -30,7 +22,7 @@ describe("'/visited' rules", () => {
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
-      console.error( "Failed to initialize the Firebase database: ", err );
+      console.error( "Failed to initialize the Firebase database: ", err );   // not occurred
       throw err;
     }
   });

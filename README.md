@@ -29,13 +29,17 @@ We use Vite for development workflow, and ES modules for partitioning the code. 
 
 No central state management - Vue.js 3 `ref`s and `reactive`s make each component perfectly capable of handling their state, and exposing it.
 
+Jest for back-end testing.
+
 Module-sized bundling for production.
 
 <br/>
 
 ## Easy for beginners
 
+<!-- unneeded (no actual info!)
 If the above distilled list of contents surpasses your current level of knowledge, don't turn back, yet. This repo is intended for professionals and beginners, alike. Its main point is to showcase how easy, and effective, making Web Applications in the 2020's is, when (only) modern tools are used.
+-->
 
 One learns best by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't feature a to-do list ;). It does (intend to) feature:
 
@@ -45,16 +49,20 @@ One learns best by reading other people's code. Actual code. This template is ma
 
 This hopefully makes the app not only easy, but interesting as well.
 
+On the technical side:
+
+- testing of back-end features
+- development workflow, using emulators
+- deployment to production
+
 Below, you'll find instructions on how to get started. You are encouraged to use this template as a basis for your own special Web App, but please observe the points (later) about removing the branding.
 
-Let's get started! 😀
+Let's get to it! 😀
 
 
 
 
 ## Firebase
-
-Forgot to mention Firebase.
 
 This repo uses the Firebase serverless framework for a lot of things. Authentication, running background functions and storing data in the cloud.
 
@@ -64,8 +72,7 @@ Firebase allows a mere mortal to create fully functional cloud-based application
 
 *Figure 1. Traditional cloud vs. Firebase approach <sub>[source](https://docs.google.com/drawings/d/15_rPDZDOCHwdL0RIX8Rg3Der1tb4mx2tMi9asQ_aegw)</sub>*
 
-There are other similar offerings from other companies, but they are years behind, in the ease of use, based on the author's opinion.
-
+There are similar offerings from other companies, but they are years behind, in the ease of use, based on the author's opinion.
 
 
 ## Requirements
@@ -84,11 +91,11 @@ $ firebase setup:emulators:firestore
 
 >Note: Rerun the setup above if you have upgraded `firebase-tools`.
 
-<!-- tbd. is setting up (and re-running the setup) needed; does `firebase` do those automatically? try)
+<!-- tbd. Is setting up (and re-running the setup) needed; does `firebase` do those automatically? #try
 -->
 
 <!--
-The repo is developed with latest `firebase` (8.7.0) and Node.js (14.7.0) on macOS.
+The repo is developed with latest `firebase` (8.7.0) and Node.js (14.8.0) on macOS.
 -->
 
 ### Firebase plan
@@ -107,9 +114,6 @@ You need to:
   - choose the set of authentication providers you like (Google, anonymous recommended)
 - `firebase login`
 - `firebase use --add` to activate the project for this working directory
-
-<!-- tbd. what was the app necessary for? (guessed auth) 
--->
 
 >Note: You don't need to use `firebase init` - that one is for creating a repo from scratch.
 
@@ -138,6 +142,7 @@ Create `.__.js` with these keys:
 const __ = {
   apiKey: '...',
   projectId: '...',
+  locationId: 'europe-west3',
   authDomain: '...'
 }
 export { __ }
@@ -145,10 +150,10 @@ export { __ }
 
 If you use Firebase hosting for deployments (default), this file only matters for the development work.
 
-Now we're finally ready to get started...!
+Now we're finally ready to get started...
 
 
-## Getting started
+## Getting started ⏱
 
 Fetch dependencies:
 
@@ -158,33 +163,21 @@ $ npm install
 
 Back-end features (Cloud Firestore Security Rules and Cloud Functions) have their own directory. This is just a convention followed in this repo, but feels useful.
 
-You need two more `npm install`s:
+However, we don't want two `node_modules` folders, so tools and scripts for back-end testing are included in the same `package.json` as the front-end features. Again, this is just a convention.
 
-```
-$ cd back-end
-$ firebase use --add   # pick same project as for the front-end. This is for emulation.
-$ npm install
-```
+Firebase configuration files (`firebase.json`, `firebase.norules.json` and `.firebaserc`) are kept in the root. There is only one project in Firebase, for both the front and the back end features.
 
-One more for the implementation (server side) of Cloud Functions:
+The Cloud Functions have their own node environment. Fetch its dependencies:
 
 ```
 $ (cd functions && npm install)
 $ cd ..
 ```
 
-<!-- disabled (noisy and not relevant for most)
->macOS Note: If you get `gyp: No Xcode or CLT version detected!` error:
->
->   ```
->   # trash `/Library/Developer/CommandLineTools`
->   $ xcode-select --install
->   ```
--->
+>Note: We mirror the `functions` both at the root, as well as in `back-end/functions`. Firebase does not allow free movement of that folder (8.7.0).
+
 
 ### Running tests
-
-Back at the root level:
 
 ```
 $ npm test
@@ -193,13 +186,14 @@ $ npm test
 
 This runs tests for:
 
-- back end / security rules
 - back end / Cloud Functions
+- back end / security rules
 - front-end APP
 
->Note: There are currently no UI side tests for the project, but this is intended to change, eventually. You should look into [Cypress](https://www.cypress.io) if you don't already have a favourite app level testing toolkit.
+>Note: There are currently no UI side tests for the project, but this is intended to change, eventually. Look into [Cypress](https://www.cypress.io) if you don't already have a favourite app level testing toolkit. We'll get there.
 
->Interestingly, we use [Jest](https://jestjs.io) for the back-end tests but [Cypress](https://www.cypress.io) for the front end.
+The tests should all pass (or be skipped). If some test fails, please [create an issue](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues).
+
 
 ### Dev mode
 
@@ -212,11 +206,11 @@ Dev server running at:
 ...
 ```
 
-This serves the UI locally, against an emulated Firebase back-end. You can edit the UI sources and changes should be reflected in the application. This is called Hot Module Replacement.
+This serves the UI locally, against an emulated Firebase back-end, with Security Rules applied. You can edit the UI sources and changes should be reflected in the application. This is called Hot Module Replacement.
 
 Try it out at [http://localhost:3000](http://localhost:3000). Can you sign in?
 
-Try making some changes and see that they are reflected in the browser.
+Try making some changes in the `src/**` files and see that they are reflected in the browser.
 
 
 ## Two development workflows
@@ -607,4 +601,16 @@ Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 <!-- tbd. When someone has checked Firelayer in detail, and can make a brief (2 sentence!) summary on how it differs from GroundLevel, that is a welcome #contribution!
 -->
 
- 
+
+
+<!-- disabled (noisy and not relevant for most)
+### Troubleshooting
+
+>macOS Note: If you get `gyp: No Xcode or CLT version detected!` error:
+>
+>   ```
+>   # trash `/Library/Developer/CommandLineTools`
+>   $ xcode-select --install
+>   ```
+-->
+

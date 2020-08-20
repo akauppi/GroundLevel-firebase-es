@@ -30,9 +30,9 @@ service cloud.firestore {
       //
       allow create: if isSignedIn()
         && validProjectWrite()
-        && request.resource.data.created == request.time
+        && after().created == request.time
         && !isRemovedAfter()
-        && request.auth.uid in request.resource.data.authors    // creator added as an author (we could go soft on this..)
+        && request.auth.uid in after().authors    // creator added as an author (we could go soft on this..)
 
       // Update
       //    | field    | mutability |
@@ -46,16 +46,12 @@ service cloud.firestore {
       allow update: if isAuthor()
         && validProjectWrite()
         && request.resource.data.created == resource.data.created
-        && removedUnaffected() || (
-            onlyRemovedAffected() && (
-              diff().addedKeys() == ["removed"].toSet() ? request.resource.data.removed == request.time :
-              diff().removedKeys() == ["removed"].toSet() ? true :
-              false
-            ))
+        && (removedUnaffected() ||
+            diff().addedKeys() == ["removed"].toSet() ? true
+            : diff().removedKeys() == ["removed"].toSet() ? true
+            : false   // update not allowed
+          )
 
-      function onlyRemovedAffected() {
-        return diff().affectedKeys() == ["removed"].toSet()
-      }
       function removedUnaffected() {
         // Implementation note: if not using '.diff', you must consider the case when there is no '.removed' (it's optional).
         return !( "removed" in diff().affectedKeys() )
@@ -81,7 +77,7 @@ service cloud.firestore {
           && after().created is timestamp
           && (!isRemovedAfter() || (after().removed == request.time))
           && after().authors is list && after().authors.size() > 0
-          && after().members is list && after().members.toSet().hasAll( after().authors().toSet() )
+          && after().members is list && after().members.toSet().hasAll( after().authors.toSet() )
 
           && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
       }
@@ -106,7 +102,7 @@ service cloud.firestore {
 
       function isAuthor() {
         return isSignedIn() &&
-          request.auth.uid in prior().authors    // resource.data.authors
+          request.auth.uid in prior().authors
       }
 
       function isCollaborator() {
@@ -189,13 +185,13 @@ service cloud.firestore {
         //
         allow update: if EXT_isMember_COST1()
           && validSymbolWrite()
-          && (      // case A: claiming an unclaimed symbol
-            !isClaimed() ? (
+          && (
+            !isClaimed() ? (          // case A: claiming an unclaimed symbol
               after().claimed.by == request.auth.uid &&		// I make the claim
               after().claimed.at == request.time
             ) : isClaimedByMe() && (  // case B: changing other fields while claimed
                   after().claimed == prior().claimed
-                ) || (   // case C: revoking the claim
+                ) || (                // case C: revoking the claim
                   diff().affectedKeys() == ["claimed"].toSet() &&     // only '.claimed' affected
                   !("claimed" in after())                             // ..and it is removed
                 )
@@ -224,8 +220,8 @@ service cloud.firestore {
             )
             && (!("claimed" in after()) || (
               keysEq( after().claimed, ["by","at"] ) &&
-              after().claimed.by is string &&
-              after().claimed.at is timestamp // and <= request.time
+                after().claimed.by is string &&
+                after().claimed.at is timestamp // and <= request.time
             ))
         }
 
@@ -234,8 +230,7 @@ service cloud.firestore {
         }
 
         function isClaimed() {
-          // Note: 'resource != null' required in the online Rules Playground (was it; is it still?); not worth it: keep rules alike for all environments!!!
-          return /*resource != null &&*/ "claimed" in resource.data
+          return "claimed" in resource.data
         }
       } // symbols
 

@@ -9,33 +9,57 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:all",
-    "test:app": "echo \"Sorry, no application tests yet! 🙁\" (but letting you pass)",
-    "test:rules": "(cd rules-test && npm test)",
-    "test:fns": "(cd fns-test && npm test)",
-    "test:all": "npm run test:rules && npm run test:fns && npm run test:app",
-    "--": "",
+    "test": "npm run ci",
+    "ci": "npm run ci_seq",
+    "ci_seq": "npm run ci:rest && npm run ci:rules",
+    "//ci_par": "concurrently -n rules,rest \"npm run ci:rest\" \"npm run ci:rules\"",
+    "---": "",
+    "ci:rest": "firebase emulators:exec --config firebase.norules.json --only firestore,functions 'npm run _ci_init && npm run _ci_fns'",
+    "_ci_fns": "FIREBASE_JSON=firebase.norules.json npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs --verbose --detectOpenHandles",
+    "_ci_init": "FIREBASE_JSON=firebase.norules.json node --harmony-top-level-await back-end/test/prime-docs.js",
+    "--- ": "",
+    "ci:rules": "firebase emulators:exec --config firebase.json --only firestore 'npm run _ci_rules'",
+    "_ci_rules": "npx --node-arg=--experimental-vm-modules jest --config sample/test-rules/jest.config.cjs --verbose --detectOpenHandles",
+    "---  ": "",
+    "start:rest": "concurrently -n emul,init \"firebase emulators:start --config firebase.norules.json --only functions,firestore\" \"npm run _start_rest_2\"",
+    "_start_rest_2": "wait-on http://localhost:4000 && FIREBASE_JSON=firebase.norules.json node --harmony-top-level-await back-end/test/prime-docs.js",
+    "test:fns:monitoring": "FIREBASE_JSON=firebase.norules.json npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs -f monitoring.test.js --detectOpenHandles",
+    "test:fns:callables": "FIREBASE_JSON=firebase.norules.json npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs -f callables.test.js --detectOpenHandles",
+    "test:fns:userInfo": "FIREBASE_JSON=firebase.norules.json npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs -f userInfo.test.js --detectOpenHandles",
+    "test:fns:all": "FIREBASE_JSON=firebase.norules.json npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs --verbose --detectOpenHandles",
+    "---   ": "",
+    "start:rules": "firebase emulators:start --config firebase.json --only firestore",
+    "test:rules:invites": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f invitesC.test.js --verbose --detectOpenHandles",
+    "test:rules:projects": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f projectsC.test.js --verbose --detectOpenHandles",
+    "test:rules:symbols": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f symbolsC.test.js --verbose --detectOpenHandles",
+    "test:rules:userInfo": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f userInfoC.test.js --verbose --detectOpenHandles",
+    "test:rules:visited": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f visitedC.test.js --verbose --detectOpenHandles",
+    "test:rules:all": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs --verbose --detectOpenHandles",
+    "---    ": "",
+    "test:app": "echo \"Sorry, no application tests yet! 🙁\" && false",
     "lint": "eslint --ext .js,.vue src",
+    "---     ": "",
     "dev": "npm run dev:local",
-    "dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
+    "//dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
+    "dev:local": "firebase emulators:exec --ui --only functions,firestore \"npm run _dev_local_2\"",
     "_dev_local_2": "wait-on http://localhost:4000 && node ./local/init.js && npx vite --port 3000 --mode dev_local",
     "dev:online": "vite --port 3001 --mode dev_online",
     "build": "npm run prod:build",
-    "prod:build": "rollup -c rollup.config.prod.js",
-    "prod:serve": "firebase serve --only hosting --port 3010",
-    "clean": "(rm public/dist/* 2> /dev/null || true)",
+    "//prod:build": "rollup -c rollup.config.prod.js",
+    "//prod:serve": "firebase serve --only hosting --port 3010",
+    "//clean": "(rm public/dist/* 2> /dev/null || true)",
     "__": "firebase emulators:exec --only hosting \"node ./tools/__.js\"",
-    "preprod:build": "npm run clean",
-    "preprod:serve": "npm run prod:build",
-    "_vite:build": "vite build --outDir dist.vite"
+    "//preprod:build": "npm run clean",
+    "//preprod:serve": "npm run prod:build",
+    "//_vite:build": "vite build --outDir dist.vite"
   },
   "//scripts": {
     "__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\""
   },
   "dependencies": {
     "firebase": "^7.18.0",
-    "vue": "^3.0.0-rc.5",
-    "vue-router": "^4.0.0-beta.6"
+    "vue": "^3.0.0-rc.6",
+    "vue-router": "^4.0.0-beta.7"
   },
   "//dependencies": {
     "//bootstrap": "^4.5.0",
@@ -46,12 +70,12 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^8.1.0",
     "@rollup/plugin-replace": "^2.3.3",
-    "@vue/compiler-sfc": "^3.0.0-rc.5",
+    "@vue/compiler-sfc": "^3.0.0-rc.6",
     "concurrently": "^5.3.0",
     "eslint": "^7.7.0",
     "eslint-plugin-vue": "^7.0.0-beta.1",
-    "firebase-jest-testing": "0.0.1-alpha.2",
-    "jest": "^26.4.0",
+    "firebase-jest-testing": "0.0.1-alpha.5",
+    "jest": "^26.4.1",
     "rollup": "^2.20.0",
     "rollup-plugin-scss": "^2.5.0",
     "rollup-plugin-terser": "^6.1.0",
@@ -67,13 +91,10 @@
     "//rollup-plugin-filesize": "^9.0.2"
   },
   "engines": {
-    "node": ">=13.2"
+    "node": ">=14.3"
   },
   "//comments": {
     "devDependencies": {
-      "@firebase/testing": [
-        "We use it to populate the emulator in local dev mode."
-      ],
       "@vue/compiler-sfc": [
         "This needs to be the same version as 'dependencies.vue' but did not find a way to ",
         "enforce that. Tried '$npm_package_dependencies_vue' but that doesn't work. npm 6.14.4 on macOS."
@@ -92,13 +113,17 @@
       "dev:local": {
         "emulator:exec": [
           "Firebase shows the new local emulator UI only with 'emulator:start', not with 'emulator:exec'. Not sure if this is intentional.",
-          "We use 'concurrently' and 'wait-on' to allow people to benefit from the emulator UI. If Firebase changes",
-          "their policy, we can gladly use 'emulator:exec' (would be simpler)."
+          "We use 'concurrently' and 'wait-on' to allow people to benefit from the emulator UI.",
+          "Note: It now has ’—ui’ flag but we’re already used to this approach…"
         ]
-      }
+      },
+      "ci_par": [
+        "Cannot run two Firebase emulators in parallel; we'd prefer to have only one instance, anyways."
+      ]
     },
     "engines": [
-      "'>=13.2’ for ES module support"
+      "'>=13.2' for ES module support",
+      "'>=14.3' for '—harmony-top-level-await'"
     ]
   }
 }

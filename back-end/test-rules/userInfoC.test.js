@@ -1,21 +1,17 @@
 /*
-* rules-test/userInfoC.test.js
+* back-end/test-rules/userInfoC.test.js
 */
-import './tools/jest-matchers';
-
-import { sessionProm } from './tools/guarded-session';
-
-import { strict as assert } from 'assert';
-
+import { strict as assert } from 'assert'
 import { test, expect, describe, beforeAll } from '@jest/globals'
+
+import { dbAuth } from 'firebase-jest-testing/firestoreTestingReadOnly';
 
 describe("'/userInfo' rules", () => {
   let unauth_userinfoC, abc_userinfoC, def_userinfoC;
 
-  beforeAll( async () => {
-    const session = await sessionProm();
+  beforeAll( async () => {    // tbd. remove 'async' when all tests pass
     try {
-      const coll = session.collection('userInfo');   // root collection
+      const coll = dbAuth.collection('userInfo');   // root collection
 
       unauth_userinfoC = coll.as(null);
       abc_userinfoC = coll.as({uid:'abc'});
@@ -25,7 +21,7 @@ describe("'/userInfo' rules", () => {
     }
     catch (err) {
       // tbd. How to cancel the tests if we end up here? #help
-      console.error( "Failed to initialize the database: ", err );
+      console.error( "Failed to initialize the database: ", err );    // not happened
       throw err;
     }
   });

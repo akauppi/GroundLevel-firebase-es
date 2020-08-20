@@ -37,7 +37,17 @@
     ]
   },
   "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    "rules": "back-end/firestore.rules",
+    "indexes": "back-end/firestore.indexes.json"
+  },
+  "emulators": {
+    "firestore": {
+      "port": "6767"
+    }
+  },
+  "//": {
+    "": [
+      "The normal Firebase config. Used for deployments and testing of Security Rules"
+    ]
   }
 }

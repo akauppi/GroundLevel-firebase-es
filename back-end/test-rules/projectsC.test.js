@@ -1,27 +1,19 @@
 /*
-* rules-test/projectsC.test.js
+* back-end/test-rules/projectsC.test.js
 */
 import { strict as assert } from 'assert'
+import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import * as firebase from '@firebase/testing'
-
-import './tools/jest-matchers'
-
-import { sessionProm } from './tools/guarded-session'
-
-const FieldValue = firebase.firestore.FieldValue;
+import { dbAuth } from 'firebase-jest-testing/firestoreTestingReadOnly';
+import { FieldValue } from 'firebase-jest-testing/firestoreTesting';
 
 const anyDate = new Date();   // a non-server date
 
-import { test, expect, describe, beforeAll } from '@jest/globals'
-
 let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC, ghi_projectsC;
 
-beforeAll( async () => {
-  const session = await sessionProm();
-
+beforeAll(  () => {
   try {
-    const coll = session.collection('projects');
+    const coll = dbAuth.collection('projects');
 
     unauth_projectsC = coll.as(null);
     auth_projectsC = coll.as({uid:'_'});
@@ -115,7 +107,7 @@ describe("'/projects' rules", () => {
     ]);
   });
 
-  // tbd. fails #study
+  // tbd. Cannot figure out why this fails. #help
   test.skip("An author can mark a project '.removed'", async () => {
     const p1mod = {
       removed: FieldValue.serverTimestamp()
@@ -126,7 +118,7 @@ describe("'/projects' rules", () => {
     ]);
   });
 
-  // tbd. fails #study
+  // tbd. Cannot figure out why this fails. #help
   test.skip("An author can remove the '.removed' mark", async () => {
     const p2mod = {
       removed: FieldValue.delete()

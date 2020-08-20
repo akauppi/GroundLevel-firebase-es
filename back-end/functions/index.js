@@ -10,8 +10,8 @@
 *     official client is; thus rather deal with database as the interface.
 *
 * Cloud Functions note:
-*   - until Cloud Functions supports node.js, we're stuck using 'require' (no prob there, just hang on). Decided not
-*     to use Babel but just wait until the native ES modules support surfaces (2024).
+*   - until Cloud Functions supports node.js 14, we're stuck using 'require' (no prob there, just hang on). Decided not
+*     to use Babel but just wait until the native ES modules support surfaces.
 *
 * Note:
 *   'HttpsError' 'code' values must be from a particular set
@@ -31,10 +31,6 @@ const admin = require('firebase-admin');
 
 admin.initializeApp();
 
-// Tell local emulation from being run in the cloud.
-//
-const LOCAL = !! process.env["FUNCTIONS_EMULATOR"];    // "true" | undefined
-
 // Note: You can run functions in multiple regions, and some functions in some etc. But for a start, it's likely best
 //    to keep them in one, near you.
 //
@@ -49,7 +45,7 @@ const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 // }
 //
 // NOTE!!! Since callables require online connection, WE SHOULD RETHINK THIS APPROACH. Use Firestore, or a logging
-//      provider that provides a client tolerant of offline moments.
+//      provider (DataDog) that provides a client tolerant of offline moments.
 //
 exports.logs_v190720 = regionalFunctions
 //const logs_v190720 = regionalFunctions
@@ -96,17 +92,6 @@ exports.fatal_v210720 = regionalFunctions.https
   });
 
 
-/*
-* Just for testing.
-*
-* { msg: string } -> string
-*/
-exports.greet = regionalFunctions.https
-  .onCall((msg, context) => {
-    return `Greetings, ${msg}.`;
-  });
-
-
 // UserInfo shadowing
 //
 // Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
@@ -118,7 +103,6 @@ exports.userInfoShadow = regionalFunctions.firestore
     const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
 
     const db = admin.firestore();
-    const FieldPath = admin.firestore.FieldPath;
 
     const uid = change.after.id;
 
@@ -177,21 +161,20 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
   })
 */
 
-
 /***  // sample of using REST API
- * Note: There's little benefit for making REST API for the client (use 'callables' instead). If you wish to do those
- *      for other integrations, that's another case (i.e. not requiring the user to have a Firebase client). /AK
- *
- // POST /logs
- //    body: { level: "debug"|"info"|"warn"|"error", msg: string }
- //
- // Usage:
- //    <<
- //      curl -X POST -H "Content-Type:application/json" $ENDPOINT -d '{"level":"debug", "msg":"Hey Earth!"}'
- //    <<
- //
- exports.logs = regionalFunctions
-  .https.onRequest((req, resp) => {
+* Note: There's little benefit for making REST API for the client (use 'callables' instead). If you wish to do those
+*      for other integrations, that's another case (i.e. not requiring the user to have a Firebase client). /AK
+*
+// POST /logs
+//    body: { level: "debug"|"info"|"warn"|"error", msg: string }
+//
+// Usage:
+//    <<
+//      curl -X POST -H "Content-Type:application/json" $ENDPOINT -d '{"level":"debug", "msg":"Hey Earth!"}'
+//    <<
+//
+exports.logs = regionalFunctions
+ .https.onRequest((req, resp) => {
 
   const level = req.body.level;
   const msg = req.body.msg;

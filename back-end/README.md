@@ -4,7 +4,7 @@ This folder contains the back-end features, and tests for them.
 
 ## Testing Cloud Functions
 
-**Approach**
+### Approach
 
 We prime the database with a scenario that the functions then work on. 
 
@@ -14,50 +14,27 @@ When tests are re-run, they try to clean away possible trash left by the earlier
 
 We test Cloud Functions with full access to all database contents (no security rules). This rises from the philosophy of orthogonal testing. One suite should test one thing. Others can then consider that done. The aim is more simplicity. 
 
-### Running tests in development
+## Testing Security Rules
 
-When you develop the Cloud Functions, you should start a Firebase emulator in one terminal, and run the tests in another - or in an IDE.
+### Approach
 
-**Starting the emulator**
+Using a fixed Firebase project ID ("rules-test"). This means you won't see the data in the Emulator UI.
 
-```
-$ npm run start
-```
+The data is primed at the Jest `globalSetup` step, run prior to any tests. This is unlike with the Cloud Functions, where the data is primed at the emulator launch. Both approaches would work; this one keeps the data a bit closer to the tests themselves.
 
-Once we run tests, it's worth checking the emulator output, occasionally.
+Tests are run as-if they wouldn't change the database, if successful. This is managed with the tools from the `firebase-jest-testing` library. Since we only test **whether we have access** to certain fields, there is no benefit in being able to change the data. In fact, it is creating confusion. 
 
-**Running tests**
-
-In another terminal:
-
-```
-$ npm run test:monitoring
-$ npm run test:userInfo
-...
-$ npm run test:all
-```
-
-When developing functions, it's meaningful to run only one suit, at a time.
-
-You can easily set the tests to be run from an IDE, see `DEBUGGING.md`. <!-- tbd. bring it here, from 'rules-test/DEBUGGING.md -->
-
->NOTE: Unlike Security Rules, where changes are picked up automatically, the emulator **needs to be restarted** if you change the function source code. This is a bit weird.
+>NOTE: If this approach feels welcome to you, PLEASE LOBBY to the Firebase architects to make Firestore emulator + `@firebase/testing` library provide read-only access handles.
 
 
-### CI: As a single command
-
-Once tests pass, you'll likely be just running them over and over, e.g. from a CI script.
-
-This command starts the emulator in the background, for the duration of running the tests. Launching adds ~5..6s to the execution time.
-
-```
-$ npm test
-...
-```
-
-<!-- tbd. output above -->
-
+<!-- tbd. not sure if all the references are important, any more. Revise.
 
 ## References
 
 - Cloud Functions > [Get Started](https://firebase.google.com/docs/functions/get-started) (Firebase docs)
+- [Testing Firestore Security Rules With the Emulator](https://fireship.io/lessons/testing-firestore-security-rules-with-the-emulator/) (article, Oct 2018)
+- [Connect your app and start prototyping](https://firebase.google.com/docs/emulator-suite/connect_and_prototype) (Firebase docs)
+- [Firebase Security Rules and Tests for Firebase](https://medium.com/flutter-community/firestore-security-rules-and-tests-for-firebase-e195bdbea198) (blog, Feb 2020)
+
+-->
+

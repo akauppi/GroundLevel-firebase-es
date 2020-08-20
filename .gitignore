@@ -3,6 +3,7 @@ node_modules/
 #/public/dist/
 
 /dist.vite/
+/.lock
 
 # Created by 'npm run build'
 /public/index.prod.html

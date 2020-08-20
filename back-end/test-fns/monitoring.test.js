@@ -1,5 +1,5 @@
 /*
-* fns-test/monitoring.test.js
+* back-end/test-fns/monitoring.test.js
 *
 * Test the central monitoring functions (logs etc.)
 */
