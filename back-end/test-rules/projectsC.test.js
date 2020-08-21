@@ -56,8 +56,7 @@ describe("'/projects' rules", () => {
 
   //--- ProjectsC create rules ---
 
-  // tbd. Why fails?
-  test.skip('any authenticated user may create a project, but must include themselves as an author', async () => {
+  test('any authenticated user may create a project, but must include themselves as an author', async () => {
     // This implies: unauthenticated users cannot create a project, since they don't have a uid.
 
     const serverTimestamp = FieldValue.serverTimestamp();
@@ -66,7 +65,7 @@ describe("'/projects' rules", () => {
       created: serverTimestamp,
       // no 'removed'
       authors: ["abc"],
-      collaborators: []
+      members: ["abc"]
     };
 
     const p3_withoutAuthor = {...p3_valid, authors: [] };
@@ -127,10 +126,10 @@ describe("'/projects' rules", () => {
     ]);
   });
 
-  // tbd. Why fails?
-  test.skip("An author can add new authors, and remove authors as long as one remains", async () => {
+  test("An author can add new authors, and remove authors as long as one remains", async () => {
     const p1_addAuthor = {
-      authors: FieldValue.arrayUnion("zxy")
+      authors: FieldValue.arrayUnion("zxy"),
+      members: FieldValue.arrayUnion("zxy")   // add also to 'members' since not there, yet
     };
     const p3_removeAuthor = {
       authors: FieldValue.arrayRemove("def")
@@ -158,7 +157,7 @@ describe("'/projects' rules", () => {
   *
   test("An author can add or remove collaborators", async () => {
     const p1_addCollaborator = {
-      collaborators: FieldValue.arrayUnion("xyz")
+      members: FieldValue.arrayUnion("xyz")
     };
     await expect( abc_projectsC.doc("1").update(p1_addCollaborator) ).toAllow();
     await expect( def_projectsC.doc("1").update(p1_addCollaborator) ).toDeny();   // collaborator

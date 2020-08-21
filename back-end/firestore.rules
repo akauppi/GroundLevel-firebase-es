@@ -45,7 +45,7 @@ service cloud.firestore {
       //
       allow update: if isAuthor()
         && validProjectWrite()
-        && request.resource.data.created == resource.data.created
+        && after().created == prior().created
         && (removedUnaffected() ||
             diff().addedKeys() == ["removed"].toSet() ? true
             : diff().removedKeys() == ["removed"].toSet() ? true
@@ -65,9 +65,6 @@ service cloud.firestore {
       //  - removed (timestamp) is optional; if exists, must be a server time stamp now or in the past
       //  - at least one author must exist
       //  - members must contain all authors (and thus is >= 1)
-      //  - users are either in 'authors' or in 'collaborators' (but not in both)
-      //
-      // Deprecated keys: "collaborators" 4-Aug-20
       //
       function validProjectWrite() {
         let possibleKeys = ["title", "created", "removed", "authors", "members"].toSet();
@@ -186,12 +183,12 @@ service cloud.firestore {
         allow update: if EXT_isMember_COST1()
           && validSymbolWrite()
           && (
-            !isClaimed() ? (          // case A: claiming an unclaimed symbol
+            !isClaimed() ? (        // case A: claiming an unclaimed symbol
               after().claimed.by == request.auth.uid &&		// I make the claim
               after().claimed.at == request.time
             ) : isClaimedByMe() && (  // case B: changing other fields while claimed
                   after().claimed == prior().claimed
-                ) || (                // case C: revoking the claim
+                ) || (              // case C: revoking the claim
                   diff().affectedKeys() == ["claimed"].toSet() &&     // only '.claimed' affected
                   !("claimed" in after())                             // ..and it is removed
                 )
