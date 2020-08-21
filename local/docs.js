@@ -1,5 +1,5 @@
 /*
-* local/data.js
+* local/docs.js
 *
 * Initial data when run with local emulation.
 *
@@ -52,9 +52,4 @@ const docs = {
   }
 };
 
-//ES6
 export { docs }
-
-// CommonJS
-//module.exports = docs;
-

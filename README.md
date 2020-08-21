@@ -221,8 +221,6 @@ The other way is `npm run dev:online`. This works against your cloud Firebase pr
 
 The "online" workflow is recommended when you are working with the UI code, but the full story is a bit longer. Let's start with the "local" workflow.
 
->Note: Firebase is gently nudging developers towards the local emulator. You don't e.g. cause any payments when using it.
-
 
 ### `dev:local`
 
@@ -230,7 +228,7 @@ When working on Firestore security rules, or Cloud Functions, you are better off
 
 - faster change cycle (no deployments)
 - no costs
-- from Aug 2020 onwards, only possible mode for users on Spark plan (free)
+- since Aug 2020, only possible mode for users on Spark plan (free)
 
 With local mode, you can develop back-end features locally, and only deploy working stuff. This changes the role of the cloud project to be more of a staging environment than a development hot-pot. This is good.
 
@@ -286,20 +284,18 @@ The command then proceeds to serve the files, using Vite:
 [dev-local] vite v1.0.0-beta.11
 [dev-local] 
 [dev-local]   Dev server running at:
-[dev-local]   > Local:    http://localhost:3001/
-[dev-local]   > Network:  http://192.168.1.62:3001/
-[dev-local]   > Network:  http://169.254.160.107:3001/
+[dev-local]   > Local:    http://localhost:3000/
+[dev-local]   > Network:  http://192.168.1.62:3000/
+[dev-local]   > Network:  http://169.254.160.107:3000/
 [dev-local] 
 ...
 ```
 
-You can now access the app in [localhost:3001](localhost:3001). 
-
->Note: We intentionally keep the ports separate for the two dev modes. You can launch them simultaneously, if you want.
+You can now access the app in [localhost:3000](localhost:3000). 
 
 WARNING: Changes you make while in "local" mode are LOST WHEN YOU STOP the server. This is intentional. It's a nice way of starting again, afresh.
 
-The primed data is located in `local/data.js`. You should customize this data to your/your team's liking. At the least update the user ids in the beginning:
+The data used for priming is located in `local/docs.js`. You should customize this data to your/your team's liking. At the least update the user ids in the beginning:
 
 ```
 // Change the user id's to match your own. Check them from Firestore console.
@@ -320,10 +316,20 @@ To pick up your Firebase user id, either:
 
    ![](.images/uid-from-browser.png)
 
-Then insert such a UID in `local/data.js`, restart the server and you should have some data to play with.
+Then insert such a UID in `local/docs.js`, restart the server and you should have some data to play with.
 
 
-#### When to develop in local mode?
+### `dev:online`
+
+```
+$ npm run dev:online
+...
+```
+
+Quite like above, except the data is not primed - it persists in the Firebase cloud.
+
+
+### When to develop in local mode?
 
 As mentioned above, for just developing the UI, it may be nice to work against real (changing) data. It just feels more normal. 
 
@@ -350,25 +356,12 @@ We first told you don't need a back end but then there's such a directory. What'
 
 What you don't need is deploying, managing and *scaling* your *servers*. That is automatic by Firebase. But you need to define the functionality that the back-end will do - it's still there.
 
-We've placed this part behind a corner, almost as a sub-project of its own. This for example keeps the Node.js dependencies separate for the two. Check out [back-end/README](back-end/README.md) at your will.
+We've placed this part behind a corner, in its own directory. These two share the same `package.json` (and thus the same `node_modules`), and you perform back-end testing in the project root directory. These are just conventions - you can separate the front and back even more, if you want to.
 
+The testing of the back end benefits from [firebase-jest-testing](https://github.com/akauppi/firebase-jest-testing) that provides some useful tools.
 
-<!-- REMOVE (into back-end/README?)
-## Security Rules
+Check out [back-end/README](back-end/README.md) for more information. 🦸‍♂️
 
-If you are serious about development, have a look at the `rules-test` sub-project. It has tests to check the rules we have in `firestore.rules` behave as intended.
-
-Since this is quite an added complexity (more `npm` dependencies), it's been left as a self-sufficient sub-project.
-
-```
-$ cd rules-test
-$ npm install
-...
-$ npm test
-```
-
-Please see its own [README](rules-test/README.md) file.
--->
 
 ## Production workflow
 
