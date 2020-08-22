@@ -2,6 +2,8 @@
 
 Firebase has quite many server and client side JavaScript libraries, and their life cycles, quality etc. differ from each other.
 
+Firebase seems to be wanting to clarify this and e.g. renamed `@firebase/testing` as `@firebase/rules-unit-testing` in Aug 2020, which does better convey its purpose.
+
 Here is a list of the ones we've come across (all authored by Firebase), to help one see their relevance - or lack thereof. 
 
 
@@ -13,8 +15,8 @@ Here is a list of the ones we've come across (all authored by Firebase), to help
 |npm|What is it?|When to use?|Open issues|
 |---|---|---|---|
 |**Client side**|
-|&nbsp;&nbsp;[`firebase`](https://www.npmjs.com/package/firebase)|Main JavaScript client|Browser app or client side node.js (e.g. tests)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` issues|
-|&nbsp;&nbsp;`@firebase/testing`|Library "..for testing Security Rules with the Realtime Database or Cloud Firestore".|Testing Firestore functionality that needs authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/testing`. *No separate issues tracking* <br/><br/>[9](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) (24-Jul-20); oldest 16-May-2019|
+|&nbsp;&nbsp;[`firebase`](https://www.npmjs.com/package/firebase)|Main JavaScript client|Browser app or client side node.js (e.g. tests)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
+|&nbsp;&nbsp;`@firebase/rules-unit-testing`|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Firestore functionality that needs authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[9](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) (24-Jul-20); oldest 16-May-2019|
 |**Between client and server sides (fuzzy and furry) 🦥**|
 |&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|You want to unit test Cloud Functions within the `functions` folder. We don't use it. Making integration tests against local emulators may be a better approach.|[9](https://github.com/firebase/firebase-functions-test/issues) (23-Jul-20); oldest 8-Apr-2018|
 |**Server side**|
@@ -23,6 +25,12 @@ Here is a list of the ones we've come across (all authored by Firebase), to help
 |**Developer tools**|
 |&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; launching emulators. You need it.|[146](https://github.com/firebase/firebase-tools/issues) (23-Jul-20); oldest 16-Dec-2015|
 
+### Deprecated libraries
+
+|npm|What was it?|
+|---|---|
+|&nbsp;&nbsp;`@firebase/testing`|Security Rules testing, until Aug 2020.|
+
 Note: There are also other, non-official packages that are *not* deployed by Firebase. **Stay clear of those!** It would be a good phishing attempt to make something people would install, by accident. **DO NOT TRUST THE NAMES**. It would be welcome if Firebase brought **all** their `npm` modules under the `@firebase` namespace, for simplicity.
 
 ### `@firebase/testing` is really only about authentication..
@@ -30,6 +38,8 @@ Note: There are also other, non-official packages that are *not* deployed by Fir
 You don't really need it much. The approach taken in this repo is to use it for testing to Security Rules, but not elsewhere.
 
 This approach provides a great orthogonality for testing. One set (`rules-test`) tests *who* can change things but the rest simply expect that to have been handled, and don't apply security rules. This means, `@firebase/testing` only needs to be included in one test set and the normal JavaScript client can be used, elsewhere.
+
+>Note: The library was renamed as `@firebase-rules-unit-testing` in Aug 2020, which does better reflect its purpose.
 
 
 ### Why list the oldest issues?

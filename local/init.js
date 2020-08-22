@@ -11,15 +11,16 @@
 * [1]: "Firestore and Database Emulator: Initialization of an instance with a dataset" (Firebase Issues)
 *       -> https://github.com/firebase/firebase-tools/issues/1167
 */
-import { docs } from './docs.js';
-import firebase from '@firebase/testing';     // note: must be imported like this, not 'import * as firebase ..'
+import { docs } from './docs.js'
+//import firebase from '@firebase/testing';     // note: must be imported like this, not 'import * as firebase ..'
+import admin from 'firebase-admin'
 import { __ } from '../.__.js'; const { projectId } = __;
 
 // Note: For dev mode, we can do the priming in the background (not wait for the Promise to return). This is rather
 //    instantaneous, anyways. The down side is that errors will not cause the server not to load.
 //
 (async () => {
-  const adminApp = firebase.initializeAdminApp({
+  const adminApp = admin.initializeApp({
     projectId
   });
 
