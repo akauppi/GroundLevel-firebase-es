@@ -161,7 +161,7 @@ Function not found error: Name: [validUserInfoWrite]. for 'create' @ L334
 
 Set the `projectId` to the same as your active project (see `.firebaserc`).
 
-The `@firebase/testing` library allows writing to any projects (which is handy), but the emulator UI only shows the active one.
+The `@firebase/rules-unit-testing` library allows writing to any projects (which is handy), but the emulator UI only shows the active one.
 
 
 

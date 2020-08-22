@@ -148,7 +148,7 @@ Another alternative for this could be for the `initializeTestApp` call to have a
 
 ![](.images/initializeTestApp.png)
 
-Each project using `@firebase/testing` for rules testing uses this call. It would likely take some collaboration between the emulator and the client side library, to mark "don't take this set/update/delete seriously", but the change in application code would be just one line.
+Each project using <strike>`@firebase/testing`</strike> `@firebase/rules-unit-testing` for rules testing uses this call. It would likely take some collaboration between the emulator and the client side library, to mark "don't take this set/update/delete seriously", but the change in application code would be just one line.
 
 
 ## Firestore emulator: evaluate the rules at launch (and complain!)
@@ -183,23 +183,6 @@ i  firestore: Change detected, updating rules...
 
 It would be useful and fair to show these already at the launch.
 
-
-
-## Ability to ES6 `import` `@firebase/testing`
-
-It is currently (Apr 2020, Jul 2020 8.6.0) exported only as common-JS:
-
-```
-$ ls node_modules/@firebase/testing/dist
-index.cjs.js		index.cjs.js.map	index.d.ts		src			test
-```
-
-```
-const firebase = require('@firebase/testing');   # works
-import firebase from `@firebase/testing`;   # fails
-```
-
-It would be nice to have possibility of using ES6 `import` alongside the common-js `require`. Node.js now supports imports.
 
 
 ## Local emulator UI
@@ -538,7 +521,7 @@ This would mean the `window.LOCAL` mode can be taken from the library, instead o
 
 Asking about how many "reads" a certain security rule causes has been mentioned in community forums (especially newcomers).
 
-Would you be able to add this to the emulator / `@firebase/testing` so that we can compare the reported "reads" count automatically to expected ones. I would add this as part of the security rules tests.
+Would you be able to add this to the emulator / `@firebase/rules-unit-testing` so that we can compare the reported "reads" count automatically to expected ones. I would add this as part of the security rules tests.
 
 This makes the billing explicit, and confirmable.
 

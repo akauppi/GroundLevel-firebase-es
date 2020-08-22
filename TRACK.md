@@ -53,20 +53,6 @@ Note: The ideology of the repo is to work close to what plain browsers offer. Th
 Firebase Live chat 23-Jun-2020.  Happy!  🦋
 
 
-## Making Emulator and Firestore-admin have a date
-
-[https://github.com/googleapis/google-cloud-go/issues/1978](https://github.com/googleapis/google-cloud-go/issues/1978)
-
-It's strange this would be a problem.. Let's keep an eye on the:
-
->going to be larger than any one client to be improved.
-
-(comment 15-May-20)
-
-Status: Using `@firebase/testing` to prime the emulator (in `npm run dev:local`). Works.
-
-Keep an eye on this, but we don't need it.
-
 ## Rollup-plugin-vue for Vue.js 3 (beta) needs an extra plugin for CSS/Sass
 
 [https://github.com/vuejs/rollup-plugin-vue/issues/364](https://github.com/vuejs/rollup-plugin-vue/issues/364)

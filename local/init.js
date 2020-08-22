@@ -12,7 +12,6 @@
 *       -> https://github.com/firebase/firebase-tools/issues/1167
 */
 import { docs } from './docs.js'
-//import firebase from '@firebase/testing';     // note: must be imported like this, not 'import * as firebase ..'
 import admin from 'firebase-admin'
 import { __ } from '../.__.js'; const { projectId } = __;
 
