@@ -40,9 +40,9 @@
     "lint": "eslint --ext .js,.vue src",
     "---     ": "",
     "dev": "npm run dev:local",
-    "//dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
-    "dev:local": "firebase emulators:exec --ui --only functions,firestore \"npm run _dev_local_2\"",
-    "_dev_local_2": "wait-on http://localhost:4000 && node ./local/init.js && npx vite --port 3000 --mode dev_local",
+    "dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
+    "//dev:local": "firebase emulators:exec --ui --only functions,firestore \"npm run _dev_local_2\"",
+    "_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
     "dev:online": "vite --port 3001 --mode dev_online",
     "build": "npm run prod:build",
     "//prod:build": "rollup -c rollup.config.prod.js",
@@ -57,8 +57,8 @@
     "__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\""
   },
   "dependencies": {
-    "firebase": "^7.18.0",
-    "vue": "^3.0.0-rc.6",
+    "firebase": "^7.19.0",
+    "vue": "^3.0.0-rc.7",
     "vue-router": "^4.0.0-beta.7"
   },
   "//dependencies": {
@@ -68,9 +68,10 @@
     "//popper.js": "^1.16.1"
   },
   "devDependencies": {
+    "@firebase/testing": "^0.20.11",
     "@rollup/plugin-node-resolve": "^8.1.0",
     "@rollup/plugin-replace": "^2.3.3",
-    "@vue/compiler-sfc": "^3.0.0-rc.6",
+    "@vue/compiler-sfc": "^3.0.0-rc.7",
     "concurrently": "^5.3.0",
     "eslint": "^7.7.0",
     "eslint-plugin-vue": "^7.0.0-beta.1",

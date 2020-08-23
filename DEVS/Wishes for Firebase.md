@@ -393,7 +393,11 @@ It would be nice to have a flag/config setting to disallow changing ports. It ca
 
 Timestamps in the Firestore data are provided as: `{ seconds: int, nanos: int }`.
 
-There is a native JavaScript presentation for dates, `Date`. It would make sense that the client provides such data, automatically, as `Date`s (in `.onSnapshot` and what not). Now the application code must convert individual fields.
+There is a native JavaScript presentation for dates, `Date`, and the Firebase client provide `.toDate()` method for converting to it. 
+
+But why is this not made automatically? What would be the use case that needs something other than a normal `Date`?
+
+It would make sense that the client provides such data, automatically, in the normal abstraction of the platform. Now the application code must convert individual fields.
 
 Two ways to make such a change:
 
@@ -410,7 +414,7 @@ The change detection of the Rules file does not work, if the file (mentioned in 
 
 ## Firebase emulator configuration from a `.js` file
 
-It is nowadays customary (jest, babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have e.g. comments in there.
+It is nowadays customary (babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have e.g. comments in there.
 
 Firebase (8.6.0) seems to be fixed on `firebase.json` and providing a `firebase.js` (or `firebase.cjs`) is ignored.
 
@@ -525,35 +529,6 @@ Would you be able to add this to the emulator / `@firebase/rules-unit-testing` s
 
 This makes the billing explicit, and confirmable.
 
-
-## Why do I need an active project for emulation??
-
-If all parts of a project are emulated, why would one need to point to an (online) Firebase project?
-
-If there is not `.firebaserc`:
-
-**Actual:**
-
-```
-$ npm run start
-
-> fns-test@0.0.0 start /Users/asko/Git/GroundLevel-es6-firebase-web/fns-test
-> firebase emulators:start --only firestore,functions
-
-i  emulators: Starting emulators: functions, firestore
-i  emulators: Shutting down emulators.
-
-Error: No currently active project.
-To run this command, you need to specify a project. You have two options:
-- Run this command with --project <alias_or_project_id>.
-- Set an active project by running firebase use --add, then rerun this command.
-To list all the Firebase projects to which you have access, run firebase projects:list.
-To learn about active projects for the CLI, visit https://firebase.google.com/docs/cli#project_aliases
-```
-
-**Expected:**
-
-Functions and Firestore emulators start. 
 
 
 ## Cloud Functions emulator: could watch for changes

@@ -21,7 +21,7 @@ import { convertDateValue, unshot } from "../firebase/utils"
 //
 const projects = shallowReactive( new Map() );
   //
-  // { <project-id>: { title: string, created: Date, lastVisited: Date, authors: Array of uid (>=1), collaborators: Array of uid (>=1) }
+  // { <project-id>: { title: string, created: Date, lastVisited: Date, authors: Array of uid (>=1), members: Array of uid (>=1) }
 
 function handleDoc(doc) {
   const id = doc.id;
@@ -30,6 +30,8 @@ function handleDoc(doc) {
   // to them (or removed, to resurrect).
   //
   const raw = doc.exists ? doc.data() : null;  // with optional '.removed'
+
+  console.debug("Got:", raw);
 
   if (raw && !('removed' in raw)) {
     const o = {
@@ -61,25 +63,24 @@ watchEffect(() => {    // when the user changes
   //
   //    This may be reason enough to place removed projects to a separate collection. #rework #data
 
-  console.debug("User change seen in 'projects': ", auth);
+  console.debug("User change seen in 'projects':", auth);
 
   if (auth) {   // new user, start tracking
-    assert(!unsub);   // no ongoing watch
+    assert(!unsub);   // always transitions between users with logged out state in between
 
     const uid = auth.uid;
     try {
-      const unsub1 = projectsC.where('authors', 'array-contains', uid).onSnapshot(unshot(handleDoc));
-      const unsub2 = projectsC.where('collaborators', 'array-contains', uid).onSnapshot(unshot(handleDoc));
-      unsub = () => { unsub1(); unsub2() }
+      unsub = projectsC.where('members', 'array-contains', uid).onSnapshot( unshot(handleDoc) );
     } catch (ex) {
-      reportFatal("Subscribing to 'projectsC' failed:", ex)
+      reportFatal("Subscribing to 'projectsC' failed:", ex);    // never observed
     }
 
   } else if (auth === false) {  // user signed out - wipe the projects and stop tracking!
     // 'unsub' can be 'null' or non-null.
     projects.clear()
-    if (unsub) unsub();
-    unsub = null;
+    if (unsub) {
+      unsub(); unsub= null;
+    }
 
   } else {
     assert(auth === undefined);   // initial call (ignore)

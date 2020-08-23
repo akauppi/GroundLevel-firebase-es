@@ -24,7 +24,7 @@ const docs = {
     created: new Date('01 Jan 1880 00:00:00 GMT'),
     // no 'removed'
     authors: [abc],
-    collaborators: [def]
+    members: [abc,def]
   },
   "/projects/1/symbols/1": {    // free symbol
     layer: 0,
@@ -39,7 +39,7 @@ const docs = {
     size: 50,
     fillColor: "peru",
     center: { x: 100, y: 100 },
-    claimed: { by: 'def', at: new Date() }
+    claimed: { by: def, at: new Date() }
   },
 
   // Invites (just one)
@@ -47,7 +47,7 @@ const docs = {
     email: "a@b.com",
     project: "1",
     asAuthor: false,
-    by: "abc",
+    by: abc,
     at: new Date('07 Apr 2020 15:12:00 GMT')
   }
 };

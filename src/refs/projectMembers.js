@@ -16,7 +16,7 @@ import {userUIinfoProm} from "../firebase/calls";
 // Note: Seems Vue.js (3.0.0-beta.20) doesn't work with async 'computed'. We'll use watch and imperative setting, instead.
 
 /*
-* Sets 'members', with a potential delay (if fetching UI info is needed), when 'project.authors' or 'project.collaborators' change
+* Sets 'members', with a potential delay (if fetching UI info is needed), 'project.members' change
 *
 * The returned 'reactive' contains information of the members of the current project, and may contain info of people
 * who have recently (while the web page is open) been in the project (if people leave, their info is not cleared, other
@@ -54,7 +54,7 @@ function membersGen(projectId, project) {   // (string, reactive of { ...project
       return;
     }
 
-    const uids = [...project.authors, ...project.collaborators];
+    const uids = project.members;
     console.debug("Members update uids:", uids);
 
     const newUids = [];

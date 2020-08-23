@@ -13,14 +13,28 @@
 */
 import { docs } from './docs.js'
 import admin from 'firebase-admin'
+//import firebase from '@firebase/testing'
+
 import { __ } from '../.__.js'; const { projectId } = __;
+
+// Sniff the port
+import firebaseJson from '../firebase.json'
+const firestoreHost = `localhost:${firebaseJson.emulators.firestore.port}`;
 
 // Note: For dev mode, we can do the priming in the background (not wait for the Promise to return). This is rather
 //    instantaneous, anyways. The down side is that errors will not cause the server not to load.
 //
+//    If you wish to wait until the priming has happened, use top level await (requires '--harmony-top-level-await').
+//
 (async () => {
   const adminApp = admin.initializeApp({
+  //const adminApp = firebase.initializeAdminApp({
     projectId
+  });
+
+  adminApp.firestore().settings({
+    host: firestoreHost,
+    ssl: false
   });
 
   const fsAdmin = adminApp.firestore();

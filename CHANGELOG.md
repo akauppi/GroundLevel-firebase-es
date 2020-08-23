@@ -1,8 +1,8 @@
 # Changelog
 
-## 20-Aug-20
+## 23-Aug-20
 
-- Using `firebase-jest-testing` for the back-end testing frames
+- Using `firebase-jest-testing` for the back-end testing
  
 ## 4-Aug-20
 

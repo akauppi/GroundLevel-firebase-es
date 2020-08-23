@@ -77,7 +77,9 @@ function init({ apiKey, projectId, locationId, authDomain }) {    // called by '
   const LOCAL = import.meta.env.MODE == "dev_local";
   if (LOCAL) {
     console.info("Initializing for LOCAL EMULATION");
-    const [DEV_FUNCTIONS_URL, DEV_FIRESTORE_HOST] = ["http://localhost:5001", "localhost:8080"];    // #cleanup
+
+    const DEV_FUNCTIONS_URL = "http://localhost:5001";
+    const FIRESTORE_HOST = "localhost:6767";    // Could pass this from 'firebase.json' as 'import.meta...' #maybe
 
     // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
     //
@@ -87,7 +89,7 @@ function init({ apiKey, projectId, locationId, authDomain }) {    // called by '
     firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
 
     firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
-      host: DEV_FIRESTORE_HOST,
+      host: FIRESTORE_HOST,
       ssl: false
     });
 

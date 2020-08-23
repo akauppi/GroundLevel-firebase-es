@@ -20,7 +20,7 @@ service cloud.firestore {
       // Note: Checking for validity at reads is optional. Doing validation guards against bad data caused by manual
       //       changes, admin SDK changes, or data written by earlier generations of the security rules.
       //
-      allow read: if (isAuthor() || isCollaborator() && !isRemoved())
+      allow read: if isMember() && (!isRemoved() || isAuthor())
         //&& validProject2()       // optional: enable if you want to guard against bad data instead of letting client cope with it
 
       // Creation
@@ -82,7 +82,7 @@ service cloud.firestore {
       /*** DELAYED. Making a read version of validity is very hard.
       // DEBUG for seeing, what causes reads to have a problem!
       function validProject2() {
-        let possibleKeys = ["title", "created", "removed", "authors", "collaborators"].toSet();
+        let possibleKeys = ["title", "created", "removed", "authors", "members"].toSet();
 
         return true
           //&& resource.data.title is string && resource.data.title != ''
@@ -100,6 +100,11 @@ service cloud.firestore {
       function isAuthor() {
         return isSignedIn() &&
           request.auth.uid in prior().authors
+      }
+
+      function isMember() {
+        return isSignedIn() &&
+          request.auth.uid in prior().members
       }
 
       function isCollaborator() {
