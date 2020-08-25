@@ -6,8 +6,7 @@
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { db } from 'firebase-jest-testing'
-import { eventually } from "firebase-jest-testing/eventually"
+import { dbUnlimited as db, eventually } from 'firebase-jest-testing'
 
 import './matchers/toContainObject'
 
@@ -42,7 +41,7 @@ async function wipe(collection) {   // CollectionReference => Promise of ()
 * Cleanup
 */
 afterAll( async () => {
-  await db.app.delete();
+  //await db.app.delete();    // would fail; 'firebase-jest-testing' cleanup story a bit unclear
 });
 
 describe("userInfo shadowing", () => {

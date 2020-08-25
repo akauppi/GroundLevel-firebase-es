@@ -44,10 +44,5 @@
     "firestore": {
       "port": "6767"
     }
-  },
-  "//": {
-    "": [
-      "The normal Firebase config. Used for deployments and testing of Security Rules"
-    ]
   }
 }

@@ -13,7 +13,6 @@
 */
 import { docs } from './docs.js'
 import admin from 'firebase-admin'
-//import firebase from '@firebase/testing'
 
 import { __ } from '../.__.js'; const { projectId } = __;
 
@@ -28,7 +27,6 @@ const firestoreHost = `localhost:${firebaseJson.emulators.firestore.port}`;
 //
 (async () => {
   const adminApp = admin.initializeApp({
-  //const adminApp = firebase.initializeAdminApp({
     projectId
   });
 

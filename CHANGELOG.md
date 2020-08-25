@@ -1,5 +1,9 @@
 # Changelog
 
+## 25-Aug-20
+
+- Adapted to `firebase-jest-testing` 0.0.1-alpha.7. Tests pass; stable.
+
 ## 23-Aug-20
 
 - Using `firebase-jest-testing` for the back-end testing

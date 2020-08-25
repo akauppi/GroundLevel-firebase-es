@@ -9,18 +9,13 @@
 //import { docs } from './docs.js'
 const docs = require('./docs.cjs');
 
-// We just know it is (until ES modules)
-//
-//import { projectId } from './projectId.js'
-const projectId = "rules-test";
-
 //import { clearAndPrime } from './tools/clearAndPrime.js'
 const clearAndPrime = require('./tools/clearAndPrime.cjs');
 
 const setup = async _ => {
   // Clean the existing data and prime with ours
 
-  await clearAndPrime(projectId, docs);
+  await clearAndPrime(docs);
 
   console.debug("Docs primed for test-rules.");
 }
