@@ -12,7 +12,7 @@ const PRIME_ROUND = !global.afterAll;   // are we called from 'globalSetup'
 assert(PRIME_ROUND);
 
 // import { clearAll, prime } from 'firebase-jest-testing/fireStore'
-const cjsTools = require('firebase-jest-testing/cjs'); const { clearFirestoreData, prime } = cjsTools;
+const cjsTools = require('@akauppi/firebase-jest-testing/cjs'); const { clearFirestoreData, prime } = cjsTools;
 
 // We just know it (from 'firebase-jest-testing')   #later: once we're in ESM, let's make an API that exposes it?
 //

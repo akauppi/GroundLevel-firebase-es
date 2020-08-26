@@ -1,6 +1,6 @@
 // back-end/jest.config.default.cjs
 //
-// Default values common to 'test-fns' and 'test-rules'.
+// Common values to 'test-fns' and 'test-rules'
 
 module.exports = {
   // Recommended for native ES6 use (Aug-20):
@@ -16,6 +16,6 @@ module.exports = {
   // This is a perfectly valid way of declaring modules, but Jest 26.x resolver (aka browserify resolver) is not up to it,
   // yet (Aug-2020). See 'TRACK.md'.
   //
-  //resolver: "firebase-jest-testing/jestResolver"
-  resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
+  //resolver: "@akauppi/firebase-jest-testing/jestResolver"
+  resolver: "@akauppi/firebase-jest-testing/src/cjs/jestResolver.cjs"
 };

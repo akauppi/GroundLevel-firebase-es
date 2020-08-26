@@ -6,7 +6,7 @@
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { dbUnlimited as db, eventually } from 'firebase-jest-testing'
+import { dbUnlimited as db, eventually } from '@akauppi/firebase-jest-testing'
 
 import './matchers/toContainObject'
 

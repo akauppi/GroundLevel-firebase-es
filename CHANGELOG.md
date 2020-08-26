@@ -1,5 +1,9 @@
 # Changelog
 
+## 26-Aug-20
+
+- Adapted to using `@akauppi/firebase-jest-testing` published via GitHub Packages
+
 ## 25-Aug-20
 
 - Adapted to `firebase-jest-testing` 0.0.1-alpha.7. Tests pass; stable.

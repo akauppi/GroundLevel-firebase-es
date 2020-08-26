@@ -1,8 +1,8 @@
 /*
 * back-end/test-rules-test/visitedC.test.js
 */
-import { dbAuth } from 'firebase-jest-testing/firestoreTestingReadOnly';
-import { FieldValue } from 'firebase-jest-testing/firestoreTesting';
+import { dbAuth } from '@akauppi/firebase-jest-testing/firestoreTestingReadOnly';
+import { FieldValue } from '@akauppi/firebase-jest-testing/firestoreTesting';
 
 import { describe, expect, beforeAll } from '@jest/globals'
 
