@@ -4,8 +4,7 @@
 import { strict as assert } from 'assert'
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { dbAuth } from '@akauppi/firebase-jest-testing/firestoreTestingReadOnly'
-import { FieldValue } from '@akauppi/firebase-jest-testing/firestoreTesting'
+import { dbAuth, FieldValue } from '@akauppi/firebase-jest-testing/firestoreReadOnly'
 
 const anyDate = new Date();   // a non-server date
 

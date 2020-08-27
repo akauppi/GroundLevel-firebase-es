@@ -1,5 +1,9 @@
 # Changelog
 
+## 27-Aug-20
+
+- Adapted to using the changed API in `@akauppi/firebase-jest-testing@0.0.1-alpha.10`
+
 ## 26-Aug-20
 
 - Adapted to using `@akauppi/firebase-jest-testing` published via GitHub Packages

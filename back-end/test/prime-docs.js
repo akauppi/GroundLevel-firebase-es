@@ -4,7 +4,7 @@
 * Write the data in 'docs.js' to the running emulator's Firestore instance.
 */
 import { docs } from './docs.js'
-import { prime } from '@akauppi/firebase-jest-testing/prime'
+import { prime } from '@akauppi/firebase-jest-testing/firestore'
 
 //console.info("Priming...");
 await prime(docs);

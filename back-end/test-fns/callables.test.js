@@ -3,7 +3,7 @@
 */
 import { test, expect, describe } from '@jest/globals'
 
-import { fns } from '@akauppi/firebase-jest-testing'
+import { fns } from '@akauppi/firebase-jest-testing/cloudFunctions'
 
 describe ('Cloud Function callables', () => {
   test ('returns a greeting', async () => {
