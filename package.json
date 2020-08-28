@@ -42,7 +42,7 @@
     "dev": "npm run dev:local",
     "dev:local": "firebase emulators:exec --project=app --ui --only functions,firestore \"npm run _dev_local_2\"",
     "_dev_local_2": "node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
-    "dev:online": "vite --port 3001 --mode dev_online",
+    "dev:online": "tools/hasActiveProject.sh && vite --port 3001 --mode dev_online",
     "---      ": "",
     "build": "npm run _prod_clean && npm run prod:build",
     "prod:build": "rollup -c rollup.config.prod.js",

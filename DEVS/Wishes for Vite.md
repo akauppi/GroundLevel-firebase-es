@@ -17,6 +17,11 @@ I'd also like to be driving them simultaneously (so modifying files is not getti
 
 Could try module aliasing.
 
+**Sample case**
+
+Provide the value of `GCLOUD_PROJECT` to the browser environment. 
+
+This is set by `firebase emulator:exec` and we'd just want to carry it over. Current `.env` file system doesn't seem to bend to this.
 
 
 ## Configurable path to `index.html`

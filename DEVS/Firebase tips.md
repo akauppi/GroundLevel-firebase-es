@@ -116,15 +116,11 @@ See filtering info -> [Logs Based Metrics](https://firebase.google.com/docs/func
 Note that Firebase logs are intended for the back end (which is always online). The front end library has no means for central logging.
 
 
-## You can `debug()` security rules! (undocumented)
+## You can `debug()` security rules!
 
-See [https://github.com/firebase/firebase-tools/issues/1166#issuecomment-472063944](https://github.com/firebase/firebase-tools/issues/1166#issuecomment-472063944)
+Firebase Rules Reference > [rules.debug](https://firebase.google.com/docs/reference/rules/rules.debug) (Firebase docs)
 
-That issue (of documenting the `debug()`) is still open (27-Aug-20). 1 year 5 months. **:R**
-
-Note that: 
-
->In firestore emulator v1.10.2, the emulator seems to only output the debug log to the firestore-debug.log, not stdout.
+>Note that the output goes to `firestore-debug.log`, not stdout.
 
 
 ## Debugging Security Rules tests

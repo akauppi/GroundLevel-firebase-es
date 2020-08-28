@@ -1,3 +1,4 @@
+// vite.config.cjs
 
 module.exports = {
   minify: false,

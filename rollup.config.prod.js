@@ -11,15 +11,15 @@
 
 // To support CommonJS dependencies, enable any lines mentioning 'commonjs'.
 
-//import alias from '@rollup/plugin-alias';
-//import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
-import replace from '@rollup/plugin-replace';
-//import { terser } from 'rollup-plugin-terser';
-import vue from 'rollup-plugin-vue';
+//import alias from '@rollup/plugin-alias'
+//import commonjs from '@rollup/plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
+//import { terser } from 'rollup-plugin-terser'
+import vue from 'rollup-plugin-vue'
 
-import path from 'path';
-import fs from 'fs';
+import path from 'path'
+import fs from 'fs'
 
 // Antidote to these:
 //  <<
@@ -29,7 +29,7 @@ import fs from 'fs';
 //
 // Reported -> https://github.com/vuejs/rollup-plugin-vue/issues/364
 //
-import scss from 'rollup-plugin-scss';      // handles '.css' and '.scss'
+import scss from 'rollup-plugin-scss'      // handles '.css' and '.scss'
 const scssHackNeeded = true;    // still needed with: vue 3.0.0-beta.18, rollup-plugin-vue 6.0.0-beta.6
 
 const publicDir = 'public';

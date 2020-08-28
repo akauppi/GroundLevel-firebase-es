@@ -37,7 +37,8 @@ assert(firebase.functions);
 // !!! The fact that the application code needs to know, whether it's dealing with a normal or emulated back-end
 //    can be seen as a BUG of Firebase client library (7.16.1, 8.8.1).
 //
-const localSkipRegion = false;    // set to 'true' if needed
+
+const localSkipRegion = true;    // set to 'true' ONLY IF NEEDED (keep 'false' in commits)
 
 const fns = (window.LOCAL && localSkipRegion) ? firebase.app().functions() :
   firebase.app().functions(functionsRegion);

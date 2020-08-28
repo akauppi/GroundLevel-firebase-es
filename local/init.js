@@ -14,7 +14,13 @@
 import { docs } from './docs.js'
 import admin from 'firebase-admin'
 
-import { __ } from '../.__.js'; const { projectId } = __;
+let projectId = process.env["GCLOUD_PROJECT"];    // set by 'firebase emulator:exec' (or explicitly)
+
+if (!projectId) {
+  const msg = "No 'GCLOUD_PROJECT' env.var. set. PLEASE set it explicitly, e.g. like: 'GCLOUD_PROJECT=$(firebase use)'";
+  console.error(msg);
+  throw new Error(msg);
+}
 
 // Sniff the port
 import firebaseJson from '../firebase.json'

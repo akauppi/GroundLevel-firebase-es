@@ -34,69 +34,68 @@ assert(firebase.initializeApp, "Firebase initialization failed");
 window.firebase = firebase;
 window.assert = assert;
 
-function init({ apiKey, projectId, locationId, authDomain }) {    // called by 'index.html'
-  assert(apiKey && projectId && locationId);
+const LOCAL = import.meta.env.MODE === "dev_local";
+window.LOCAL = LOCAL;    // inform the UI
 
-  firebase.initializeApp({
-    apiKey,
-    projectId,
-    locationId,
-    authDomain
-  });
+// Note: Even for 'dev:local' we need some fields from here, for authentication.
+//
+import { __ } from '../__.js'
+const { apiKey, authDomain } = __;
+const projectId = LOCAL ? "app" : __.projectId;   // note: 'dev:local' project name needs to match that in 'package.json'
+                                                  //      (carrying it past Vite from 'GCLOUD_PROJECT' is difficult)
 
-  // Check Firebase health
-  // Note: This needs to be done here, not in 'main.js'. In there, the components will import Firebase before the
-  //    main code.
-  //
-  try {
-    const app = firebase.app();
-    const features = ['auth','firestore','functions'].filter(feature => typeof app[feature] === 'function');
-    console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
-  } catch (e) {
-    // tbd. we might have some error banner UI, later
-    console.error(e);
-    alert('Error loading the Firebase SDK, check the console.');
-  }
+firebase.initializeApp({
+  apiKey,
+  projectId,
+  locationId: LOCAL ? undefined : 'europe-west3',   // needed by 'dev:online'
+  authDomain
+});
 
-  // Detect local emulation and set it up. Needs to be before any 'firebase.firestore()' use.
-  //
-  // Note: Would LOVE two things to happen:
-  //    - emulation to be a configuration thing for Firebase. Set up there, not here.
-  //    - the 'firebase' object to expose (e.g. 'firebase.emulated: [...]' whether parts are emulated or not)
-  //
-  //    Until then, we get the order from the build system. 💂‍
-  //
-  const LOCAL = import.meta.env.MODE == "dev_local";
-  if (LOCAL) {
-    console.info("Initializing for LOCAL EMULATION");
-
-    const DEV_FUNCTIONS_URL = "http://localhost:5001";
-    const FIRESTORE_HOST = "localhost:6767";    // Could pass this from 'firebase.json' as 'import.meta...' #maybe
-
-    // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
-    //
-    // Note: source code states "change this [functions] instance". But it seems that another 'firebase.functions()'
-    //    later must return the same instance, since this works. #firebase #docs #unsure
-    //
-    firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
-
-    firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
-      host: FIRESTORE_HOST,
-      ssl: false
-    });
-
-    window.LOCAL = true;    // inform the UI
-  }
-
-  // Load 'main' dynamically. This makes sure that the Firebase initialization we did above is the *first* to touch
-  // Firebase. Otherwise, some inner module (likely 'SignIn') would be the one initializing it for all.
-  //
-  // Also, 'assert' initialization preceeds app modules, because of this (otherwise, they'd need to make imports).
-  //
-  import('./app.js');
+// Check Firebase health
+// Note: This needs to be done here, not in 'main.js'. In there, the components will import Firebase before the
+//    main code.
+//
+try {
+  const app = firebase.app();
+  const features = ['auth','firestore','functions'].filter(feature => typeof app[feature] === 'function');
+  console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
+} catch (e) {
+  // tbd. we might have some error banner UI, later
+  console.error(e);
+  alert('Error loading the Firebase SDK, check the console.');
 }
 
-import { __ } from '../.__.js'
-init(__);
+// Set up local emulation. Needs to be before any 'firebase.firestore()' use.
+//
+// Note: Would LOVE two things to happen:
+//    - emulation to be a configuration thing for Firebase. Set up there, not here!!
+//    - the 'firebase' object to expose (e.g. 'firebase.emulated: [...]' whether parts are emulated or not)
+//        OR: to have a REST API that exposes these details
+//
+if (LOCAL) {
+  console.info("Initializing for LOCAL EMULATION");
+
+  const DEV_FUNCTIONS_URL = "http://localhost:5001";
+  const FIRESTORE_HOST = "localhost:6767";    // Could pass this from 'firebase.json' as 'import.meta...' #maybe
+
+  // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
+  //
+  // Note: source code states "change this [functions] instance". But it seems that another 'firebase.functions()'
+  //    later must return the same instance, since this works. #firebase #docs #unsure
+  //
+  firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
+
+  firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
+    host: FIRESTORE_HOST,
+    ssl: false
+  });
+}
+
+// Load 'main' dynamically. This makes sure that the Firebase initialization we did above is the *first* to touch
+// Firebase. Otherwise, some inner module (likely 'SignIn') would be the one initializing it for all.
+//
+// Also, 'assert' initialization precedes app modules, because of this (otherwise, they'd need to make imports).
+//
+import('./app.js');
 
 export { };
