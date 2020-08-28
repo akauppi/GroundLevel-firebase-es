@@ -2,22 +2,17 @@
 
 ## Prefer explicit exports over default
 
-`import { some } from 'module.js'`, even when there's just one thing to export/import. Using default export (not those curly braces is treated as a javascriptism.
+`import { some } from 'module.js'`, even when there's just one thing to export/import. Using default export (no curly braces) is treated as a javascriptism.
 
-## Prefer `(vm) => ...` over `this`
+## Avoid `this` - like a plague
 
-ES6 arrow functions can be used with Vue. It's just that most existing samples rely on `this` approach. 
+`this` is *not* required with ES6 coding and Vue.js 3.
 
-Using `this` becomes tedious in an otherwise ES6 environment. Which scope does it refer to - where was my `function`. Sometimes, there is no `function` keyword but it's implied:
+Any place where it occurs is **treated as a bug**.
 
-```
-const abc = ({
-  ...,
-  created() {   // method definition seems to make a traditional JavaScript function
-    const vm = this;
-```
+*Why does this matter?*
 
-It would be best to avoid using `this` completely, in ES6 code. Help is welcome to spot places it still exists - and overcome them with arrow functions.
+The `this` mentality provides an additional axis of abstraction (a context) that is sometimes hard to reason about (`function` vs. arrow function). It makes the *language* more complex than it needs to be.
 
 ## Language over framework
 

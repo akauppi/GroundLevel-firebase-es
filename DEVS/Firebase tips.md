@@ -13,7 +13,7 @@ While you *can* likely get this info from elsewhere, why not just make randomnes
 
 ## Firestore: use array/object or a collection?
 
-Firestore works on the document-collection-document-... pattern ([Cloud Firestore Data model](https://firebase.google.com/docs/firestore/data-model)).
+Firestore works on the document-collection-document-... pattern (see [Cloud Firestore Data model](https://firebase.google.com/docs/firestore/data-model) (Firebase docs)).
 
 One can express a dataset either within a document, or as a combination of documents and subcollections. Here are the pros/cons of both approaches:
 
@@ -21,30 +21,24 @@ One can express a dataset either within a document, or as a combination of docum
 
 Pros:
 
-- Simple, traditional.
+- Simple, traditional
 - May be cheaper: access is charged by documents read, and access to multiple fields of a single document counts as 1 read. This may be the strongest reason to avoid splitting data to sub-collections.
 
 Cons:
 
-- ...
+- Not native thinking for Firebase
+- Access is all-or-nothing
 
 ### As sub-collections
 
-Pros:
-- ...
-
-Cons:
-- ...
+Essentially the inverse of the pros/cons above. :)
 
 
 ### Quotes
 
 >Don't add subcollections unless you need it. I only add them when there is a large amount of related data that does not need to be pulled Everytime I retrieve root data.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
 
->You can't currently [2019] query across subcollections, but this feature is planned for the future.  When it is launched, it should make subcollections significantly more useful.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
-
-
->I use them [sub-collections] when I have lists of notifications for users. So there will be a users collection, and a notifications subcollection for each user.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
+Ability to do [Collection group queries](https://firebase.google.com/docs/firestore/query-data/queries#collection-group-query) (Firebase docs) has likely evened the weigh for using sub-collections (they were launched in 2019). If you read online, consider any experiences *prior* to that as potentially misleading. 🍄
 
 
 ## Syntax highlighting of Security Rules on IntelliJ IDEs (kind of...)
@@ -58,49 +52,29 @@ In addition, set to 2 spaces:
 
 It defines which Firebase project your development terminal and local instance started by, say, `npm run dev`, is connected to.
 
-List the current shortcuts with:
+|||
+|---|---|
+|List the current shortcuts|`firebase use`|
+|Make a new shortcut|`firebase use --add`|
 
-```
-$ firebase use
-Active Project: prod (groundlevel-production)
-
-Project aliases for /Users/asko/Git/GroundLevel-es6-firebase-web:
-
-  dev (vue-rollup-example)
-  default (vue-rollup-example)
-* prod (groundlevel-production)
-
-Run firebase use --add to define a new project alias.
-```
-
-As it says there, to make a new shortcut, run `firebase use --add`.
-
-The shortcuts are folder specific and stored in the `.firebaserc` file:
+The aliases you give don't really matter. `abc` is a good candidate. ;P
 
 ```
 $ more .firebaserc 
 {
   "projects": {
-    "dev": "vue-rollup-example",
     "default": "vue-rollup-example",
     "prod": "groundlevel-production"
   }
 }
 ```
 
-If you open a new terminal - as long as you are within the project folder - your in-use Firebase project will remain the same.
-
-Doing `firebase use <shortcut>` changes the active project. 
-
-<!-- tbd. Q: Where is the active project stored?  It does not change anything in the `.firebaserc` nor `firebase.json` files
--->
-
-
-
 
 ## Security Rules Online Simulator
 
 The simulator can be very useful, providing detailed information on why a certain rule failed. But you need to know where to look.
+
+>Note: Now that Firebase is bringing the development experience more towards the local (with emulation), how about a local tool for this use case so we don't need to copy-paste rules files to the cloud? (27-Aug-20)
 
 ### Rule, Evaluated
 
@@ -113,7 +87,7 @@ You can click each rule fragment open to see what it evaluates to. Any surprises
 
 ### Entering `FieldValue` values
 
-There is no GUI support for building a document with `FieldValue`s (e.g. server time stamp) but maybe we can fool the simulator by:
+There is no UI support for building a document with `FieldValue`s (e.g. server time stamp) but maybe we can fool the simulator by:
 
 ```
 {
@@ -139,10 +113,18 @@ Nice! 😀
 
 See filtering info -> [Logs Based Metrics](https://firebase.google.com/docs/functions/writing-and-viewing-logs#logs-based_metrics) (Firebase docs)
 
+Note that Firebase logs are intended for the back end (which is always online). The front end library has no means for central logging.
+
 
 ## You can `debug()` security rules! (undocumented)
 
 See [https://github.com/firebase/firebase-tools/issues/1166#issuecomment-472063944](https://github.com/firebase/firebase-tools/issues/1166#issuecomment-472063944)
+
+That issue (of documenting the `debug()`) is still open (27-Aug-20). 1 year 5 months. **:R**
+
+Note that: 
+
+>In firestore emulator v1.10.2, the emulator seems to only output the debug log to the firestore-debug.log, not stdout.
 
 
 ## Debugging Security Rules tests
@@ -157,17 +139,9 @@ Function not found error: Name: [validUserInfoWrite]. for 'create' @ L334
 ```
 
 
-## See the data used in Security Rules tests
-
-Set the `projectId` to the same as your active project (see `.firebaserc`).
-
-The `@firebase/rules-unit-testing` library allows writing to any projects (which is handy), but the emulator UI only shows the active one.
-
-
-
 ## Changes are different in server triggers vs. Firestore client
 
-Listening to changes to a document, using Cloud Firestore triggers (server):
+Listening to changes to a document, using Cloud Firestore triggers (`firestore-functions`):
 
 ```
 exports.blah = regionalFunctions.firestore
@@ -181,7 +155,7 @@ exports.blah = regionalFunctions.firestore
 ```
 
 
-Doing the same in client code:
+Doing the same in client code (`firebase`):
 
 ```
 db.collection("userInfo/{uid}")
@@ -190,11 +164,6 @@ db.collection("userInfo/{uid}")
       // change.type: "added"|"modified"|...
       // change.doc.data(): 
 ```
-
-References:
-
-- [Cloud Firestore function triggers](https://firebase.google.com/docs/functions/firestore-events#function_triggers)
-- [View changes between snapshots](https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots)
 
 
 ||Cloud Functions trigger (server)|Firestore client|
@@ -205,4 +174,9 @@ References:
 |New contents|`change.after.data()`|`change.doc.data()`|
 
 These are essentially two wholly separate APIs and there are likely reasons why they are so. The first happens **on demand** at the server, whereas the client approach is an ongoing watcher for data changes.
+
+References:
+
+- [Cloud Firestore function triggers](https://firebase.google.com/docs/functions/firestore-events#function_triggers) (Firebase docs)
+- [View changes between snapshots](https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots) (Firebase docs)
 

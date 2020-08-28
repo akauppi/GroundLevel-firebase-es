@@ -16,7 +16,7 @@ Microsoft has implemented the grammar, but someone with IntelliJ syntax highligh
 See [IDEABKL-7927](https://youtrack.jetbrains.com/issue/IDEABKL-7927) (Youtrack).
 
 - open since 2018
-- 27 votes (only)
+- 27 votes (only); 58 by 28-Aug-2020
 
 >VisualStudio has a plugin for this: https://github.com/toba/vsfire - it would be great to have this in intellij as well.
 

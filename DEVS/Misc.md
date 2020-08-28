@@ -4,7 +4,9 @@
 
 For the same error, Chrome (v80) gives way better console error messages than Safari (v13). It's simply faster to do basic development with Chrome.
 
-Also, Chrome sports the "Vue.js devtools" plugin.
+Also, Chrome sports the "Vue.js devtools" plugin.[^1]
+
+[^1]: Use the [beta](https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg) tools, until support for Vue 3.0 is mainstream.
 
 Safari:
 
@@ -14,14 +16,16 @@ Chrome:
 
 ![](.images/chrome-console-error.png)
 
-*(btw. that one was caused by forgetting `return { ... }` in declaring `data`. :/ )*
-
 
 ## Why (not to) have `package-lock.json`?
 
-`package-lock.json` is intended to ensure that one's CI (or other developers) get the same dependencies as you. It makes debugging more reproducible.
+`package-lock.json` is intended to ensure that one's CI (or other developers) get the same dependencies as you. It makes debugging more reproducible, and is likely a good thing to enable, if working as a team.
 
 It's also a pain, and in many cases unnecessary.
+
+Reasons not to have it:
+
+- it causes commit noise
 
 Reasons to have it:
 

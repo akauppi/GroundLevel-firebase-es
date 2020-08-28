@@ -4,7 +4,7 @@ Firebase has quite many server and client side JavaScript libraries, and their l
 
 Firebase seems to be wanting to clarify this and e.g. renamed `@firebase/testing` as `@firebase/rules-unit-testing` in Aug 2020, which does better convey its purpose.
 
-Here is a list of the ones we've come across (all authored by Firebase), to help one see their relevance - or lack thereof. 
+Here is a list of the ones we've come across (all authored by Firebase), to help one see their relevance.
 
 
 
@@ -12,34 +12,24 @@ Here is a list of the ones we've come across (all authored by Firebase), to help
 
 >Note: This table is a "best effort" and we aim to edit it, from time to time, when better real world knowledge of the various libraries is gained.
 
-|npm|What is it?|When to use?|Open issues|
+Open issues is listed because their number, and the oldest age are indicators of how well the repo is attended by the authors. (This author will remove that column if/when Firebase cleans up their act.)
+
+||What is it?|When to use?|Open issues|
 |---|---|---|---|
 |**Client side**|
-|&nbsp;&nbsp;[`firebase`](https://www.npmjs.com/package/firebase)|Main JavaScript client|Browser app or client side node.js (e.g. tests)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
-|&nbsp;&nbsp;`@firebase/rules-unit-testing`|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Firestore functionality that needs authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[9](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) (24-Jul-20); oldest 16-May-2019|
-|**Between client and server sides (fuzzy and furry) 🦥**|
-|&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|You want to unit test Cloud Functions within the `functions` folder. We don't use it. Making integration tests against local emulators may be a better approach.|[9](https://github.com/firebase/firebase-functions-test/issues) (23-Jul-20); oldest 8-Apr-2018|
+|&nbsp;&nbsp;[`firebase`](https://www.npmjs.com/package/firebase)|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
 |**Server side**|
-|&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, when running in a server-side node environment (locally emulated or online)|Don't use this client side.|[33](https://github.com/firebase/firebase-admin-node/issues) (23-Jul-20); oldest 7-Jun-2017|
-|&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[30](https://github.com/firebase/firebase-functions/issues) (23-Jul-20); oldest 19-Jun-2018|
+|&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules.|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser.|[36](https://github.com/firebase/firebase-admin-node/issues) (27-Aug-20); oldest 7-Jun-2017|
+|&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[35](https://github.com/firebase/firebase-functions/issues) (27-Aug-20); oldest 19-Jun-2018|
+|**Testing libraries**|
+|&nbsp;&nbsp;`@firebase/rules-unit-testing`|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Firestore authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[8](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) (27-Aug-20); oldest 16-May-2019|
+|&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|Unit testing Cloud Functions within the `functions` folder. We don't do it but run integration tests against local emulators instead, using the normal `firebase` library.|[9](https://github.com/firebase/firebase-functions-test/issues) (23-Jul-20); oldest 8-Apr-2018|
 |**Developer tools**|
-|&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; launching emulators. You need it.|[146](https://github.com/firebase/firebase-tools/issues) (23-Jul-20); oldest 16-Dec-2015|
+|&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; Launching emulators. You need it.|[146](https://github.com/firebase/firebase-tools/issues) (23-Jul-20); oldest 16-Dec-2015|
+|**Deprecated**|
+|`@firebase/testing` -> `@firebase/rules-unit-testing`|Security Rules testing, until Aug 2020.|
 
-### Deprecated libraries
-
-|npm|What was it?|
-|---|---|
-|&nbsp;&nbsp;`@firebase/testing`|Security Rules testing, until Aug 2020.|
-
-Note: There are also other, non-official packages that are *not* deployed by Firebase. **Stay clear of those!** It would be a good phishing attempt to make something people would install, by accident. **DO NOT TRUST THE NAMES**. It would be welcome if Firebase brought **all** their `npm` modules under the `@firebase` namespace, for simplicity.
-
-### `@firebase/testing` is really only about authentication..
-
-You don't really need it much. The approach taken in this repo is to use it for testing to Security Rules, but not elsewhere.
-
-This approach provides a great orthogonality for testing. One set (`rules-test`) tests *who* can change things but the rest simply expect that to have been handled, and don't apply security rules. This means, `@firebase/testing` only needs to be included in one test set and the normal JavaScript client can be used, elsewhere.
-
->Note: The library was renamed as `@firebase-rules-unit-testing` in Aug 2020, which does better reflect its purpose.
+Note: There are also other, non-official packages that are *not* deployed by Firebase. **Stay clear of those!** It would be a good phishing attempt to make something people would install, by accident. **DO NOT TRUST THE NAMES**.
 
 
 ### Why list the oldest issues?
@@ -52,6 +42,7 @@ That's why they are listed. Once they are <1 year in the past, we'll remove the 
 
 🧹
 
+<!-- this is confusing
 ### Where does the confusion rise from??
 
 Entries like [this](https://stackoverflow.com/questions/62566957/cannot-call-firestore-from-unit-tests/62586875#62586875) show the "admin" library being used with tests (not run as a privileged environment, but just from the development environment command line).
@@ -63,5 +54,4 @@ It might work.
 However, the author finds it way clearer to keep `firebase-admin` to the admin side (Cloud Functions run either online, or by the emulator) and client side (including tests) client side.
 
 This means no function unit tests, but integration tests instead.
-
-
+-->

@@ -4,43 +4,35 @@
 * The entry point for development mode.
 *
 * There are a couple of reasons for this separate layer between 'index.html' and 'main.js'.
-*   - Firebase initialization is crucially different for the lcoal modes, vs. production.
-*   - Having Firebase initialization in index.html (and setting it as a global) would make Rollup not catch it, as a module.
-*   - This allows easy differentiation/experiments between Rollup and Vite approaches (to e.g. Firebase loading).
+*   - Firebase initialization is crucially different for the 'dev:local' mode vs. 'dev:online' and production.
+*   - allows easy differentiation/experiments between Rollup and Vite approaches
 */
-//import * as firebase from 'firebase/app';   // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
-import firebase from 'firebase/app';    // works (but does not allow firebaseui from npm :( )
+//import * as firebase from 'firebase/app'    // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
+import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
 
-import 'firebase/auth';
-import 'firebase/firestore';  // for lcoal mode
-import 'firebase/functions';
-
-// Note: We don't want to import project-internal things at this level.
-
-// As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-beta.11 in dev mode),
-// let's place it as a global.
-//
-// Once we know the official way ('import * as firebase from 'firebase/app') works, we can go back to having
-// modules read them as imports.
-//
-window.firebase = firebase;
+import 'firebase/auth'
+import 'firebase/firestore'   // for local mode
+import 'firebase/functions'
 
 /*
-* Set up globals
-*
-* Note: 'assert' must be set up in a block that does not import our app level code (or maybe it could be an import,
-*     itself).
+* Don't want to add dependency on 'assert' module.
 */
-function assert(cond) {
+function assert(cond, msgOpt) {
   if (!cond) {
-    debugger;   // allows us to see the 'call stack' in browser
-    throw "Assertion failed!";
+    if (msgOpt) {
+      console.assert(msgOpt);
+    }
+    throw new Error(`Assertion failed: ${msgOpt || '(no message)'}`);
   }
 }
 
-window.assert = assert
+assert(firebase.initializeApp, "Firebase initialization failed");
 
-assert(firebase.initializeApp);
+// As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-rc.8 in dev mode), let's place it
+// as a global.
+//
+window.firebase = firebase;
+window.assert = assert;
 
 function init({ apiKey, projectId, locationId, authDomain }) {    // called by 'index.html'
   assert(apiKey && projectId && locationId);
@@ -98,6 +90,8 @@ function init({ apiKey, projectId, locationId, authDomain }) {    // called by '
 
   // Load 'main' dynamically. This makes sure that the Firebase initialization we did above is the *first* to touch
   // Firebase. Otherwise, some inner module (likely 'SignIn') would be the one initializing it for all.
+  //
+  // Also, 'assert' initialization preceeds app modules, because of this (otherwise, they'd need to make imports).
   //
   import('./app.js');
 }

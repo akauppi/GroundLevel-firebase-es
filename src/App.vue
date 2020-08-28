@@ -39,6 +39,7 @@
   import AppLogo from './components/AppLogo.vue'
   import AppProfile from './components/AppProfile/index.vue'
   import AppFooter from './components/AppFooter.vue'
+  import Fatal from './components/Fatal.vue'
 
   import { user } from './refs/user.js'
 
@@ -57,7 +58,7 @@
   export default {
     name: 'App',     // helps in debugging
     components: {
-      AppLogo, AppProfile, AppFooter
+      AppLogo, AppProfile, AppFooter, Fatal
     },
     props: {
       localMode: Boolean    // 'true' if running against the local Firebase emulator

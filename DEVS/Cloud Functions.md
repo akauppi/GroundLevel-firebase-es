@@ -15,3 +15,10 @@ $ firebase functions:log
 
 ..or go to Firebase Console > Functions > Logs
 
+>Note: Likely going to use some other service for monitoring, eventually (e.g. Datadog). Firebase doesn't really have a metrics / logging solution does it?
+>
+>Requirements:
+>
+>- offline friendly (callables are not)
+>- good SRE dashboard
+

@@ -63,9 +63,9 @@ const routes = [
 
   // Note: Not really important for us, just showing off dynamic component import.
   //
-  rOpen( '/easter',
-() => import('./pages/_EasterEGG.vue')    // tbd. How to make IDE (WebStorm) not red-underline 'import'?
-  ),
+  //rOpen( '/easter',
+  //  () => import('./pages/_EasterEGG.vue')    // tbd. How to make IDE (WebStorm) not red-underline 'import'?
+  //),
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.

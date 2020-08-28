@@ -24,4 +24,7 @@
 </style>
 
 <script>
+  export default {
+    name: 'Fatal'
+  };
 </script>

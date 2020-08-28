@@ -5,7 +5,6 @@ Dear Firebase. You are awesome. If you ever run out of things to improve, here 
 Hot list: 🌶
 
 - ability to have immutable Rules evaluation (evaluation not changing the data set)
-- ability to pick up if the rules file changes
 - online Simulator and local Firestore emulator should have 100% same logic
 
 🙏
@@ -61,7 +60,7 @@ ALTERNATIVE suggestion:
 
 Adding `FieldValue` to the `Type` drop-down would be more in line with the Firestore data model, in general. The user could then choose the server timestamp from there, to get the "current" time.
 
-These two are slightly different ideas. My initial idea was more about usability (the date picker). If the server timestamp feature exists, there will be not so much value in the initial request.
+These two are slightly different ideas.
 
 
 ### Firebase emulator API
@@ -129,26 +128,18 @@ If we go by the dialog, ability to make changes to the previous document would b
 
 >![](.images/rules-playground-build.png)
 
-Here, the doc is non-trivial. When I click `Build document`, instead of being able to add or remove fields, I need to start creating it all from scratch.
+Here, the document contents are non-trivial. When I click `Build document`, instead of being able to add or remove fields, I need to start creating it all from scratch.
 
 
 ### 🌶 Firestore Security Rules emulator: a "dry run" mode
 
-It took me a while (several days) to realize that the allowed rule evaluations (create, update, delete) actually do change the data they operate on.
+When I first used the rules unit testing library (`@firebase/testing`, now `@firebase/rules-unit-testing`), I somehow supposed the underlying data would not get changed. It does.
 
-This is not necessarily needed, for evaluating security rules. One can build tests with the assumption that changes are not applied. This in fact makes tests more easy to build, in my opinion, since the underlying data model stays untouched.
+Then created a means to protect the tests from this side effect. That means is now the [firebase-jest-testing](https://github.com/akauppi/firebase-jest-testing) library.
 
-Even if this were a good idea, for backwards compatibility the current behaviour must of course remain, as a default.
+If the Firebase emulator provided a "dry run" flag, the library could get rid of the locks it now needs. This might also improve test performance, a bit.
 
-<strike>Would you (Firebase) consider an `--immutable` or `--dry-run` flag to starting the emulator. If used, it would not apply a succesful rule evaluation to the data.</strike>
-
-Edit: The above does not work, since the emulator is a full `--firestore` emulator, not just for rules.
-
-Another alternative for this could be for the `initializeTestApp` call to have a `dryRun: true` option:
-
-![](.images/initializeTestApp.png)
-
-Each project using <strike>`@firebase/testing`</strike> `@firebase/rules-unit-testing` for rules testing uses this call. It would likely take some collaboration between the emulator and the client side library, to mark "don't take this set/update/delete seriously", but the change in application code would be just one line.
+The flag can also be a configuration for a particular project id, but since configuration at the moment (Aug 2020) is all over the place, I'm not advocating that unless it first gets gathered in a centralized way (e.g. `firebase.json` and emulator command line flags; away from source code!).
 
 
 ## Firestore emulator: evaluate the rules at launch (and complain!)
@@ -192,28 +183,61 @@ It would be useful and fair to show these already at the launch.
 E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
 
 
-<!-- tbd. is it?
-## Config in config files - not code!
+## Config should be transparent to client code!!!
 
 The configuration story for Firebase seems unclear (Jul 2020). 
 
-While there is a config file (`firebase.json`), a Firebase employee mentions that is only for hosting (reference missing). That's not true. It contains entries for `firestore` and `emulation`, but it does not consistently collect all Firebase configuration into itself, as it could.
+While there is a config file (`firebase.json`), a Firebase employee mentioned that is only for hosting (reference missing). That's not true. It contains entries for `firestore` and `emulation`, but it does not consistently collect all Firebase configuration into itself, as it could.
 
-Note:
+>The `firebase-jest-testing` library hides these configuration steps from this application code. But they are still there; would rather have them in `firebase.json`.
 
->We *can* help this by using it with extended fields, and picking those up in code. Maybe we should... };)
+Aim:
 
-In code, currently:
+- Browser code should be absolutely same, whether running against emulator or cloud deployment
 
-...tbd. fill. Remember to keep server and client separate.
--->
+Means this block (in `init.dev-vite.js`) should become void:
 
-## Cloud Functions: ability to configure the region in one place
+```
+  const LOCAL = import.meta.env.MODE == "dev_local";
+  if (LOCAL) {
+    console.info("Initializing for LOCAL EMULATION");
 
-If one wants to specify a region, it needs to be separately specified for both the server and the client. This specification happens in the code.
+    const DEV_FUNCTIONS_URL = "http://localhost:5001";
+    const FIRESTORE_HOST = "localhost:6767";
 
-Instead, couldn't this be part of the project configuration? Then, the server (and emulator) would get it directly and the client (browser) via `/__/firebase/init.js`.
+    // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
+    //
+    // Note: source code states "change this [functions] instance". But it seems that another 'firebase.functions()'
+    //    later must return the same instance, since this works. #firebase #docs #unsure
+    //
+    firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
 
+    firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
+      host: FIRESTORE_HOST,
+      ssl: false
+    });
+  }
+```
+
+Can we do that?
+
+## Cloud Functions: ability to configure the default region in one place
+
+The current situation on Cloud Functions regions is not completely clear (Aug 2020). There are cases where the code seems to prefer the global default region (e.g. emulation has this).
+
+Overrides to regions can only be done on a function-by-function basis. This leads to the Internet recommending things like a `regionalFunction` value - the approach taken also in this repo.
+
+1. A developer should have a clear place to override the default region for their functions.
+   - this place could be the `firebase.json` file?
+
+2. The client should "just pick up" such a setting.
+   - If needed, this can be done via the `__` URL mechanism
+
+>Firebase says (@puf on Twitter) that the `__` configuration is only for hosting.
+>
+>To a user, it does not really seem that way, having `storageBucket`, `messagingSenderId` etc. How would `functionsDefaultRegion` be any different?
+
+<!-- disabled
 Note: Having the error message about CORS makes this especially nasty for developers.
 
 See [SO 62042554](https://stackoverflow.com/questions/50278537/firebase-callable-function-cors/61725395#62042554). 
@@ -222,47 +246,28 @@ Also relevant:
 
 - [firebase deploy to custom region (eu-central1)](https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1) (StackOverflow)
 
----
-
-**Opinion:**
-
-This complexity is against the aim for simplicity that is the main selling argument of Firebase (you can do back-end without being a wizard class security specialist! ).
+The current complexity is against the aim for simplicity that is the main selling argument of Firebase (you can do back-end without being a wizard class security specialist!).
 
 There may be a need for overriding the region on a function-by-function basis, but there should also be a way to change the default (in configuration). This would be the way most people change their region. Such a change would not break code that currently uses the in-code settings.
-
----
-
-**Firebase answers**
-
-Firebase says (@puf on Twitter) that the `__` configuration is only for hosting.
-
-To a user, it does not really seem that way, having `storageBucket`, `messagingSenderId` etc. How would `functionsDefaultRegion` be different of those?
-
----
+-->
 
 
-## `firebase emulators:exec` does not enable the UI
+## `firebase emulators:start` behaves different from `emulators:exec`
 
-The new (as of Jun 2020) emulator UI only occurs with `emulators:start` but not with `emulators:exec`.
+This is a surprise for developers.
 
-This likely is due to Firebase staff thinking of `:start` as interactive and `:exec` as CI/CD faceless testing tool. But it's an artificial watershed. `:exec` is useful also for launching a dev mode command (avoids a package like `start-server-and-test`.
+e.g. the `debug()` feature of Security Rules (undocumented) places the notes in `stdout` with `emulators:exec` but into `firestore-debug.log` if run via `emulators:start`.
 
-Compare:
-
-```
-# Provides emulator UI
-"dev:local": "start-server-and-test \"firebase emulators:start --only functions,firestore\" 4000 \"node ./local/init.js && npx vite --port 3001\""
-
-# Shorter & simpler
-"__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\"",
-``` 
+The two commands look similar, and there's no cue to make us think they would work differently. 
 
 Suggestion:
 
-Bring the `:exec` and `:start` commands closer. Maybe they both can use a `--ui [on|off|<port>]` flag (that can be on in one, by default, and off in another, to provide compatibility with current behavior).
+Bring the `:exec` and `:start` commands closer. Either merge them, or hide the internal implementation aspects (`start` is said to be a "wrapper") from the developers.
 
 
 ## Loading initial data - from JSON
+
+>Note: This is already sufficiently handled by `firebase-jest-testing` and doesn't necessarily need support from Firebase emulator commands.
 
 The import/export mechanism ([#1167](https://github.com/firebase/firebase-tools/issues/1167)) works on a binary data format that humans cannot directly read or edit.
 
@@ -271,37 +276,31 @@ That's one use case. Another is to prime an emulator with JSON data, instead of 
 Our current approach uses `local/init.js` to prime such data. It works, but is clumsy in the `package.json` command:
 
 ```
-"__dev:local": "firebase emulators:exec --only functions,firestore \"node ./local/init.js && npx vite --port 3001\"",
+    "dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
+    "_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
 ```
 
 This could be:
 
 ```
-"__dev:local": "firebase emulators:exec --only functions,firestore local/init.js \"vite --port 3001\"",
+    "dev:local": "firebase emulators:exec --ui --only functions,firestore local/init.js \"npm run _dev_local_2\"",
+    "_dev_local_2": "npx vite --port 3000 --mode dev_local",
 ```
-
-Here, `emulators:exec` would run the provided file, at launch, before starting the provided command. Cloud Function emulation would be switched off during the run of the init file.
-
-Pros:
-- Firebase does not need to take stand as to the data format (opposed to if loading JSON)
-
-Cons:
-- Separate loading file (`local/init.js`) needs to be provided
 
 
 ## Firebase hosting could provide config as ES module
 
 Firebase hosting makes it easy to initialize project identity via `/__/firebase/init.js`. This file is supposed to be read in as a `script` tag.
 
-This belongs to the bygone era, and should be complemented by an `import` friendly way of getting such configuration.
+This belongs to a bygone era, and could be complemented by an `import` friendly way of getting such configuration.
 
-One could serve a module exporting the config object (and `init` if one wants to be compatible with the earlier way). Let's say the url for this would be `/__/firebase/init.mjs`.
+One could serve a module exporting the config object (and `init` if one wants to be compatible with the earlier way). Let's say the url for this would be `/__/firebase/config.mjs`.
 
 This would allow: 
 
 ```
 import * as firebase from 'firebase/app'
-import { default as __ } from "/__/firebase/init.mjs"
+import { default as __ } from "/__/firebase/config.mjs"
 firebase.initializeApp(__);
 ```
 
@@ -366,6 +365,7 @@ Firebase tools v. 8.4.3.
 - [ ] Report to Firebase
 
 
+<!-- disabled: not reproducible? / haven't seen since
 ## Emulator should behave exactly as the online
 
 Currently (Jul 2020, Firebase tools 8.4.3) the emulator chokes on something that is okay for the online implementation.
@@ -376,7 +376,7 @@ In browser console:
 database.ts:2096 Uncaught Error in onSnapshot: FirebaseError: 
 Property resource is undefined on object. for 'list' @ L19
 ```
-
+-->
 
 ## Would like to control, whether Firebase hosting emulation changes the port if taken, or fails
 
@@ -391,25 +391,22 @@ It would be nice to have a flag/config setting to disallow changing ports. It ca
 
 ## Firestore JavaScript client could provide `Date`s?
 
-Timestamps in the Firestore data are provided as: `{ seconds: int, nanos: int }`.
+Timestamps in the Firestore data are provided as: `{ seconds: int, nanos: int }`. There is a native JavaScript presentation for dates, `Date`, and the Firebase client provides `.toDate()` method for converting to it. 
 
-There is a native JavaScript presentation for dates, `Date`, and the Firebase client provide `.toDate()` method for converting to it. 
+But why is this not made automatically? What would be the use case that needs "more resolution" than a normal `Date`?
 
-But why is this not made automatically? What would be the use case that needs something other than a normal `Date`?
+Are the timestamps even having more than 1ms resolution? Firebase docs suggest this, but let's see on server timestamps.
 
-It would make sense that the client provides such data, automatically, in the normal abstraction of the platform. Now the application code must convert individual fields.
+>tbd. Check some server-timestamp fields (in code); what are the `nanos` values for them?
+
+For a document database (not real time database) I don't see a reason for sub-1ms resolution.
+
+It would make sense that the client provides such data in the normal abstraction of the platform. Now the application code must convert individual fields.
 
 Two ways to make such a change:
 
 1. Derive from `Date` (or make a class that behaves the same), and have it also provide the `.seconds` and `.nanos` for backwards compatibility.
-2. Have a global switch somewhere (initialization of the `.firebase.firestore`?), so application programmers can select the "old" or the "native" way.
-
-
-## Firestore emulator does not detect changes via symbolic links
-
-This is a minor thing, and can be simply mentioned in the documents.
-
-The change detection of the Rules file does not work, if the file (mentioned in `firebase.json`) is a symbolic link (8.6.0, macOS).
+2. Have a global switch somewhere (initialization of the `.firebase.firestore`?), so application programmers can select the "old" or the "JavaScript" way.
 
 
 ## Firebase emulator configuration from a `.js` file
@@ -500,16 +497,7 @@ Application code now needs to have the above condition (firebase-tools 8.6.0, Ja
 
 - With the region parameter, emulated call just disappears (no logging, no invocation)
 
-This seems to have been tested only with default region, in which case identical code can be used.
-
----
-
-The current (20-Jul-20) recommended way for initializing Firebase Functions for emulation is yet different (will report this to them): <sub>[source](https://firebase.google.com/docs/functions/callable#initialize_the_client_sdk)</sub>
-
-```
-var functions = firebase.functions();
-```
-
+>This seems to have been tested only with default region, in which case identical code can be used.
 
 
 ## Firebase emulation: expose in the client, whether it's running against local emulator
@@ -520,17 +508,21 @@ The JavaScript library probably knows this. Can it somehow tell it to us?
 
 This would mean the `window.LOCAL` mode can be taken from the library, instead of the build system and `import.meta.env.MODE`.
 
+Suggestion:
 
-## Testable billing for Security Rules
+- bring all the configuration of the server (emulator) available in one end point (preferably `__`)
+
+
+## 🍎🍎🍎Testable billing for Security Rules
 
 Asking about how many "reads" a certain security rule causes has been mentioned in community forums (especially newcomers).
 
 Would you be able to add this to the emulator / `@firebase/rules-unit-testing` so that we can compare the reported "reads" count automatically to expected ones. I would add this as part of the security rules tests.
 
-This makes the billing explicit, and confirmable.
+This makes the billing attestable.
 
 
-
+<!-- seems done in 8.8.1
 ## Cloud Functions emulator: could watch for changes
 
 Firebase emulator (firebase-tools 8.6.0) does not pick up changes to the functions sources.
@@ -540,9 +532,9 @@ Since the Security Rules emulator does watch for changes, this is at the least a
 Work-around:
 
 - we could architect automatic restart using `npm`, but that adds complexity. Let's see what Firebase people say, first..
+-->
 
-
-## Emulator: if you cannot deliver, please fail.
+## Emulator: if you cannot deliver, please fail!
 
 ```
 $ npm run start:rest
@@ -610,6 +602,27 @@ I'd prefer a failed launch, when the config file is explicitly stated: `--config
 
 In this case, the file *was there* but it wasn't valid JSON. Please strive to make the error messages precise. The file **was found** but its contents were not valid. I don't want line-wise error message, just "not valid JSON" is enough to get one fast on the right bug. 🏹🐞
 
+
+## Emulators: don't leak to the cloud
+
+The `firebase emulators:exec` and `emulators:start` `--only` flag works like this:
+
+- named services are emulated
+- for other services, the cloud instances are used
+
+What is the use case of such leaking to the cloud?
+
+As a developer, I would prefer to keep emulation and cloud project completely separate. At the least, there should be (a `--only-only`?? :) ) flag, to state I just want emulated services.
+
+Output from current `npm run dev` launch:
+
+```
+...
+[emul] ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: database, hosting, pubsub
+...
+```
+
+This is mostly just to "feel safe", I guess.
 
 ## References
 

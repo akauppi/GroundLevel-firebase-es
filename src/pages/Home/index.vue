@@ -82,10 +82,8 @@
     components: {   // tbd. Do I still need to mention components?
       ProjectTile
     },
-    setup() {
-      return {
-        projectsSorted
-      }
-    }
+    setup: _ => ({
+      projectsSorted
+    })
   }
 </script>

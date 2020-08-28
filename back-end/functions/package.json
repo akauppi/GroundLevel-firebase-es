@@ -3,21 +3,19 @@
   "private": true,
   "//type": "module",
   "engines": {
-    "node": ">=14.3",
-    "//node": ">=13.2"
+    "node": "12"
   },
   "dependencies": {
-    "firebase-admin": "^9.1.0",
-    "firebase-functions": "^3.9.1"
+    "firebase-admin": "^9.1.1",
+    "firebase-functions": "^3.11.0"
   },
   "//": {
     "engines.node": [
-      ">= 13.2 provides native ES module support.",
-      "With Firebase Cloud Functions only using LTS versions (12,14,...) of Node, we'll likely get there with 14.x.",
-      "Until then, the source uses CommonJS ('require').",
+      ">= 13.2 provides native ES module support",
+      "Firebase Cloud Functions only supports LTS versions (12,14,...) and the string must be '12','14', ...",
       "",
-      "Cloud Functions *could* load the scripts with '--experimental-modules'. This would allow us to experiment with",
-      "ES modules already in node.js 12, though print a warning. People wanting to play safe would miss nothing."
+      "Note: Cloud Functions *could* load the scripts with '--experimental-modules'. This would allow people to experiment",
+      "with ES modules already in Node.js 12, though printing a warning. Likely not going to happen, though..."
     ]
   }
 }
