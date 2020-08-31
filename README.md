@@ -74,6 +74,12 @@ Firebase allows a mere mortal to create fully functional cloud-based application
 
 There are similar offerings from other companies, but they are years behind, in the ease of use, based on the author's opinion.
 
+### Blaze vs. Spark (Firebase plans)
+
+In order to deploy Cloud Functions, Firebase requires you to sign up to the "Blaze" plan. This means you need to give a credit card but does not necessarily introduce cost.
+
+You can still use this repo for local development (see "dev:local", below) even without a Firebase account or a project. If your project doesn't require Cloud Functions, you can use the "Spark" (free) plan and still deploy.
+
 
 ## Requirements
 
@@ -83,6 +89,7 @@ There are similar offerings from other companies, but they are years behind, in 
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
+<!-- tbd. is this actually needed?:
 Set up the Firestore emulator:
 
 ```
@@ -90,67 +97,11 @@ $ firebase setup:emulators:firestore
 ```
 
 >Note: Rerun the setup above if you have upgraded `firebase-tools`.
-
-<!-- tbd. Is setting up (and re-running the setup) needed; does `firebase` do those automatically? #try
 -->
 
 <!--
-The repo is developed with latest `firebase` (8.7.0) and Node.js (14.8.0) on macOS.
+The repo is developed with latest `firebase` (8.9.2) and Node.js (14.8.0) on macOS.
 -->
-
-### Firebase plan
-
-Firebase requires you to sign up to the "Blaze" plan, in order to deploy Cloud Functions. This means you need to give a credit card but does not necessarily introduce cost.
-
-You can still use this repo for local development and training with the "Spark" (free) plan, and an emulator.
-
-### Firebase project
-
-You need to:
-
-- create a Firebase project at the [Firebase console](https://console.firebase.google.com/)
-  - enable hosting, authentication, Cloud Firestore and Cloud Functions
-  - create an app (needed for authentication)
-  - choose the set of authentication providers you like (Google, anonymous recommended)
-- `firebase login`
-- `firebase use --add` to activate the project for this working directory
-
->Note: You don't need to use `firebase init` - that one is for creating a repo from scratch.
-
-#### Development configuration 
-
-When using Firebase hosting for development, one's project configuration is offered at a certain URL (`/__/firebase/init.js`). However, we use Vite so we need to catch the config and expose it in a file.
-
->Note: You can also see the project configuration in the Firebase Console. `Settings` > `Your apps`.
-
-The values are *not* secrets. You may place the file in version control, if you want. Anyone having access to your Web App will be able to see the parameters, if they want to.
-
-We've done a script that starts Firebase hosting momentarily, and lists the settings for you.
-
-```
-$ npm run __
-...
-{
-  "projectId": "your-project-name",  
-  ...
-}
-```
-
-Create `.__.js` with these keys:
-
-```
-const __ = {
-  apiKey: '...',
-  projectId: '...',
-  locationId: 'europe-west3',
-  authDomain: '...'
-}
-export { __ }
-```
-
-If you use Firebase hosting for deployments (default), this file only matters for the development work.
-
-Now we're finally ready to get started...
 
 
 ## Getting started ⏱
@@ -161,20 +112,20 @@ Fetch dependencies:
 $ npm install
 ```
 
-Back-end features (Cloud Firestore Security Rules and Cloud Functions) have their own directory. This is just a convention followed in this repo, but feels useful.
+### Directory layout
 
-However, we don't want two `node_modules` folders, so tools and scripts for back-end testing are included in the same `package.json` as the front-end features. Again, this is just a convention.
+Back-end features (Cloud Firestore Security Rules and Cloud Functions) have their own directory, `back-end`. This is just a convention followed in this repo.
 
-Firebase configuration files (`firebase.json`, `firebase.norules.json` and `.firebaserc`) are kept in the root. There is only one project in Firebase, for both the front and the back end features.
+We don't want two `node_modules` folders, so tools and scripts for back-end testing are included in the root `package.json`, alongside the front-end features. Again, this is just a convention.
 
 The Cloud Functions have their own node environment. Fetch its dependencies:
 
 ```
-$ (cd functions && npm install)
+$ (cd back-end/functions && npm install)
 $ cd ..
 ```
 
->Note: We mirror the `functions` both at the root, as well as in `back-end/functions`. Firebase does not allow free movement of that folder (8.7.0).
+>Note: The `back-end/functions` folder has a symbolic link at the root, to please Firebase.
 
 
 ### Running tests
@@ -197,6 +148,8 @@ The tests should all pass (or be skipped). If some test fails, please [create an
 
 ### Dev mode
 
+You don't even need a Firebase project, to get started.
+
 ```
 $ npm run dev
 ...
@@ -217,9 +170,11 @@ Try making some changes in the `src/**` files and see that they are reflected in
 
 The above command started a local, emulated version of Firebase. You can also start it with `npm run dev:local`. 
 
-The other way is `npm run dev:online`. This works against your cloud Firebase project. Try it!
+The other way is `npm run dev:online`. This works against your cloud Firebase project. We'll come to it shortly.
 
-The "online" workflow is recommended when you are working with the UI code, but the full story is a bit longer. Let's start with the "local" workflow.
+The "online" workflow is recommended when you are working with the UI code, but the full story is a bit longer.
+
+>Note: Authentication normally requires a Firebase project to be set up. Here, we are piggy-backing an existing project (details in `src/init-dev.vite.js`) so that you get going, faster.
 
 
 ### `dev:local`
@@ -228,7 +183,7 @@ When working on Firestore security rules, or Cloud Functions, you are better off
 
 - faster change cycle (no deployments)
 - no costs
-- since Aug 2020, only possible mode for users on Spark plan (free)
+- since Aug 2020, only possible mode for users on Spark plan
 
 With local mode, you can develop back-end features locally, and only deploy working stuff. This changes the role of the cloud project to be more of a staging environment than a development hot-pot. This is good.
 
@@ -295,7 +250,7 @@ You can now access the app in [localhost:3000](localhost:3000).
 
 WARNING: Changes you make while in "local" mode are LOST WHEN YOU STOP the server. This is intentional. It's a nice way of starting again, afresh.
 
-The data used for priming is located in `local/docs.js`. You should customize this data to your/your team's liking. At the least update the user ids in the beginning:
+The data used for priming is located in `local/docs.js`. You should customize this to your/your team's liking. At the least update the user ids in the beginning:
 
 ```
 // Change the user id's to match your own. Check them from Firestore console.
@@ -321,23 +276,99 @@ Then insert such a UID in `local/docs.js`, restart the server and you should hav
 
 ### `dev:online`
 
+With "online" development, you run against the Firebase back-end services of your active project. But first you have to create one.
+
+#### Setting up Firebase project
+
+- Create a project in the [Firebase console](https://console.firebase.google.com/)
+   - enable hosting, authentication, Cloud Firestore and Cloud Functions
+   - create an app (needed for authentication)
+   - choose the set of authentication providers you like (Google, anonymous recommended)
+- Tie your local CLI to your project:
+   
+   ```
+   $ firebase login
+   ```
+   
+   ```
+   $ firebase use --add 
+   ```
+   
+   The alias you choose doesn't really matter. `"abc"` is okay.
+   
+- Deploy Cloud Functions and Cloud Firestore Security Rules:
+
+   ```
+   $ firebase deploy --only functions,firestore
+   ```
+
+#### Setting up `__.js`
+
+When using Firebase hosting emulator, one's project configuration is offered automatically at `/__/firebase/init.js` URL. We use Vite for the hosting so an extra step is needed.
+
+>Note: You can also see the project configuration in the Firebase Console. `Settings` > `Your apps`.
+
+The values are *not* secrets. You may place the file in version control, if you want. Anyone having access to your Web App will be able to see the parameters, if they want to.
+
+We've done a script that starts Firebase hosting momentarily, and lists the settings for you.
+
+```
+$ ./tools/print-__.js
+{
+  "projectId": "vue-rollup-example",
+  "appId": "1:990955970646:web:400a55b0df8ba415c2dbf7",
+  "databaseURL": "https://vue-rollup-example.firebaseio.com",
+  "storageBucket": "vue-rollup-example.appspot.com",
+  "locationId": "europe-west3",
+  "apiKey": "AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk",
+  "authDomain": "vue-rollup-example.firebaseapp.com",
+  "messagingSenderId": "990955970646",
+  "measurementId": "G-VJSH9D5HX1"
+}
+```
+
+You only need some of the fields. Create `__.js` with these keys:
+
+```
+const __ = {
+  apiKey: '...',
+  projectId: '...',
+  locationId: 'europe-west3',
+  authDomain: '...'
+}
+export { __ }
+```
+
+>Note: If your `locationId` is something else than "europe-west3", you may need to change values within the repo. Let us know in Issues, to make this a globally friendly project. 🌏
+
+#### Launch! 🚀
+
+Launch the server:
+  
 ```
 $ npm run dev:online
 ...
 ```
 
-Quite like above, except the data is not primed - it persists in the Firebase cloud.
+Point your browser to `http://localhost:3001`.
+
+Changes to your front-end files are still reflected in the browser, but back-end services are now run in the cloud. Changes you do to the data will persist. Access you do will be using your [quotas](https://firebase.google.com/docs/functions/quotas).
 
 
 ### When to develop in local mode?
 
-As mentioned above, for just developing the UI, it may be nice to work against real (changing) data. It just feels more normal. 
+For just developing the UI, it may be nice to work against real (changing) data. It just feels more normal. 
 
 If you intend to test things like removal of data, local mode may be better, since changes are not permanent.
 
 For back-end work, local mode rocks!
 
 You can also run these modes simultaneously, in different terminals. By default, local uses port 3000 and online port 3001.
+
+
+### Note: Making your local mode your own :)
+
+We took a shortcut in the code, letting you play with `dev:local` *before* setting up a Firebase project. Now that you are familiar with the setup, visit `src/init.dev-vite.js` and see if you can make it, too, use the `__.js` file you've created. This way, you will not be at the mercy of any alien project. 👾👾👾
 
 
 ## Tests and Linting
@@ -348,6 +379,8 @@ $ npm run lint
 ```
 
 This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
+
+>Note: At the moment (31-Aug-20) we're not focused on reducing the number of lints (if they are warnings).
 
 
 ## Back-end
@@ -365,47 +398,56 @@ Check out [back-end/README](back-end/README.md) for more information. 🦸‍♂
 
 ## Production workflow
 
-<font color=red>THIS IS STILL HUGELY IN FLUX. DON*T BELIEVE WHAT YOU READ!!!</font>
+Vite home page mentions:
 
-<!-- In fact, we're liking to do all with Vite. Would be simpler.
--->
+>Vite does utilize bundling for production builds, because native ES module imports result in waterfall network requests that are simply too punishing for page load time in production.
 
-<strike>For production builds, we use Rollup. You find the configuration in [rollup.config.js](rollup.config.js).</strike>
+This is not necessarily true.
 
+It seems we need to do both `vite build` and ES modules Rollup deployment, to see for ourselves how the load times are. The aim is to take ES modules **all the way**, including deployment.
+
+### Rollup setup
+
+For production builds, we use Rollup. You find the configuration in [rollup.config.prod.js](rollup.config.prod.js).
+
+<!-- too much
 >Reasons not to use Vite for production:
 > 
 >- we wish to keep HTML unmodified, but Vite insist in bunding even scripts within it (!)
 >- we wish to experiment with ES6 modules all the way (vs. bundle)
 >- Rollup simply gives a better feeling of control
-
-<!-- FLUX FLUX FLUX
-### Production build
+-->
 
 ```
 $ npm run prod:build
 ```
 
-This creates the deployables at `public/`.
+This creates the deployables at `public/dist`.
 
 You can tune the settings to your liking. There is no one single best set, and tastes differ.
 
 Default setup has:
 
-- only ES6 modules from npm (no CommonJS)
+- only ES6 modules (no CommonJS)
 - preserve modules (no bundling)
 
->Hint: To enable support for CommonJS modules[^1-cjs], uncomment `//import commonjs from '@rollup/plugin-commonjs';` and `//commonjs()` lines (not tested!).
+>Hint: To enable support for CommonJS modules, uncomment `//import commonjs from '@rollup/plugin-commonjs';` and `//commonjs()` lines (not tested!).
 
 
 ### Testing production build
 
 ```
 $ npm run prod:serve
+...
+✔  hosting: Local server: http://localhost:3010
+...
 ```
+
+Try it out at `localhost:3010`.
 
 Local Firebase serving of the production build.
 
--- tbd. place deployment into a separate directory; INCLUDING documentation. --
+
 
 ### Deployment
 

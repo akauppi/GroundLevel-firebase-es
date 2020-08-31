@@ -1,5 +1,9 @@
 # Changelog
 
+## 31-Aug-20
+
+- `npm run dev:local` does not need even creation of a Firebase project, any more (good!) 🌞 
+
 ## 27-Aug-20
 
 - Adapted to using the changed API in `@akauppi/firebase-jest-testing@0.0.1-alpha.10`

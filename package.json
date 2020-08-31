@@ -48,12 +48,13 @@
     "prod:build": "rollup -c rollup.config.prod.js",
     "prod:serve": "firebase serve --only hosting --port 3010",
     "_prod_clean": "(rm public/dist/* 2> /dev/null || true)",
-    "__": "firebase emulators:exec --only hosting \"node ./tools/__.js\"",
+    "---       ": "",
     "preprod:serve": "npm run prod:build"
   },
   "//scripts": {
     "//dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
-    "//_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local"
+    "//_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
+    "//__": "firebase emulators:exec --only hosting \"node ./tools/__.js\""
   },
   "dependencies": {
     "firebase": "^7.19.1",

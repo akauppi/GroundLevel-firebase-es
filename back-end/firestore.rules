@@ -107,10 +107,10 @@ service cloud.firestore {
           request.auth.uid in prior().members
       }
 
-      function isCollaborator() {
+      /*function isCollaborator() {   // NOT USED
         return isSignedIn() &&
           request.auth.uid in prior().members.toSet().difference( prior().authors.toSet() )   // in 'members' but not in 'authors'
-      }
+      }*/
 
       function isRemoved() {
         return "removed" in resource.data
