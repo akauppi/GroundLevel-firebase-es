@@ -398,31 +398,23 @@ Check out [back-end/README](back-end/README.md) for more information. 🦸‍♂
 
 ## Production workflow
 
-Vite home page mentions:
+<!-- cut
+We use the Rollup bundler *natively* for doing production builds. This is because of the repo's approach of using ES modules all the way, and Vite drops the baton a bit short. It insists on bundling.. 
 
->Vite does utilize bundling for production builds, because native ES module imports result in waterfall network requests that are simply too punishing for page load time in production.
+>because native ES module imports result in waterfall network requests that are simply too punishing for page load time in production.
 
 This is not necessarily true.
-
-It seems we need to do both `vite build` and ES modules Rollup deployment, to see for ourselves how the load times are. The aim is to take ES modules **all the way**, including deployment.
+-->
 
 ### Rollup setup
 
 For production builds, we use Rollup. You find the configuration in [rollup.config.prod.js](rollup.config.prod.js).
 
-<!-- too much
->Reasons not to use Vite for production:
-> 
->- we wish to keep HTML unmodified, but Vite insist in bunding even scripts within it (!)
->- we wish to experiment with ES6 modules all the way (vs. bundle)
->- Rollup simply gives a better feeling of control
--->
-
 ```
 $ npm run prod:build
 ```
 
-This creates the deployables at `public/dist`.
+This creates the deployables in `public/dist`.
 
 You can tune the settings to your liking. There is no one single best set, and tastes differ.
 

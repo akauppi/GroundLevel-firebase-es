@@ -54,17 +54,18 @@
       // The values are NOT secrets. You can safely place a config right here, as on object (faster loading). For
       // ease of code sharing, we prefer fetching it.
       //
-      fetch('/__/firebase/init.js')
-        .then(resp => {    // returns JavaScript; parse away the program parts
-          if (!resp.ok) {
-            console.fatal("Unable to read Firebase config:", resp);
-            throw Error("Unable to read Firebase config (see console)");
-          }
-          resp.text().then( s => {
-            const s2 = s.replace(/^[\s\S]+ firebaseConfig = ({[\s\S]+\n});\s+if [\s\S]+$/gm, "$1");
-            init( JSON.parse(s2) );
-          });
-        });
+      (async _ => {
+        const resp = await fetch('/__/firebase/init.js');
+
+        if (!resp.ok) {
+          console.fatal("Unable to read Firebase config:", resp);
+          throw Error("Unable to read Firebase config (see console)");
+        }
+
+        const s = await resp.text();    // returns JavaScript; parse away the program parts
+        const s2 = s.replace(/^[\s\S]+ firebaseConfig = ({[\s\S]+\n});\s+if [\s\S]+$/gm, "$1");
+        init( JSON.parse(s2) );
+      })();
     </script>
     -->
     <!--DEV -->

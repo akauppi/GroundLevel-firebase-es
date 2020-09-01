@@ -11,31 +11,35 @@
 //    initializeApp is not exported by node_modules/firebase/app/dist/index.esm.js
 //  <<
 //
-//import * as firebase from 'firebase/app';
+//import * as firebase from 'firebase/app';   // still fails with firebase 7.19.1
 import firebase from 'firebase/app';    // works (but does not allow firebaseui from npm :( )
 import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/functions';
 
-// Provide as a global until the 'import * as firebase' works.
-window.firebase = firebase;
-
 /*
 * Set up globals
 *
-* Note: 'assert' must be set up in a block that does not import our app level code (or maybe it could be an import,
-*     itself).
+* Note: Needs to be set up in a block that does not import our app level code.
 */
-function assert(cond) {
+function assert(cond, msgOpt) {
   if (!cond) {
-    debugger;   // allows us to see the 'call stack' in browser
-    throw "Assertion failed!";
+    //debugger;   // allows us to see the 'call stack' in browser
+
+    if (msgOpt) {
+      console.assert(msgOpt);
+      console.trace(msgOpt);
+    }
+    throw new Error(`Assertion failed: ${msgOpt || '(no message)'}`);
   }
 }
 
-window.assert = assert
-
 assert(firebase.initializeApp);
+
+// As long as loading Firebase via 'import' is shaky (also with Vite), let's place it as a global.
+//
+window.firebase = firebase;
+window.assert = assert;
 
 function init({ apiKey, projectId, locationId, authDomain }) {    // called by 'index.html'
   assert(apiKey && projectId && locationId);

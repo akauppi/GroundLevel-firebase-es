@@ -2,7 +2,7 @@
 * Rollup config
 *
 * Strategy:
-*   Provide ES6 modules. Firebase hosting uses HTTP/2. Let's measure how slow or fast the initial load is, without
+*   Provide ES modules. Firebase hosting uses HTTP/2. Let's measure how slow or fast the initial load is, without
 *   bundling.
 *
 * HUGE thanks to Phil Walker for showing how it can be done!  Go Phil! :)
@@ -30,7 +30,7 @@ import fs from 'fs'
 // Reported -> https://github.com/vuejs/rollup-plugin-vue/issues/364
 //
 import scss from 'rollup-plugin-scss'      // handles '.css' and '.scss'
-const scssHackNeeded = true;    // still needed with: vue 3.0.0-beta.18, rollup-plugin-vue 6.0.0-beta.6
+const scssHackNeeded = true;    // still needed with: vue 3.0.0-rc.9, rollup-plugin-vue 6.0.0-beta.10
 
 const publicDir = 'public';
 const indexDevFile = 'index.html';

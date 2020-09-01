@@ -5,36 +5,26 @@
     "ignore": [],
     "rewrites": [
       {
-        "//tbd.": [
-          "try this: { source: \"!**.{js|css}\" }"
-        ],
-        "//": [
-          "Serve the same page for everything '.html' or postfixless: client does the routing.",
-          "Note: if we let pass here, it's going to be a 200. Handle obvious 404's like wrong path to scripts or CSS here."
-        ],
-        "source": "**",
-        "destination": "/index.prod.html"
+        "//": "Keep this first! '.js' and '.css' are not redirected.",
+        "source": "**/*.@(css|js)",
+        "destination": "/nosuch"
       },
       {
-        "//": [ "Does this work? From -> https://stackoverflow.com/questions/38619572/set-file-mime-type-on-firebase-hosting",
-          "Nope. Still gives HTML and likely 200."
-        ],
-        "source": "**.js",
-        "code": 404
+        "//": "Single-page-app (keep last)",
+        "source": "**",
+        "destination": "/index.prod.html"
       }
     ],
-    "headers": [
-      {
-        "//": "Firebase (7.15.5) provides wrong default MIME type for '.js' (application/json)",
-        "source": "**/*.js",
-        "headers": [
-          {
-            "key": "Content-Type",
-            "value": "application/javascript"
-          }
-        ]
-      }
-    ]
+    "//": {
+      "Intention": [
+        "Serve the same page for everything '.html' or postfixless: client does the routing.",
+        "Note: if we let pass here, it's going to be a 200. Handle obvious 404's like wrong path to scripts or CSS here."
+      ],
+      "Creating 404": [
+        "Directing to a non-existing page causes the response to become 404 (this is undocumented behavior; an alternative",
+        "could be excluding some suffixes from SPA route, but 'glob' syntax doesn't sport a NOT operator, does it? #help"
+      ]
+    }
   },
   "firestore": {
     "rules": "back-end/firestore.rules",
