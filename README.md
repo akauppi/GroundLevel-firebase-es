@@ -368,7 +368,7 @@ You can also run these modes simultaneously, in different terminals. By default,
 
 ### Note: Making your local mode your own :)
 
-We took a shortcut in the code, letting you play with `dev:local` *before* setting up a Firebase project. Now that you are familiar with the setup, visit `src/init.dev-vite.js` and see if you can make it, too, use the `__.js` file you've created. This way, you will not be at the mercy of any alien project. 👾👾👾
+We took a shortcut in the code, letting you play with `dev:local` *before* setting up a Firebase project. Now that you are familiar with the setup, visit `src/init.vite.js` and see if you can make it, too, use the `__.js` file you've created. This way, you will not be at the mercy of any alien project. 👾👾👾
 
 
 ## Tests and Linting
@@ -437,48 +437,50 @@ $ npm run prod:serve
 
 Try it out at `localhost:3010`.
 
-Local Firebase serving of the production build.
-
+>WARNING: There's an issue with the [Firebase hosting crashing](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/22).
 
 
 ### Deployment
 
 Once you've got your app together, you want to roll it out to the world. There are many ways, either manually or using a CI/CD pipeline.
 
-We'll walk you through the manual steps. You can build the CI/CD pipeline based on them - people's taste often differs on those so we don't want to enforce certain way (except for production - see later).
+We'll walk you through the manual steps. You can build the CI/CD pipeline based on them - people's tastes often differ on those so we don't want to enforce certain way (except for production - see later).
 
 >NOTE TO SELF: *CI/CD without tests is a bad idea. We (read: You :) ) should have `npm test` test your UI before even thinking of automating deployment. Time better used.*
 
-><font color=red>`npm run build` implementation will likely change. Vite bundles everything together (including scripts from `index.html`) and the author doesn't like that. 
->
->Instead, we may go with Rollup directly, and configure it to just collect ES6 modules instead of bundling. The reason Vite insists on bundling is a claimed "avalanche" of module dependencies, but we'll need to see that for ourselves. The end user (you) should have a choice, here.</font>
-
 ```
-$ npm run build
-...
-```
+$ npm run prod:deploy:all
 
->Note: The output bundle sizes shown on the console are not quite what's in the file system. #help
-
-This builds a production mode front end under `dist/`.
-
-><font color=red>BROKEN GLASS!! Production build with Vite still needs work. The output (index.html) is broken!
-
-To check it's working, we can serve it (don't try opening the `index.html` from the file system).
-
-```
-$ firebase serve --only hosting --port 3002
-```
-
-```
-$ firebase deploy
+> groundlevel-es6-firebase@0.0.0 prod:deploy:all /Users/asko/Git/GroundLevel-es6-firebase-web
+> firebase deploy
 
 === Deploying to 'vue-rollup-example'...
 
-i  deploying hosting
+i  deploying firestore, functions, hosting
+i  firestore: reading indexes from back-end/firestore.indexes.json...
+i  cloud.firestore: checking back-end/firestore.rules for compilation errors...
+✔  cloud.firestore: rules file back-end/firestore.rules compiled successfully
+i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
+i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
+✔  functions: required API cloudbuild.googleapis.com is enabled
+✔  functions: required API cloudfunctions.googleapis.com is enabled
+✔  firestore: deployed indexes in back-end/firestore.indexes.json successfully
+i  firestore: latest version of back-end/firestore.rules already up to date, skipping upload...
+i  functions: preparing functions directory for uploading...
+i  functions: packaged functions (27.75 KB) for uploading
+✔  functions: functions folder uploaded successfully
 i  hosting[vue-rollup-example]: beginning deploy...
-i  hosting[vue-rollup-example]: found 3 files in ./public
+i  hosting[vue-rollup-example]: found 16 files in public
 ✔  hosting[vue-rollup-example]: file upload complete
+✔  firestore: released rules back-end/firestore.rules to cloud.firestore
+i  functions: updating Node.js 12 function logs_v190720(europe-west3)...
+i  functions: updating Node.js 12 function fatal_v210720(europe-west3)...
+i  functions: updating Node.js 12 function userInfoShadow(europe-west3)...
+i  functions: updating Node.js 12 function greet(europe-west3)...
+✔  functions[fatal_v210720(europe-west3)]: Successful update operation. 
+✔  functions[greet(europe-west3)]: Successful update operation. 
+✔  functions[logs_v190720(europe-west3)]: Successful update operation. 
+✔  functions[userInfoShadow(europe-west3)]: Successful update operation. 
 i  hosting[vue-rollup-example]: finalizing version...
 ✔  hosting[vue-rollup-example]: version finalized
 i  hosting[vue-rollup-example]: releasing new version...
@@ -487,56 +489,19 @@ i  hosting[vue-rollup-example]: releasing new version...
 ✔  Deploy complete!
 
 Project Console: https://console.firebase.google.com/project/vue-rollup-example/overview
-Hosting URL: https://vue-rollup-example.firebaseapp.com
+Hosting URL: https://vue-rollup-example.web.app
 ```
 
 Visit the stated URL. :)
 
-Note: These instructions are no-where complete, and you should really visit the Firebase documentation (it being awesome!! 🥳). Check e.g. [Test locally then deploy to your site](https://firebase.google.com/docs/hosting/deploying)
-
-</font>
--->
-
-<!-- disabled, to keep things short-ish
-## Digging deeper...
-
-The template aims to cover more ground:
- 
-- [x] Authentication
-- [x] Cloud Firestore; creating an actual collaborative app behind the authentication
-  - [ ] invitations
-- [x] Logging
-- [ ] Performance monitoring
-- [ ] A/B testing
-
-Stay tuned for these developments, or chime in to make them happen!!! 🏅
--->
-
-<!--
-## Production tier
-
-//using CI/CD; not manually; once there are tests
-...
--->
-
-<!--
-## Monitoring
-
-- about Logging (already set up)
--->
-
 
 ## Developing *your* app
 
-The repo is intended to be used as an application template. By doing so, you make its purpose come true!
+This repo can be used as an application template. By doing so, you make its purpose come true!
 
 ### Back-tracking changes
 
 We need to develop / think of ways to allow a derivative of this repo to gain updates, if they so wish.
-
-<font color=red>
-If you keep the Git history, you should be able to `git pull` changes, but how messy that becomes in practise remains to be seen.
-</font>
 
 ### Remove branding
 
@@ -550,7 +515,7 @@ Please remove all "GroundLevel" branding, once you turn this into something else
 $ git grep "[gG]round[Ll]evel"
 ```
 
-Please remove/edit those files, to remove any mention. You may mention using this repo as your starting point, but are not obliged to do so.
+If there are any matches, please remove/edit those files. You may mention using this repo as your starting point, but are not obliged to do so.
 
 
 ## Help welcome!

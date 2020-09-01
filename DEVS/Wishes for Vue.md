@@ -1,4 +1,4 @@
-# Wishes for Vue.js 3 (beta)
+# Wishes for Vue.js 3 (rc)
 
 Dear Vue.
 
@@ -10,6 +10,7 @@ Your fan. 🌺🌺
 
 ---
 
+<!-- disabled (too lazy)
 ## Having better support for an async `reactive`
 
 The [Vue Composition API](https://composition-api.vuejs.org/#ref-vs-reactive) says that one should use `reactive` by default, especially when the payload is object-like.
@@ -108,7 +109,7 @@ The implementation would use some inner field like `_v_initialized` (there are s
 **Performance implications:**
 
 Resetting the `_v_initialized` field per each write of the reactive (maybe there is a way to avoid this?).
-
+-->
 
 <!-- no, not really worth it? (initializing from an async generator would be what I'm after here, but those cases likely aren't that frequent, yet)
 

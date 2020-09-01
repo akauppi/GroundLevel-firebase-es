@@ -195,7 +195,7 @@ Aim:
 
 - Browser code should be absolutely same, whether running against emulator or cloud deployment
 
-Means this block (in `init.dev-vite.js`) should become void:
+Means this block (in `init.vite.js`) should become void:
 
 ```
   const LOCAL = import.meta.env.MODE == "dev_local";

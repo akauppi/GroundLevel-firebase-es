@@ -3,7 +3,7 @@
 *
 * The entry point for production mode.
 *
-* See comments in [init.dev-vite.js](init.dev-vite.js).
+* See comments in 'src/init.vite.js'.
 */
 
 // DOES NOT WORK but is according to npm firebase instructions:

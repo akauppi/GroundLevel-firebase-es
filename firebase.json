@@ -24,7 +24,19 @@
         "Directing to a non-existing page causes the response to become 404 (this is undocumented behavior; an alternative",
         "could be excluding some suffixes from SPA route, but 'glob' syntax doesn't sport a NOT operator, does it? #help"
       ]
-    }
+    },
+    "headers": [
+      {
+        "//": "Firebase (7.15.5) provides wrong default MIME type for '.js' (application/json)",
+        "source": "**/*.js",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/javascript"
+          }
+        ]
+      }
+    ]
   },
   "firestore": {
     "rules": "back-end/firestore.rules",

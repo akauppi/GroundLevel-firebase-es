@@ -4,8 +4,8 @@
 - The frame of the application - same for all pages
 -->
 <template>
-  <fatal />
   <header>
+    <fatal />
     <app-logo />
     <div id="emul" v-if="localMode">
       EMULATION MODE

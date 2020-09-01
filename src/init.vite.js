@@ -1,5 +1,5 @@
 /*
-* src/init.dev-vite.js
+* src/init.vite.js
 *
 * The entry point for development mode.
 *
@@ -9,9 +9,8 @@
 */
 //import * as firebase from 'firebase/app'    // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
 import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
-
 import 'firebase/auth'
-import 'firebase/firestore'   // for local mode
+import 'firebase/firestore'
 import 'firebase/functions'
 
 /*
@@ -37,6 +36,16 @@ window.assert = assert;
 const LOCAL = import.meta.env.MODE === "dev_local";
 window.LOCAL = LOCAL;    // inform the UI
 
+// ES note: Seems 'import.meta.env' must be read at the root.
+const _MODE = import.meta.env.MODE;
+
+// import.meta.env.MODE:
+//    - "dev_local": dev:local
+//    - "development": dev:online
+//    - ("production": npx vite build) ???
+//
+console.debug("import.meta.env.MODE:", import.meta.env.MODE);   // chokes 'vite build'
+
 // Vite does not support top level await (1.0.0.-rc.4) so we need this.
 //
 async function initFirebase() {   // () => Promise of ()
@@ -47,15 +56,19 @@ async function initFirebase() {   // () => Promise of ()
   if (LOCAL) {
     console.info("Initializing for LOCAL EMULATION");
 
+    // Settings to an existing cloud project, used by 'dev:local'
+    //
+    const justAuthOptions = {
+      apiKey: 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
+      projectId: 'app',     // <-- must match that in 'package.json'
+      authDomain: 'vue-rollup-example.firebaseapp.com'
+    };
+
     // Minimum fields, needed for auth. Using a known-to-exist project.
     //
     // Note: project id needs to match that in 'package.json' (carrying it past Vite from 'GCLOUD_PROJECT' was difficult)
     //
-    firebase.initializeApp({
-      apiKey: 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
-      projectId: 'app',     // <-- must match that in 'package.json'
-      authDomain: 'vue-rollup-example.firebaseapp.com'
-    });
+    firebase.initializeApp(justAuthOptions);
 
     // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
     //
@@ -78,8 +91,8 @@ async function initFirebase() {   // () => Promise of ()
       host: FIRESTORE_HOST,
       ssl: false
     });
-  } else {
-    const mod = await import('../__.js');   // dynamic, only for 'dev:online'
+  } else if (_MODE === "development") {    // dev:online
+    const mod = await import('../__.js');   // not needed for 'dev:local'
     const {apiKey, authDomain, projectId} = mod.__;
 
     firebase.initializeApp({
@@ -88,6 +101,12 @@ async function initFirebase() {   // () => Promise of ()
       //locationId,   // is it needed?
       authDomain
     });
+  } else {      // 'npx vite build'
+    assert(_MODE === "production");
+
+    throw new Error("not implemented.");
+
+    // Load '/__/firebase/init.json' and use it for initialization
   }
 }
 

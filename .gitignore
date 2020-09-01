@@ -1,6 +1,7 @@
 node_modules/
 
-#/public/dist/
+# Rollup build target
+/public/dist/
 
 /dist.vite/
 /.lock

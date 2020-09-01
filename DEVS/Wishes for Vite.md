@@ -13,15 +13,17 @@ The reason this is a problem for us is that there are *two* configurations for d
 
 I'd also like to be driving them simultaneously (so modifying files is not getting votes)....
 
----
-
-Could try module aliasing.
-
 **Sample case**
 
 Provide the value of `GCLOUD_PROJECT` to the browser environment. 
 
-This is set by `firebase emulator:exec` and we'd just want to carry it over. Current `.env` file system doesn't seem to bend to this.
+This is set by `firebase emulator:exec` and we'd just want to carry it over. Current `.env` system doesn't seem to bend to this.
+
+```
+vite --env VITE_PROJECT=${GCLOUD_PROJECT}
+```
+
+This could set the `import.meta.env.VITE_PROJECT` value, within the browser. Would be SO happy! 🌞
 
 
 ## Configurable path to `index.html`
@@ -42,12 +44,22 @@ This is where it should be, if `index.html` is seen as an immutable asset. For V
 - In dev mode, Vite modifies it in-flight, making the scripts magic just work (this is great!)
 - In production mode, Vite heavily modifies the file, bundling the scripts within it. This may be necessary with Vite's current (Jul '20) production strategy, but also a more immutable approach to index.html could be done.
 
-See how we generate an `public/index.prod.html` and don't need its scripts to be massaged.
+See how we generate a `public/index.prod.html` and don't need its internal scripts to be massaged.
 
 *Continuation...*
 
 Now doing production build using ES modules, and Rollup. It is not true that this leads to long loading times.
 
-<-- tbd. make a table of Vite production build vs. Rollup/ES6 load times. One day... -->
+||Rollup|Vite 1.0.0-rc.4|
+|---|---|---|
+|load time (local hosting)|270 ms|<font color=red>xxx</font>|
+|load time (web)|<font color=red>xxx</font>|<font color=red>xxx</font>|
+|file size (`du -hk`)|4292 kB||
+
+<font color=red>Unable to get the Vite numbers, because `npx vite build` fails.</font>
+
+>Time measured on page refresh, to the start of authentication flow.
+
+<!-- tbd. numbers above -->
 
 Since `index.html` now has become a read-only file for us, I'd still like to place it away from the root... Any ideas??

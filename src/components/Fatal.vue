@@ -14,7 +14,7 @@
 
 <style scoped>
   div {
-    position: absolute;
+    position: fixed;
   }
 
   .fade-enter,
