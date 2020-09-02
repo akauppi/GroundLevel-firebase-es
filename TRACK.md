@@ -11,23 +11,6 @@ This is *highly* welcome to us!!! 🎉🎊🍬
 Track [https://github.com/vitejs/vite/issues/279](https://github.com/vitejs/vite/issues/279)
 
 
-## Support of Vue 3.0 from Chrome Vue development plugin
-
-It's not detecting the setup.
-
-<strike>Also the [beta channel](https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg) doesn't.</strike> Dev tools 6.0 is now in beta. Does not show up with 3.0.0-rc2.
-
-- [issues](https://github.com/vuejs/vue-devtools/issues)
-
-There's a new [vue 3/ vue next](https://github.com/vuejs/vue-devtools/issues/1199) issue that brings this up (May 20).
-
-
-<strike>
-## Bootstrap-Vue on Vue 3 (beta)
-
-[Vue 3 support](https://github.com/bootstrap-vue/bootstrap-vue/issues/5196)</strike>
-
-
 ## Import maps (in browser)
 
 https://wicg.github.io/import-maps/
@@ -109,7 +92,7 @@ We didn't, but until this is fixed we likely also cannot.
 - [ ] keep an eye on. Having `package-lock.json` there is okay.
 
 
-## Jest: native ES6 support
+## Jest: native ES module support
 
 - In StackOverflow: [https://stackoverflow.com/questions/60372790/node-v13-jest-es6-native-support-for-modules-without-babel-or-esm](https://stackoverflow.com/questions/60372790/node-v13-jest-es6-native-support-for-modules-without-babel-or-esm)
 
@@ -136,4 +119,34 @@ Track:
 
 - [ ] Find an issue to track this
 
+
+## `vite build` crashes on us!!!
+
+```
+$ npx vite build
+vite v1.0.0-rc.4
+⠋ Building for production...
+[vite] Build errored out.
+Error: [vite]: Rollup failed to resolve import "%7B%7B%20m.photoURL%20%7D%7D" from "src/pages/Project/index.vue?vue&type=template&id=81f22f30&scoped=true".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`rollupInputOptions.external`
+    at Object.onwarn (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/vite/dist/node/build/index.js:70:19)
+    at Object.onwarn (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:19374:20)
+    at ModuleLoader.handleResolveId (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18249:26)
+    at /Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18239:22
+    at async Promise.all (index 1)
+    at async ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18237:34)
+    at async Promise.all (index 0)
+    at async ModuleLoader.fetchModule (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18214:9)
+    at async Promise.all (index 1)
+    at async ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18237:34) {
+  watchFiles: [
+    '/Users/asko/Git/GroundLevel-es6-firebase-web/index.html',
+    '/Users/asko/Git/GroundLevel-es6-firebase-web/src/init.vite.js',
+    '/Users/asko/Git/GroundLevel-es6-firebase-web/__.js',
+...
+```
+
+Reporting this at []().
 

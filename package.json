@@ -1,6 +1,6 @@
 {
   "name": "groundlevel-es6-firebase",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/akauppi/groundlevel-es6-firebase-web.git"
@@ -50,6 +50,7 @@
     "_prod_rollup_clean": "(rm public/dist/* 2> /dev/null || true)",
     "---       ": "",
     "//prod:vite:build": "vite build",
+    "//prod:vite:serve": "npm run //prod:vite:build && npx http-server dist",
     "---        ": "",
     "prod:deploy:hosting": "firebase deploy --only hosting",
     "prod:deploy:fns": "firebase deploy --only functions",

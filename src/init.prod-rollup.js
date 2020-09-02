@@ -41,13 +41,12 @@ assert(firebase.initializeApp);
 window.firebase = firebase;
 window.assert = assert;
 
-function init({ apiKey, projectId, locationId, authDomain }) {    // called by 'index.html'
-  assert(apiKey && projectId && locationId);
+function init({ apiKey, projectId, authDomain }) {    // called by 'index.html'
+  assert(apiKey && projectId && authDomain, "Missing Firebase pieces");
 
   firebase.initializeApp({
     apiKey,
     projectId,
-    locationId,
     authDomain
   });
 

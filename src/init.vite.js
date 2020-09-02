@@ -44,7 +44,7 @@ const _MODE = import.meta.env.MODE;
 //    - "development": dev:online
 //    - ("production": npx vite build) ???
 //
-console.debug("import.meta.env.MODE:", import.meta.env.MODE);   // chokes 'vite build'
+//console.debug("import.meta.env.MODE:", import.meta.env.MODE);   // chokes 'vite build'
 
 // Vite does not support top level await (1.0.0.-rc.4) so we need this.
 //
@@ -92,21 +92,30 @@ async function initFirebase() {   // () => Promise of ()
       ssl: false
     });
   } else if (_MODE === "development") {    // dev:online
+    console.info("Initializing for cloud back-end; watched local front-end.");
+
     const mod = await import('../__.js');   // not needed for 'dev:local'
     const {apiKey, authDomain, projectId} = mod.__;
 
     firebase.initializeApp({
       apiKey,
       projectId,
-      //locationId,   // is it needed?
       authDomain
     });
-  } else {      // 'npx vite build'
+  } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
+    console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
+
     assert(_MODE === "production");
 
-    throw new Error("not implemented.");
+    // Hack '__' here (allows this to work with any hosting) 🤪
+    //
+    const json = {
+      "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
+      "projectId": 'vue-rollup-example',
+      "authDomain": 'vue-rollup-example.firebaseapp.com'
+    };
 
-    // Load '/__/firebase/init.json' and use it for initialization
+    firebase.initializeApp(json);
   }
 }
 

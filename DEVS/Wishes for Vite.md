@@ -50,16 +50,12 @@ See how we generate a `public/index.prod.html` and don't need its internal scrip
 
 Now doing production build using ES modules, and Rollup. It is not true that this leads to long loading times.
 
-||Rollup|Vite 1.0.0-rc.4|
-|---|---|---|
-|load time (local hosting)|270 ms|<font color=red>xxx</font>|
-|load time (web)|<font color=red>xxx</font>|<font color=red>xxx</font>|
-|file size (`du -hk`)|4292 kB||
-
-<font color=red>Unable to get the Vite numbers, because `npx vite build` fails.</font>
+||Rollup|Vite 1.0.0-rc.4|comments|
+|---|---|---|---|
+|load time (local hosting)|270 ms|160 ms|not sure about variation|
+|load time (web)|160, 275 ms|245, 295, 555 ms|
+|file size (`du -hk`)|4292 kB|4904 kB|
 
 >Time measured on page refresh, to the start of authentication flow.
-
-<!-- tbd. numbers above -->
 
 Since `index.html` now has become a read-only file for us, I'd still like to place it away from the root... Any ideas??

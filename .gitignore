@@ -3,7 +3,10 @@ node_modules/
 # Rollup build target
 /public/dist/
 
-/dist.vite/
+# 'vite build'
+/dist/
+
+# firebase-jest-testing
 /.lock
 
 # Created by 'npm run build'

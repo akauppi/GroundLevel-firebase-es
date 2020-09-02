@@ -1,5 +1,9 @@
 # Changelog
 
+## 1-Sep-20
+
+- Deployment all the way to cloud - with both Rollup and Vite - works. 🌞🌞
+
 ## 31-Aug-20
 
 - `npm run dev:local` does not need even creation of a Firebase project, any more (good!) 🌞 

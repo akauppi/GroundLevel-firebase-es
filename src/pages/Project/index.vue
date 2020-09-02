@@ -15,7 +15,9 @@
     <ul v-if="membersReady">
       <li v-for="(m,uid) in members" :key="uid">
         {{ m.name }} {{ m.isAuthor ? "is author" : "" }}
+        <!-- breaks 'vite build'
         <img src="{{ m.photoURL }}"/>
+        -->
       </li>
     </ul>
 

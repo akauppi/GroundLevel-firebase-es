@@ -1,7 +1,6 @@
 {
   "hosting": {
     "public": "public",
-    "//public": "dist.vite",
     "ignore": [],
     "rewrites": [
       {
