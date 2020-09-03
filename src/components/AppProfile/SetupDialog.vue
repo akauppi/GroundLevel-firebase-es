@@ -139,7 +139,7 @@
 
     return {
       closeEl,
-      version: window.version,    // provided by production build; undefined for dev
+      version: window.VERSION,    // provided by production build; undefined for dev
       closeMe: () => emit('closeMe'),
       signOut
     }
