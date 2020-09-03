@@ -33,6 +33,8 @@
       </datalist>
     </div>
     <hr />
+    <!-- tbd. layout sucks -->
+    <label>Version:</label><span>{{ version || "(not available)" }}</span>
     <button class="signOut" @click.stop="signOut">Sign out</button>
   </div>
 </template>
@@ -96,7 +98,7 @@
 </style>
 
 <script>
-  //assert(firebase);
+  assert(firebase);
   import { ref, onMounted, onUnmounted } from 'vue'
 
   import { routerProm } from '../../router.js'
@@ -137,6 +139,7 @@
 
     return {
       closeEl,
+      version: window.version,    // provided by production build; undefined for dev
       closeMe: () => emit('closeMe'),
       signOut
     }

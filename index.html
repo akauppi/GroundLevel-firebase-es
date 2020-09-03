@@ -34,38 +34,8 @@
 
     <!--PROD
     <script type="module">
-      import { init } from './dist/main.#.js'
-
-      // On Firebase hosting, we can get the configuration from the server:
-      //
-      // <<
-      //    if (typeof firebase === 'undefined') throw new Error('hosting/init-error: Firebase SDK not detected. You must include it before /__/firebase/init.js');
-      //    var firebaseConfig = {
-      //      "projectId": "vue-rollup-example",
-      //      "appId": ...,
-      //      ...
-      //
-      //    };
-      //    if (firebaseConfig) {
-      //      firebase.initializeApp(firebaseConfig);
-      //    }
-      // <<
-      //
-      // The values are NOT secrets. You can safely place a config right here, as on object (faster loading). For
-      // ease of code sharing, we prefer fetching it.
-      //
-      (async _ => {
-        const resp = await fetch('/__/firebase/init.json');
-
-        if (!resp.ok) {
-          console.fatal("Unable to read Firebase config:", resp);
-          throw Error("Unable to read Firebase config (see console)");
-        }
-
-        const o = await resp.json();
-        console.debug("Firebase config:", o);
-        init(o);
-      })();
+      window.VERSION = '${VERSION}';
+      import './dist/main.#.js'
     </script>
     -->
     <!--DEV -->

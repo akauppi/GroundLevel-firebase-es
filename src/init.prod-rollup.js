@@ -16,6 +16,7 @@ import firebase from 'firebase/app';    // works (but does not allow firebaseui 
 import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/functions';
+import "firebase/performance";
 
 /*
 * Set up globals
@@ -41,32 +42,36 @@ assert(firebase.initializeApp);
 window.firebase = firebase;
 window.assert = assert;
 
-function init({ apiKey, projectId, authDomain }) {    // called by 'index.html'
-  assert(apiKey && projectId && authDomain, "Missing Firebase pieces");
+async function init() {    // called by 'index.html'
+
+  const resp = await fetch('/__/firebase/init.json');
+  if (!resp.ok) {
+    console.fatal("Unable to read Firebase config:", resp);
+    throw Error("Unable to read Firebase config (see console)");
+  }
+
+  // 'appId' is needed for Firebase Performance Monitoring
+  //
+  const { apiKey, appId, projectId, authDomain } = await resp.json();
 
   firebase.initializeApp({
     apiKey,
+    appId,
     projectId,
     authDomain
   });
 
-  // Check Firebase health
-  // Note: This needs to be done here, not in 'main.js'. In there, the components will import Firebase before the
-  //    main code.
-  //
-  try {
-    const app = firebase.app();
-    const features = ['auth','firestore','functions'].filter(feature => typeof app[feature] === 'function');
-    console.log(`Firebase SDK loaded with: ${features.join(', ')}`);
-  } catch (e) {
-    // tbd. we might have some error banner UI, later
-    console.error(e);
-    alert('Error loading the Firebase SDK, check the console.');
-  }
+  // Initialize Performance Monitoring
+  const perf = firebase.performance();
 
   // Dynamic import so that above gets first lick of Firebase. 🍭
   //
   import('./app.js');
 }
 
-export { init };
+// Note: When we can use top level 'await' in browsers, let's do it here. For now, it's a free-running tail. 🐕
+//    track -> https://github.com/Fyrd/caniuse/issues/4978
+//
+/*await*/ init();
+
+export { };

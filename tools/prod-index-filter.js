@@ -1,12 +1,7 @@
 /*
-* tools/prod-index-update.js
+* tools/prod-index-filter.js
 *
-* Create 'public/index.prod.html', based on 'index.html' and a set of bundles created / to be created by Rollup.
-*
-* Usage:
-*   <<
-*     ...
-*   <<
+* Provide a production version of 'index.html', based on comments within it.
 *
 * Index syntax:
 *   - leave everything, except:
@@ -21,11 +16,12 @@
 *
 *     ${PRELOADS}       // gets replaced by a modulepreloading code for the chunks produced by Rollup
 *
+*     ${VERSION}        // gets replaced by the 'version' from 'package.json'
+*
 *     <script ... src=".../mod.#..."         // '#' gets replaced by the hash for 'mod'
 */
-
-import fs from 'fs';
-import path from 'path';
+import { strict as assert } from 'assert'
+import fs from "fs"
 
 /*
 * Create a block of:
@@ -41,9 +37,10 @@ function preloadsArr(modFiles) {   // array of "dist/{mod}[-.]{hash}.js" -> arra
 }
 
 /*
-*
 */
-function productize(contents, hashes) {    // (String, Map<String,String>) -> String    // may throw
+function productize(contents, hashes, { version }) {    // (String, Map<String,String>, { version: String }) -> String    // may throw
+  assert(version, "No '.version'");
+
   const errors = new Array();
 
   const modFiles = Array.from( hashes.entries() ).map( ([key,value]) => `dist/${key}${key !== "main" ? '-':'.'}${value}.js` );
@@ -67,12 +64,18 @@ function productize(contents, hashes) {    // (String, Map<String,String>) -> St
   const s3a = s2.replace(/^\s*<!--PROD\s*\n([\s\S]+?)^\s*-->\s*\n/gm, "\n$1\n");
   const s3 = s3a.replace(/^(\s*)<!--PROD +(.*?)\s*\n([\s\S]+?)^\s*-->\s*\n/gm, "$1<!-- $2 -->\n$3\n" );
 
+  // tbd. #rework: For the rest, might be better to go through them line by line, since they don't span multiple lines. (simpler regex)
+
   // '${PRELOADS}'
   //
   // Note: A bit difficult playing with the white space and regex. '\s' matches also newlines. Is there a way to
   //      "match white space but not newlines" other than '[ \t]'?
   //
-  const s4 = s3.replace(/^([ \t]*)\$\{PRELOADS\}[ \t]*$/gm, (_,c1) => preloads.map(x => c1+x).join('\n') );
+  const s4 = s3.replace(/^([ \t]*)\${PRELOADS}[ \t]*$/gm, (_,c1) => preloads.map(x => c1+x).join('\n') );
+
+  // '${VERSION}'
+  //
+  const s5 = s4.replace(/\${VERSION}/gm, version );
 
   // Hashes
   //
@@ -85,7 +88,7 @@ function productize(contents, hashes) {    // (String, Map<String,String>) -> St
   //
   // Note: For some reason, Rollup uses '.' for main but '-' for others. We only need to support 'main.#.js'.
   //
-  const s5 = s4.replace(/'[^']+\/([\w\d]+)[.-]#\.js'/gm,
+  const s6 = s5.replace(/'[^']+\/([\w\d]+)[.-]#\.js'/gm,
     (match,c1) => {   // e.g. match="'/main.#.js'", c1="main"
       const hash = hashes.get(c1)
       if (!hash) throw new Error( "No hash for: "+c1 );
@@ -94,8 +97,48 @@ function productize(contents, hashes) {    // (String, Map<String,String>) -> St
     }
   );
 
-  return errors.length == 0 ? s5
-    : new Error( `ERROR(s) in filtering: ${errors.join()}` );
+  return errors.length == 0 ? s6
+    : new Error( `ERROR(s) in generation of production 'index': ${errors.join()}` );
 }
 
-export { productize }
+/*
+* Rollup plugin to get the chunks and their hashes (as by the 'manualChunks' policy), pass it on to a tool script
+* that creates production index.html from the 'index.html' template.
+*
+* Based on 'modulepreloadPlugin' by Philip Walton
+*   -> https://github.com/philipwalton/rollup-native-modules-boilerplate/blob/master/rollup.config.js#L63-L84
+*/
+const prodIndexPlugin = ({ template, out, map }) => {    // ({ template: String (filename), out: String (filename), map { version: str } }) => { ...Rollup plugin object... }
+  return {
+    name: 'prodIndex',
+    generateBundle(options, bundle) {
+      const files = new Set();   // Set of e.g. 'main.e40530d8.js', ...
+
+      // Loop through all the chunks
+      for (const [fileName, chunkInfo] of Object.entries(bundle)) {
+        if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
+          //console.debug(`Chunk imports of ${fileName}:`, chunkInfo.imports);   // dependent modules
+
+          [fileName, ...chunkInfo.imports]    // others than 'main' only show up in the imports
+            .forEach( x => files.add(x) );
+        }
+      }
+
+      const hashes = new Map();
+      files.forEach( x => {
+        const [_,c1,c2] = x.match(/^(.+)[.-](.+)\.js$/);
+        hashes.set(c1,c2);
+      });
+
+      console.debug( "Working with module hashes:", hashes );
+
+      const templateText = fs.readFileSync(template, 'utf8');
+      const prodText = productize(templateText, hashes, map);
+
+      // Note: Not using Rollup's 'this.emitFile' since there's no need (Q: what would be the use case for it?).
+      fs.writeFileSync(out, prodText);
+    },
+  };
+};
+
+export { prodIndexPlugin }

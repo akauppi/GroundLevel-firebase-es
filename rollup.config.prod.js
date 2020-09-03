@@ -19,7 +19,6 @@ import replace from '@rollup/plugin-replace'
 import vue from 'rollup-plugin-vue'
 
 import path from 'path'
-import fs from 'fs'
 
 // Antidote to these:
 //  <<
@@ -33,50 +32,13 @@ import scss from 'rollup-plugin-scss'      // handles '.css' and '.scss'
 const scssHackNeeded = true;    // still needed with: vue 3.0.0-rc.9, rollup-plugin-vue 6.0.0-beta.10
 
 const publicDir = 'public';
-const indexDevFile = 'index.html';
-const indexProdFile = 'public/index.prod.html';
+const indexDev = 'index.html';
+const indexProd = 'public/index.prod.html';
 
-import { productize } from './tools/prod-index-filter'
+import { prodIndexPlugin } from './tools/prod-index-filter'
 
-/*
-* Rollup plugin to get the chunks and their hashes (as by the 'manualChunks' policy), pass it on to a tool script
-* that creates production index.html from the 'index.html' template.
-*
-* Based on 'modulepreloadPlugin' by Philip Walton
-*   -> https://github.com/philipwalton/rollup-native-modules-boilerplate/blob/master/rollup.config.js#L63-L84
-*/
-const prodIndexPlugin = () => {
-  return {
-    name: 'prodIndex',
-    generateBundle(options, bundle) {
-      const files = new Set();   // Set of e.g. 'main.e40530d8.js', ...
-
-      // Loop through all the chunks
-      for (const [fileName, chunkInfo] of Object.entries(bundle)) {
-        if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
-          //console.debug(`Chunk imports of ${fileName}:`, chunkInfo.imports);   // dependent modules
-
-          [fileName, ...chunkInfo.imports]    // others than 'main' only show up in the imports
-            .forEach( x => files.add(x) );
-        }
-      }
-
-      const hashes = new Map();
-      files.forEach( x => {
-        const [_,c1,c2] = x.match(/^(.+)[.-](.+)\.js$/);
-        hashes.set(c1,c2);
-      });
-
-      console.debug( "Working with module hashes:", hashes );
-
-      const indexDev = fs.readFileSync(indexDevFile, 'utf8');
-      const indexProd = productize(indexDev, hashes);
-
-      // Note: Not using Rollup's 'this.emitFile' since there's no need (Q: what would be the use case for it?).
-      fs.writeFileSync(indexProdFile, indexProd);
-    },
-  };
-};
+//import { version } from './package.json'
+const { version } = require('./package.json');    // this works, 'import' didn't
 
 /*
 * Note: The order of the plugins does sometimes matter.
@@ -112,7 +74,7 @@ const plugins = [
   // enable for minified output (~600 vs. ~2090 kB)
   //terser(),
 
-  prodIndexPlugin()
+  prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } })
 ];
 
 export default {

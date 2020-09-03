@@ -541,6 +541,18 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 
 
+## Other folders
+
+We've stashed some things aside from this `README`:
+
+- [DEVS](DEVS/) contains various notes for developers. These are not necessarily project specific - more like findings that you're good to be aware of. Check them out if you plan to contribute to the project. This is a wholly documentation-only folder so you can also just remove it, from your own project.
+- [ops](ops/): Once you've deployed your application, this is where the Fun Starts! The `ops` folder contains everything operational:
+   - [analytics](ops/README.md#Analytics)
+   - metrics (tbd.)
+   - logging (tbd.)
+   - A/B testing (tbd.)
+
+
 ## References
 
 - [Handling 3rd-party JavaScript with Rollup](https://engineering.mixmax.com/blog/rollup-externals/) (blog, Dec 2017)
