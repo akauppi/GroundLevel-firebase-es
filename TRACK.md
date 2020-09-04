@@ -150,3 +150,7 @@ If you do want to externalize this module explicitly add it to
 
 Reporting this at []().
 
+## Firebase Crashlytics -> Web
+
+- [https://github.com/firebase/firebase-js-sdk/issues/710](https://github.com/firebase/firebase-js-sdk/issues/710)
+
