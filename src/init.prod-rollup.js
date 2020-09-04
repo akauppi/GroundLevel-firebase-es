@@ -66,7 +66,13 @@ async function init() {    // called by 'index.html'
 
   // Dynamic import so that above gets first lick of Firebase. 🍭
   //
-  import('./app.js');
+  const tailProm = import('./app.js');   // free-running tail
+
+  //...while 'import' is running, let's do other stuff.
+  //
+  const trace = perf.trace('test_trace');
+
+  trace.putAttribute("version", VERSION);
 }
 
 // Note: When we can use top level 'await' in browsers, let's do it here. For now, it's a free-running tail. 🐕

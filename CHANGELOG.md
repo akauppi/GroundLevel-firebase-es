@@ -1,5 +1,9 @@
 # Changelog
 
+## latest
+
+- Enabled minification for both Vite and Rollup; updated size comparisons
+
 ## 1-Sep-20
 
 - Deployment all the way to cloud - with both Rollup and Vite - works. 🌞🌞

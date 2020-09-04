@@ -19,21 +19,51 @@ The reason this is not default is just avoiding any complexity. The template aim
 Which is more customary, in Firestore?
 
 
-## Can we import Firebase from `@firebase/app`, directly?
+### Can I tell Firebase Performance the version of my app?
 
-The official [npm page](https://www.npmjs.com/package/firebase) shows this use pattern (for ES modules):
+I know a `version` string. Would like to use it as a filter in Performance metrics, like country, browser are being used.
+
+[Here](https://firebase.google.com/docs/perf-mon/custom_traces-metrics?platform=web#attributes-and-metrics) is mentioned:
+
+>applicable metadata like app version (that is collected)
+
+Where does Firebase get that version?
+
+Seems like the "version" applies to iOS and Android: 
+
+
+**Suggestion:**
+
+Allow providing a web application's version as:
 
 ```
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+const perf = firebase.performance("0.0.1-abc");
 ```
 
-However, the `firebase` imports internally import from `@firebase`. This would work also for us, but we are not doing it since it’s not according to documentation.
+or in:
 
-Q: Is Firebase moving to that direction (@firebase), or is the current vaneer going to remain?
+```
+firebase.initializeApp({
+  ...
+  version: "0.0.1-abc"
+});
+```
 
-This is not a problem. `npm run build` outputs two different bundles, because of the two namespaces, but we solve this in chunk merging.
+### What does Firebase offer for centralized web app client logging?
+
+I want to be able to statistically see, how many of my users are getting to a certain code paths, in their client (e.g. warnings, errors). Want such logging to be "offline" friendly, i.e. cached.
+
+A big point in this becomes also the possibilty to filter and analyze the logs, later.
+
+There doesn't seem to be a solution to this, within Firebase. What do you use? Am I looking at this wrongly? 
+
+"Firebase logs" are for server-side functions only.
+
+Alternatives:
+
+- write to Cloud Firestore debugging collection
+- Datadog etc.
+
 
 
 ## Does Vue.js 3 have a corresponding thing to `renderError`?

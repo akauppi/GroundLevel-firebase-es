@@ -4,12 +4,10 @@
 * Create central logs. Used for being able to detect what's going on - and sometimes for debugging cases where
 * the page refreshes (e.g. authentication flow).
 *
-* Reference:
-*   - Write and view logs (Firebase functions docs)
-*     -> https://firebase.google.com/docs/functions/writing-and-viewing-logs
+* NOTE!!!
+* - Firebase logs are for server-side functions, not for the browser client.
 */
 import {fns} from './fns'
-
 const log = fns.httpsCallable('logs_v190720');
 
   //

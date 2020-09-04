@@ -10,6 +10,13 @@
     <link type="text/css" rel="stylesheet" href="dist/bundle.css" />
     -->
 
+    <!--PROD Enable 'first-input-delay' performance metrics; see -> https://firebase.google.com/docs/perf-mon/auto_duration-traces-metrics_web#input-delay
+    <script>
+      //${INCLUDE node_modules/first-input-delay/dist/first-input-delay.min.js}
+      !function(n,e){var t,o,i,c=[],f={passive:!0,capture:!0},r=new Date,a="pointerup",u="pointercancel";function p(n,c){t||(t=c,o=n,i=new Date,w(e),s())}function s(){o>=0&&o<i-r&&(c.forEach(function(n){n(o,t)}),c=[])}function l(t){if(t.cancelable){var o=(t.timeStamp>1e12?new Date:performance.now())-t.timeStamp;"pointerdown"==t.type?function(t,o){function i(){p(t,o),r()}function c(){r()}function r(){e(a,i,f),e(u,c,f)}n(a,i,f),n(u,c,f)}(o,t):p(o,t)}}function w(n){["click","mousedown","keydown","touchstart","pointerdown"].forEach(function(e){n(e,l,f)})}w(n),self.perfMetrics=self.perfMetrics||{},self.perfMetrics.onFirstInputDelay=function(n){c.push(n),s()}}(addEventListener,removeEventListener);
+    </script>
+    -->
+
     <!--DEV,PROD -->
     <!--
     - See [#18](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/18), why this is needed.
@@ -24,8 +31,8 @@
     -     needed (we don't use/need all authentication flows) as a Vue-specific component. This a) does not seem to
     -     be as great quality as other tools we use and b) we're not getting it from npm.
     -->
-    <script defer src="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.1/firebase-ui-auth.css" />
+    <script defer src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
     <!-- -->
 
     <!--PROD

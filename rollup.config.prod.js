@@ -15,7 +15,7 @@
 //import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
-//import { terser } from 'rollup-plugin-terser'
+import { terser } from 'rollup-plugin-terser'
 import vue from 'rollup-plugin-vue'
 
 import path from 'path'
@@ -71,8 +71,10 @@ const plugins = [
     output: publicDir +'/dist/bundle.css'
   }),
 
-  // enable for minified output (~600 vs. ~2090 kB)
-  //terser(),
+  // enable for minified output (~600 vs. ~1432 kB)
+  // as by: du -hk -I "*.map" public/dist/
+  //
+  terser(),
 
   prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } })
 ];

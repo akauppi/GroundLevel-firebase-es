@@ -10,7 +10,7 @@ There is no single way to do these things, and you may choose to use tools other
 **What we want:**
 
 - performance monitoring of actual use
-- stats on end user hardware, resolution, physical screen sizes (desktop/tablet/phone?)
+- stats on end user hardware, resolution, physical screen sizes (desktop/tablet/phone?), browser type and version
 - client side logging ("custom events")
 - ability to work over offline gaps (i.e. caching)
 
@@ -28,29 +28,28 @@ Then, you should see this in the Firebase Console > Performance:
 
 **Now is a good time to read the manuals.** (link above) You really must read them carefully, to understand what to gain from the metrics.
 
-After 24h, you'll see this:
+After 24h, you'll see something like this:
+
+![](.images/perf-dashboard.png)
 
 <!--
-**tbd. continue here**
-
 **tbd. what is Performance Monitoring good for?**
 -->
 
+**Learning resources:**
 
+- [Faster web apps with Firebase](https://www.youtube.com/watch?v=DHbVyRLkX4c) (Youtube 23:29; Sep 2019)
 
-
-
-
-
-<!-- #Logging
+## Central logging
 
 **What we want:**
 
 - centralized, filterable dashboard for seeing logs
 - especially seeing warnings / errors, to help develop the source code
 - retention time: 1 week is likely enough
--->
+- offline friendliness; cache and send when the client can
 
+<font color=red>tbd. How to do this with Firebase??</font>
 
 
 <!--
