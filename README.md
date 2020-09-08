@@ -276,7 +276,18 @@ Then insert such a UID in `local/docs.js`, restart the server and you should hav
 
 ### `dev:online`
 
-With "online" development, you run against the Firebase back-end services of your active project. But first you have to create one.
+With "online" development, you run against the Firebase back-end services of your active project. There's also a third party monitoring service but we don't need to activate it, yet.
+
+Just do this:
+
+```
+$ cp .env.sample.js .env.js
+```
+
+The `.env.js` contains operational configuration. It doesn't have any account information for now; we'll get back to it later, during Ops discussion.
+
+Now, let's create a Firebase project for your app. 😀
+
 
 #### Setting up Firebase project
 

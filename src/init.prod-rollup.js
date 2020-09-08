@@ -5,7 +5,6 @@
 *
 * See comments in 'src/init.vite.js'.
 */
-import { Notifier } from '@airbrake/browser'
 
 // DOES NOT WORK but is according to npm firebase instructions:
 //  <<

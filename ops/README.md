@@ -40,22 +40,24 @@ Airbrake covers:
   - not available for browsers (Sep 2020); hopefully it will become so
 -->
 
-### Create an ops configuration file
+### Provide the ops id & key
 
-Create `public/prod.config.js` file that provides your Airbrake id and key. 
-
->Note: the project id/key are not secret. People having access to your client will be able to figure them out. You may commit them to version control to make it easy for your team to use the project.
+Edit `.env.js` or modify `src/config.js` directly, and provide your Airbrake project's id & key:
 
 ```
-export default {
-  // Airbrake
-  ops: {
-    projectId: '345678'
-    projectKey: '...'
-  }
+const ops = {
+  projectId: '345678'
+  projectKey: '...'
 }
+
+export { ops }
 ```
- 
+
+Note: You can have this file in version control - or remove it and place the values directly in `src/config.js`. It's not version controlled because the author of GroundLevel does not wish others to accidentially start logging to the same Airbrake project. This isn't a problem when you work on an app repo instead of a template.
+
+>Note: the project id/key are not secret. People having access to your client will be able to figure them out. 
+
+There's likely no way to prohibit others from logging with your id & key.
 
 
 ## Performance monitoring
@@ -111,20 +113,31 @@ After 24h, you'll see something like this:
 - retention time: 1 week is likely enough
 - ability to work over offline gaps (i.e. caching)
 
-Firebase *does not* provide this, as of Sep 2020. Recommendations on Firebase would be using Google Analytics, but we rather turn to a real product, geared at this.
+Firebase *does not provide this*, as of Sep 2020. Recommendations on Firebase would be using Google Analytics, but we rather turn to a real product, geared at this.
 
 [Airbrake.io](https://airbrake.io) has been selected for this - as you likely guessed. With your identification in the ops config file, logs from clients should get gathered in the Airbrake dashboard.
 
 **Usage:**
 
+Integrated in the code to:
 
+- catch `logs.[debug|info|warn|error|fatal]` calls
+- catch Vue errors/warnings
+
+Runs with `dev:online` feed the Airbrake project with `environment: "development"` whereas production feeds it with `environment: "production"`.
+
+Use the app with either.
+
+Open ...
 
 
 **Alternatives:**
 
 - [Datadog](https://www.datadoghq.com)
 - [LogRocket](https://logrocket.com)
-- (want to suggest others; if you have experience on them)
+- Google Analytics > [Log Events](https://firebase.google.com/docs/analytics/events) (Firebase docs)
+
+Please suggest others, but only if you have experience on them.
 
 
 ## Deployment tracking

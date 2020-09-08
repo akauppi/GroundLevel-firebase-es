@@ -154,3 +154,12 @@ Reporting this at []().
 
 - [https://github.com/firebase/firebase-js-sdk/issues/710](https://github.com/firebase/firebase-js-sdk/issues/710)
 
+
+## Airbrake: Performance Monitoring for browser
+
+Seems they are working on it. 
+
+[https://akauppi-gmail-com.airbrake.io/projects/294803/performance](https://akauppi-gmail-com.airbrake.io/projects/294803/performance) has a "Request Performance Monitoring for airbrake-js/browser" link (but clicking it did nothing...)
+
+- [ ] Once available, let's integrate to it!
+

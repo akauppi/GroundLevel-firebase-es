@@ -81,34 +81,32 @@ async function initFirebase() {   // () => Promise of ()
       ssl: false
     });
 
-  } else {
-    if (_MODE === "development") {    // dev:online
-      console.info("Initializing for cloud back-end; watched local front-end.");
+  } else if (_MODE === "development") {    // dev:online
+    console.info("Initializing for DEV:ONLINE (cloud back-end; local, watched front-end).");
 
-      const mod = await import('../__.js');   // not needed for 'dev:local'
-      const {apiKey, authDomain, projectId} = mod.__;
+    const mod = await import('../__.js');   // not needed for 'dev:local'
+    const {apiKey, authDomain, projectId} = mod.__;
 
-      firebase.initializeApp({
-        apiKey,
-        projectId,
-        authDomain
-      });
+    firebase.initializeApp({
+      apiKey,
+      projectId,
+      authDomain
+    });
 
-    } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
-      console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
+  } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
+    console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
 
-      assert(_MODE === "production");
+    assert(_MODE === "production");
 
-      // Hack '__' here (allows this to work with any hosting) 🤪
-      //
-      const json = {
-        "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
-        "projectId": 'vue-rollup-example',
-        "authDomain": 'vue-rollup-example.firebaseapp.com'
-      };
+    // Hack '__' here (allows this to work with any hosting) 🤪
+    //
+    const json = {
+      "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
+      "projectId": 'vue-rollup-example',
+      "authDomain": 'vue-rollup-example.firebaseapp.com'
+    };
 
-      firebase.initializeApp(json);
-    }
+    firebase.initializeApp(json);
   }
 }
 
@@ -122,9 +120,7 @@ async function initFirebase() {   // () => Promise of ()
     await import('./init/initLocal.js');    // sets up 'window.logs'
 
   } else {    // Initialize with cloud monitoring (Airbrake)
-    const mod = import('./init/initOps.js'); const { doneProm } = mod;
-
-    const proms = [initFirebase(), doneProm];
+    const proms = [initFirebase(), import('./init/initOps.js')];
     await Promise.all(proms);
   }
   assert(window.logs);

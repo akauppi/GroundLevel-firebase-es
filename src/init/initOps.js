@@ -5,7 +5,8 @@
 */
 assert(!LOCAL, "Cloud based monitoring tried with 'dev:local'. Not allowed." )
 
-import {Notifier} from "@airbrake/browser";
+import { Notifier } from "@airbrake/browser"    // works for Vite (not for Rollup 2.6.11)
+//import { Notifier } from "@airbrake/browser/dist/index"
 
 const mode = import.meta.env.MODE;
 assert( mode === 'production' || mode === 'development', `Unexpected MODE: ${mode}` );
@@ -32,14 +33,7 @@ if (! (projectId && projectKey)) {
   });
   window.airbrake = airbrake;
 
-  airbrake.onerror(message, filename, line, column, err) {   // (string, string?, string?, number?, Error?) => ()
-
-    // toast, maybe?
-    console.error("Airbrake error:", { message, filename, line, column, err });   // tbd. do we see these?
-  }
-
   logGen = level => (msg, opt) => {   // (string) => (string, object|undefined) => ()
-
     // Q: is there a way to provide severity for Airbrake textual messages?
 
     const s = `[${ level.toUpperCase() }] ` +

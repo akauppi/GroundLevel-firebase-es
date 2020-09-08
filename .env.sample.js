@@ -4,13 +4,13 @@
 //
 // The values are used for logging of 'dev:online' and production.
 //
-// NOTE: The values are *not* secret since they get exposed in the client. You can add the `.env.js` file
-//       to version control, or place the values directly to 'src/config.js'.
+// NOTE: The values are *not* secret since they get exposed in the client. You can add the file to version control,
+//      or provide the values directly in 'src/config.js'.
 //
 const ops = {
   // Airbrake
-  projectId: '...',
-  projectKey: '...'
+  //projectId: '123456',
+  //projectKey: '...'
 }
 
 export { ops }
