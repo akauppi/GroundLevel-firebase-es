@@ -3,6 +3,7 @@
 ## latest
 
 - Enabled minification for both Vite and Rollup; updated size comparisons
+- Separated Cloud Functions only needed in `dev:local` and testing; no longer deploying them
 
 ## 1-Sep-20
 

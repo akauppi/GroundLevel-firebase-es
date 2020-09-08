@@ -5,6 +5,7 @@
 *
 * See comments in 'src/init.vite.js'.
 */
+import { Notifier } from '@airbrake/browser'
 
 // DOES NOT WORK but is according to npm firebase instructions:
 //  <<
@@ -42,42 +43,42 @@ assert(firebase.initializeApp);
 window.firebase = firebase;
 window.assert = assert;
 
-async function init() {    // called by 'index.html'
+async function initFirebase() {
+  // Note: Don't think browsers can dynamically 'import' a JSON. This gives (Chrome 85):
+  //  <<
+  //    The server responded with a non-JavaScript MIME type of "application/json".
+  //  <<
+  //const json = await import('/__/firebase/init.json');    // NOPE
 
-  const resp = await fetch('/__/firebase/init.json');
-  if (!resp.ok) {
-    console.fatal("Unable to read Firebase config:", resp);
-    throw Error("Unable to read Firebase config (see console)");
-  }
+  const json = await fetch('/__/firebase/init.json').then( resp => {
+    if (!resp.ok) {
+      console.fatal("Unable to read Firebase config:", resp);
+      throw Error("Unable to read Firebase config (see console)");
+    } else {
+      return resp.json();   // Promise of ...
+    }
+  });
 
-  // 'appId' is needed for Firebase Performance Monitoring
-  //
-  const { apiKey, appId, projectId, authDomain } = await resp.json();
+  const { apiKey, appId, projectId, authDomain } = json;
 
   firebase.initializeApp({
     apiKey,
-    appId,
+    appId,      // for Firebase Performance Monitoring
     projectId,
     authDomain
   });
 
-  // Initialize Performance Monitoring
   const perf = firebase.performance();
-
-  // Dynamic import so that above gets first lick of Firebase. 🍭
-  //
-  const tailProm = import('./app.js');   // free-running tail
-
-  //...while 'import' is running, let's do other stuff.
-  //
-  const trace = perf.trace('test_trace');
-
-  trace.putAttribute("version", VERSION);
 }
 
-// Note: When we can use top level 'await' in browsers, let's do it here. For now, it's a free-running tail. 🐕
-//    track -> https://github.com/Fyrd/caniuse/issues/4978
-//
-/*await*/ init();
+(async () => {
+  // Ensure that 'app.js' has both ops and Firebase installed.
+  //
+  await Promise.all([initOps(), initFirebase()]);
+
+  // Dynamic import so that it happens only once the above are resolved.
+  //
+  import('./app.js');   // free-running tail
+})();
 
 export { };

@@ -624,6 +624,16 @@ Output from current `npm run dev` launch:
 
 This is mostly just to "feel safe", I guess.
 
+## Firebase Performance Monitoring: the concept of version
+
+Firebase Performance Monitoring has the concepts of version and build for mobile (iOS, Android) apps, but not for web apps (Sep 2020).
+
+Isn't that a useful concept even when versions presumably update faster? I'd like to be able to tell Firebase the version and build (for production), preferably in `initializeApp` itself.
+
+Firebase Performance Monitoring could then provide parity with the mobile versions. #pun
+
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

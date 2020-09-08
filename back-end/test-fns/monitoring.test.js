@@ -23,6 +23,7 @@ describe("monitoring functions", () => {
     // Cannot test what emerged in the logs - do that manually.
   });
 
+  /*** DISCHARGED
   //--- Fatal reporting ---
 
   test('should be able to report a fatal (unexpected code path) condition', async () => {
@@ -31,4 +32,5 @@ describe("monitoring functions", () => {
 
     // Again, check manually the outcome
   });
+  ***/
 });

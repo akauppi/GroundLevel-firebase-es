@@ -44,8 +44,10 @@
     "_dev_local_2": "node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
     "dev:online": "tools/hasActiveProject.sh && vite --port 3001",
     "---      ": "",
-    "prod:rollup:build": "rollup -c rollup.config.prod.js",
-    "prod:rollup:serve": "firebase serve --only hosting --port 3010",
+    "prod:build": "npm run _prod_rollup_build",
+    "prod:serve": "npm run _prod_rollup_serve",
+    "_prod_rollup_build": "rollup -c rollup.config.prod.js",
+    "_prod_rollup_serve": "firebase serve --only hosting --port 3010",
     "_prod_rollup_clean": "(rm public/dist/* 2> /dev/null || true)",
     "---       ": "",
     "//prod:vite:build": "vite build",
@@ -56,14 +58,15 @@
     "prod:deploy:rules": "firebase deploy --only firestore",
     "prod:deploy:all": "firebase deploy",
     "---         ": "",
-    "preprod:rollup:build": "npm run _prod_rollup_clean",
-    "preprod:rollup:serve": "npm run prod:rollup:build"
+    "pre_prod_rollup_build": "npm run _prod_rollup_clean",
+    "pre_prod_rollup_serve": "npm run _prod_rollup_build"
   },
   "//scripts": {
     "//dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
     "//_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local"
   },
   "dependencies": {
+    "@airbrake/browser": "^1.4.1",
     "firebase": "^7.19.1",
     "vue": "^3.0.0-rc.10",
     "vue-router": "^4.0.0-beta.9"
@@ -84,7 +87,7 @@
     "jest-circus": "^26.4.2",
     "rollup": "^2.26.10",
     "rollup-plugin-scss": "^2.6.0",
-    "rollup-plugin-terser": "^7.0.1",
+    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-vue": "^6.0.0-beta.10",
     "sass": "^1.26.10",
     "vite": "1.0.0-rc.4",

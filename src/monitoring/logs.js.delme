@@ -1,0 +1,68 @@
+/*
+* src/monitoring/logs.js
+*
+* Log to:
+*   - local server on 'dev:local'
+*   - ops system (e.g. Airbrake) on 'dev:online' and production, if set up
+*
+* Note: Ops logging is expected to be offline friendly (as Firebase is).
+*
+* References:
+*   - "Official Airbrake Notifier for Browsers"
+*     -> https://github.com/airbrake/airbrake-js/tree/master/packages/browser#severity
+*/
+const MODE = import.meta.env.MODE;
+
+let logGen;   // (string) => (string [, object]) => ()
+
+// For 'dev:local', do central logging with callables.
+//
+if (LOCAL) {
+  const mod = import('../firebase/logs.js'); const { _logs } = mod;
+
+  logGen = level => {
+    if (level == "debug") return _logs.debug;
+    else if (level == "info") return _logs.info;
+    else if (level == "warn") return _logs.warn;
+    else if (level == "error") return _logs.error;
+    else {
+      assert(false, `Unexpected level: ${level}`)
+    }
+  }
+
+} else {    // 'dev:online' or production
+  const airbrake = window.airbrake;   // set by initialization (if ops config has it)
+
+  if (!airbrake) {
+    console.warn("Ops logging disabled by the app coordinator.");
+
+    logGen = level => _ => undefined;   // ignore all
+  } else {
+
+    logGen = level => {
+      const severity = level == 'warn' ? 'warning' : level;
+
+      return (msg, opt) => {
+
+        // tbd. attach active user id
+
+        airbrake.notify({
+          error: msg,
+          context: {
+            ...opt,
+            severity
+          }
+        });
+      }
+    }
+  }
+}
+
+const logs = {
+  debug: logGen("debug"),
+  info: logGen("info"),
+  warn: logGen("warn"),
+  error: logGen("error")
+}
+
+export { logs };

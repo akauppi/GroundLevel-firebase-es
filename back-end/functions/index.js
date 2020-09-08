@@ -36,42 +36,16 @@ admin.initializeApp();
 //
 const regionalFunctions = functions.region('europe-west3');   // Frankfurt
 
-// Logs, as "callable function"
-//
-// {
-//    level: "debug"|"info"|"warn"|"error"
-//    msg: string
-//    payload: object   //optional
-// }
-//
-// NOTE!!! Since callables require online connection, WE SHOULD RETHINK THIS APPROACH. Use Firestore, or a logging
-//      provider (DataDog) that provides a client tolerant of offline moments.
-//
-exports.logs_v190720 = regionalFunctions
-//const logs_v190720 = regionalFunctions
-  .https.onCall(({ level, msg, payload }, context) => {
+const EMULATION = !! process.env.FUNCTIONS_EMULATOR;
 
-    const { debug, info, warn, error } = functions.logger;
+if (EMULATION) {
+  const tmp = require('./local.cjs');     // functions only used in 'dev:local'
 
-    switch (level) {
-      case "debug":
-        debug(msg, payload);
-        break;
-      case "info":
-        info(msg, payload);
-        break;
-      case "warn":
-        warn(msg, payload);
-        break;
-      case "error":
-        error(msg, payload);
-        break;
-      default:
-        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
-    }
-  });
+  exports.logs_v190720 = tmp.logs_v190720;
+  exports.greet = tmp.greet;
+}
 
-
+/*** DISCHARGED
 // Something went awfully wrong.
 //
 // A central place to catch unexpected circumstances in already deployed code.
@@ -90,7 +64,7 @@ exports.fatal_v210720 = regionalFunctions.https
 
     functions.logger.error(`FATAL: ${msg}`, ex);    // keep an eye - is that good?
   });
-
+***/
 
 // UserInfo shadowing
 //
@@ -135,17 +109,6 @@ exports.userInfoShadow = regionalFunctions.firestore
         await Promise.all(proms);
       }
     }
-  });
-
-
-/*
-* Just for testing
-*
-* { msg: string } -> string
-*/
-exports.greet = regionalFunctions.https
-  .onCall((msg, context) => {
-    return `Greetings, ${msg}.`;
   });
 
 

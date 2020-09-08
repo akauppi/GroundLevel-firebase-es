@@ -109,3 +109,11 @@ Can the `:key` just be left out (but the key still picked):
 ```
 <li v-for="m in members">
 ```
+
+
+## Airbrake: how to provide version/build info?
+
+..for a web app
+
+Ideally, we'd like to provide them as `new Notifier({ ... })` params.
+

@@ -2,37 +2,36 @@
 * src/app.js
 *
 * Application entry point.
+*
+* Where dev mode and production code combine. Firebase is initialized.
 */
 import { createApp } from 'vue';
 
 import { appTitle } from './config.js';
-import { logs } from './firebase/logs.js';
-
-//--- Make-up 💄
-/* not yet...
-import 'jquery';    // for Bootstrap, before it
-import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-*/
-
-// Exercise central logging - trial ALL levels
-if (false) {  // they all get to the logs
-  logs.debug("We got up!", {a:1});
-  logs.info("We got up!", {b:2});
-  logs.warn("We got up!", {c:3});
-  logs.error("We got up!", {d:42000});
-}
-logs.info("We got up!", {b:2});
 
 document.title = appTitle;
 
 import App from './App.vue';
 import { routerProm } from './router.js';
+import { Notifier } from "@airbrake/browser";
 
-routerProm.then(router => {
-  createApp(App, {localMode: window.LOCAL})
-    .use(router)
+const app = createApp(App, {localMode: window.LOCAL});
+
+app.config.errorHandler = (err, vm, info) => {
+
+  // tbd. Airbreak allows shipping an 'Error' directly: see -> https://github.com/airbrake/airbrake-js/tree/master/packages/browser#basic-usage
+  logs.error("Vue error:", {err, vm, info});   // tbd. tune
+}
+
+if (!import.meta.env.MODE !== "production") {   // 'warnHandler' "only works during development"
+
+  app.config.warnHandler = (msg, vm, trace) => {
+    logs.warn("Vue warning:", {msg, vm, trace});    // tbd. tune
+  }
+}
+
+(async () => {    // until we have top-level-await
+  const router = await routerProm;
+  app.use(router)
     .mount('#app');
-}).catch(ex => {
-  console.error("Unable to get router:", ex);
-});
+})();

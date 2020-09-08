@@ -102,7 +102,7 @@
   import { ref, onMounted, onUnmounted } from 'vue'
 
   import { routerProm } from '../../router.js'
-  import { reportFatal } from "../../monitoring/reportFatal"
+  //REMOVE import { reportFatal } from "../../monitoring/reportFatal"
 
   const closeEl = ref(null);    // DOM element, gets set during mounting
 
@@ -130,7 +130,8 @@
         await firebase.auth().signOut();
       }
       catch(ex) {
-        reportFatal("Sign out failed", ex);   // not observed
+        // tbd. Toast also
+        logs.fatal( "Sign out failed", ex);   // not observed
       }
 
       const router = await routerProm;    // must wait for it here -> 'setup' must be synchronous (Vue.js 3.0)

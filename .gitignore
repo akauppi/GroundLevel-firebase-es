@@ -27,3 +27,6 @@ ui-debug.log
 
 # Firebase dev config
 /__.js
+
+# Ops configuration (can be in version control in your project; or simply baked into 'src/config.js')
+/.env.js

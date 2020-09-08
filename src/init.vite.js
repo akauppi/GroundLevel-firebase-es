@@ -39,15 +39,6 @@ window.LOCAL = LOCAL;    // inform the UI
 // ES note: Seems 'import.meta.env' must be read at the root.
 const _MODE = import.meta.env.MODE;
 
-// import.meta.env.MODE:
-//    - "dev_local": dev:local
-//    - "development": dev:online
-//    - ("production": npx vite build) ???
-//
-//console.debug("import.meta.env.MODE:", import.meta.env.MODE);   // chokes 'vite build'
-
-// Vite does not support top level await (1.0.0.-rc.4) so we need this.
-//
 async function initFirebase() {   // () => Promise of ()
 
   // For 'dev:local', we only need authentication information and "any" project will do for that. This allows us to
@@ -56,8 +47,6 @@ async function initFirebase() {   // () => Promise of ()
   if (LOCAL) {
     console.info("Initializing for LOCAL EMULATION");
 
-    // Settings to an existing cloud project, used by 'dev:local'
-    //
     const justAuthOptions = {
       apiKey: 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
       projectId: 'app',     // <-- must match that in 'package.json'
@@ -91,35 +80,54 @@ async function initFirebase() {   // () => Promise of ()
       host: FIRESTORE_HOST,
       ssl: false
     });
-  } else if (_MODE === "development") {    // dev:online
-    console.info("Initializing for cloud back-end; watched local front-end.");
 
-    const mod = await import('../__.js');   // not needed for 'dev:local'
-    const {apiKey, authDomain, projectId} = mod.__;
+  } else {
+    if (_MODE === "development") {    // dev:online
+      console.info("Initializing for cloud back-end; watched local front-end.");
 
-    firebase.initializeApp({
-      apiKey,
-      projectId,
-      authDomain
-    });
-  } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
-    console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
+      const mod = await import('../__.js');   // not needed for 'dev:local'
+      const {apiKey, authDomain, projectId} = mod.__;
 
-    assert(_MODE === "production");
+      firebase.initializeApp({
+        apiKey,
+        projectId,
+        authDomain
+      });
 
-    // Hack '__' here (allows this to work with any hosting) 🤪
-    //
-    const json = {
-      "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
-      "projectId": 'vue-rollup-example',
-      "authDomain": 'vue-rollup-example.firebaseapp.com'
-    };
+    } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
+      console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
 
-    firebase.initializeApp(json);
+      assert(_MODE === "production");
+
+      // Hack '__' here (allows this to work with any hosting) 🤪
+      //
+      const json = {
+        "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
+        "projectId": 'vue-rollup-example',
+        "authDomain": 'vue-rollup-example.firebaseapp.com'
+      };
+
+      firebase.initializeApp(json);
+    }
   }
 }
 
 (async _ => {
-  await initFirebase();
+
+  if (LOCAL) {    // Initialize with emulated Cloud Function logging (no cloud monitoring)
+    await initFirebase();
+
+    // Now that Cloud Functions have been set up, we can tie logging to them.
+    //
+    await import('./init/initLocal.js');    // sets up 'window.logs'
+
+  } else {    // Initialize with cloud monitoring (Airbrake)
+    const mod = import('./init/initOps.js'); const { doneProm } = mod;
+
+    const proms = [initFirebase(), doneProm];
+    await Promise.all(proms);
+  }
+  assert(window.logs);
+
   import('./app.js');
 })();

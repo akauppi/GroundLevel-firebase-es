@@ -3,8 +3,6 @@
 *
 * Reactive 'projects' map, reflecting both database and sign-in/out changes.
 */
-import {reportFatal} from "../monitoring/reportFatal"
-
 assert(firebase.firestore);
 
 const db = firebase.firestore();
@@ -72,7 +70,8 @@ watchEffect(() => {    // when the user changes
     try {
       unsub = projectsC.where('members', 'array-contains', uid).onSnapshot( unshot(handleDoc) );
     } catch (ex) {
-      reportFatal("Subscribing to 'projectsC' failed:", ex);    // never observed
+      // Toast?
+      logs.fatal("Subscribing to 'projectsC' failed:", ex);    // never observed
     }
 
   } else if (auth === false) {  // user signed out - wipe the projects and stop tracking!
