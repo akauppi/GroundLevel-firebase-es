@@ -166,3 +166,13 @@ Also:
 >We don't currently have Performance Monitoring for our js/browser notifier but are planning on adding it. Please stay tuned.
 
 - [ ] Once available, let's integrate to it!
+
+## Rollup-plugin-vue dependency
+
+This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs/rollup-plugin-vue/issues/364) and thus with us not needing to load a plugin.
+
+- [https://github.com/Norserium/vue-advanced-cropper/issues/72](https://github.com/Norserium/vue-advanced-cropper/issues/72)
+
+Also otherwise try to link with `rollup-plugin-vue`.
+
+
