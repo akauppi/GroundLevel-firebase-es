@@ -1,9 +1,12 @@
 # Changelog
 
-## latest
+## 11-Sep-20
 
 - Enabled minification for both Vite and Rollup; updated size comparisons
 - Separated Cloud Functions only needed in `dev:local` and testing; no longer deploying them
+- Created `central.js` for central logging.
+- Brought in `@airbrake/browser` and `toastify` - **both having problems with Rollup builds**, thus initializing them in init scripts. 💩
+- Muchos debugging to get all combinations running (considering tilting towards Vite also in production).
 
 ## 1-Sep-20
 

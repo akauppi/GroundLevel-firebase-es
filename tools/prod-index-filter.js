@@ -1,6 +1,8 @@
 /*
 * tools/prod-index-filter.js
 *
+* Only applies to ROLLUP production builds; not Vite.
+*
 * Provide a production version of 'index.html', based on comments within it.
 *
 * Index syntax:

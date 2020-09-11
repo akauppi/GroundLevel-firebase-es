@@ -10,22 +10,28 @@
 *
 * Such logs can also be shown as Toasts, in the UI. Which logs ignite toasts is configurable.
 */
-import Toastify from 'toastify-js'
-import 'toastify-js/src/toastify.css'
+
+// Rollup doesn't build these:
+//  <<
+//    TypeError: object null is not iterable
+//  <<
+//
+// Instead of doing if/else on Rollup vs. Vite here, we set the 'Toastify' in the init blocks. Once/if Toastify becomes
+// at friends with Rollup (targeting ES modules is likely the problem?), return to modular design and 'import' here.
+//
+//import Toastify from 'toastify-js'
+//import 'toastify-js/src/toastify.css'
+
+assert(Toastify);
 
 import { ops } from './config.js'
 import { Fatal, fatalConfigurationMismatch } from './fatal.js'
 
 // Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
-//    For that reason, at least, import is now conditional so that 'ops.logs.type' steers, whether loading Airbrake
-//    client is even attended!
 //
 //import { Notifier } from "@airbrake/browser"    // causes problems with 'npm run prod:serve' (Rollup)
+assert(Notifier);   // from the init scripts
 
-// CONSTRUCTION:
-//    REALLY don't want to make 'central' as async function, so... we just try to set this speedily to Airbrake's
-//    'Notifier'. At the worst, some early birds would be lost. AK/11-Sep-20.
-//
 let airbrake;   // 'Notifier' | undefined
 
 const mode = import.meta.env.MODE;    // needs to be at the root (Rollup)
@@ -40,15 +46,11 @@ if (!LOCAL) {
       throw Fatal( fatalConfigurationMismatch,"Configuration mismatch: 'ops.airbrake.projectId' and/or 'ops.airbrake.projectKey' missing");
     }
 
-    (async _ => {
-      const { Notifier } = await import("@airbrake/browser");   // tbd. consider always importing (as static)
-
-      airbrake = new Notifier({
-        projectId,
-        projectKey,
-        environment: mode   // 'production'|'development'
-      });
-    })();   // free-running
+    airbrake = new Notifier({
+      projectId,
+      projectKey,
+      environment: mode   // 'production'|'development'
+    });
 
   } else if (ops.logs.type) {
     throw Fatal( fatalConfigurationMismatch,`Unexpected 'ops.logs.type' in config: ${ops.logs.type}`);
@@ -71,7 +73,7 @@ if (LOCAL) {
       log({level, msg, payload: opt})   // tbd. catch errors and report to the user
     }
   };
-} else if (airbrakeProm) {
+} else if (airbrake) {
 
   const severityMap = {
     'debug': "DEBUG",
@@ -137,7 +139,20 @@ function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal'
   const { level } = id;
 
   if (toastThese[id]) {
-
+    Toastify({
+      text: msg,
+      duration: 3000,
+      //destination: "https://github.com/apvarun/toastify-js",
+      newWindow: true,
+      close: true,
+      gravity: "top", // 'top'|'bottom'
+      position: 'right', // 'left'|'center'|'right'
+      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+      stopOnFocus: true,  // prevent dismissing of toast on hover
+      onClick: () => {
+        // nada
+      }
+    }).showToast();
   }
 
   logs[level](msg);

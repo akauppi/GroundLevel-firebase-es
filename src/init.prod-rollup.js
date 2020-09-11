@@ -79,12 +79,29 @@ async function initFirebase() {
   }
 }
 
+async function initCentral() {
+  // Toastify (1.9.1) doesn't like to be 'import'ed by Rollup (2.26.11). Until then.
+  //
+  window.Toastify = require('toastify-js');
+  require('toastify-js/src/toastify.css');
+
+  // Airbrake (1.4.1) doesn't like to be 'import'ed by Rollup (2.26.11).
+  //
+  //const { Notifier } = await import("@airbrake/browser");   // Does NOT build with Rollup
+  const { Notifier } = await import("@airbrake/browser/dist/index.js");   // builds with Rollup
+  window.Notifier = Notifier;
+
+  await import('./central.js');
+}
+
 (async () => {
   // Ensure that 'app.js' has both Firebase and 'central' installed.
   //
-  await Promise.all([initFirebase(), import('./central.js')]);
+  await Promise.all([initFirebase(), initCentral()]);
     //
     // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since all is loaded at launch).
+
+  console.info("Loading the app.");
 
   import('./app.js');   // free-running tail
 })();

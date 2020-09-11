@@ -8,6 +8,7 @@
 * HUGE thanks to Phil Walker for showing how it can be done!  Go Phil! :)
 *   -> https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/
 */
+import { strict as assert } from 'assert'
 
 // To support CommonJS dependencies, enable any lines mentioning 'commonjs'.
 
@@ -92,20 +93,80 @@ export default {
 
     // Pack imports within each node package, together. See Phil Walker's blog (README.md > References) for more details.
     //
+    // Want:
+    //  - initialization code as 'main' (includes root files of 'src' such as 'central.js', 'config.js')
+    //  - application as 'app'
+    //  - dependencies in their own, nice cubicles
+    //
+    // The division of 'main' and 'app' is a bit arbitrary. It does mean that dependencies used in the root (e.g. toaster,
+    // performance monitoring like Airbrake) end up in the 'main' chunk. At the least, this provides an idea of the
+    // relative weights of the template vs. one's actual app. Also, 'main' would likely remain fairly unchanging,
+    // providing better client side caching.
+    //
+    // Ref -> https://rollupjs.org/guide/en/#outputmanualchunks
+    //
     manualChunks(id) {
+      const pathParts = id.split(path.sep);
+
       if (id.includes('node_modules')) {
+        const name = pathParts[ pathParts.lastIndexOf('node_modules') + 1 ];   // package or scope
 
-        // Find the directory name following the last `node_modules`. Usually this is the package, but it could also be the scope.
-        const arr = id.split(path.sep);
-        const tmp = arr[arr.lastIndexOf('node_modules') + 1];
-
-        // Pack '@firebase' and 'firebase' in the same chunk.
+        // Expected names (and their transformation).
         //
-        return tmp.match(/^@?firebase$/) ? 'firebase'
-          : tmp.match(/^@?vue$/) ? 'vue'    // avoids a "(!) Generated an empty chunk" warning, by Rollup
-          : tmp;
+        const map = {
+          '@firebase': 'firebase',
+          '@vue': 'vue',
+          'firebase': true,
+          'idb': 'firebase',
+          'tslib': true,  // used by Firebase, but keep it separate
+          'vue': true,
+          'vue-router': true
+        };
+
+        if (map[name] === true) {
+          return name;
+
+        } else if (map[name]) {
+          return map[name];
+
+        } else {
+          console.warn("Unexpected dependency found (not mapped in 'manualChunks'):", name);
+          return;   // do NOT return a value -> let Rollup do its default
+        }
+
+      } else {    // Internal pieces
+
+        // src/init.prod-rollup.js
+        // ...
+        // src/app.js
+        // src/router.js
+        // .env.js
+        //
+        const Rmain = /.+\/src\/[^/?]+(?<!\.vue)$|.+\/.env.js$/;
+
+        // src/App.vue
+        // src/App.vue?vue&type=script&lang.js
+        // src/*/**
+        //
+        const Rapp = /.+\.vue.*|.+\/src\/.+\/.+/;
+
+        if (id.match(Rmain)) {
+          assert(! id.match(Rapp));
+          return "main";
+
+        } else if (id.match(Rapp)) {
+          return "app";
+
+        } else {
+          console.warn("Unexpected code file (mapped to 'app'):", name);
+        }
       }
     },
+
+    // Could use this for differentiating between Vite and Rollup builds (but rather do it in the init scripts)
+    /* environment: {
+      ROLLUP: 'true'   // 'process.env.ROLLUP'
+    },*/
 
     sourcemap: true   // have source map even for production
   },

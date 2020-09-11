@@ -15,6 +15,8 @@ import 'firebase/functions'
 
 import { Fatal } from './fatal.js'
 
+import { Notifier } from '@airbrake/browser'    // normal ES import works with Vite (NOT with Rollup)
+
 /*
 * Don't want to add dependency on 'assert' module.
 */
@@ -105,44 +107,46 @@ async function initFirebase() {   // () => Promise of ()
     });
 
   } else {
+    const mod = await import('../__.js');   // not needed for 'dev:local'
+    const {apiKey, appId, authDomain, projectId} = mod.__;
+
+    assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
+
     if (_MODE === "development") {    // dev:online
       console.info("Initializing for DEV:ONLINE (cloud back-end; local, watched front-end).");
 
-      const mod = await import('../__.js');   // not needed for 'dev:local'
-      const {apiKey, appId, authDomain, projectId} = mod.__;
-
-      firebase.initializeApp({
-        apiKey,
-        appId,      // needed by Firebase Performance Monitoring
-        projectId,
-        authDomain
-      });
-
     } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
-      console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
-
       assert(_MODE === "production");
-
-      // Hack '__' here (allows this to work with any hosting) 🤪
-      //
-      const json = {
-        "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
-        "projectId": 'vue-rollup-example',
-        "authDomain": 'vue-rollup-example.firebaseapp.com'
-      };
-
-      firebase.initializeApp(json);
+      console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
     }
 
+    firebase.initializeApp({
+      apiKey,
+      appId,      // needed by Firebase Performance Monitoring
+      projectId,
+      authDomain
+    });
+
+    // tbd. Must differ between 'dev:online' and production tracking (call it 'prod:vite:serve', not 'production'). <-- app name?
+    //
     if (await enableFirebasePerfProm) {
       await import ('firebase/performance');
-      firebase.performance();   // should provide basic reporting (tbd. how to differ between 'dev:ops' and production tracking?)  <-- app name?
+      firebase.performance();   // should provide basic reporting
     }
   }
 }
 
+async function initCentral() {
+  window.Toastify = import('toastify-js');    // the normal way
+  import('toastify-js/src/toastify.css');
+
+  window.Notifier = Notifier;
+
+  await import('./central.js');
+}
+
 (async _ => {
-  await initFirebase();
-  await import('./central.js');   // initialize central logging
+  await Promise.all([initFirebase(), initCentral()]);
+
   /*run free*/ import('./app.js');
 })();
