@@ -13,6 +13,8 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import 'firebase/functions'
 
+import { Fatal } from './fatal.js'
+
 /*
 * Don't want to add dependency on 'assert' module.
 */
@@ -21,7 +23,7 @@ function assert(cond, msgOpt) {
     if (msgOpt) {
       console.assert(msgOpt);
     }
-    throw new Error(`Assertion failed: ${msgOpt || '(no message)'}`);
+    throw new Fatal(`Assertion failed: ${msgOpt || '(no message)'}`);
   }
 }
 
@@ -38,6 +40,27 @@ window.LOCAL = LOCAL;    // inform the UI
 
 // ES note: Seems 'import.meta.env' must be read at the root.
 const _MODE = import.meta.env.MODE;
+
+let enableFirebasePerfProm;   // Promise of boolean | undefined
+
+if (!LOCAL) {     // tbd. once have top-level-await, use it here
+  enableFirebasePerfProm = (async _ => {
+    // Dynamic import so that '.env.js' is not needed, for 'dev:local'
+    //
+    const { ops } = await import('./config.js');
+
+    // For 'dev:online' and production, we require ops configuration to be given.
+    //
+    if (ops.perf?.type === undefined) {   // not set; no perf
+      return false;
+    }
+    else if (ops.perf.type === 'firebase') {
+      return true;
+    } else {
+      throw Fatal(fatalConfigurationMismatch, `Configuration mismatch: 'ops.perf.type' has unknown value: ${ops.perf.type}`);
+    }
+  })();
+}
 
 async function initFirebase() {   // () => Promise of ()
 
@@ -81,49 +104,45 @@ async function initFirebase() {   // () => Promise of ()
       ssl: false
     });
 
-  } else if (_MODE === "development") {    // dev:online
-    console.info("Initializing for DEV:ONLINE (cloud back-end; local, watched front-end).");
+  } else {
+    if (_MODE === "development") {    // dev:online
+      console.info("Initializing for DEV:ONLINE (cloud back-end; local, watched front-end).");
 
-    const mod = await import('../__.js');   // not needed for 'dev:local'
-    const {apiKey, authDomain, projectId} = mod.__;
+      const mod = await import('../__.js');   // not needed for 'dev:local'
+      const {apiKey, appId, authDomain, projectId} = mod.__;
 
-    firebase.initializeApp({
-      apiKey,
-      projectId,
-      authDomain
-    });
+      firebase.initializeApp({
+        apiKey,
+        appId,      // needed by Firebase Performance Monitoring
+        projectId,
+        authDomain
+      });
 
-  } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
-    console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
+    } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
+      console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
 
-    assert(_MODE === "production");
+      assert(_MODE === "production");
 
-    // Hack '__' here (allows this to work with any hosting) 🤪
-    //
-    const json = {
-      "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
-      "projectId": 'vue-rollup-example',
-      "authDomain": 'vue-rollup-example.firebaseapp.com'
-    };
+      // Hack '__' here (allows this to work with any hosting) 🤪
+      //
+      const json = {
+        "apiKey": 'AIzaSyD29Hgpv8-D0-06TZJQurkZNHeOh8nKrsk',
+        "projectId": 'vue-rollup-example',
+        "authDomain": 'vue-rollup-example.firebaseapp.com'
+      };
 
-    firebase.initializeApp(json);
+      firebase.initializeApp(json);
+    }
+
+    if (await enableFirebasePerfProm) {
+      await import ('firebase/performance');
+      firebase.performance();   // should provide basic reporting (tbd. how to differ between 'dev:ops' and production tracking?)  <-- app name?
+    }
   }
 }
 
 (async _ => {
-
-  if (LOCAL) {    // Initialize with emulated Cloud Function logging (no cloud monitoring)
-    await initFirebase();
-
-    // Now that Cloud Functions have been set up, we can tie logging to them.
-    //
-    await import('./init/initLocal.js');    // sets up 'window.logs'
-
-  } else {    // Initialize with cloud monitoring (Airbrake)
-    const proms = [initFirebase(), import('./init/initOps.js')];
-    await Promise.all(proms);
-  }
-  assert(window.logs);
-
-  import('./app.js');
+  await initFirebase();
+  await import('./central.js');   // initialize central logging
+  /*run free*/ import('./app.js');
 })();

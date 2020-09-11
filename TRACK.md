@@ -161,5 +161,8 @@ Seems they are working on it.
 
 [https://akauppi-gmail-com.airbrake.io/projects/294803/performance](https://akauppi-gmail-com.airbrake.io/projects/294803/performance) has a "Request Performance Monitoring for airbrake-js/browser" link (but clicking it did nothing...)
 
-- [ ] Once available, let's integrate to it!
+Also:
 
+>We don't currently have Performance Monitoring for our js/browser notifier but are planning on adding it. Please stay tuned.
+
+- [ ] Once available, let's integrate to it!

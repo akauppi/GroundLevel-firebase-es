@@ -343,14 +343,14 @@ You only need some of the fields. Create `__.js` with these keys:
 ```
 const __ = {
   apiKey: '...',
+  appId: '...',
   projectId: '...',
-  locationId: 'europe-west3',
   authDomain: '...'
 }
 export { __ }
 ```
 
->Note: If your `locationId` is something else than "europe-west3", you may need to change values within the repo. Let us know in Issues, to make this a globally friendly project. 🌏
+>Note: If your `locationId` is something else than "europe-west3", change occurrences of `"europe-west3"` within the repo. Remind us about this in Issues, to make this a globally friendly project. 🌏
 
 #### Launch! 🚀
 

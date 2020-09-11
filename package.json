@@ -50,6 +50,7 @@
     "_prod_rollup_serve": "firebase serve --only hosting --port 3010",
     "_prod_rollup_clean": "(rm public/dist/* 2> /dev/null || true)",
     "---       ": "",
+    "prod:vite:serve": "vite --mode production --port 3011",
     "//prod:vite:build": "vite build",
     "//prod:vite:serve": "npm run //prod:vite:build && npx http-server dist",
     "---        ": "",
@@ -67,7 +68,8 @@
   },
   "dependencies": {
     "@airbrake/browser": "^1.4.1",
-    "firebase": "^7.19.1",
+    "firebase": "^7.20.0",
+    "toastify-js": "^1.9.1",
     "vue": "^3.0.0-rc.10",
     "vue-router": "^4.0.0-beta.9"
   },

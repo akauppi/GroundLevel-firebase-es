@@ -5,10 +5,9 @@
 -->
 <template>
   <header>
-    <fatal />
     <app-logo />
-    <div id="emul" v-if="localMode">
-      EMULATION MODE
+    <div id="mode" v-bind:class="{ devLocal: mode === 'dev_local', devOnline: mode === 'development' }">
+      {{ mode === 'dev_local' ? 'EMULATION MODE' : 'DEV:ONLINE' }}
     </div>
     <!-- Note: 'user' can be 'null' at first, then either an object (signed in) or 'false' (signed out).
     -->
@@ -23,13 +22,22 @@
 </template>
 
 <style scoped>
-  #emul {
+  #mode {
     padding: 10px;
-    background-color: dodgerblue;
-
     position: fixed;
     top: 40px;
     left: 0;
+    display: none;
+  }
+  #mode.devLocal {
+    display: block;
+    background-color: dodgerblue;
+    content: 'EMULATION MODE'
+  }
+  #mode.devOnline {
+    display: none;
+    background-color: indianred;
+    content: 'ONLINE MODE'
   }
 </style>
 
@@ -39,7 +47,6 @@
   import AppLogo from './components/AppLogo.vue'
   import AppProfile from './components/AppProfile/index.vue'
   import AppFooter from './components/AppFooter.vue'
-  import Fatal from './components/Fatal.vue'
 
   import { user } from './refs/user.js'
 
@@ -58,10 +65,10 @@
   export default {
     name: 'App',     // helps in debugging
     components: {
-      AppLogo, AppProfile, AppFooter, Fatal
+      AppLogo, AppProfile, AppFooter
     },
     props: {
-      localMode: Boolean    // 'true' if running against the local Firebase emulator
+      mode: String    // 'dev_local', 'development' or 'production'
     },
     setup
   }

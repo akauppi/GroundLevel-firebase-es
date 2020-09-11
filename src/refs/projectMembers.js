@@ -10,7 +10,7 @@
 *   - Project page
 */
 
-import {computed, shallowReactive, watch} from "vue";
+import {shallowReactive, watchEffect} from "vue";
 import {userUIinfoProm} from "../firebase/calls";
 
 // Note: Seems Vue.js (3.0.0-beta.20) doesn't work with async 'computed'. We'll use watch and imperative setting, instead.
@@ -48,7 +48,7 @@ function membersGen(projectId, project) {   // (string, reactive of { ...project
   //***WHAT IF: reactive + watch
   const members = shallowReactive( new Map() );    // { <uid>: { ..userInfoC-fields, isAuthor: boolean } }
 
-  watch( async () => {  // () => Promise of ()
+  watchEffect( async () => {  // () => Promise of ()
     if (Object.keys(project).length == 0) {   // no active project
       members.clear();
       return;
@@ -96,7 +96,7 @@ function membersGen(projectId, project) {   // (string, reactive of { ...project
   });
   //***/
 
-  watch( () => {  // DEBUG
+  watchEffect( () => {  // DEBUG
     console.log("MEMBERS changed:", members);
   });
 

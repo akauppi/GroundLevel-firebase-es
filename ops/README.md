@@ -112,6 +112,7 @@ After 24h, you'll see something like this:
 - especially seeing warnings / errors, to help develop the source code
 - retention time: 1 week is likely enough
 - ability to work over offline gaps (i.e. caching)
+- client side time stamps
 
 Firebase *does not provide this*, as of Sep 2020. Recommendations on Firebase would be using Google Analytics, but we rather turn to a real product, geared at this.
 

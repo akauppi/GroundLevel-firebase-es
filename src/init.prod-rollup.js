@@ -11,12 +11,22 @@
 //    initializeApp is not exported by node_modules/firebase/app/dist/index.esm.js
 //  <<
 //
-//import * as firebase from 'firebase/app';   // still fails with firebase 7.19.1
-import firebase from 'firebase/app';    // works (but does not allow firebaseui from npm :( )
-import 'firebase/auth';
-import 'firebase/firestore';
-import 'firebase/functions';
-import "firebase/performance";
+//import * as firebase from 'firebase/app'    // still fails with firebase 7.19.1
+import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
+import 'firebase/auth'
+import 'firebase/firestore'
+import 'firebase/functions'
+import "firebase/performance"
+
+import { ops } from './config.js'
+import { Fatal } from './fatal.js'
+
+let enableFirebasePerf = false;
+if (ops.perf.type == 'firebase') { enableFirebasePerf = true; }
+else if (ops.perf.type) {
+  throw Fatal(`Unexpected config 'ops.perf.type' (ignored): ${ops.perf.type}`);
+    // note: Doesn't really need to be 'fatal' but best to have the configs sound.
+}
 
 /*
 * Set up globals
@@ -25,13 +35,10 @@ import "firebase/performance";
 */
 function assert(cond, msgOpt) {
   if (!cond) {
-    //debugger;   // allows us to see the 'call stack' in browser
-
     if (msgOpt) {
       console.assert(msgOpt);
-      console.trace(msgOpt);
     }
-    throw new Error(`Assertion failed: ${msgOpt || '(no message)'}`);
+    throw Fatal(`Assertion failed: ${msgOpt || '(no message)'}`);
   }
 }
 
@@ -43,7 +50,7 @@ window.firebase = firebase;
 window.assert = assert;
 
 async function initFirebase() {
-  // Note: Don't think browsers can dynamically 'import' a JSON. This gives (Chrome 85):
+  // Browsers don't dynamically 'import' a JSON (Chrome 85):
   //  <<
   //    The server responded with a non-JavaScript MIME type of "application/json".
   //  <<
@@ -62,21 +69,23 @@ async function initFirebase() {
 
   firebase.initializeApp({
     apiKey,
-    appId,      // for Firebase Performance Monitoring
+    appId: enableFirebasePerf ? appId : undefined,      // needed for Firebase Performance Monitoring
     projectId,
     authDomain
   });
 
-  const perf = firebase.performance();
+  if (enableFirebasePerf) {
+    /*const perf =*/ firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed. tbd.
+  }
 }
 
 (async () => {
-  // Ensure that 'app.js' has both ops and Firebase installed.
+  // Ensure that 'app.js' has both Firebase and 'central' installed.
   //
-  await Promise.all([initOps(), initFirebase()]);
+  await Promise.all([initFirebase(), import('./central.js')]);
+    //
+    // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since all is loaded at launch).
 
-  // Dynamic import so that it happens only once the above are resolved.
-  //
   import('./app.js');   // free-running tail
 })();
 

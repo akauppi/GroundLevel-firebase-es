@@ -9,7 +9,6 @@ import { fns } from '@akauppi/firebase-jest-testing/cloudFunctions'
 
 describe("monitoring functions", () => {
   const fnLogs = fns.httpsCallable('logs_v190720');
-  const fnFatal = fns.httpsCallable('fatal_v210720');
 
   //--- Logs ---
 
@@ -22,15 +21,4 @@ describe("monitoring functions", () => {
 
     // Cannot test what emerged in the logs - do that manually.
   });
-
-  /*** DISCHARGED
-  //--- Fatal reporting ---
-
-  test('should be able to report a fatal (unexpected code path) condition', async () => {
-
-    await fnFatal({ msg: "Testing fatal", ex: new Error("abc") });
-
-    // Again, check manually the outcome
-  });
-  ***/
 });

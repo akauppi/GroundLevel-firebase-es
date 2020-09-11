@@ -11,7 +11,7 @@ const db = firebase.firestore();
 
 import { authRef } from './authRef'
 
-import { watch } from 'vue'
+import { watchEffect } from 'vue'
 
 /*
 * Sets the UI parts of a user so that people working with them in a project can view display name and an image.
@@ -19,7 +19,7 @@ import { watch } from 'vue'
 * These info are written to a project-independent collection. This way, any login will update (if the data has changed)
 * the data in the projects (there's a background mechanism for that).
 */
-watch(async () => {
+watchEffect(async () => {
   const auth = authRef.value;
 
   if (auth) {

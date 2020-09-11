@@ -40,9 +40,6 @@ import { prodIndexPlugin } from './tools/prod-index-filter'
 //import { version } from './package.json'
 const { version } = require('./package.json');    // this works, 'import' didn't
 
-import dotenv from 'dotenv'
-dotenv.config();    // apply '.env.production' file (if there) -> 'process.env'
-
 /*
 * Note: The order of the plugins does sometimes matter.
 */
@@ -111,5 +108,7 @@ export default {
     },
 
     sourcemap: true   // have source map even for production
-  }
+  },
+
+  preserveEntrySignatures: false,   // "recommended setting for web apps" (supresses a warning)
 };
