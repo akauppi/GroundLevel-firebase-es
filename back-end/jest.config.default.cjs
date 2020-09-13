@@ -16,6 +16,6 @@ module.exports = {
   // This is a perfectly valid way of declaring modules, but Jest 26.x resolver (aka browserify resolver) is not up to it,
   // yet (Aug-2020). See 'TRACK.md'.
   //
-  //resolver: "@akauppi/firebase-jest-testing/cjs/jestResolver"
-  resolver: "@akauppi/firebase-jest-testing/src/cjs/jestResolver.cjs"
+  //resolver: "firebase-jest-testing/cjs/jestResolver"
+  resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
 };

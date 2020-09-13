@@ -6,8 +6,8 @@
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { dbUnlimited as db } from '@akauppi/firebase-jest-testing/firestore'
-import { eventually } from '@akauppi/firebase-jest-testing/jest'
+import { dbUnlimited as db } from 'firebase-jest-testing/firestore'
+import { eventually } from 'firebase-jest-testing/jest'
 
 import './matchers/toContainObject'
 

@@ -4,7 +4,7 @@
 import { strict as assert } from 'assert'
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { dbAuth } from '@akauppi/firebase-jest-testing/firestoreReadOnly';
+import { dbAuth } from 'firebase-jest-testing/firestoreReadOnly';
 
 describe("'/userInfo' rules", () => {
   let unauth_userinfoC, abc_userinfoC, def_userinfoC;

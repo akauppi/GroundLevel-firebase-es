@@ -1,5 +1,9 @@
 # Changelog
 
+## 13-Sep-20
+
+- Using `firebase-jest-testing` from `npm` registry
+
 ## 11-Sep-20
 
 - Enabled minification for both Vite and Rollup; updated size comparisons

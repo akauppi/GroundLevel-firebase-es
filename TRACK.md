@@ -166,3 +166,10 @@ Also:
 >We don't currently have Performance Monitoring for our js/browser notifier but are planning on adding it. Please stay tuned.
 
 - [ ] Once available, let's integrate to it!
+
+
+## Firebase bundle size
+
+- [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
+
+Consider moving to `firebase@exp`, once it supports auth as well.
