@@ -1,4 +1,4 @@
-# GroundLevel * ES6 * Firebase
+# GroundLevel * ESM * Firebase
 
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
 

@@ -167,9 +167,21 @@ Also:
 
 - [ ] Once available, let's integrate to it!
 
+<<<<<<< HEAD
 
 ## Firebase bundle size
 
 - [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
 
 Consider moving to `firebase@exp`, once it supports auth as well.
+=======
+## Rollup-plugin-vue dependency
+
+This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs/rollup-plugin-vue/issues/364) and thus with us not needing to load a plugin.
+
+- [https://github.com/Norserium/vue-advanced-cropper/issues/72](https://github.com/Norserium/vue-advanced-cropper/issues/72)
+
+Also otherwise try to link with `rollup-plugin-vue`.
+
+
+>>>>>>> 7d28c71078708c65f0d05f5b4dfe7af2f190c541
