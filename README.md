@@ -284,7 +284,7 @@ Just do this:
 $ cp .env.sample.js .env.js
 ```
 
-The `.env.js` contains operational configuration. It doesn't have any account information for now; we'll get back to it later, during Ops discussion.
+The `.env.js` doesn't have any account information for now; we'll get back to it later, during Ops discussion.
 
 Now, let's create a Firebase project for your app. 😀
 

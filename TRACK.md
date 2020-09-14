@@ -117,38 +117,8 @@ import "firebase/firestore/dist/index.cjs.js"
 
 Track:
 
-- [ ] Find an issue to track this
+- [https://github.com/firebase/firebase-js-sdk/issues/3069](https://github.com/firebase/firebase-js-sdk/issues/3069)
 
-
-## `vite build` crashes on us!!!
-
-```
-$ npx vite build
-vite v1.0.0-rc.4
-⠋ Building for production...
-[vite] Build errored out.
-Error: [vite]: Rollup failed to resolve import "%7B%7B%20m.photoURL%20%7D%7D" from "src/pages/Project/index.vue?vue&type=template&id=81f22f30&scoped=true".
-This is most likely unintended because it can break your application at runtime.
-If you do want to externalize this module explicitly add it to
-`rollupInputOptions.external`
-    at Object.onwarn (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/vite/dist/node/build/index.js:70:19)
-    at Object.onwarn (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:19374:20)
-    at ModuleLoader.handleResolveId (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18249:26)
-    at /Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18239:22
-    at async Promise.all (index 1)
-    at async ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18237:34)
-    at async Promise.all (index 0)
-    at async ModuleLoader.fetchModule (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18214:9)
-    at async Promise.all (index 1)
-    at async ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18237:34) {
-  watchFiles: [
-    '/Users/asko/Git/GroundLevel-es6-firebase-web/index.html',
-    '/Users/asko/Git/GroundLevel-es6-firebase-web/src/init.vite.js',
-    '/Users/asko/Git/GroundLevel-es6-firebase-web/__.js',
-...
-```
-
-Reporting this at []().
 
 ## Firebase Crashlytics -> Web
 
@@ -167,14 +137,12 @@ Also:
 
 - [ ] Once available, let's integrate to it!
 
-<<<<<<< HEAD
+## `firebase@exp` for tree-shaking!!!
 
-## Firebase bundle size
+They are REWRITING the JavaScript client, as `exp` (expire?). 
 
-- [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
+- [ ] Check out, especially when auth support is there: [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
 
-Consider moving to `firebase@exp`, once it supports auth as well.
-=======
 ## Rollup-plugin-vue dependency
 
 This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs/rollup-plugin-vue/issues/364) and thus with us not needing to load a plugin.
@@ -184,4 +152,11 @@ This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs
 Also otherwise try to link with `rollup-plugin-vue`.
 
 
->>>>>>> 7d28c71078708c65f0d05f5b4dfe7af2f190c541
+## Firebase hosting: "Cannot remove headers"
+
+- [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
+
+- Disabled the portion in `firebase.json` altogether.
+- [ ] Re-enable when above is solved.
+
+

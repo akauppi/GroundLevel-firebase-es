@@ -8,12 +8,12 @@
 *   - allows easy differentiation/experiments between Rollup and Vite approaches
 */
 //import * as firebase from 'firebase/app'    // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
-import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
-import 'firebase/auth'
-import 'firebase/firestore'
-import 'firebase/functions'
+//import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
 
-import { Fatal } from './fatal.js'
+import { firebase } from '@firebase/app/dist/index.esm.js'    // works; index2017.esm.js doesn't
+import '@firebase/auth'
+import '@firebase/firestore'
+import '@firebase/functions'
 
 import { Notifier } from '@airbrake/browser'    // normal ES import works with Vite (NOT with Rollup)
 
@@ -25,7 +25,7 @@ function assert(cond, msgOpt) {
     if (msgOpt) {
       console.assert(msgOpt);
     }
-    throw new Fatal(`Assertion failed: ${msgOpt || '(no message)'}`);
+    throw new Error(`Assertion failed: ${msgOpt || '(no message)'}`);
   }
 }
 
@@ -59,7 +59,7 @@ if (!LOCAL) {     // tbd. once have top-level-await, use it here
     else if (ops.perf.type === 'firebase') {
       return true;
     } else {
-      throw Fatal(fatalConfigurationMismatch, `Configuration mismatch: 'ops.perf.type' has unknown value: ${ops.perf.type}`);
+      throw Error(/*fatalConfigurationMismatch,*/ `Configuration mismatch: 'ops.perf.type' has unknown value: ${ops.perf.type}`);
     }
   })();
 }
@@ -130,7 +130,7 @@ async function initFirebase() {   // () => Promise of ()
     // tbd. Must differ between 'dev:online' and production tracking (call it 'prod:vite:serve', not 'production'). <-- app name?
     //
     if (await enableFirebasePerfProm) {
-      await import ('firebase/performance');
+      await import ('@firebase/performance');
       firebase.performance();   // should provide basic reporting
     }
   }

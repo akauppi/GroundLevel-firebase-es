@@ -22,15 +22,14 @@
 //import Toastify from 'toastify-js'
 //import 'toastify-js/src/toastify.css'
 
-assert(Toastify);
+assert(window.Toastify);
 
 import { ops } from './config.js'
-import { Fatal, fatalConfigurationMismatch } from './fatal.js'
 
 // Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
 //
 //import { Notifier } from "@airbrake/browser"    // causes problems with 'npm run prod:serve' (Rollup)
-assert(Notifier);   // from the init scripts
+assert(window.Notifier);   // from the init scripts
 
 let airbrake;   // 'Notifier' | undefined
 
@@ -40,20 +39,28 @@ const mode = import.meta.env.MODE;    // needs to be at the root (Rollup)
 //    lead to an infinite loop.
 
 if (!LOCAL) {
-  if (ops.logs.type === 'airbrake') {
-    const { projectId, projectKey } = ops.airbrake;
-    if (! (projectId && projectKey)) {
-      throw Fatal( fatalConfigurationMismatch,"Configuration mismatch: 'ops.airbrake.projectId' and/or 'ops.airbrake.projectKey' missing");
+  // Can have multiple logs handlers (good for comparing alternatives)
+  //  - { }   // ignore
+  //  - { type: 'airbrake', projectId: ..., projectKey: ... }   // airbrake.io
+  //  - { type: ... }
+  //
+  for( const o of ops.logs ) {
+    if (!o.type) {  // skip
+    } else if (o.type === 'airbrake') {
+      const { projectId, projectKey } = o;
+      if (! (projectId && projectKey)) {
+        throw Error( /*fatalConfigurationMismatch,*/ "Configuration mismatch for Airbrake logging: '.projectId' and/or '.projectKey' missing");
+      }
+
+      airbrake = new Notifier({
+        projectId,
+        projectKey,
+        environment: mode   // 'production'|'development'
+      });
+
+    } else {
+      throw Error( /*fatalConfigurationMismatch,*/ `Unexpected 'ops.logs[].type' in config: ${o.type}`);
     }
-
-    airbrake = new Notifier({
-      projectId,
-      projectKey,
-      environment: mode   // 'production'|'development'
-    });
-
-  } else if (ops.logs.type) {
-    throw Fatal( fatalConfigurationMismatch,`Unexpected 'ops.logs.type' in config: ${ops.logs.type}`);
   }
 }
 
@@ -74,6 +81,7 @@ if (LOCAL) {
     }
   };
 } else if (airbrake) {
+  assert(window.airbrake.notify);
 
   const severityMap = {
     'debug': "DEBUG",
@@ -169,6 +177,9 @@ const testInfo = { level: 'info' };
 const testWarn = { level: 'warn' };
 const testError = { level: 'error' };
 
+const vueWarning = { level: 'warn' };
+const vueError = { level: 'error' };
+
 const toastThese = new Set([
   testDebug, testWarn   // TESTING...
 ]);
@@ -178,5 +189,7 @@ export {
   testInfo,
   testWarn,
   testError,
+  vueWarning,
+  vueError,
   central
 }

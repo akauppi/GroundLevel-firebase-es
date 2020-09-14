@@ -45,10 +45,10 @@
     "dev:online": "tools/hasActiveProject.sh && vite --port 3001",
     " - -": "",
     "prod:build": "npm run _prod_rollup_build",
-    "prod:serve": "PORT=3010 npm run prod:rollup:serve",
+    "prod:serve": "PORT=3010 npm run _prod_rollup_serve",
     " -- ": "",
-    "prod:rollup:serve": "firebase serve --only hosting --port ${PORT:-3012}",
-    "preprod:rollup:serve": "npm run _prod_rollup_build",
+    "_prod_rollup_serve": "firebase serve --only hosting --host 0.0.0.0 --port ${PORT:-3012}",
+    "pre_prod_rollup_serve": "npm run _prod_rollup_build",
     "_prod_rollup_build": "rollup -c rollup.config.prod.js",
     "pre_prod_rollup_build": "npm run _prod_rollup_clean",
     "_prod_rollup_clean": "(rm public/dist/* 2> /dev/null || true)",
@@ -58,10 +58,10 @@
     "prod:deploy:rules": "firebase deploy --only firestore",
     "prod:deploy:all": "firebase deploy",
     "-   ": "",
-    "prod:vite:serve": "vite --mode production --port ${PORT:-3011}"
-  },
-  "//scripts": {
-    "//prod:vite:build": "vite build"
+    "_rollup:build": "npm run _prod_rollup_build",
+    "_rollup:serve": "npm run _prod_rollup_serve",
+    "_vite:build": "vite build && rm dist/dist/index.prod.html",
+    "_vite:serve": "vite --mode production --port ${PORT:-3011}"
   },
   "dependencies": {
     "@airbrake/browser": "^1.4.1",
@@ -85,6 +85,7 @@
     "jest": "^26.4.2",
     "jest-circus": "^26.4.2",
     "rollup": "^2.26.11",
+    "rollup-plugin-analyzer": "^3.3.0",
     "rollup-plugin-scss": "^2.6.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-vue": "^6.0.0-beta.10",
@@ -95,8 +96,7 @@
   },
   "//devDependencies": {
     "//@rollup/plugin-alias": "^3.1.0",
-    "//@rollup/plugin-commonjs": "^11.0.1",
-    "//rollup-plugin-filesize": "^9.0.2"
+    "//@rollup/plugin-commonjs": "^11.0.1"
   },
   "//comments": {
     "devDependencies": {

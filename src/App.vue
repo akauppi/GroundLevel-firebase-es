@@ -4,10 +4,12 @@
 - The frame of the application - same for all pages
 -->
 <template>
+  <!--
+  <fatal v-if="fatalMessage"/>
+  -->
   <header>
     <app-logo />
     <div id="mode" v-bind:class="{ devLocal: mode === 'dev_local', devOnline: mode === 'development' }">
-      {{ mode === 'dev_local' ? 'EMULATION MODE' : 'DEV:ONLINE' }}
     </div>
     <!-- Note: 'user' can be 'null' at first, then either an object (signed in) or 'false' (signed out).
     -->
@@ -32,12 +34,12 @@
   #mode.devLocal {
     display: block;
     background-color: dodgerblue;
-    content: 'EMULATION MODE'
+    content: 'EMULATION MODE';
   }
   #mode.devOnline {
     display: none;
     background-color: indianred;
-    content: 'ONLINE MODE'
+    content: 'ONLINE MODE';
   }
 </style>
 

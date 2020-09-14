@@ -13,6 +13,7 @@ import { strict as assert } from 'assert'
 // To support CommonJS dependencies, enable any lines mentioning 'commonjs'.
 
 //import alias from '@rollup/plugin-alias'
+import analyze from 'rollup-plugin-analyzer'
 //import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
@@ -77,7 +78,9 @@ const plugins = [
   //
   terser(),
 
-  prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } })
+  prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } }),
+
+  analyze()
 ];
 
 export default {
@@ -108,16 +111,20 @@ export default {
     manualChunks(id) {
       const pathParts = id.split(path.sep);
 
+      //console.debug("Looking for home for:", id);   // DEBUG
+
       if (id.includes('node_modules')) {
         const name = pathParts[ pathParts.lastIndexOf('node_modules') + 1 ];   // package or scope
 
         // Expected names (and their transformation).
         //
         const map = {
+          '@airbrake': true,
           '@firebase': 'firebase',
           '@vue': 'vue',
           'firebase': true,
           'idb': 'firebase',
+          'toastify-js': true,
           'tslib': true,  // used by Firebase, but keep it separate
           'vue': true,
           'vue-router': true

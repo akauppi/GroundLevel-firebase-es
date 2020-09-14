@@ -2,6 +2,28 @@
 
 *Place for informing of things that are not seen as bugs.*
 
+## Firebase hosting: "Cannot remove headers"
+
+```
+$ npm run prod:rollup:serve
+...
+Error [ERR_HTTP_HEADERS_SENT]: Cannot remove headers after they are sent to the client
+...
+```
+
+Described here:
+
+- [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
+
+
+**Work-around**
+
+Don't open the browser as `http://localhost:3012` but `http://localhost:3012/index.prod.html`. Also otherwise try to avoid situations where the redirecting would be needed.
+
+
+
+
+<!-- Haven't seen recently. REMOVE AK 14-Sep-20
 ## Vite build fails
 
 With Vite `1.0.0-rc.4`:
@@ -35,3 +57,6 @@ If you do want to externalize this module explicitly add it to
 This is weird.
 
 `m.photoURL` is from an `img` tag, not an import.
+-->
+
+

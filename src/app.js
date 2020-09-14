@@ -11,7 +11,8 @@ import { createApp } from 'vue'
 
 import { appTitle } from './config.js'
 
-import { central, testDebug, testInfo, testWarn, testError } from './central.js'
+import {central, testDebug, testInfo, testWarn, testError, vueWarning} from './central.js'
+import { fatal } from './fatal.js'
 
 import App from './App.vue'
 import { routerProm } from './router.js'
@@ -19,7 +20,9 @@ import { routerProm } from './router.js'
 document.title = appTitle;
 
 // Note: 'import.meta.env' is defined only under Vite; with Rollup 'import.meta.env' is undefined.
-const _MODE = import.meta.env?.MODE ?? 'production';
+const _MODE = import.meta.env?.MODE || 'production';
+
+console.debug("_MODE", _MODE);
 
 const app = createApp(App, { mode: _MODE });
 
@@ -31,20 +34,23 @@ if (true) {
   central( testError, "This is an ERROR test.");
 }
 
-/*** tbd. enable
 app.config.errorHandler = (err, vm, info) => {
+  console.debug("Vue error:", {err, vm, info});
 
-  // tbd. Airbreak allows shipping an 'Error' directly: see -> https://github.com/airbrake/airbrake-js/tree/master/packages/browser#basic-usage
-  logs.error("Vue error:", {err, vm, info});   // tbd. tune
+  central( vueError, "Vue error", {err, vm, info} );
+  //fatal(err);
+
+  // Send 'App' a message that an error has happened
 }
 
-if (!_MODE !== "production") {   // 'warnHandler' "only works during development"
+if (!_MODE !== 'production') {   // 'warnHandler' "only works during development"
 
   app.config.warnHandler = (msg, vm, trace) => {
-    logs.warn("Vue warning:", {msg, vm, trace});    // tbd. tune
+    console.warn("Vue warning:", {msg, vm, trace});
+
+    central(vueWarning, "Vue warning", {msg, vm, trace});
   }
 }
-***/
 
 (async () => {    // until we have top-level-await
   const router = await routerProm;
