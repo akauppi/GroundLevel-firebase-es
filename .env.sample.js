@@ -13,4 +13,14 @@ const airbrake = {
   //projectKey: '...'
 }
 
-export { airbrake }
+const firebase = {
+  //type: 'firebase',
+
+  // Needed when we host with Vite
+  //apiKey: '...',
+  //appId: '...',   // needed for Firebase Performance Monitoring
+  //projectId: '...',
+  //authDomain: '...firebaseapp.com'
+}
+
+export { airbrake, firebase }

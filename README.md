@@ -276,18 +276,9 @@ Then insert such a UID in `local/docs.js`, restart the server and you should hav
 
 ### `dev:online`
 
-With "online" development, you run against the Firebase back-end services of your active project. There's also a third party monitoring service but we don't need to activate it, yet.
-
-Just do this:
-
-```
-$ cp .env.sample.js .env.js
-```
-
-The `.env.js` doesn't have any account information for now; we'll get back to it later, during Ops discussion.
+With "online" development, you run against the Firebase back-end services of your active project. You can also use third party monitoring services but we don't need to activate them, yet.
 
 Now, let's create a Firebase project for your app. 😀
-
 
 #### Setting up Firebase project
 
@@ -307,24 +298,24 @@ Now, let's create a Firebase project for your app. 😀
    
    The alias you choose doesn't really matter. `"abc"` is okay.
    
-- Deploy Cloud Functions and Cloud Firestore Security Rules:
+- Deploy back-end features:
 
    ```
    $ firebase deploy --only functions,firestore
    ```
 
-#### Setting up `__.js`
+#### Set up `.env.js`
 
-When using Firebase hosting emulator, one's project configuration is offered automatically at `/__/firebase/init.js` URL. We use Vite for the hosting so an extra step is needed.
+When using Firebase hosting emulator, one's project configuration is offered automatically at `/__/firebase/init.js[on]` URLs. We use Vite for the hosting so an extra step is needed.
 
->Note: You can also see the project configuration in the Firebase Console. `Settings` > `Your apps`.
-
-The values are *not* secrets. You may place the file in version control, if you want. Anyone having access to your Web App will be able to see the parameters, if they want to.
-
-We've done a script that starts Firebase hosting momentarily, and lists the settings for you.
+>Note: this needs `curl`. If you have difficulties, you can also find the necessary fields in the Firebase Console.
 
 ```
-$ ./tools/print-__.js
+$ tools/print-__.sh
+i  emulators: Starting emulators: hosting
+i  hosting: Serving hosting files from: public
+✔  hosting: Local server: http://localhost:5000
+i  Running script: curl http://localhost:5000/__/firebase/init.json
 {
   "projectId": "vue-rollup-example",
   "appId": "1:990955970646:web:400a55b0df8ba415c2dbf7",
@@ -335,22 +326,43 @@ $ ./tools/print-__.js
   "authDomain": "vue-rollup-example.firebaseapp.com",
   "messagingSenderId": "990955970646",
   "measurementId": "G-VJSH9D5HX1"
+}i  hosting: 127.0.0.1 - - [14/Sep/2020:16:45:27 +0000] "GET /__/firebase/init.json HTTP/1.1" 200 - "-" "curl/7.64.1"
+✔  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  hosting: Stopping Hosting Emulator
+i  hub: Stopping emulator hub
+```
+
+You only need some of the fields. We place them in a `.env.js` file.
+
+```
+$ cp .env.sample.js .env.js
+```
+
+Edit `.env.js` so that:
+
+```
+...
+
+const firebase = {
+  type: 'firebase',
+
+  // Needed when we host with Vite
+  apiKey: ...,
+  appId: ...,   // needed for Firebase Performance Monitoring
+  projectId: ...,
+  authDomain: ...
 }
+...
 ```
 
-You only need some of the fields. Create `__.js` with these keys:
+The values are *not* secrets. You may place the file in version control, if you want (and remove the sample). Anyone having access to your Web App will be able to see the parameters, if they want to.
 
-```
-const __ = {
-  apiKey: '...',
-  appId: '...',
-  projectId: '...',
-  authDomain: '...'
-}
-export { __ }
-```
-
+<!-- later, alligator 🐊
 >Note: If your `locationId` is something else than "europe-west3", change occurrences of `"europe-west3"` within the repo. Remind us about this in Issues, to make this a globally friendly project. 🌏
+-->
+
+The file can also carry third party tool access id's. We'll return to that in the ops section.
 
 #### Launch! 🚀
 
