@@ -5,6 +5,7 @@
 *
 * See comments in 'src/init.vite.js'.
 */
+import { assert } from './assert.js'
 
 // DOES NOT WORK but is according to npm firebase instructions:
 //  <<
@@ -21,7 +22,7 @@ import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
-import { ops } from './config.js'
+import { ops } from './ops-config.js'
 
 let enableFirebasePerf = false;
 if (ops.perf.type == 'firebase') { enableFirebasePerf = true; }
@@ -30,26 +31,7 @@ else if (ops.perf.type) {
     // note: Doesn't really need to be 'fatal' but best to have the configs sound.
 }
 
-/*
-* Set up globals
-*
-* Note: Needs to be set up in a block that does not import our app level code.
-*/
-function assert(cond, msgOpt) {
-  if (!cond) {
-    if (msgOpt) {
-      console.assert(msgOpt);
-    }
-    throw Error(`Assertion failed: ${msgOpt || '(no message)'}`);
-  }
-}
-
 assert(firebase.initializeApp);
-
-// As long as loading Firebase via 'import' is shaky (also with Vite), let's place it as a global.
-//
-window.firebase = firebase;
-window.assert = assert;
 
 async function initFirebase() {
   // Browsers don't dynamically 'import' a JSON (Chrome 85):
@@ -77,7 +59,7 @@ async function initFirebase() {
   });
 
   if (enableFirebasePerf) {
-    // tbd. Does it matter if this is before or after 'initializeApp'?
+    // tbd. Q: #Firebase Does it matter if this is before or after 'initializeApp'?
     await import('@firebase/performance');
     /*const perf =*/ firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed. tbd.
   }

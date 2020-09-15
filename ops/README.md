@@ -42,7 +42,7 @@ Airbrake covers:
 
 ### Provide the ops id & key
 
-Edit `.env.js` or modify `src/config.js` directly, and provide your Airbrake project's id & key:
+Edit `.env.js` or modify `src/ops-config.js` directly, and provide your Airbrake project's id & key:
 
 ```
 const ops = {
@@ -53,7 +53,7 @@ const ops = {
 export { ops }
 ```
 
-Note: You can have this file in version control - or remove it and place the values directly in `src/config.js`. It's not version controlled because the author of GroundLevel does not wish others to accidentially start logging to the same Airbrake project. This isn't a problem when you work on an app repo instead of a template.
+Note: You can have this file in version control. It's not version controlled because the author of GroundLevel does not wish others to accidentially start logging to the same Airbrake project. This isn't a problem when you work on an app repo instead of a template.
 
 >Note: the project id/key are not secret. People having access to your client will be able to figure them out. 
 

@@ -1,11 +1,11 @@
 // .env.js
 //
-// Operational configuration. Gets merged to 'src/config.js' at build time.
+// Operational configuration. Gets merged to 'src/ops-config.js' at build time.
 //
 // The values are used for 'dev:online' and production.
 //
 // NOTE: The values are *not* secret since they get exposed in the client. You can add the file to version control,
-//      or provide the values directly in 'src/config.js'.
+//      or provide the values directly in 'src/ops-config.js'.
 //
 const airbrake = {
   //type: 'airbrake',

@@ -7,6 +7,8 @@
 *   - Firebase initialization is crucially different for the 'dev:local' mode vs. 'dev:online' and production.
 *   - allows easy differentiation/experiments between Rollup and Vite approaches
 */
+import { assert } from './assert.js'
+
 //import * as firebase from 'firebase/app'    // DOES NOT WORK (in Vite, dev mode) but is according to npm firebase instructions
 //import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
 
@@ -15,33 +17,14 @@ import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
-import { Notifier } from '@airbrake/browser'    // normal ES import works with Vite (NOT with Rollup)
+import Toastify from 'toastify-js'
+import 'toastify-js/src/toastify.css'
 
-/*
-* Don't want to add dependency on 'assert' module.
-*/
-function assert(cond, msgOpt) {
-  if (!cond) {
-    if (msgOpt) {
-      console.assert(msgOpt);
-    }
-    throw new Error(`Assertion failed: ${msgOpt || '(no message)'}`);
-  }
-}
+import { Notifier } from '@airbrake/browser'    // normal ES import works with Vite (NOT with Rollup)
 
 assert(firebase.initializeApp, "Firebase initialization failed");
 
-// As long as loading Firebase via 'import' is shaky (at least with Vite 1.0.0-rc.8 in dev mode), let's place it
-// as a global.
-//
-window.firebase = firebase;
-window.assert = assert;
-
 const LOCAL = import.meta.env.MODE === "dev_local";
-window.LOCAL = LOCAL;    // inform the UI
-
-// ES note: Seems 'import.meta.env' must be read at the root.
-const _MODE = import.meta.env.MODE;
 
 let enableFirebasePerfProm;   // Promise of boolean | undefined
 
@@ -49,7 +32,7 @@ if (!LOCAL) {     // tbd. once have top-level-await, use it here
   enableFirebasePerfProm = (async _ => {
     // Dynamic import so that '.env.js' is not needed, for 'dev:local'
     //
-    const { ops } = await import('./config.js');
+    const { ops } = await import('./ops-config.js');
 
     // For 'dev:online' and production, we require ops configuration to be given.
     //
@@ -107,8 +90,11 @@ async function initFirebase() {   // () => Promise of ()
     });
 
   } else {
-    const mod = await import('../__.js');   // not needed for 'dev:local'
-    const {apiKey, appId, authDomain, projectId} = mod.__;
+    //REMOVE comment? ES note: Seems 'import.meta.env' must be read at the root.
+    const _MODE = import.meta.env.MODE;   // 'development'|'production'
+
+    const mod = await import('../.env.js');
+    const {apiKey, appId, authDomain, projectId} = mod.firebase;
 
     assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 
@@ -136,17 +122,33 @@ async function initFirebase() {   // () => Promise of ()
   }
 }
 
-async function initCentral() {
-  window.Toastify = import('toastify-js');    // the normal way
-  import('toastify-js/src/toastify.css');
-
+async function initCentral() {    // () => Promise of central
+  // Both Toastify and Airbrake have issues with static import in Rollup (but not in Vite). This is why we provide
+  // the values as a global (to be abandoned, once we can just import them statically, within 'central.js').
+  //
+  window.Toastify = Toastify;
   window.Notifier = Notifier;
 
-  await import('./central.js');
+  const mod = await import('./central.js'); const { central } = mod;
+  return central;
 }
 
 (async _ => {
-  await Promise.all([initFirebase(), initCentral()]);
+  console.debug("Initializing Firebase and central...");
+  const [__, central] = await Promise.all([initFirebase(), initCentral()]);
 
-  /*run free*/ import('./app.js');
+  window.assert = assert;
+  window.central = central;
+
+  // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
+  //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.
+  //
+  window.firebase = firebase;
+
+  console.debug("Launching app...");
+
+  const mod = await import('./app.js'); const { init } = mod;
+  await init();
+
+  console.debug("App on its own :)");
 })();

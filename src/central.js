@@ -10,6 +10,9 @@
 *
 * Such logs can also be shown as Toasts, in the UI. Which logs ignite toasts is configurable.
 */
+import { assert } from './assert.js'
+
+const LOCAL = import.meta.env?.MODE === "dev_local";   // note: 'import.meta.env' not defined for Rollup
 
 // Rollup doesn't build these:
 //  <<
@@ -22,9 +25,12 @@
 //import Toastify from 'toastify-js'
 //import 'toastify-js/src/toastify.css'
 
+import { firebase } from '@firebase/app/dist/index.esm.js'    // works; index2017.esm.js doesn't
+import '@firebase/functions'
+
 assert(window.Toastify);
 
-import { ops } from './config.js'
+import { ops } from './ops-config.js'
 
 // Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
 //
@@ -66,6 +72,7 @@ if (!LOCAL) {
 
 let logGen;   // (string) => (string [, object]) => ()
 
+// tbd. if we go to FOUR REPOS model, this (and need for Firebase) would disappear.
 if (LOCAL) {
   // Using Firebase callables for 'dev:local'. Generally a bad idea, since it requires an online connection, but
   // suitable for development.
@@ -146,7 +153,7 @@ const logs = {
 function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal' }, string) => ()
   const { level } = id;
 
-  if (toastThese[id]) {
+  if (ops.toastThis(id)) {
     Toastify({
       text: msg,
       duration: 3000,
@@ -166,30 +173,6 @@ function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal'
   logs[level](msg);
 }
 
-/*
-* Logging id's
-*
-* Note: Use of the id's allows us to defined centrally, which get toasted (shown in the UI), and ..maybe.. in the future
-*     provide translations.
-*/
-const testDebug = { level: 'debug' };
-const testInfo = { level: 'info' };
-const testWarn = { level: 'warn' };
-const testError = { level: 'error' };
-
-const vueWarning = { level: 'warn' };
-const vueError = { level: 'error' };
-
-const toastThese = new Set([
-  testDebug, testWarn   // TESTING...
-]);
-
 export {
-  testDebug,
-  testInfo,
-  testWarn,
-  testError,
-  vueWarning,
-  vueError,
   central
 }

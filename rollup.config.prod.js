@@ -170,12 +170,17 @@ export default {
       }
     },
 
-    // Could use this for differentiating between Vite and Rollup builds (but rather do it in the init scripts)
-    /* environment: {
-      ROLLUP: 'true'   // 'process.env.ROLLUP'
-    },*/
+    sourcemap: true,   // have source map even for production
 
-    sourcemap: true   // have source map even for production
+    // tbd. Try different values. Can we make the official Firebase loading work, by tuning this??
+    //  - "esModule"
+    //  - "auto" (the new default, from Rollup > 26)
+    //  - "default"
+    //
+    // -> https://rollupjs.org/guide/en/#outputinterop
+    interop: "auto",
+
+    intro: "const ROLLUP = true;"
   },
 
   preserveEntrySignatures: false,   // "recommended setting for web apps" (supresses a warning)

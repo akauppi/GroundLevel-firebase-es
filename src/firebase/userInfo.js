@@ -5,7 +5,7 @@
 *
 * Note: It is enough to just 'import' this file, to have the 'userInfo' collection track the user's UI info.
 */
-assert(firebase.firestore);
+assert(firebase.firestore)
 
 const db = firebase.firestore();
 

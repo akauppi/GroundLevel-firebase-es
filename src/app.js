@@ -5,14 +5,14 @@
 *
 * When we get here:
 *   - Firebase is initialized
+*   - ops handling (error gathering, central logging) is initialized
 *   - 'assert' is available, as a global
 */
 import { createApp } from 'vue'
 
 import { appTitle } from './config.js'
 
-import {central, testDebug, testInfo, testWarn, testError, vueWarning} from './central.js'
-import { fatal } from './fatal.js'
+import {testDebug, testInfo, testWarn, testError, vueWarning} from './logging.js'
 
 import App from './App.vue'
 import { routerProm } from './router.js'
@@ -52,8 +52,13 @@ if (!_MODE !== 'production') {   // 'warnHandler' "only works during development
   }
 }
 
-(async () => {    // until we have top-level-await
+/*
+* Exposing this to the ops allows more control than free-running tail. Maybe...
+*/
+async function init() {
   const router = await routerProm;
   app.use(router)
     .mount('#app');
-})();
+}
+
+export { init }

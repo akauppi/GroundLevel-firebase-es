@@ -4,9 +4,9 @@
 * Code because Firebase 'functions' needs to be set up differently for local emulation, or working against cloud
 * (when regions are used).
 */
-import {functionsRegion} from "../config"
+assert(firebase.functions)
 
-assert(firebase.functions);
+import {functionsRegion} from "../config"
 
 // WARN:
 //  Whether a function was deployed to the cloud or not SEEMS TO AFFECT how it should be used, under emulation.
