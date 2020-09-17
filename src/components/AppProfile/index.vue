@@ -5,7 +5,7 @@
 - Only visible when signed in.
 -->
 <template>
-  <div class="app-profile fixed-top-right" @click.stop="openDialog">
+  <div class="app-profile absolute-top-right" @click.stop="openDialog">
     <div id="user-name">
       {{ user ? (user.displayName || 'anonymous user') : 'WHAT?!?' }}
     </div>
@@ -54,18 +54,6 @@
     padding-left: 0.6em;
   }
 
-  /*** disabled
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: all .2s ease-out;
-  }
-
-  .fade-enter,
-  .fade-leave-to {
-    opacity: 0;
-  }
-  ***/
-
   /* Note: Firefox (Aug 2020): 'backdrop-filter' implemented but not enabled by default
   *     -> https://bugzilla.mozilla.org/show_bug.cgi?id=1178765
   */
@@ -80,13 +68,10 @@
     z-index: 9999;
 
     backdrop-filter: blur(6px);
-
-    /*-webkit-transition: 0.5s;*/
-    /*transition: all 3s linear;*/
   }
 
-  .fixed-top-right {
-    position: fixed;
+  .absolute-top-right {
+    position: absolute;
     top: 0;
     right: 0;
   }

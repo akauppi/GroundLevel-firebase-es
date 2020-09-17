@@ -39,7 +39,7 @@
     ${PRELOADS}
     -->
 
-    <!--PROD Unable to load 'Toastify' within scripts, using Rollup - see 'central.js'.
+    <!--PROD Unable to load 'Toastify' within scripts, using Rollup.
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     -->
@@ -59,9 +59,56 @@
       import './src/init.vite.js'
     </script>
     <!-- -->
+
+    <style>
+    #fatal {
+        background-color: orangered;
+        height: 3em;
+        padding: 1em;
+        margin-bottom: 3px;
+        border-style: dotted;
+        box-shadow: #ccc 0 3px;
+        overflow: hidden;
+
+        line-height: 1.5em;
+        transition: height 0.3s, padding 0.3s;
+    }
+    #fatal::before {
+        content: "⚠️ "
+    }
+    #fatal.inactive {
+        padding: 0 1em;
+        height: 0;
+        border-style: none;
+        margin-bottom: 0;
+    }
+
+    /* Something brings 'margin-top: 8px'. We don't want that. */
+    body {
+        margin: 0;
+    }
+
+    #magicBtn {
+        position: fixed;
+        right: 0;
+        bottom: 25px;
+        padding: 10px;
+    }
+    </style>
+
+    <script>
+      function magic() {
+        const el = document.getElementById("fatal");
+        el.classList.toggle("inactive");
+      }
+    </script>
   </head>
 
   <body>
-    <div id="app"></div>
+    <div id="fatal" class="inactive"></div>
+    <div id="app" style="position: relative"></div>
+    <!--
+    <button id="magicBtn" onclick="magic();">Show/hide fatal</button>
+    -->
   </body>
 </html>

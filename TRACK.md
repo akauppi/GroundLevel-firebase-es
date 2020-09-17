@@ -160,3 +160,8 @@ Also otherwise try to link with `rollup-plugin-vue`.
 - [ ] Re-enable when above is solved.
 
 
+## Rollbar Vue plugin: availability for Vue.js 3?
+
+- Study its sources or take into action once there is a Vue.js 3 version.
+- [https://github.com/gaelreyrol/vue-rollbar](https://github.com/gaelreyrol/vue-rollbar)
+

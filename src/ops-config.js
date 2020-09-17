@@ -24,8 +24,8 @@ const toastThese = new Set([ testDebug, testWarn ]);
 
 const ops = {
   perf: [firebase],
-  errors: [airbrake],
   logs: [airbrake],
+  fatal: [airbrake],
 
   toastThis(id) {   // (obj) => boolean
     return toastThese.has(id);

@@ -4,18 +4,18 @@
 - The logo in top left corner
 -->
 <template>
-  <div class="app-logo fixed-top-left">
+  <div class="absolute-top-left">
     YOUR LOGO HERE!
   </div>
 </template>
 
 <style scoped>
-  .app-logo {
+  div {
     padding: 10px;
     background-color: orange;
   }
-  .fixed-top-left {
-    position: fixed;
+  .absolute-top-left {
+    position: absolute;
     top: 0;
     left: 0;
   }

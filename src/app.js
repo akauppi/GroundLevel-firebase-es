@@ -22,8 +22,6 @@ document.title = appTitle;
 // Note: 'import.meta.env' is defined only under Vite; with Rollup 'import.meta.env' is undefined.
 const _MODE = import.meta.env?.MODE || 'production';
 
-console.debug("_MODE", _MODE);
-
 const app = createApp(App, { mode: _MODE });
 
 /*** JUST TESTING ***/
@@ -32,24 +30,6 @@ if (true) {
   central( testInfo, "This is a INFO test.");
   central( testWarn, "This is a WARNING test.");
   central( testError, "This is an ERROR test.");
-}
-
-app.config.errorHandler = (err, vm, info) => {
-  console.debug("Vue error:", {err, vm, info});
-
-  central( vueError, "Vue error", {err, vm, info} );
-  //fatal(err);
-
-  // Send 'App' a message that an error has happened
-}
-
-if (!_MODE !== 'production') {   // 'warnHandler' "only works during development"
-
-  app.config.warnHandler = (msg, vm, trace) => {
-    console.warn("Vue warning:", {msg, vm, trace});
-
-    central(vueWarning, "Vue warning", {msg, vm, trace});
-  }
 }
 
 /*

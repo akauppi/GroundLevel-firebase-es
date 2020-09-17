@@ -124,7 +124,6 @@ export default {
           '@vue': 'vue',
           'firebase': true,
           'idb': 'firebase',
-          'toastify-js': true,
           'tslib': true,  // used by Firebase, but keep it separate
           'vue': true,
           'vue-router': true

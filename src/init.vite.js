@@ -1,11 +1,12 @@
 /*
 * src/init.vite.js
 *
-* The entry point for development mode.
+* The entry point for Vite (development and potential 'prod:vite:serve').
 *
-* There are a couple of reasons for this separate layer between 'index.html' and 'main.js'.
-*   - Firebase initialization is crucially different for the 'dev:local' mode vs. 'dev:online' and production.
-*   - allows easy differentiation/experiments between Rollup and Vite approaches
+* Having two different initializations (Vite; Rollup) serves a few goals:
+*   - development initialization of Firebase is hugely different from production setup (unfortunate)
+*   - import of some libraries is different in Rollup vs. Vite (generally, Vite seems to be more easy to work with)
+*   - the REAL value we get is having two production candidates (Vite and Rollup builds); both of which should work!! :)
 */
 import { assert } from './assert.js'
 
@@ -17,10 +18,8 @@ import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
-import Toastify from 'toastify-js'
-import 'toastify-js/src/toastify.css'
-
-import { Notifier } from '@airbrake/browser'    // normal ES import works with Vite (NOT with Rollup)
+import { Notifier } from '@airbrake/browser'
+import {ops} from "./ops-config";    // normal ES import works with Vite (NOT with Rollup)
 
 assert(firebase.initializeApp, "Firebase initialization failed");
 
@@ -34,15 +33,11 @@ if (!LOCAL) {     // tbd. once have top-level-await, use it here
     //
     const { ops } = await import('./ops-config.js');
 
-    // For 'dev:online' and production, we require ops configuration to be given.
-    //
-    if (ops.perf?.type === undefined) {   // not set; no perf
-      return false;
-    }
-    else if (ops.perf.type === 'firebase') {
+    if (ops.perf.type == 'firebase') {
       return true;
-    } else {
-      throw Error(/*fatalConfigurationMismatch,*/ `Configuration mismatch: 'ops.perf.type' has unknown value: ${ops.perf.type}`);
+    } else if (ops.perf.type) {
+      throw new Error(`Unexpected 'perf.type' ops config (ignored): ${ops.perf.type}`);
+        // note: Doesn't really need to be this fatal, but best to have the configs sound.
     }
   })();
 }
@@ -60,22 +55,34 @@ async function initFirebase() {   // () => Promise of ()
       projectId: 'app',     // <-- must match that in 'package.json'
       authDomain: 'vue-rollup-example.firebaseapp.com'
     };
-
-    // Minimum fields, needed for auth. Using a known-to-exist project.
-    //
-    // Note: project id needs to match that in 'package.json' (carrying it past Vite from 'GCLOUD_PROJECT' was difficult)
-    //
     firebase.initializeApp(justAuthOptions);
 
     // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
     //
-    // Note: Would LOVE two things to happen:
-    //    - emulation to be a configuration thing for Firebase. Set up there, not here!!
-    //    - the 'firebase' object to expose (e.g. 'firebase.emulated: [...]' whether parts are emulated or not)
-    //        OR: to have a REST API that exposes these details
+    // We get the necessary values from 'firebase.json' itself. This way, things are controlled there, and the code
+    // follows, accordingly.
     //
-    const DEV_FUNCTIONS_URL = "http://localhost:5001";
-    const FIRESTORE_HOST = "localhost:6767";    // Could pass this from 'firebase.json' as 'import.meta...' #maybe
+    // Note: Would LOVE:
+    //    - the 'firebase' library to handle this all on its own
+    //    - the 'firebase' object to expose emulation status (e.g. as 'firebase.emulated...')
+    //
+    const [firestorePort, fnsPort] = await (async () => {
+      const json = await fetch('./firebase.json').then(resp => {
+        if (!resp.ok) {
+          console.fatal("Unable to read 'firebase.json'", resp);
+          throw new Error("Unable to read 'firebase.json' (see console)");
+        } else {
+          return resp.json();   // Promise of ... ('.then' takes care of it)
+        }
+      });
+
+      const aPort = json.emulators?.firestore?.port || (_ => { throw new Error("Please define 'emulators.firestore.port' in firebase.json." ); })();
+      const bPort = json.emulators?.functions?.port || (_ => { throw new Error("Please define 'emulators.functions.port' in firebase.json." ); })();
+
+      return [aPort,bPort];
+    })();
+    const FIRESTORE_HOST = `localhost:${firestorePort}`;   // "localhost:6767"
+    const DEV_FUNCTIONS_URL = `http://localhost:${fnsPort}`;    // "localhost:5002"
 
     // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
     //
@@ -90,7 +97,7 @@ async function initFirebase() {   // () => Promise of ()
     });
 
   } else {
-    //REMOVE comment? ES note: Seems 'import.meta.env' must be read at the root.
+    //tbd. REMOVE comment? ES note: Seems 'import.meta.env' must be read at the root.
     const _MODE = import.meta.env.MODE;   // 'development'|'production'
 
     const mod = await import('../.env.js');
@@ -98,11 +105,7 @@ async function initFirebase() {   // () => Promise of ()
 
     assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 
-    if (_MODE === "development") {    // dev:online
-      console.info("Initializing for DEV:ONLINE (cloud back-end; local, watched front-end).");
-
-    } else {      // 'npx vite build' - just TESTING for comparison with Rollup - quality rot warning!!! 💩
-      assert(_MODE === "production");
+    if (_MODE === "production") {   // 'npx vite build' - just TESTING for comparison with Rollup builds
       console.warn("Initializing for Vite PRODUCTION (experimental!!!)");
     }
 
@@ -113,32 +116,41 @@ async function initFirebase() {   // () => Promise of ()
       authDomain
     });
 
-    // tbd. Must differ between 'dev:online' and production tracking (call it 'prod:vite:serve', not 'production'). <-- app name?
-    //
     if (await enableFirebasePerfProm) {
       await import ('@firebase/performance');
-      firebase.performance();   // should provide basic reporting
+
+      // tbd. How to differ between 'dev:online' and production tracking? Maybe use app name??? #firebase
+      firebase.performance();   // basic reporting
     }
   }
 }
 
 async function initCentral() {    // () => Promise of central
-  // Both Toastify and Airbrake have issues with static import in Rollup (but not in Vite). This is why we provide
-  // the values as a global (to be abandoned, once we can just import them statically, within 'central.js').
+  // Airbrake has issues with import in Rollup (but not in Vite). This is why we provide the value as a global
+  // (to be abandoned, once we can just import it statically, within 'central.js').
   //
-  window.Toastify = Toastify;
   window.Notifier = Notifier;
 
-  const mod = await import('./central.js'); const { central } = mod;
-  return central;
+  return await import('./central.js').then( mod => mod.central );
 }
 
 (async _ => {
-  console.debug("Initializing Firebase and central...");
-  const [__, central] = await Promise.all([initFirebase(), initCentral()]);
+  console.debug("Initializing ops stuff...");
+
+  const t0 = performance.now();
+
+  const [__, central, ___ /*centralError*/] = await Promise.all([
+    initFirebase(),
+    initCentral(),
+    import('./centralError.js') //.then( mod => mod.centralError )
+  ]);
+
+  const dt = performance.now() - t0;
+  console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);  // 90, 100, 114 ms
 
   window.assert = assert;
   window.central = central;
+  //window.centralError = centralError;
 
   // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
   //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.

@@ -12,37 +12,20 @@
 */
 import { assert } from './assert.js'
 
-const LOCAL = import.meta.env?.MODE === "dev_local";   // note: 'import.meta.env' not defined for Rollup
-
-// Rollup doesn't build these:
-//  <<
-//    TypeError: object null is not iterable
-//  <<
-//
-// Instead of doing if/else on Rollup vs. Vite here, we set the 'Toastify' in the init blocks. Once/if Toastify becomes
-// at friends with Rollup (targeting ES modules is likely the problem?), return to modular design and 'import' here.
-//
-//import Toastify from 'toastify-js'
-//import 'toastify-js/src/toastify.css'
+const _MODE = import.meta.env?.MODE || 'production';    // default is for Rollup (no 'import.meta.env' support, yet Sep-20)
+const LOCAL = _MODE === "dev_local";   // note: 'import.meta.env' not defined for Rollup
 
 import { firebase } from '@firebase/app/dist/index.esm.js'    // works; index2017.esm.js doesn't
 import '@firebase/functions'
 
-assert(window.Toastify);
-
 import { ops } from './ops-config.js'
 
-// Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
+// Note: Rollup has difficulties importing '@airbrake/browser' (under Vite, loads fine).
 //
 //import { Notifier } from "@airbrake/browser"    // causes problems with 'npm run prod:serve' (Rollup)
 assert(window.Notifier);   // from the init scripts
 
 let airbrake;   // 'Notifier' | undefined
-
-const mode = import.meta.env.MODE;    // needs to be at the root (Rollup)
-
-// Note: We _know_ that we get called before 'app.js', so it's safe to throw a 'Fatal' at initialization - it won't
-//    lead to an infinite loop.
 
 if (!LOCAL) {
   // Can have multiple logs handlers (good for comparing alternatives)
@@ -51,21 +34,20 @@ if (!LOCAL) {
   //  - { type: ... }
   //
   for( const o of ops.logs ) {
-    if (!o.type) {  // skip
+    if (!o.type) {
+      // skip
     } else if (o.type === 'airbrake') {
       const { projectId, projectKey } = o;
-      if (! (projectId && projectKey)) {
-        throw Error( /*fatalConfigurationMismatch,*/ "Configuration mismatch for Airbrake logging: '.projectId' and/or '.projectKey' missing");
-      }
+      assert(projectId && projectKey);    // already tested by 'ops-config.js' that they exist
 
       airbrake = new Notifier({
         projectId,
         projectKey,
-        environment: mode   // 'production'|'development'
+        environment: _MODE   // 'production'|'development'
       });
 
     } else {
-      throw Error( /*fatalConfigurationMismatch,*/ `Unexpected 'ops.logs[].type' in config: ${o.type}`);
+      throw new Error( `Unexpected 'logs[].type' in ops config: ${o.type}`);
     }
   }
 }
@@ -88,7 +70,7 @@ if (LOCAL) {
     }
   };
 } else if (airbrake) {
-  assert(window.airbrake.notify);
+  assert(airbrake.notify);
 
   const severityMap = {
     'debug': "DEBUG",
@@ -153,6 +135,7 @@ const logs = {
 function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal' }, string) => ()
   const { level } = id;
 
+  /*** disabled
   if (ops.toastThis(id)) {
     Toastify({
       text: msg,
@@ -169,6 +152,7 @@ function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal'
       }
     }).showToast();
   }
+  ***/
 
   logs[level](msg);
 }

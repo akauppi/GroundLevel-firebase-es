@@ -68,3 +68,5 @@ Don't want to twist the blade for Vite, but merely provide a bar that can be rea
 <!-- too mcuh
 Since `index.html` now has become a read-only file for us, I'd still like to place it away from the root... Any ideas??
 -->
+
+>Note: Firebase hosting (8.10.0) [does not support HTTP/2 when emulated](https://github.com/firebase/firebase-tools/issues/2571). Loading performance comparisons should therefore be done with actually deployed code.

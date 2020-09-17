@@ -1,5 +1,10 @@
 # Changelog
 
+## latest
+
+- Very clumsy error panel (shows uncaught errors in UI), but works.
+- Taking Functions emulator's port (in `dev:local`) from `firebase.json`.
+
 ## 13-Sep-20
 
 - Using `firebase-jest-testing` from `npm` registry

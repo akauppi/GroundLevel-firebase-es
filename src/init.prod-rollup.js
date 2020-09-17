@@ -1,9 +1,9 @@
 /*
 * src/init.prod-rollup.js
 *
-* The entry point for production mode.
+* The entry point for Rollup (production candidate).
 *
-* See comments in 'src/init.vite.js'.
+* See also comments in 'src/init.vite.js'.
 */
 import { assert } from './assert.js'
 
@@ -16,44 +16,59 @@ import { assert } from './assert.js'
 //import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
 
 //import firebase from '@firebase/app'  // this works
-import { firebase } from '@firebase/app/dist/index.esm2017.js'    // this also works
-
+import { firebase } from '@firebase/app/dist/index.esm2017.js'    // also works
 import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
 import { ops } from './ops-config.js'
 
-let enableFirebasePerf = false;
-if (ops.perf.type == 'firebase') { enableFirebasePerf = true; }
-else if (ops.perf.type) {
-  throw Error(`Unexpected config 'ops.perf.type' (ignored): ${ops.perf.type}`);
-    // note: Doesn't really need to be 'fatal' but best to have the configs sound.
-}
-
 assert(firebase.initializeApp);
 
-async function initFirebase() {
-  // Browsers don't dynamically 'import' a JSON (Chrome 85):
-  //  <<
-  //    The server responded with a non-JavaScript MIME type of "application/json".
-  //  <<
+const enableFirebasePerf = (_ => {
+  if (ops.perf.type == 'firebase') {
+    return true;
+  } else if (ops.perf.type) {
+    throw new Error(`Unexpected 'perf.type' ops config (ignored): ${ops.perf.type}`);
+      // note: Doesn't really need to be this fatal, but best to have the configs sound.
+  }
+})();
+
+// Get the Firebase configuration.
+//
+// Note: We have the data in 'ops-config.js' but here we should have access to the real source (Firebase hosting)
+//    so let's prefer it (for marginally faster loading, or hosting on something else than Firebase, use the other
+//    implementation).
+//
+const firebaseConfigProm = (async _ => {
+  // Note: Browsers don't dynamically 'import' a JSON (Chrome 85)
   //const json = await import('/__/firebase/init.json');    // NOPE
 
-  const json = await fetch('/__/firebase/init.json').then( resp => {
+  const json = await fetch('/__/firebase/init.json').then(resp => {
     if (!resp.ok) {
       console.fatal("Unable to read Firebase config:", resp);
-      throw Error("Unable to read Firebase config (see console)");
+      throw new Error("Unable to read Firebase config (see console)");
     } else {
-      return resp.json();   // Promise of ...
+      return resp.json();   // Promise of ... ('.then' takes care of it)
     }
   });
+  return json;
+})();
 
-  const { apiKey, appId, projectId, authDomain } = json;
+/*SAMPLE
+// Same, for using the cached values
+(async _ => {
+  const json = await import('./ops-config.js').then( mod => mod.firebase );
+  return json;
+})();
+*/
+
+async function initFirebase() {
+  const { apiKey, appId, projectId, authDomain } = await firebaseConfigProm;
 
   firebase.initializeApp({
     apiKey,
-    appId: enableFirebasePerf ? appId : undefined,      // needed for Firebase Performance Monitoring
+    appId,      // needed for Firebase Performance Monitoring
     projectId,
     authDomain
   });
@@ -61,56 +76,51 @@ async function initFirebase() {
   if (enableFirebasePerf) {
     // tbd. Q: #Firebase Does it matter if this is before or after 'initializeApp'?
     await import('@firebase/performance');
-    /*const perf =*/ firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed. tbd.
+    /*const perf =*/ firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed.
   }
 }
 
-// ALL of our trying to load 'Toastify' and 'Airbrake' (unrelated) failed. Getting these from 'index.html'.
-// Must happen before an 'async' block loading 'central.js'.
-// Real solution is to have those libraries fixed, so we can _statically_ import them, in 'central.js'. And #peace will prevail??
-//
-assert(Toastify);
-
-assert(window.airbrake);
-window.Notifier = airbrake.Notifier;
-assert(Notifier);
-
 async function initCentral() {
-  // Rollup note: It seems to initiate all dynamic 'import's within a scope at the same time. This is not suitable
-  //    for us, if we want to pass 'Toastify' and 'Notifier' to 'central.js' as globals.
-
-  // #optimize: Can load Toastify and Airbrake in parallel (but rather have Toastify be statically importable).
-
-  /* EVEN THIS didn't work - loading it in 'index.html'
-  // Toastify (1.9.1) doesn't like to be statically 'import'ed by Rollup (2.26.11).
-  // Dynamic import seems to work, however.
+  // Our trying to load 'Airbrake' failed. Getting these from 'index.html'.
+  // Real solution is to have the library fixed, so it can be _statically_ imported, in 'central.js'.
   //
-  window.Toastify = await import('toastify-js');
-  await import('toastify-js/src/toastify.css');
-  */
+  assert(window.airbrake);
+  window.Notifier = airbrake.Notifier;
 
-  /** ALSO all these fail - load from index.html
-  // Airbrake (1.4.1) doesn't like to be 'import'ed by Rollup (2.26.11).
-  //
-  //const { Notifier } = await import("@airbrake/browser");   // build FAILS: "object null is not iterable"
-  const { Notifier } = await import("@airbrake/browser/dist/index.js");   // builds but: "Unresolved dependencies" (-> fails in runtime..)
-  //const { Notifier } = await import("@airbrake/browser/esm/index.js");    // build FAILS: "object null is not iterable"
-  **/
-
-  await import('./central.js');
+  const { central } = await import('./central.js');
+  return central;
 }
 
 (async () => {
-  // Ensure that 'app.js' has both Firebase and 'central' installed.
+  const t0 = performance.now();
+
+  // Ensure that 'app.js' has Firebase, 'central' and 'centralError' installed.
   //
-  await Promise.all([initFirebase(), initCentral()]);
+  await Promise.all([
+    initFirebase(),
+    initCentral(),
+    import('./centralError.js').then( mod => mod.centralError )
+  ]);
     //
-    // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since all is loaded at launch).
+    // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since chunks are loaded at launch).
+
+  const dt = performance.now() - t0;
+  console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);
 
   debugger;
   console.info("Loading the app.");
 
-  await import('./app.js');
+  assert(window.firebase);
+  /* tbd. enable this
+  console.debug("Launching app...");
+
+  const mod = await import('./app.js'); const { init } = mod;
+  await init();
+
+  console.debug("App on its own :)");
+  */
+
+  /*free running*/ import('./app.js');
 })();
 
 export { };

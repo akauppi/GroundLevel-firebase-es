@@ -14,13 +14,11 @@ const testWarn = { level: 'warn' };
 const testError = { level: 'error' };
 
 const vueWarning = { level: 'warn' };
-const vueError = { level: 'error' };
 
 export {
   testDebug,
   testInfo,
   testWarn,
   testError,
-  vueWarning,
-  vueError
+  vueWarning
 }

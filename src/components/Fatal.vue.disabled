@@ -1,0 +1,36 @@
+<!--
+- src/components/Fatal.vue
+-
+- Banner above anything else, shown on catching an 'Error'. The idea is to show the user that something catastrophic
+- has happened, but yet allow them to carry on with the app (or maybe better not).
+-
+- Used by: App.vue
+-
+- Sample:
+-   <fatal msg="World sucks but the planet is brilliant!!" />
+-
+- Note:
+-   Though this is used only by one place (and there's only one instance), for the sake of styling it's kept as a
+-   separate component.
+-->
+<template>
+  <div v-if="msg">
+    {{ msg }}
+  </div>
+</template>
+
+<style scoped>
+  div {
+    background-color: red;
+    color: #eee;
+  }
+</style>
+
+<script>
+  export default {
+    name: 'Fatal',
+    props: {
+      msg: String
+    }
+  };
+</script>
