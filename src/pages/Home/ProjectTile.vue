@@ -7,24 +7,32 @@
 -   project: { _id: string, ..projectsC document fields }
 -->
 <template>
-  <div class="project-tile" :class="{ 'new-project-tile': isNewTile }">
-    <template v-if="isNewTile">
-      NEW PROJECT
-      <br />
-      <button id="new-project">+ Create</button>
-    </template>
-    <template v-else>
-      <router-link :to="`/projects/${project._id}`">
-        {{ project.title }}
-        {{ project.created.toLocaleString() }}
-        Authors: {{ project.authors }}
-        Members: {{ project.members }}
-      </router-link>
-    </template>
-  </div>
+  <template v-if="isNewTile">
+    <div class="project-tile new-tile">
+      <div>NEW PROJECT</div>
+      <button role="link" id="new-project">+ Create</button>
+    </div>
+  </template>
+  <template v-else>
+    <!-- Using slot with 'router-link'
+    -     -> https://next.router.vuejs.org/guide/migration/#removal-of-event-and-tag-props-in-router-link
+    -->
+    <router-link v-bind:to="`/projects/${project._id}`"
+                 custom
+                 v-slot="{ navigate }"
+    >
+      <div @click="navigate" role="link" class="project-tile">
+        <div class="title">{{ project.title }}</div>
+
+        <!-- users having access to the project; those currently working in it highlighted.
+        -->
+        <MemberFace v-for="id in project.members" :userId="id" />
+      </div>
+    </router-link>
+  </template>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
   .project-tile {
     padding: 30px;
     background-color: lightblue;   /* default color */
@@ -34,18 +42,36 @@
     height: 100px;
   }
 
-  .new-project-tile {
+  .new-tile {
     background-color: palegreen;
+
+    button {
+      margin-top: 0.5em;
+      font-size: 0.8em;
+    }
   }
 
-  button#new-project {
-    font-size: "+4"
+  .project-tile:not(.new-tile) {
+    .title {
+      font-weight: bold;
+      margin-bottom: 1.5em;
+    }
+  }
+
+  /* 'role=link' is accessibility stuff. We use it for providing the mouse hand. */
+  [role="link"]:hover {
+    cursor: pointer;
   }
 </style>
 
 <script>
+  import MemberFace from './MemberFace.vue';
+
   export default {
     name: 'ProjectTile',
+    components: {
+      MemberFace
+    },
     props: {
       project: { type: Object, required: false, default: null }
     },

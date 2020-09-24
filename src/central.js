@@ -23,7 +23,8 @@ import { ops } from './ops-config.js'
 // Note: Rollup has difficulties importing '@airbrake/browser' (under Vite, loads fine).
 //
 //import { Notifier } from "@airbrake/browser"    // causes problems with 'npm run prod:serve' (Rollup)
-assert(window.Notifier);   // from the init scripts
+
+assert(_MODE === 'production' || window.Notifier);   // from the init scripts (DISABLED for prod)
 
 let airbrake;   // 'Notifier' | undefined
 
@@ -39,6 +40,10 @@ if (!LOCAL) {
     } else if (o.type === 'airbrake') {
       const { projectId, projectKey } = o;
       assert(projectId && projectKey);    // already tested by 'ops-config.js' that they exist
+
+      if (!Notifier) {
+        throw new Error("Airbrake configured to be used for ops, but 'window.Notifier' not available.");
+      }
 
       airbrake = new Notifier({
         projectId,
@@ -132,8 +137,8 @@ const logs = {
 *
 *
 */
-function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal' }, string) => ()
-  const { level } = id;
+function central({ level }, msg, opt) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal' }, string, object?) => ()
+  //REMOVE? const s = opt === undefined ? msg : `${msg}: ${JSON.stringify(opt)}`;
 
   /*** disabled
   if (ops.toastThis(id)) {
@@ -154,8 +159,17 @@ function central(id, msg) {   // ({ level: 'debug'|'info'|'warn'|'error'|'fatal'
   }
   ***/
 
-  logs[level](msg);
+  console.debug(`logs[${level}]`, logs[level]); // DEBUG
+  logs[level](msg, opt);
 }
+
+// EXPERIMENTAL: trying out different APIs
+//
+central.fatal = (msg, opt) => {
+  central( { level: 'fatal' }, msg, opt);
+}
+
+throw new Error("Here: "+ central);
 
 export {
   central

@@ -19,7 +19,7 @@ import '@firebase/firestore'
 import '@firebase/functions'
 
 import { Notifier } from '@airbrake/browser'
-import {ops} from "./ops-config";    // normal ES import works with Vite (NOT with Rollup)
+import { ops } from "./ops-config"      // normal ES import works with Vite (NOT with Rollup)
 
 assert(firebase.initializeApp, "Firebase initialization failed");
 
@@ -139,10 +139,10 @@ async function initCentral() {    // () => Promise of central
 
   const t0 = performance.now();
 
-  const [__, central, ___ /*centralError*/] = await Promise.all([
+  const [__, central, ___] = await Promise.all([
     initFirebase(),
     initCentral(),
-    import('./centralError.js') //.then( mod => mod.centralError )
+    import('./centralError.js')   // initializes as a side effect
   ]);
 
   const dt = performance.now() - t0;
@@ -150,7 +150,6 @@ async function initCentral() {    // () => Promise of central
 
   window.assert = assert;
   window.central = central;
-  //window.centralError = centralError;
 
   // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
   //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.

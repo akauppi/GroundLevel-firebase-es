@@ -64,7 +64,7 @@ const plugins = [
       isProduction: true,
       compilerOptions: { preserveWhitespace: false }
     },
-    //css: false,   // note: 'false' extracts styles as a separate '.css' file
+    //css: false,   // note: 'false' extracts styles as a separate '.css' file (if you use 'false', also enable loading in 'index.html'
   }),
 
   replace({ 'process.env.NODE_ENV': '"production"' }),
@@ -114,26 +114,38 @@ export default {
       //console.debug("Looking for home for:", id);   // DEBUG
 
       if (id.includes('node_modules')) {
-        const name = pathParts[ pathParts.lastIndexOf('node_modules') + 1 ];   // package or scope
+        const idx = pathParts.lastIndexOf('node_modules') +1;   // index of package or scope
 
-        // Expected names (and their transformation).
+        const tmp = pathParts.slice(idx);   // [ package, ... ] | [ scope, package, ... ]
+
+        const name = tmp[0].startsWith('@') ? `${tmp[0]}/${tmp[1]}` : tmp[0];   // e.g. "firebase" | "@firebase/functions"
+
+        // Expected names (and their transformation)
         //
         const map = {
-          '@airbrake': true,
-          '@firebase': 'firebase',
+          '@airbrake/browser': true,
+          '@firebase/auth': true,
+          '@firebase/functions': true,
+          '@firebase/firestore': true,
+          '@firebase': 'firebase',    // performance, app, installations, ...
           '@vue': 'vue',
-          'firebase': true,
+          //'firebase': true,
           'idb': 'firebase',
           'tslib': true,  // used by Firebase, but keep it separate
           'vue': true,
           'vue-router': true
         };
 
-        if (map[name] === true) {
-          return name;
+        const scope = name.startsWith('@') ? tmp[0] : false;
 
-        } else if (map[name]) {
-          return map[name];
+        if (map[name]) {
+          return map[name] === true ? (
+              scope ? name.replace('/','-') : name    // "@<scope>-<pkg>" | "<pkg>"
+            )
+            : map[name];
+
+        } else if (scope && map[scope]) {   // put all subpackages in the given one
+          return map[scope] === true ? scope : map[scope];
 
         } else {
           console.warn("Unexpected dependency found (not mapped in 'manualChunks'):", name);

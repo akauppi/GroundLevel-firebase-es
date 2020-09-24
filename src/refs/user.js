@@ -23,7 +23,7 @@ import { computed } from 'vue'
 
 import { authRef } from '../firebase/authRef'
 
-const user = computed( () => {   // undefined | false | { displayName: string, uid: string }
+const user = computed( () => {   // Ref of undefined | false | { displayName: string, uid: string }
   const a = authRef.value;  // undefined | false | { displayName: string, uid: string, ... }
 
   if (a) {

@@ -100,7 +100,7 @@ $ firebase setup:emulators:firestore
 -->
 
 <!--
-The repo is developed with latest `firebase` (8.9.2) and Node.js (14.8.0) on macOS.
+The repo is developed with latest `firebase` (8.11.0) and Node.js (14.12.0) on macOS.
 -->
 
 
@@ -124,9 +124,6 @@ The Cloud Functions have their own node environment. Fetch its dependencies:
 $ (cd back-end/functions && npm install)
 $ cd ..
 ```
-
->Note: The `back-end/functions` folder has a symbolic link at the root, to please Firebase.
-
 
 ### Running tests
 

@@ -59,6 +59,10 @@ That is also connected.
 
 That could be closed.
 
+One more:
+
+[https://github.com/firebase/firebase-js-sdk/issues/3069](https://github.com/firebase/firebase-js-sdk/issues/3069)
+
 
 ## Cloud Functions: ES modules support
 
@@ -164,4 +168,40 @@ Also otherwise try to link with `rollup-plugin-vue`.
 
 - Study its sources or take into action once there is a Vue.js 3 version.
 - [https://github.com/gaelreyrol/vue-rollbar](https://github.com/gaelreyrol/vue-rollbar)
+
+## Firebase hosting: not using HTTP/2
+
+- [https://github.com/firebase/firebase-tools/issues/2571](https://github.com/firebase/firebase-tools/issues/2571)
+
+Once it does, remove mention in `DEVS/Wishes for Vite`. We can better use Lighthouse locally, at that point.
+
+## Firebase hosting: ..crash when reponding with 304..
+
+- [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
+
+!! It **really hurts** that Firebase does not react on issues.
+
+1. Please clean up the old ones.
+2. Managers, please insist reports about turn-around times!
+3. Teams, please take them in sprints, and churn some to closing (including testing with those who reported!).
+
+Thanks. I hope.
+
+## Firebase: Bundle size reduction
+
+Firebase has been asked to slim down [since 2017](https://github.com/firebase/firebase-js-sdk/issues/332). 
+
+In Aug 2020, there is an `exp` effort on the way, however without authentication.
+
+- [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
+
+One great idea from 2018:
+
+>One immediate optimization would be load Firebase UI only when the user is not logged in, using Dynamic imports or an equivalent. 
+
+Sure. Track the AUTH work of `exp` and see if they do it this way.
+
+- [ ] Have the code working, with `exp` (once they support Auth at least for Google login)
+- [ ] Get Firebase UI away from HTML, and to be brought in via `npm` (currently we cannot, due to another glitch; see "FirebaseUI from npm")
+
 

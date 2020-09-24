@@ -5,7 +5,7 @@
 - Only visible when signed in.
 -->
 <template>
-  <div class="app-profile absolute-top-right" @click.stop="openDialog">
+  <div class="app-profile fixed-top-right" @click.stop="openDialog">
     <div id="user-name">
       {{ user ? (user.displayName || 'anonymous user') : 'WHAT?!?' }}
     </div>
@@ -70,8 +70,8 @@
     backdrop-filter: blur(6px);
   }
 
-  .absolute-top-right {
-    position: absolute;
+  .fixed-top-right {
+    position: fixed;
     top: 0;
     right: 0;
   }

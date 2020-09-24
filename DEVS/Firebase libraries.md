@@ -17,7 +17,8 @@ Open issues is listed because their number, and the oldest age are indicators of
 ||What is it?|When to use?|Open issues|
 |---|---|---|---|
 |**Client side**|
-|&nbsp;&nbsp;[`firebase`](https://www.npmjs.com/package/firebase)|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
+|&nbsp;&nbsp;`firebase`|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
+|&nbsp;&nbsp;`firebaseui-web`|Authentication UI for web|Browser app with auth|[109](https://github.com/firebase/firebaseui-web/issues) (18-Sep-20); oldest 24-Jun-2016|
 |**Server side**|
 |&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules.|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser.|[36](https://github.com/firebase/firebase-admin-node/issues) (27-Aug-20); oldest 7-Jun-2017|
 |&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[35](https://github.com/firebase/firebase-functions/issues) (27-Aug-20); oldest 19-Jun-2018|
@@ -26,6 +27,7 @@ Open issues is listed because their number, and the oldest age are indicators of
 |&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|Unit testing Cloud Functions within the `functions` folder. We don't do it but run integration tests against local emulators instead, using the normal `firebase` library.|[9](https://github.com/firebase/firebase-functions-test/issues) (23-Jul-20); oldest 8-Apr-2018|
 |**Developer tools**|
 |&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; Launching emulators. You need it.|[146](https://github.com/firebase/firebase-tools/issues) (23-Jul-20); oldest 16-Dec-2015|
+|&nbsp;&nbsp;`superstatic`|Library used for Firebase hosting (authored by Firebase)|Firebase hosting|[19](https://github.com/firebase/superstatic/issues) (18-Sep-20); oldest 25-Sep-2014|
 |**Deprecated**|
 |`@firebase/testing` -> `@firebase/rules-unit-testing`|Security Rules testing, until Aug 2020.|
 

@@ -1,5 +1,5 @@
 /*
-* src/rs/project.js
+* src/rves/project.js
 *
 * Reactive tracking of a certain project.
 */
@@ -23,7 +23,7 @@ if (unsub) {  // Happens because of Hot Module Reload, in development.
 * Watch a certain project.
 *
 * Note:
-*   Subcollections (visited, symbols) are subscribed separately. This is in line with how Firestore sees such collections:
+*   Subcollections (visited, symbols, ...) are subscribed separately. This is in line with how Firestore sees such collections:
 *   while their paths can seem hierarchical, all collections are essentially "flat".
 *
 * Note:

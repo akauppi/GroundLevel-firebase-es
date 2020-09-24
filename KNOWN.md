@@ -18,8 +18,9 @@ Described here:
 
 **Work-around**
 
-Don't open the browser as `http://localhost:3012` but `http://localhost:3012/index.prod.html`. Also otherwise try to avoid situations where the redirecting would be needed.
+Seems ([here](https://github.com/firebase/firebase-tools/issues/2610#issuecomment-698177644)) that removing/renaming the `public/404.html` would solve this.
 
+Weird.
 
 
 

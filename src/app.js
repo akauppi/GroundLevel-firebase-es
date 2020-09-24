@@ -38,7 +38,13 @@ if (true) {
 async function init() {
   const router = await routerProm;
   app.use(router)
-    .mount('#app');
+    //.mount('#app');
+
+  // Vue-router note: It may be that we need to wait for router to be ready. Check here -> https://next.router.vuejs.org/guide/migration/#all-navigations-are-now-always-asynchronous
+  //
+  // tbd. "block the app render" until authentication has been done.
+  //
+  router.isReady().then(() => app.mount('#app'));
 }
 
 export { init }

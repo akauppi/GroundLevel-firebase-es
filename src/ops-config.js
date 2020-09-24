@@ -22,10 +22,12 @@ check( firebase, { type: 'firebase', apiKey: 'string', appId: 'string?', project
 import { testDebug, testWarn } from './logging.js'
 const toastThese = new Set([ testDebug, testWarn ]);
 
+const _PROD = (import.meta.env?.MODE || 'production') === 'production';
+
 const ops = {
   perf: [firebase],
-  logs: [airbrake],
-  fatal: [airbrake],
+  logs: _PROD ? [] : [airbrake],    // DISABLED for prod
+  fatal: _PROD ? [] : [airbrake],   // DISABLED for prod
 
   toastThis(id) {   // (obj) => boolean
     return toastThese.has(id);

@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="icon" type="image/png" href="/favicon.png">
-    <!--PROD
+
+    <!-- //PROD enable this if Vue plugin's option 'css: false' is set in 'rollup.config.prod.js'
     <link type="text/css" rel="stylesheet" href="dist/bundle.css" />
     -->
 
@@ -39,7 +40,7 @@
     ${PRELOADS}
     -->
 
-    <!--PROD Unable to load 'Toastify' within scripts, using Rollup.
+    <!-- //DISABLED PROD Unable to load 'Toastify' within scripts, using Rollup.
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     -->
@@ -51,7 +52,9 @@
     <!--PROD
     <script type="module">
       window.VERSION = '${VERSION}';
-      import './dist/main.#.js'
+      //window.airbrake = airbrake;   // too hard
+
+      import('./dist/main.#.js');   // dynamic so the 'window.' dressings are up, first
     </script>
     -->
     <!--DEV -->
@@ -62,16 +65,20 @@
 
     <style>
     #fatal {
+        position: fixed;
+        top: 0.5em;
+        z-index: 999;
+
         background-color: orangered;
-        height: 3em;
         padding: 1em;
-        margin-bottom: 3px;
         border-style: dotted;
-        box-shadow: #ccc 0 3px;
-        overflow: hidden;
+        box-shadow: #ccc 3px 3px;
 
         line-height: 1.5em;
         transition: height 0.3s, padding 0.3s;
+
+        left: 50%;
+        transform: translateX(-50%);
     }
     #fatal::before {
         content: "⚠️ "
@@ -82,33 +89,20 @@
         border-style: none;
         margin-bottom: 0;
     }
+    #fatal.inactive::before {
+        content: ""
+    }
 
     /* Something brings 'margin-top: 8px'. We don't want that. */
     body {
         margin: 0;
     }
-
-    #magicBtn {
-        position: fixed;
-        right: 0;
-        bottom: 25px;
-        padding: 10px;
-    }
     </style>
-
-    <script>
-      function magic() {
-        const el = document.getElementById("fatal");
-        el.classList.toggle("inactive");
-      }
-    </script>
   </head>
 
   <body>
-    <div id="fatal" class="inactive"></div>
-    <div id="app" style="position: relative"></div>
-    <!--
-    <button id="magicBtn" onclick="magic();">Show/hide fatal</button>
-    -->
+    <div id="fatal" class="inactive">
+    </div>
+    <div id="app"></div>
   </body>
 </html>

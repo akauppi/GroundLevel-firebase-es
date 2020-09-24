@@ -14,11 +14,6 @@ The reason this is not default is just avoiding any complexity. The template aim
 
 ## Firestore
 
-### Is it better to name document keys `last-used` or `lastUsed`?
-
-Which is more customary, in Firestore?
-
-
 ### Can I tell Firebase Performance the version of my app?
 
 I know a `version` string. Would like to use it as a filter in Performance metrics, like country, browser are being used.
@@ -63,7 +58,6 @@ Alternatives:
 
 - write to Cloud Firestore debugging collection
 - Datadog etc.
-
 
 
 ## Does Vue.js 3 have a corresponding thing to `renderError`?

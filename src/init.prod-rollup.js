@@ -21,6 +21,9 @@ import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
+//  ^-- Note: We can eventually make 'firestore' and 'functions' lazy-loading (i.e. start loading already here,
+//          but don't make 'app.js' wait for them).
+
 import { ops } from './ops-config.js'
 
 assert(firebase.initializeApp);
@@ -80,14 +83,17 @@ async function initFirebase() {
   }
 }
 
-async function initCentral() {
-  // Our trying to load 'Airbrake' failed. Getting these from 'index.html'.
-  // Real solution is to have the library fixed, so it can be _statically_ imported, in 'central.js'.
-  //
-  assert(window.airbrake);
-  window.Notifier = airbrake.Notifier;
+// Our trying to load 'Airbrake' failed. Getting these from 'index.html'.
+// Real solution is to have the library fixed, so it can be _statically_ imported, in 'central.js'.
+//
+// NOTE: This is WAY TOO DIFFICULT. Airbrake should fix their ES loading, or we look elsewhere. DISABLED for now
+//    (for production).
+//
+window.Notifier = undefined;  // window.airbrake.Notifier;
 
-  const { central } = await import('./central.js');
+async function initCentral() {
+  const central = await import('./central.js').then( mod => mod.central );
+  debugger;
   return central;
 }
 
@@ -96,10 +102,10 @@ async function initCentral() {
 
   // Ensure that 'app.js' has Firebase, 'central' and 'centralError' installed.
   //
-  await Promise.all([
+  const [__, central, ___] = await Promise.all([
     initFirebase(),
     initCentral(),
-    import('./centralError.js').then( mod => mod.centralError )
+    import('./centralError.js')   // initializes as a side effect
   ]);
     //
     // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since chunks are loaded at launch).
@@ -107,20 +113,23 @@ async function initCentral() {
   const dt = performance.now() - t0;
   console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);
 
-  debugger;
-  console.info("Loading the app.");
+  window.assert = assert;
+  window.central = central;
 
-  assert(window.firebase);
-  /* tbd. enable this
+  // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
+  //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.
+  //
+  window.firebase = firebase;
+
   console.debug("Launching app...");
 
-  const mod = await import('./app.js'); const { init } = mod;
-  await init();
+  //BUG: If we enable this, gives 'ReferenceError: assert is not defined' (AppLogo.vue:22)
+  //  - but there's no 'assert' use in AppLogo.vue
+
+  //const mod = await import('./app.js'); const { init } = mod;
+  //await init();
 
   console.debug("App on its own :)");
-  */
-
-  /*free running*/ import('./app.js');
 })();
 
 export { };

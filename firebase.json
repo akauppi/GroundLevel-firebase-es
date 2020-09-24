@@ -1,32 +1,29 @@
 {
-  "hosting": {
-    "public": "public",
-    "//rewrites": [
-      {
-        "//": "Keep this first! '.js' and '.css' are not redirected.",
-        "source": "**/*.@(css|js)",
-        "destination": "/nosuch"
-      },
-      {
-        "//": "Single-page-app (keep last)",
-        "source": "**",
-        "destination": "/index.prod.html"
-      }
-    ],
-    "//": {
-      "Intention": [
-        "Serve the same page for everything '.html' or postfixless: client does the routing.",
-        "Note: if we let pass here, it's going to be a 200. Handle obvious 404's like wrong path to scripts or CSS here."
-      ],
-      "Creating 404": [
-        "Directing to a non-existing page causes the response to become 404 (this is undocumented behavior; an alternative",
-        "could be excluding some suffixes from SPA route, but 'glob' syntax doesn't sport a NOT operator, does it? #help"
-      ]
-    }
-  },
   "firestore": {
     "rules": "back-end/firestore.rules",
     "indexes": "back-end/firestore.indexes.json"
+  },
+  "functions": {
+    "source": "back-end/functions"
+  },
+  "hosting": {
+    "public": "public",
+    "rewrites": [
+      {
+        "//": [
+          "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing maps, js etc. should show as 404.",
+          "",
+          "tbd. Test this by:",
+          "  /common.css -> 200",
+          "  /nosuch.js -> 404",
+          "  /some -> 200 (index.prod.html)",
+          "  /some.html -> 200",
+          "  /dist/main.{hash}.js.map (that exists) -> 200"
+        ],
+        "source": "!**/*.@(css|js|map)",
+        "destination": "/index.prod.html"
+      }
+    ]
   },
   "emulators": {
     "firestore": {

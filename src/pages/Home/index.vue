@@ -1,5 +1,5 @@
 <!--
-- src/pages/Home[/.vue]
+- src/pages/Home
 -
 - The default page (URL /). Needs authentication.
 - Signing in with mere '/signin' leads here.
@@ -32,7 +32,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-start;
-    align-items: flex-start;
+    /*align-items: flex-start;*/
     padding: 10px;
   }
   .flex-container > div {
@@ -43,28 +43,18 @@
     -moz-box-shadow: 10px 10px 25px -13px rgba(0,0,0,0.5);
     box-shadow: 10px 10px 25px -13px rgba(0,0,0,0.5);
   }
-
-  /* disabled (used flex instead)
-  .grid-container-projects {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto;
-    justify-items: center;
-
-    grid-gap: 10px;
-  }*/
 </style>
 
 <script>
   import ProjectTile from './ProjectTile.vue';
-  import { projects } from "../../refs/projects.js";
+  import { projects } from "../../rves/projects.js";    // shallowReactive of 'Map'
 
   import { computed } from 'vue';
 
   // The UI uses projects sorted
   //
   const projectsSorted = computed( () => {   // array of { id: string, ..projectsC doc fields }
-    const dataRaw = Array.from( projects.entries() );    // ES6 'Map'
+    const dataRaw = Array.from( projects.entries() );
 
     if (dataRaw.length > 0) { // DEBUG
       console.debug( "Projects data (still unsorted):", dataRaw);
@@ -82,8 +72,10 @@
     components: {   // tbd. Do I still need to mention components?
       ProjectTile
     },
-    setup: _ => ({
-      projectsSorted
-    })
+    setup() {
+      return {
+        projectsSorted
+      }
+    }
   }
 </script>

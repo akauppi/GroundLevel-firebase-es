@@ -26,11 +26,8 @@
 </template>
 
 <style scoped lang="scss">
-  header {
-    position: relative;   /* allow 'fatal' to be totally on its own (children can use 'position:relative') */
-  }
   #mode {
-    position: relative;
+    position: fixed;
     top: 40px;
     left: 0;
     width: 9.1em;   /* Q: how to make it automatically scale, based on contents (from CSS)? #help #css */
@@ -55,6 +52,7 @@
 </style>
 
 <script>
+  assert(assert);
   import { onMounted, getCurrentInstance, ref } from 'vue'
 
   import AppLogo from './components/AppLogo.vue'
@@ -79,11 +77,10 @@
     });
 
     const appConfig = getCurrentInstance().appContext.config;
-      //
-      assert (appConfig.errorHandler === undefined);    // we're not overwriting anything
-      assert (appConfig.warnHandler === undefined);
 
     /***  We benefit from this only if we wish to see Vue specific context.
+    assert (appConfig.errorHandler === undefined);    // we're not overwriting anything
+
     // '.errorHandler' catches errors "during component rendering" (well, and watch callbacks, lifecycle hooks,
     //                  component event handlers) - but still only Vue specific code.
     //
@@ -100,6 +97,8 @@
 
     // For warnings, most important to see them in the browser console (disabled in production, by Vue itself)
     //
+    assert (appConfig.warnHandler === undefined);
+
     if (mode !== 'production') {   // "only works during development"
       appConfig.warnHandler = (msg, vm, trace) => {
         console.warn("Vue warning:", {msg, vm, trace});
@@ -108,20 +107,13 @@
       }
     }
 
-    // Note: We get the Vue warning:
-    //  <<
-    //    Property "user" was accessed during render but is not defined on instance.
-    //  <<
-    //
-    //   This is not harmful but a way to mitigate such warning is appreciated. #help
-
     function makeError() {
       throw new Error("Error for testing!");
     }
 
     return {
       user,
-      makeError
+      makeError   // IDE note: used though dimmed
     }
   }
 
