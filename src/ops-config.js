@@ -19,8 +19,8 @@ check( firebase, { type: 'firebase', apiKey: 'string', appId: 'string?', project
 
 //--- Logging config
 
-import { testDebug, testWarn } from './logging.js'
-const toastThese = new Set([ testDebug, testWarn ]);
+//import { testDebug, testWarn } from '../app/logging.js'
+//const toastThese = new Set([ testDebug, testWarn ]);
 
 const _PROD = (import.meta.env?.MODE || 'production') === 'production';
 

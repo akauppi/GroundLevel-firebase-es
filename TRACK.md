@@ -131,6 +131,8 @@ Track:
 
 ## Airbrake: Performance Monitoring for browser
 
+><font color=red>Note: We might opt out of Airbrake altogether.</font>
+
 Seems they are working on it. 
 
 [https://akauppi-gmail-com.airbrake.io/projects/294803/performance](https://akauppi-gmail-com.airbrake.io/projects/294803/performance) has a "Request Performance Monitoring for airbrake-js/browser" link (but clicking it did nothing...)
@@ -140,6 +142,7 @@ Also:
 >We don't currently have Performance Monitoring for our js/browser notifier but are planning on adding it. Please stay tuned.
 
 - [ ] Once available, let's integrate to it!
+
 
 ## `firebase@exp` for tree-shaking!!!
 
@@ -156,14 +159,6 @@ This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs
 Also otherwise try to link with `rollup-plugin-vue`.
 
 
-## Firebase hosting: "Cannot remove headers"
-
-- [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
-
-- Disabled the portion in `firebase.json` altogether.
-- [ ] Re-enable when above is solved.
-
-
 ## Rollbar Vue plugin: availability for Vue.js 3?
 
 - Study its sources or take into action once there is a Vue.js 3 version.
@@ -175,6 +170,7 @@ Also otherwise try to link with `rollup-plugin-vue`.
 
 Once it does, remove mention in `DEVS/Wishes for Vite`. We can better use Lighthouse locally, at that point.
 
+<!-- Done :)
 ## Firebase hosting: ..crash when reponding with 304..
 
 - [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
@@ -186,6 +182,7 @@ Once it does, remove mention in `DEVS/Wishes for Vite`. We can better use Lighth
 3. Teams, please take them in sprints, and churn some to closing (including testing with those who reported!).
 
 Thanks. I hope.
+-->
 
 ## Firebase: Bundle size reduction
 

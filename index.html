@@ -45,7 +45,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     -->
 
-    <!--PROD Unable to load 'Airbrake' within scripts, using Rollup - see 'central.js'.
+    <!-- //DISABLED PROD Unable to load 'Airbrake' within scripts, using Rollup - see 'central.js'.
     <script type="text/javascript" src="hack/airbrake.min.js"></script>
     -->
 
@@ -53,8 +53,9 @@
     <script type="module">
       window.VERSION = '${VERSION}';
       //window.airbrake = airbrake;   // too hard
+      //throw new Error("Airbrake:", airbrake);   // "airbrake is not defined" DEBUG
 
-      import('./dist/main.#.js');   // dynamic so the 'window.' dressings are up, first
+      import('./dist/main-#.js');   // dynamic so the 'window.' dressings are up, first
     </script>
     -->
     <!--DEV -->

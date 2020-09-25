@@ -31,10 +31,17 @@ import fs from "fs"
 *     <link rel="modulepreload" href="dist/@vue-6ed1e3f4.js">
 *     ...
 *   <<
+*
+* Note: 'main' chunk is NOT preloaded. Doing so would allow the browser to compile (and likely run the root source),
+*     when we wish to dynamically load it in. Also, we refer to it from HTML anyways, so there is no speedup increase.
 */
-function preloadsArr(modFiles) {   // array of "dist/{mod}[-.]{hash}.js" -> array of "<link rel...>"
+function preloadsArr(modFiles) {   // array of "dist/{mod}-{hash}.js" -> array of "<link rel...>"
 
-  const ret = modFiles.map( fn => `<link rel="modulepreload" href="${fn}">` );
+  console.debug("MODFILES:", modFiles);
+
+  const ret = modFiles
+    .filter( fn => ! fn.includes("/main-"))   // skip main chunk
+    .map( fn => `<link rel="modulepreload" href="${fn}">` );
   return ret;
 }
 
@@ -45,7 +52,7 @@ function productize(contents, hashes, { version }) {    // (String, Map<String,S
 
   const errors = new Array();
 
-  const modFiles = Array.from( hashes.entries() ).map( ([key,value]) => `dist/${key}${key !== "main" ? '-':'.'}${value}.js` );
+  const modFiles = Array.from( hashes.entries() ).map( ([key,value]) => `dist/${key}-${value}.js` );
 
   const preloads = preloadsArr(modFiles);   // ["<link ...>", ...]
 
@@ -81,17 +88,17 @@ function productize(contents, hashes, { version }) {    // (String, Map<String,S
 
   // Hashes
   //
-  // Any '{file}.#.js' to be filled in the hash.
+  // Any '{file}-#.js' to be filled in the hash.
   //
   // Example:
   //  <<
-  //    import { init } from './main.#.js'
+  //    import { init } from './main-#.js'
   //  <<
   //
-  // Note: For some reason, Rollup uses '.' for main but '-' for others. We only need to support 'main.#.js'.
+  // Note: Here, we expect '-' delimiter in Rollup 'output.entryFileNames'.
   //
-  const s6 = s5.replace(/'[^']+\/([\w\d]+)[.-]#\.js'/gm,
-    (match,c1) => {   // e.g. match="'/main.#.js'", c1="main"
+  const s6 = s5.replace(/'[^']+\/([\w\d]+)-#\.js'/gm,
+    (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
       const hash = hashes.get(c1)
       if (!hash) throw new Error( "No hash for: "+c1 );
 
@@ -114,12 +121,12 @@ const prodIndexPlugin = ({ template, out, map }) => {    // ({ template: String 
   return {
     name: 'prodIndex',
     generateBundle(options, bundle) {
-      const files = new Set();   // Set of e.g. 'main.e40530d8.js', ...
+      const files = new Set();   // Set of e.g. 'main-e40530d8.js', ...
 
       // Loop through all the chunks
       for (const [fileName, chunkInfo] of Object.entries(bundle)) {
         if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
-          //console.debug(`Chunk imports of ${fileName}:`, chunkInfo.imports);   // dependent modules
+          console.debug(`Chunk imports of ${fileName}:`, chunkInfo.imports);   // dependent modules
 
           [fileName, ...chunkInfo.imports]    // others than 'main' only show up in the imports
             .forEach( x => files.add(x) );
@@ -128,7 +135,7 @@ const prodIndexPlugin = ({ template, out, map }) => {    // ({ template: String 
 
       const hashes = new Map();
       files.forEach( x => {
-        const [_,c1,c2] = x.match(/^(.+)[.-](.+)\.js$/);
+        const [_,c1,c2] = x.match(/^(.+)-(.+)\.js$/);
         hashes.set(c1,c2);
       });
 

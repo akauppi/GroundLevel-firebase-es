@@ -40,8 +40,8 @@
     "lint": "eslint --ext .js,.vue src",
     " -  ": "",
     "dev": "npm run dev:local",
-    "dev:local": "firebase emulators:exec --project=app --ui --only functions,firestore \"npm run _dev_local_2\"",
-    "_dev_local_2": "node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
+    "dev:local": "concurrently -n emul,init \"firebase emulators:start --project=app --only functions,firestore\" \"GCLOUD_PROJECT=app npm run _dev_local_2\"",
+    "_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && vite --port 3000 --mode dev_local",
     "dev:online": "tools/hasActiveProject.sh && vite --port 3001",
     " - -": "",
     "prod:build": "npm run _prod_rollup_build",
@@ -63,11 +63,21 @@
     "_vite_build": "vite build && rm dist/dist/index.prod.html",
     "_vite_serve": "vite --mode production --port ${PORT:-3011}"
   },
+  "//scripts": {
+    "//dev:local": [
+      "This worked, but tended to leave the terminal in uncomfortable situation on Ctrl-C. Trying if 'emulators:start'",
+      "is any better.",
+      {
+        "//dev:local": "firebase emulators:exec --project=app --ui --only functions,firestore \"npm run _dev_local_2\"",
+        "//_dev_local_2": "node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local"
+      }
+    ]
+  },
   "dependencies": {
     "@airbrake/browser": "^1.4.1",
-    "firebase": "^7.21.0",
+    "firebase": "^7.21.1",
     "vue": "^3.0.0",
-    "vue-router": "^4.0.0-beta.11"
+    "vue-router": "^4.0.0-beta.12"
   },
   "//dependencies": {
     "//firebaseui": "^4.6.1"

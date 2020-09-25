@@ -169,8 +169,6 @@ central.fatal = (msg, opt) => {
   central( { level: 'fatal' }, msg, opt);
 }
 
-throw new Error("Here: "+ central);
-
 export {
   central
 }

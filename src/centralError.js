@@ -22,7 +22,8 @@ const elFatal = document.getElementById("fatal");   // Element | ...
 // Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
 //
 //import { Notifier } from "@airbrake/browser"    // causes problems with 'npm run prod:serve' (Rollup)
-assert(window.Notifier);   // from the init scripts
+
+assert(_MODE === 'production' || window.Notifier);   // from the init scripts (DISABLED for prod)
 
 let airbrake;   // 'Notifier' | undefined
 
@@ -37,6 +38,10 @@ if (!LOCAL) {
     } else if (o.type === 'airbrake') {
       const { projectId, projectKey } = o;
       assert(projectId && projectKey);  // 'ops-config' has already given an error message
+
+      if (!Notifier) {
+        throw new Error("Airbrake configured to be used for ops, but 'window.Notifier' not available.");
+      }
 
       airbrake = new Notifier({
         projectId,

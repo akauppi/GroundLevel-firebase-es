@@ -17,7 +17,10 @@
 *   - firebase.auth.Auth (Firebase docs)
 *       -> https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 */
-assert(firebase.auth);
+console.debug("VERSION:", window.VERSION);    // 0.0.1  DEBUG
+
+//import { assert } from '../assert'
+window.assert(window.firebase.auth);
 
 import { ref } from 'vue';
 

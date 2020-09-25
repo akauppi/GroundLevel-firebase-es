@@ -3,7 +3,7 @@
 *
 * Utilities for working with Firebase
 */
-assert(true);   // we have assert
+assert(true);
 
 /*
 * Firestore client provides timestamps as '{ seconds: integer, nanoseconds: 0 }'. Let's convert those to JavaScript 'Date'.

@@ -10,7 +10,7 @@
 </template>
 
 <style scoped>
-  @import '../common.css';
+  /* @import '../common.css'; */
   div {
     padding: 10px;
     background-color: orange;
@@ -18,6 +18,7 @@
 </style>
 
 <script>
+  import '../common.css'
   export default {
     name: 'AppLogo'
   };

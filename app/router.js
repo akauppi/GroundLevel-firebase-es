@@ -11,6 +11,7 @@
 *     the _only_ place where the info really needs to be (since if the user ends up on a protected page, we already
 *     know authentication happened). Thus, embedding a part of Firebase in here. :)
 */
+assert(true);
 assert(firebase && firebase.auth);
 
 import { createRouter, createWebHistory } from 'vue-router';

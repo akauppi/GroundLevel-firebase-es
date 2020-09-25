@@ -15,8 +15,8 @@ import { assert } from './assert.js'
 //import * as firebase from 'firebase/app'    // still fails with firebase 8.10.0 (7.19.1)
 //import firebase from 'firebase/app'     // works (but does not allow firebaseui from npm :( )
 
-//import firebase from '@firebase/app'  // this works
-import { firebase } from '@firebase/app/dist/index.esm2017.js'    // also works
+import firebase from '@firebase/app'  // this works
+//import { firebase } from '@firebase/app/dist/index.esm.js'    // also works (same behaviour as with above)
 import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
@@ -24,9 +24,10 @@ import '@firebase/functions'
 //  ^-- Note: We can eventually make 'firestore' and 'functions' lazy-loading (i.e. start loading already here,
 //          but don't make 'app.js' wait for them).
 
-import { ops } from './ops-config.js'
-
 assert(firebase.initializeApp);
+assert(firebase.auth);    // check if there are loading problems
+
+import { ops } from './ops-config.js'
 
 const enableFirebasePerf = (_ => {
   if (ops.perf.type == 'firebase') {
@@ -58,8 +59,7 @@ const firebaseConfigProm = (async _ => {
   return json;
 })();
 
-/*SAMPLE
-// Same, for using the cached values
+/* Alternative for non-Firebase hosting:
 (async _ => {
   const json = await import('./ops-config.js').then( mod => mod.firebase );
   return json;
@@ -113,21 +113,18 @@ async function initCentral() {
   const dt = performance.now() - t0;
   console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);
 
-  window.assert = assert;
   window.central = central;
 
   // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
   //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.
   //
   window.firebase = firebase;
+  //window.assert = assert;
 
   console.debug("Launching app...");
 
-  //BUG: If we enable this, gives 'ReferenceError: assert is not defined' (AppLogo.vue:22)
-  //  - but there's no 'assert' use in AppLogo.vue
-
-  //const mod = await import('./app.js'); const { init } = mod;
-  //await init();
+  const { init } = await import('../app/app.js');
+  await init();
 
   console.debug("App on its own :)");
 })();

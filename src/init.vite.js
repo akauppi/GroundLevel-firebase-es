@@ -158,7 +158,7 @@ async function initCentral() {    // () => Promise of central
 
   console.debug("Launching app...");
 
-  const mod = await import('./app.js'); const { init } = mod;
+  const mod = await import('../app/app.js'); const { init } = mod;
   await init();
 
   console.debug("App on its own :)");

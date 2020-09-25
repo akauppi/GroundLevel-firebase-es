@@ -13,7 +13,7 @@ import { strict as assert } from 'assert'
 // To support CommonJS dependencies, enable any lines mentioning 'commonjs'.
 
 //import alias from '@rollup/plugin-alias'
-import analyze from 'rollup-plugin-analyzer'
+//import analyze from 'rollup-plugin-analyzer'
 //import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
@@ -31,7 +31,7 @@ import path from 'path'
 // Reported -> https://github.com/vuejs/rollup-plugin-vue/issues/364
 //
 import scss from 'rollup-plugin-scss'      // handles '.css' and '.scss'
-const scssHackNeeded = true;    // still needed with: vue 3.0.0-rc.9, rollup-plugin-vue 6.0.0-beta.10
+const scssHackNeeded = true;    // still needed with: vue 3.0.0, rollup-plugin-vue 6.0.0-beta.10
 
 const publicDir = 'public';
 const indexDev = 'index.html';
@@ -67,7 +67,9 @@ const plugins = [
     //css: false,   // note: 'false' extracts styles as a separate '.css' file (if you use 'false', also enable loading in 'index.html'
   }),
 
-  replace({ 'process.env.NODE_ENV': '"production"' }),
+  // Fix mentions of 'process.env.NODE_ENV' (Vue.js 3.0.0 needs this!). Note: It would be nice if Vue found another way?? :)
+  //
+  replace({ 'process.env.NODE_ENV': '"production"' }),    // for Vue.js 3.0.0
 
   scssHackNeeded && scss({    // Should not be needed in the long run!
     output: publicDir +'/dist/bundle.css'
@@ -80,7 +82,8 @@ const plugins = [
 
   prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } }),
 
-  analyze()
+  // Enable for seeing more detailed info on the chunks
+  //analyze()
 ];
 
 export default {
@@ -92,7 +95,7 @@ export default {
   output: {
     dir: 'public/dist',
     format: 'es',
-    entryFileNames: '[name].[hash].js',
+    entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
     // Pack imports within each node package, together. See Phil Walker's blog (README.md > References) for more details.
     //
@@ -123,11 +126,10 @@ export default {
         // Expected names (and their transformation)
         //
         const map = {
-          '@airbrake/browser': true,
-          '@firebase/auth': true,
-          '@firebase/functions': true,
-          '@firebase/firestore': true,
-          '@firebase': 'firebase',    // performance, app, installations, ...
+          //'@airbrake/browser': true,    // disabled; enable this if loading it from npm
+          '@firebase/auth': true,         // ~170kB
+          '@firebase/firestore': true,    // ~270kB
+          '@firebase': 'firebase',    // performance, app, installations, functions (was just <10kB) ...
           '@vue': 'vue',
           //'firebase': true,
           'idb': 'firebase',
@@ -154,19 +156,32 @@ export default {
 
       } else {    // Internal pieces
 
-        // src/init.prod-rollup.js
-        // ...
+        // NOTE: We're likely to split the app (and backend) repos apart from this one. When that happens, this
+        //    can be simplified to always provide 'main' (since app comes from a depenendency).
+        //
+        //    Until that, we split the bootloader to 'main' and actual app to 'app'. This is because if they are
+        //    TOGETHER, the app side runs too fast (not when we dynamically bring it in).
+        //
+
+        // App:
         // src/app.js
         // src/router.js
-        // .env.js
-        //
-        const Rmain = /.+\/src\/[^/?]+(?<!\.vue)$|.+\/.env.js$/;
-
         // src/App.vue
         // src/App.vue?vue&type=script&lang.js
         // src/*/**
         //
-        const Rapp = /.+\.vue.*|.+\/src\/.+\/.+/;
+        const Rapp = /.+\/src\/app\.js|.+\/src\/router.js|.+\.vue.*|.+\/src\/.+\/.+/;
+
+        // Rest (main):
+        // src/init.prod-rollup.js
+        // src/central.js
+        // src/centralError.js
+        // src/ops-config.js
+        // src/assert.js
+        // ...
+        // .env.js
+        //
+        const Rmain = /.+\/src\/[^/?]+(?<!\.vue)$|.+\/.env.js$/;
 
         if (id.match(Rmain)) {
           assert(! id.match(Rapp));
@@ -174,10 +189,12 @@ export default {
 
         } else if (id.match(Rapp)) {
           return "app";
-
         } else {
           console.warn("Unexpected code file (mapped to 'app'):", name);
         }
+        ***/
+
+        return "main";
       }
     },
 
@@ -189,9 +206,9 @@ export default {
     //  - "default"
     //
     // -> https://rollupjs.org/guide/en/#outputinterop
-    interop: "auto",
+    //interop: "default",
 
-    intro: "const ROLLUP = true;"
+    intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
   },
 
   preserveEntrySignatures: false,   // "recommended setting for web apps" (supresses a warning)

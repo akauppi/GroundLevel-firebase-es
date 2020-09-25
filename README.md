@@ -87,6 +87,8 @@ You can still use this repo for local development (see "dev:local", below) even 
 - `firebase`
   - `npm install -g firebase-tools`
 
+You should use `firebase-tools` >= 8.11.1. <!-- because of https://github.com/firebase/firebase-tools/issues/2610 -->
+
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
 <!-- tbd. is this actually needed?:

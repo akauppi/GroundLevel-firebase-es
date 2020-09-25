@@ -2,27 +2,6 @@
 
 *Place for informing of things that are not seen as bugs.*
 
-## Firebase hosting: "Cannot remove headers"
-
-```
-$ npm run prod:rollup:serve
-...
-Error [ERR_HTTP_HEADERS_SENT]: Cannot remove headers after they are sent to the client
-...
-```
-
-Described here:
-
-- [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
-
-
-**Work-around**
-
-Seems ([here](https://github.com/firebase/firebase-tools/issues/2610#issuecomment-698177644)) that removing/renaming the `public/404.html` would solve this.
-
-Weird.
-
-
 
 <!-- Haven't seen recently. REMOVE AK 14-Sep-20
 ## Vite build fails
