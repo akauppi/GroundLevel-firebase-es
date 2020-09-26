@@ -6,6 +6,7 @@
 - Taking Functions emulator's port (in `dev:local`) from `firebase.json`.
 - Multiple bugs solved regarding `npm run prod:rollup:serve` (also upstream)
 - Moved front-end code to `app/`.
+- Ability to deploy!! 🎉🎉🎉
 
 ## 13-Sep-20
 

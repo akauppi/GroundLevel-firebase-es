@@ -119,7 +119,7 @@ async function initCentral() {
   //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.
   //
   window.firebase = firebase;
-  //window.assert = assert;
+  window.assert = assert;
 
   console.debug("Launching app...");
 

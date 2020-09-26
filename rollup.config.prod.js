@@ -36,6 +36,7 @@ const scssHackNeeded = true;    // still needed with: vue 3.0.0, rollup-plugin-v
 const publicDir = 'public';
 const indexDev = 'index.html';
 const indexProd = 'public/index.prod.html';
+const scssHackCss = scssHackNeeded ? 'public/dist/scss-hack.css' : undefined;
 
 import { prodIndexPlugin } from './tools/prod-index-filter'
 
@@ -64,15 +65,18 @@ const plugins = [
       isProduction: true,
       compilerOptions: { preserveWhitespace: false }
     },
-    //css: false,   // note: 'false' extracts styles as a separate '.css' file (if you use 'false', also enable loading in 'index.html'
+    // Note: 'false' "extracts styles as a separate '.css' file". If you use it, also enable loading in 'index.html' (but see 'scssHackNeeded', below!)
+    //css: false,
   }),
 
   // Fix mentions of 'process.env.NODE_ENV' (Vue.js 3.0.0 needs this!). Note: It would be nice if Vue found another way?? :)
   //
   replace({ 'process.env.NODE_ENV': '"production"' }),    // for Vue.js 3.0.0
 
-  scssHackNeeded && scss({    // Should not be needed in the long run!
-    output: publicDir +'/dist/bundle.css'
+  // Note: Because of needing this, the bundle file is ALWAYS needed to be read in, by 'index.html'.
+  //
+  scssHackCss && scss({    // Should not be needed in the long run!
+    output: scssHackCss
   }),
 
   // enable for minified output (~600 vs. ~1432 kB)
@@ -156,45 +160,12 @@ export default {
 
       } else {    // Internal pieces
 
-        // NOTE: We're likely to split the app (and backend) repos apart from this one. When that happens, this
-        //    can be simplified to always provide 'main' (since app comes from a depenendency).
+        // Place everything in 'app' in its own module.
+        // 'src/' has the stuff that will load it, and this allows us to control the dynamic loading order nicer.
         //
-        //    Until that, we split the bootloader to 'main' and actual app to 'app'. This is because if they are
-        //    TOGETHER, the app side runs too fast (not when we dynamically bring it in).
+        // Note: Eventually, we'll take the app via npm. This may or may not be affected, at that point.
         //
-
-        // App:
-        // src/app.js
-        // src/router.js
-        // src/App.vue
-        // src/App.vue?vue&type=script&lang.js
-        // src/*/**
-        //
-        const Rapp = /.+\/src\/app\.js|.+\/src\/router.js|.+\.vue.*|.+\/src\/.+\/.+/;
-
-        // Rest (main):
-        // src/init.prod-rollup.js
-        // src/central.js
-        // src/centralError.js
-        // src/ops-config.js
-        // src/assert.js
-        // ...
-        // .env.js
-        //
-        const Rmain = /.+\/src\/[^/?]+(?<!\.vue)$|.+\/.env.js$/;
-
-        if (id.match(Rmain)) {
-          assert(! id.match(Rapp));
-          return "main";
-
-        } else if (id.match(Rapp)) {
-          return "app";
-        } else {
-          console.warn("Unexpected code file (mapped to 'app'):", name);
-        }
-        ***/
-
-        return "main";
+        return (id.includes("/app/")) ? "app" : "main";   // tbd. consider changing to 'boot'
       }
     },
 

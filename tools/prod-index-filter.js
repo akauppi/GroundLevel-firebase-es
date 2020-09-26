@@ -40,7 +40,7 @@ function preloadsArr(modFiles) {   // array of "dist/{mod}-{hash}.js" -> array o
   console.debug("MODFILES:", modFiles);
 
   const ret = modFiles
-    .filter( fn => ! fn.includes("/main-"))   // skip main chunk
+    .filter( fn => ! fn.includes("/main-"))   // skip boot chunk
     .map( fn => `<link rel="modulepreload" href="${fn}">` );
   return ret;
 }
@@ -95,7 +95,7 @@ function productize(contents, hashes, { version }) {    // (String, Map<String,S
   //    import { init } from './main-#.js'
   //  <<
   //
-  // Note: Here, we expect '-' delimiter in Rollup 'output.entryFileNames'.
+  // Note: expects '-' delimiter in Rollup 'output.entryFileNames'
   //
   const s6 = s5.replace(/'[^']+\/([\w\d]+)-#\.js'/gm,
     (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"

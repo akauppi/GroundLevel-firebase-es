@@ -7,8 +7,12 @@
 
     <link rel="icon" type="image/png" href="/favicon.png">
 
-    <!-- //PROD enable this if Vue plugin's option 'css: false' is set in 'rollup.config.prod.js'
-    <link type="text/css" rel="stylesheet" href="dist/bundle.css" />
+    <!--PROD Needed as long as we need 'scss' plugin in Rollup config (see 'scssHackNeeded').
+    <link type="text/css" rel="stylesheet" href="dist/scss-hack.css" />
+    -->
+
+    <!--//PROD If your Rollup config has 'plugins.vue.css: false', link to the output CSS here.
+    <link type="text/css" rel="stylesheet" href="dist/<some>.css" />
     -->
 
     <!--PROD Enable 'first-input-delay' performance metrics; see -> https://firebase.google.com/docs/perf-mon/auto_duration-traces-metrics_web#input-delay
@@ -55,7 +59,7 @@
       //window.airbrake = airbrake;   // too hard
       //throw new Error("Airbrake:", airbrake);   // "airbrake is not defined" DEBUG
 
-      import('./dist/main-#.js');   // dynamic so the 'window.' dressings are up, first
+      import('./dist/main-#.js');
     </script>
     -->
     <!--DEV -->
