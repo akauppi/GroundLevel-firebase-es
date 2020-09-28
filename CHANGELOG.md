@@ -1,12 +1,13 @@
 # Changelog
 
-## latest
+## 28-Sep-20
 
 - Very clumsy error panel (shows uncaught errors in UI), but works.
 - Taking Functions emulator's port (in `dev:local`) from `firebase.json`.
 - Multiple bugs solved regarding `npm run prod:rollup:serve` (also upstream)
 - Moved front-end code to `app/`.
 - Ability to deploy!! 🎉🎉🎉
+- Placed `@firebase/firestore` and `@firebase/auth` in their own chunks.
 
 ## 13-Sep-20
 
