@@ -118,7 +118,7 @@ export default {
     manualChunks(id) {
       const pathParts = id.split(path.sep);
 
-      //console.debug("Looking for home for:", id);   // DEBUG
+      console.debug("Looking for home for:", id);   // DEBUG
 
       if (id.includes('node_modules')) {
         const idx = pathParts.lastIndexOf('node_modules') +1;   // index of package or scope
@@ -126,35 +126,52 @@ export default {
         const tmp = pathParts.slice(idx);   // [ package, ... ] | [ scope, package, ... ]
 
         const name = tmp[0].startsWith('@') ? `${tmp[0]}/${tmp[1]}` : tmp[0];   // e.g. "firebase" | "@firebase/functions"
+        const scope = tmp[0].startsWith('@') ? tmp[0] : null;
 
         // Expected names (and their transformation)
         //
         const map = {
-          //'@airbrake/browser': true,    // disabled; enable this if loading it from npm
-          '@firebase/auth': true,         // ~170kB
-          '@firebase/firestore': true,    // ~270kB
-          '@firebase': 'firebase',    // performance, app, installations, functions (was just <10kB) ...
           '@vue': 'vue',
-          //'firebase': true,
-          'idb': 'firebase',
           'tslib': true,  // used by Firebase, but keep it separate
           'vue': true,
-          'vue-router': true
+          'vue-router': true,
+
+          // 'firebase': base Firebase stuff: app, (internal) logging, functions (< 10kB), util, ...
+          '@firebase/app': 'firebase',        // ~26k
+          '@firebase/component': 'firebase',  // ~13k
+          '@firebase/functions': 'firebase',  // ~25k
+          '@firebase/logger': 'firebase',     // ~10k
+          '@firebase/util': 'firebase',       // ~20k
+
+          // '@firebase/auth'
+          '@firebase/auth': true,         // ~170kB
+
+          // '@firebase/firestore' with exclusive dependencies
+          //
+          '@firebase/firestore': true,    // ~270kB
+          '@firebase/webchannel-wrapper': '@firebase/firestore', // ~62kB
+
+          // '@firebase/performance' and its direct (and exclusive) dependencies. This is an optional monitoring feature.
+          //
+          '@firebase/installations': '@firebase/performance',    // ~54kB
+          '@firebase/performance': true,    // ~57kB (117kB with dependencies)
+          'idb': '@firebase/performance'    // ~6kB
         };
 
-        const scope = name.startsWith('@') ? tmp[0] : false;
-
+        // tbd. Unsure why 'public/dist/@firebase-performance' does not get created, and why 'index.esm-....js' gets. #bug #help
+        //
         if (map[name]) {
-          return map[name] === true ? (
-              scope ? name.replace('/','-') : name    // "@<scope>-<pkg>" | "<pkg>"
-            )
-            : map[name];
+          const tmp = map[name] === true ? name : map[name];
+
+          // Flatten the chunk names (we wish all in one directory, just an opinion)
+          return tmp.replace('/','-');
 
         } else if (scope && map[scope]) {   // put all subpackages in the given one
           return map[scope] === true ? scope : map[scope];
 
         } else {
           console.warn("Unexpected dependency found (not mapped in 'manualChunks'):", name);
+
           return;   // do NOT return a value -> let Rollup do its default
         }
 

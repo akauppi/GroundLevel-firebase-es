@@ -53,7 +53,7 @@ You can build the code for production using either Rollup (with ES level bundlin
 
 ||Rollup|Vite 1.0.0-rc.4|comments|
 |---|---|---|---|
-|file size; minified (`du -hk -I "*.map"`)|728 kB|1484 kB|Rollup-built size is 49% of Vite's|
+|file size; minified (`du -hk -I "*.map" [public/]dist`)|724 <!--was: 728--> kB|1536 <!--1484--> kB|Rollup-built size is 47% <!--49%--> of Vite's|
 
 <!-- old stuff: remeasure!
 |load time (local hosting)|270 ms|160 ms|not sure about variation|

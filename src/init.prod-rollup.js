@@ -77,9 +77,15 @@ async function initFirebase() {
   });
 
   if (enableFirebasePerf) {
+    console.info("Taking Firebase Performance client to use.");    // DEBUG
     // tbd. Q: #Firebase Does it matter if this is before or after 'initializeApp'?
     await import('@firebase/performance');
-    /*const perf =*/ firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed.
+    /*const perf =*/ firebase.performance()    // enables the basics. To use e.g. custom traces, more wiring is needed.
+      .then( x => {
+        console.info("Firebase Performance successfully loaded.");
+      }).catch( err => {
+        console.error("Failed to initialize Firebase Performance:", err);
+      })
   }
 }
 

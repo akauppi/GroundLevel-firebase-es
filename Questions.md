@@ -60,6 +60,15 @@ Alternatives:
 - Datadog etc.
 
 
+### Callable functions: what's the region story???
+
+The use of [regions](https://firebase.google.com/docs/functions/locations) (Firebase docs) is not well laid out. 
+
+- [ ] When and how should one use them?
+- [ ] Can we just ignore them at testing?
+- [ ] Why do regions need to be specified in code, per function. There doesn't seem to be a way to change the default from `us-central1`, is there?
+
+
 ## Does Vue.js 3 have a corresponding thing to `renderError`?
 
 Vue.js 2 had this this - what's a similar way with Vue 3 (beta)? Do we need this?
@@ -105,9 +114,10 @@ Can the `:key` just be left out (but the key still picked):
 ```
 
 
+<!-- dump it
 ## Airbrake: how to provide version/build info?
 
 ..for a web app
 
 Ideally, we'd like to provide them as `new Notifier({ ... })` params.
-
+-->

@@ -113,7 +113,13 @@ if (LOCAL) {
         if (notice.id) {
           console.info('notify successful, id:', notice.id);
         } else {
-          console.error('notify failed', notice.error);
+          const err= notice.error;
+
+          if (err.message === "airbrake: error is filtered") {  // what is this? not even sent to Airbrake? (based on looking at 'error' details)
+            console.warn('Airbrake error is filtered out by the client');
+          } else {
+            console.warn('Airbrake notify failed', notice.error);
+          }
         }
       });
     }
