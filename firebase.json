@@ -1,11 +1,4 @@
 {
-  "firestore": {
-    "rules": "back-end/firestore.rules",
-    "indexes": "back-end/firestore.indexes.json"
-  },
-  "functions": {
-    "source": "back-end/functions"
-  },
   "hosting": {
     "public": "public",
     "rewrites": [
@@ -21,16 +14,8 @@
           "  /dist/main.{hash}.js.map (that exists) -> 200"
         ],
         "source": "!**/*.@(css|js|map)",
-        "destination": "/index.prod.html"
+        "destination": "/index.html"
       }
     ]
-  },
-  "emulators": {
-    "firestore": {
-      "port": "6767"
-    },
-    "functions": {
-      "port": "5002"
-    }
   }
 }

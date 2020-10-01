@@ -1,130 +1,63 @@
 {
-  "name": "groundlevel-es6-firebase",
+  "name": "groundlevel-es-firebase",
   "version": "0.0.1",
+  "description": "Production build and ops (B&O) of an ES modules, Firebase -using single-page-application (SPA)",
+  "license": "MIT + see 'LICENSE' for restriction",
+  "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akauppi/groundlevel-es6-firebase-web.git"
+    "url": "git+https://github.com/akauppi/GroundLevel-es-firebase-web.git"
   },
-  "author": "<akauppi@gmail.com>",
-  "private": true,
   "type": "module",
   "engines": {
     "node": ">=14.3"
   },
   "scripts": {
-    "test": "npm run ci",
-    "ci": "npm run ci:seq",
-    "    ": "",
-    "ci:seq": "firebase emulators:exec --project=bunny --config firebase.json --only firestore,functions \"npm run _ci_init && npm run _ci_fns && npm run _ci_rules\"",
-    "_ci_init": "node --harmony-top-level-await back-end/test/prime-docs.js",
-    "_ci_fns": "npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs --verbose --detectOpenHandles",
-    "_ci_rules": "npx --node-arg=--experimental-vm-modules jest --config back-end/test-rules/jest.config.cjs --verbose --detectOpenHandles",
-    "ci:par": "firebase emulators:exec --project=bunny --config firebase.json --only firestore,functions \"npm run _ci_par_2\"",
-    "_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_init && npm run _ci_fns\" \"npm run _ci_rules\"",
-    "   -": "",
-    "start:back-end": "concurrently -n emul,init \"firebase emulators:start --project=bunny --config firebase.json --only functions,firestore\" \"GCLOUD_PROJECT=bunny npm run _start_2\"",
-    "_start_2": "wait-on http://localhost:4000 && node --harmony-top-level-await back-end/test/prime-docs.js",
-    "test:fns:callables": "GCLOUD_PROJECT=bunny npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs -f callables.test.js",
-    "test:fns:monitoring": "GCLOUD_PROJECT=bunny npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs -f monitoring.test.js",
-    "test:fns:userInfo": "GCLOUD_PROJECT=bunny npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs -f userInfo.test.js --detectOpenHandles",
-    "test:fns:all": "GCLOUD_PROJECT=bunny npx --node-arg=--experimental-vm-modules jest --config back-end/test-fns/jest.config.cjs --verbose --detectOpenHandles",
-    "  - ": "",
-    "test:rules:invites": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f invitesC.test.js --verbose --detectOpenHandles",
-    "test:rules:projects": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f projectsC.test.js --verbose --detectOpenHandles",
-    "test:rules:symbols": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f symbolsC.test.js --verbose --detectOpenHandles",
-    "test:rules:userInfo": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f userInfoC.test.js --verbose --detectOpenHandles",
-    "test:rules:visited": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs -f visitedC.test.js --verbose --detectOpenHandles",
-    "test:rules:all": "npx --node-arg=--experimental-vm-modules --node-arg=--harmony-top-level-await jest --config back-end/test-rules/jest.config.cjs --verbose --detectOpenHandles",
-    "  --": "",
-    "test:app": "echo \"Sorry, no application tests yet! 🙁\" && false",
-    "lint": "eslint --ext .js,.vue src",
-    " -  ": "",
-    "dev": "npm run dev:local",
-    "dev:local": "concurrently -n emul,init \"firebase emulators:start --project=app --only functions,firestore\" \"GCLOUD_PROJECT=app npm run _dev_local_2\"",
-    "_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && vite --port 3000 --mode dev_local",
-    "dev:online": "tools/hasActiveProject.sh && vite --port 3001",
-    " - -": "",
-    "prod:build": "npm run _prod_rollup_build",
-    "prod:serve": "PORT=3010 npm run _prod_rollup_serve",
-    " -- ": "",
-    "_prod_rollup_serve": "firebase serve --only hosting --host 0.0.0.0 --port ${PORT:-3012}",
-    "pre_prod_rollup_serve": "npm run _prod_rollup_build",
-    "_prod_rollup_build": "rollup -c rollup.config.prod.js",
-    "pre_prod_rollup_build": "npm run _prod_rollup_clean",
-    "_prod_rollup_clean": "(rm public/dist/* 2> /dev/null || true)",
+    "test": "false",
+    "--test:app": "echo \"Sorry, no application tests yet! 🙁\" && false",
+    "lint": "eslint --ext .js,.vue init",
+    "--lint-x": "eslint --ext .js,.vue init node_modules/@app/groundlevel-es-firebase-app/src",
+    "  -": "",
+    "build": "rollup -c rollup.config.prod.js",
+    "serve": "firebase serve --only hosting --host 0.0.0.0 --port ${PORT:-3012}",
+    "prebuild": "npm run _clean",
+    "preserve": "npm run build",
+    "postbuild": "du -hk -I '*.map' public",
+    "_clean": "(rm public/dist/* 2> /dev/null || true)",
     " ---": "",
-    "prod:deploy:hosting": "firebase deploy --only hosting",
-    "prod:deploy:fns": "firebase deploy --only functions",
-    "prod:deploy:rules": "firebase deploy --only firestore",
-    "prod:deploy:all": "firebase deploy",
-    "-   ": "",
-    "prod:rollup:build": "npm run _prod_rollup_build",
-    "prod:rollup:serve": "npm run _prod_rollup_serve",
-    "_vite_build": "vite build && rm dist/dist/index.prod.html",
-    "_vite_serve": "vite --mode production --port ${PORT:-3011}"
-  },
-  "//scripts": {
-    "//dev:local": [
-      "This worked, but tended to leave the terminal in uncomfortable situation on Ctrl-C. Trying if 'emulators:start'",
-      "is any better.",
-      {
-        "//dev:local": "firebase emulators:exec --project=app --ui --only functions,firestore \"npm run _dev_local_2\"",
-        "//_dev_local_2": "node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local"
-      }
-    ]
+    "prod:deploy": "firebase deploy --only hosting"
   },
   "dependencies": {
-    "@airbrake/browser": "^1.4.1",
-    "firebase": "^7.21.1",
-    "vue": "^3.0.0",
-    "vue-router": "^4.0.0-beta.12"
-  },
-  "//dependencies": {
-    "//firebaseui": "^4.6.1"
+    "@app/groundlevel-es-firebase-app": "git://github.com/akauppi/groundLevel-es-firebase-app"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-replace": "^2.3.3",
-    "@vue/compiler-sfc": "^3.0.0",
-    "concurrently": "^5.3.0",
     "eslint": "^7.10.0",
-    "eslint-plugin-vue": "^7.0.0-beta.4",
-    "firebase-admin": "^9.2.0",
-    "firebase-jest-testing": "0.0.1-beta.3",
-    "jest": "^26.4.2",
-    "jest-circus": "^26.4.2",
+    "eslint-plugin-vue": "^7.0.0",
     "rollup": "^2.28.2",
     "rollup-plugin-analyzer": "^3.3.0",
-    "rollup-plugin-scss": "^2.6.0",
+    "rollup-plugin-scss": "^2.6.1",
     "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-visualizer": "^4.1.1",
     "rollup-plugin-vue": "^6.0.0-beta.10",
-    "sass": "^1.26.11",
-    "vite": "1.0.0-rc.4",
-    "vue-eslint-parser": "^7.1.0",
-    "wait-on": "^5.2.0"
+    "vue-eslint-parser": "^7.1.0"
   },
   "//devDependencies": {
     "//@rollup/plugin-alias": "^3.1.0",
-    "//@rollup/plugin-commonjs": "^11.0.1"
+    "//@rollup/plugin-commonjs": "^11.0.1",
+    "--concurrently": "^5.3.0",
+    "--sass": "^1.26.11",
+    "--wait-on": "^5.2.0"
   },
   "//comments": {
     "devDependencies": {
-      "@vue/compiler-sfc": [
-        "This needs to be the same version as 'dependencies.vue' but did not find a way to ",
-        "enforce that. Tried '$npm_package_dependencies_vue' but that doesn't work. npm 6.14.4 on macOS."
-      ],
       "rollup-plugin-scss": [
         "Needed only as an antidote, until 'rollup-plugin-vue' does things right.",
         "See -> https://github.com/vuejs/rollup-plugin-vue/issues/322#issuecomment-586371970"
       ]
     },
-    "scripts": {
-      "build": [
-        "Builds production code.",
-        "Linting is separated from 'npm run build' intentionally. CI/CD can easily do them both (as it should) but",
-        "for developer being able to run them separately is considered good."
-      ]
-    },
+    "scripts": {},
     "engines": [
       "'>=14.3' for '—harmony-top-level-await'",
       "'>=13.2' for ES module support"

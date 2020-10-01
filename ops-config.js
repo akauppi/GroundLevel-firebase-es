@@ -1,5 +1,5 @@
 /*
-* src/ops-config.js
+* /ops-config.js
 *
 * Ops configuration
 *
@@ -8,7 +8,7 @@
 */
 
 // Account specific values (note: not really secrets, they are available to anyone having access to the front end)
-import { airbrake, firebase } from '../.env.js'
+import { airbrake, firebase } from './.env.js'
 
 // Schema checking
 //
@@ -17,26 +17,22 @@ import { airbrake, firebase } from '../.env.js'
 check( airbrake, { type: 'airbrake', projectId: 'string', projectKey: 'string' } );
 check( firebase, { type: 'firebase', apiKey: 'string', appId: 'string?', projectId: 'string', authDomain: 'string' } );
 
-//--- Logging config
-
-//import { testDebug, testWarn } from '../app/logging.js'
-//const toastThese = new Set([ testDebug, testWarn ]);
-
-const _PROD = (import.meta.env?.MODE || 'production') === 'production';
+const _PROD = true;   // (import.meta.env?.MODE || 'production') === 'production';
 
 const ops = {
   perf: [firebase],
   logs: _PROD ? [] : [airbrake],    // DISABLED for prod
-  fatal: _PROD ? [] : [airbrake],   // DISABLED for prod
-
-  toastThis(id) {   // (obj) => boolean
-    return toastThese.has(id);
-  }
+  fatal: _PROD ? [] : [airbrake]    // DISABLED for prod
 }
 
+export {
+  ops
+}
+
+//--- ignore: implementation
 function check(o, template) {   // (object, object) => ()   // throws an Error on failures; may print warnings to 'console.warn'
 
-  if (Object.keys(airbrake).length === 0) {   // {}: allowed as a "skip" object
+  if (Object.keys(template).length === 0) {   // {}: allowed as a "skip" object
     return;
 
   } else {
@@ -61,8 +57,4 @@ function check(o, template) {   // (object, object) => ()   // throws an Error o
       }
     });
   }
-}
-
-export {
-  ops
 }

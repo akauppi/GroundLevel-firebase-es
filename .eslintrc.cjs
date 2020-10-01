@@ -15,7 +15,7 @@ module.exports = {
   parserOptions: {
     sourceType: 'module',
     //ecmaVersion: 2018,  // 9 (we use: object spread)
-    ecmaVersion: 2020   // to use dynamic import (not crucial)
+    ecmaVersion: 2020   // we use: dynamic import
   },
 
   rules: {

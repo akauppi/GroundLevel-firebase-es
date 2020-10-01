@@ -633,6 +633,28 @@ Isn't that a useful concept even when versions presumably update faster? I'd lik
 Firebase Performance Monitoring could then provide parity with the mobile versions. #pun
 
 
+## Firebase: `firebase use` to detect whether there's an active project
+
+Current situation (`firebase-tools` 8.11.1):
+
+```
+$ firebase use | more
+
+ESC[1mESC[31mError:ESC[39mESC[22m No active project
+```
+
+`firebase use` works differently, based on whether it's part of a pipe (above) or run interactively. This is not the problem.
+
+When run as pipe, it shouldn't do the ANSI graphics (above). This is not the problem, either.
+
+Return code is 0, even when there's no active project. This is the problem and causes one to parse the output, in order to know (in a script) whether there's an active project.
+
+**Suggestion:**
+
+`firebase use` could return with a non-zero exit code, if there is no current project.
+
+This is a breaking change.
+
 
 ## References
 

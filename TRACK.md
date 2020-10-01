@@ -201,4 +201,10 @@ Sure. Track the AUTH work of `exp` and see if they do it this way.
 - [ ] Have the code working, with `exp` (once they support Auth at least for Google login)
 - [ ] Get Firebase UI away from HTML, and to be brought in via `npm` (currently we cannot, due to another glitch; see "FirebaseUI from npm")
 
+**Special tracking:**
 
+- [https://github.com/firebase/firebase-js-sdk/pull/3722](https://github.com/firebase/firebase-js-sdk/pull/3722)
+
+   Once that is merged, we should be able to test `exp`.
+   
+   

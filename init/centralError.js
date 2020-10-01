@@ -1,5 +1,5 @@
 /*
-* src/centralError.js
+* init/centralError.js
 *
 * Central error collection.
 *
@@ -14,45 +14,41 @@ import { assert } from './assert.js'
 const _MODE = import.meta.env?.MODE || 'production';    // default is for Rollup (no 'import.meta.env' support, yet Sep-20)
 const LOCAL = _MODE === "dev_local";
 
-import { ops } from './ops-config.js'
+import { ops } from '../ops-config.js'
 import { central } from './central.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
 // Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
 //
-//import { Notifier } from "@airbrake/browser"    // causes problems with 'npm run prod:serve' (Rollup)
-
-assert(_MODE === 'production' || window.Notifier);   // from the init scripts (DISABLED for prod)
+//import { Notifier } from "@airbrake/browser"    // causes problems with Rollup
 
 let airbrake;   // 'Notifier' | undefined
 
-if (!LOCAL) {
-  // Can have multiple error handlers (good for comparing alternatives)
-  //  - { }   // ignore
-  //  - { type: 'airbrake', projectId: ..., projectKey: ... }   // airbrake.io
-  //
-  for( const o of ops.fatal ) {
-    if (!o.type) {
-      // skip
-    } else if (o.type === 'airbrake') {
-      const { projectId, projectKey } = o;
-      assert(projectId && projectKey);  // 'ops-config' has already given an error message
+// Can have multiple error handlers (good for comparing alternatives)
+//  - { }   // ignore
+//  - { type: 'airbrake', projectId: ..., projectKey: ... }   // airbrake.io
+//
+for( const o of ops.fatal ) {
+  if (!o.type) {
+    // skip
+  } else if (o.type === 'airbrake') {
+    const { projectId, projectKey } = o;
+    assert(projectId && projectKey);  // 'ops-config' has already given an error message
 
-      if (!Notifier) {
-        throw new Error("Airbrake configured to be used for ops, but 'window.Notifier' not available.");
-      }
-
-      airbrake = new Notifier({
-        projectId,
-        projectKey,
-        environment: _MODE   // 'production'|'development'
-      });
-
-    } else {
-      throw new Error( `Unexpected 'fatal[].type' in ops config: ${o.type}` );
-        // Note: No eternal loop - we're just loading the module.
+    if (!Notifier) {
+      throw new Error("Airbrake configured to be used for ops, but 'window.Notifier' not available.");
     }
+
+    airbrake = new Notifier({
+      projectId,
+      projectKey,
+      environment: _MODE   // 'production'|'development'
+    });
+
+  } else {
+    throw new Error( `Unexpected 'fatal[].type' in ops config: ${o.type}` );
+      // Note: No eternal loop - we're just loading the module.
   }
 }
 
@@ -68,7 +64,7 @@ function centralError(err) {    // (Error) => ()
 
   if (airbrake) {
     (async _ => {
-      central( uncaughtErrorFatal, 'Error caught', err );
+      central._fatal( 'Error caught:', err );
 
       const notice = await airbrake.notify(err)
       if (notice.id) {
@@ -76,7 +72,7 @@ function centralError(err) {    // (Error) => ()
       } else {
         console.error('Error notifying an error to Airbrake', notice.error);
 
-        //central( centralErrorNoDelivery, 'Error notifying an error to Airbrake', notice.error );
+        //central.error( 'Error notifying an error to Airbrake', notice.error );
 
         const msg = `Error notifying an error to Airbrake: ${notice.error.message}`;
         alert(msg);
@@ -108,7 +104,5 @@ window.onerror = function(msg, source, lineNbr, colNbr, error) {    // other
   centralError(error);
   prevOnError();
 }
-
-const uncaughtErrorFatal = { level: 'fatal' }
 
 export { }

@@ -1,9 +1,7 @@
 /*
-* src/init.prod-rollup.js
+* init/main.js
 *
-* The entry point for Rollup (production candidate).
-*
-* See also comments in 'src/init.vite.js'.
+* Entry point for Rollup (production build).
 */
 import { assert } from './assert.js'
 
@@ -20,6 +18,7 @@ import firebase from '@firebase/app'  // this works
 import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
+import '@firebase/performance'    // Importing as static, though use is optional. Otherwise the chunk name becomes 'index.esm', for some reason
 
 //  ^-- Note: We can eventually make 'firestore' and 'functions' lazy-loading (i.e. start loading already here,
 //          but don't make 'app.js' wait for them).
@@ -27,7 +26,7 @@ import '@firebase/functions'
 assert(firebase.initializeApp);
 assert(firebase.auth);    // check if there are loading problems
 
-import { ops } from './ops-config.js'
+import { ops } from '../ops-config.js'
 
 const enableFirebasePerf = (_ => {
   if (ops.perf.type == 'firebase') {
@@ -44,7 +43,7 @@ const enableFirebasePerf = (_ => {
 //    so let's prefer it (for marginally faster loading, or hosting on something else than Firebase, use the other
 //    implementation).
 //
-const firebaseConfigProm = (async _ => {
+const firebaseConfigProm = (async _ => {    // () => Promise of { apiKey, appId, projectId, authDomain }
   // Note: Browsers don't dynamically 'import' a JSON (Chrome 85)
   //const json = await import('/__/firebase/init.json');    // NOPE
 
@@ -61,7 +60,7 @@ const firebaseConfigProm = (async _ => {
 
 /* Alternative for non-Firebase hosting:
 (async _ => {
-  const json = await import('./ops-config.js').then( mod => mod.firebase );
+  const json = await import('../.env.js').then( mod => mod.firebase );
   return json;
 })();
 */
@@ -78,9 +77,12 @@ async function initFirebase() {
 
   if (enableFirebasePerf) {
     console.info("Taking Firebase Performance client to use.");    // DEBUG
+
     // tbd. Q: #Firebase Does it matter if this is before or after 'initializeApp'?
-    await import('@firebase/performance');
-    /*const perf =*/ firebase.performance()    // enables the basics. To use e.g. custom traces, more wiring is needed.
+    //
+    // Note: If we import dynamically, the chunk name becomes 'index.esm.js'
+    //await import('@firebase/performance');
+    await firebase.performance()    // enables the basics. To use e.g. custom traces, more wiring is needed.
       .then( x => {
         console.info("Firebase Performance successfully loaded.");
       }).catch( err => {
@@ -89,6 +91,7 @@ async function initFirebase() {
   }
 }
 
+/*** disabled
 // Our trying to load 'Airbrake' failed. Getting these from 'index.html'.
 // Real solution is to have the library fixed, so it can be _statically_ imported, in 'central.js'.
 //
@@ -96,12 +99,7 @@ async function initFirebase() {
 //    (for production).
 //
 window.Notifier = undefined;  // window.airbrake.Notifier;
-
-async function initCentral() {
-  const central = await import('./central.js').then( mod => mod.central );
-  debugger;
-  return central;
-}
+***/
 
 (async () => {
   const t0 = performance.now();
@@ -110,7 +108,7 @@ async function initCentral() {
   //
   const [__, central, ___] = await Promise.all([
     initFirebase(),
-    initCentral(),
+    import('./central.js').then( mod => mod.central ),
     import('./centralError.js')   // initializes as a side effect
   ]);
     //
@@ -119,17 +117,16 @@ async function initCentral() {
   const dt = performance.now() - t0;
   console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);
 
-  window.central = central;
-
   // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
   //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.
   //
   window.firebase = firebase;
   window.assert = assert;
+  window.central = central;
 
   console.debug("Launching app...");
 
-  const { init } = await import('../app/app.js');
+  const { init } = await import('@app/groundlevel-es-firebase-app/src/app.js');
   await init();
 
   console.debug("App on its own :)");

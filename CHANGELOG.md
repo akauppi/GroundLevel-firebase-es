@@ -1,5 +1,9 @@
 # Changelog
 
+## 1-Oct-20
+
+- Split app and back-end from the main repo.
+
 ## 28-Sep-20
 
 - Very clumsy error panel (shows uncaught errors in UI), but works.

@@ -1,29 +1,24 @@
-node_modules/
+/node_modules/
 
 # Rollup build target
 /public/dist/
 
-# 'vite build'
-/dist/
-
-# firebase-jest-testing
-/.lock
-
-# Created by 'npm run build'
-/public/index.prod.html
-
-/functions/node_modules/
-/functions/ui-debug.log
+# Build output
+/public/index.html
 
 # Firebase hosting caches
 /.firebase/
 
 /.firebaserc
 
-# These occur at /, /functions/, /rules-test
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
+# Temporary
+/firebase-debug.log
+/firestore-debug.log
+/ui-debug.log
 
 # Ops configuration (can be in version control in your project; or simply baked into 'src/ops-config.js')
 /.env.js
+
+# Rollup visualization
+/stats.html
+

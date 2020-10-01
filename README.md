@@ -102,7 +102,7 @@ $ firebase setup:emulators:firestore
 -->
 
 <!--
-The repo is developed with latest `firebase` (8.11.0) and Node.js (14.12.0) on macOS.
+The repo is developed with latest `firebase` (8.11.1) and Node.js (14.12.0) on macOS.
 -->
 
 

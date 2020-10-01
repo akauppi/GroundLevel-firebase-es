@@ -18,6 +18,7 @@ import { strict as assert } from 'assert'
 import resolve from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
+import visualizer from 'rollup-plugin-visualizer';
 import vue from 'rollup-plugin-vue'
 
 import path from 'path'
@@ -33,9 +34,8 @@ import path from 'path'
 import scss from 'rollup-plugin-scss'      // handles '.css' and '.scss'
 const scssHackNeeded = true;    // still needed with: vue 3.0.0, rollup-plugin-vue 6.0.0-beta.10
 
-const publicDir = 'public';
-const indexDev = 'index.html';
-const indexProd = 'public/index.prod.html';
+const indexDev = 'index.template.html';
+const indexProd = 'public/index.html';
 const scssHackCss = scssHackNeeded ? 'public/dist/scss-hack.css' : undefined;
 
 import { prodIndexPlugin } from './tools/prod-index-filter'
@@ -87,13 +87,20 @@ const plugins = [
   prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } }),
 
   // Enable for seeing more detailed info on the chunks
-  //analyze()
+  //analyze(),
+
+  // see -> https://www.npmjs.com/package/rollup-plugin-visualizer
+  visualizer({
+    sourcemap: true,        // seems to show the reduced sizes (e.g. 594k instead of 1.4M)
+    template: 'sunburst',   // 'sunburst'|'treemap'|'network'
+    brotliSize: true        // Show also Brotli compressed size (Firebase hosting supports it)
+  })
 ];
 
 export default {
   plugins,
   input: {
-    main: 'src/init.prod-rollup.js'   // becomes the 'main' chunk
+    main: 'init/main.js'   // becomes the 'main' chunk (regardless of filename)
   },
 
   output: {
@@ -118,8 +125,6 @@ export default {
     manualChunks(id) {
       const pathParts = id.split(path.sep);
 
-      console.debug("Looking for home for:", id);   // DEBUG
-
       if (id.includes('node_modules')) {
         const idx = pathParts.lastIndexOf('node_modules') +1;   // index of package or scope
 
@@ -131,6 +136,7 @@ export default {
         // Expected names (and their transformation)
         //
         const map = {
+          '@app': 'app',  // application code
           '@vue': 'vue',
           'tslib': true,  // used by Firebase, but keep it separate
           'vue': true,
@@ -153,13 +159,14 @@ export default {
 
           // '@firebase/performance' and its direct (and exclusive) dependencies. This is an optional monitoring feature.
           //
+          // NOTE: If '@firebase/performance' is imported dynamically, the chunk name 'index.esm.{hash}.js' is used,
+          //    regardless what we give.
+          //
           '@firebase/installations': '@firebase/performance',    // ~54kB
           '@firebase/performance': true,    // ~57kB (117kB with dependencies)
           'idb': '@firebase/performance'    // ~6kB
         };
 
-        // tbd. Unsure why 'public/dist/@firebase-performance' does not get created, and why 'index.esm-....js' gets. #bug #help
-        //
         if (map[name]) {
           const tmp = map[name] === true ? name : map[name];
 
@@ -176,13 +183,8 @@ export default {
         }
 
       } else {    // Internal pieces
-
-        // Place everything in 'app' in its own module.
-        // 'src/' has the stuff that will load it, and this allows us to control the dynamic loading order nicer.
-        //
-        // Note: Eventually, we'll take the app via npm. This may or may not be affected, at that point.
-        //
-        return (id.includes("/app/")) ? "app" : "main";   // tbd. consider changing to 'boot'
+        // Note: We don't seem to be able to steer the name here. Just use 'main'.
+        return "main";
       }
     },
 
@@ -199,5 +201,5 @@ export default {
     intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
   },
 
-  preserveEntrySignatures: false,   // "recommended setting for web apps" (supresses a warning)
+  preserveEntrySignatures: false,   // "recommended setting for web apps" (suppresses a warning)
 };

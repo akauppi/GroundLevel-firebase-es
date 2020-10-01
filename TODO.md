@@ -1,13 +1,5 @@
 # Todo
 
-## Tests
-
-- [ ] Add tests
-
-<!--
-  - Coming to the site with a URL path, going through sign-in, one should land in the original intended path.
--->
-
 ## WebStorm IDE
 
 *Note: this is not really in the project scope. The author just happens to be using WebStorm.*
@@ -153,7 +145,4 @@ It just doesn't seem to have the same quality and clarity of documentation as th
 - ...
 
 While it makes sense to have a centralized library to "do auth right", this one is getting out of hand as to the number of features - and not getting enough care at the same time. By focusing on a smaller feature set, and not needing to be generic web (i.e. we can be ES6 and Vue 3 specific), we likely will be able to do a better job.
-
-
-## Move `iconart` originals elswhere
 

@@ -3,40 +3,24 @@
 *Place for informing of things that are not seen as bugs.*
 
 
-<!-- Haven't seen recently. REMOVE AK 14-Sep-20
-## Vite build fails
+## `firebase use --clear` does not work
 
-With Vite `1.0.0-rc.4`:
+Reported as [https://github.com/firebase/firebase-tools/issues/2656](https://github.com/firebase/firebase-tools/issues/2656).
+
+Work-around:
+
+Add two aliases to your project, e.g. 
 
 ```
-$ npx vite build
-vite v1.0.0-rc.4
-⠋ Building for production...
-[vite] Build errored out.
-Error: [vite]: Rollup failed to resolve import "%7B%7B%20m.photoURL%20%7D%7D" from "src/pages/Project/index.vue?vue&type=template&id=81f22f30&scoped=true".
-This is most likely unintended because it can break your application at runtime.
-If you do want to externalize this module explicitly add it to
-`rollupInputOptions.external`
-    at Object.onwarn (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/vite/dist/node/build/index.js:70:19)
-    at Object.onwarn (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:19374:20)
-    at ModuleLoader.handleResolveId (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18249:26)
-    at /Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18239:22
-    at async Promise.all (index 1)
-    at async ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18237:34)
-    at async Promise.all (index 0)
-    at async ModuleLoader.fetchModule (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18214:9)
-    at async Promise.all (index 1)
-    at async ModuleLoader.fetchStaticDependencies (/Users/asko/Git/GroundLevel-es6-firebase-web/node_modules/rollup/dist/shared/rollup.js:18237:34) {
-  watchFiles: [
-    '/Users/asko/Git/GroundLevel-es6-firebase-web/index.html',
-    '/Users/asko/Git/GroundLevel-es6-firebase-web/src/init.vite.js',
-    '/Users/asko/Git/GroundLevel-es6-firebase-web/__.js',
+$ firebase use --add    # call it anything
 ...
+
+$ firebase use --add    # call it "bandaid"
 ```
 
-This is weird.
+Also: check the above issue and +1 it, to get more focus...
 
-`m.photoURL` is from an `img` tag, not an import.
--->
+**Since:**
 
+- noticed and reported: `8.11.2` (30-Sep-20)
 
