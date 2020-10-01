@@ -1,11 +1,9 @@
 // .env.js
 //
-// Operational configuration. Gets merged to 'src/ops-config.js' at build time.
-//
-// The values are used for 'dev:online' and production.
+// Access values for ops systems.
 //
 // NOTE: The values are *not* secret since they get exposed in the client. You can add the file to version control,
-//      or provide the values directly in 'src/ops-config.js'.
+//      or provide the values directly in '/ops-config.js'.
 //
 const airbrake = {
   //type: 'airbrake',
@@ -13,14 +11,4 @@ const airbrake = {
   //projectKey: '...'
 }
 
-const firebase = {
-  //type: 'firebase',
-
-  // Needed when we host with Vite
-  //apiKey: '...',
-  //appId: '...',   // needed for Firebase Performance Monitoring
-  //projectId: '...',
-  //authDomain: '...firebaseapp.com'
-}
-
-export { airbrake, firebase }
+export { airbrake }

@@ -11,10 +11,7 @@
 */
 import { assert } from './assert.js'
 
-const _MODE = import.meta.env?.MODE || 'production';    // default is for Rollup (no 'import.meta.env' support, yet Sep-20)
-const LOCAL = _MODE === "dev_local";
-
-import { ops } from '../ops-config.js'
+import { crashs as opsCrashes } from './opsConfig.js'
 import { central } from './central.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
@@ -29,7 +26,7 @@ let airbrake;   // 'Notifier' | undefined
 //  - { }   // ignore
 //  - { type: 'airbrake', projectId: ..., projectKey: ... }   // airbrake.io
 //
-for( const o of ops.fatal ) {
+for( const o of opsCrashes ) {
   if (!o.type) {
     // skip
   } else if (o.type === 'airbrake') {

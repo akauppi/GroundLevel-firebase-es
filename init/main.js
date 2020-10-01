@@ -23,50 +23,26 @@ import '@firebase/performance'    // Importing as static, though use is optional
 //  ^-- Note: We can eventually make 'firestore' and 'functions' lazy-loading (i.e. start loading already here,
 //          but don't make 'app.js' wait for them).
 
+import { firebaseProm } from './__.js'
+
 assert(firebase.initializeApp);
 assert(firebase.auth);    // check if there are loading problems
 
-import { ops } from '../ops-config.js'
+import {perfs as opsPerfs} from './opsConfig.js'
 
-const enableFirebasePerf = (_ => {
-  if (ops.perf.type == 'firebase') {
-    return true;
-  } else if (ops.perf.type) {
-    throw new Error(`Unexpected 'perf.type' ops config (ignored): ${ops.perf.type}`);
-      // note: Doesn't really need to be this fatal, but best to have the configs sound.
+let enableFirebasePerf;
+
+for( const o of opsPerfs ) {
+  if (o.type === 'firebase') {
+    enableFirebasePerf = true;
+  } else {
+    throw new Error(`Unexpected 'perf.type' ops config (ignored): ${o.type}`);
+      // note: Doesn't really need to be fatal, but best to have the configs sound.
   }
-})();
-
-// Get the Firebase configuration.
-//
-// Note: We have the data in 'ops-config.js' but here we should have access to the real source (Firebase hosting)
-//    so let's prefer it (for marginally faster loading, or hosting on something else than Firebase, use the other
-//    implementation).
-//
-const firebaseConfigProm = (async _ => {    // () => Promise of { apiKey, appId, projectId, authDomain }
-  // Note: Browsers don't dynamically 'import' a JSON (Chrome 85)
-  //const json = await import('/__/firebase/init.json');    // NOPE
-
-  const json = await fetch('/__/firebase/init.json').then(resp => {
-    if (!resp.ok) {
-      console.fatal("Unable to read Firebase config:", resp);
-      throw new Error("Unable to read Firebase config (see console)");
-    } else {
-      return resp.json();   // Promise of ... ('.then' takes care of it)
-    }
-  });
-  return json;
-})();
-
-/* Alternative for non-Firebase hosting:
-(async _ => {
-  const json = await import('../.env.js').then( mod => mod.firebase );
-  return json;
-})();
-*/
+}
 
 async function initFirebase() {
-  const { apiKey, appId, projectId, authDomain } = await firebaseConfigProm;
+  const { apiKey, appId, projectId, authDomain } = await firebaseProm;
 
   firebase.initializeApp({
     apiKey,
@@ -82,12 +58,7 @@ async function initFirebase() {
     //
     // Note: If we import dynamically, the chunk name becomes 'index.esm.js'
     //await import('@firebase/performance');
-    await firebase.performance()    // enables the basics. To use e.g. custom traces, more wiring is needed.
-      .then( x => {
-        console.info("Firebase Performance successfully loaded.");
-      }).catch( err => {
-        console.error("Failed to initialize Firebase Performance:", err);
-      })
+    firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed.
   }
 }
 
@@ -115,7 +86,7 @@ window.Notifier = undefined;  // window.airbrake.Notifier;
     // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since chunks are loaded at launch).
 
   const dt = performance.now() - t0;
-  console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);
+  console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);    // 25ms
 
   // Note: If we let the app code import Firebase again, it doesn't get e.g. 'firebase.auth'.
   //    For this reason - until Firebase can be loaded as-per-docs - provide 'firebase' as a global to it.

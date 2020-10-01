@@ -8,7 +8,7 @@
 */
 //import { assert } from './assert.js'
 
-import { ops } from '../ops-config.js'
+import { logs as opsLogs } from './opsConfig.js'
 
 /*** disabled
 // Note: Rollup has difficulties importing '@airbrake/browser' (under Vite, loads fine).
@@ -23,7 +23,7 @@ let airbrake;   // 'Notifier' | undefined
 //  - { type: 'airbrake', projectId: ..., projectKey: ... }   // airbrake.io    DISABLED, had difficulties with it
 //  - { type: ... }
 //
-for( const o of ops.logs ) {
+for( const o of opsLogs ) {
   if (!o.type) {
     // skip
   /*** disabled
