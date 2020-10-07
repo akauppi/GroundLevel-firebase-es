@@ -411,12 +411,13 @@ Two ways to make such a change:
 
 ## Firebase emulator configuration from a `.js` file
 
+*Having the `init.json` (maybe undocumented?) makes this easy enough.*
+
 It is nowadays customary (babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have e.g. comments in there.
 
 Firebase (8.6.0) seems to be fixed on `firebase.json` and providing a `firebase.js` (or `firebase.cjs`) is ignored.
 
 Furthermore, the emulator should fail to start if there is no configuration available. Currently, it proceeds and gives a runtime error when one tries to use it.
-
 
 ## Firestore emulator: ability to load rules from multiple files
 

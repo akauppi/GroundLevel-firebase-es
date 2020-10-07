@@ -102,7 +102,7 @@ if (airbrake) {
 
 } else { ***/
 if (true) {   // no central logging
-  logGen = _ => (msg, opt) => {}
+  logGen = _ => (/*msg, opt*/) => {}
 }
 
 const central = {

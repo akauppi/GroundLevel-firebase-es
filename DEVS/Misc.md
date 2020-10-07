@@ -47,3 +47,16 @@ $ rm package-lock.json
 ```
 
 Of course, you can also choose to have it enabled. :)
+
+
+## Using CommonJS dependencies
+
+Vite will handle this automatically (development).
+
+In Rollup, you need to:
+
+- enable `@rollup/plugin-commonjs` in `package.json`
+- uncomment `//import commonjs from '@rollup/plugin-commonjs';` and `//commonjs()` lines in `rollup.config.prod.js`
+
+Test it. The setup hasn't been tested with CommonJS dependencies, so it would be nice to hear, whether these instructions are sufficient.
+

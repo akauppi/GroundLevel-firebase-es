@@ -80,7 +80,8 @@ window.Notifier = undefined;  // window.airbrake.Notifier;
   const [__, central, ___] = await Promise.all([
     initFirebase(),
     import('./central.js').then( mod => mod.central ),
-    import('./centralError.js')   // initializes as a side effect
+    import('./centralError.js'),   // initializes as a side effect
+    import('./firebaseUi.js')   // EXPERIMENTAL
   ]);
     //
     // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since chunks are loaded at launch).
@@ -96,6 +97,8 @@ window.Notifier = undefined;  // window.airbrake.Notifier;
   window.central = central;
 
   console.debug("Launching app...");
+
+  // NOTE: Make sure that errors within the app cause an error banner. No quiet problems. <-- tbd. remove comment
 
   const { init } = await import('@app/groundlevel-es-firebase-app/src/app.js');
   await init();

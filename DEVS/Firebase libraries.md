@@ -18,7 +18,7 @@ Open issues is listed because their number, and the oldest age are indicators of
 |---|---|---|---|
 |**Client side**|
 |&nbsp;&nbsp;`firebase`|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
-|&nbsp;&nbsp;`firebaseui-web`|Authentication UI for web|Browser app with auth|[109](https://github.com/firebase/firebaseui-web/issues) (18-Sep-20); oldest 24-Jun-2016|
+|&nbsp;&nbsp;`firebaseui-web`|Authentication UI for web|Browser app with auth|[114](https://github.com/firebase/firebaseui-web/issues) <!--was: 109--> (1-Oct-20); oldest 24-Jun-2016
 |**Server side**|
 |&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules.|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser.|[36](https://github.com/firebase/firebase-admin-node/issues) (27-Aug-20); oldest 7-Jun-2017|
 |&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[35](https://github.com/firebase/firebase-functions/issues) (27-Aug-20); oldest 19-Jun-2018|

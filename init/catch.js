@@ -12,7 +12,7 @@
 import { assert } from './assert.js'
 
 import { crashs as opsCrashes } from './opsConfig.js'
-import { central } from './central.js'
+import { _fatal } from './central.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
@@ -29,7 +29,8 @@ let airbrake;   // 'Notifier' | undefined
 for( const o of opsCrashes ) {
   if (!o.type) {
     // skip
-  } else if (o.type === 'airbrake') {
+
+  /*** REMOVE } else if (o.type === 'airbrake') {
     const { projectId, projectKey } = o;
     assert(projectId && projectKey);  // 'ops-config' has already given an error message
 
@@ -42,7 +43,7 @@ for( const o of opsCrashes ) {
       projectKey,
       environment: _MODE   // 'production'|'development'
     });
-
+  ***/
   } else {
     throw new Error( `Unexpected 'fatal[].type' in ops config: ${o.type}` );
       // Note: No eternal loop - we're just loading the module.
@@ -52,13 +53,14 @@ for( const o of opsCrashes ) {
 /*
 * Report an error.
 *
-* Returns right away. If there are problems with reporting the errors, somehow reports those (at least on the UI)
-* but does not influence the caller.
+* Returns right away. If there are problems with reporting the errors, somehow reports those (at least on the UI,
+* maybe central logging) but does not influence the caller.
 */
 function centralError(err) {    // (Error) => ()
 
   // Collect to central monitoring
 
+  /*** disabled
   if (airbrake) {
     (async _ => {
       central._fatal( 'Error caught:', err );
@@ -75,7 +77,7 @@ function centralError(err) {    // (Error) => ()
         alert(msg);
       }
     })();
-  }
+  }***/
 
   // Always show in browser console
   //
@@ -93,13 +95,17 @@ function centralError(err) {    // (Error) => ()
 * Catch any (uncaught by app) exceptions; show in the UI and report to central.
 */
 //assert (!window.onerror);   // defined. Q: Does Airbrake do this, automatically?
-const prevOnError = window.onerror || (_ => {});
+const prevOnError = window.onerror;   // function|undefined
+assert(!prevOnError, "'window.onerror' already defined!");    // some third party could have done this
 
-window.onerror = function(msg, source, lineNbr, colNbr, error) {    // other
-  console.debug("Uncaught error:", {msg, source, lineNbr, colNbr, error});    // DEBUG
+window.onerror = function (errorMsg, url, lineNbr, colNbr, error) {
+
+  console.debug("centralError saw:", {errorMsg, url, lineNbr, colNbr});    // DEBUG
+
+  _fatal(errorMsg, { url, lineNbr, colNbr, error });    // tbd. is this useful?
 
   centralError(error);
-  prevOnError();
+  if (prevOnError) prevOnError(errorMsg, url, lineNbr, colNbr);
 }
 
 export { }

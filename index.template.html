@@ -22,7 +22,6 @@
     </script>
     -->
 
-    <!--DEV,PROD -->
     <!--
     - See [#18](https://github.com/akauppi/GroundLevel-es6-firebase-web/issues/18), why this is needed.
     -
@@ -38,7 +37,6 @@
     -->
     <script defer src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
-    <!-- -->
 
     <!--PROD
     <link rel="preload" href="__/firebase/__.json" as="fetch">
@@ -50,15 +48,9 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     -->
 
-    <!-- //DISABLED PROD Unable to load 'Airbrake' within scripts, using Rollup - see 'central.js'.
-    <script type="text/javascript" src="hack/airbrake.min.js"></script>
-    -->
-
     <!--PROD
     <script type="module">
       window.VERSION = '${VERSION}';
-      //window.airbrake = airbrake;   // too hard
-      //throw new Error("Airbrake:", airbrake);   // "airbrake is not defined" DEBUG
 
       import('./dist/main-#.js');
     </script>

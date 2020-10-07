@@ -41,7 +41,9 @@ const scssHackCss = scssHackNeeded ? 'public/dist/scss-hack.css' : undefined;
 import { prodIndexPlugin } from './tools/prod-index-filter'
 
 //import { version } from './package.json'
-const { version } = require('./package.json');    // this works, 'import' didn't
+const { version } = require('./package.json');    // this works, 'import' didn't (not even dynamic)
+
+const createStats = false;
 
 /*
 * Note: The order of the plugins does sometimes matter.
@@ -79,18 +81,13 @@ const plugins = [
     output: scssHackCss
   }),
 
-  // enable for minified output (~600 vs. ~1432 kB)
-  // as by: du -hk -I "*.map" public/dist/
-  //
-  terser(),
+  // enable for minified output (~720 vs. ~1492 kB)
+  //terser(),
 
   prodIndexPlugin({ template: indexDev, out: indexProd, map: { version } }),
 
-  // Enable for seeing more detailed info on the chunks
-  //analyze(),
-
   // see -> https://www.npmjs.com/package/rollup-plugin-visualizer
-  visualizer({
+  createStats && visualizer({
     sourcemap: true,        // seems to show the reduced sizes (e.g. 594k instead of 1.4M)
     template: 'sunburst',   // 'sunburst'|'treemap'|'network'
     brotliSize: true        // Show also Brotli compressed size (Firebase hosting supports it)

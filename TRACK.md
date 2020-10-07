@@ -63,6 +63,9 @@ One more:
 
 [https://github.com/firebase/firebase-js-sdk/issues/3069](https://github.com/firebase/firebase-js-sdk/issues/3069)
 
+Yet one:
+
+[https://github.com/firebase/firebaseui-web/issues/757](https://github.com/firebase/firebaseui-web/issues/757)
 
 ## Cloud Functions: ES modules support
 
