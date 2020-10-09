@@ -110,7 +110,19 @@ const central = {
   info: logGen("info"),
   warn: logGen("warn"),
   error: logGen("error"),
-  _fatal: logGen("fatal")   // only to be exercised by catching of 'Error' (not directly from app code)
+  fatal: logGen("fatal")      // like the others, in "no return" scenarios by the app to give additional context
+
+  /*** disabled
+  fatal: (msg, opt) => {    // (msg,object|Error|undefined) => Error;    use as 'throw central.fatal(...,{ opt } | ex)'
+    if (typeof opt === "Error") {
+      _fatal(msg, { error: opt });    // #tune
+      return opt;
+    } else {
+      _fatal(msg,opt);
+      return new Error(msg);
+    }
+  }
+  ***/
 }
 
 export {

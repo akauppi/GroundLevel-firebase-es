@@ -1,49 +1,27 @@
 /*
-* init/centralError.js
+* init/catch.js
 *
-* Central error collection.
+* Catch uncaught errors and report them.
 *
-* Also indicates to the user (if there is a '#fatal' element to fill) that there is a problem (better than silently
-* acting weird).
+* Also indicates to the user (shows and fills the '#fatal' element) that there is a problem.
 *
-* Note: Error collection is separate from logging. These cases SHOULD NOT HAPPEN (failed asserts, etc.) and we don't
-*     know more about them than what's in the 'Error' object.
+* Note: We *can* integrate this with 'central' logging; it is up to the operational preferences whether a crash
+*     should be seen in both log collection and crash reporting. #later
 */
 import { assert } from './assert.js'
 
 import { crashs as opsCrashes } from './opsConfig.js'
-import { _fatal } from './central.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
-// Note: We have difficulties importing '@airbrake/browser' within Rollup (under Vite, it seems to work).
-//
-//import { Notifier } from "@airbrake/browser"    // causes problems with Rollup
-
-let airbrake;   // 'Notifier' | undefined
-
 // Can have multiple error handlers (good for comparing alternatives)
 //  - { }   // ignore
-//  - { type: 'airbrake', projectId: ..., projectKey: ... }   // airbrake.io
+//  - { type: 'xxx', projectId: ..., projectKey: ... }
 //
 for( const o of opsCrashes ) {
   if (!o.type) {
     // skip
 
-  /*** REMOVE } else if (o.type === 'airbrake') {
-    const { projectId, projectKey } = o;
-    assert(projectId && projectKey);  // 'ops-config' has already given an error message
-
-    if (!Notifier) {
-      throw new Error("Airbrake configured to be used for ops, but 'window.Notifier' not available.");
-    }
-
-    airbrake = new Notifier({
-      projectId,
-      projectKey,
-      environment: _MODE   // 'production'|'development'
-    });
-  ***/
   } else {
     throw new Error( `Unexpected 'fatal[].type' in ops config: ${o.type}` );
       // Note: No eternal loop - we're just loading the module.
@@ -56,28 +34,7 @@ for( const o of opsCrashes ) {
 * Returns right away. If there are problems with reporting the errors, somehow reports those (at least on the UI,
 * maybe central logging) but does not influence the caller.
 */
-function centralError(err) {    // (Error) => ()
-
-  // Collect to central monitoring
-
-  /*** disabled
-  if (airbrake) {
-    (async _ => {
-      central._fatal( 'Error caught:', err );
-
-      const notice = await airbrake.notify(err)
-      if (notice.id) {
-        console.debug('Error notified successful, id:', notice.id);
-      } else {
-        console.error('Error notifying an error to Airbrake', notice.error);
-
-        //central.error( 'Error notifying an error to Airbrake', notice.error );
-
-        const msg = `Error notifying an error to Airbrake: ${notice.error.message}`;
-        alert(msg);
-      }
-    })();
-  }***/
+function hub(err) {    // (Error) => ()
 
   // Always show in browser console
   //
@@ -98,14 +55,18 @@ function centralError(err) {    // (Error) => ()
 const prevOnError = window.onerror;   // function|undefined
 assert(!prevOnError, "'window.onerror' already defined!");    // some third party could have done this
 
-window.onerror = function (errorMsg, url, lineNbr, colNbr, error) {
+// BUG:
+//    Errors during application loading (e.g. press 'MakeError' right after load) don't seem to reach here.
+//    But once the app is up, they do. Bareable, for now. #help
+//
+window.onerror = function (msg, source, lineNbr, colNbr, error) {
+  console.debug("centralError saw:", {msg, source, lineNbr, colNbr});    // DEBUG
 
-  console.debug("centralError saw:", {errorMsg, url, lineNbr, colNbr});    // DEBUG
+  hub(error);
 
-  _fatal(errorMsg, { url, lineNbr, colNbr, error });    // tbd. is this useful?
+  //if (prevOnError) prevOnError(arguments);
 
-  centralError(error);
-  if (prevOnError) prevOnError(errorMsg, url, lineNbr, colNbr);
+  return true;    // "prevents the firing of the default error handler" (what would that do?)
 }
 
 export { }
