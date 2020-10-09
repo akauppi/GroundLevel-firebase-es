@@ -69,6 +69,18 @@ $ more .firebaserc
 }
 ```
 
+### Gotcha!
+
+`firebase use --clear` logs you out of the active project, but **only if there are 2 or more aliases**. Otherwise, it silently fails (you are still having an active project).
+
+Clearing the project is useful for being able to test the developer experience, and to write right documentation. 
+
+According to Firebase, the above is **intended behavior**. They could at least print a warning, to let the user know their wish was turned down.
+
+**Work-around:**
+
+Add your project twice, with different aliases. :)
+
 
 ## Security Rules Online Simulator
 
@@ -94,26 +106,6 @@ There is no UI support for building a document with `FieldValue`s (e.g. server t
   _methodName: 'FieldValue.serverTimestamp'
 }
 ```
-
-
-
-## Viewing logs online
-
-Easiest to get to the online logs:
-
-```
-$ firebase functions:log --only logs_v200719 --open
-```
-
-Click `Preview`.
-
-![](.images/logs-viewer-preview.png)
-
-Nice! 😀
-
-See filtering info -> [Logs Based Metrics](https://firebase.google.com/docs/functions/writing-and-viewing-logs#logs-based_metrics) (Firebase docs)
-
-Note that Firebase logs are intended for the back end (which is always online). The front end library has no means for central logging.
 
 
 ## You can `debug()` security rules!

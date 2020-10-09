@@ -12,8 +12,6 @@ Here is a list of the ones we've come across (all authored by Firebase), to help
 
 >Note: This table is a "best effort" and we aim to edit it, from time to time, when better real world knowledge of the various libraries is gained.
 
-Open issues is listed because their number, and the oldest age are indicators of how well the repo is attended by the authors. (This author will remove that column if/when Firebase cleans up their act.)
-
 ||What is it?|When to use?|Open issues|
 |---|---|---|---|
 |**Client side**|

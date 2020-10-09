@@ -16,11 +16,16 @@ The `this` mentality provides an additional axis of abstraction (a context) that
 
 ## Language over framework
 
-It seems Vue 2 has [injection handling](https://vuejs.org/v2/api/#provide-inject).
+The sample for this is from Vue 2 but may serve a point:
+
+---
+
+It seems Vue 2 has [injection handling](https://vuejs.org/v2/api/#provide-inject). 
 
 Instead of using that, we use ES6 modules (`mixins/user.js`).
 
+---
+
 The problem with framework features is added learning curve - also from the reader of such code. If something can be done in the language (ES6 + async/await), let's do it there.
 
-This also makes it easier to change frameworks, or implement the template in multiple frameworks (in different branches).
-
+This also makes it easier to change frameworks, or implement the template in multiple frameworks.

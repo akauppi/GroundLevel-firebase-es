@@ -29,7 +29,16 @@
     -   - latest versions -> https://github.com/firebase/firebaseui-web/releases
     -
     - This is only needed in 'SignIn.vue'. Ideally, it would merely 'import' it, but that doesn't work until Firebase
-    - can be read the way it wants ('import * as firebase from ...'). See 'src/init.vite.js'.
+    - can be read the way it wants ('import * as firebase from ...').
+    -
+    - [EDIT] Trying to load in code (in a way that works for Vite), Rollup crashes in the build:
+    -   <<
+    -     firebaseui/dist/firebaseui.js (imported by init/firebaseUi.js)
+    -     firebaseui/dist/firebaseui.css (imported by init/firebaseUi.js)
+    -     [!] (plugin prodIndex) TypeError: object null is not iterable (cannot read property Symbol(Symbol.iterator))
+    -     TypeError: object null is not iterable (cannot read property Symbol(Symbol.iterator))
+    -       ...
+    -   <<
     -
     - NOTE: It's not unlikely that one day we'd read the source of the Firebase UI project and implement the parts
     -     needed (we don't use/need all authentication flows) as a Vue-specific component. This a) does not seem to
@@ -38,8 +47,13 @@
     <script defer src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
 
+    <!-- Disabled; causes "not used within a few seconds" warning though we clearly fetch it in 'init/__.js'.
+    -
+    - tbd. Check again, later, once app is more stable.
+    <link rel="preload" href="/__/firebase/__.json" as="fetch">
+    -->
+
     <!--PROD
-    <link rel="preload" href="__/firebase/__.json" as="fetch">
     ${PRELOADS}
     -->
 
@@ -48,18 +62,11 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     -->
 
-    <!--PROD
     <script type="module">
       window.VERSION = '${VERSION}';
 
       import('./dist/main-#.js');
     </script>
-    -->
-    <!--DEV -->
-    <script type="module">
-      import './src/init.vite.js'
-    </script>
-    <!-- -->
 
     <style>
     #fatal {

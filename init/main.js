@@ -28,6 +28,8 @@ import { firebaseProm } from './__.js'
 assert(firebase.initializeApp);
 assert(firebase.auth);    // check if there are loading problems
 
+assert(window.firebaseui);    // loaded from 'index.html'
+
 import {perfs as opsPerfs} from './opsConfig.js'
 
 let enableFirebasePerf;
@@ -62,26 +64,15 @@ async function initFirebase() {
   }
 }
 
-/*** disabled
-// Our trying to load 'Airbrake' failed. Getting these from 'index.html'.
-// Real solution is to have the library fixed, so it can be _statically_ imported, in 'central.js'.
-//
-// NOTE: This is WAY TOO DIFFICULT. Airbrake should fix their ES loading, or we look elsewhere. DISABLED for now
-//    (for production).
-//
-window.Notifier = undefined;  // window.airbrake.Notifier;
-***/
-
 (async () => {
   const t0 = performance.now();
 
-  // Ensure that 'app.js' has Firebase, 'central' and 'centralError' installed.
+  // Ensure that 'app.js' has Firebase, 'central' and error catching.
   //
   const [__, central, ___] = await Promise.all([
     initFirebase(),
     import('./central.js').then( mod => mod.central ),
-    import('./centralError.js'),   // initializes as a side effect
-    import('./firebaseUi.js')   // EXPERIMENTAL
+    import('./catch.js')   // initializes as a side effect
   ]);
     //
     // tbd. ^-- Check one day, whether loading them sequentially is as fast as this (can be, since chunks are loaded at launch).
@@ -98,9 +89,11 @@ window.Notifier = undefined;  // window.airbrake.Notifier;
 
   console.debug("Launching app...");
 
-  // NOTE: Make sure that errors within the app cause an error banner. No quiet problems. <-- tbd. remove comment
+  //CONSTRUCTION
+  // For testing the error banner - if actual errors don't trigger it.
+  //window.onerror("Something bad just happened! #test", "abc", 101, 20, new Error("Something bad just happened!"));    // BUG: DOES _NOT_ CALL 'onerror' handler!!!
 
-  const { init } = await import('@app/groundlevel-es-firebase-app/src/app.js');
+  const { init } = await import('@app/app/src/app.js');
   await init();
 
   console.debug("App on its own :)");

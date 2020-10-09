@@ -1,5 +1,6 @@
 # Todo
 
+<!-- disabled
 ## WebStorm IDE
 
 *Note: this is not really in the project scope. The author just happens to be using WebStorm.*
@@ -11,7 +12,7 @@
    Track -> https://stackoverflow.com/questions/38440538/how-to-tell-webstorm-a-module-is-installed
 
    - [ ] Alert IntelliJ to this. It behaves like [this issue from 2016](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207304095-Using-ES6-import-and-node-modules-are-marked-as-Module-is-not-installed-) but is likely different.
-
+-->
 
 ## deployment
 
@@ -22,42 +23,14 @@
 
 - Consider making a cloud function that periodically looks for projects that were removed a certain time ago (e.g. > 1 month), and completely removes them. (of course making notes to the log)
 
-## Narrative as the Wiki
+## <strike>Narrative as the Wiki
 
 Move narrative documents (why we do things in certain way) to the Wiki. 
 
 Make it a walk-through or bisection of the project, leaving project itself uncluttered. :)
 
-- *Vital ingredients*: what tools/libraries we picked and why
+- *Vital ingredients*: what tools/libraries we picked and why</strike>
 
-
-## Wiki about design of data modeling (document or collection)
-
-<!-- tbd. move this analysis somewhere else, maybe Wiki? Make it GOOD!
-
-Add:
-- fields needed in Security Rules are best to be in the same document (each document read costs for access)
-- how often does the data (need to) change?  Change to an auxiliary field (e.g. 'lastSeen') triggers updates to anyone following the document.
-- do the fields contribute to another (parent) document's Security Rules? If not, they may be okay as a subcollection. (this was already mentioned, in other words)
-...
-
-<<
-With Cloud Firestore, design of data schemas is steered by these considerations:
-
-To go in-document:
-
-- **Billing:** access is charged per document. Avoid sub-collections unless they are really required.
-
-
-To go sub-collection:
-
-- **Access:** you cannot restrict reading of individual fields &mdash; documents are either fully available or not at all. You can restrict write access to individual fields.
-- **Security rules:** you cannot use in-document arrays as part of security rule logic ("allow if `uid` is found within the `authors`"). You can express this with sub-collections.
-- **Document size:** Documents must fit 1MB - 89 bytes. If you think they might grow larger, split something to sub-collections.
-
->Do you know more guidance for steering database schema design in Firestore? Please share the info at [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) or as a PR. 📝🙂
-<<
--->
 
 ## Security Rules
 
@@ -73,24 +46,6 @@ It kind of *does*. Evan published an "API" and it allows before/after filters.  
 Also:
 
 - `import ... from "blah"` -> `import ... from "blah.js"`
-
-
-## Bootcamp 5
-
-Bootcamp has great docs and version 5 is no longer dependent on jQuery. We'll use it as our make-up layer.
-
-- [ ] Start section in the Wiki, describing why this
-
-
-## Firebase UI - or not???
-
-There's an unnecessary re-rendering of the SignUp page, when using Google sign-in with Firebase UI.
-
-Why does that exist?
-
-We likely need to read the Firebase UI code base. And if we do, doing the same as part of `SignIn.vue` might become a tempting idea.
-
-FirebaseUI is just a veneer on top of Firebase auth. If we are better off without it, why not?
 
 
 ## Upgrading an anonymous user
@@ -109,23 +64,6 @@ It's now a bit too fast.
 
 Discuss in suitable place about using just one project, or separate staging/production.
 
-## Docker?
-
-Try Docker for the security rules testing.
-
-- no two `node_modules` - make a generic Docker image (maybe in a separate repo?) that we can use for running the tests
-- running security tests from the project root
-
-The idea is to keep Docker as an optional requirement. Heavy lifters will likely not mind it, and it makes their own repo clones lighter. 
-
-## Can we develop without `__.js`?
-
-In the local mode, we are using emulator. 
-
-What happens if we don't provide the `__.js` file - would things still work?? :)
-
-( Check especially after authentication has become part of emulation. )
-
 
 ## Re-implement auth flow as Vue 3 component
 
@@ -139,10 +77,20 @@ It just doesn't seem to have the same quality and clarity of documentation as th
 
 **Shortcomings experienced:**
 
-- Not fully ES module compatible: insists in `firebase` being provided as a global.
+- Not fully ES module compatible
 - Has [over 100 Issues open](https://github.com/firebase/firebaseui-web/issues)
 - Could use promises
 - ...
 
 While it makes sense to have a centralized library to "do auth right", this one is getting out of hand as to the number of features - and not getting enough care at the same time. By focusing on a smaller feature set, and not needing to be generic web (i.e. we can be ES6 and Vue 3 specific), we likely will be able to do a better job.
+
+
+## Hot reloading also for `npm run serve`
+
+Seems this should now be possible (Rollup [2.29.0](https://github.com/rollup/rollup/blob/master/CHANGELOG.md#2290)).
+
+- Study how it's done
+- Try out
+
+If nothing else, using watch also for `npm run serve` would be consistent with `dev`. Matters most when the `init` code is developed.
 

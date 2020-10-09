@@ -3,6 +3,7 @@
 *
 * EXPERIMENTAL to try to load 'firebaseui' from npm, using Rollup.
 */
+import { assert } from './assert'
 
 // Causes (at build time):
 //  <<
@@ -16,17 +17,17 @@
 //import { auth } from 'firebaseui'
 //const firebaseui = { auth };
 
-// These crash the build:
+// These crash the build:   (also tried dynamically, same thing)
 //  <<
 //    [!] (plugin prodIndex) TypeError: object null is not iterable (cannot read property Symbol(Symbol.iterator))
 //  <<
 //
-//import 'firebaseui/dist/firebaseui.js'    // works; WORK-AROUND until real loading works
+//  ^-- That happens also if 'firebaseui' is received as a dependency (from '@app/app'); therefore we must keep it
+//      a buildDependency, there.
+//
+//import 'firebaseui/dist/firebaseui.js'
 //import 'firebaseui/dist/firebaseui.css'   // needed; otherwise the login buttons look broken
-//const firebaseui = window.firebaseui;
 
-const firebaseui = window.firebaseui;   // provided in index.html (from CDN)  #byway
+assert(window.firebaseui);    // from 'index.html'
 
-console.debug("firebaseui:", firebaseui);
-
-export { firebaseui }
+export { }

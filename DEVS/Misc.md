@@ -46,17 +46,18 @@ $ git restore .npmrc
 $ rm package-lock.json
 ```
 
-Of course, you can also choose to have it enabled. :)
+Of course, you can also choose to have it enabled.
 
 
-## Using CommonJS dependencies
+## Enabling CommonJS
 
-Vite will handle this automatically (development).
+The sample application does not need `npm` modules that would not be available as ES modules (well, except for Firebase and FirebaseUI but that's a different book). Therefore, CommonJS production support is turned off.
+
+In development, Vite handles CommonJS translation for you (i.e. it has it switched on, under the hood).
 
 In Rollup, you need to:
 
 - enable `@rollup/plugin-commonjs` in `package.json`
-- uncomment `//import commonjs from '@rollup/plugin-commonjs';` and `//commonjs()` lines in `rollup.config.prod.js`
+- uncomment lines with `commonjs` in `rollup.config.prod.js`
 
-Test it. The setup hasn't been tested with CommonJS dependencies, so it would be nice to hear, whether these instructions are sufficient.
-
+>Disclaimer: The setup hasn't been tested with CommonJS dependencies, so it would be nice to hear, whether these instructions are sufficient.

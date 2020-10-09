@@ -108,14 +108,9 @@ export default {
     // Pack imports within each node package, together. See Phil Walker's blog (README.md > References) for more details.
     //
     // Want:
-    //  - initialization code as 'main' (includes root files of 'src' such as 'central.js', 'config.js')
+    //  - initialization code as 'main' (includes root files of 'init', '/ops-config.js' etc.)
     //  - application as 'app'
     //  - dependencies in their own, nice cubicles
-    //
-    // The division of 'main' and 'app' is a bit arbitrary. It does mean that dependencies used in the root (e.g. toaster,
-    // performance monitoring like Airbrake) end up in the 'main' chunk. At the least, this provides an idea of the
-    // relative weights of the template vs. one's actual app. Also, 'main' would likely remain fairly unchanging,
-    // providing better client side caching.
     //
     // Ref -> https://rollupjs.org/guide/en/#outputmanualchunks
     //
@@ -161,7 +156,7 @@ export default {
           //
           '@firebase/installations': '@firebase/performance',    // ~54kB
           '@firebase/performance': true,    // ~57kB (117kB with dependencies)
-          'idb': '@firebase/performance'    // ~6kB
+          'idb': '@firebase/performance'   // ~6kB
         };
 
         if (map[name]) {
@@ -195,7 +190,7 @@ export default {
     // -> https://rollupjs.org/guide/en/#outputinterop
     //interop: "default",
 
-    intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
+    //intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
   },
 
   preserveEntrySignatures: false,   // "recommended setting for web apps" (suppresses a warning)
