@@ -288,25 +288,7 @@ This could be:
 ```
 
 
-## Firebase hosting could provide config as ES module
-
-Firebase hosting makes it easy to initialize project identity via `/__/firebase/init.js`. This file is supposed to be read in as a `script` tag.
-
-This belongs to a bygone era, and could be complemented by an `import` friendly way of getting such configuration.
-
-One could serve a module exporting the config object (and `init` if one wants to be compatible with the earlier way). Let's say the url for this would be `/__/firebase/config.mjs`.
-
-This would allow: 
-
-```
-import * as firebase from 'firebase/app'
-import { default as __ } from "/__/firebase/config.mjs"
-firebase.initializeApp(__);
-```
-
-It feels a lot more module friendly that the app does the initialization.
-
-  
+<!-- think this is gone /17-Oct-20
 ## Firebase hosting BUG: wrong MIME type for `.js`
 
 Firebase hosting defaults to `application/json` for JavaScript files, instead of `text/javascript`. This disallows their use in a browser (error from Chrome).
@@ -363,7 +345,7 @@ First aid: specify the correct content type in `firebase.json`:
 Firebase tools v. 8.4.3.
 
 - [ ] Report to Firebase
-
+-->
 
 <!-- disabled: not reproducible? / haven't seen since
 ## Emulator should behave exactly as the online
@@ -411,13 +393,16 @@ Two ways to make such a change:
 
 ## Firebase emulator configuration from a `.js` file
 
-*Having the `init.json` (maybe undocumented?) makes this easy enough.*
-
-It is nowadays customary (babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have e.g. comments in there.
+It is nowadays customary (babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have comments in there.
 
 Firebase (8.6.0) seems to be fixed on `firebase.json` and providing a `firebase.js` (or `firebase.cjs`) is ignored.
 
-Furthermore, the emulator should fail to start if there is no configuration available. Currently, it proceeds and gives a runtime error when one tries to use it.
+
+## Firebase emulators should fail fast
+
+The emulator should fail to start if there is no configuration available. Currently, it proceeds and gives a runtime error when one tries to use it.
+
+*This obviously lacks detail, eg. which `firebase-tools`. Sorry - needs to be enhanced.*
 
 ## Firestore emulator: ability to load rules from multiple files
 
@@ -655,6 +640,45 @@ Return code is 0, even when there's no active project. This is the problem and c
 `firebase use` could return with a non-zero exit code, if there is no current project.
 
 This is a breaking change.
+
+
+## Accessing Cloud Functions should be the same, whether there's emulation or not (regions)
+
+It was not.
+
+This code is now removed from the project (since we don't want to directly use Cloud Functions for offline friendly operation), but once it was in, calling a function needed to be different, if one has regions, based on them running in the cloud or emulated.
+
+```
+const fns = (window.LOCAL) ? firebase.app().functions() :
+  firebase.app().functions(functionsRegion);
+
+export { fns }
+```
+
+## Auth emulation (Early Access) still doesn't allow completely local development
+
+The aim of Firebase (in 2020) seems to be to bring development more local. No need for billing etc.
+
+Taking this to the end would mean that one can build and run a Firebase project locally, without having created an account or intialized a project therein.
+
+This is good for first touch developer experience. Get started fast. Commit later.
+
+Today (Oct 2020), this can only be done by creating a public Firebase project that the newcomers use (without knowing about it). The "app" project would like to get rid of these work-arounds:
+
+- [.env.justSign.js](https://github.com/akauppi/GroundLevel-es-firebase-app/blob/master/.env.justSign.js)
+
+The lines in [init/main.js](https://github.com/akauppi/GroundLevel-es-firebase-app/blob/master/init/main.js#L30-L31) that do this:
+
+```
+const { apiKey, authDomain } = await import('../.env.justSign.js').then( mod => mod.firebase );
+firebase.initializeApp( {
+  projectId,
+  apiKey,     // <-- why is this needed? #firebase
+  authDomain  // <-- without this, FirebaseUI sign-in won't work (even when auth is emulated)
+} );
+```
+
+Firebase, please make running auth emulated projects possible, without the `apiKey` and `authDomain` values - or provide information why they would still be necessary.
 
 
 ## References
