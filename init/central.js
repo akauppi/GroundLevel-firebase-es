@@ -9,6 +9,7 @@
 //import { assert } from './assert.js'
 
 import { logs as opsLogs } from './opsConfig.js'
+import { WrappedError } from "./WrappedError"
 
 /*** disabled
 // Note: Rollup has difficulties importing '@airbrake/browser' (under Vite, loads fine).
@@ -105,24 +106,24 @@ if (true) {   // no central logging
   logGen = _ => (/*msg, opt*/) => {}
 }
 
+const lf = logGen("fatal");
+
 const central = {
   debug: logGen("debug"),
   info: logGen("info"),
   warn: logGen("warn"),
   error: logGen("error"),
-  fatal: logGen("fatal")      // like the others, in "no return" scenarios by the app to give additional context
 
-  /*** disabled
-  fatal: (msg, opt) => {    // (msg,object|Error|undefined) => Error;    use as 'throw central.fatal(...,{ opt } | ex)'
-    if (typeof opt === "Error") {
-      _fatal(msg, { error: opt });    // #tune
-      return opt;
+  fatal: (msg, opt) => {    // (msg,object|XxxError|undefined) => Error;    use as 'throw central.fatal(...,{ opt } | err)'
+    if (opt instanceof Error) {
+      lf(msg, { error: opt });    // #tune
+
+      return new WrappedError(msg,opt);
     } else {
-      _fatal(msg,opt);
-      return new Error(msg);
+      lf(msg,opt);
+      return new Error( `${msg} ${ JSON.stringify(opt) }` );
     }
   }
-  ***/
 }
 
 export {

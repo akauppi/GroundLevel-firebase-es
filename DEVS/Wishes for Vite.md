@@ -45,28 +45,3 @@ This is where it should be, if `index.html` is seen as an immutable asset. For V
 - In production mode, Vite heavily modifies the file, bundling the scripts within it. This may be necessary with Vite's current (Jul '20) production strategy, but also a more immutable approach to index.html could be done.
 
 See how we generate a `public/index.prod.html` and don't need its internal scripts to be massaged.
-
-
-## Production "bundle" size comparison
-
-You can build the code for production using either Rollup (with ES level bundling and some scripting in `tools/`) or Vite.
-
-||Rollup|Vite 1.0.0-rc.4|comments|
-|---|---|---|---|
-|file size; minified (`du -hk -I "*.map" [public/]dist`)|724 <!--was: 728--> kB|1536 <!--1484--> kB|Rollup-built size is 47% <!--49%--> of Vite's|
-
-<!-- old stuff: remeasure!
-|load time (local hosting)|270 ms|160 ms|not sure about variation|
-|load time (web)|160, 275 ms|245, 295, 555 ms|
-|file size; not minified (`du -hk -I "*.map"`)|1460 kB|1948 kB|-25%|
-
-*Load time = time measured on page refresh, to the start of authentication flow, using Chrome developer tools.*
--->
-
-Don't want to twist the blade for Vite, but merely provide a bar that can be reached with manual Rollup configuration. PRs to provide a more favourable comparison (i.e. tweaking the Rollup settings for Vite config) are welcome.
-
-<!-- too mcuh
-Since `index.html` now has become a read-only file for us, I'd still like to place it away from the root... Any ideas??
--->
-
->Note: Firebase hosting (8.10.0) [does not support HTTP/2 when emulated](https://github.com/firebase/firebase-tools/issues/2571). Loading performance comparisons should therefore be done with actually deployed code.

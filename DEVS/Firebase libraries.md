@@ -15,17 +15,17 @@ Here is a list of the ones we've come across (all authored by Firebase), to help
 ||What is it?|When to use?|Open issues|
 |---|---|---|---|
 |**Client side**|
-|&nbsp;&nbsp;`firebase`|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[220](https://github.com/firebase/firebase-js-sdk/issues) (23-Jul-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
-|&nbsp;&nbsp;`firebaseui-web`|Authentication UI for web|Browser app with auth|[114](https://github.com/firebase/firebaseui-web/issues) <!--was: 109--> (1-Oct-20); oldest 24-Jun-2016
+|&nbsp;&nbsp;`firebase`|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[249](https://github.com/firebase/firebase-js-sdk/issues) <!-- was: 220 --> (7-Nov-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
+|&nbsp;&nbsp;`firebaseui-web`|Authentication UI for web|Browser app with auth|[114](https://github.com/firebase/firebaseui-web/issues) <!--was: 109--> (7-Nov-20); oldest 24-Jun-2016
 |**Server side**|
-|&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules.|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser.|[36](https://github.com/firebase/firebase-admin-node/issues) (27-Aug-20); oldest 7-Jun-2017|
-|&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[35](https://github.com/firebase/firebase-functions/issues) (27-Aug-20); oldest 19-Jun-2018|
+|&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules.|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser.|[42](https://github.com/firebase/firebase-admin-node/issues) <!-- was: 36 --> (7-Nov-20); oldest 7-Jun-2017|
+|&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[54](https://github.com/firebase/firebase-functions/issues) <!-- was: 35 --> (7-Nov-20); oldest 19-Jun-2018|
 |**Testing libraries**|
-|&nbsp;&nbsp;`@firebase/rules-unit-testing`|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Firestore authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[8](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) (27-Aug-20); oldest 16-May-2019|
-|&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|Unit testing Cloud Functions within the `functions` folder. We don't do it but run integration tests against local emulators instead, using the normal `firebase` library.|[9](https://github.com/firebase/firebase-functions-test/issues) (23-Jul-20); oldest 8-Apr-2018|
+|&nbsp;&nbsp;`@firebase/rules-unit-testing`|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Firestore authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[12](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) <!-- was: 8 --> (7-Nov-20); oldest 16-May-2019|
+|&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|Unit testing Cloud Functions within the `functions` folder. We don't do it but run integration tests against local emulators instead, using the normal `firebase` library.|[11](https://github.com/firebase/firebase-functions-test/issues) <!-- was: 9 --> (7-Nov-20); oldest 8-Apr-2018|
 |**Developer tools**|
-|&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; Launching emulators. You need it.|[146](https://github.com/firebase/firebase-tools/issues) (23-Jul-20); oldest 16-Dec-2015|
-|&nbsp;&nbsp;`superstatic`|Library used for Firebase hosting (authored by Firebase)|Firebase hosting|[19](https://github.com/firebase/superstatic/issues) (18-Sep-20); oldest 25-Sep-2014|
+|&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; Launching emulators. You need it.|[179](https://github.com/firebase/firebase-tools/issues) <!-- was: 146 --> (7-Nov-20); oldest 16-Dec-2015|
+|&nbsp;&nbsp;`superstatic`|Library used for Firebase hosting (authored by Firebase)|Firebase hosting|[18](https://github.com/firebase/superstatic/issues) <!-- was: 19 --> (7-Nov-20); oldest 25-Sep-2014|
 |**Deprecated**|
 |`@firebase/testing` -> `@firebase/rules-unit-testing`|Security Rules testing, until Aug 2020.|
 

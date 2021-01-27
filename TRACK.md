@@ -1,16 +1,6 @@
 # Track
 
-## vite - Custom imports map (alias) support
-
-Mentioned on the README (0.6.0). 
-
-This is *highly* welcome to us!!! 🎉🎊🍬
-
-- Removed from Vite README (0.7.0)
-
-Track [https://github.com/vitejs/vite/issues/279](https://github.com/vitejs/vite/issues/279)
-
-
+<!-- might not need this (Vite aliases work)
 ## Import maps (in browser)
 
 https://wicg.github.io/import-maps/
@@ -18,7 +8,7 @@ https://wicg.github.io/import-maps/
 State: no browser support?
 
 >not a W3C Standard nor is it on the W3C Standards Track
-
+-->
 
 ## CSS standard support for nesting
 
@@ -29,13 +19,6 @@ Once implemented in browsers, we don't need the `lang="scss"` any more.
 Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
 
 
-## Firebase Auth emulator
-
->An Auth Emulator is on our roadmap.
-
-Firebase Live chat 23-Jun-2020.  Happy!  🦋
-
-
 ## Rollup-plugin-vue for Vue.js 3 (beta) needs an extra plugin for CSS/Sass
 
 [https://github.com/vuejs/rollup-plugin-vue/issues/364](https://github.com/vuejs/rollup-plugin-vue/issues/364)
@@ -44,28 +27,6 @@ Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 
 If they react on the issue, we can remove the extra plugin.
 
-
-## FirebaseUI from `npm`
-
-[https://github.com/firebase/firebaseui-web/issues/674](https://github.com/firebase/firebaseui-web/issues/674)
-
-Once a fix is available, let's bring in FirebaseUI via `npm` (`pr-issue-7-firebaseui`).
-
-[https://github.com/firebase/firebaseui-web/issues/612](https://github.com/firebase/firebaseui-web/issues/612)
-
-That is also connected.
-
-[https://github.com/firebase/firebase-js-sdk/issues/3315](https://github.com/firebase/firebase-js-sdk/issues/3315)
-
-That could be closed.
-
-One more:
-
-[https://github.com/firebase/firebase-js-sdk/issues/3069](https://github.com/firebase/firebase-js-sdk/issues/3069)
-
-Yet one:
-
-[https://github.com/firebase/firebaseui-web/issues/757](https://github.com/firebase/firebaseui-web/issues/757)
 
 ## Cloud Functions: ES modules support
 
@@ -113,25 +74,12 @@ We didn't, but until this is fixed we likely also cannot.
    - "Detect if a file is supposed to be ESM or CJS mode"
    
 
-## Firebase: proper native ES modules support
-
-So this isn't needed (in `fns-test/tools/session.js`):
-
-```
-import firebase from 'firebase/app/dist/index.cjs.js'
-import "firebase/firestore/dist/index.cjs.js"
-```
-
-Track:
-
-- [https://github.com/firebase/firebase-js-sdk/issues/3069](https://github.com/firebase/firebase-js-sdk/issues/3069)
-
-
 ## Firebase Crashlytics -> Web
 
 - [https://github.com/firebase/firebase-js-sdk/issues/710](https://github.com/firebase/firebase-js-sdk/issues/710)
 
 
+<!-- DISABLED: We don't like Airbrake, any more...
 ## Airbrake: Performance Monitoring for browser
 
 ><font color=red>Note: We might opt out of Airbrake altogether.</font>
@@ -145,13 +93,16 @@ Also:
 >We don't currently have Performance Monitoring for our js/browser notifier but are planning on adding it. Please stay tuned.
 
 - [ ] Once available, let's integrate to it!
-
+-->
 
 ## `firebase@exp` for tree-shaking!!!
 
 They are REWRITING the JavaScript client, as `exp` (expire?). 
 
 - [ ] Check out, especially when auth support is there: [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
+
+"A couple of months" further down the road (Nov 2020).
+
 
 ## Rollup-plugin-vue dependency
 
@@ -173,19 +124,6 @@ Also otherwise try to link with `rollup-plugin-vue`.
 
 Once it does, remove mention in `DEVS/Wishes for Vite`. We can better use Lighthouse locally, at that point.
 
-<!-- Done :)
-## Firebase hosting: ..crash when reponding with 304..
-
-- [https://github.com/firebase/firebase-tools/issues/2610](https://github.com/firebase/firebase-tools/issues/2610)
-
-!! It **really hurts** that Firebase does not react on issues.
-
-1. Please clean up the old ones.
-2. Managers, please insist reports about turn-around times!
-3. Teams, please take them in sprints, and churn some to closing (including testing with those who reported!).
-
-Thanks. I hope.
--->
 
 ## Firebase: Bundle size reduction
 
@@ -210,4 +148,16 @@ Sure. Track the AUTH work of `exp` and see if they do it this way.
 
    Once that is merged, we should be able to test `exp`.
    
+   
+## firebase-admin: no way to create users, under Auth emulator?
+
+```
+ FirebaseAuthError: There is no user record corresponding to the provided identifier.
+```
+
+..with 9.4.0.
+
+  #sigh
+
+
    

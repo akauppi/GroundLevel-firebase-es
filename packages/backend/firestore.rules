@@ -1,0 +1,375 @@
+rules_version = '2';
+
+// Note: When editing the rules, consider using the online Rules Simulator:
+//      e.g. https://console.firebase.google.com/u/0/project/vue-rollup-example/database/firestore/rules
+//
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // tbd. removed projects likely to get their own collection (simpler)
+
+    // Access cost:
+    //    read: 1
+    //    write: 1
+    //
+    match /projects/{projectId} {
+      // Read
+      //    - authors can see all projects, also removed (archived)
+      //    - collaborators see only active projects
+      //
+      // Note: Checking for validity at reads is optional. Doing validation guards against bad data caused by manual
+      //       changes, admin SDK changes, or data written by earlier generations of the security rules.
+      //
+      allow read: if isMember() && (!isRemoved() || isAuthor())
+        //&& validProject2()       // optional: enable if you want to guard against bad data instead of letting client cope with it
+
+      // Creation
+      //    - the creating user must list themselves as an author
+      //    - creating time-stamp must be a 'FieldValue.serverTimestamp()'
+      //    - may not be created as 'removed'
+      //
+      allow create: if isSignedIn()
+        && validProjectWrite()
+        && after().created == request.time
+        && !isRemovedAfter()
+        && request.auth.uid in after().authors    // creator added as an author (we could go soft on this..)
+
+      // Update
+      //    | field    | mutability |
+      //    |----------|------------|
+      //    | /title   | author may change |
+      //    | /created | no |
+      //    | /removed | author may add or remove; no other fields may change; if added, must be the server timestamp |
+      //    | /authors | author may change; at least one author must remain |
+      //    | /members | author may change; must include authors |
+      //
+      allow update: if isAuthor()
+        && validProjectWrite()
+        && after().created == prior().created
+        && (removedUnaffected() ||
+            diff().addedKeys() == ["removed"].toSet() ? true
+            : diff().removedKeys() == ["removed"].toSet() ? true
+            : false   // update not allowed
+          )
+
+      function removedUnaffected() {
+        // Implementation note: if not using '.diff', you must consider the case when there is no '.removed' (it's optional).
+        return !( "removed" in diff().affectedKeys() )
+      }
+
+      allow delete: if false        // no deletion via web app
+
+      // Project consistency:
+      //  - title (string) may not be empty
+      //  - created (timestamp) must exist
+      //  - removed (timestamp) is optional; if exists, must be a server time stamp now or in the past
+      //  - at least one author must exist
+      //  - members must contain all authors (and thus is >= 1)
+      //
+      function validProjectWrite() {
+        let possibleKeys = ["title", "created", "removed", "authors", "members"].toSet();
+
+        return true
+          && after().title is string && after().title != ''
+          && after().created is timestamp
+          && (!isRemovedAfter() || (after().removed == request.time))
+          && after().authors is list && after().authors.size() > 0
+          && after().members is list && after().members.toSet().hasAll( after().authors.toSet() )
+
+          && possibleKeys.hasAll( request.resource.data.keys() )        // no unexpected keys
+      }
+
+      /*** DELAYED. Making a read version of validity is very hard.
+      // DEBUG for seeing, what causes reads to have a problem!
+      function validProject2() {
+        let possibleKeys = ["title", "created", "removed", "authors", "members"].toSet();
+
+        return true
+          //&& resource.data.title is string && resource.data.title != ''
+          //&& request.resource.data.created is timestamp
+          //&& (!isRemovedAfter() || (request.resource.data.removed <= request.time))
+          //&& request.resource.data.authors is list && request.resource.data.authors.size() > 0
+          //&& request.resource.data.collaborators is list
+          //&& request.resource.data.authors.toSet().intersection( after().collaborators.toSet() ).size() == 0
+            // no common entries (could also omit this; logic would work even if a user is listed in both)
+
+          //&& possibleKeys.hasAll( resource.data.keys() )        // no unexpected keys
+      }
+      ***/
+
+      function isAuthor() {
+        return isSignedIn() &&
+          request.auth.uid in prior().authors
+      }
+
+      function isMember() {
+        return isSignedIn() &&
+          request.auth.uid in prior().members
+      }
+
+      /*function isCollaborator() {   // NOT USED
+        return isSignedIn() &&
+          request.auth.uid in prior().members.toSet().difference( prior().authors.toSet() )   // in 'members' but not in 'authors'
+      }*/
+
+      function isRemoved() {
+        return "removed" in resource.data
+      }
+
+      function isRemovedAfter() {
+        return "removed" in request.resource.data
+      }
+
+//--- Projects > Symbols ---
+
+      // Access cost:
+      //    read: 2
+      //    write: 2
+      //
+      // tbd. Observe access cost in real world scenerio: user tracking changes to all symbols, within a project.
+      //      Is it acceptable?
+      //
+      match /symbols/{symbolId} {
+        // Read:
+        //  - all members of the project can read
+        //
+        allow read: if EXT_isMember_COST1()
+          //&& validSymbol()      // guards against bad data in test setup, manual Firestore edits or from earlier schemas
+
+        // Creation:
+        //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
+        //
+        allow create: if EXT_isMember_COST1()
+          && validSymbolWrite()
+          && after().claimed.by == request.auth.uid
+          && after().claimed.at == request.time
+
+        // Updates:
+        //  - can claim a non-claimed symbol
+        //  - can do changes to an already claimed symbol
+        //  - can revoke the claim
+        //  - claim itself cannot be changed; only revoked
+        //
+        allow update: if EXT_isMember_COST1()
+          && validSymbolWrite()
+          && (
+            !isClaimed() ? (        // case A: claiming an unclaimed symbol
+              after().claimed.by == request.auth.uid &&		// I make the claim
+              after().claimed.at == request.time
+            ) : isClaimedByMe() && (  // case B: changing other fields while claimed
+                  after().claimed == prior().claimed
+                ) || (              // case C: revoking the claim
+                  diff().affectedKeys() == ["claimed"].toSet() &&     // only '.claimed' affected
+                  !("claimed" in after())                             // ..and it is removed
+                )
+            )
+
+        // Delete:
+        //	- can delete a symbol claimed to themselves
+        //
+        allow delete: if EXT_isMember_COST1()
+          && isClaimedByMe()
+
+        function validSymbolWrite() {
+          let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
+          let possibleKeys = requiredKeys.union( ['claimed'].toSet() );
+
+          return true
+            && (after().keys().toSet().hasAll(requiredKeys) &&
+                possibleKeys.hasAll(after().keys()))
+            && after().layer is int
+            && after().shape in ['star']      // enum
+            && after()['size'] > 0
+            && after().fillColor is string
+            && (keysEq( after().center, ["x","y"] ) &&
+               after().center.x is number &&
+               after().center.y is number
+            )
+            && (!("claimed" in after()) || (
+              keysEq( after().claimed, ["by","at"] ) &&
+                after().claimed.by is string &&
+                after().claimed.at is timestamp // and <= request.time
+            ))
+        }
+
+        function isClaimedByMe() {
+          return isClaimed() && prior().claimed.by == request.auth.uid
+        }
+
+        function isClaimed() {
+          return "claimed" in resource.data
+        }
+      } // symbols
+
+//--- Projects > UserInfo ---
+
+      // Written by both Cloud Functions (bypassing access rights) and a client (for personal activity).
+      //
+      // Access cost:
+      //    read: 2
+      //    write: 2
+      //
+      match /userInfo/{userId} {
+        // Read:
+        //	- all project members can read each other's last visit time
+        //
+        allow read: if EXT_isMember_COST1()
+
+        // Write:
+        //	- only the user themselves may write their doc, and only a certain field(s)
+        //
+        allow write: if EXT_isMember_COST1()
+          && validProjectsUserInfoWrite()
+          && userId == request.auth.uid
+          && after().lastActive == request.time
+
+        allow delete: if false
+
+        // Consistency:
+        //  - 'lastActive' must be a timestamp
+        //  - other (Cloud Function provided) fields may exist
+        //
+        function validProjectsUserInfoWrite() {
+          return true
+            && after().lastActive is timestamp
+            // tbd. fails if below is enabled. #later #help
+            //&& debug( diff().affectedKeys() ) == ["lastActive"].toSet()     // client must change this
+        }
+      }
+
+      // Functions for sub-collections
+      //
+      // While the 'project' documents can address their 'authors' and 'members' fields directly, sub-collection
+      // documents must use 'get'. This also implies an added billing cost for processing those security rules.
+
+      function EXT_isMember_COST1() {
+        return isSignedIn() && (
+          request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.members
+        )
+      }
+    }   // project
+
+//--- Invites ---
+//
+// Writable by members, to invite new members to a project (authors can invite either category; members can only invite
+// as members). From there, Cloud Functions should do all.
+
+    // Access cost:
+    //    read: 2
+    //    write: 2
+    //
+    match /invites/{inviteId} {   // inviteId: '<email>:<projectId>'
+      // Read:
+      //  - only Cloud Functions read invites
+      allow read: if false
+
+      // Create:
+      //  - any collaborator or author of a project may invite more people
+      //  - a previous invite may be overwritten (= extended)
+      //
+      allow create: if true
+        // if (inviting as author) invitor must be an author (this gets checked again, once the guest turns up)
+        && after().asAuthor ?
+            PROJ_isAuthor_COST1( after().project ) :
+            PROJ_isMember_COST1( after().project )      // else anyone in the project can invite
+        && validInviteWrite()
+
+      // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an
+      //        existing entry observes it).
+      allow update: if false
+
+      allow delete: if false
+
+      function validInviteWrite() {
+        let requiredKeys = ['email','project','asAuthor','by','at'];
+
+        return true
+          && afterKeysEq(requiredKeys)
+          && inviteId /*request.resource.id*/ == after().email +":"+ after().project	  // validate the id schema
+          && after().email is string
+          && after().project is string
+          && after().asAuthor is bool
+          && after().by == request.auth.uid
+          && after().at == request.time
+      }
+
+      // Checking membership in a project from other collections.
+      //
+      // Unlike 'symbols' etc., 'invites' is not a sub-collection of 'projectC'. Thus, the project ID comes as a param,
+      // not from the 'match'.
+      //
+      // Note: Below is optimized for just one external 'get' per rule evaluation, but it is possible this is not
+      //      necessary (do two gets to the same entry count as 1 or 2 in rule evaluation billing?).
+      //
+      function _PROJ_isMember_COST1(projectId, mustBeAuthor) {  // (string, bool) => bool
+        let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
+
+        return isSignedIn() && (
+          mustBeAuthor ? request.auth.uid in data.authors
+            : request.auth.uid in data.members
+        )
+      }
+      function PROJ_isAuthor_COST1(projectId) { return _PROJ_isMember_COST1(projectId, true); }
+      function PROJ_isMember_COST1(projectId) { return _PROJ_isMember_COST1(projectId, false); }
+
+    } // invites
+
+//--- User info ---
+//
+// Written by the user themselves. Read by Cloud Functions when there are changes.
+//
+    // Access cost:
+    //    read: 1
+    //    write: 1
+    //
+    match /userInfo/{userId} {
+      // Read:
+      //  - only by Cloud Function trigger
+      allow read: if false
+
+      allow write: if true
+        && isSignedIn() && request.auth.uid == userId
+        && validUserInfoWrite()
+
+      function validUserInfoWrite() {
+        let requiredKeys = ['displayName','photoURL'];
+
+        return true
+          && afterKeysEq(requiredKeys)
+          && after().displayName is string
+          && after().photoURL is string
+      }
+    }
+
+//--- Temp ---
+//
+// Collection for various tests. No schema. Used only under emulation.
+
+    match /temp {
+      allow read, write: if true
+    }
+
+//--- Helpers (visible to all matches) ---
+
+    // Aliases
+    function prior() { return resource.data; }
+    function after() { return request.resource.data; }
+    function diff()  { return request.resource.data.diff(resource.data) }
+
+    // Compare root level keys with 'arr'; those and only those keys should exist.
+    //
+    function afterKeysEq(arr) {
+      return keysEq( request.resource.data, arr );
+    }
+
+    // Test two lists for equality.
+    //
+    function keysEq(a,b) {        // ({.keys(): List}, List|Set) => Boolean
+      return a.keys().toSet() == b.toSet();
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+  } // database
+}

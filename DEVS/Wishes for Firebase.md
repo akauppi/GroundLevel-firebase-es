@@ -175,6 +175,35 @@ i  firestore: Change detected, updating rules...
 It would be useful and fair to show these already at the launch.
 
 
+## Firebase emulator: check for 'package.json' at launch!
+
+```
+$ npm run start
+...
+[emul] ┌───────────┬────────────────┬─────────────────────────────────┐
+[emul] │ Emulator  │ Host:Port      │ View in Emulator UI             │
+[emul] ├───────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Functions │ localhost:5002 │ http://localhost:4000/functions │
+[emul] ├───────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Firestore │ localhost:6767 │ http://localhost:4000/firestore │
+[emul] └───────────┴────────────────┴─────────────────────────────────┘
+[emul]   Emulator Hub running at localhost:4400
+[emul]   Other reserved ports: 4500
+[emul] 
+[emul] Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+[emul]  
+[init] Primed :)
+[init] GCLOUD_PROJECT=bunny npm run _start_2 exited with code 0
+
+
+[emul] ⚠  The Cloud Functions directory you specified does not have a "package.json" file, so we can't load it.
+[emul] ⚠  functions: Could not find package.json
+```
+
+That error is logged only *once running tests*. The Functions emulator could just as well check that it's environment looks cosy, at launch. 
+
+Similar to the "check rules early" mentioned above.
+
 
 ## Local emulator UI
 
@@ -398,11 +427,25 @@ It is nowadays customary (babel etc.) that configuration can be provided in a `.
 Firebase (8.6.0) seems to be fixed on `firebase.json` and providing a `firebase.js` (or `firebase.cjs`) is ignored.
 
 
-## Firebase emulators should fail fast
+## Firebase emulators should fail fast ‼️
 
 The emulator should fail to start if there is no configuration available. Currently, it proceeds and gives a runtime error when one tries to use it.
 
-*This obviously lacks detail, eg. which `firebase-tools`. Sorry - needs to be enhanced.*
+```
+$ firebase emulators:start --project=bunny --only functions,firestore
+i  emulators: Starting emulators: functions, firestore
+⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, database, hosting, pubsub
+⚠  Your requested "node" version "14" doesn't match your global version "15"
+⚠  functions: Unable to fetch project Admin SDK configuration, Admin SDK behavior in Cloud Functions emulator may be incorrect.
+i  firestore: Firestore Emulator logging to firestore-debug.log
+i  ui: Emulator UI logging to ui-debug.log
+i  functions: Watching "/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions" for Cloud Functions...
+⚠  The Cloud Functions emulator requires the module "firebase-functions" to be installed. This package is in your package.json, but it's not available. You probably need to run "npm install" in your functions directory.
+i  functions: Your functions could not be parsed due to an issue with your node_modules (see above)
+```
+
+..but the emulator keeps running. **THIS IS NOT ACCEPTABLE!** We developers lose time, because one needs to really scan the logs to find out the functions aren't really up. You are not being resilient here - you are simply pretending like things are okay when they aren't. Exit!!! (with non-zero) 👺
+
 
 ## Firestore emulator: ability to load rules from multiple files
 
@@ -679,6 +722,20 @@ firebase.initializeApp( {
 ```
 
 Firebase, please make running auth emulated projects possible, without the `apiKey` and `authDomain` values - or provide information why they would still be necessary.
+
+### EDIT
+
+No longer a problem for us, since we moved to using a single developer in `dev:local` (Mr/Mrs "dev"). 
+
+However, Google authentication could not be used emulated last time I checked, without creating a Firebase project (ie. the aim would be: actual third-party Google identification, but by the local emulator).
+
+## Firebase Auth does not allow data URLs for `.photoURL`
+
+It guards the URL formatting too strictly. [Data URLs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs) are generally valid, and in mocking users it makes sense to provide an icon as a data URL string. No need to host separate pictures.
+
+Also, Firebase error message states the data URLs not to be "valid URLs". But they are. Just not for Firebase.
+
+See [/local/init.js](../local/init.js).
 
 
 ## References
