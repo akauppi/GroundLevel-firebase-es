@@ -9,9 +9,10 @@
 * Note! If one's front end code uses callables, it is no longer tolerant to offline work. Using Firestore with the
 *     official client is; thus rather deal with database as the interface.
 *
-* Cloud Functions note:
-*   - until Cloud Functions supports node.js 14, we're stuck using 'require' (no prob there, just hang on). Decided not
-*     to use Babel but just wait until the native ES modules support surfaces.
+* ES modules support:
+*   - [x] Cloud Functions supports node.js 14
+*   - [ ] Firebase Emulator allows Cloud Functions to be expressed as ECMAScript modules (not yet)
+*   - [ ] 'firebase-functions' and 'firebase-admin' are available as ESM exports (not yet)
 *
 * Note:
 *   'HttpsError' 'code' values must be from a particular set
@@ -24,10 +25,10 @@
 *     -> https://firebase.google.com/docs/admin/setup
 */
 const functions = require('firebase-functions');
-//import * as functions from 'firebase-functions'   // tried with firebase 8.6.0
+//import * as functions from 'firebase-functions';
 
 const admin = require('firebase-admin');
-//import * as admin from 'firebase-admin';    // ..once node.js >= 13.2 is supported
+//import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
