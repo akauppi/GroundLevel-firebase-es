@@ -25,9 +25,7 @@ If you know how these can be mitigated, please do. `#help`
 $ npm install
 ...
 npm WARN deprecated request-promise-native@1.0.9: request-promise-native has been deprecated because it extends the now deprecated request package, see https://github.com/request/request/issues/3142
-npm WARN deprecated urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
 npm WARN deprecated har-validator@5.1.5: this library is no longer supported
-npm WARN deprecated resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
 npm WARN deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
 ```
 
@@ -35,9 +33,7 @@ These come from (used `npm list`):
 
 ||caused by|
 |---|---|
-|`request-promise-native`|`jest-circus@26.6.3`|
-|`urix`|`jest-circus@26.6.3`|
-|`har-validator`|`firebase-jest-testing@0.0.1-beta.3`|
-|`resolve-url`|`jest-circus@26.6.3`|
-|`request`|`firebase-jest-testing@0.0.1-beta.3`, `jest-circus@26.6.3`|
+|`request-promise-native`|`jest-circus@27.0.0-next.2`|
+|`har-validator`|`firebase-jest-testing@0.0.2-beta.0`|
+|`request`|`firebase-jest-testing@0.0.2-beta.0`, `jest-circus@27.0.0-next.2`|
 
