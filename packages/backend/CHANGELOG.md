@@ -1,5 +1,11 @@
 # Changelog
 
+## 29-Jan-21
+
+- Brought `backend` back to main repo. 🥳
+- Updated dependencies
+- Experimenting with Jest 27 
+
 ## 27-Oct-20
 
 - Renamed userInfo field `name` -> `displayName`, to be more consistent with Firebase.

@@ -16,11 +16,11 @@
     "test": "npm run ci",
     "ci": "npm run ci:seq",
     "  ": "",
-    "ci:seq": "firebase emulators:exec --project=bunny --only firestore,functions \"npm run _ci_init && npm run _ci_fns && npm run _ci_rules\"",
+    "ci:seq": "firebase emulators:exec --project=bunny --only firestore,functions \"npm run _ci_init && npm run --silent _ci_fns && npm run --silent _ci_rules\"",
     "_ci_init": "node test/prime-docs.js",
     "_ci_fns": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs --verbose --detectOpenHandles",
     "_ci_rules": "npm run test:rules:all",
-    "ci:par": "firebase emulators:exec --project=bunny --only firestore,functions \"npm run _ci_par_2\"",
+    "ci:par": "firebase emulators:exec --project=bunny --only firestore,functions \"npm run --silent _ci_par_2\"",
     "_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_init && npm run _ci_fns\" \"npm run _ci_rules\"",
     "  -": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --project=bunny --only functions,firestore\" \"GCLOUD_PROJECT=bunny npm run _start_2\"",
@@ -35,18 +35,13 @@
     "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all"
   },
-  "//scripts": {
-    "//prestart": "[[ ! -d functions/node_modules/@firebase ]] && ( >&2 echo \"ERROR: please '(cd functions && npm install)'\n\"; exit 9)",
-    "//test:fns:callables": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs -f callables.test.js",
-    "//_check_npx7": "if [[ $(npx --version) < '7.' ]]; then ( >&2 echo \"ERROR: Need npx >= 7.x.\n\"); exit 1; fi"
-  },
   "devDependencies": {
     "@local/functions": "file:functions",
     "concurrently": "^5.3.0",
     "firebase-admin": "^9.4.2",
-    "firebase-jest-testing": "0.0.1-beta.3",
-    "jest": "^26.6.3",
-    "jest-circus": "^26.6.3",
+    "firebase-jest-testing": "^0.0.2-beta.0",
+    "jest": "^27.0.0-next.2",
+    "jest-circus": "^27.0.0-next.2",
     "wait-on": "^5.2.1"
   },
   "//comments": {
