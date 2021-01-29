@@ -49,6 +49,12 @@
     "engines": [
       "'>=14.3' for '—harmony-top-level-await'",
       "'>=13.2' for ES module support"
-    ]
+    ],
+    "scripts": {
+      "//preinstall": [
+        "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
+        "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
+      ]
+    }
   }
 }
