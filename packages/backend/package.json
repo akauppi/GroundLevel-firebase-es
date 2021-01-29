@@ -1,14 +1,11 @@
 {
   "name": "@local/back-end",
-  "version": "0.0.3-alpha",
   "description": "Sample backend for GroundLevel-es-firebase",
   "license": "MIT",
   "private": true,
   "type": "module",
   "files": [
     "functions/*.js",
-    "functions/*.cjs",
-    "!functions/node_modules",
     "firestore.rules",
     "firestore.indexes.json"
   ],
@@ -28,7 +25,6 @@
     "  -": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --project=bunny --only functions,firestore\" \"GCLOUD_PROJECT=bunny npm run _start_2\"",
     "_start_2": "wait-on http://localhost:4000 && node test/prime-docs.js",
-
     "test:fns:userInfo": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs -f userInfo.test.js --detectOpenHandles --all",
     "test:fns:all": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs --verbose --detectOpenHandles --all",
     "  --": "",
@@ -37,14 +33,12 @@
     "test:rules:projectsSymbols": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f projectsC/symbolsC.test.js --verbose --detectOpenHandles --all",
     "test:rules:projectsUserInfo": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f projectsC/userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f userInfoC.test.js --verbose --detectOpenHandles --all",
-    "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all",
-    "  - -": "",
-    "prestart": "if [[ ! -d functions/node_modules/@firebase ]]; then ( >&2 echo \"ERROR: please '(cd functions && npm install)'\n\"); exit 1; fi",
-    "  - - ": "",
-    "//_check_npx7": "if [[ $(npx --version) < '7.' ]]; then ( >&2 echo \"ERROR: Need npx >= 7.x.\n\"); exit 1; fi"
+    "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all"
   },
   "//scripts": {
-    "//test:fns:callables": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs -f callables.test.js"
+    "//prestart": "[[ ! -d functions/node_modules/@firebase ]] && ( >&2 echo \"ERROR: please '(cd functions && npm install)'\n\"; exit 9)",
+    "//test:fns:callables": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs -f callables.test.js",
+    "//_check_npx7": "if [[ $(npx --version) < '7.' ]]; then ( >&2 echo \"ERROR: Need npx >= 7.x.\n\"); exit 1; fi"
   },
   "devDependencies": {
     "@local/functions": "file:functions",
