@@ -1,24 +1,5 @@
 # Known Issues
 
-## Warnings at `npm install`
-
-```
-$ npm install
-npm WARN EBADENGINE Unsupported engine {
-npm WARN EBADENGINE   package: undefined,
-npm WARN EBADENGINE   required: { node: '14' },
-npm WARN EBADENGINE   current: { node: 'v15.5.0', npm: '7.3.0' }
-npm WARN EBADENGINE }
-npm WARN EBADENGINE Unsupported engine {
-npm WARN EBADENGINE   package: undefined,
-npm WARN EBADENGINE   required: { node: '14' },
-npm WARN EBADENGINE   current: { node: 'v15.5.0', npm: '7.3.0' }
-npm WARN EBADENGINE }
-...
-```
-
-If you know how these can be mitigated, please do. `#help` 
-
 ## Deprecated dependency warnings
 
 ```
