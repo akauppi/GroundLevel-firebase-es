@@ -1,25 +1,27 @@
 /*
 * /.eslintrc.cjs
 *
-* Only for the Rollup bootloader code in 'init/'. See application repo for linting the application code.
+* Only for configuration files (like this) and the Rollup bootloader code ('init/'). See 'packages/**_/.eslintrc.cjs'
+* for linting the actual code (they are marked 'root: true' so isolated from this file).
 *
 * References:
 *   - Configuring ESLint
 *     -> https://eslint.org/docs/user-guide/configuring
-*
-*   - List of available rules
-*     -> https://eslint.org/docs/rules/
 */
 const [off,warn,error] = ['off','warn','error'];
 
 module.exports = {
+  root: true,
   extends: ['eslint:recommended'],
 
   env: {
-    browser: true,
+    node: true,
     es6: true      // 'Promise'
   },
 
+  globals: {
+    //module: true,
+  },
   parserOptions: {
     ecmaVersion: 2020,   // we use: object spread (2018), dynamic import (2020)
     sourceType: 'module'
@@ -31,5 +33,16 @@ module.exports = {
       argsIgnorePattern: "^_",
     }],
     "no-constant-condition": [warn]
-  }
+  },
+
+  overrides: [
+    {   // Browser bootup code
+      files: ["init/*.js"],
+      env: {
+        browser: true
+      },
+      globals: {
+      }
+    }
+  ]
 }

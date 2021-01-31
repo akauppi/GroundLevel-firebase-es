@@ -8,6 +8,7 @@
 const [off,warn,error] = ['off','warn','error'];
 
 module.exports = {
+  root: true,   // we want various source packages (app/backend/...) to remain independent
   extends: [
     'eslint:recommended'
   ],

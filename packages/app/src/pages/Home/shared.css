@@ -1,0 +1,12 @@
+/*
+* CSS shared with 'ProjectTile' and 'NewTile'
+*/
+.new-tile,
+.project-tile {
+  padding: 30px;
+  background-color: lightblue;   /* default color */
+  border-radius: 10px;
+
+  width: 150px;
+  height: 100px;
+}

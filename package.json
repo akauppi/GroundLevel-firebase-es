@@ -1,0 +1,21 @@
+{
+  "name": "@local/Groundlevel-es-firebase",
+  "description": "Sample web application based on ES modules and Firebase.",
+  "license": "MIT + see 'LICENSE' for restriction",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akauppi/GroundLevel-es-firebase.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=14.3"
+  },
+  "--": "-- following stuff matters for development, only --",
+  "scripts": {
+    "preinstall": "for SUB in $(ls packages); do (cd packages/$SUB && npm install); done"
+  },
+  "//comments": [
+    "This file is simply for those lazy enough to come to a repo and type 'npm install' without looking at details. :)"
+  ]
+}

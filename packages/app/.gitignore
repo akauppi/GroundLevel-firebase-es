@@ -1,0 +1,19 @@
+# 'node_modules' ignored by the main project
+
+# 'vite build'
+/dist/
+
+# Firebase hosting caches
+/.firebase/
+
+/.firebaserc
+
+/firebase-debug.log
+/firestore-debug.log
+/ui-debug.log
+
+# Cypress
+/.screenshots
+
+# Generated files
+/vitebox/.env.dev*

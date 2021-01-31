@@ -35,11 +35,7 @@ developed with:
 $ npm install
 ```
 
-Cloud Functions emulation has its own folder and needs a separate install:
-
-```
-$ (cd functions && npm install)
-```
+>Note: There is a separate `functions/node_modules` for the emulated Cloud Functions. Its packages will be installed/updated automatically, with this command.
 
 ```
 $ npm run ci
