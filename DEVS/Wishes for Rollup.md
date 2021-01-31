@@ -1,5 +1,7 @@
 # Wishes for Rollup
 
+>WARNING: This is an old entry; might not be true, any more!
+
 ## BUG: Line numbers for `manualChunks` are wrong
 
 ```

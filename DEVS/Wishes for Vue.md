@@ -1,4 +1,4 @@
-# Wishes for Vue.js 3 (rc)
+# Wishes for Vue.js 3
 
 Dear Vue.
 
@@ -111,24 +111,6 @@ The implementation would use some inner field like `_v_initialized` (there are s
 Resetting the `_v_initialized` field per each write of the reactive (maybe there is a way to avoid this?).
 -->
 
-<!-- no, not really worth it? (initializing from an async generator would be what I'm after here, but those cases likely aren't that frequent, yet)
-
-**Further development:**
-
-Vue could allow a Promise to be used for initializing a `reactive`.
-
-```
-const r = reactive(...Promise of object/Map...)
-```
-
-Current behavior (Vue.js 3.0 beta):
-
-- not defined; the parameter needs to be an object or `Map`. <small>(a Promise is an object but there's no point in using it like this, today)</small>
-  
-Suggested behavior:
--->
-
-
 
 ## Tapping to end-of-life of `reactive`
 
@@ -225,8 +207,4 @@ Vue implementation (3.0.0) requires the `setup` function to be synchronous.
 There are likely reasons for this. However, could it be possible to allow `async` and then just wait for that Promise, until proceeding further?
 
 This would simplify certain use cases, e.g. the access of Router in `AppProfile`.
-
-
-
-
 

@@ -13,6 +13,12 @@ Microsoft has implemented the grammar, but someone with IntelliJ syntax highligh
 
 ## Syntax highlight for Firebase Security Rules [IDEABKL-7927]
 
+>NOTE: There's a Security Rules plugin now: [Firebase Rules Syntax Highlighter](https://plugins.jetbrains.com/plugin/15189-firebase-rules-syntax-highlighter)
+>
+>- [ ] is it any good?
+>- [ ] having versions be "-SNAPSHOT" is worrying (Jan-21)
+>- [x] keeping it disabled, until next time working with Rules
+
 See [IDEABKL-7927](https://youtrack.jetbrains.com/issue/IDEABKL-7927) (Youtrack).
 
 - open since 2018
