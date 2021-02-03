@@ -27,8 +27,10 @@ Development is done with:
 ## Getting started
 
 ```
-$ npm install
+$ CYPRESS_INSTALL_BINARY=0 npm install
 ```
+
+>Note: The `CYPRESS_INSTALL_BINARY=0` speeds up the install by skipping downloading the binary part of Cypress. It's only needed for running tests - we'll get back to it.
 
 Launch the app:
 
@@ -201,7 +203,7 @@ The guidance on how to deal with these values varies a bit between Firebase and 
 - Google Identity Platform: [Using API keys](https://cloud.google.com/docs/authentication/api-keys) (Google Cloud docs)
 
    The author restricted their API key by:
-   1. Google Console > `APIs & Services` > `Credentials` > `API Keys` > `Browser key (auto created by Firebase)` (click)
+   1. Google Cloud console > `APIs & Services` > `Credentials` > `API Keys` > `Browser key (auto created by Firebase)` (click)
    3. `API Restrictions` > `Restrict key` > `[x] Identity Toolkit API`
 
    >![](.images/gip-api-restriction.png)

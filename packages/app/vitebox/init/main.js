@@ -11,7 +11,13 @@ import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
-assert(firebase.auth && firebase.firestore && firebase.functions)   // #temp
+// Changes to Vite caused (at 2.0.0.beta.57) that these were suddenly not available (Firebase packaging is pretty awkward).
+//
+if (! (firebase.auth && firebase.firestore && firebase.functions)) {
+  let s;
+  console.error(s = "Firebase modules not loaded correctly (INTERNAL)", { auth: firebase.auth, firestore: firebase.firestore, functions: firebase.functions });
+  throw new Error(s);
+}
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 

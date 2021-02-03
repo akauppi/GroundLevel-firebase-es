@@ -29,7 +29,7 @@ const subAliases = (() => {
   return Object.fromEntries(pairs);
 })();
 
-export default {    // note: entries in alphabetical order
+export default {
   root: 'vitebox',
 
   alias: {
@@ -38,7 +38,9 @@ export default {    // note: entries in alphabetical order
   },
 
   build: {
-    minify: true
+    minify: true,
+    target: 'esnext',   // assumes native dynamic imports
+    //polyfillDynamicImport: false
   },
 
   // Means to pass build time values to the browser (in addition to '.env' files).
@@ -52,7 +54,16 @@ export default {    // note: entries in alphabetical order
   //      excluding 'firebase' seems to be the right step. 👣
   //
   optimizeDeps: {
-    exclude: [ 'firebase' ]
+    // Vite docs note: It doesn't say, what exactly the "string" is supposed to contain. Until beta.56, '@firebase'
+    //    seemed to cover all subpackages (eg. '@firebase/auth').
+    //
+    // Q: Has something changes with this, at 2.0.0-beta.57?
+    exclude: [
+      'firebase/app',
+      '@firebase/auth',
+      '@firebase/firestore',
+      '@firebase/functions'
+    ]
   },
 
   plugins: [

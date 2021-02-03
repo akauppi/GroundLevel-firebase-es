@@ -1,0 +1,16 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "testFiles": "**/*.js",
+  "screenshotsFolder": ".screenshots",
+  "video": false,
+  "fixturesFolder": false,
+
+  "//": {
+    "testFiles": [
+      "There so that we can disable whole files by rename (eg. 'some.js.disabled'). Default '**/*.*' would run them."
+    ],
+    "fixturesFolder": [
+      "Did not need it. Remove the =false if you do."
+    ]
+  }
+}

@@ -19,9 +19,9 @@
   "scripts": {
     "dev": "npm run dev:local",
     "__": "",
-    "test": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-on http://localhost:3000 && npx cypress run\"",
+    "test": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-on http://localhost:3000 && cypress run\"",
     "  -": "",
-    "cy:run": "npx cypress run",
+    "cy:run": "cypress run",
     "  -- ": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"firebase emulators:start --project=app --only auth,functions,firestore\" \"(export GCLOUD_PROJECT=app; npm run --silent _dev_local_init && npm run --silent _dev_local_vite)\"",
     "_dev_local_init": "wait-on http://localhost:4000 && node --experimental-json-modules --harmony-top-level-await ./local/init.js",
@@ -32,7 +32,6 @@
     "_dev_online_vite": "wait-on http://localhost:5050 && vite --port 3001 --clearScreen false",
     "  ---": "",
     "lint": "eslint --ext .js,.vue src",
-    "//get__": "firebase emulators:exec --only hosting \"curl http://localhost:5000/__/firebase/init.json\"",
     "  - ": "",
     "predev:local": "npm run --silent _checkFirebaseEmulVer && (PORT=3000 npm run --silent _checkPortIsFree) && npm run --silent _genEnvLocal",
     "predev:online": "(PORT=3001 npm run --silent _checkPortIsFree) && npm run --silent _genEnvOnline",
@@ -47,17 +46,18 @@
     "//vite:serve": "vite --mode production --port ${PORT:-3011}"
   },
   "dependencies": {
-    "@akauppi/aside-keys": "^0.0.0-alpha.0",
-    "firebase": "^8.2.4",
+    "@akauppi/aside-keys": "^0.0.0-alpha.2",
+    "firebase": "^8.2.5",
     "tslib": "^1.14.1",
     "vue": "^3.0.5",
     "vue-router": "^4.0.3"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
-    "@vitejs/plugin-vue": "1.1.0",
+    "@vitejs/plugin-vue": "^1.1.4",
     "@vue/compiler-sfc": "^3.0.5",
     "concurrently": "^5.3.0",
+    "cypress": "^6.3.0",
     "eslint": "^7.18.0",
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-node": "^11.1.0",
@@ -65,7 +65,7 @@
     "firebase-admin": "^9.4.1",
     "prettier": "^2.2.0",
     "sass": "^1.32.2",
-    "vite": "2.0.0-beta.56",
+    "vite": "^2.0.0-beta.63",
     "vue-eslint-parser": "^7.4.1",
     "wait-on": "^5.2.1"
   },
@@ -76,9 +76,6 @@
       ]
     },
     "devDependencies": {
-      "@vitejs/plugin-vue": [
-        "WARNING: 1.1.2 does not work with us (1.1.0 does). (see 'TRACK.md')"
-      ],
       "@vue/compiler-sfc": [
         "This needs to be the same version as 'dependencies.vue' but did not find a way to enforce that."
       ],
