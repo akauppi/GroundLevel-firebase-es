@@ -19,9 +19,10 @@ The test section discusses it more.
 <!--
 Development is done with: 
 
-- latest macOS (11.1) <!_--latestMacOS--_>
-- latest node (15.5.0) <!_--latestNode--_>
-- firebase CLI (9.2.2)
+- latest macOS (11.1)
+- latest node (15.5.0)
+- npm (7.5.x)
+- firebase CLI (9.3.0)
 -->
 
 ## Getting started
@@ -51,7 +52,8 @@ Authentication is not included in this "local" mode. Instead, you provide the us
 
 [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 
-<!--
+<!-- (future me: can I make any sense of this??)
+
 Tests use the same server and there are tests for the sign-in, so we didn't want to just automatically sign you in. Now you know. Now, you can forget..
 -->
 

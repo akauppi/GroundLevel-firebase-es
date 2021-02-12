@@ -57,7 +57,7 @@
   }
   */
 
-  function setup({ id }) {    // Note: We don't need 'id' to be reactive (won't be changed while on the page)
+  function setup({ id }) {    // 'id' is from the URL
     const projectId = id;
 
     shareMyActivity(projectId);   // also call this in certain actions (just keeping the tab open is not activity)

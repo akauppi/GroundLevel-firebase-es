@@ -7,8 +7,10 @@ Release dates are marked; 'latest' shows WIP window.
 ## Latest
 
 - **FEATURE:** replaced FirebaseUI with `aside-keys` web component
+  - Changed Vue components to `LikeThis` to separate them from web components
 - Internal: dependency updates
 - Internal: brought back home from its separate repo 🏠
+- Internal: Router changes, in utilizing Vue Router 4 APIs 
 
 ## 8-Jan-2021
 

@@ -9,19 +9,20 @@
 -->
 <template>
   <header>
-    <app-logo />
-    <div id="mode" v-bind:class="{ devLocal: mode === 'dev_local' /*, devOnline: mode === 'development'*/ }">
+    <AppLogo />
+    <div id="mode" v-bind:class="{ devLocal: LOCAL /*, devOnline: mode === 'development'*/ }">
     </div>
-    <!-- Note: 'user' can be 'null' at first, then either an object (signed in) or 'false' (signed out).
+    <!-- 'user' is Ref of (undefined | null | { ..Firebase user object })
     -->
-    <app-profile v-if="user" />
+    <AppProfile v-if="user" />
   </header>
   <main>
     <router-view />
-    <aside-keys init-json=""/>
+    <aside-keys v-if="!LOCAL" >
+    </aside-keys>
   </main>
   <footer>
-    <app-footer />
+    <AppFooter />
     <button id="errorBtn" v-on:click="makeError">Make error!</button>
   </footer>
 </template>
@@ -38,9 +39,9 @@
   }
   #mode.devLocal {
     display: block;
-    background-color: dodgerblue;
+    background-color: #ffc800;
     &:after {
-      content: 'EMULATION MODE';
+      content: 'LOCAL MODE';
     }
   }
 
@@ -49,6 +50,23 @@
     bottom: 0;
     right: 0;
     margin: 0.3em;
+  }
+
+  /* Theming the side panel
+  */
+  aside-keys::part(frame) {
+    /*
+    background: rgba(255, 255, 255, 0.3);		/_* semi-transparent background *_/
+    backdrop-filter: blur(1em);
+    -webkit-backdrop-filter: blur(1em);
+    border-radius: 1em 0 0 1em;
+    box-shadow: 6px 6px 3px rgba(0, 0, 0, 0.2);
+    */
+    margin-top: -2em;
+    padding-top: 2.8em;
+    width: 255px;
+    background: #f8f8f8;
+    border: 0.5px solid rgba(100,100,100,0.4);
   }
 </style>
 
@@ -61,13 +79,16 @@
   import AppProfile from './components/AppProfile/index.vue'
   import AppFooter from './components/AppFooter.vue'
 
-  import { userRef as user } from './auth/userRef.js'
+  import { userRef2 } from './user'
 
-  const _MODE = import.meta.env?.MODE || 'production';
+  const _MODE = import.meta.env?.MODE || 'production';    // tbd. needed? why the '|| "production"'?
+  const LOCAL = import.meta.env.MODE === 'dev_local';
 
   import { devVueWarningsToCentral } from "./config"
 
-  import './auth/updateUserInfo'
+  if (!LOCAL) {
+    import ('/@background/updateUserInfo');
+  }
 
   // Add '.xListen' to Firestore objects
   import '/@xListen/stab'
@@ -153,8 +174,8 @@
     }
 
     return {
-      user,
-      mode: _MODE,
+      user: userRef2,
+      LOCAL: _MODE === 'dev_local',
       makeError   // IDE note: used though dimmed
     }
   }

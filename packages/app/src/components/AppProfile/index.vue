@@ -24,7 +24,7 @@
   - Note: '@keyup:esc=...' does not work on a div. Doing it in code.
   -->
   <div id="modal-background" v-if="isOpen" @click.stop="closeDialog">
-    <setup-dialog @closeMe="closeDialog" />
+    <SetupDialog @closeMe="closeDialog" />
   </div>
 </template>
 
@@ -85,7 +85,9 @@
 
   import { ref } from 'vue'
 
-  import { userRef as user } from '/@auth/userRef.js'
+  // tbd. Do we need 'userRef' or would 'getCurrentUser()' work, just as well?
+  //import { userRef2 as user } from '/@/user'
+  import { getCurrentUserWarm } from "/@/user"
 
   import SetupDialog from './SetupDialog.vue'
 
@@ -102,6 +104,8 @@
   }
 
   function setup() {
+    const user = getCurrentUserWarm();
+
     return {
       isOpen,
       openDialog,   // IDE note: mistakenly shows these dimmed (they are used)

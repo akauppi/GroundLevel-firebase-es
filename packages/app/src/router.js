@@ -1,56 +1,54 @@
 /*
 * src/router.js
 *
+* This file is maybe most Magic 🎩 in the whole project. It helps to know Vue Router and the concept of front end
+* routing.
+*
 * Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
 *
-* We do a delayed (async) router generator, based on the 'firebase.auth().currentUser' being known. This delays about
-* 300..500ms but ensures the authentication system is up, when the router needs it. No need for promises, later.
-*
-* Note: tried multiple approaches before this. Initializing Firebase before Vue (and Vue router), dealing with auth
-*     info as a promise always. Each of them has down sides (and the delay is inevitable somewhere). The router is
-*     the _only_ place where the info really needs to be (since if the user ends up on a protected page, we already
-*     know authentication happened). Thus, embedding a part of Firebase in here. :)
+* References:
+*   - Vue Router (next) > Guide
+*     https://next.router.vuejs.org/guide/
 */
 import { assert } from '/@/assert'
-
-import firebase from 'firebase/app'
-import '@firebase/auth'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
 // Pages
 //
 // Note: Static import is shorter and recommended [1]. However, also the dynamic 'await import('./pages/Some.vue')'
-//      should work. ESLint dislikes it, though. (May 2020)
+//      should work.
 //
 //    [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 //
-import Home from './pages/Home/index.vue';
-import SignIn from './pages/SignIn.vue';
-import Project from './pages/Project/index.vue';
-import NotFound from './pages/_NotFound.vue';
+import Home from './pages/Home/index.vue'
+import HomeGuest from './pages/Home.guest.vue'
+import Project from './pages/Project/index.vue'
+import NotFound from './pages/_NotFound.vue'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
   // For local mode, pass 'user=...' in navigation.
 
-let localUser;
+let localUser;    // 'user=' query parameter (LOCAL mode)     // <-- tbd. is that needed?  What for?
 
-// Turning Firebase subscription model into a Promise, based on:
-//    -> https://medium.com/@gaute.meek/vue-guard-routes-with-firebase-authentication-7a139bb8b4f6
-//
-function currentFirebaseUserProm() {    // () => Promise of object|null
-  return new Promise( (resolve, reject) => {   // () => Promise of (firebase user object)
-    const unsub = firebase.auth().onAuthStateChanged(user => {
-      unsub();
-      resolve(user);
-    }, reject);
-  });
+import { getCurrentUserProm, /*getCurrentUserId,*/ setLocalUser /*, isReadyProm as isUserReadyProm*/ } from './user'
+
+/*** disabled (providing user globally, but the IDEA of passing it as props to a page is nice (more declarative). Maybe later?????
+// tbd. Likely get away from passing 'Home' the uid as a prop. (and importing 'getCurrentUser' instead).
+function getCurrentUserId(r) {
+  if (LOCAL) {
+    const uid = r.query.user;
+    assert(uid, "No 'user' in query string to pass!");
+    return uid;
+  } else {
+    const uid = getCurrentUserId();
+    return uid;
+  }
 }
+***/
 
-const rLocked = (path, component, o) => ({ ...o, path, component, meta: { ...(o?.meta || {}), needAuth: true }});
+const rLocked = (path, component, o) => ({ ...o, path, component, meta: { needAuth: true } /*, prop: injectUidProp*/ });
 const rOpen = (path, component, o) => ({ ...o, path, component });
-
-let routerProm;   // available for 'routes'??? (trying to work around a cyclic dependency)
 
 // Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose
 //                not to do this, and go for the shorter format (best when there are lots of routes).
@@ -59,90 +57,114 @@ let routerProm;   // available for 'routes'??? (trying to work around a cyclic d
 //      the server config.
 //
 const routes = [
-  rLocked('/', Home /*, { name: 'home' }*/),
-
-  // Notes:
-  //    - 'final': we provide the query parameter as a property so the component does not need to do parsing.
-  //    - 'routerProm': avoids a cyclical dependency
-
-  LOCAL ? null : rOpen('/signin', SignIn, { props: route => ({ final: route.query.final, routerProm }) }),  // '?final=/somein'
-
-  rLocked('/projects/:id', Project, { props: true, query: (LOCAL && localUser) ? { user: localUser } : {} /*, name: 'projects'*/ }),    // '/projects/<project-id>[&user=...]'
-
-  // Note: Not really important for us, just showing off dynamic component import.
+  // Home page allowed either signed in or not - will just render differently.
   //
-  //rOpen( '/easter',
-  //  () => import('./pages/_EasterEGG.vue')    // tbd. How to make IDE (WebStorm) not red-underline 'import'?
-  //),
+  // Notes:
+  //  - 'props: true' passes the 'route.params' (eg. '/:id') to the component, as props.
+  //  - for query params, we also pass them as props so the component doesn't need to parse things (we do)
+  //
+  // Note: By using a '.name', we can distinguish between the guest home path and the signed one, without need for
+  //    a designated URL for sign-in. :)
+  //
+  rLocked('/', Home /***REMOVE, { props: r => ({ uid: getCurrentUserId(r) }) }***/ ),
+  LOCAL ? rOpen('/', HomeGuest, { name: 'Home.guest' })
+        : rOpen('/', HomeGuest, { props: r => ({ final: r.query.final }), name: 'Home.guest' }),  // '[?final=/somein]'
+
+  LOCAL ? rLocked('/projects/:id', Project, { props: true, query: { user: localUser } /*, name: 'projects'*/ })    // '/projects/<project-id>[&user=...]'
+        : rLocked('/projects/:id', Project, { props: true /*, name: 'projects'*/ }),    // '/projects/<project-id>'
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.
   //
-  rOpen('/:catchAll(.*)', NotFound )
+  rOpen('/:pathMatch(.*)', NotFound )    // was: ':catchAll(.*)'
 ].filter( x => x !== null );
 
-// Note: Until JavaScript "top-level await" proposal, we export both a promise (for creating the route) and a
-//    'route' value (which remains 'undefined' until the route is created - but users of it are behind routes so
-//    they will never see that).
-//
-//    When the proposal has passed, and implemented in evergreen browsers, we can turn to just having 'router'
-//    exposed.
-//
-//    See -> https://github.com/tc39/proposal-top-level-await
-//
-routerProm = currentFirebaseUserProm().then( _ => {
-
-  const router = createRouter({
-    history: createWebHistory(),
-    //base: process.env.BASE_URL,    // tbd. what is this used for?
-    routes
-  });
-
-  router.beforeEach(async (to, from, next) => {
-    assert(to.path !== null);   // "/some"
-
-    console.log(`router entering page: ${to.path}`);
-
-    // 'to.matched' likely has the routes (including parent levels) leading to our page. We don't use route levels
-    // (parent/children) (Jun 2020), so the array is always just one entry long. (Note: This is guesswork, '.matched'
-    // does not have documentation in its source).
-    //
-    // For this, it is irrelevant whether we use '.some' or what not. Maybe we should use '.last' (the actual page).
-    // Check this out properly, one day.
-    //
-    // Based on -> https://router.vuejs.org/guide/advanced/meta.html
-    //
-    console.debug("Before route, to.matched:", to.matched);    // DEBUG (could use central logging here!!! tbd.!!)
-
-    const needAuth = to.matched.some(r => r.meta.needAuth);
-
-    if ((!needAuth) || firebase.auth().currentUser) {    // since we waited for 'currentFirebaseUserProm', we can now trust '.currentuser'
-
-      if (LOCAL && from.query.user && !to.query.user) {   // keep 'user=...' automatically in the game
-        next({...to, query: {...(to.query || {}), user: from.query.user}});
-
-      } else {
-        next();   // just proceed
-      }
-
-    } else {    // need auth but user is not signed in
-      console.log("Wanting to go to (but not signed in):", to);  // DEBUG
-
-      if (LOCAL) {  // don't have '/signin' page for local - we want the dev to provide '?user=<id>'
-        console.warn("Missing 'user' parameter")
-        next('/no-user-param');
-        return;
-      }
-
-      if (to.path === '/') {    // no need to clutter the URL with '?final=/'
-        next('/signin')
-      } else {
-        next(`/signin?final=${to.path}`);
-      }
-    }
-  });
-
-  return router;
+const router = createRouter({
+  history: createWebHistory(),
+  //base: process.env.BASE_URL,    // tbd. what is this used for?
+  routes
 });
 
-export { routerProm /*, router*/ }
+// See: Vue Router > Navigation Guards
+//    -> https://next.router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
+//
+router.beforeResolve(async (to, from) => {
+  assert(to.path !== null);   // "/some"
+
+  console.log(`router entering page: ${to.path}`);
+
+  /*** DISABLED: maybe we don't need 'to.matched' at all, Vue Router docs use 'to.meta'
+  // 'to.matched' likely has the routes (including parent levels) leading to our page. We don't use route levels
+  // (parent/children), so the array is always just one entry long. (Note: This is guesswork, '.matched' does not have
+  // documentation in its source).
+  //
+  // Based on -> https://router.vuejs.org/guide/advanced/meta.html
+  //
+  console.debug("Before route, to.matched:", to.matched);    // DEBUG
+
+  assert(to.matched.length == 1, "Multiple levels in 'to.matched' - we're unprepared!");
+  const needAuth = to.matched[0].meta.needAuth;
+  ***/
+  const needAuth = to.meta.needAuth;
+
+  if (LOCAL) {
+    const uid = to.query.user || from.query.user;
+    setLocalUser(uid);
+    let ret;
+
+    if (needAuth) {
+      if (to.query.user) {    // already has self-claimed uid (ie. it's been through here)
+        ret= true;
+
+      } else if (from.query.user) {   // have the 'user=' in current URL; pass it on
+        ret= {
+          ...to,
+          query: {...(to.query || {}), "user": from.query.user}
+        };
+
+      } else if (to.path === '/') {   // aiming at home; we can provide a guest version (same URL)
+        ret= { name: 'Home.guest' };
+
+      } else {   // no 'user=...'
+        console.warn("Missing 'user' parameter");
+        ret= { path: '/no-user-param' };
+      }
+    } else {    // Home.guest
+      ret= true;   // just proceed
+    }
+    assert(ret !== undefined, "route missing");
+    return ret;
+
+  } else {  // real world
+    let ret;
+
+    if (needAuth) {
+      // 'guest' is an undocumented way to force routing to go to 'Home.guest' (even when authenticated)
+
+      const user = !(to.query.guest) && await getCurrentUserProm();    // null | { ..Firebase user object }
+
+      if (user) {    // authenticated; pass 'uid' as a prop (since we already know it)
+        ret= {...to,
+          props: {uid: user.uid}
+        };
+
+      } else {  // need auth but user is not signed in
+        console.log("Wanting to go to (but not signed in):", to);  // DEBUG
+
+        ret= {
+          name: 'Home.guest',
+          query: {"final": to.fullPath}
+        };
+      }
+    } else {    // Home.guest
+      ret= true;   // just proceed
+    }
+
+    assert( ret !== undefined, "route missing");
+    return ret;
+  }
+});
+
+export {
+  router
+}

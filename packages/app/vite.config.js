@@ -29,6 +29,16 @@ const subAliases = (() => {
   return Object.fromEntries(pairs);
 })();
 
+// Naming pattern we use for Vue vs. web components:
+//  - 'router-[view|link]' must be treated as Vue components (comes from a library)
+//  - 'any-thing' are web components (they seem to follow that pattern, always)
+//  - 'ThisThing' are our self-made Vue components
+//
+const forcedVueComponents = new Set([
+  "router-view",
+  "router-link"
+]);
+
 export default {
   root: 'vitebox',
 
@@ -48,26 +58,10 @@ export default {
     "LOCAL_PROJECT": process.env.GCLOUD_PROJECT
   },
 
-  // WITHOUT THIS, VITE GIVES A RED DREADING DIALOG (2.0 beta)!!!
-  //
-  // Note: The error recommends including 'firebase/app' but in order for also '@firebase/firestore' etc. to work,
-  //      excluding 'firebase' seems to be the right step. 👣
-  //
-  optimizeDeps: {
-    // Vite docs note: It doesn't say, what exactly the "string" is supposed to contain. Until beta.56, '@firebase'
-    //    seemed to cover all subpackages (eg. '@firebase/auth').
-    //
-    // Q: Has something changes with this, at 2.0.0-beta.57?
-    exclude: [
-      'firebase/app',
-      '@firebase/auth',
-      '@firebase/firestore',
-      '@firebase/functions'
-    ]
-  },
-
   plugins: [
-    vue()
+    vue({ template: { compilerOptions: {
+      isCustomElement: tag => tag.includes('-') && !forcedVueComponents.has(tag)
+    }}})
   ],
 
   // This doesn't cut it, from config file (vite 2.0.0-beta.52). Using it as command line parameter does. Weird.

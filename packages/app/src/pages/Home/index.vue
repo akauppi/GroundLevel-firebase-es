@@ -1,8 +1,7 @@
 <!--
 - src/pages/Home
 -
-- The default page (URL /). Needs authentication.
-- Signing in with mere '/signin' leads here.
+- The default page (URL /), with a signed in user.
 -->
 <template>
   <div>
@@ -46,13 +45,13 @@
 </style>
 
 <script>
+  import { computed, onUnmounted } from 'vue'
+
   import NewTile from './NewTile.vue'
   import ProjectTile from './ProjectTile/index.vue'
 
-  import { currentUserGen } from "/@firebase/currentUser"
   import { activeProjects } from "/@data/activeProjects.js"
-
-  import { computed, onUnmounted } from 'vue'
+  import { getCurrentUserId } from "/@/user"
 
   // The UI uses projects sorted
   //
@@ -63,7 +62,8 @@
   }
 
   function setup() {
-    const uid = currentUserGen().uid;    // does not change while we're on the page
+    const uid = getCurrentUserId();
+
     const myProjects = activeProjects(uid);
 
     onUnmounted( myProjects.unsub );
@@ -71,7 +71,7 @@
     return {
       projectsSorted: computed( () => {
         return sort(myProjects.value)    // Array of [<id>, { ..projectsC doc }]
-    })
+      })
         //
         // ^-- Note: No need for '...Ref' naming, since only used in the HTML
     }

@@ -107,14 +107,12 @@
 
 <script>
   import { assert } from '/@/assert'
-  import firebase from 'firebase/app'
+  import { signOut as outerSignOut } from '@akauppi/aside-keys'
 
   import { ref, onMounted, onUnmounted } from 'vue'
+  import { useRouter } from 'vue-router'
 
-  import { routerProm } from '/@/router.js'
-  import { userRef as user } from '/@auth/userRef.js'
-
-  import { ContextError } from '/@xListen/ContextError'
+  import { getCurrentUserWarm } from '/@/user'
 
   const LOCAL = import.meta.env.MODE === 'dev_local'
 
@@ -134,6 +132,8 @@
   }
 
   function setup(_, { emit, refs }) {
+    const router = useRouter();
+
     // 'closeEl' is valid only after mounting, so safest to activate the listener only then.
     onMounted( () => {
       document.addEventListener('keyup', escListener);
@@ -143,19 +143,16 @@
       document.removeEventListener('keyup', escListener);
     });
 
-    async function signOut () {
-      assert(!LOCAL)
+    function signOut () {
+      assert(!LOCAL);
 
-      try {
-        await firebase.auth().signOut();
-      }
-      catch(err) {
-        throw new ContextError('Sign out failed', err);   // not observed
-      }
-
-      const router = await routerProm;    // must wait for it here -> 'setup' must be synchronous (Vue.js 3.0)
-      router.push('/signin');
+      outerSignOut().then( _ => {
+        // tbd. consider 'replace' - do we wish the signed out URL to remain in browser history?
+        router.push('/');
+      });
     }
+
+    const user = getCurrentUserWarm();
 
     return {
       closeEl,
