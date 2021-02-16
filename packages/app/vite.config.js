@@ -42,9 +42,15 @@ const forcedVueComponents = new Set([
 export default {
   root: 'vitebox',
 
-  alias: {
-    '/@': srcPath,
-    ...subAliases
+  resolve: {
+    alias: { ...subAliases,
+      '/@': srcPath
+    }
+  },
+
+  // Means to pass build time values to the browser (in addition to '.env' files).
+  define: {
+    "LOCAL_PROJECT": process.env.GCLOUD_PROJECT
   },
 
   build: {
@@ -53,15 +59,10 @@ export default {
     //polyfillDynamicImport: false
   },
 
-  // Means to pass build time values to the browser (in addition to '.env' files).
-  define: {
-    "LOCAL_PROJECT": process.env.GCLOUD_PROJECT
-  },
-
   plugins: [
     vue({ template: { compilerOptions: {
-      isCustomElement: tag => tag.includes('-') && !forcedVueComponents.has(tag)
-    }}})
+          isCustomElement: tag => tag.includes('-') && !forcedVueComponents.has(tag)
+        }}})
   ],
 
   // This doesn't cut it, from config file (vite 2.0.0-beta.52). Using it as command line parameter does. Weird.

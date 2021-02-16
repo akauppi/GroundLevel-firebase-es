@@ -1,6 +1,6 @@
 {
   "name": "@local/back-end",
-  "description": "Sample backend for GroundLevel-es-firebase",
+  "description": "Sample back-end",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -25,7 +25,7 @@
     "  -": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --project=bunny --only functions,firestore\" \"GCLOUD_PROJECT=bunny npm run _start_2\"",
     "_start_2": "wait-on http://localhost:4000 && node test/prime-docs.js",
-    "test:fns:userInfo": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs -f userInfo.test.js --detectOpenHandles --all",
+    "test:fns:userInfo": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs -f userInfo.test.js --verbose --detectOpenHandles --all",
     "test:fns:all": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs --verbose --detectOpenHandles --all",
     "  --": "",
     "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f invitesC.test.js --verbose --detectOpenHandles --all",

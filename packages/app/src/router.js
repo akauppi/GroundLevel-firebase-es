@@ -23,7 +23,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 //
 import Home from './pages/Home/index.vue'
 import HomeGuest from './pages/Home.guest.vue'
-import Project from './pages/Project/index.vue'
+import Project from './pages/Project.vue'
 import NotFound from './pages/_NotFound.vue'
 
 const LOCAL = import.meta.env.MODE === "dev_local";

@@ -1,5 +1,5 @@
 <!--
-- src/pages/Project/index.vue
+- src/pages/Project.vue
 -
 - The project page. Most of the time will be spent here.
 -->
@@ -15,7 +15,9 @@
     <ul v-if="membersReady">
       <li v-for="(m,uid) in members" :key="uid">
         {{ m.name }} {{ m.isAuthor ? "is author" : "" }}
+        <!-- tbd. doesn't build; fix
         <img src="{{ m.photoURL }}"/>
+        -->
       </li>
     </ul>
 

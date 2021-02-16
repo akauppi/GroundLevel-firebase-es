@@ -252,9 +252,25 @@ Can we do that?
 
 ## Cloud Functions: ability to configure the default region in one place
 
+---
+
+**Edit 16-Feb-2021:**
+
+It seems this boild down to two, separate issues:
+
+- having to provide the Functions' region **in code**, as opposed to configuration.
+
+   There should be a one clear place where one can say "I wish to use location ... for this project". If more complex use cases require more, that is fine, but the poor man's case must be simple!
+
+- having to provide the region **in front end client**.
+
+   Surely the Firebase JavaScript library can figure it out? Again, for complex cases there may be other requirements, but the 90% use cases should not need the location to be sprinkled around here and there!
+
+---
+
 The current situation on Cloud Functions regions is not completely clear (Aug 2020). There are cases where the code seems to prefer the global default region (e.g. emulation has this).
 
-Overrides to regions can only be done on a function-by-function basis. This leads to the Internet recommending things like a `regionalFunction` value - the approach taken also in this repo.
+Overrides to regions can only be done on a function-by-function basis. This leads to the Internet [recommending](https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246) things like a `regionalFunction` value - the approach taken also in this repo.
 
 1. A developer should have a clear place to override the default region for their functions.
    - this place could be the `firebase.json` file?
@@ -279,6 +295,10 @@ The current complexity is against the aim for simplicity that is the main sellin
 
 There may be a need for overriding the region on a function-by-function basis, but there should also be a way to change the default (in configuration). This would be the way most people change their region. Such a change would not break code that currently uses the in-code settings.
 -->
+
+---
+
+The [environment configuration](https://firebase.google.com/docs/functions/config-env) provides a solution to the first problem (not having regions in code). It should just be more clearly communicated in Firebase docs. (instead of recommending to stamp the region in code)
 
 
 ## `firebase emulators:start` behaves different from `emulators:exec`

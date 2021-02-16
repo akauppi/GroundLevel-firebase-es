@@ -21,3 +21,12 @@ Vue.js normally uses `like-this` naming for its components.
 We reserve that for externally imported web components, and have our own Vue components `LikeThis`.
 
 Externally imported *Vue* components must be white listed.
+
+
+## One `local` or two?
+
+Both the Cypress tests (`npm test`) and `npm run dev` want to have local data and users for the emulation. They can work completely offline.
+
+One could separate these, but there's no real benefit from doing so. Our approach is to keep the same local mode for both but differentiate in the data (and users) being loaded.
+
+This might even provide benefits, because you are able to sign in as one of the Daltons, under `npm run dev`.

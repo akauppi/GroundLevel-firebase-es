@@ -1,6 +1,6 @@
 {
   "name": "@local/app",
-  "description": "Sample front end for GroundLevel-es-firebase",
+  "description": "Sample front end",
   "license": "MIT",
   "private": true,
   "author": "<akauppi@gmail.com>",

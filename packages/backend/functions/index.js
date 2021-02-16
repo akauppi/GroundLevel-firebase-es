@@ -3,8 +3,7 @@
 *
 * Cloud Functions for our app.
 *
-* Some of these do back-end chores like moving data when triggered. Others are for monitoring (getting central logging).
-* Yet others can be "callables" (like RPC), to interact with the backend.
+* Back-end chores like moving data when triggered.
 *
 * Note! If one's front end code uses callables, it is no longer tolerant to offline work. Using Firestore with the
 *     official client is; thus rather deal with database as the interface.
@@ -30,21 +29,36 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 //import * as admin from 'firebase-admin';
 
+const EMULATION = !! process.env.FUNCTIONS_EMULATOR;
+
 admin.initializeApp();
 
-// Note: You can run functions in multiple regions, and some functions in some etc. But for a start, it's likely best
-//    to keep them in one, near you.
-//
-const regionalFunctions = functions.region('europe-west3');   // Frankfurt
+/*
+* For production (not emulation), provide the region where the Firebase project has been set up (Firestore,
+* in particular).
+*/
+function prodRegion() {   // () => string
+  const arr = functions.config().regions;
+  const reg0 = arr && arr[0];
+  if (!reg0) {
+    throw new Error("Please provide Firebase region by 'firebase functions:config:set regions.0=[europe-...|us-...|asia-...]'");
+  }
+  return reg0;
+}
 
-//const EMULATION = !! process.env.FUNCTIONS_EMULATOR;
+// To have your Functions work, if you chose *ANY* other location than 'us-central1', you need to mention the region
+// in CODE (that's against good principles of programming; this should be a CONFIGURATION!!!)
+//
+// See -> https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246
+//
+const regionalFunctions = EMULATION ? functions : functions.region( prodRegion() );
 
 // UserInfo shadowing
 //
 // Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
 // renewed user info.
 //
-exports.userInfoShadow = regionalFunctions.firestore
+exports.userInfoShadow_2 = regionalFunctions.firestore
   .document('/userInfo/{uid}')
   .onWrite( async (change, context) => {
     const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]

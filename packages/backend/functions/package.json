@@ -3,15 +3,19 @@
   "private": true,
   "//type": "module",
   "engines": {
-    "node": "^14.0.0 || >= 15"
+    "node": "14"
   },
   "dependencies": {
-    "firebase-admin": "^9.4.2",
+    "firebase-admin": "^9.5.0",
     "firebase-functions": "^3.13.1"
   },
   "//": {
+    "type": [
+      "Change to 'type: module' when Firebase is ready for it (not yet in Feb 2021)."
+    ],
     "engines.node": [
-      "Firebase Cloud Functions only supports LTS versions (12,14,...) and the string must be '12','14', ...",
+      "We'd prefer e.g. \"14 || >=15.0.0\" but Firebase Cloud Functions insists the string MUST be '12', '14', ...",
+      "",
       ">= 13.2 provides native ES module support"
     ]
   }

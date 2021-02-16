@@ -1,12 +1,18 @@
 # Approach
 
-## One `local` or two?
+## Isolating the `package.json`s
 
-Both the Cypress tests (`npm test`) and `npm run dev` want to have local data - and users - for the emulation. They can work completely offline.
+In many web projects, one sees the same `package.json` being used for multiple things.
 
-You can separate these, but there's not necessarily benefits from it. Since the data is tied to users (because of Firestore access rights), we can simply keep one folder - `local` - having both. Anything having to do with the Daltons is for testing - changing those will affect tests passing.
+This is not cool. Putting different kinds of beans in the same bag makes maintenance and understanding the code (same thing?) difficult.
 
-Anything else is for your development pleasure, and free to be changed at will.
+We've tried to separate `package.json`s so that one only has a single role (eg. developing of the front end code; developing the back-end; managing deployments).
 
-You can of course combine these approaches even more, and sign in as one of the Daltons, also under `npm run dev`.
+This means more `package.json`s and sometimes more tediousness when one needs to update a dependency in multiple places. But the alternative would be worse.
+
+In practise, separating `package.json`s can be done by placing subprojects in the `packages` subproject.
+
+<!--
+tbd. add more details - about 'file:' references etc.
+-->
 

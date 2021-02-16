@@ -11,8 +11,8 @@
 
 **A modern (ES modules based) Web App template**
 
-- great tools selected for you: [Firebase](https://firebase.google.com), [Vue.js 3](https://v3.vuejs.org), [Vite](https://github.com/vitejs/vite), [Rollup](https://rollupjs.org/guide/en/), [Jest](https://jestjs.io), [Cypress](https://www.cypress.io)
-- built on 2020's technology (ES9, async/await), aiming to stay up to date
+- great tools selected for you: [Vue.js 3](https://v3.vuejs.org), [Vite](https://github.com/vitejs/vite), [Rollup](https://rollupjs.org/guide/en/), [Firebase](https://firebase.google.com), [Jest](https://jestjs.io), [Cypress](https://www.cypress.io)
+- built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 
 <br clear=all />
 
@@ -23,22 +23,18 @@ This repo is intended for professionals and beginners, alike. Its main point is 
 
 One learns best by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't create a to-do list.
 
-There's going to be a [narrative](...) that discusses the design choices done. For a beginner it's important to know what could have been done differently, and why the approach was selected.
+There's going to be a [narrative](...) that discusses the design in more detail. Some comments for such are left in the `APPROACH.md` files so you can not only read the code but see what choices needed to be made, and why.
 
 For medium and pro level software engineers, you should still get something out of this. The project features e.g.
 
 - social invites
 - collaboration
-- interactive SVG graphics (tbd.)
+- interactive SVG graphics
 - testing
 - production builds
 - operations / metrics
 
 This hopefully makes the app not only easy, but interesting as well.
-
-<!--
-We also cover testing, production build and operations. This is in contrast to app templates that just show you the app but not how you'd keep it running healthy for a longer time span.
--->
 
 But let's cut the chace and get started! 😀
 
@@ -48,15 +44,15 @@ But let's cut the chace and get started! 😀
 
 <img src="https://firebase.google.com/downloads/brand-guidelines/SVG/logo-logomark.svg" align="left" style="padding: 1em" />
 
-This repo uses the Firebase serverless framework for a lot of things: authentication, background functions, data storage, operational monitoring.
+This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, background functions, data storage, operational monitoring.
 
-Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API / GraphQL world, since your front end deals directly with the database, also handling authentication and access rights management.
+Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API / GraphQL world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
 
 >![](.images/backend-vs-firebase.png)
 
 *Figure 1. Traditional cloud vs. Firebase approach <sub>[source](https://docs.google.com/drawings/d/15_rPDZDOCHwdL0RIX8Rg3Der1tb4mx2tMi9asQ_aegw)</sub>*
 
-There are similar offerings from other companies, but they are years behind, in the ease of use, based on the author's opinion.
+There are similar offerings from other companies, but they are a year or two behind, in the ease of use, based on the author's opinion.
 
 >Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun. It's recommended to check those out in parallel with this repo.
 
@@ -65,66 +61,216 @@ There are links to Firebase resources at the [References](#References).
 <!-- tbd. check whether the link works in GitHub -->
 
 
+<!-- Edit: too much talk. Place this somewhere else
+## Where are you now?
+
+><font color=red>tbd. a map here, showing the `app`, `background`, `deploy` and their relationsships to cloud presence (auth, hosting, database, ops)
+</font>
+
+The repo grew. Though simplicity is the aim, there are things that simply need to be there. Anything extra should be considered for abandoning, since it makes learning more difficult.
+
+The aim is that a single person (you) can be in charge of all this (and more since you'll likely want your app on top of it).
+
+>Note: Let the author know if there's something unnecessary in the repos.
+-->
+
 ## Requirements
 
 - `npm`
-- `firebase`
+- `firebase` CLI (Command Line Interface)
 
   ```
   $ npm install -g firebase-tools
   ```
 
+<!-- Editor's note:
+-- unnecessary to mention about the version. Also, better that we check it in software. ;)
 You should use `firebase-tools` >= 8.11.1.
+-->
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-The repo is developed with latest `firebase` (8.11.1) and Node.js (14.12.0) on macOS.
+<!--
+Developed with:
+- npm (7.5.3) 
+- macOS
+- node (15.8.0)
+-->
+
+The repo is developed on macOS, with latest `npm` and `node`.
+
+>Note: Eventually, we'll test it also on Linux and Windows (maybe restricting to Linux Subsystem for Windows that has Bash). We're not there yet - issues or PRs are welcome! 
 
 
 ## Getting started
 
-Fetch dependencies:
+>![](.images/y-sign.png)
+>
+>There's a choice you can do now. Are you more interested in:
+>
+>- A: seeing your app work in the cloud
+>- B: UI development
+>
+>For route A, sign up to Firebase "blaze" plan and [create a project](README.firebase.md). Then proceed with these instructions.
+>
+>For route B, change to `packages/app` folder and see the `README` therein. You will be able to play around with the UI <u>without the need to create a Firebase account</u> right now.
+
+<a name="back"></a>   <!-- comes back here from Blaze setup -->
+<!-- Editor's note:
+- Having self-terminating tag messed up markdown editor.
+-->
+
+---
+
+### Fetch dependencies
 
 ```
 $ npm install
 ```
 
-This brings in a sample application from another repo: [GroundLevel-es-firebase-app](https://github.com/akauppi/GroundLevel-es-firebase-app). The development happens there, whereas the repo you are now looking at is responsible for "B&O" (build and ops) - placing the app to production.
-
-There's also a third repo [GroundLevel-es-firebase-backend](https://github.com/akauppi/GroundLevel-es-firebase-backend) for back-end implementation, testing and also deployment.
+This prepares the UI (under `packages/app` folder) and the backend (under `packages/backend`). 
 
 We'll come to these later. For now, the aim is to get the application deployed, under your Firebase account. Then we'll look into development and making changes.
 
-Having three repos simplifies the setup, e.g. `package.json` files become less cluttered.
-
-
-### Set up a Firebase project
-
-- Create a project in the [Firebase console](https://console.firebase.google.com/)
-   - enable hosting, authentication, Cloud Firestore and Cloud Functions
-   - create an app (needed for authentication)
-   - choose the set of authentication providers you like (Google, anonymous recommended)
-- Tie your local CLI to your project:
+### Tie to your Firebase project
    
-   ```
-   $ firebase use --add 
-   ```
+```
+$ firebase use --add
+```
    
-   The alias you choose doesn't really matter. `"abc"` is okay.
-   
+The alias you choose doesn't really matter. `"abc"` is okay.
+
 This creates the file `.firebaserc`. You can now use the project from `firebase` command.
-   
-<!-- Editor's note:
-This is left rather low (not in 'Requirements') so that the reader would get a faster fulfilling feeling (thinking `npm install` is more fulfilling than setting up Firebase project).
--->   
+
+```
+$ firebase use
+Active Project: prod-zurich (groundlevel-160221)
+...
+```
+
+### No tests?
+
+The `app` and `backend` sub-packages have tests. By the time code reaches us, it's expected to pass the tests.
+
+- The application package is responsible for front-end development and testing.
+- We are responsible for front-end *deployment* and *operational monitoring* (of both the app and back-end).
+- The back-end package is responsible for back-end development, testing, *and deployment*.
+
+Responsibilities:
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>development</th>
+      <th>testing</th>
+      <th>deployment</th>
+      <th>monitoring</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>app</td>
+      <td colspan=2><pre>packages/app</pre></td>
+      <td colspan=2>us</td>
+    </tr>
+    <tr>
+      <td>back-end</td>
+      <td colspan=3><pre>packages/backend</pre></td>
+      <td>us</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Editor's note
+Using 'table' to be able to merge cells. Seems 'rowspan' is "on GitHub markdown whitelist"
+-->
+
+Because the back-end sub-project takes care of its own deployment, we need to visit there in order to get things up in the cloud.
+
+## Deployment of back-end
+
+We'll just do this fast. There are more information in [packages/backend/README.md](packages/backend/README.md).
+
+```
+$ pushd packages/backend
+
+$ npm test     
+...
+```
+
+The tests should all pass, or be ignored. Note that they run with local emulation; cloud is not involved, yet.
+
+```
+$ firebase use --add    # provide the same id as above
+```
+
+We need to do this `firebase use --add` separately for each directory where `firebase` CLI is used.
+
+<details style="background-color: #eff; cursor: pointer">
+<summary>The longer story..</summary>
+<div style="margin: 0 1em">
+<p>Firebase stores its state in `~/.config/configstore/firebase-tools.json`. The active projects are stored per folder path:
+
+<pre>
+"activeProjects": {
+  "/Users/asko/Git/cicp-proto": "cicp-proto-240219",
+  "/Users/asko/Git/vue-rollup-example-with-firebase-auth": "dev",
+  ...
+</pre>
+
+This means if you eg. rename a folder, you'll likely need to redo `firebase use --add`.
+</div>
+</details>
+
+### State your region
+
+```
+$ firebase functions:config:set regions.0="europe-west6"
+```
+
+>Note: The convention of `regions.0` is picked up from [here](https://firebase-wordpress-docs.readthedocs.io/en/latest/intro/cloud-functions-deployment.html#change-cloud-functions-regions).
 
 
-### No tests
+### Deploy
 
-The build & ops repo does not have tests.
+```
+$ firebase deploy
 
-- Your application repo is responsible for front-end testing.
-- Your back-end repo is responsible for back-end testing.
+=== Deploying to 'groundlevel-160221'...
+
+i  deploying firestore, functions
+i  firestore: reading indexes from ./firestore.indexes.json...
+i  cloud.firestore: checking ./firestore.rules for compilation errors...
+✔  cloud.firestore: rules file ./firestore.rules compiled successfully
+i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
+i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
+⚠  functions: missing required API cloudbuild.googleapis.com. Enabling now...
+⚠  functions: missing required API cloudfunctions.googleapis.com. Enabling now...
+✔  functions: required API cloudbuild.googleapis.com is enabled
+✔  functions: required API cloudfunctions.googleapis.com is enabled
+✔  firestore: deployed indexes in ./firestore.indexes.json successfully
+i  firestore: uploading rules ./firestore.rules...
+i  functions: preparing ./functions directory for uploading...
+i  functions: packaged ./functions (3.44 KB) for uploading
+✔  functions: ./functions folder uploaded successfully
+✔  firestore: released rules ./firestore.rules to cloud.firestore
+i  functions: creating Node.js 14 (Beta) function userInfoShadow(europe-west6)...
+...
+```
+
+>ERROR: Right after that, the function does not get deployed. tbd. Study & fix!!!!!!
+
+```
+$ popd    # back to root
+```
+
+
+## Deployment of front-end
+
+
+
+
 
 Next, let's build the front-end for production and deploy it.
 
