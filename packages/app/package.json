@@ -8,7 +8,8 @@
   "files": [
     "vitebox/dist/app.es.js",
     "vitebox/dist/vue*.js",
-    "vitebox/dist/style.css"
+    "vitebox/dist/style.css",
+    "vitebox/dist/**.map"
   ],
   "exports": {
     ".": "./vitebox/dist/app.es.js"

@@ -108,7 +108,10 @@ export default {
   },
 
   build: {
-    minify: true,
+    // tbd. Is minification required? Ops build will do it for us, right?
+    //minify: true,
+    minify: false,
+    sourcemap: true,    // "generate production source maps"
     target: 'esnext',   // assumes native dynamic imports
     //polyfillDynamicImport: false
 
@@ -121,6 +124,7 @@ export default {
     rollupOptions: {
       external: [
         /^@?firebase\//,    // 'firebase/app', '@firebase/...'
+        "/favicon.png"
       ],
       output: { manualChunks }
     },
