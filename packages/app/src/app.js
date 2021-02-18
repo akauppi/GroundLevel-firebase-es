@@ -9,7 +9,10 @@
 */
 import { createApp, ref } from 'vue'
 
-import { init as initAuth, isReadyProm as isReadyAuthProm } from '@akauppi/aside-keys'
+import firebase from 'firebase/app'
+import '@firebase/auth'
+
+import { init as initAuth, onUserChange, isReadyProm as isReadyAuthProm } from '@akauppi/aside-keys'
 
 import { appTitle } from './config.js'
 
@@ -17,6 +20,7 @@ import App from './App.vue'
 import { router } from './router.js'    // initializes the router; important we have it!
 
 import './common.css'
+import { assert } from './assert'
 
 document.title = appTitle;
 
@@ -27,7 +31,9 @@ const user = ref();   // 'undefined' until we get the first 'onUser' callback
 const LOCAL = import.meta.env.MODE === 'dev_local';
 const [apiKey, authDomain] = [import.meta.env.VITE_API_KEY, import.meta.env.VITE_AUTH_DOMAIN];
 
-function init() {
+async function init() {
+  assert(firebase.auth);
+
   const t0 = performance.now();
 
   // Initialize the authentication system
@@ -35,10 +41,32 @@ function init() {
   if (!LOCAL) {
     initAuth({ apiKey, authDomain });
 
+    // tbd. we could use below 'onUser' and not need this separate Prom. #later
+    //
     isReadyAuthProm.then( _ => {
       const dt = performance.now() - t0;
       console.log(`Authentication initialized (took ${ dt.toFixed(0) }ms)`);    // #later: candidate for ops analytics
     })
+
+    // Tie the 'aside-keys' authentication to our Firebase application (allows us to be able to use services that
+    // need authentication).
+    //
+    onUserChange( user => {
+      if (user) {
+        const { token } = user;
+
+        firebase.auth().signInWithCustomToken(token)
+          .then(_ /*userCred*/ => {
+            console.log('Authenticated in app tier.');
+          })
+          .catch(err => {
+            console.error("Failed to auth in default Firebase app:", err);
+            throw err;
+          });
+      } else {
+        firebase.auth().signOut();
+      }
+    });
   }
 
   // Initialize Vue Router

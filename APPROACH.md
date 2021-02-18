@@ -9,10 +9,3 @@ This is not cool. Putting different kinds of beans in the same bag makes mainten
 We've tried to separate `package.json`s so that one only has a single role (eg. developing of the front end code; developing the back-end; managing deployments).
 
 This means more `package.json`s and sometimes more tediousness when one needs to update a dependency in multiple places. But the alternative would be worse.
-
-In practise, separating `package.json`s can be done by placing subprojects in the `packages` subproject.
-
-<!--
-tbd. add more details - about 'file:' references etc.
--->
-

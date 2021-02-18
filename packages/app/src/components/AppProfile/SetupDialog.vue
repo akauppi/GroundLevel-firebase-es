@@ -146,19 +146,25 @@
     function signOut () {
       assert(!LOCAL);
 
-      outerSignOut().then( _ => {
+      outerSignOut().then( async _ => {
         // tbd. consider 'replace' - do we wish the signed out URL to remain in browser history?
         router.push('/');
+
+        closeMe();    // avoid the dialog from popping up if re-authenticating
       });
     }
 
     const user = getCurrentUserWarm();
 
+    function closeMe() {
+      emit('closeMe')
+    }
+
     return {
       closeEl,
       user,
       version: window.VERSION,    // provided by production build; undefined for dev
-      closeMe: () => emit('closeMe'),
+      closeMe,
       signOut,
       LOCAL
     }

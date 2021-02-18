@@ -1,12 +1,12 @@
 # 'node_modules' ignored by the main project
 
-# 'vite build'
-/dist/
+/vitebox/dist/
 
 # Firebase hosting caches
 /.firebase/
 
-/.firebaserc
+# (follow project root's .gitignore on those)
+#/.firebaserc
 
 /firebase-debug.log
 /firestore-debug.log

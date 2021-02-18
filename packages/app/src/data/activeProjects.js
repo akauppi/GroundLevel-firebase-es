@@ -6,7 +6,6 @@
 * Used by:
 *   - Home
 */
-import { assert } from '/@/assert'
 import firebase from 'firebase/app'
 import '@firebase/firestore'
 

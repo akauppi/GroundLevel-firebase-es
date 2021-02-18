@@ -1,0 +1,4 @@
+# We use 'public' as the output folder
+/public/
+
+/.firebase/

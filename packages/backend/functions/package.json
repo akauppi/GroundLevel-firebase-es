@@ -3,7 +3,7 @@
   "private": true,
   "//type": "module",
   "engines": {
-    "node": "14"
+    "node": "14 || >=15"
   },
   "dependencies": {
     "firebase-admin": "^9.5.0",
@@ -14,7 +14,7 @@
       "Change to 'type: module' when Firebase is ready for it (not yet in Feb 2021)."
     ],
     "engines.node": [
-      "We'd prefer e.g. \"14 || >=15.0.0\" but Firebase Cloud Functions insists the string MUST be '12', '14', ...",
+      "We prefer e.g. \"14 || >=15\". During deployment, the scripts turn this into \"14\", which is acceptable to Firebase CLI (9.4.0)",
       "",
       ">= 13.2 provides native ES module support"
     ]

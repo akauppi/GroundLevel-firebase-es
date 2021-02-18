@@ -1,8 +1,8 @@
 /*
 * /.eslintrc.cjs
 *
-* Only for configuration files (like this) and the Rollup bootloader code ('init/'). See 'packages/**_/.eslintrc.cjs'
-* for linting the actual code (they are marked 'root: true' so isolated from this file).
+* Only for configuration files (like this). See 'packages/**_/.eslintrc.cjs' for linting the actual code (they are
+* marked 'root: true' so isolated from this file).
 *
 * References:
 *   - Configuring ESLint
@@ -33,16 +33,5 @@ module.exports = {
       argsIgnorePattern: "^_",
     }],
     "no-constant-condition": [warn]
-  },
-
-  overrides: [
-    {   // Browser bootup code
-      files: ["init/*.js"],
-      env: {
-        browser: true
-      },
-      globals: {
-      }
-    }
-  ]
+  }
 }

@@ -58,3 +58,37 @@ e.g.
 ```
 $ npm run test:fns:userInfo
 ```
+
+## Deploying
+
+```
+$ firebase use --add
+```
+
+Inform the project's location to Firebase Functions by:
+
+```
+$ firebase functions:config:set regions.0="(your project's location)"
+```
+
+---
+
+>You can see the project's location either in [Firebase Console](https://console.firebase.google.com) > Project > App > ⚙️ > `Default GCP resource location`.
+>
+>..or by:
+>
+```
+$ firebase apps:sdkconfig
+...
+firebase.initializeApp({
+  "projectId": "groundlevel-160221",
+   	 ...
+  "locationId": "europe-west6",
+    ...
+});
+```
+
+```
+$ npm run deploy
+```
+

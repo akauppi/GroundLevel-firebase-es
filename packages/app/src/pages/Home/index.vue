@@ -45,13 +45,15 @@
 </style>
 
 <script>
-  import { computed, onUnmounted } from 'vue'
+  import { computed, onUnmounted, toRefs } from 'vue'
 
   import NewTile from './NewTile.vue'
   import ProjectTile from './ProjectTile/index.vue'
 
   import { activeProjects } from "/@data/activeProjects.js"
-  import { getCurrentUserId } from "/@/user"
+  //import { getCurrentUserWarm } from "/@/user"
+
+  import { assert } from '/@/assert'
 
   // The UI uses projects sorted
   //
@@ -61,24 +63,53 @@
     return dataRaw.sort( ([_,a],[__,b]) => b.created - a.created );
   }
 
-  function setup() {
-    const uid = getCurrentUserId();
+  // Props:
+  //  uid: string   Reactive value, telling the currently logged in user.
+  //
+  function setup(props) {     // note: object spread would lose reactivity!
+    const { uid } = toRefs(props);
 
-    const myProjects = activeProjects(uid);
+    // Note: Not quite sure this is the right way to code in Vue.js 3? Please advice on the lifespan of a page data. #vuejs
 
-    onUnmounted( myProjects.unsub );
+    let myProjects;
+
+    console.debug("!! HOME SETUP with", { uid: uid.value });
+
+    myProjects = activeProjects(uid.value);
+
+    /***
+    const unsub = watch( uid, (uid) => {
+      assert(!myProjects);  // released by 'onUnmounted'?
+
+      myProjects = activeProjects(uid);
+    });
+    ***/
+
+    const projectsSorted = computed( () => {
+      return sort(myProjects.value)    // Array of [<id>, { ..projectsC doc }]
+    })
+
+    // tbd. #style See if the '.unsub' API makes sense (should we return the 'unsub' already from 'activeProjects()'?)
+    //
+    onUnmounted( _ => {
+      console.log("Unmounting HOME");   // DEBUG
+
+      if (myProjects) myProjects.unsub();
+      myProjects = null;
+
+      //unsub();    // Q: should we call it?
+    });
 
     return {
-      projectsSorted: computed( () => {
-        return sort(myProjects.value)    // Array of [<id>, { ..projectsC doc }]
-      })
-        //
-        // ^-- Note: No need for '...Ref' naming, since only used in the HTML
+      projectsSorted
     }
   }
 
   export default {
     name: 'Home',
+    props: {
+      uid: { type: String, required: true },
+    },
     components: {   // tbd. Do I still need to mention components?
       NewTile,
       ProjectTile

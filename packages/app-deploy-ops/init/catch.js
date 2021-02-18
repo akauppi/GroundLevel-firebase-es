@@ -10,10 +10,12 @@
 */
 import { assert } from './assert.js'
 
-import { crashs as opsCrashes } from './opsConfig.js'
+// #rework
+//import { crashs as opsCrashes } from './opsConfig.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
+/*** #rework
 // Can have multiple error handlers (good for comparing alternatives)
 //  - { }   // ignore
 //  - { type: 'xxx', projectId: ..., projectKey: ... }
@@ -27,6 +29,7 @@ for( const o of opsCrashes ) {
       // Note: No eternal loop - we're just loading the module.
   }
 }
+***/
 
 /*
 * Report an error.
@@ -51,13 +54,12 @@ function hub(err) {    // (Error) => ()
 /*
 * Catch any (uncaught by app) exceptions; show in the UI and report to central.
 */
-//assert (!window.onerror);   // defined. Q: Does Airbrake do this, automatically?
 const prevOnError = window.onerror;   // function|undefined
 assert(!prevOnError, "'window.onerror' already defined!");    // some third party could have done this
 
 // BUG:
 //    Errors during application loading (e.g. press 'MakeError' right after load) don't seem to reach here.
-//    But once the app is up, they do. Bareable, for now. #help
+//    But once the app is up, they do. Bearable, for now. #help
 //
 window.onerror = function (msg, source, lineNbr, colNbr, error) {
   console.debug("centralError saw:", {msg, source, lineNbr, colNbr});    // DEBUG

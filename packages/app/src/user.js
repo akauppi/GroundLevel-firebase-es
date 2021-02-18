@@ -79,17 +79,19 @@ const userRef2 = computed( () => {   // Ref of undefined | false | { displayName
 /*
 * Asking the current user, by a page.
 */
-function getCurrentUserWarm() {
+function getCurrentUserWarm() {   // () => null | { ..Firebase user object }
   const v = userRef2.value;
   assert(v !== undefined, "Too early! Asked for current user but we don't know them, yet!");  // if this happens, need to rethink code flow
 
   return v;
 }
 
-// Note: It's either this, or providing another means for a component to get the user id. Try the props. #later
+// Get the user id when we *know* there is a user logged in.
 //
-function getCurrentUserId() {
-  return getCurrentUserWarm().uid;
+function getCurrentUserIdWarm() {
+  const v = getCurrentUserWarm();
+  assert(v, "Asking user id with no active user.");
+  return v.uid;
 }
 
 /*
@@ -111,6 +113,6 @@ export {
   userRef2,
   getCurrentUserProm,
   getCurrentUserWarm,
-  getCurrentUserId,
+  getCurrentUserIdWarm,
   setLocalUser,
 }

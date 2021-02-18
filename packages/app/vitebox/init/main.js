@@ -2,7 +2,7 @@
 * /init/main.js
 *
 * Entry point for Vite. Development mode harness that is *not* part of the application, itself.
-* Does *not* get deployed.
+* Does *not* get packed.
 */
 import { assert } from './assert.js'
 
@@ -11,11 +11,10 @@ import '@firebase/auth'
 import '@firebase/firestore'
 import '@firebase/functions'
 
-// Changes to Vite caused (at 2.0.0.beta.57) that these were suddenly not available (Firebase packaging is pretty awkward).
-//
+// Safety fuse: there were Vite packing problems at one point.
 if (! (firebase.auth && firebase.firestore && firebase.functions)) {
   let s;
-  console.error(s = "Firebase modules not loaded correctly (INTERNAL)", { auth: firebase.auth, firestore: firebase.firestore, functions: firebase.functions });
+  console.error(s = "[INTERNAL] Firebase modules not loaded correctly", { auth: firebase.auth, firestore: firebase.firestore, functions: firebase.functions });
   throw new Error(s);
 }
 
@@ -45,12 +44,14 @@ async function initFirebase() {   // () => Promise of ()
     firebase.initializeApp( {
       projectId,
       apiKey: "none",
-      authDomain: "no.such.com"
+      authDomain: "no.such.com"   // tbd. is this needed?
     } );
 
     // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
     //
     // Build has poured the necessary values from '../firebase.json' to us, as VITE_... constants.
+    //
+    // Note: Even LOCAL needs auth emulation to be started. Otherwise the impersonation fails.
     //
     const [firestorePort, fnsPort, authPort] = [
       import.meta.env.VITE_FIRESTORE_PORT,
@@ -64,7 +65,7 @@ async function initFirebase() {   // () => Promise of ()
 
     firebase.firestore().useEmulator('localhost',FIRESTORE_PORT);
     firebase.functions().useEmulator('localhost',FUNCTIONS_PORT);
-    firebase.auth().useEmulator(AUTH_URL, { disableWarnings: true });   // IDE note: should not have type warnings. Has (firebase JS SDK 8.2.4).
+    firebase.auth().useEmulator(AUTH_URL);
 
     if (autoSignUserId) {
       // Note: Do allow any user id to be used, for auto signing. We just haven't tested it with real uid's, but that
@@ -84,7 +85,7 @@ async function initFirebase() {   // () => Promise of ()
     //
     window["TESTS_GO!"] = firebase;   // expose our 'firebase'; otherwise Cypress seems to have problems
 
-  } else if (import.meta.env.MODE === "development") {    // dev:online
+  } else {    // dev:online, production build
     const [ apiKey, authDomain, projectId ] = [
       import.meta.env.VITE_API_KEY,
       import.meta.env.VITE_AUTH_DOMAIN,
@@ -98,9 +99,6 @@ async function initFirebase() {   // () => Promise of ()
       authDomain,
       projectId
     });
-  } else {    // prod
-    console.debug( import.meta.env.MODE );
-    throw new Error("tbd. not prepared for Vite & production (yet)")
   }
 }
 
@@ -109,7 +107,7 @@ async function initCentral() {    // () => Promise of central
   return await import('./central.js').then( mod => mod.central );
 }
 
-const tailProm = (async _ => {   // loose-running tail (no top-level await in browsers)
+/*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
   const t0 = performance.now();
 
   const [__, central] = await Promise.all([

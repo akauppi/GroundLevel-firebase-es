@@ -168,3 +168,34 @@ References:
 - [Cloud Firestore function triggers](https://firebase.google.com/docs/functions/firestore-events#function_triggers) (Firebase docs)
 - [View changes between snapshots](https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots) (Firebase docs)
 
+
+## `firebase use --clear` does not work
+
+Reported as [https://github.com/firebase/firebase-tools/issues/2656](https://github.com/firebase/firebase-tools/issues/2656).
+
+Responded by Firebase that it is "WAI" (Works As Intended).
+
+>...
+>You can also work around this by deleting the .firebaserc file - then we'll just rely on the saved configstore variable, which is cleared by the --clear command.
+>
+>If you'd like to have version of --clear command that deletes the .firebaserc, or forces the project to be unset, please file a feature request for it.
+
+Reading the issue may be worth if you're using `firebase use --clear`. Same as with almost any Firebase tools decision, it's hard to understand the way the authors think. What am I supposed to use - what not? The UNIX command line tool thinking (one tool for a job) is strikingly absent!
+
+**Work-around:**
+
+Add two aliases to your project, e.g. 
+
+```
+$ firebase use --add    # call it anything
+...
+
+$ firebase use --add    # call it "bandaid"
+```
+
+Also: check the above issue and +1 it, to get more focus...
+
+**Alternative:**
+
+Remove `.firebaserc` like the Firebase `@kmcnellis` suggests. Did not try.
+

@@ -33,7 +33,15 @@
     "test:rules:projectsSymbols": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f projectsC/symbolsC.test.js --verbose --detectOpenHandles --all",
     "test:rules:projectsUserInfo": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f projectsC/userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs -f userInfoC.test.js --verbose --detectOpenHandles --all",
-    "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all"
+    "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all",
+    " -- ": "",
+    "deploy": "firebase deploy --only functions,firestore",
+    "predeploy": "tools/hack.sh 1",
+    "postdeploy": "tools/hack.sh 2",
+    " -- -": "",
+    "//pretest, prestart, predeploy": "tbd. Test that 'firebase' version >= 9.4.0 (has a fix for deploying with Node 15)",
+    "//predeploy": "npm run --silent _checkFirebaseActiveProj",
+    "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"
   },
   "devDependencies": {
     "@local/functions": "file:functions",
@@ -47,7 +55,7 @@
   },
   "//comments": {
     "devDependencies": {},
-    "engines": [
+    "engines.node": [
       "'>=14.3' for '—harmony-top-level-await'",
       "'>=13.2' for ES module support"
     ],

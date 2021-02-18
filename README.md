@@ -5,7 +5,7 @@
 <!-- Using 'img' to be able to scale from Markdown.
 - Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
 -->
-<img alt="Logo" src=".images/icon_512x512.png" width=300 align="left" style="margin: 40px">
+<img alt="Logo" src="branding/icon_512x512.png" width=300 align="left" style="margin: 40px">
 
 <br />
 
@@ -234,8 +234,18 @@ $ firebase functions:config:set regions.0="europe-west6"
 
 ### Deploy
 
+>Note: Check that your Firebase CLI version is >= 9.4.0. There was a bug with deployment (affecting Node 15) in prior versions.
+>
 ```
-$ firebase deploy
+$ firebase --version
+9.4.0
+```
+
+```
+$ npm run deploy
+...
+> firebase deploy --only functions,firestore
+
 
 === Deploying to 'groundlevel-160221'...
 
@@ -245,39 +255,41 @@ i  cloud.firestore: checking ./firestore.rules for compilation errors...
 ✔  cloud.firestore: rules file ./firestore.rules compiled successfully
 i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
 i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
-⚠  functions: missing required API cloudbuild.googleapis.com. Enabling now...
-⚠  functions: missing required API cloudfunctions.googleapis.com. Enabling now...
-✔  functions: required API cloudbuild.googleapis.com is enabled
 ✔  functions: required API cloudfunctions.googleapis.com is enabled
-✔  firestore: deployed indexes in ./firestore.indexes.json successfully
-i  firestore: uploading rules ./firestore.rules...
+✔  functions: required API cloudbuild.googleapis.com is enabled
 i  functions: preparing ./functions directory for uploading...
-i  functions: packaged ./functions (3.44 KB) for uploading
+i  functions: packaged ./functions (31.44 KB) for uploading
+✔  firestore: deployed indexes in ./firestore.indexes.json successfully
+i  firestore: latest version of ./firestore.rules already up to date, skipping upload...
 ✔  functions: ./functions folder uploaded successfully
 ✔  firestore: released rules ./firestore.rules to cloud.firestore
-i  functions: creating Node.js 14 (Beta) function userInfoShadow(europe-west6)...
 ...
+i  functions: creating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
+✔  functions[userInfoShadow_2(europe-west6)]: Successful create operation. 
+
+✔  Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/groundlevel-160221/overview
+
+> postdeploy
+> tools/hack.sh 2
+
 ```
 
->ERROR: Right after that, the function does not get deployed. tbd. Study & fix!!!!!!
+Now your data base access rules and background functions are running in Google cloud. 👏🙂
 
 ```
 $ popd    # back to root
 ```
 
 
-## Deployment of front-end
+## Front end build & deployment
 
-
-
-
-
-Next, let's build the front-end for production and deploy it.
-
-
-## Production build
+This is done in the `packages/app-deploy-ops` sub-package.
 
 ```
+$ pushd packages/app-deploy-ops
+
 $ npm run build
 ...
 688	public/dist
@@ -291,23 +303,8 @@ This uses Rollup to build the sample app for good tightness. The final numbers i
 
 But... it's more fun to RUN an application! Unfortunately, this means we must take a side tour to the back end repo in order to have the back end deployed.
 
-### Deploying the back end [side kick]
 
-In another folder:
-
-```
-$ git checkout git@github.com:akauppi/GroundLevel-es-firebase-backend.git
-
-$ cd GroundLevel-es-firebase-backend
-
-$ open README.md
-
-$ firebase use --add    # select your project
-
-$ firebase deploy --only functions,firestore
-```
-
-That should do it! You can dwell more in the back end repo later, but now let's surface back to the B&O (build & ops) repo since we can run the front end, locally.
+`<CLIP>`
 
 ### Running the production build, locally
 
@@ -325,7 +322,7 @@ Open [localhost:3012](http://localhost:3012) and you should see something like:
 You can try the application. It should work against the back-end of the Firebase project you created, storing data there. Close and re-open the browser. You should be able to see your data.
 
 
-## Deploying front-end
+### Deploying
 
 The front-end you were using was still running locally. Let's get also it online.
 

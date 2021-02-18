@@ -1,0 +1,41 @@
+{
+  "name": "@local/app-deploy-ops",
+  "description": "Sample front end (deployment & operations)",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=14.3"
+  },
+  "scripts": {
+    "test": ">&2 echo \"No tests here. Tests are run in development projects (../app and ../backend).\"; false",
+    "lint": "eslint init",
+    "  -": "",
+    "build": "vite build",
+    "  - ": "",
+    "--serve": "vite serve --port 3012",
+    "serve": "firebase serve --only hosting --host 0.0.0.0 --port 3012",
+    "_clean": "(rm dist/* 2> /dev/null || true)",
+    "  --": "",
+    "deploy": "firebase deploy --only hosting",
+    "  - -": "",
+    "prebuild": "(cd ../app && npm run build)",
+    "//preserve": "npm run --silent _checkFirebaseActiveProj",
+    "  -  ": "",
+    "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"
+  },
+  "dependencies": {
+    "@local/app": "file:../app",
+    "firebase": "^8.2.7"
+  },
+  "devDependencies": {
+    "eslint": "^7.20.0",
+    "vite": "^2.0.1"
+  },
+  "//comments": {
+    "engines.node": [
+      "'>=14.3' for '—harmony-top-level-await'",
+      "'>=13.2' for ES module support"
+    ]
+  }
+}

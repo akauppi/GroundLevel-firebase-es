@@ -1,24 +1,18 @@
 /**/node_modules/
 
-# Rollup build target
-/public/dist/
-
 # Build output
-/public/index.html
+#/public/index.html
 
 # Firebase hosting caches
-/.firebase/
+#/.firebase/
 
-/.firebaserc
+# Note: Not sure if '.firebaserc' should be in the version control or not.
+/**/.firebaserc
 
 # Temporary
-/firebase-debug.log
-/firestore-debug.log
-/ui-debug.log
-
-# Ops configuration (can be in version control in your project; or simply baked into 'src/ops-config.js')
-/.env.js
+#/firebase-debug.log
+#/firestore-debug.log
+#/ui-debug.log
 
 # Rollup visualization
 /stats.html
-

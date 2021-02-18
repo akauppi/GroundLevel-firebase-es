@@ -31,23 +31,47 @@ const LOCAL = import.meta.env.MODE === "dev_local";
 
 let localUser;    // 'user=' query parameter (LOCAL mode)     // <-- tbd. is that needed?  What for?
 
-import { getCurrentUserProm, /*getCurrentUserId,*/ setLocalUser /*, isReadyProm as isUserReadyProm*/ } from './user'
+import { getCurrentUserProm, getCurrentUserWarm, setLocalUser } from './user'
 
-/*** disabled (providing user globally, but the IDEA of passing it as props to a page is nice (more declarative). Maybe later?????
-// tbd. Likely get away from passing 'Home' the uid as a prop. (and importing 'getCurrentUser' instead).
+// ALTERNATIVE to having components ask the current user from 'user' module.
+//
 function getCurrentUserId(r) {
+  console.log("!!! Router asking current user", { r });
+
   if (LOCAL) {
     const uid = r.query.user;
     assert(uid, "No 'user' in query string to pass!");
     return uid;
   } else {
-    const uid = getCurrentUserId();
-    return uid;
+    const user = getCurrentUserWarm();
+    assert(user?.uid, "No active user though locked route!");
+    return user.uid;
   }
 }
-***/
 
-const rLocked = (path, component, o) => ({ ...o, path, component, meta: { needAuth: true } /*, prop: injectUidProp*/ });
+// #rework?
+// "Try to keep the props function stateless, as it's only evaluated on route changes. Use a wrapper component if you
+// need state to define the props, that way vue can react to state changes."
+//
+// ^--- = when do we hear of user changes?
+
+/*
+* Provide props for a component that relies on a logged in user.
+*
+*   - uid: uid of the current user
+*   - ..: any parameters from the path (eg. project id as '/:id')
+*/
+function lockedProps(r) {   // (Route) => { uid?: string, ..params from path }
+
+  const uid = getCurrentUserId(r);    // #rework If we keep this, bring the code here
+  assert(uid,
+    "[INTERNAL] Not finding user id in a locked path."    // route guards should have ensured a uid
+  );
+
+  return { uid, ...r.params }
+}
+
+const rLocked = (path, component, o) => ({ ...o, path, component, meta: { needAuth: true }, props: r => lockedProps(r) });
 const rOpen = (path, component, o) => ({ ...o, path, component });
 
 // Template note: You can use '.name' fields for giving routes memorizable names (separate from their URLs). Chose
@@ -66,12 +90,13 @@ const routes = [
   // Note: By using a '.name', we can distinguish between the guest home path and the signed one, without need for
   //    a designated URL for sign-in. :)
   //
-  rLocked('/', Home /***REMOVE, { props: r => ({ uid: getCurrentUserId(r) }) }***/ ),
+  rLocked('/', Home, { props: r => ({ uid: getCurrentUserId(r) }) } ),
   LOCAL ? rOpen('/', HomeGuest, { name: 'Home.guest' })
         : rOpen('/', HomeGuest, { props: r => ({ final: r.query.final }), name: 'Home.guest' }),  // '[?final=/somein]'
 
-  LOCAL ? rLocked('/projects/:id', Project, { props: true, query: { user: localUser } /*, name: 'projects'*/ })    // '/projects/<project-id>[&user=...]'
-        : rLocked('/projects/:id', Project, { props: true /*, name: 'projects'*/ }),    // '/projects/<project-id>'
+  // #rework: those are the same
+  LOCAL ? rLocked('/projects/:id', Project, { /*query: { user: localUser }*/ })    // '/projects/<project-id>[&user=...]'
+        : rLocked('/projects/:id', Project, { }),    // '/projects/<project-id>'
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.
@@ -107,6 +132,19 @@ router.beforeResolve(async (to, from) => {
   ***/
   const needAuth = to.meta.needAuth;
 
+  // Vue Router (4.0.3) QUESTION:
+  //
+  // What is the relationship of the router with the components being created?
+  //
+  // We'd like to:
+  //  - provide the uid of a signed-in user, to the component in question, as a prop, before entering it
+  //
+  // We already have this value, as a side-effect of checking authentication. Is there a nice way to pass it on to the
+  // component itself?
+  //
+  // If yes, let's use it!
+  // If not... need to have components ask for it when entered.
+
   if (LOCAL) {
     const uid = to.query.user || from.query.user;
     setLocalUser(uid);
@@ -115,6 +153,7 @@ router.beforeResolve(async (to, from) => {
     if (needAuth) {
       if (to.query.user) {    // already has self-claimed uid (ie. it's been through here)
         ret= true;
+        // tbd. provide 'uid' also here!!
 
       } else if (from.query.user) {   // have the 'user=' in current URL; pass it on
         ret= {
@@ -144,8 +183,20 @@ router.beforeResolve(async (to, from) => {
       const user = !(to.query.guest) && await getCurrentUserProm();    // null | { ..Firebase user object }
 
       if (user) {    // authenticated; pass 'uid' as a prop (since we already know it)
-        ret= {...to,
-          props: {uid: user.uid}
+        // NOTE: This is alternative to asking the user from 'user' module, in the page.
+        //     ALL pages that require authentication receive the 'uid' prop.
+        console.debug("!!!", {to, props: to?.props});
+
+        ret = true;
+        //ret = {...to, params: { uid: user.uid }};     // we could do it with params, but won't
+
+        /*ret= to?.props?.uid ? true : {...to,
+          props: {...to?.props || {}, uid: user.uid}
+        };*/
+
+      } else if (to.path === '/') {   // okay to head to the root; we'll show sign-in
+        ret= {
+          name: 'Home.guest'
         };
 
       } else {  // need auth but user is not signed in

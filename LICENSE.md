@@ -3,8 +3,8 @@ graphic art.
 
 In particular:
 
-- iconart/*
-- public/favicon.*
+- `branding/*`
+- `**/public/favicon.*`
 
 Those files are PROPRIETARY to this project, and not to be used in other circumstances.
 You may, however, create a fork of this GitHub repo and continue working with the graphic
@@ -15,9 +15,9 @@ For the rest of the repo (code, configs and textual documentation), this applies
 
 ---
 
-MIT License
+## MIT License
 
-Copyright (c) 2020, Asko Kauppi
+Copyright (c) 2020-2021, Asko Kauppi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

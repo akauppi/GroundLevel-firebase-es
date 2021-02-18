@@ -80,14 +80,9 @@
 <script>
   // Note: the user remains the same throughout our lifespan (there's no UI option to change the user).
 
-  import { assert } from '/@/assert'
-  import firebase from 'firebase/app'
-
   import { ref } from 'vue'
 
-  // tbd. Do we need 'userRef' or would 'getCurrentUser()' work, just as well?
-  //import { userRef2 as user } from '/@/user'
-  import { getCurrentUserWarm } from "/@/user"
+  import { userRef2 as user } from '/@/user'
 
   import SetupDialog from './SetupDialog.vue'
 
@@ -104,8 +99,6 @@
   }
 
   function setup() {
-    const user = getCurrentUserWarm();
-
     return {
       isOpen,
       openDialog,   // IDE note: mistakenly shows these dimmed (they are used)
