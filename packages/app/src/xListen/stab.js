@@ -25,8 +25,10 @@
 *     there, as well. #dirty but beautiful
 */
 import { assert } from '/@/assert'
+
 import firebase from 'firebase/app'
 import '@firebase/firestore'
+//assert(firebase?.firestore);
 
 import { RColl } from './RColl'
 import { RDoc } from './RDoc'
@@ -91,7 +93,7 @@ function mergedConv(conv, filter) {   // ( (obj => obj|undefined)?, (obj => bool
   return undefined;
 }
 
-if (true) {   // eslint-disable-line no-constant-condition
+(_ => {   // call for scoping (if would need eslint mitigation)
   const db = firebase.firestore();
 
   // CollectionReference
@@ -121,7 +123,7 @@ if (true) {   // eslint-disable-line no-constant-condition
   assert(anyD.xListen);
 
   //... more classes?
-}
+})();
 
 export {
 }

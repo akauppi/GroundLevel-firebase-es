@@ -90,10 +90,7 @@
     import ('/@background/updateUserInfo');
   }
 
-  // Add '.xListen' to Firestore objects
-  import '/@xListen/stab'
-
-  import '@akauppi/aside-keys';   // brings in '<aside-keys>'    (tbd. the path will change!)
+  import 'aside-keys';   // brings in '<aside-keys>'
 
   /*
   * Vue warn handler

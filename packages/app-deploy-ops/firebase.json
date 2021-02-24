@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "public",
+    "public": "out",
     "rewrites": [
       {
         "source": "!**/*.@(css|js|map)",
@@ -10,6 +10,9 @@
   },
 
   "//": {
+    "hosting.public": [
+      "Must match 'outDir' in 'vite.config.js'"
+    ],
     "hosting.rewrites": [
       "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing maps, js etc. should show as 404.",
       "",

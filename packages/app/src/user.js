@@ -15,17 +15,22 @@
 *     -> https://firebase.google.com/docs/reference/js/firebase.User.html
 */
 import { computed, ref } from 'vue'
-import { onUserChange } from '@akauppi/aside-keys'
+
+import firebase from 'firebase/app'
+import '@firebase/auth'
 
 import { assert } from './assert'
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 
-const authRef = ref();   // '.value' is 'undefined' until auth has been established
+const fbAuth = LOCAL ? undefined : firebase.app().auth();
+
+const authRef = ref();   // Ref of undefined | null | { ..Firebase User object }  ; 'undefined' until auth is warmed up
 
 // Start tracking the user (turn a callback into Vue 'ref').
 //
 let isReadyProm;    // Promise of ()
+
 if (LOCAL) {
   isReadyProm = Promise.resolve();   // we're ready
 
@@ -38,29 +43,28 @@ if (LOCAL) {
   isReadyProm = new Promise( (resolve/*,reject*/) => {
     let resolved = false;
 
-    onUserChange(user => {
-      if (user === undefined) {
-        console.warn("'onUserChange' leaks an 'undefined' - it should not! (ignored)");   // tbd. fix - it's a #BUG
-        return;
-      }
+    fbAuth.onAuthStateChanged( user => {
+      assert(user !== undefined, "[INTERNAL] Firebase told user is 'undefined'" )   // used to do this
 
-      authRef.value = user;    // { ... } | null
+      authRef.value = user;    // null | { ..Firebase User object }
 
       if (!resolved) {
         resolve();
         resolved = true;
       }
     }, err => {
-      console.error("Failure in getting user info:", err);
+      console.error("Failure in getting user info:", err);    // tbd. deserves 'central' attention
+      throw err;
     });
   });
 }
 
 /*
-* 'userRef' should not be needed by pages; it's for the application level that can see users change back and forth.
-* For pages, use 'getCurrentUser()' and 'getCurrentUserId()'.
+* Expose only certain user fields.
+*
+* For the application level that can see users change back and forth. For pages, get the user by props.
 */
-const userRef2 = computed( () => {   // Ref of undefined | false | { displayName: string, uid: string }
+const userRef2 = computed( () => {   // Ref of undefined | null | { displayName: string, uid: string }
   const a = authRef.value;  // undefined | false | { displayName: string, uid: string, ... }
 
   if (a) {
@@ -86,6 +90,7 @@ function getCurrentUserWarm() {   // () => null | { ..Firebase user object }
   return v;
 }
 
+/*** not needed?
 // Get the user id when we *know* there is a user logged in.
 //
 function getCurrentUserIdWarm() {
@@ -93,6 +98,7 @@ function getCurrentUserIdWarm() {
   assert(v, "Asking user id with no active user.");
   return v.uid;
 }
+***/
 
 /*
 * Asking the current user, when the auth pipeline might still be warming up.
@@ -109,10 +115,23 @@ const setLocalUser = LOCAL && ((o) => {   // called by router
   authRef.value = o;
 });
 
+/***
+// Sign out
+//
+function signOut() {
+  fbAuth.signOut().then( _ => {
+    console.debug("User signed out");
+  }).catch( err => {
+    central.error("Failed to sign out:", err);    // never seen
+  })
+}
+***/
+
 export {
   userRef2,
   getCurrentUserProm,
   getCurrentUserWarm,
-  getCurrentUserIdWarm,
+  //getCurrentUserIdWarm,
   setLocalUser,
+  //signOut
 }

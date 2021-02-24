@@ -43,7 +43,7 @@
     <hr />
     <!-- tbd. layout sucks -->
     <label>Version:</label><span>{{ version || "(not available)" }}</span>
-    <button class="signOut" @click.stop="signOut" :disabled="LOCAL">Sign out</button>
+    <button class="signOut" @click.stop="signOut" >Sign out</button>
   </div>
 </template>
 
@@ -107,14 +107,18 @@
 
 <script>
   import { assert } from '/@/assert'
-  import { signOut as outerSignOut } from '@akauppi/aside-keys'
 
   import { ref, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
 
+  import firebase from 'firebase/app'
+  import '@firebase/auth'
+
   import { getCurrentUserWarm } from '/@/user'
 
   const LOCAL = import.meta.env.MODE === 'dev_local'
+
+  const fbAuth = LOCAL ? undefined : firebase.app().auth();
 
   // Borrowing a component from deep in. (maybe it is moved to '/components', later, if used in multiple places?)
   //
@@ -143,15 +147,11 @@
       document.removeEventListener('keyup', escListener);
     });
 
-    function signOut () {
-      assert(!LOCAL);
+    async function signOut () {
+      if (!LOCAL) await fbAuth.signOut();
 
-      outerSignOut().then( async _ => {
-        // tbd. consider 'replace' - do we wish the signed out URL to remain in browser history?
-        router.push('/');
-
-        closeMe();    // avoid the dialog from popping up if re-authenticating
-      });
+      router.push('/');
+      closeMe();    // avoid the dialog from popping up if re-authenticating
     }
 
     const user = getCurrentUserWarm();

@@ -6,8 +6,11 @@
 * Used by:
 *   - Project page
 */
+import { assert } from '/@/assert'
+
 import firebase from 'firebase/app'
 import '@firebase/firestore'
+assert(firebase?.firestore);
 
 const db = firebase.firestore();
 

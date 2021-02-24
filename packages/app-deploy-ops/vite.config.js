@@ -1,6 +1,8 @@
 // vite.config.js
 //
 
+const minify = process.env["MINIFY"] ?? true;   // allows MINIFY=false ... override (for debugging)
+
 // Help Rollup in packaging (deploy & ops)
 //
 // Want:
@@ -26,8 +28,9 @@ function manualChunks(id) {
   //  vite/preload-helper
   //    ...
   //  /Users/.../app/vitebox/dist/vue.js
+  //    ...
   //
-  console.debug(`Chunking (ID): ${id}`);
+  //console.debug(`Chunking (ID): ${id}`);
 
   // Guard: Firebase should come from us; not the app
   //
@@ -74,28 +77,28 @@ const chunkTo = [     // Array of (Regex | [Regex, string])
   // Place Firebase libraries in small pieces. This helps us see their respective sizes.
   //
   // /\/node_modules\/(firebase)/,
-  /\/node_modules\/(tslib)\//,                // used only by Firebase
-  /\/node_modules\/(idb)\//,                  // used by Firebase performance
+  [/\/node_modules\/tslib\//, 'firebase'],   // used only by Firebase; wrap it together
+
+  [/\/node_modules\/@firebase\/(?:installations|component|logger|util|webchannel-wrapper)\//, 'firebase'],
+
   /\/node_modules\/@(firebase\/auth)\//,
   /\/node_modules\/@(firebase\/firestore)\//,
   /\/node_modules\/@(firebase\/functions)\//,
-  /\/node_modules\/@(firebase\/performance)\//,
-
-  [/\/node_modules\/@firebase\/(?:installations|component|logger|util|webchannel-wrapper)\//, 'firebase-misc'],
+  // /\/node_modules\/@(firebase\/performance)\//,
+  // [/\/node_modules\/(idb)\//, 'firebase-performance']    // used only by Firebase performance (pack together)
 ];
 
 export default {
   build: {
-    // Note: We use 'public' as the output directory (not the way Vite does, which is input of static assets).
-    //    To avoid confusing Vite, 'publicDir' is set to a non-existing directory name.
-    outDir: "public",
-    publicDir: "nosuch",
+    // Must match 'hosting.public' in 'firebase.json'.
+    outDir: "out",
 
     rollupOptions: {
       output: { manualChunks }
     },
 
-    minify: true,
+    minify: minify,
+    sourcemap: true,
     target: 'esnext',   // assumes native dynamic imports
     //polyfillDynamicImport: false
   },

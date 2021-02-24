@@ -11,18 +11,13 @@ Web application sample project.
    $ npm install -g firebase-tools
    ```
 
-Installing [Cypress](https://www.cypress.io) is left optional, since it's 
-a big install and one can play with the repo even without it. 
-
-The test section discusses it more.
-
 <!--
 Development is done with: 
 
-- latest macOS (11.1)
-- latest node (15.5.0)
+- latest macOS (11.2.x)
+- latest node (15.x)
 - npm (7.5.x)
-- firebase CLI (9.3.0)
+- firebase CLI (9.5.0)
 -->
 
 ## Getting started

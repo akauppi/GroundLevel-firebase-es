@@ -757,6 +757,21 @@ Also, Firebase error message states the data URLs not to be "valid URLs". But th
 
 See [/local/init.js](../local/init.js).
 
+## Firebase JS SDK: please update the Changelog *before* publishing 
+
+The current (2020-21) workflow at Firebase seems to be:
+
+- publish an `npm` package
+- (maybe) change the website, and let the users wait until changes propagate
+
+This is not user friendly: I see with `npm outdated` that a new `firebase` package is out (8.2.9). What might it contain?
+
+>![](.images/changelog-at-8.2.8.png) 
+
+Yeah, right. 
+
+Ping for a day or so and eventually 8.2.9 info is out. **No other software package I use suffers from this**. Wouldn't it be nicer to have the release information out promptly, after the release? I'm okay with a 1..2 minute delay but hours. Not cool.
+
 
 ## References
 

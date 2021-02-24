@@ -10,6 +10,7 @@ import { assert } from '/@/assert'
 import firebase from 'firebase/app'
 import '@firebase/auth'
 import '@firebase/firestore'
+assert(firebase?.auth && firebase?.firestore);
 
 const db = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;

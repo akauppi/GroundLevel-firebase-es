@@ -4,15 +4,15 @@
 * Application entry point.
 *
 * When we get here:
-*   - Firebase is initialized
 *   - ops handling (error gathering, central logging) is initialized
+*   - Firebase IS initialized, but we might not see that in our universe. :R  Use the provided handle, instead.
 */
 import { createApp, ref } from 'vue'
 
 import firebase from 'firebase/app'
 import '@firebase/auth'
 
-import { init as initAuth, onUserChange, isReadyProm as isReadyAuthProm } from '@akauppi/aside-keys'
+import { init as initAside } from 'aside-keys'
 
 import { appTitle } from './config.js'
 
@@ -29,9 +29,12 @@ const app = createApp(App);
 const user = ref();   // 'undefined' until we get the first 'onUser' callback
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
-const [apiKey, authDomain] = [import.meta.env.VITE_API_KEY, import.meta.env.VITE_AUTH_DOMAIN];
 
-async function init() {
+// Add '.xListen' to Firestore objects
+import '/@xListen/stab'
+
+async function init() {    // () => Promise of ()
+  console.log("app init()");  // integration DEBUG
   assert(firebase.auth);
 
   const t0 = performance.now();
@@ -39,33 +42,12 @@ async function init() {
   // Initialize the authentication system
   //
   if (!LOCAL) {
-    initAuth({ apiKey, authDomain });
+    const fah = firebase.apps[0];
+    assert(fah, "[INTERNAL] No default Firebase app");
 
-    // tbd. we could use below 'onUser' and not need this separate Prom. #later
-    //
-    isReadyAuthProm.then( _ => {
+    initAside(fah).then( _ => {
       const dt = performance.now() - t0;
-      console.log(`Authentication initialized (took ${ dt.toFixed(0) }ms)`);    // #later: candidate for ops analytics
-    })
-
-    // Tie the 'aside-keys' authentication to our Firebase application (allows us to be able to use services that
-    // need authentication).
-    //
-    onUserChange( user => {
-      if (user) {
-        const { token } = user;
-
-        firebase.auth().signInWithCustomToken(token)
-          .then(_ /*userCred*/ => {
-            console.log('Authenticated in app tier.');
-          })
-          .catch(err => {
-            console.error("Failed to auth in default Firebase app:", err);
-            throw err;
-          });
-      } else {
-        firebase.auth().signOut();
-      }
+      console.log(`Authentication initialized (took ${dt.toFixed(0)}ms)`);    // #later: candidate for ops analytics
     });
   }
 
@@ -82,7 +64,7 @@ async function init() {
     throw err;
   });
 
-  //tbd. revise the comment
+  //tbd. revise the comment (do we need a wait?)
   // Vue-router note:
   //    It may be that we need to wait for router to be ready. Check here -> https://next.router.vuejs.org/guide/migration/#all-navigations-are-now-always-asynchronous
   //

@@ -11,8 +11,12 @@
 *   - Project page
 */
 import { assert } from '/@/assert'
+
 import firebase from 'firebase/app'
 import '@firebase/firestore'
+assert(firebase?.firestore);
+
+assert(firebase.apps.length > 0, "Default Firebase app NOT initialized?!");   // DEBUG
 
 const db = firebase.firestore();
 const FieldPath = firebase.firestore.FieldPath

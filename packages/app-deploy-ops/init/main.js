@@ -58,6 +58,8 @@ async function initFirebase() {
     authDomain
   });
 
+  console.debug("!!! Firebase initialized", { apiKey, authDomain });
+
   /*** #rework
   if (enableFirebasePerf) {
     console.info("Taking Firebase Performance client to use.");    // DEBUG

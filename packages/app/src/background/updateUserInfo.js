@@ -11,11 +11,12 @@
 *
 * This code is completely separate from the web app. It listens to Firebase auth directly.
 */
-//import { assert } from '/@/assert'
+import { assert } from '/@/assert'
 
 import firebase from 'firebase/app'
 import '@firebase/firestore'
 import '@firebase/auth'
+assert(firebase?.firestore && firebase?.auth);
 
 import { userRef2 } from '/@/user'
 import { watch } from 'vue'

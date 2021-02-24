@@ -20,6 +20,8 @@
     "deploy": "firebase deploy --only hosting",
     "  - -": "",
     "prebuild": "(cd ../app && npm run build)",
+    "preserve": "PORT=3012 npm run --silent _checkPortIsFree",
+    "_checkPortIsFree": "../app/tools/port-is-free.sh $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)",
     "//preserve": "npm run --silent _checkFirebaseActiveProj",
     "  -  ": "",
     "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"

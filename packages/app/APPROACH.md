@@ -14,6 +14,24 @@ When, later, we need to do some more real time dataflow, it's either Firebase Re
 
 Data is stored distributed, in the `Ref`s and `Reactive`s around the code. There did not seem to be a need for a centralized data store, à la Vuex.
 
+## Authentication UI
+
+We don't use [Firebase UI](https://github.com/firebase/firebaseui-web) (used by maybe 99% of Firebase web projects) but a web component made specifically to replace it.
+
+The reasons are many:
+
+- Firebase UI didn't catch up with ES modules in time
+- At 195 kB, Firebase UI is bulky
+- It is very badly maintained; not part of the official Firebase web offering (yet crucial)
+- It is *waaaaay* overcomplex. The author was not able to compile it from sources, to begin with (!)
+
+In short, the author gave up hope on it ever catching up with modern times.
+
+If features are lacking in the web component, let's build them in there.
+
+>As a side note, the author wonders why browsers don't provide more built-in  support for authentication UI? Something like [Google OneTap for web](https://developers.google.com/identity/one-tap/web/reference/js-reference) on Android. We trust browsers and it would be better to see a native login screen instead of something that can be easily faked in the browser land. If you know the answer, please chime in. 🔔
+
+
 ## Component naming convention
 
 Vue.js normally uses `like-this` naming for its components.
