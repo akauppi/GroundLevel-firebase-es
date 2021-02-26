@@ -44,7 +44,7 @@
 <script>
   import { onUnmounted, computed } from 'vue'
 
-  import { shareMyActivity } from "/@data-wr/shareMyActivity"
+  import { shareMyActivity } from "/@data/wr/shareMyActivity"
 
   import { projectSub } from '/@data/project'
   //import { symbolsSub } from '../../data/projectSymbols'

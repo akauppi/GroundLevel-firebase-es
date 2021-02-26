@@ -8,14 +8,14 @@
 */
 import { assert } from '/@/assert'
 
-import { db } from './common'
+import { dbD } from './common'
 
 import { listenD } from '/@tools/listenD'
 
-function projectSub(projectId) {    // (string) => Promise of [Ref of { ..projectsC doc }, () => ()]
+function projectSub(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]
 
-  const prom = listenD(db, `projects/${projectId}`, { context: "Listening to 'projectD'" });
-  return prom;
+  const pair = listenD(dbD(`projects/${projectId}`), { context: "Listening to 'projectD'" });
+  return pair;
 }
 
 export {

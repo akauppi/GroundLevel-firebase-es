@@ -6,11 +6,11 @@
 *
 * Sets the (immutable) data for the Rules tests.
 */
-//import { docs } from './docs.js'
-const docs = require('./docs.cjs');
+import { docs } from './docs.js'
+//const docs = require('./docs.cjs');
 
-//import { clearAndPrime } from './tools/clearAndPrime.js'
-const clearAndPrime = require('./tools/clearAndPrime.cjs');
+import { clearAndPrime } from './tools/clearAndPrime.js'
+//const clearAndPrime = require('./tools/clearAndPrime.cjs');
 
 const setup = async _ => {
   // Clean the existing data and prime with ours
@@ -20,5 +20,5 @@ const setup = async _ => {
   console.debug("Docs primed for test-rules.");
 }
 
-//export default setup;
-module.exports = setup;
+export default setup;
+//module.exports = setup;

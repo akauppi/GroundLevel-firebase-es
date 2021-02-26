@@ -14,6 +14,8 @@ import { assert } from '/@/assert'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { ref } from 'vue'
+
 // Pages
 //
 // Note: Static import is shorter and recommended [1]. However, also the dynamic 'await import('./pages/Some.vue')'
@@ -27,27 +29,8 @@ import Project from './pages/Project.vue'
 import NotFound from './pages/_NotFound.vue'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
-  // For local mode, pass 'user=...' in navigation.
 
-let localUser;    // 'user=' query parameter (LOCAL mode)     // <-- tbd. is that needed?  What for?
-
-import { getCurrentUserProm, getCurrentUserWarm, setLocalUser } from './user'
-
-// ALTERNATIVE to having components ask the current user from 'user' module.
-//
-function getCurrentUserId(r) {
-  console.log("!!! Router asking current user", { r });
-
-  if (LOCAL) {
-    const uid = r.query.user;
-    assert(uid, "No 'user' in query string to pass!");
-    return uid;
-  } else {
-    const user = getCurrentUserWarm();
-    assert(user?.uid, "No active user though locked route!");
-    return user.uid;
-  }
-}
+import { getCurrentUserWarm, isReadyProm } from './user'
 
 // #rework?
 // "Try to keep the props function stateless, as it's only evaluated on route changes. Use a wrapper component if you
@@ -56,17 +39,27 @@ function getCurrentUserId(r) {
 // ^--- = when do we hear of user changes?
 
 /*
+* Asking the current user, when the auth pipeline may still be warming up.
+*
+* This isolates the authentication delays to the router, which can be asynchronous.
+*/
+async function getCurrentUserProm_online() {
+  assert(!LOCAL);
+
+  await isReadyProm;
+  return getCurrentUserWarm();
+}
+
+/*
 * Provide props for a component that relies on a logged in user.
 *
 *   - uid: uid of the current user
 *   - ..: any parameters from the path (eg. project id as '/:id')
 */
-function lockedProps(r) {   // (Route) => { uid?: string, ..params from path }
+function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
 
-  const uid = getCurrentUserId(r);    // #rework If we keep this, bring the code here
-  assert(uid,
-    "[INTERNAL] Not finding user id in a locked path."    // route guards should have ensured a uid
-  );
+  const uid = LOCAL ? r.query.user || (_ => { throw new Error("[INTERNAL] No 'user' param though in 'lockedProps'; shouldn't happen.") })()
+    : getCurrentUserWarm();
 
   return { uid, ...r.params }
 }
@@ -90,25 +83,31 @@ const routes = [
   // Note: By using a '.name', we can distinguish between the guest home path and the signed one, without need for
   //    a designated URL for sign-in. :)
   //
-  rLocked('/', Home, { props: r => ({ uid: getCurrentUserId(r) }) } ),
+  rLocked('/', Home ),
+
   LOCAL ? rOpen('/', HomeGuest, { name: 'Home.guest' })
         : rOpen('/', HomeGuest, { props: r => ({ final: r.query.final }), name: 'Home.guest' }),  // '[?final=/somein]'
 
-  // #rework: those are the same
-  LOCAL ? rLocked('/projects/:id', Project, { /*query: { user: localUser }*/ })    // '/projects/<project-id>[&user=...]'
-        : rLocked('/projects/:id', Project, { }),    // '/projects/<project-id>'
+  rLocked('/projects/:id', Project),   // '/projects/<project-id>[&user=...]'
+
+  // For '/index.html', use the '/' route.
+  // This removes 'index.html' from the URL which is fine. We merely want the user not to end up with 404.
+  //
+  { path: '/index.html', redirect: '/' },
 
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.
   //
   rOpen('/:pathMatch(.*)', NotFound )    // was: ':catchAll(.*)'
-].filter( x => x !== null );
+]; //.filter( x => x !== null );
 
 const router = createRouter({
   history: createWebHistory(),
   //base: process.env.BASE_URL,    // tbd. what is this used for?
   routes
 });
+
+const localUserRef = LOCAL && ref();
 
 // See: Vue Router > Navigation Guards
 //    -> https://next.router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
@@ -118,18 +117,7 @@ router.beforeResolve(async (to, from) => {
 
   console.log(`router entering page: ${to.path}`);
 
-  /*** DISABLED: maybe we don't need 'to.matched' at all, Vue Router docs use 'to.meta'
-  // 'to.matched' likely has the routes (including parent levels) leading to our page. We don't use route levels
-  // (parent/children), so the array is always just one entry long. (Note: This is guesswork, '.matched' does not have
-  // documentation in its source).
-  //
-  // Based on -> https://router.vuejs.org/guide/advanced/meta.html
-  //
-  console.debug("Before route, to.matched:", to.matched);    // DEBUG
-
-  assert(to.matched.length == 1, "Multiple levels in 'to.matched' - we're unprepared!");
-  const needAuth = to.matched[0].meta.needAuth;
-  ***/
+  // This used to be 'to.matched[0].meta.needAuth' but that's not needed: Vue router sums 'to.matched[].meta' for us.
   const needAuth = to.meta.needAuth;
 
   // Vue Router (4.0.3) QUESTION:
@@ -146,8 +134,6 @@ router.beforeResolve(async (to, from) => {
   // If not... need to have components ask for it when entered.
 
   if (LOCAL) {
-    const uid = to.query.user || from.query.user;
-    setLocalUser(uid);
     let ret;
 
     if (needAuth) {
@@ -172,15 +158,19 @@ router.beforeResolve(async (to, from) => {
       ret= true;   // just proceed
     }
     assert(ret !== undefined, "route missing");
+
+    // Inform 'user.js'
+    localUserRef.value = to.query.user || from.query.user;
+
     return ret;
 
   } else {  // real world
     let ret;
 
     if (needAuth) {
-      // 'guest' is an undocumented way to force routing to go to 'Home.guest' (even when authenticated)
+      // '__guest' is an undocumented way to force routing to go to 'Home.guest' (even when authenticated)
 
-      const user = !(to.query.guest) && await getCurrentUserProm();    // null | { ..Firebase user object }
+      const user = to.query.__guest ? null : await getCurrentUserProm_online();    // null | { ..Firebase user object }
 
       if (user) {    // authenticated; pass 'uid' as a prop (since we already know it)
         // NOTE: This is alternative to asking the user from 'user' module, in the page.
@@ -217,5 +207,6 @@ router.beforeResolve(async (to, from) => {
 });
 
 export {
-  router
+  router,
+  localUserRef
 }

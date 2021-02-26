@@ -17,6 +17,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
 
 import { assert } from './assert'
+import { localUserRef } from "./router"
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 
@@ -27,12 +28,12 @@ const authRef = ref();   // Ref of undefined | null | { displayName: string, pho
 // Start tracking the user (turn a callback into Vue 'ref').
 //
 if (LOCAL) {
-  // tbd. do an 'onLocalUserChange' where the access of 'setLocalUser' is reversed
-  /*onLocalUserChange( user => {
+  watchEffect( () => {    // pass user from router
+    const user = localUserRef.value;
+    authRef.value = user;
+  });
 
-  })*/
-
-} else {  // real world
+} else {    // real world
   /*const tailProm = */ (async () => {
     const auth = await import('/@/firebase').then(mod => mod.auth);
 
@@ -85,24 +86,8 @@ function getCurrentUserWarm() {   // () => null | { uid: string, displayName: st
   return v;
 }
 
-/*
-* Asking the current user, when the auth pipeline may still be warming up.
-*/
-async function getCurrentUserProm() {
-  await isReadyProm;
-  return getCurrentUserWarm();
-}
-
-// tbd. for now, only; we'd eventually like the control to be reversed: 'router.js' providing a 'onLocalUser' callback
-//    that we can call (here); keeps 'authRef' a bit more private.
-//
-const setLocalUser = LOCAL && ((o) => {   // called by router
-  authRef.value = o;
-});
-
 export {
   userRef2,
-  getCurrentUserProm,
   getCurrentUserWarm,
-  setLocalUser
+  isReadyProm
 }

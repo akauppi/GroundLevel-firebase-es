@@ -83,8 +83,11 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
-  // Firebase '@exp' note (version 0.900.15):
-  //    Calling 'getAuth' must precede other 'get..()' calls. Otherwise (browser console):
+  // Firebase note:
+  //    'getAuth' initializes the default authentication and (it or 'initializeAuth') MUST BE CALLED BEFORE any other
+  //    SDK access.
+  //
+  //    The error message is slightly confusing, since we only have one SDK in use:
   //    <<
   //      Firebase: Another Firebase SDK was initialized and is trying to use Auth before Auth is initialized. Please be sure to call `initializeAuth` or `getAuth` before starting any other Firebase SDK. (auth/dependent-sdk-initialized-before-auth).
   //    <<
@@ -94,20 +97,17 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
 
   useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
   useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
-  useAuthEmulator(auth, AUTH_URL);    // tbd. is there such??
+  useAuthEmulator(auth, AUTH_URL);
 
   if (autoSignUserId) {
     // Note: Do allow any user id to be used, for auto signing. We just haven't tested it with real uid's, but that
     //      may be useful (ie. customize one's 'local/docs.js' with real uid's of the team).
-    /*** disabled
-    if (!users[autoSignUserId]) {
-      throw new Error(`User id '${autoSignUserId}' not in 'local/users.js`);
-    }
-    ***/
 
     console.debug("Automatically signing in as:", autoSignUserId);
 
-    await signInWithCustomToken( auth, JSON.stringify({ uid: autoSignUserId }) );
+    await signInWithCustomToken( auth, JSON.stringify({ uid: autoSignUserId }) )   // GETS STUCK!!
+
+    console.debug("!!!");
   }
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).

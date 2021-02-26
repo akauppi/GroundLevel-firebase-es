@@ -1,5 +1,5 @@
 /*
-* src/data-wr/shareMyActivity.js
+* src/data/wr/shareMyActivity.js
 *
 * Write the projectUserInfoC '.lastActive' field, but only if enough time has passed from last write.
 *
@@ -8,19 +8,12 @@
 import { assert } from '/@/assert'
 
 import { FieldValue, setDoc } from 'firebase/firestore'
-import { userRef2, getCurrentUserWarm } from "/@/user"
+import { getCurrentUserWarm } from "/@/user"
 
-import { dbD } from '../data/common'
-
-import { watchEffect } from 'vue'
+import { dbD } from '../common'
 
 let lastActive;   // Date | undefined; when last written
-
-/*unsub=*/ watchEffect( () => {
-  if (userRef2.value === null) {
-    lastActive = undefined;   // user signed out
-  }
-});
+let lastUid;      // ..for this user
 
 function projectsUserInfoD(projectId, uid) {
   return dbD(`projects/${projectId}/userInfo/${uid}`);
@@ -31,19 +24,25 @@ function shareMyActivity(projectId) {
   const uid = getCurrentUserWarm().uid;
 
   function longEnough() {
+    if (!lastActive) return true;
+
     const diffMs = new Date() - lastActive;
     return (diffMs / 1000) >= longEnoughSecs;
   }
 
-  if (!lastActive || longEnough()) {
+  if (uid !== lastUid || longEnough()) {
     const prom = setDoc(
       projectsUserInfoD(projectId, uid),
       { lastActive: FieldValue.serverTimestamp() },
       { merge: true }   // options
     );
 
-    // Let the tail run freely, but report errors if fails.
-    prom.catch( err => {
+    // Let the tail run freely
+    prom.then( _ => {
+      lastActive = new Date();
+      lastUid = uid;
+    })
+    .catch( err => {
       central.error("Reporting activity failed:", err);
     });
   }
