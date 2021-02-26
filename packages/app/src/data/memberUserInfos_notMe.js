@@ -12,33 +12,34 @@
 */
 import { assert } from '/@/assert'
 
-import firebase from 'firebase/app'
-import '@firebase/firestore'
-assert(firebase?.firestore);
+import { FieldPath } from 'firebase/firestore'
 
-assert(firebase.apps.length > 0, "Default Firebase app NOT initialized?!");   // DEBUG
-
-const db = firebase.firestore();
-const FieldPath = firebase.firestore.FieldPath
+import { getCurrentUserWarm } from "../user"
+import { listenC } from "/@tools/listenC"
+import { dbQ } from './common'
 
 /*
 * Note: Excluding the current user is simply an optimization (because of billing).
 */
-function projectUserInfoC_notMe(projectId, myUid) {
+function projectUserInfoC_not(projectId, uid) {   // (string, string) => Query
   assert(projectId);
 
-  return db.collection(`projects/${projectId}/userInfo`)
-    .where(FieldPath.documentId(), '!=', myUid);
+  return dbQ(`projects/${projectId}/userInfo`, [ FieldPath.documentId, '!=', uid ] );
 }
 
-function memberUserInfos_notMe(projectId) {    // (string) => RMap of <uid> -> { ...projectUserInfoC doc, status: "live"|"recent"|"" }
+function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <uid> -> { ...projectUserInfoC doc, status: "live"|"recent"|"" }, () => ()]
   assert(projectId);
+
+  const myUid = getCurrentUserWarm().uid;
 
   /*
   * Convert the data a bit:
   *   - instead of passing the '.lastActive' date field (which is imprecise by design), turn it into a status that
   *     better describes the recency. This UI centric transform is made rather low in the data pipeline. We'll see.
   *   - compatibility changes (old data has '.name' and we're lazy to change it..)
+  *
+  * Note: The benefit of doing this within 'listenC' is that the conversion is only applied to incoming (changed) data.
+  *     If we used 'computed()' and a raw ref of map, all values would need to be iterated, for every change.
   */
   function conv(o) {    // (obj) => obj
     const diffMins = (new Date() - o.lastActive) / (1000 * 60);
@@ -56,12 +57,12 @@ function memberUserInfos_notMe(projectId) {    // (string) => RMap of <uid> -> {
     }
   }
 
-  const uid = firebase.auth().currentUser.uid;
+  const [ref, unsub] = listenC( projectUserInfoC_not(projectId, myUid), {
+    context: "listening to project userInfo",
+    conv
+  } );
 
-  const rm = projectUserInfoC_notMe(projectId, uid)
-    .xListen( { context: "listening to project userInfo", conv } );
-
-  return rm;
+  return [ref,unsub];
 }
 
 export {

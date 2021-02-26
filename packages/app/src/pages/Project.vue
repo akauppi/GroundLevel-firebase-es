@@ -66,21 +66,21 @@
 
     console.debug("Entering project page: ", projectId);
 
-    const projectRD = projectSub(projectId);
+    const [project, unsub1] = projectSub(projectId);    // note: 'project.value' is 'undefined' until the Firestore subscription has initialized
     //const [symbols, unsub2] = symbolsSub(projectId);
 
     //const symbolsSortedByLayer = computed(() => sortByLayer(symbols) );   // ReactiveReadOnly of [ {...symbolsD, _id: index } ]   // sorted by layer
 
     onUnmounted( () => {
       console.debug("Leaving project page: unsubscribing");
-      projectRD.unsub();
-      //symRD.unsub();
+      unsub1();
+      //unsub2();
     });
 
     //const membersReady = computed( () => Object.keys(members).length > 0 );
 
     return {
-      project: projectRD,
+      project,
       //symbolsSortedByLayer,
       //members,
       //membersReady

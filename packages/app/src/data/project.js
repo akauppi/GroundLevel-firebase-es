@@ -8,20 +8,14 @@
 */
 import { assert } from '/@/assert'
 
-import firebase from 'firebase/app'
-import '@firebase/firestore'
-assert(firebase?.firestore);
+import { db } from './common'
 
-const db = firebase.firestore();
+import { listenD } from '/@tools/listenD'
 
-function projectSub(projectId) {    // (string) => RDoc of { ..projectsC doc }
-  const docRef = db.collection('projects').doc(projectId);    // DocumentReference
+function projectSub(projectId) {    // (string) => Promise of [Ref of { ..projectsC doc }, () => ()]
 
-  const rm = docRef.xListen( {
-    context: "listening to 'projectD'"
-  });
-
-  return rm;
+  const prom = listenD(db, `projects/${projectId}`, { context: "Listening to 'projectD'" });
+  return prom;
 }
 
 export {

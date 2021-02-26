@@ -1,63 +1,58 @@
 /*
 * src/user.js
 *
-* The sole arbitrator of user signed in/out information.
-*
 * Takes care of the different user handling between LOCAL (self-claimed user, for development) and real world
 * (Firebase auth). This way, other parts of the code don't need to do if/else's.
 *
 * Note:
-*   Web pages shouldn't really need to subscribe to changes of user. From their (life cycle's) point of view, the user
-*   is stable, or at the most signs in/out (but does not change).
+*   Only a few places in the app might be interested in user changes. For a single web page (component), the user is
+*   there, and often provided as a prop. They don't change.
 *
 * References:
 *   - Firebase User object documentation
 *     -> https://firebase.google.com/docs/reference/js/firebase.User.html
 */
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
-import firebase from 'firebase/app'
-import '@firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
 
 import { assert } from './assert'
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 
-const fbAuth = LOCAL ? undefined : firebase.app().auth();
-
-const authRef = ref();   // Ref of undefined | null | { ..Firebase User object }  ; 'undefined' until auth is warmed up
+// Fed either by Firebase auth changes or the router (LOCAL mode)
+//
+const authRef = ref();   // Ref of undefined | null | { displayName: string, photoURL: string, ... }  ; 'undefined' until auth is warmed up
 
 // Start tracking the user (turn a callback into Vue 'ref').
 //
-let isReadyProm;    // Promise of ()
-
 if (LOCAL) {
-  isReadyProm = Promise.resolve();   // we're ready
-
   // tbd. do an 'onLocalUserChange' where the access of 'setLocalUser' is reversed
   /*onLocalUserChange( user => {
 
   })*/
 
 } else {  // real world
-  isReadyProm = new Promise( (resolve/*,reject*/) => {
-    let resolved = false;
+  /*const tailProm = */ (async () => {
+    const auth = await import('/@/firebase').then(mod => mod.auth);
 
-    fbAuth.onAuthStateChanged( user => {
-      assert(user !== undefined, "[INTERNAL] Firebase told user is 'undefined'" )   // used to do this
+    onAuthStateChanged(auth, user => {
+      assert(user !== undefined, "[INTERNAL] Mom! Firebase auth gave 'undefined'!")
 
       authRef.value = user;    // null | { ..Firebase User object }
 
-      if (!resolved) {
-        resolve();
-        resolved = true;
-      }
-    }, err => {
-      console.error("Failure in getting user info:", err);    // tbd. deserves 'central' attention
-      throw err;
-    });
-  });
+    });   // ops catches possible errors (never seen)
+  })();
 }
+
+const isReadyProm = new Promise( (resolve /*,reject*/) => {
+  const unsub = watchEffect(() => {
+    if (authRef.value !== undefined) {  // auth is awake
+      unsub();
+      resolve();
+    }
+  });
+});
 
 /*
 * Expose only certain user fields.
@@ -83,25 +78,15 @@ const userRef2 = computed( () => {   // Ref of undefined | null | { displayName:
 /*
 * Asking the current user, by a page.
 */
-function getCurrentUserWarm() {   // () => null | { ..Firebase user object }
+function getCurrentUserWarm() {   // () => null | { uid: string, displayName: string, isAnonymous: Boolean, photoURL: string }
   const v = userRef2.value;
   assert(v !== undefined, "Too early! Asked for current user but we don't know them, yet!");  // if this happens, need to rethink code flow
 
   return v;
 }
 
-/*** not needed?
-// Get the user id when we *know* there is a user logged in.
-//
-function getCurrentUserIdWarm() {
-  const v = getCurrentUserWarm();
-  assert(v, "Asking user id with no active user.");
-  return v.uid;
-}
-***/
-
 /*
-* Asking the current user, when the auth pipeline might still be warming up.
+* Asking the current user, when the auth pipeline may still be warming up.
 */
 async function getCurrentUserProm() {
   await isReadyProm;
@@ -115,23 +100,9 @@ const setLocalUser = LOCAL && ((o) => {   // called by router
   authRef.value = o;
 });
 
-/***
-// Sign out
-//
-function signOut() {
-  fbAuth.signOut().then( _ => {
-    console.debug("User signed out");
-  }).catch( err => {
-    central.error("Failed to sign out:", err);    // never seen
-  })
-}
-***/
-
 export {
   userRef2,
   getCurrentUserProm,
   getCurrentUserWarm,
-  //getCurrentUserIdWarm,
-  setLocalUser,
-  //signOut
+  setLocalUser
 }

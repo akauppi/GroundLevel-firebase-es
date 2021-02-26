@@ -7,29 +7,28 @@
 */
 import { assert } from '/@/assert'
 
-import firebase from 'firebase/app'
-import '@firebase/auth'
-import '@firebase/firestore'
-assert(firebase?.auth && firebase?.firestore);
+import { FieldValue, setDoc } from 'firebase/firestore'
+import { userRef2, getCurrentUserWarm } from "/@/user"
 
-const db = firebase.firestore();
-const FieldValue = firebase.firestore.FieldValue;
+import { dbD } from '../data/common'
+
+import { watchEffect } from 'vue'
 
 let lastActive;   // Date | undefined; when last written
 
-firebase.auth().onAuthStateChanged( (o) => {
-  if (o === null) {
-    lastActive = undefined;
+/*unsub=*/ watchEffect( () => {
+  if (userRef2.value === null) {
+    lastActive = undefined;   // user signed out
   }
 });
 
-function projectsUserInfoC(projectId) {
-  return db.collection(`projects/${projectId}/userInfo`);
+function projectsUserInfoD(projectId, uid) {
+  return dbD(`projects/${projectId}/userInfo/${uid}`);
 }
 
 function shareMyActivity(projectId) {
   const longEnoughSecs = 5 * 60;   // 5 min; tbd. take from config?
-  const uid = firebase.auth().currentUser.uid;
+  const uid = getCurrentUserWarm().uid;
 
   function longEnough() {
     const diffMs = new Date() - lastActive;
@@ -37,8 +36,11 @@ function shareMyActivity(projectId) {
   }
 
   if (!lastActive || longEnough()) {
-    const prom = projectsUserInfoC(projectId)
-      .doc(uid).set( { lastActive: FieldValue.serverTimestamp() }, { merge: true });
+    const prom = setDoc(
+      projectsUserInfoD(projectId, uid),
+      { lastActive: FieldValue.serverTimestamp() },
+      { merge: true }   // options
+    );
 
     // Let the tail run freely, but report errors if fails.
     prom.catch( err => {

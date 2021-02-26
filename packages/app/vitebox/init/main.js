@@ -6,14 +6,42 @@
 */
 import { assert } from './assert.js'
 
-import firebase from 'firebase/app'
-import '@firebase/auth'
-import '@firebase/firestore'
-import '@firebase/functions'
+import { initializeApp } from 'firebase/app'
+import { getAuth, useAuthEmulator, signInWithCustomToken } from 'firebase/auth'
+import { getFirestore, useFirestoreEmulator } from 'firebase/firestore'
+import { getFunctions, useFunctionsEmulator } from 'firebase/functions'
+
+/** KEEP for helping with this -> https://github.com/firebase/firebase-js-sdk/discussions/4534
+import { getAnalytics } from 'firebase/analytics'
+getAnalytics;
+import { getApp } from 'firebase/app'
+getApp;
+import { getAuth } from 'firebase/auth'
+getAuth;
+import { getDatabase } from 'firebase/database'
+getDatabase
+import { getFirestore } from 'firebase/firestore'
+getFirestore
+import { FieldPath } from 'firebase/firestore/lite'
+FieldPath
+import { getFunctions } from 'firebase/functions'
+getFunctions
+import { getInstallations } from 'firebase/installations'
+getInstallations
+import { getMessaging } from 'firebase/messaging'
+getMessaging
+import { getPerformance } from 'firebase/performance'
+getPerformance
+import { activate } from 'firebase/remote-config'
+activate
+import { getStorage } from 'firebase/storage'
+getStorage
+**/
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
 async function initFirebaseLocal() {   // () => Promise of FirebaseApp
+  assert(LOCAL);
 
   // For 'dev:local', one does not need a Firebase project (or even account) in the cloud.
   //
@@ -33,7 +61,7 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
 
   console.debug("Project id:", projectId);
 
-  const fah= firebase.initializeApp( {
+  const fah= initializeApp( {
     projectId,
     apiKey: "none",
     authDomain: "no.such.com"   // tbd. is this needed?
@@ -55,9 +83,18 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
-  firebase.firestore().useEmulator('localhost',FIRESTORE_PORT);
-  firebase.functions().useEmulator('localhost',FUNCTIONS_PORT);
-  firebase.auth().useEmulator(AUTH_URL);
+  // Firebase '@exp' note (version 0.900.15):
+  //    Calling 'getAuth' must precede other 'get..()' calls. Otherwise (browser console):
+  //    <<
+  //      Firebase: Another Firebase SDK was initialized and is trying to use Auth before Auth is initialized. Please be sure to call `initializeAuth` or `getAuth` before starting any other Firebase SDK. (auth/dependent-sdk-initialized-before-auth).
+  //    <<
+  //
+  //const [firestore, fns, auth] = [getFirestore(fah), getFunctions(fah), getAuth(fah)];  // fails
+  const [auth, firestore, fns] = [getAuth(fah), getFirestore(fah), getFunctions(fah)];  // ok :)
+
+  useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
+  useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
+  useAuthEmulator(auth, AUTH_URL);    // tbd. is there such??
 
   if (autoSignUserId) {
     // Note: Do allow any user id to be used, for auto signing. We just haven't tested it with real uid's, but that
@@ -70,17 +107,20 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
 
     console.debug("Automatically signing in as:", autoSignUserId);
 
-    await firebase.auth().signInWithCustomToken( JSON.stringify({ uid: autoSignUserId }) );
+    await signInWithCustomToken( auth, JSON.stringify({ uid: autoSignUserId }) );
   }
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
-  window["TESTS_GO!"] = firebase;   // expose our 'firebase'; otherwise Cypress seems to have problems
+  // tbd. #rework now that we're in '@exp' land! :)
+  //window["TESTS_GO!"] = firebase;   // expose our Firebase app; otherwise Cypress seems to have problems
 
   return fah;
 }
 
 function initFirebase() {   // () => FirebaseApp    // dev:online, production build
+  assert(!LOCAL);
+
   const [ apiKey, authDomain, projectId ] = [
     import.meta.env.VITE_API_KEY,
     import.meta.env.VITE_AUTH_DOMAIN,
@@ -89,7 +129,7 @@ function initFirebase() {   // () => FirebaseApp    // dev:online, production bu
 
   assert(apiKey && authDomain && projectId, "Some Firebase param(s) are missing");
 
-  return firebase.initializeApp({
+  return initializeApp({
     apiKey,
     authDomain,
     projectId
@@ -117,7 +157,6 @@ async function initCentral() {    // () => Promise of central
   console.debug("Launching app...");
 
   const { init } = await import('/@/app.js');
-  //REMOVE? const init = await import('/@/app.js').then( mod => mod.init );
   await init();
 
   console.debug("App on its own :)");

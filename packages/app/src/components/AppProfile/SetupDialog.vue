@@ -111,14 +111,9 @@
   import { ref, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
 
-  import firebase from 'firebase/app'
-  import '@firebase/auth'
-
   import { getCurrentUserWarm } from '/@/user'
 
   const LOCAL = import.meta.env.MODE === 'dev_local'
-
-  const fbAuth = LOCAL ? undefined : firebase.app().auth();
 
   // Borrowing a component from deep in. (maybe it is moved to '/components', later, if used in multiple places?)
   //
@@ -148,7 +143,10 @@
     });
 
     async function signOut () {
-      if (!LOCAL) await fbAuth.signOut();
+      if (!LOCAL) {
+        const auth = await import('/@/firebase').then( mod => mod.auth );
+        await auth.signOut();
+      }
 
       router.push('/');
       closeMe();    // avoid the dialog from popping up if re-authenticating

@@ -13,23 +13,12 @@
 */
 import { assert } from '/@/assert'
 
-import firebase from 'firebase/app'
-import '@firebase/firestore'
-import '@firebase/auth'
-assert(firebase?.firestore && firebase?.auth);
+import { setDoc } from '/@/firebase'
 
 import { userRef2 } from '/@/user'
-import { watch } from 'vue'
+import { watchEffect } from 'vue'
 
-import { ContextError } from "/@xListen/ContextError"   // #rework
-
-const LOCAL = import.meta.env.MODE === 'dev_local';
-
-if (LOCAL) {
-  throw new Error("'updateUserInfo' is not for the LOCAL mode");
-}
-
-const db = firebase.firestore();
+import { dbD } from '/@data/common'
 
 /*
 * Updates the UI specific info about the user to a project-independent collection. Cloud Functions will distribute the
@@ -37,29 +26,26 @@ const db = firebase.firestore();
 *
 * tbd. Consider doing this as a sub-collection write.
 */
-watch(
-  () => userRef2,
-  user => {   // undefined | null | { ..Firebase user object }
-    if (user === undefined) return;   // skip
+watchEffect( () => {
+  const user = userRef2.value;  // undefined | null | { ..Firebase user object }
 
-    if (user) {
-      const uid = user.uid;
-      const o = {
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      }
-      console.debug(`UserInfo: going to write: ${uid} ->`, o);
-
-      const prom = db.doc(`userInfo/${uid}`).set(o);
-
-      prom.then( _ => {
-          console.debug("UserInfo written");
-        })
-        .catch( err => {
-          throw new ContextError("Writing userInfo", err, { o });
-        });
+  if (user) {
+    const uid = user.uid;
+    const o = {
+      displayName: user.displayName,
+      photoURL: user.photoURL
     }
+    console.debug(`UserInfo: going to write: ${uid} ->`, o);
+
+    const prom = setDoc(dbD(`userInfo/${uid}`), o);
+
+    prom.then(_ => {
+      console.debug("UserInfo written");
+    })
+    .catch(err => {
+      throw new Error(`Writing userInfo: ${err}`);
+    });
   }
-);
+});
 
 export { }

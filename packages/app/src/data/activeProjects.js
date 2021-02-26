@@ -8,32 +8,26 @@
 */
 import { assert } from '/@/assert'
 
-import firebase from 'firebase/app'
-import '@firebase/firestore'
-assert(firebase?.firestore);
+import { firestore as db } from '/@/firebase'
 
-const db = firebase.firestore();
+import { computed } from 'vue'
+
+import { listenC } from '/@tools/listenC'
 
 // Firestore notes:
 //  - Cannot do a '.where()' on missing fields (Apr 2020) (we want projects without '.removed'). Can let them
 //    come and then skip.
-//
-// Note: Being a collaborator (not member), even skipping may be problematic. Let's see. (tbd. test and remove the comment)
-//
-function projectsC(uid) {   // (string) -> Query
-  return db.collection('projects')
-    .where('members', 'array-contains', uid);
-}
 
-function activeProjects(uid) {    // (string) => RMap of <project-id> -> { ..projectsC doc }
+function activeProjects(uid) {    // (string) => Ref of Map of <project-id> -> { ..projectsC doc }
 
-  const rm = projectsC(uid)
-    .xListen( {
-      context: "listening to 'projectsC'",
-      filter: o => !o.removed
-    });
+  const [mapRef,unsub] = listenC( db, 'projects', ['members', 'array-contains', uid], {
+    context: "listening to 'projectsC'",
+    conv(v) {
+      return v.removed ? null : v;    // filter out removed already at the entrance
+    }
+  });
 
-  return rm;
+  return [mapRef,unsub];
 }
 
 export {
