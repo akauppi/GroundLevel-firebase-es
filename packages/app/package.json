@@ -43,25 +43,24 @@
     "_genEnvOnline": "node --harmony-top-level-await tools/gen-vite-env-online.js > vitebox/.env.development"
   },
   "dependencies": {
-    "aside-keys": "^0.0.2-alpha.2",
     "firebase": "^0.900.15",
     "vue": "^3.0.6",
     "vue-router": "^4.0.4"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
-    "@vitejs/plugin-vue": "^1.1.4",
+    "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.6",
     "concurrently": "^6.0.0",
     "cypress": "^6.5.0",
-    "eslint": "^7.20.0",
+    "eslint": "^7.21.0",
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.6.0",
     "firebase-admin": "^9.5.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.8",
-    "vite": "^2.0.3",
+    "vite": "^2.0.4",
     "vue-eslint-parser": "^7.5.0",
     "wait-on": "^5.2.1"
   },

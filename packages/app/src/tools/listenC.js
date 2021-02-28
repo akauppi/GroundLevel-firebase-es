@@ -3,7 +3,6 @@
 *
 * Subscribe to a Firebase collection
 */
-
 import { query, collection, onSnapshot } from 'firebase/firestore'
 
 import { mapRef } from './mapRef'
@@ -18,7 +17,7 @@ function listenC(db, collectionPath, ...args ) {    // (Firestore, "{collectionN
 
   const [qcArr, { context, conv }] =
     args.length == 2 ? [...args] :
-    args.length == 1 ? [null, args[0]] : ( _ => { throw new Error("Bad arguments:", args) })();
+    args.length == 1 ? [null, args[0]] : ( _ => { throw new Error(`Bad arguments: ${args}`) })();
 
   const fbColl = collection(db, collectionPath);
   const q = (!qcArr || qcArr.length === 0) ? query(fbColl) : query(fbColl, ...qcArr);
@@ -37,7 +36,9 @@ function listenC(db, collectionPath, ...args ) {    // (Firestore, "{collectionN
       const data = conv2( dss.data() );
 
       return [id,data];
-    })
+    }, (err) => {   // (FirestoreError) => ()
+      central.error(`Failure listening to: ${context}`, err);
+    });
 
     setN(kvs);
   });

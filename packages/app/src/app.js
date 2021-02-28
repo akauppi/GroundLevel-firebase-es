@@ -31,7 +31,7 @@ async function init() {    // () => Promise of ()
   // Initialize the authentication system
   //
   if (!LOCAL) {
-    const auth = import('/@/firebase').then( mod => mod.auth );
+    const auth = await import('/@/firebase').then( mod => mod.auth );
 
     initAside(auth).then( _ => {
       const dt = performance.now() - t0;
@@ -57,7 +57,9 @@ async function init() {    // () => Promise of ()
   //
   // tbd. "block the app render" until authentication has been done.
   //
-  //await router.isReady().then( _ => ... )
+  await router.isReady().then( _ => {
+    console.debug("Router is ready");   // note: it DOES NOT get ready!!
+  } );
 
   app.mount('#app');
   central.info("App is mounted.");

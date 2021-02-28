@@ -30,6 +30,8 @@ function listenD( db, path, opt) {   // ( FirebaseFirestore, "{collectionName}/{
     console.debug("!!! Listened to:", doc )
 
     ref.value = doc;
+  }, (err) => {   // (FirestoreError) => ()
+    central.error(`Failure listening to: ${context}`, err);
   });
 
   return [ref, unsub];

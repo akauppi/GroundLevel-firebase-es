@@ -2,7 +2,7 @@
 * src/user.js
 *
 * Takes care of the different user handling between LOCAL (self-claimed user, for development) and real world
-* (Firebase auth). This way, other parts of the code don't need to do if/else's.
+* (Firebase auth). This way, other parts of the code don't need to do if/else's.    // <-- tbd. revise comment
 *
 * Note:
 *   Only a few places in the app might be interested in user changes. For a single web page (component), the user is
@@ -15,11 +15,10 @@
 import { computed, ref, watchEffect } from 'vue'
 
 import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '/@/firebase'
 
 import { assert } from './assert'
-import { localUserRef } from "./router"
-
-const LOCAL = import.meta.env.MODE === 'dev_local';
+//REMOVE import { localUserRef } from "./router"
 
 // Fed either by Firebase auth changes or the router (LOCAL mode)
 //
@@ -27,24 +26,12 @@ const authRef = ref();   // Ref of undefined | null | { displayName: string, pho
 
 // Start tracking the user (turn a callback into Vue 'ref').
 //
-if (LOCAL) {
-  watchEffect( () => {    // pass user from router
-    const user = localUserRef.value;
-    authRef.value = user;
-  });
+onAuthStateChanged(auth, user => {
+  assert(user !== undefined, "[INTERNAL] Mom! Firebase auth gave 'undefined'!")
 
-} else {    // real world
-  /*const tailProm = */ (async () => {
-    const auth = await import('/@/firebase').then(mod => mod.auth);
-
-    onAuthStateChanged(auth, user => {
-      assert(user !== undefined, "[INTERNAL] Mom! Firebase auth gave 'undefined'!")
-
-      authRef.value = user;    // null | { ..Firebase User object }
-
-    });   // ops catches possible errors (never seen)
-  })();
-}
+  authRef.value = user;    // null | { ..Firebase User object }
+});
+  // ops catches possible errors (never seen)
 
 const isReadyProm = new Promise( (resolve /*,reject*/) => {
   const unsub = watchEffect(() => {

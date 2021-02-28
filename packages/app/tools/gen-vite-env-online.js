@@ -37,11 +37,15 @@ const cmd = 'firebase apps:sdkconfig';
 const { stdout } = await( execProm(cmd) ).catch( ({ err, stdout, stderr }) => {
   // err.code: 1
   // stdout: "... No project active, but project aliases are available.\n ..."
+  //        or: "... No currently active project.\n ..."
   // stderr: ''
+  //
+  //console.error("!!!", { err, stdout, stderr });
+  //process.exit(99);
 
   // Note: Errors should be in 'stderr', but Firebase CLI consistently doesn't do it.
 
-  if (!stdout.includes("No project active")) {
+  if (! (stdout.includes("No project active") || stdout.includes("No currently active"))) {
     console.error("Unexpected command output:", { err, stdout, stderr });
     process.exit(-3);
   }

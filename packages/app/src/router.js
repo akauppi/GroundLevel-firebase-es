@@ -4,17 +4,18 @@
 * This file is maybe most Magic 🎩 in the whole project. It helps to know Vue Router and the concept of front end
 * routing.
 *
-* Based on -> https://github.com/gautemo/Vue-guard-routes-with-Firebase-Authentication
-*
 * References:
 *   - Vue Router (next) > Guide
 *     https://next.router.vuejs.org/guide/
 */
 import { assert } from '/@/assert'
 
+import { signInWithCustomToken } from 'firebase/auth'
+import { auth } from '/@/firebase'
+
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { ref } from 'vue'
+//import { ref } from 'vue'
 
 // Pages
 //
@@ -107,7 +108,7 @@ const router = createRouter({
   routes
 });
 
-const localUserRef = LOCAL && ref();
+//REMOVE const localUserRef = LOCAL && ref();
 
 // See: Vue Router > Navigation Guards
 //    -> https://next.router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
@@ -160,7 +161,22 @@ router.beforeResolve(async (to, from) => {
     assert(ret !== undefined, "route missing");
 
     // Inform 'user.js'
-    localUserRef.value = to.query.user || from.query.user;
+    //REMOVE localUserRef.value = to.query.user || from.query.user;
+
+    // Sign in in Firebase emulator. This
+    //  a) ensures the user existed in 'local/users.js'
+    //  b) provides the user details (displayName, photoURL) the normal route to the application (see 'user.js')
+    //
+    const uid = to.query.user || from.query.user;
+    console.debug("Automatically signing in as:", uid);
+
+    await signInWithCustomToken( auth, JSON.stringify({ uid }) )   // GETS STUCK!!
+      .then( creds => {
+        console.debug("Signed in as:", { creds });
+      })
+      .catch( err => {
+        console.error("Sign-in failed:", err);
+      })
 
     return ret;
 
@@ -208,5 +224,5 @@ router.beforeResolve(async (to, from) => {
 
 export {
   router,
-  localUserRef
+  //localUserRef
 }

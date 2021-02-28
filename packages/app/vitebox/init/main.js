@@ -43,6 +43,7 @@ const LOCAL = import.meta.env.MODE === "dev_local";
 async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   assert(LOCAL);
 
+  /*** REMOVE?
   // For 'dev:local', one does not need a Firebase project (or even account) in the cloud.
   //
   // Query parameters:
@@ -50,6 +51,7 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   //
   const urlParams = new URLSearchParams(window.location.search);
   const autoSignUserId = urlParams.get('user');   // e.g. 'user=dev'
+  ***/
 
   console.info("Initializing for LOCAL EMULATION");
 
@@ -99,6 +101,7 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
   useAuthEmulator(auth, AUTH_URL);
 
+  /*** disabled (moved to router)
   if (autoSignUserId) {
     // Note: Do allow any user id to be used, for auto signing. We just haven't tested it with real uid's, but that
     //      may be useful (ie. customize one's 'local/docs.js' with real uid's of the team).
@@ -109,6 +112,7 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
 
     console.debug("!!!");
   }
+  ***/
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //

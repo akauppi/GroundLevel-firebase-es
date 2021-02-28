@@ -13,7 +13,7 @@
 */
 import { assert } from '/@/assert'
 
-import { setDoc } from '/@/firebase'
+import { setDoc } from 'firebase/firestore'
 
 import { userRef2 } from '/@/user'
 import { watchEffect } from 'vue'
