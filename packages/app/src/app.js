@@ -10,6 +10,7 @@
 import { createApp } from 'vue'
 
 import { init as initAside } from 'aside-keys'
+  // Only needed in 'online' mode but import unconditionally; probably better for bundling.
 
 import { appTitle } from './config.js'
 

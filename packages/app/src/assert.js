@@ -5,13 +5,13 @@
 *
 * This is for the application. You may or may not want to use an assert at production time: up to you.
 */
-function assert(cond, msgOpt) {
+function assert(cond, story) {   // (any, (String | () => String)?) => ()   ; throws an Error if 'any' is falsy
   if (!cond) {
-    if (msgOpt) {   // tbd. do we want this - maybe not?
-      console.assert(msgOpt);
-    }
+    const msg = (story instanceof Function) ? (story())
+      : story || "(no message)";
+
     // tbd. Is there a way to set the callstack to our caller's? #help
-    throw new AssertError(`Assertion failed: ${msgOpt || '(no message)'}`);
+    throw new AssertError(`Assertion failed: ${msg}`);
   }
 }
 

@@ -44,13 +44,13 @@
   },
   "dependencies": {
     "firebase": "^0.900.15",
-    "vue": "^3.0.6",
+    "vue": "^3.0.7",
     "vue-router": "^4.0.4"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
     "@vitejs/plugin-vue": "^1.1.5",
-    "@vue/compiler-sfc": "^3.0.6",
+    "@vue/compiler-sfc": "^3.0.7",
     "concurrently": "^6.0.0",
     "cypress": "^6.5.0",
     "eslint": "^7.21.0",

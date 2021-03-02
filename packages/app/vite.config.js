@@ -91,6 +91,12 @@ const chunkTo = [     // Array of Regex
 
   /\/node_modules\/@?(vue)\//,
   /\/node_modules\/(vue-router)\//,
+
+  /\/node_modules\/@?(firebase)\//,
+    // firebase/{auth|app|firestore}
+    // @firebase/{auth|app|firestore|util|logger|component|webchannel-wrapper|...}
+
+  /\/node_modules\/(tslib)\//,    // used by Firebase, but place in its own chunk
 ];
 
 export default {
@@ -123,7 +129,6 @@ export default {
 
     rollupOptions: {
       external: [
-        /^@?firebase\//,    // 'firebase/app', '@firebase/...'
         "/favicon.png"
       ],
       output: { manualChunks }

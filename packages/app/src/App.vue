@@ -18,8 +18,7 @@
   </header>
   <main>
     <router-view />
-    <aside-keys v-if="!LOCAL" >
-    </aside-keys>
+    <aside-keys v-if="!LOCAL" />
   </main>
   <footer>
     <AppFooter />
@@ -89,8 +88,6 @@
   if (!LOCAL) {
     import ('/@background/updateUserInfo');
   }
-
-  import 'aside-keys';   // brings in '<aside-keys>'
 
   /*
   * Vue warn handler
