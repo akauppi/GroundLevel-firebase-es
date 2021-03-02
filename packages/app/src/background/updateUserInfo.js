@@ -16,7 +16,7 @@ import { assert } from '/@/assert'
 import { setDoc } from 'firebase/firestore'
 
 import { userRef2 } from '/@/user'
-import { watchEffect } from 'vue'
+import { watch } from 'vue'
 
 import { dbD } from '/@data/common'
 
@@ -26,8 +26,7 @@ import { dbD } from '/@data/common'
 *
 * tbd. Consider doing this as a sub-collection write.
 */
-watchEffect( () => {
-  const user = userRef2.value;  // undefined | null | { ..Firebase user object }
+watch( userRef2, (user) => {  // undefined | null | { ..Firebase user object }
 
   if (user) {
     const uid = user.uid;
@@ -37,14 +36,13 @@ watchEffect( () => {
     }
     console.debug(`UserInfo: going to write: ${uid} ->`, o);
 
-    const prom = setDoc(dbD(`userInfo/${uid}`), o);
-
-    prom.then(_ => {
-      console.debug("UserInfo written");
-    })
-    .catch(err => {
-      throw new Error(`Writing userInfo: ${err}`);
-    });
+    /*const tail =*/ setDoc( dbD(`userInfo/${uid}`), o )
+      .then(_ => {
+        console.debug("UserInfo written");
+      })
+      .catch(err => {
+        throw new Error(`Writing userInfo/${uid}: ${err}`);
+      });
   }
 });
 

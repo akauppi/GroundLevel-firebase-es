@@ -8,13 +8,12 @@
 */
 import { assert } from '/@/assert'
 
-import { dbD } from './common'
-
-import { listenD } from '/@tools/listenD'
+import { db } from '/@/firebase'
+import { listenD } from '/@tools/listen'
 
 function projectSub(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]
 
-  const pair = listenD(dbD(`projects/${projectId}`), { context: "Listening to 'projectD'" });
+  const pair = listenD(db, `projects/${projectId}`);
   return pair;
 }
 

@@ -12,20 +12,11 @@
 */
 import { assert } from '/@/assert'
 
-import { FieldPath } from 'firebase/firestore'
+import { FieldPath, where } from 'firebase/firestore'
 
 import { getCurrentUserWarm } from "../user"
-import { listenC } from "/@tools/listenC"
-import { dbQ } from './common'
-
-/*
-* Note: Excluding the current user is simply an optimization (because of billing).
-*/
-function projectUserInfoC_not(projectId, uid) {   // (string, string) => Query
-  assert(projectId);
-
-  return dbQ(`projects/${projectId}/userInfo`, [ FieldPath.documentId, '!=', uid ] );
-}
+import { listenC } from "/@tools/listen"
+import { db } from '/@/firebase'
 
 function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <uid> -> { ...projectUserInfoC doc, status: "live"|"recent"|"" }, () => ()]
   assert(projectId);
@@ -38,7 +29,7 @@ function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <ui
   *     better describes the recency. This UI centric transform is made rather low in the data pipeline. We'll see.
   *   - compatibility changes (old data has '.name' and we're lazy to change it..)
   *
-  * Note: The benefit of doing this within 'listenC' is that the conversion is only applied to incoming (changed) data.
+  * Note: The benefit of doing this within 'listenQ' is that the conversion is only applied to incoming (changed) data.
   *     If we used 'computed()' and a raw ref of map, all values would need to be iterated, for every change.
   */
   function conv(o) {    // (obj) => obj
@@ -57,8 +48,8 @@ function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <ui
     }
   }
 
-  const [ref, unsub] = listenC( projectUserInfoC_not(projectId, myUid), {
-    context: "listening to project userInfo",
+  debugger;
+  const [ref, unsub] = listenC( db, `projects/${projectId}/userInfo`, where(FieldPath.documentId, '!=', myUid), {
     conv
   } );
 

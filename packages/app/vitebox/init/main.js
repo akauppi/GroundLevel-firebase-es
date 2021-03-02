@@ -7,27 +7,25 @@
 import { assert } from './assert.js'
 
 import { initializeApp } from 'firebase/app'
-import { getAuth, useAuthEmulator, signInWithCustomToken } from 'firebase/auth'
+import { getAuth, useAuthEmulator } from 'firebase/auth'
 import { getFirestore, useFirestoreEmulator } from 'firebase/firestore'
 import { getFunctions, useFunctionsEmulator } from 'firebase/functions'
 
-/** KEEP for helping with this -> https://github.com/firebase/firebase-js-sdk/discussions/4534
+/** KEEP for helping with this -> https://github.com/firebase/firebase-js-sdk/discussions/4534 **
 import { getAnalytics } from 'firebase/analytics'
 getAnalytics;
 import { getApp } from 'firebase/app'
 getApp;
-import { getAuth } from 'firebase/auth'
-getAuth;
+import { getIdToken } from 'firebase/auth'
+getIdToken;
 import { getDatabase } from 'firebase/database'
 getDatabase
-import { getFirestore } from 'firebase/firestore'
-getFirestore
+import { arrayUnion } from 'firebase/firestore'
+arrayUnion
 import { FieldPath } from 'firebase/firestore/lite'
 FieldPath
-import { getFunctions } from 'firebase/functions'
-getFunctions
-import { getInstallations } from 'firebase/installations'
-getInstallations
+import { getFunctions as ignore8 } from 'firebase/functions'
+ignore8
 import { getMessaging } from 'firebase/messaging'
 getMessaging
 import { getPerformance } from 'firebase/performance'
@@ -36,7 +34,7 @@ import { activate } from 'firebase/remote-config'
 activate
 import { getStorage } from 'firebase/storage'
 getStorage
-**/
+//**/
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 

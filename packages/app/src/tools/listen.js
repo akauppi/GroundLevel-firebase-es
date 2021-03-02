@@ -1,55 +1,121 @@
 /*
-* src/tools/listenC.js
+* src/tools/listen.js
 *
-* Subscribe to a Firebase collection
+* Subscribe to a Firebase collection, document, or query.
 */
-import { query, collection, onSnapshot } from 'firebase/firestore'
+import { doc, collection, query, where, onSnapshot } from 'firebase/firestore'
   //
   // Firebase @exp note: 'onSnapshot' brings in following both for references, and queries
 
 import { mapRef } from './mapRef'
+import {ref as vueRef} from "vue";
 
-/*
-* Subscribe to a Firebase Firestore collection, with an optional 'QueryConstraint' (from a 'where' clause) to restrict
-* the catch.
-*
-* The collection is shown as a Vue.js 3 'Ref'.
-*/
-function listenC(db, collectionPath, ...args ) {    // (Firestore, "{collectionPath}", Array? of string|..., { context: string, conv?: obj => obj? }) => [Ref of Map of string -> string|bool|number|..., () => ()]
+import { assert } from '/@/assert'
 
-  const [qcArr, { context, conv }] =
-    args.length == 2 ? [...args] :
-    args.length == 1 ? [null, args[0]] : ( _ => { throw new Error(`Bad arguments: ${args}`) })();
-
-  const fbColl = collection(db, collectionPath);
-
+// Generator for listening of collections and queries.
+//
+// - convert dates to JavaScript 'Date' (Firebase ~~c~~should do it!)
+// - do application specific conversions if 'conv' options is provided
+//
+function ref_f_gen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref of undefined | { <key>: any }, (QuerySnapshot) => ()]
   const [ref, setN] = mapRef();
+  const conv2 = conv | (x => x);
 
-  function f(qss) {   // (QuerySnapshot) => ()
-    const conv2 = conv || (x => x);
+  function f(ss) {
+    const kvs = ss.docChanges().map( (change) => {
+      debugger;
 
-    // Collect all the changes together; pass them to the 'ref' at once.
+      const tmp = (change.type !== 'removed') ? change.doc.data() : null;
+      const v = tmp ? conv2(tmp) : undefined;
 
-    // tbd. how about removal of docs??
-
-    const kvs = qss.docs().map( (dss) => {
-      const id = dss.id;
-      const data = conv2( dss.data() );
-
-      return [id,data];
-    }, (err) => {   // (FirestoreError) => ()
-      central.error(`Failure listening to: ${context}`, err);
+      const k = change.id;
+      return [k,v];
     });
 
     setN(kvs);
   }
 
-  const unsub = (!qcArr || qcArr.length === 0) ? onSnapshot(fbColl, f)
-    : onSnapshot(query(fbColl, ...qcArr), f);
+  return [ref,f];
+}
+
+/*
+* Subscribe to a Firebase Firestore collection.
+*/
+function _listenC(db, collectionPath, opt ) {    // (Firestore, string, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+  const { conv } = opt || {};
+
+  const coll = collection(db, collectionPath);
+
+  const [ref, f] = ref_f_gen({ context, conv });
+  const unsub = onSnapshot(coll, f, err => {
+    central.error(`Failed to listen to '${collectionPath}':`, err);
+  });
 
   return [ref,unsub];
 }
 
+/*
+* Subscribe to a Firebase Firestore query.
+*/
+function _listenQ(db, collectionPath, qc, opt ) {    // (Firestore, string, QueryConstraint, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+  const { conv } = opt || {};
+
+  const coll = collection(db, collectionPath);
+  const q = query(coll,qc);
+
+  const [ref, f] = ref_f_gen({ conv });
+  const unsub = onSnapshot(q, f, err => {
+    central.error(`Failed to listen to '${collectionPath}' with query '${ qcArr.join() }':`, err);
+  });
+
+  return [ref,unsub];
+}
+
+/*
+*
+*/
+function listenC(db, collectionPath, ...args) {    // (Firestore, string, QueryConstraint?, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+
+  if (args.length > 1) {
+    const [qc, opts] = [...args];
+    return _listenQ(db, collectionPath, qc, opts)
+  } else {
+    const opts = args[0];
+    return _listenC(db, collectionPath, opts)
+  }
+}
+
+/*
+* Follow a certain Firestore document as Vue.js 3 'Ref'.
+*
+* The value is 'undefined' until the database connection has been established (alternatively, we could return a Promise).
+*
+* opt: {
+*   context: string   // describes the subscription; used in error messages
+* }
+*/
+function listenD( db, docPath ) {   // ( FirebaseFirestore, "{collectionPath}/{documentId}" ) => [Ref of undefined | { ..firestore doc }, () => ()]
+
+  const [_,a,b] = docPath.match(/(.+)\/(.+?)/);
+  assert(a && b, `Bad Firebase document path: ${docPath}`);
+
+  const dRef = doc( collection(db,a), b);
+
+  const ref = vueRef();
+
+  const unsub = onSnapshot( dRef, (dss) => {
+    console.debug("!!! Listened to:", dss )
+    debugger;
+
+    ref.value = dss;
+  }, (err) => {   // (FirestoreError) => ()
+    central.error(`Failure listening to: ${docPath}`, err);
+  });
+
+  return [ref, unsub];
+}
+
 export {
-  listenC
+  listenC,
+  listenD
 }

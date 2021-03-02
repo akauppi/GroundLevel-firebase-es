@@ -18,7 +18,7 @@
   </header>
   <main>
     <router-view />
-    <aside-keys v-if="!LOCAL" />
+    <aside-keys v-show="!LOCAL" />
   </main>
   <footer>
     <AppFooter />
@@ -85,9 +85,11 @@
 
   import { devVueWarningsToCentral } from "./config"
 
-  if (!LOCAL) {
-    import ('/@background/updateUserInfo');
-  }
+  // DID NOT WORK with @exp API ("missing or ... permissions").
+  //
+  // tbd. Study if there's a server-side trigger for a user authenticated; move the code there.
+  //
+  //import '/@background/updateUserInfo';
 
   /*
   * Vue warn handler
@@ -163,7 +165,7 @@
     ***/
 
     if (warnHandler) {
-      assert (appConfig.warnHandler === undefined);
+      assert (appConfig.warnHandler === undefined, "Warn handler already occupied! (refresh the browser?)");   // this can happen in HMR
       appConfig.warnHandler = warnHandler
     }
 

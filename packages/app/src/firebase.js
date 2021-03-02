@@ -13,8 +13,10 @@ const app = getApp();
 
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+const db = firestore;
 
 export {
   auth,
-  firestore
+  firestore,
+  db
 }

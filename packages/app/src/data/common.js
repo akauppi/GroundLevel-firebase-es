@@ -33,11 +33,13 @@ function dbC(collPath) {    // (string) => CollectionReference
 function dbD(docPath) {    // (string) => DocumentReference
   const [_,a,b] = docPath.match(/^(.+)\/(.+?)$/);   // split to collection and doc parts
 
+  console.debug(`Parsing path '${docPath}':`, { collection: a, doc: b } );
+
   return doc( collection(db,a), b );
 }
 
 export {
-  dbC,
+  //dbC,
   dbD,
-  dbQ
+  //dbQ
 }

@@ -3,7 +3,7 @@
 -
 - The default page (URL /), with a signed in user.
 -->
-<template>
+<template v-if="projectsSorted">
   <div>
     YOU ARE AT HOME 🏯
   </div>
@@ -45,7 +45,7 @@
 </style>
 
 <script>
-  import { computed, onUnmounted, toRefs } from 'vue'
+  import { computed, /*onMounted, onUnmounted,*/ toRefs, watch, ref } from 'vue'
 
   import NewTile from './NewTile.vue'
   import ProjectTile from './ProjectTile/index.vue'
@@ -64,41 +64,35 @@
   }
 
   // Props:
-  //  uid: string   Reactive value, telling the currently logged in user.
+  //  uid: Ref of String    Reactive value, telling the currently logged in user.
   //
-  function setup(props) {     // note: object spread would lose reactivity!
-    const { uid } = toRefs(props);
+  function setup(props) {     // Vue note: object spread would lose reactivity
+    const { uid: /*as*/ uidRef } = toRefs(props);
 
-    // Note: Not quite sure this is the right way to code in Vue.js 3? Please advice on the lifespan of a page data. #vuejs
+    console.debug("!! HOME CREATED!");
 
-    let myProjects;
+    const myProjectsRef = ref();   // Ref of undefined | null | Ref of Map of <project-id> -> { ..Firebase project fields }
 
-    console.debug("!! HOME SETUP with", { uid: uid.value });
+    let unsub;   // undefined | null | () => ()    ; call to stop tracking 'myProjects.value'
 
-    myProjects = activeProjects(uid.value);
+    /*const unsub2 =*/ watch( uidRef, (uid) => {
+      console.debug("!! HOME occupied by", { uid: uid });
 
-    /***
-    const unsub = watch( uid, (uid) => {
-      assert(!myProjects);  // released by 'onUnmounted'?
-
-      myProjects = activeProjects(uid);
+      if (uid) {
+        assert(!unsub);
+        [myProjectsRef.value, unsub] = activeProjects(uid);
+      } else {
+        // 'Home' is not visible once there is no user, but the component is still up and about (or destroyed and will be recreated?)
+        assert(unsub);
+        unsub();
+        [myProjectsRef.value, unsub] = [null, null];
+      }
     });
-    ***/
 
-    const projectsSorted = computed( () => {
-      return sort(myProjects.value)    // Array of [<id>, { ..projectsC doc }]
+    const projectsSorted = computed( () => {    // Ref of null | Array of [<uid>, { ..projectsC doc }]
+      const x = myProjectsRef.value;
+      return x ? sort(x.value) : [];   // null | Array of [<uid>, { ..projectsC doc }]
     })
-
-    // tbd. #style See if the '.unsub' API makes sense (should we return the 'unsub' already from 'activeProjects()'?)
-    //
-    onUnmounted( _ => {
-      console.log("Unmounting HOME");   // DEBUG
-
-      if (myProjects) myProjects.unsub();
-      myProjects = null;
-
-      //unsub();    // Q: should we call it?
-    });
 
     return {
       projectsSorted
@@ -108,7 +102,11 @@
   export default {
     name: 'Home',
     props: {
-      uid: { type: String, required: true },
+      uid: {
+        type: String,
+        required: true,
+        validator: (v) => v.match(/[a-zA-Z0-9]+/)    // e.g. "dev", "7wo7MczY0mStZXHQIKnKMuh1V3Y2"
+      }
     },
     components: {   // tbd. Do I still need to mention components?
       NewTile,

@@ -54,13 +54,13 @@ async function getCurrentUserProm_online() {
 /*
 * Provide props for a component that relies on a logged in user.
 *
-*   - uid: uid of the current user
+*   - "uid": uid of the current user
 *   - ..: any parameters from the path (eg. project id as '/:id')
 */
 function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
 
   const uid = LOCAL ? r.query.user || (_ => { throw new Error("[INTERNAL] No 'user' param though in 'lockedProps'; shouldn't happen.") })()
-    : getCurrentUserWarm();
+    : getCurrentUserWarm().uid;
 
   return { uid, ...r.params }
 }
