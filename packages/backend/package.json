@@ -44,7 +44,6 @@
     "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"
   },
   "devDependencies": {
-    "@local/functions": "file:functions",
     "concurrently": "^6.0.0",
     "eslint-plugin-node": "^11.1.0",
     "firebase-admin": "^9.5.0",
@@ -52,8 +51,10 @@
     "jest-circus": "^27.0.0-next.3",
     "wait-on": "^5.2.1"
   },
+  "//devDependencies": {
+    "//@local/functions": "file:functions"
+  },
   "//comments": {
-    "devDependencies": {},
     "engines.node": [
       "'>=14.3' for '—harmony-top-level-await'",
       "'>=13.2' for ES module support"

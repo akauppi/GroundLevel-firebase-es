@@ -2,5 +2,5 @@
 
 module.exports = { ...require('../jest.config.default.cjs'),
   // Load docs, once at the beginning of the tests.
-  globalSetup: "./setup.jest.js"
+  globalSetup: "./setup.jest.cjs"
 };

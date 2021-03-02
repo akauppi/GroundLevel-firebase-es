@@ -30,4 +30,5 @@ async function clearAndPrime(docs) {    // ({ <docPath>: { <field>: <value> } })
   console.debug("Cleared and primed!");
 }
 
+//export { cleanAndPrime }
 module.exports = clearAndPrime;
