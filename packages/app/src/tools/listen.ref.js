@@ -1,23 +1,23 @@
 /*
-* src/tools/listen.js
+* src/data/listen.ref.js
 *
-* Subscribe to a Firebase collection, document, or query.
+* Tools to turn Firebase doc, collection and query subscription into the UI framework's reference model.
 */
-import { doc, collection, query, onSnapshot, QueryConstraint } from 'firebase/firestore'
+import { collection, query, onSnapshot, QueryConstraint } from 'firebase/firestore'
   //
   // Firebase @exp note: 'onSnapshot' brings in following both for references, and queries
 
 import { mapRef } from './mapRef'
-import {ref as vueRef} from "vue";
+import {shallowRef} from 'vue'
 
-import { assert } from '/@/assert'
+import { assert } from './assert'
 
 // Generator for listening of collections and queries.
 //
 // - convert dates to JavaScript 'Date' (Firebase ~~c~~should do it!)
 // - do application specific conversions if 'conv' options is provided
 //
-function ref_f_gen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref of undefined | { <key>: any }, (QuerySnapshot) => ()]
+function mapRefSetterGen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref of undefined | { <key>: any }, (QuerySnapshot) => ()]
   const [ref, setN] = mapRef();
   const conv2 = conv | (x => x);
 
@@ -46,7 +46,7 @@ function _listenC(db, collectionPath, opts ) {    // (Firestore, string, { conv?
 
   const coll = collection(db, collectionPath);
 
-  const [ref, f] = ref_f_gen({ conv });
+  const [ref, f] = mapRefSetterGen({ conv });
   const unsub = onSnapshot(coll, f, err => {
     central.error(`Failed to listen to '${collectionPath}':`, err);
   });
@@ -66,7 +66,7 @@ function _listenQ(db, collectionPath, qc, opts ) {    // (Firestore, string, Que
   debugger;
   console.debug("Starting to follow:", { collectionPath, qc });   // DEBUG
 
-  const [ref, f] = ref_f_gen({ conv });
+  const [ref, f] = mapRefSetterGen({ conv });
   const unsub = onSnapshot(q, f, err => {
     central.error(`Failed to listen to '${collectionPath}' with  constraint '${qc}':`, err);
   });
@@ -90,36 +90,67 @@ function listenC(db, collectionPath, ...args) {    // (Firestore, string, QueryC
 }
 
 /*
-* Follow a certain Firestore document as Vue.js 3 'Ref'.
-*
-* The value is 'undefined' until the database connection has been established (alternatively, we could return a Promise).
+* Follow a certain Firestore document as a 'Ref'.
 *
 * opt: {
 *   context: string   // describes the subscription; used in error messages
 * }
+*
+* Note that we leave out the metadata Firebase provides, and just pass the document itself further.
+*
+* Returns a pair:
+*   [0]: Ref that updates as the document does; 'undefined' until database connection established; 'null' for no document
+*   [1]: unsub function
 */
-function listenD( db, docPath ) {   // ( FirebaseFirestore, "{collectionPath}/{documentId}" ) => [Ref of undefined | { ..firestore doc }, () => ()]
+function docRef(_D) {   // ( DocumentReference ) => [Ref of undefined | null | { ..document fields }, () => ()]
+  const ref = shallowRef();
 
-  const [_,a,b] = docPath.match(/(.+)\/(.+?)/);
-  assert(a && b, `Bad Firebase document path: ${docPath}`);
+  const unsub = onSnapshot( _D, (ss) => {
+    console.debug("!!! Listened to:", ss )
 
-  const dRef = doc( collection(db,a), b);
+    const data = ss.data();
+    ref.value = data ? convTimestamps(data) : null;
 
-  const ref = vueRef();
-
-  const unsub = onSnapshot( dRef, (dss) => {
-    console.debug("!!! Listened to:", dss )
-    debugger;
-
-    ref.value = dss;
   }, (err) => {   // (FirestoreError) => ()
-    central.error(`Failure listening to: ${docPath}`, err);
+    central.error(`Failure listening to '${_D.path}':`, err);
   });
 
   return [ref, unsub];
 }
 
+/*
+* Convert values of 'Timestamp'[1] to JavaScript native 'Date', for easier consumption.
+*
+* Note: This is only a shallow scan: 'Timestamp' fields within maps are currently not converted.
+*
+* [1]: https://modularfirebase.web.app/reference/firestore_.timestamp
+*
+* Timestamp: [2]
+*   {
+*     // Represents seconds of UTC time since Unix epoch
+*     // 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+*     // 9999-12-31T23:59:59Z inclusive.
+*     int64 seconds;
+*
+*     // Non-negative fractions of a second at nanosecond resolution. Negative
+*     // second values with fractions must still have non-negative nanos values
+*     // that count forward in time. Must be from 0 to 999,999,999
+*     // inclusive.
+*     int32 nanos;
+*   }
+*
+* [2]: https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto
+*/
+function convTimestamps(o) {
+  return oMap(o, v => v.toDate ? v.toDate() : v);
+}
+
+function oMap(o,vf) {
+  const arr = Object.entries(o).map(vf);
+  return Object.fromEntries(arr);
+}
+
 export {
   listenC,
-  listenD
+  docRef
 }

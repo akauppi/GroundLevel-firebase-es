@@ -3,14 +3,15 @@
 -
 - The project page. Most of the time will be spent here.
 -->
-<template>
-  <template v-if="project !== undefined">
+<template>    <!-- Vue.js 3 still needs the wrap: "single file component must have a single 'template' element" -->
+  <template v-if="project">
     <div>
       PROJECT PAGE
     </div>
 
     <h2>Project <span class="mono">{{ project.title }}</span></h2>
 
+    <h3></h3>
     <h2>Members:</h2>
     <ul v-if="membersReady">
       <li v-for="(m,uid) in members" :key="uid">
@@ -25,10 +26,13 @@
     <div v-for="sym in symbolsSortedByLayer" :key="sym._id">
       <div>{{ sym }}</div>
     </div>
-
   </template>
-  <template v-else>
+
+  <template v-else-if="project === undefined">
     <div>Loading...</div>
+  </template>
+
+  <template v-else>   <!-- Project removed while working on it; should not happen -->
   </template>
 </template>
 
@@ -42,14 +46,16 @@
 </style>
 
 <script>
-  import { onUnmounted, computed } from 'vue'
+  import { onUnmounted, computed, watch } from 'vue'
 
   import { shareMyActivity } from "/@data/wr/shareMyActivity"
 
-  import { projectSub } from '/@data/project'
+  import { projectPair } from '/@data/project'
   //import { symbolsSub } from '../../data/projectSymbols'
-  import { currentUser } from '/@firebase'   // DEBUG
-  import { getCurrentUserWarm } from "../user"    // DEBUG
+  import {uidValidator} from "/@/user"    // DEBUG
+  import { testConsumingDEBUG } from "/@/test-consuming.tmp"
+
+  import { useRouter } from 'vue-router'
 
   /* #later
   function sortByLayer(symbols) {
@@ -61,15 +67,16 @@
   }
   */
 
-  function setup({ id }) {    // 'id' is from the URL
+  function setup({ id, uid }) {    // 'id' is from the URL
+    const router= useRouter();
     const projectId = id;
 
-    shareMyActivity(projectId);   // also call this in certain actions (just keeping the tab open is not activity)
+    // TEMPORARILY DISABLED!!! tbd.
+    //shareMyActivity(projectId);   // also call this in certain actions (just keeping the tab open is not activity)
 
-    const userWarm = getCurrentUserWarm()?.uid;
-    console.debug("Entering project page: ", { projectId, currentUser, userWarm });
+    console.debug("Entering project page: ", { projectId, uid });
 
-    const [project, unsub1] = projectSub(projectId);    // note: 'project.value' is 'undefined' until the Firestore subscription has initialized
+    const [projectRef, unsub1] = projectPair(projectId);    // note: 'projectRef.value' is 'undefined' until the Firestore subscription has initialized
     //const [symbols, unsub2] = symbolsSub(projectId);
 
     //const symbolsSortedByLayer = computed(() => sortByLayer(symbols) );   // ReactiveReadOnly of [ {...symbolsD, _id: index } ]   // sorted by layer
@@ -82,8 +89,19 @@
 
     //const membersReady = computed( () => Object.keys(members).length > 0 );
 
+    // Safety guard for a case when the project simply vanishes. Should NOT happen in reality, but if does, let's log.
+    //
+    watch( projectRef, proj => {
+      if (proj === null) {
+        central.fatal("Project removed while open! Leading the user to home page.");
+
+        alert("The project is gone!!! Please continue via the home page and be in touch with app authors.");
+        router.push("/");
+      }
+    });
+
     return {
-      project,
+      project: projectRef,
       //symbolsSortedByLayer,
       //members,
       //membersReady
@@ -93,7 +111,8 @@
   export default {
     name: 'Project',
     props: {
-      id: { type: String, required: true }
+      id: { type: String, required: true },
+      uid: { type: String, required: true, validator: uidValidator }
     },
     setup
   }

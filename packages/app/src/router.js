@@ -8,7 +8,7 @@
 *   - Vue Router (next) > Guide
 *     https://next.router.vuejs.org/guide/
 */
-import { assert } from '/@/assert'
+import { assert } from '/@tools/assert'
 
 import { signInWithCustomToken } from 'firebase/auth'
 import { auth } from '/@firebase'
@@ -54,7 +54,7 @@ async function getCurrentUserProm_online() {
 /*
 * Provide props for a component that relies on a logged in user.
 *
-*   - "uidRef": Ref of undefined | null | { ..Firebase user fields }
+*   - "uid": undefined | null | { ..Firebase user fields }
 *   - ..: any parameters from the path (eg. project id as '/:id')
 */
 function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
@@ -64,12 +64,9 @@ function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
   } else {
     uid = getCurrentUserWarm()?.uid;
   }
-  //debugger;
+  assert(uid, _ => "[INTERNAL]: 'lockedProps' called without an active user");
 
-  //DEBUG
-  //if (!uid) { throw new Error("[INTERNAL] No 'user' param though in 'lockedProps'; shouldn't happen.") }
-
-  console.debug(`lockedProps: passing uid: ${uid}`);    // DEBUG
+  console.debug("'lockedProps' passing uid:", uid);    // DEBUG
 
   return { uid, ...r.params }
 }

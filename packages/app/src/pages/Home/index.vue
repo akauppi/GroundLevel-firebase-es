@@ -52,7 +52,7 @@
 
   import { activeProjects } from "/@data/activeProjects"
 
-  import { assert } from '/@/assert'
+  import { assert } from '/@tools/assert'
   import { uidValidator } from '/@/user'
 
   // The UI uses projects sorted

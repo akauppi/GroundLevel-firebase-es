@@ -18,7 +18,7 @@ import { router } from './router.js'
 import App from '/@App/index.vue'
 
 import './common.css'
-import { assert } from './assert'
+import { assert } from '/@tools/assert'
 
 document.title = appTitle;
 

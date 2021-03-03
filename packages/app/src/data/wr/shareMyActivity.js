@@ -5,7 +5,7 @@
 *
 * This gets called by opening a project, and in certain activities within there.
 */
-import { assert } from '/@/assert'
+import { assert } from '/@tools/assert'
 
 import { setDoc } from 'firebase/firestore'
 

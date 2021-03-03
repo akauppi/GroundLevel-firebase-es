@@ -1,5 +1,5 @@
 /*
-* src/assert.js
+* src/tools/assert.js
 *
 * Simple assert implementation.
 *

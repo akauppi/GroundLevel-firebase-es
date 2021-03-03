@@ -11,7 +11,7 @@
 *
 * This code is completely separate from the web app. It listens to Firebase auth directly.
 */
-import { assert } from '/@/assert'
+import { assert } from '/@tools/assert'
 
 import { setDoc } from 'firebase/firestore'
 

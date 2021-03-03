@@ -2,6 +2,8 @@
 * src/tools/refMap.js
 *
 * A 'Ref of Map' implementation.
+*
+* Used only by 'listen.ref.js'; consider making internal to it.
 */
 import { shallowRef, triggerRef } from 'vue'
 
@@ -9,12 +11,10 @@ import { shallowRef, triggerRef } from 'vue'
 * Return a 'Ref' for a map of key -> values, and a function to set those values.
 *
 * Implementation:
-*   We use only a single 'Map' instance, set values in batch, and trigger the listeners
-*   manually. The idea is to provide the normal 'Ref' API to the application, but keep
-*   object creation to a minimum.
+*   We use only a single 'Map' instance, set values in batch, and trigger the listeners manually. The idea is to
+*   provide the normal 'Ref' API to the application, but keep object creation to a minimum.
 */
 function mapRef() {   // () => [Ref of Map of string -> any, (Array of [k,v]) => ()]
-
   const m = new Map();
 
   const ref = shallowRef(m);

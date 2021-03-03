@@ -10,12 +10,12 @@
 *   - Home > ProjectTile
 *   - Project page
 */
-import { assert } from '/@/assert'
+import { assert } from '/@tools/assert'
 
 import { where } from 'firebase/firestore'
 
-import { getCurrentUserWarm } from "../user"
-import { listenC } from "/@tools/listen"
+import { getCurrentUserWarm } from "/@/user"
+import { listenC } from "/@tools/listen.ref"
 import { db } from '/@firebase'
 import { documentIdSentinel } from '/@firebase/sentinel'
 

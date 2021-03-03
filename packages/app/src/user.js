@@ -17,7 +17,8 @@ import { computed, ref, watchEffect } from 'vue'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '/@firebase'
 
-import { assert } from './assert'
+import { assert } from '/@tools/assert'
+import {testConsumingDEBUG} from "./test-consuming.tmp";
 
 // Fed either by Firebase auth changes or the router (LOCAL mode)
 //
@@ -37,6 +38,9 @@ onAuthStateChanged(auth, user => {
   } else {
     console.info("*** Users in sync:", {user: user?.uid, currentUser: currentUser?.uid})
   }
+
+  // DEBUG
+  //testConsumingDEBUG();
 },
   // Documentation does NOT state what will happen if we don't provide an error handler. So let's provide one. #firebase
   //

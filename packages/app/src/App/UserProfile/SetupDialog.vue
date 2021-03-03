@@ -106,7 +106,7 @@
 </style>
 
 <script>
-  import { assert } from '/@/assert'
+  import { assert } from '/@tools/assert'
 
   import { ref, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'

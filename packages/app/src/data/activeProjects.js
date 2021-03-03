@@ -6,12 +6,12 @@
 * Used by:
 *   - Home
 */
-import { assert } from '/@/assert'
+import { assert } from '/@tools/assert'
 import { where } from 'firebase/firestore'
 
 import { db } from '/@firebase'
 
-import { listenC } from '/@tools/listen'
+import { listenC } from '/@tools/listen.ref'
 
 function activeProjects(uid) {    // (string) => Ref of Map of <project-id> -> { ..projectsC doc }
 

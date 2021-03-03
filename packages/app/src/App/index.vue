@@ -68,7 +68,7 @@
 </style>
 
 <script>
-  import { assert } from '/@/assert'
+  import { assert } from '/@tools/assert'
 
   import { onMounted, getCurrentInstance } from 'vue'
 

@@ -66,7 +66,7 @@ function manualChunks(id) {
   for( const re of chunkTo ) {
     const tmp = id.match(re);   // [_, capture] | null
     if (tmp) {
-      name = tmp[1] || "app";
+      name = (tmp[1] || "app").replace('/','-');    // flattening output names ('/'->'-') is just for us humans
       break;
     }
   }
@@ -92,7 +92,13 @@ const chunkTo = [     // Array of Regex
   /\/node_modules\/@?(vue)\//,
   /\/node_modules\/(vue-router)\//,
 
-  /\/node_modules\/@?(firebase)\//,
+  // Pack some packages separately:
+  //  - auth to see its size implication (will be needed always)
+  //  - firestore also because it can be lazy loaded (needed only after authentication)
+  //
+  /\/node_modules\/@?(firebase)\/(?!(auth|firestore))/,   // misc firestore packages
+  /\/node_modules\/@?(firebase\/auth)\//,
+  /\/node_modules\/@?(firebase\/firestore)\//,
     // firebase/{auth|app|firestore}
     // @firebase/{auth|app|firestore|util|logger|component|webchannel-wrapper|...}
 

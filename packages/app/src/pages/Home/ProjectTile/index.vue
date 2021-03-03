@@ -44,7 +44,7 @@
 </style>
 
 <script>
-  import { assert } from '/@/assert'
+  import { assert } from '/@tools/assert'
   import { computed, onUnmounted, ref } from 'vue'
   import MemberFace from './MemberFace.vue'
 

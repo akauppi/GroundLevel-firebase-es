@@ -36,8 +36,9 @@ span.tt {
 
 <script>
 function setup() {
+  const LOCAL = import.meta.env.MODE === 'dev_local';
   return {
-    LOCAL: import.meta.env.MODE === 'dev_local'
+    LOCAL
   }
 }
 

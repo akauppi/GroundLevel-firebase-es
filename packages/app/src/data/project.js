@@ -6,17 +6,17 @@
 * Used by:
 *   - Project page
 */
-import { assert } from '/@/assert'
+import { assert } from '/@tools/assert'
 
 import { db } from '/@firebase'
-import { listenD } from '/@tools/listen'
+import { docRef } from '/@tools/listen.ref'
+import { doc, collection } from 'firebase/firestore'
 
-function projectSub(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]
-
-  const pair = listenD(db, `projects/${projectId}`);
-  return pair;
+function projectPair(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]
+  const projectD = doc( collection(db, 'projects'), projectId);
+  return docRef( projectD );
 }
 
 export {
-  projectSub
+  projectPair
 }
