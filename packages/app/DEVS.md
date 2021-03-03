@@ -14,10 +14,16 @@ npm ERR!   dev @vue/compiler-sfc@"^3.0.6" from the root project
 ...
 ```
 
-If you run into such problems, remove the existing Vue installation eg. by:
+If you run into such problems, remove the existing installation eg. by:
 
 ```
 $ rm -rf node_modules/@vue node_modules/vue
 ```
 
 Try again.
+
+
+## Using `npm link`
+
+If you co-create packages and use `npm link`, you need to relink after each `npm install`.
+

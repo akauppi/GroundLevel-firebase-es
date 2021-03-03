@@ -78,20 +78,18 @@
     })
   }
 
+  // tbd. is the claim about 'projectId' lifespan valid?  (change projects; test...)
+
   function setup({ projectId }) {   // 'projectId' stays same within the component's lifespan; can use destructuring
     assert(projectId);
-    const infos = memberUserInfos_notMe(projectId);   // RMap of <uid> -> { displayName: string, photoURL: string, status: "live"|"recent"|... }
 
-    onUnmounted( infos.unsub );
+    // tbd. Likely this code needs to go in 'onMounted'
+    const [refMap, unsub] = memberUserInfos_notMe(projectId);   // [Ref of Map of <uid> -> { displayName: string, photoURL: string, status: "live"|"recent"|... }, () => ()]
+
+    onUnmounted( unsub );
 
     return {
-      // {{{ REMOVE THIS COMMENT ONCE IT'S OBVIOUS }}}
-      //
-      // Notes about RMap:
-      //  - it's "Ref-like", in that referencing its '.value' within 'computed()' does the reactivity magic
-      //  - possible upstream errors show as thrown exceptions when reading the '.value'
-      //
-      membersNotMeSorted: computed( () => sort(infos.value) )   // Array of [<uid>, { displayName: string, photoURL: string, status: ... }]
+      membersNotMeSorted: computed( () => sort(refMap.value) )   // Array of [<uid>, { displayName: string, photoURL: string, status: ... }]
         //
         // ^-- Note: No need to name '...Ref' since only used in HTML template.
     }
@@ -102,7 +100,7 @@
     components: {
       MemberFace
     },
-    props: {
+    props: {    // tbd. prop likely doesn't work like this, does it? #check
       projectId: { type: String, required: true },
 
       // Note: Better to take just the pieces we need (in the UI), not the whole 'projectD' object.

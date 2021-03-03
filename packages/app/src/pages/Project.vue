@@ -48,6 +48,8 @@
 
   import { projectSub } from '/@data/project'
   //import { symbolsSub } from '../../data/projectSymbols'
+  import { currentUser } from '/@firebase'   // DEBUG
+  import { getCurrentUserWarm } from "../user"    // DEBUG
 
   /* #later
   function sortByLayer(symbols) {
@@ -64,7 +66,8 @@
 
     shareMyActivity(projectId);   // also call this in certain actions (just keeping the tab open is not activity)
 
-    console.debug("Entering project page: ", projectId);
+    const userWarm = getCurrentUserWarm()?.uid;
+    console.debug("Entering project page: ", { projectId, currentUser, userWarm });
 
     const [project, unsub1] = projectSub(projectId);    // note: 'project.value' is 'undefined' until the Firestore subscription has initialized
     //const [symbols, unsub2] = symbolsSub(projectId);

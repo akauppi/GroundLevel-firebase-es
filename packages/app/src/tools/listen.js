@@ -3,7 +3,7 @@
 *
 * Subscribe to a Firebase collection, document, or query.
 */
-import { doc, collection, query, where, onSnapshot } from 'firebase/firestore'
+import { doc, collection, query, onSnapshot, QueryConstraint } from 'firebase/firestore'
   //
   // Firebase @exp note: 'onSnapshot' brings in following both for references, and queries
 
@@ -41,12 +41,12 @@ function ref_f_gen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref of und
 /*
 * Subscribe to a Firebase Firestore collection.
 */
-function _listenC(db, collectionPath, opt ) {    // (Firestore, string, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
-  const { conv } = opt || {};
+function _listenC(db, collectionPath, opts ) {    // (Firestore, string, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+  const { conv } = opts || {};
 
   const coll = collection(db, collectionPath);
 
-  const [ref, f] = ref_f_gen({ context, conv });
+  const [ref, f] = ref_f_gen({ conv });
   const unsub = onSnapshot(coll, f, err => {
     central.error(`Failed to listen to '${collectionPath}':`, err);
   });
@@ -57,15 +57,18 @@ function _listenC(db, collectionPath, opt ) {    // (Firestore, string, { conv?:
 /*
 * Subscribe to a Firebase Firestore query.
 */
-function _listenQ(db, collectionPath, qc, opt ) {    // (Firestore, string, QueryConstraint, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
-  const { conv } = opt || {};
+function _listenQ(db, collectionPath, qc, opts ) {    // (Firestore, string, QueryConstraint, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+  const { conv } = opts || {};
 
   const coll = collection(db, collectionPath);
   const q = query(coll,qc);
 
+  debugger;
+  console.debug("Starting to follow:", { collectionPath, qc });   // DEBUG
+
   const [ref, f] = ref_f_gen({ conv });
   const unsub = onSnapshot(q, f, err => {
-    central.error(`Failed to listen to '${collectionPath}' with query '${ qcArr.join() }':`, err);
+    central.error(`Failed to listen to '${collectionPath}' with  constraint '${qc}':`, err);
   });
 
   return [ref,unsub];
@@ -76,7 +79,8 @@ function _listenQ(db, collectionPath, qc, opt ) {    // (Firestore, string, Quer
 */
 function listenC(db, collectionPath, ...args) {    // (Firestore, string, QueryConstraint?, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
 
-  if (args.length > 1) {
+  debugger;
+  if (args[0] instanceof QueryConstraint) {
     const [qc, opts] = [...args];
     return _listenQ(db, collectionPath, qc, opts)
   } else {

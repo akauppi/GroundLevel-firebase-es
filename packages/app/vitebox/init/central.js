@@ -29,6 +29,11 @@ const logGen = level => {    // (string) => (string [, object]) => ()
 
   return (msg, opt) => {
     const s = format(msg,opt);
+
+    // Also print on browser console, if warn/error/fatal
+    const f = showOnBrowser.get(level);
+    if (f) f(s);
+
     try {
       const ignore = post(url,s);    // free tail
     }
@@ -46,7 +51,7 @@ const lf = logGen("fatal");
 *
 * Use:
 *   <<
-*     throw new log.fatal('msg', {...});
+*     throw log.fatal('msg', {...});
 *   <<
 */
 function logFatal(msg, opt) {
@@ -55,6 +60,12 @@ function logFatal(msg, opt) {
 
   return new Error(s);    // tbd. ideally, with the caller's stack (maybe 'throw' does it?)
 }
+
+const showOnBrowser = new Map([
+  ["warn", console.warn],
+  ["error", console.error],
+  ["fatal", console.error]    // '.error' is highest level in browsers
+]);
 
 const central = {
   debug: logGen("debug"),

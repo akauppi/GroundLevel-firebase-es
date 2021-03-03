@@ -1,5 +1,5 @@
 <!--
-- src/components/AppFooter.vue
+- src/App/AppFooter.vue
 -
 - Line at the bottom of the application.
 -->

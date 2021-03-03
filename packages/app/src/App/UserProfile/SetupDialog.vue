@@ -1,5 +1,5 @@
 <!--
-- src/components/AppProfile/SetupDialog.vue
+- src/App/UserProfile/SetupDialog.vue
 -
 - Dialog that shows a person's settings (if any) and a Sign out -button.
 -
@@ -111,7 +111,7 @@
   import { ref, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
 
-  import { getCurrentUserWarm } from '/@/user'
+  import { userRef2 as user } from '/@/user'
 
   const LOCAL = import.meta.env.MODE === 'dev_local'
 
@@ -119,14 +119,14 @@
   //
   import MemberFace from '/@pages/Home/ProjectTile/MemberFace.vue'    // #later
 
-  const closeEl = ref(null);    // DOM element, gets set during mounting
+  let closeEl;    // DOM element, gets set during mounting
 
   // If 'esc' pressed while dialog is visible, flash the close button visually.
   //
   function escListener(evt) {
     if (evt.key === "Escape") {
-      closeEl.value.classList.add("fakeHover");
-      setTimeout( () => closeEl.value.click(), 20);   // just enough to notice it
+      closeEl.classList.add("fakeHover");
+      setTimeout( () => closeEl.click(), 20);   // just enough to notice it
     }
   }
 
@@ -144,15 +144,13 @@
 
     async function signOut () {
       if (!LOCAL) {
-        const auth = await import('/@/firebase').then( mod => mod.auth );
+        const auth = await import('/@firebase').then( mod => mod.auth );
         await auth.signOut();
       }
 
       router.push('/');
       closeMe();    // avoid the dialog from popping up if re-authenticating
     }
-
-    const user = getCurrentUserWarm();
 
     function closeMe() {
       emit('closeMe')

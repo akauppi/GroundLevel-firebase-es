@@ -7,8 +7,11 @@
 */
 import { assert } from '/@/assert'
 
-import { FieldValue, setDoc } from 'firebase/firestore'
+import { setDoc } from 'firebase/firestore'
+
 import { getCurrentUserWarm } from "/@/user"
+import { currentUser } from "/@firebase"
+import { serverTimestampSentinel } from "/@firebase/sentinel"
 
 import { dbD } from '../common'
 
@@ -23,6 +26,8 @@ function shareMyActivity(projectId) {
   const longEnoughSecs = 5 * 60;   // 5 min; tbd. take from config?
   const uid = getCurrentUserWarm().uid;
 
+  console.debug(`!!! Firebase sees: ${ currentUser }`, { uid }); // DEBUG
+
   function longEnough() {
     if (!lastActive) return true;
 
@@ -33,7 +38,7 @@ function shareMyActivity(projectId) {
   if (uid !== lastUid || longEnough()) {
     const prom = setDoc(
       projectsUserInfoD(projectId, uid),
-      { lastActive: FieldValue.serverTimestamp() },
+      { lastActive: serverTimestampSentinel },
       { merge: true }   // options
     );
 

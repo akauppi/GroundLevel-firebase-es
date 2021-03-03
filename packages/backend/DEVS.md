@@ -59,3 +59,15 @@ Firebase Web client can take JavaScript `Date` objects and convert them to its `
 |Specific time|`new Date('27 Mar 2020 14:17:00 EET')`|
 
 *Note: We could detect these automatically by read validation in the access rules (not assuming existing data complies with the schema). That turned out to be non-trivial, so just be careful.*
+
+
+## Debugging Cloud Function deployment failures
+
+If a deploy fails, and the local CLI does not give proper details, try:
+
+Firebase Console > project > `Functions` > `Logs`
+
+>![](.images/firebase-console-functions-logs.png)
+
+This was enough detail to fix it.
+

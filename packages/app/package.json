@@ -60,7 +60,7 @@
     "firebase-admin": "^9.5.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.8",
-    "vite": "^2.0.4",
+    "vite": "^2.0.5",
     "vue-eslint-parser": "^7.5.0",
     "wait-on": "^5.2.1"
   },

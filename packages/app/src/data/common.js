@@ -3,27 +3,29 @@
 *
 * Provide access to the app's Firestore instance.
 */
-import { firestore as db } from '/@/firebase'
+import { db } from '/@firebase'
 import { doc, collection, query, where } from "firebase/firestore"
 
-/*
+/*** disabled
+/_*
 * <<
 *   q(`projects/${projectId}/userInfo`, [FieldPath.documentId, '!=', uid])
 * <<
-*/
+*_/
 function dbQ(collPath, whereArr) {    // (string, Array of string) => Query
   const coll = collection(db, collPath);
   return query( coll, where(...whereArr) );
 }
 
-/*
+/_*
 * <<
 *   q(`projects/${projectId}/userInfo`, [FieldPath.documentId, '!=', uid])
 * <<
-*/
+*_/
 function dbC(collPath) {    // (string) => CollectionReference
   return collection(db, collPath);
 }
+***/
 
 /*
 * <<

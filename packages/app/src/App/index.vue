@@ -1,5 +1,5 @@
 <!--
-- src/App.vue
+- src/App/index.vue
 -
 - The frame of the application - same for all pages
 -
@@ -12,9 +12,7 @@
     <AppLogo />
     <div id="mode" v-bind:class="{ devLocal: LOCAL /*, devOnline: mode === 'development'*/ }">
     </div>
-    <!-- 'user' is Ref of (undefined | null | { ..Firebase user object })
-    -->
-    <AppProfile v-if="user" />
+    <UserProfile v-if="user" />    <!-- 'user' is Ref of (undefined | null | { ..Firebase user object }) -->
   </header>
   <main>
     <router-view />
@@ -74,22 +72,16 @@
 
   import { onMounted, getCurrentInstance } from 'vue'
 
-  import AppLogo from './components/AppLogo.vue'
-  import AppProfile from './components/AppProfile/index.vue'
-  import AppFooter from './components/AppFooter.vue'
+  import AppLogo from './AppLogo.vue'
+  import UserProfile from './UserProfile/index.vue'
+  import AppFooter from './AppFooter.vue'
 
-  import { userRef2 } from './user'
+  import { userRef2 } from '/@/user'
 
   const _MODE = import.meta.env?.MODE || 'production';    // tbd. needed? why the '|| "production"'?
   const LOCAL = import.meta.env.MODE === 'dev_local';
 
-  import { devVueWarningsToCentral } from "./config"
-
-  // DID NOT WORK with @exp API ("missing or ... permissions").
-  //
-  // tbd. Study if there's a server-side trigger for a user authenticated; move the code there.
-  //
-  //import '/@background/updateUserInfo';
+  import { devVueWarningsToCentral } from "/@/config"
 
   /*
   * Vue warn handler
@@ -124,6 +116,7 @@
     }
   });
 
+  /*** disabled (do we need this?)
   /*
   * Vue error handler
   *
@@ -133,11 +126,9 @@
   *   err:    Error     // eg. "TypeError: Cannot read property ..."
   *   vm:     Proxy     "component in which error occurred"
   *   info:   "setup function" |...   // "Vue specific error information such as lifecycle hooks, events etc."
-  */
-  /*
+  *_/
   const errorHandler = (err, vm, info) => {   // (Error, Proxy, string) => ()
     console.debug("In Vue error handler:", info);
-
     debugger;
   }*/
 
@@ -152,7 +143,7 @@
 
     const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
 
-    /***
+    /*** disabled
     // Error handler. This is called within Vue lifecycle. If we don't tap into it, Vue gives one or two warnings
     // about "Unhandled error during..." and eventually the error is passed to (console / central catch in ops).
     //
@@ -161,8 +152,7 @@
     if (errorHandler) {
       assert (appConfig.errorHandler === undefined);    // we're not overwriting anything
       appConfig.errorHandler = errorHandler;
-    }
-    ***/
+    }*/
 
     if (warnHandler) {
       assert (appConfig.warnHandler === undefined, "Warn handler already occupied! (refresh the browser?)");   // this can happen in HMR
@@ -179,7 +169,7 @@
   export default {
     name: 'App',     // helps in debugging
     components: {
-      AppLogo, AppProfile, AppFooter
+      AppLogo, UserProfile, AppFooter
     },
     setup
   }

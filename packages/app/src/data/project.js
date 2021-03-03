@@ -8,7 +8,7 @@
 */
 import { assert } from '/@/assert'
 
-import { db } from '/@/firebase'
+import { db } from '/@firebase'
 import { listenD } from '/@tools/listen'
 
 function projectSub(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]

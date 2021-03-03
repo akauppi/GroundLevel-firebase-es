@@ -13,16 +13,14 @@ import { init as initAside } from 'aside-keys'
   // Only needed in 'online' mode but import unconditionally; probably better for bundling.
 
 import { appTitle } from './config.js'
+import { router } from './router.js'
 
-import App from './App.vue'
-import { router } from './router.js'    // initializes the router; important we have it!
+import App from '/@App/index.vue'
 
 import './common.css'
 import { assert } from './assert'
 
 document.title = appTitle;
-
-const app = createApp(App);
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 
@@ -32,7 +30,7 @@ async function init() {    // () => Promise of ()
   // Initialize the authentication system
   //
   if (!LOCAL) {
-    const auth = await import('/@/firebase').then( mod => mod.auth );
+    const auth = await import('/@firebase').then( mod => mod.auth );
 
     initAside(auth).then( _ => {
       const dt = performance.now() - t0;
@@ -40,12 +38,11 @@ async function init() {    // () => Promise of ()
     });
   }
 
-  // Initialize Vue Router
+  // Initialize Vue App
   //
-  // Note:
-  //  This is needed for any use of the router; not just for 'this.$route[r]'.
-  //
-  app.use(router);
+  const app = createApp(App);
+
+  app.use(router);    // needed for any use of the 'router'
 
   // Let's be curious and see whether there are ever errors from here:
   router.isReady().catch( err => {
@@ -53,6 +50,7 @@ async function init() {    // () => Promise of ()
     throw err;
   });
 
+  /*** HOLD
   // Vue-router note:
   //    It may be that we need to wait for router to be ready. Check here -> https://next.router.vuejs.org/guide/migration/#all-navigations-are-now-always-asynchronous
   //
@@ -61,9 +59,17 @@ async function init() {    // () => Promise of ()
   await router.isReady().then( _ => {
     console.debug("Router is ready");   // note: it DOES NOT get ready!!
   } );
+  ***/
 
   app.mount('#app');
   central.info("App is mounted.");
 }
 
 export { init }
+
+
+// DID NOT WORK with @exp API ("missing or ... permissions").
+//
+// tbd. Study if there's a server-side trigger for a user authenticated; move the code there.
+//
+//import '/@background/updateUserInfo';

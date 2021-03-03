@@ -1,5 +1,5 @@
 <!--
-- src/pages/Home/MemberFace.vue
+- src/pages/Home/ProjectTile/MemberFace.vue
 -
 - Avatar or a member of a project.
 -

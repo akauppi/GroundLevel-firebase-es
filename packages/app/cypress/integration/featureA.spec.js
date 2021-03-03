@@ -29,7 +29,7 @@ describe('Sign In as Joe', () => {
   it('See one\'s name', () => {
     //cy.visit('/')                               // <-- NOT logged in as "Joe D." but some other (remembered???) user
 
-    cy.get('div.app-profile #user-name')
+    cy.get('div.user-profile #user-name')
       .contains(joe.displayName)
   })
 })

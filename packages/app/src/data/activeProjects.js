@@ -9,19 +9,17 @@
 import { assert } from '/@/assert'
 import { where } from 'firebase/firestore'
 
-import { firestore as db } from '/@/firebase'
+import { db } from '/@firebase'
 
 import { listenC } from '/@tools/listen'
 
-// Firestore notes:
-//  - Cannot do a '.where()' on missing fields (Apr 2020) (we want projects without '.removed'). Can let them
-//    come and then skip.
-
 function activeProjects(uid) {    // (string) => Ref of Map of <project-id> -> { ..projectsC doc }
-  assert(uid instanceof String, _ => `Bad uid: ${uid}`);
 
+  // Firestore does not allow '.where()' on missing fields (Mar 2021); we want projects without '.removed'.
+  // Let them come and skip the ones not wanted.
+  //
   const [mapRef,unsub] = listenC( db, 'projects', where('members', 'array-contains', uid), {
-    conv: (v) => v.removed ? null : v    // filter out removed already at the entrance
+    conv: (v) => v.removed ? null : v    // filter out removed already at the porch
   });
 
   return [mapRef,unsub];

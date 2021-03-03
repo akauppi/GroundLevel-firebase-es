@@ -1,5 +1,5 @@
 /*
-* src/firebase.js
+* src/firebase/index.js
 *
 * Provide Firebase handles to application level.
 */
@@ -12,11 +12,14 @@ import { getFirestore } from 'firebase/firestore'
 const app = getApp();
 
 const auth = getAuth(app);
-const firestore = getFirestore(app);
-const db = firestore;
+const db = getFirestore(app);
+
+// Meant for DEBUGGING ONLY
+//
+const currentUser = auth.currentUser
 
 export {
   auth,
-  firestore,
-  db
+  db,
+  currentUser
 }

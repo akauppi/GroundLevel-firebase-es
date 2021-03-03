@@ -1,5 +1,5 @@
 <!--
-- src/components/AppLogo.vue
+- src/App/AppLogo.vue
 -
 - The logo in top left corner
 -->

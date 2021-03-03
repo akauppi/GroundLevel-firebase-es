@@ -12,11 +12,12 @@
 */
 import { assert } from '/@/assert'
 
-import { FieldPath, where } from 'firebase/firestore'
+import { where } from 'firebase/firestore'
 
 import { getCurrentUserWarm } from "../user"
 import { listenC } from "/@tools/listen"
-import { db } from '/@/firebase'
+import { db } from '/@firebase'
+import { documentIdSentinel } from '/@firebase/sentinel'
 
 function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <uid> -> { ...projectUserInfoC doc, status: "live"|"recent"|"" }, () => ()]
   assert(projectId);
@@ -48,8 +49,7 @@ function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <ui
     }
   }
 
-  debugger;
-  const [ref, unsub] = listenC( db, `projects/${projectId}/userInfo`, where(FieldPath.documentId, '!=', myUid), {
+  const [ref, unsub] = listenC( db, `projects/${projectId}/userInfo`, where(documentIdSentinel, '!=', myUid), {
     conv
   } );
 

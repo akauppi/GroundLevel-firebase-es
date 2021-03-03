@@ -1,11 +1,11 @@
 <!--
-- src/components/AppProfile/index.vue
+- src/App/UserProfile/index.vue
 -
 - Information about the user + possibility to open personal settings / sign out dialog.
 - Only visible when signed in.
 -->
 <template>
-  <div class="app-profile fixed-top-right" @click.stop="openDialog">
+  <div class="user-profile fixed-top-right" @click.stop="openDialog">
     <div id="user-name">
       {{ user.isAnonymous ? 'anonymous user' : user.displayName || '(missing name!)' }}
     </div>
@@ -29,7 +29,7 @@
 </template>
 
 <style scoped>
-  .app-profile {
+  .user-profile {
     display: flex;
     cursor: pointer;    /* whole corner acts as a link */
 
@@ -78,8 +78,6 @@
 </style>
 
 <script>
-  // Note: the user remains the same throughout our lifespan (there's no UI option to change the user).
-
   import { ref } from 'vue'
 
   import { userRef2 as user } from '/@/user'
@@ -101,14 +99,14 @@
   function setup() {
     return {
       isOpen,
-      openDialog,   // IDE note: mistakenly shows these dimmed (they are used)
+      openDialog,
       closeDialog,
       user
     }
   }
 
   export default {
-    name: 'AppProfile',
+    name: 'UserProfile',
     components: { SetupDialog },
     setup
   };

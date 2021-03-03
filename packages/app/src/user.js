@@ -15,10 +15,9 @@
 import { computed, ref, watchEffect } from 'vue'
 
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '/@/firebase'
+import { auth } from '/@firebase'
 
 import { assert } from './assert'
-//REMOVE import { localUserRef } from "./router"
 
 // Fed either by Firebase auth changes or the router (LOCAL mode)
 //
@@ -27,11 +26,24 @@ const authRef = ref();   // Ref of undefined | null | { displayName: string, pho
 // Start tracking the user (turn a callback into Vue 'ref').
 //
 onAuthStateChanged(auth, user => {
-  assert(user !== undefined, "[INTERNAL] Mom! Firebase auth gave 'undefined'!")
 
   authRef.value = user;    // null | { ..Firebase User object }
+
+  // DEBUG: Compare with 'Auth.currentUser'
+  //
+  const currentUser = auth.currentUser;
+  if (user ? !currentUser : currentUser) {
+    console.error("[FIREBASE INTERNAL MISMATCH]:", {user: user?.uid, currentUser: currentUser?.uid})
+  } else {
+    console.info("*** Users in sync:", {user: user?.uid, currentUser: currentUser?.uid})
+  }
+},
+  // Documentation does NOT state what will happen if we don't provide an error handler. So let's provide one. #firebase
+  //
+  (err) => {
+    central.fatal("Auth failed:", err);   // never seen?
+    throw err;
 });
-  // ops catches possible errors (never seen)
 
 const isReadyProm = new Promise( (resolve /*,reject*/) => {
   const unsub = watchEffect(() => {
@@ -46,12 +58,15 @@ const isReadyProm = new Promise( (resolve /*,reject*/) => {
 * Expose only certain user fields.
 *
 * For the application level that can see users change back and forth. For pages, get the user by props.
+*
+* Note: It's good to have two level reactivity in Vue ('ref' and then 'computed'); this allows the exposed 'Ref' to be
+*       read-only. It is the only way the author knows that this can be achieved.
 */
-const userRef2 = computed( () => {   // Ref of undefined | null | { displayName: string, uid: string }
-  const a = authRef.value;  // undefined | false | { displayName: string, uid: string, ... }
+const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid: string, displayName: string, isAnonymous: Boolean, photoURL: string }
+  const v = authRef.value;  // undefined | false | { displayName: string, uid: string, ... }
 
-  if (a) {
-    const o = a;
+  if (v) {
+    const o = v;
     return {    // expose a controlled subset (minimalistic)
       uid: o.uid,
       displayName: o.displayName,
@@ -59,12 +74,12 @@ const userRef2 = computed( () => {   // Ref of undefined | null | { displayName:
       photoURL: o.photoURL
     }
   } else {
-    return a    // undefined|null
+    return v;   // undefined|null
   }
 });
 
 /*
-* Asking the current user, by a page.
+* Asking the current user, when the caller knows there must be one.
 */
 function getCurrentUserWarm() {   // () => null | { uid: string, displayName: string, isAnonymous: Boolean, photoURL: string }
   const v = userRef2.value;
@@ -73,8 +88,16 @@ function getCurrentUserWarm() {   // () => null | { uid: string, displayName: st
   return v;
 }
 
+/*
+* Validator that can be useful for Vue props.
+*/
+function uidValidator(v) {    // (String) => Boolean
+  return v.match(/^[a-zA-Z0-9]+$/);    // e.g. "dev", "7wo7MczY0mStZXHQIKnKMuh1V3Y2"
+}
+
 export {
   userRef2,
   getCurrentUserWarm,
-  isReadyProm
+  isReadyProm,
+  uidValidator
 }
