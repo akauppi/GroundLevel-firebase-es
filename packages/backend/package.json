@@ -36,9 +36,10 @@
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all",
     " -- ": "",
     "deploy": "firebase deploy --only functions,firestore",
-    "predeploy": "tools/hack.sh 1",
+    "predeploy": "npm run --silent _functionsNpmInstall && tools/hack.sh 1",
     "postdeploy": "tools/hack.sh 2",
     " -- -": "",
+    "_functionsNpmInstall": "(cd functions && npm install)",
     "//pretest, prestart, predeploy": "tbd. Test that 'firebase' version >= 9.4.0 (has a fix for deploying with Node 15)",
     "//predeploy": "npm run --silent _checkFirebaseActiveProj",
     "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"
