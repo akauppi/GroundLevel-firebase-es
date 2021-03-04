@@ -11,13 +11,14 @@
 
     <h2>Project <span class="mono">{{ project.title }}</span></h2>
 
-    <h3></h3>
+    <h3>Date: {{ project.zzz }}</h3>
+
     <h2>Members:</h2>
     <ul v-if="membersReady">
       <li v-for="(m,uid) in members" :key="uid">
         {{ m.name }} {{ m.isAuthor ? "is author" : "" }}
-        <!-- tbd. doesn't build; fix
-        <img src="{{ m.photoURL }}"/>
+        <!-- tbd. how to form?
+        <img src={{ m.photoURL }} />
         -->
       </li>
     </ul>
@@ -53,7 +54,6 @@
   import { projectPair } from '/@data/project'
   //import { symbolsSub } from '../../data/projectSymbols'
   import {uidValidator} from "/@/user"    // DEBUG
-  import { testConsumingDEBUG } from "/@/test-consuming.tmp"
 
   import { useRouter } from 'vue-router'
 
@@ -71,8 +71,7 @@
     const router= useRouter();
     const projectId = id;
 
-    // TEMPORARILY DISABLED!!! tbd.
-    //shareMyActivity(projectId);   // also call this in certain actions (just keeping the tab open is not activity)
+    shareMyActivity(projectId);   // also call this in certain actions (just keeping the tab open is not activity)
 
     console.debug("Entering project page: ", { projectId, uid });
 

@@ -10,23 +10,19 @@ import { assert } from '/@tools/assert'
 import { setDoc } from 'firebase/firestore'
 
 import { getCurrentUserWarm } from "/@/user"
-import { currentUser } from "/@firebase"
+import { dbDoc } from "/@firebase"
 import { serverTimestampSentinel } from "/@firebase/sentinel"
-
-import { dbD } from '../common'
 
 let lastActive;   // Date | undefined; when last written
 let lastUid;      // ..for this user
 
 function projectsUserInfoD(projectId, uid) {
-  return dbD(`projects/${projectId}/userInfo/${uid}`);
+  return dbDoc( `projects/${projectId}/userInfo`, uid );
 }
 
 function shareMyActivity(projectId) {
   const longEnoughSecs = 5 * 60;   // 5 min; tbd. take from config?
   const uid = getCurrentUserWarm().uid;
-
-  console.debug(`!!! Firebase sees: ${ currentUser }`, { uid }); // DEBUG
 
   function longEnough() {
     if (!lastActive) return true;
@@ -46,6 +42,8 @@ function shareMyActivity(projectId) {
     prom.then( _ => {
       lastActive = new Date();
       lastUid = uid;
+
+      console.debug("Activity posted", { uid, lastActive });
     })
     .catch( err => {
       central.error("Reporting activity failed:", err);

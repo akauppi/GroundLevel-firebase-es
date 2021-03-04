@@ -12,10 +12,10 @@
 */
 import { assert } from '/@tools/assert'
 
-import { where } from 'firebase/firestore'
+import { collection, where } from 'firebase/firestore'
 
 import { getCurrentUserWarm } from "/@/user"
-import { listenC } from "/@tools/listen.ref"
+import { collRef } from "/@tools/listen.ref"
 import { db } from '/@firebase'
 import { documentIdSentinel } from '/@firebase/sentinel'
 
@@ -49,7 +49,7 @@ function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <ui
     }
   }
 
-  const [ref, unsub] = listenC( db, `projects/${projectId}/userInfo`, where(documentIdSentinel, '!=', myUid), {
+  const [ref, unsub] = collRef( collection(db, `projects/${projectId}/userInfo`), where(documentIdSentinel, '!=', myUid), {
     conv
   } );
 

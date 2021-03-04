@@ -5,21 +5,26 @@
 */
 import { getApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, doc, collection } from 'firebase/firestore'
 
 // Design consideration: We could "hide" the database part in here.
 
 const app = getApp();
 
+// Note. 'getAuth' uses `indexedDBLocalPersistence` for persisting the authentication values. For a larger discussion,
+//    see 'DEVS.md'.
+//
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Meant for DEBUGGING ONLY
+// Helper that reduces the amount of imports needed in application code.
 //
-const currentUser = auth.currentUser
+function dbDoc(collectionPath, documentId) {
+  return doc( collection(db, collectionPath), documentId );
+}
 
 export {
   auth,
   db,
-  currentUser
+  dbDoc
 }

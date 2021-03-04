@@ -58,7 +58,7 @@
   // The UI uses projects sorted
   //
   function sort(projects) {   // (Map of <id> -> { ..projectsC doc }) => Array of [<id>, { ..projectsC doc }]; sorted by recency
-    const dataRaw = Array.from( projects.entries() );   // Array of [<id>, { ..projectsC doc }]
+    const dataRaw = Array.from(projects);   // Array of [<id>, { ..projectsC doc }]
 
     return dataRaw.sort( ([_,a],[__,b]) => b.created - a.created );
   }
@@ -101,34 +101,35 @@
       console.debug("HOME UNMOUNTED");
     })
 
-    /*** DISABLED TEMPORARILY
-    const projectsRef = ref();   // Ref of undefined | null | Ref of Map of <project-id> -> { ..Firebase project fields }
+    //let projectsSortedRef, unsub;
 
-    let unsub;   // undefined | null | () => ()    ; call to stop tracking 'projectsRef.value'
+    // NOTE: Not sure, if the below needs to be within 'onMounted' tbd.
+    //onMounted( () => {
+      //const uid = uidRef.value;
+      //assert(uid);
 
-    /_*const unsub2 =*_/ watch( uidRef, (uid) => {
-      console.debug("!! HOME occupied by", { uid: uid });
+    const uid = uidRef.value;
+    console.debug("!!! Home occupied by:", uid);
 
-      if (uid) {
-        assert(!unsub);
-        [projectsRef.value, unsub] = activeProjects(uid);
-      } else {
-        // 'Home' is not visible once there is no user, but the component is still up and about (or destroyed and will be recreated?)
-        assert(unsub);
-        unsub();
-        [projectsRef.value, unsub] = [null, null];
-      }
+    const [projectsRef, unsub] = activeProjects(uid);   // start following this user's projects
+
+    const projectsSortedRef = computed( () => {
+      const arr = Array.from(projectsRef.value);    // [<project-id>, {..projectsC doc}]
+      console.debug("!!!", arr);
+      return sort(arr);
+    })
+
+    onUnmounted( _ => {
+      console.debug("!!! Unsubbing")
+      if (unsub) unsub();
     });
 
-    const projectsSorted = computed( () => {    // Ref of null | Array of [<uid>, { ..projectsC doc }]
-      const x = projectsRef.value;
-      return x ? sort(x.value) : [];   // null | Array of [<uid>, { ..projectsC doc }]
-    })
-    ***/
-    const projectsSorted = ref();
+    watch( projectsSortedRef, p => {    // DEBUG; REMOVE
+      console.debug("!!! Project seen:", p);
+    });
 
     return {
-      projectsSorted
+      projectsSorted: projectsSortedRef
     }
   }
 
