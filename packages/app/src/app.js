@@ -9,8 +9,9 @@
 */
 import { createApp } from 'vue'
 
+import { auth } from '/@firebase'
 import { init as initAside } from 'aside-keys'
-  // Only needed in 'online' mode but import unconditionally; probably better for bundling.
+  // Only needed in 'online' mode but import always (optimize for production)
 
 import { appTitle } from './config.js'
 import { router } from './router.js'
@@ -27,14 +28,10 @@ const LOCAL = import.meta.env.MODE === 'dev_local';
 async function init() {    // () => Promise of ()
   const t0 = performance.now();
 
-  // Initialize the authentication system
-  //
+  // Production: Initialize the authentication system
   if (!LOCAL) {
-    const auth = await import('/@firebase').then( mod => mod.auth );
-
     initAside(auth).then( _ => {
-      const dt = performance.now() - t0;
-      console.log(`Authentication initialized (took ${dt.toFixed(0)}ms)`);    // #later: candidate for ops analytics
+      console.log(`Authentication initialized (took ${(performance.now()-t0).toFixed(0)}ms)`);    // #later: candidate for ops analytics
     });
   }
 
@@ -65,8 +62,19 @@ async function init() {    // () => Promise of ()
   central.info("App is mounted.");
 }
 
-export { init }
+export {
+  init
+}
 
+// Leak certain things to the ops level (without this, they would be tree-shaken).
+//
+import { initializeApp } from 'firebase/app'
+import { getPerformance } from 'firebase/performance'
+
+export {
+  initializeApp,
+  getPerformance
+}
 
 // DID NOT WORK with @exp API ("missing or ... permissions").
 //

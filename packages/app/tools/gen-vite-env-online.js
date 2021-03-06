@@ -80,17 +80,13 @@ function pick(key) {    // (string) => string
   return capture;
 }
 
-const a = pick("apiKey");
-const b = pick("authDomain");
-const c = pick("projectId");
-
 const out =
 `# Access values for the Firebase project.
 # DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev:online'.
 #
-VITE_API_KEY=${a}
-VITE_AUTH_DOMAIN=${b}
-VITE_PROJECT_ID=${c}
+VITE_API_KEY=${ pick("apiKey") }
+VITE_AUTH_DOMAIN=${ pick("authDomain") }
+VITE_PROJECT_ID=${ pick("projectId") }
 `;
 
 process.stdout.write(out);

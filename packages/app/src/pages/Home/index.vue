@@ -64,12 +64,13 @@
   }
 
   // Props:
-  //  uid: Ref of String    Reactive value, telling the currently logged in user.
+  //  uid: string     currently logged in user
   //
-  // Modeled according to -> https://v3.vuejs.org/guide/composition-api-introduction.html#lifecycle-hook-registration-inside-setup
+  // Modeled according to: "Lifecycle Hook Registration Inside `setup`" (Vue.js docs)
+  //    -> https://v3.vuejs.org/guide/composition-api-introduction.html#lifecycle-hook-registration-inside-setup
   //
-  function setup(props) {     // Vue note: object spread would lose reactivity
-    const { uid: /*as*/ uidRef } = toRefs(props);
+  function setup({ uid }) {     // Vue note: object spread loses reactivity
+    assert(uid);   // always has a signed in user on this page
 
     // VUE.JS 3 NOTE:
     //    "Watchers and computed properties created synchronously inside of lifecycle hooks are also automatically
@@ -85,47 +86,33 @@
     console.debug("HOME created...");
 
     onMounted( () => {
-      console.debug("HOME MOUNTED:", { uid: uidRef.value });
-
-      assert(uidRef.value);   // always has a signed in user on this page
+      console.debug("HOME MOUNTED:", { uid });
     })
 
     onUpdated( () => {
-      console.debug("HOME UPDATED:", { uid: uidRef.value });
-
-      assert(uidRef.value);
+      console.debug("HOME UPDATED:", { uid });
     })
 
     onUnmounted( () => {
-      assert(uidRef.value);
       console.debug("HOME UNMOUNTED");
     })
-
-    //let projectsSortedRef, unsub;
 
     // NOTE: Not sure, if the below needs to be within 'onMounted' tbd.
     //onMounted( () => {
       //const uid = uidRef.value;
       //assert(uid);
 
-    const uid = uidRef.value;
     console.debug("!!! Home occupied by:", uid);
 
     const [projectsRef, unsub] = activeProjects(uid);   // start following this user's projects
 
     const projectsSortedRef = computed( () => {
       const arr = Array.from(projectsRef.value);    // [<project-id>, {..projectsC doc}]
-      console.debug("!!!", arr);
       return sort(arr);
     })
 
     onUnmounted( _ => {
-      console.debug("!!! Unsubbing")
       if (unsub) unsub();
-    });
-
-    watch( projectsSortedRef, p => {    // DEBUG; REMOVE
-      console.debug("!!! Project seen:", p);
     });
 
     return {

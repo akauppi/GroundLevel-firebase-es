@@ -4,13 +4,15 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
-## Latest
+## 6-Mar-2021
 
 - **FEATURE:** replaced FirebaseUI with `aside-keys` web component
   - Changed Vue components to `LikeThis` to separate them from web components
 - Internal: dependency updates
 - Internal: brought back home from its separate repo 🏠
-- Internal: Router changes, in utilizing Vue Router 4 APIs 
+- Internal: Router changes, in utilizing Vue Router 4 APIs
+- Internal: Passing certain Firebase features (`initializeApp`, `getPerformance` further to ops; solves how and where we bring in Firebase)
+- Development: Disallow `npm link` on production builds
 
 ## 8-Jan-2021
 

@@ -7,7 +7,8 @@ Adds:
 - ops instrumentation code (central logging, performance monitoring, crash reporting, etc.)
 - Firebase initialization
 
-Note: Since we get the application logic as a module dependency, we don't expect anything from it. It can use any web framework - not only Vue.js 3.
+We get the application logic as a module dependency, and don't expect anything from it (apart from it needing Firebase initialized). It can use any web framework, any libraries.
+
 
 ## Requirements
 
@@ -20,58 +21,74 @@ There is an active project; you've run `firebase use --add`.
 
 ## Getting started
 
-Install dependencies.
+Install dependencies:
 
 ```
 $ npm install
 ```
 
+Prepare and build `../app`:
+
 ```
-$ npm run build
+$ (cd ../app && npm install && npm run build)
+```
+
+Build for deployment:
+
+```
+$ npm run vite:build
 ...
-building for production...
-✓ 34 modules transformed.
-public/index.html                                      0.95kb
-public/assets/index.7c0c45a7.js                        2.14kb / brotli: 0.89kb
-public/assets/firebase-functions.b2221096.js           9.84kb / brotli: 2.52kb
-public/assets/app.es.306d8b05.js                       32.46kb / brotli: 11.26kb
-public/assets/vite.d0d1ba23.js                         0.61kb / brotli: 0.31kb
-public/assets/tslib.d012e74f.js                        3.52kb / brotli: 1.42kb
-public/assets/index.6ca839e5.js                        1.34kb / brotli: 0.62kb
-public/assets/tslib.es6.6591dcdb.js                    8.04kb / brotli: 1.52kb
-public/assets/index.esm.4d59513a.js                    79.01kb / brotli: 19.63kb
-public/assets/firebase-misc.13a81d66.js                56.44kb / brotli: 16.90kb
-public/assets/vue-router.c9fdcf42.js                   20.77kb / brotli: 7.53kb
-public/assets/vue.2105b663.js                          43.16kb / brotli: 15.59kb
-public/assets/firebase-auth.41bd0100.js                175.82kb / brotli: 46.94kb
-public/assets/firebase-firestore.9cd767af.js           293.76kb / brotli: 55.95kb
-public/assets/prebuilt-7840cb8c-52081c7f.8ccbd7ac.js   293.31kb / brotli: 55.79kb
-public/assets/auth.esm.9e24d3a1.js                     175.91kb / brotli: 46.98kb
+vite v2.0.5 building for production...
+✓ 14 modules transformed.
+out.vite/index.html                         0.46kb
+out.vite/a/vite.8d06420f.js                 0.61kb / brotli: 0.31kb
+out.vite/a/vite.8d06420f.js.map             2.43kb
+out.vite/a/index.8c58fde3.js                1.17kb / brotli: 0.59kb
+out.vite/a/index.8c58fde3.js.map            7.84kb
+out.vite/a/app.es.072adeb2.js               28.84kb / brotli: 10.29kb
+out.vite/a/app.es.072adeb2.js.map           88.72kb
+out.vite/a/vue-router.7cd7ab50.js           20.91kb / brotli: 7.55kb
+out.vite/a/vue-router.7cd7ab50.js.map       85.23kb
+out.vite/a/vue.1b433da6.js                  44.58kb / brotli: 16.00kb
+out.vite/a/vue.1b433da6.js.map              206.48kb
+out.vite/a/firebase.74bd3f4b.js             83.94kb / brotli: 19.44kb
+out.vite/a/firebase.74bd3f4b.js.map         224.37kb
+out.vite/a/tslib.18355cd6.js                7.31kb / brotli: 1.63kb
+out.vite/a/tslib.18355cd6.js.map            18.88kb
+out.vite/a/firebase-auth.5f09abc8.js        213.33kb / brotli: 20.00kb
+out.vite/a/firebase-auth.5f09abc8.js.map    563.96kb
+out.vite/a/firebase-firestore.45be24f4.js   173.90kb / brotli: 34.09kb
+out.vite/a/firebase-firestore.45be24f4.js.map 378.61kb
 ```
 
-After the command you have a ready-to-be-deployed web app under `public`:
+After the command you have a ready-to-be-deployed web app under `out.vite`:
 
 ```
-$ tree public
-public
-├── assets
-│   ├── app.es.306d8b05.js
-│   ├── auth.esm.9e24d3a1.js
-│   ├── firebase-auth.41bd0100.js
-│   ├── firebase-firestore.9cd767af.js
-│   ├── firebase-functions.b2221096.js
-│   ├── firebase-misc.13a81d66.js
-│   ├── index.6ca839e5.js
-│   ├── index.7c0c45a7.js
-│   ├── index.esm.4d59513a.js
-│   ├── prebuilt-7840cb8c-52081c7f.8ccbd7ac.js
-│   ├── tslib.d012e74f.js
-│   ├── tslib.es6.6591dcdb.js
-│   ├── vite.d0d1ba23.js
-│   ├── vue-router.c9fdcf42.js
-│   └── vue.2105b663.js
+$ tree out.vite/
+out.vite/
+├── a
+│   ├── app.es.072adeb2.js
+│   ├── app.es.072adeb2.js.map
+│   ├── firebase-auth.5f09abc8.js
+│   ├── firebase-auth.5f09abc8.js.map
+│   ├── firebase-firestore.45be24f4.js
+│   ├── firebase-firestore.45be24f4.js.map
+│   ├── firebase.74bd3f4b.js
+│   ├── firebase.74bd3f4b.js.map
+│   ├── index.8c58fde3.js
+│   ├── index.8c58fde3.js.map
+│   ├── tslib.18355cd6.js
+│   ├── tslib.18355cd6.js.map
+│   ├── vite.8d06420f.js
+│   ├── vite.8d06420f.js.map
+│   ├── vue-router.7cd7ab50.js
+│   ├── vue-router.7cd7ab50.js.map
+│   ├── vue.1b433da6.js
+│   └── vue.1b433da6.js.map
 └── index.html
 ```
+
+>Note: For some reason one of the chunks is called `index` instead of `ops`. That's unintended.
 
 ### Try it out
 

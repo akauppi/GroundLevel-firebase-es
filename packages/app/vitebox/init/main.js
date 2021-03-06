@@ -117,25 +117,21 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   // tbd. #rework now that we're in '@exp' land! :)
   //window["TESTS_GO!"] = firebase;   // expose our Firebase app; otherwise Cypress seems to have problems
 
-  return fah;
+  return;   // No need to return 'fah'
 }
 
-function initFirebase() {   // () => FirebaseApp    // dev:online, production build
+function initFirebaseOnline() {
   assert(!LOCAL);
 
-  const [ apiKey, authDomain, projectId ] = [
+  const [ apiKey, appId, authDomain, projectId ] = [
     import.meta.env.VITE_API_KEY,
+    import.meta.env.VITE_APP_ID,    // only matters for Firebase Performance Monitoring
     import.meta.env.VITE_AUTH_DOMAIN,
     import.meta.env.VITE_PROJECT_ID
   ]
-
   assert(apiKey && authDomain && projectId, "Some Firebase param(s) are missing");
 
-  return initializeApp({
-    apiKey,
-    authDomain,
-    projectId
-  });
+  initializeApp( { apiKey, appId, authDomain, projectId } );
 }
 
 async function initCentral() {    // () => Promise of central
@@ -146,13 +142,16 @@ async function initCentral() {    // () => Promise of central
 /*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
   const t0 = performance.now();
 
-  const [__, central] = await Promise.all([
-    LOCAL ? initFirebaseLocal() : initFirebase(),
-    initCentral()
-  ]);
+  if (LOCAL) {
+    await initFirebaseLocal();
+  } else {
+    initFirebaseOnline();
+  }
+
+  const central = await initCentral();
 
   const dt = performance.now() - t0;
-  console.debug(`Initializing ops stuff (in parallel) took: ${dt}ms`);  // 90, 100, 114 ms
+  console.debug(`Initializing stuff took: ${dt}ms`);        // OLD DATA: ~~90~~, ~~100~~, ~~114~~ ms
 
   window.central = central;
 

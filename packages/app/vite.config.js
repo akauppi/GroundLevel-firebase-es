@@ -50,23 +50,15 @@ const forcedVueComponents = new Set([
 //    -> https://rollupjs.org/guide/en/#outputmanualchunks
 //
 function manualChunks(id) {
-
-  // ID's that flow through:
-  //
-  //  /Users/.../app/vitebox/init/main.js
-  //  /Users/.../app/src/app.js
-  //  /Users/.../app/node_modules/firebase/app/dist/index.esm.js
-  //  vite/preload-helper
-  //  /Users/.../aside-keys/packages/aside-keys/dist/bundle.js    # if you have 'npm link'ed to it
-  //  /Users/.../app/src/App.vue?vue&type=style&index=0&scoped=true&lang.scss
-  //
-  //console.debug(`Chunking (ID): ${id}`);
-
   let name;
-  for( const re of chunkTo ) {
+  for( const x of chunkTo ) {
+    const [re,s] = Array.isArray(x) ? x : [x,"default"];    // 's' is the name override (if no capture block)
+      //
+      // ^-- note: default name doesn't get applied (vite uses "app" instead); don't know why..
+
     const tmp = id.match(re);   // [_, capture] | null
     if (tmp) {
-      name = (tmp[1] || "app").replace('/','-');    // flattening output names ('/'->'-') is just for us humans
+      name = (tmp[1] || s).replace('/','-');    // flattening output names ('/'->'-') is just for us humans
       break;
     }
   }
@@ -79,30 +71,71 @@ function manualChunks(id) {
   }
 }
 
-// Regex's for grouping the chunks. If there is a capture group, that is used for the name. Otherwise, the default
-// chunk.
-//
-// Note: Firebase (and thus its dependencies like 'tslib') is excluded (peer dependency).
+// Regex's for grouping the chunks. If there is a capture group, that is used for the name. Otherwise, explicit name or
+// "default".
 //
 const chunkTo = [     // Array of Regex
-  /\/app\/src\//,               // app.js, App.vue?vue&type=style&index=0&scoped=true&lang.scss, ...
-  /\/aside-keys\/dist\//,       // seen like this if 'npm link'ed
-  /^vite\//,      // Vite runtime (small, ~600b)
+  // /Users/.../app/src/app.js    # ..and others
+  //
+  /\/app\/src\//,
 
+  // vite/preload-helper
+  /^vite\/preload-helper$/,      // Vite runtime (small, ~600b)
+
+  // /Users/.../node_modules/vue/dist/vue.runtime.esm-bundler.js
+  // /Users/.../node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+  // /Users/.../node_modules/vue-router/dist/vue-router.esm-bundler.js
+  // /Users/.../node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
+  // /Users/.../node_modules/@vue/shared/dist/shared.esm-bundler.js
+  // /Users/.../node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+  //
   /\/node_modules\/@?(vue)\//,
   /\/node_modules\/(vue-router)\//,
+
+  // Dependencies, when brought from npm registry (no 'npm link'):
+  //
+  // /Users/.../app/node_modules/aside-keys/dist/bundle.js
+  //
+  /\/node_modules\/(aside-keys)\//,
+
+  // ORDER MATTERS: keep this ABOVE the app's own library handling.
+  //
+  // Dependencies (DEVELOPMENT ONLY!), when brought in via 'npm link'. It doesn't matter how we name these, since they
+  // will not be there for production builds.
+  //
+  // /Users/.../packages/aside-keys/dist/bundle.js
+  // /Users/.../packages/aside-keys/node_modules/firebase/auth/dist/index.esm.js
+  // /Users/.../packages/aside-keys/node_modules/@firebase/auth/dist/esm5/index.js
+  // /Users/.../packages/aside-keys/node_modules/@firebase/app/dist/index.esm5.js
+  // /Users/.../packages/aside-keys/node_modules/tslib/tslib.es6.js
+  // /Users/.../packages/aside-keys/node_modules/@firebase/util/dist/index.esm.js
+  // /Users/.../packages/aside-keys/node_modules/@firebase/auth/dist/esm5/index-392613a3.js
+  // /Users/.../packages/aside-keys/node_modules/@firebase/logger/dist/index.esm.js
+  // /Users/.../packages/aside-keys/node_modules/@firebase/component/dist/index.esm.js
+  //
+  /\/packages\/(aside-keys)\/(?!node_modules)/,     // aside itself - the library
+  [/\/packages\/aside-keys\/node_modules\/(@?firebase|tslib)\//, 'aside-keys-npm-linked-deps-dev-only'],
 
   // Pack some packages separately:
   //  - auth to see its size implication (will be needed always)
   //  - firestore also because it can be lazy loaded (needed only after authentication)
   //
-  /\/node_modules\/@?(firebase)\/(?!(auth|firestore))/,   // misc firestore packages
+  /\/node_modules\/@?(firebase)\/(?!(auth|firestore|performance))/,   // misc firestore packages
   /\/node_modules\/@?(firebase\/auth)\//,
   /\/node_modules\/@?(firebase\/firestore)\//,
     // firebase/{auth|app|firestore}
     // @firebase/{auth|app|firestore|util|logger|component|webchannel-wrapper|...}
 
   /\/node_modules\/(tslib)\//,    // used by Firebase, but place in its own chunk
+
+  // Things kept for the 'ops':
+  //
+  // /Users/.../app/node_modules/firebase/performance/dist/index.esm.js
+  // /Users/.../app/node_modules/@firebase/performance/dist/index.esm.js
+  // /Users/.../app/node_modules/idb/lib/idb.mjs       # used by 'firebase/performance', only
+  //
+  /\/node_modules\/@?(firebase\/performance)\//,
+  [/\/node_modules\/idb\//, 'firebase-performance']
 ];
 
 export default {

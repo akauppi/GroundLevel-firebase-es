@@ -28,13 +28,18 @@
   },
   "dependencies": {
     "@local/app": "file:../app",
-    "firebase": "^8.2.7"
+    "firebase": "0.900.15"
   },
   "devDependencies": {
-    "eslint": "^7.20.0",
-    "vite": "^2.0.1"
+    "eslint": "^7.21.0",
+    "rollup": "^2.40.0"
   },
   "//comments": {
+    "dependencies": {
+      "firebase": [
+        "Required for 'firebase/performance' only; other parts taken from the app. Must be the same version as used in the app."
+      ]
+    },
     "engines.node": [
       "'>=14.3' for '—harmony-top-level-await'",
       "'>=13.2' for ES module support"

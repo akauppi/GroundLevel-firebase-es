@@ -65,8 +65,6 @@ function mapRefHandlerGen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref
       const tmp = change.doc;
       const [k,data] = [tmp.id, tmp.data()];
 
-      console.log("!!! CHANGE is in the air", { k, data });
-
       if (!data) {
         assert( change.type === 'removed' );
         ref.value.delete(k);
