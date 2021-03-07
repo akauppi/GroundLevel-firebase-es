@@ -1,5 +1,5 @@
 /*
-* init/central.js
+* src/central.js
 *
 * Central logging.
 *

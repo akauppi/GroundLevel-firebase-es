@@ -25,6 +25,12 @@ document.title = appTitle;
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 
+// Build values:
+//
+// - 'VERSION' gives the version
+//
+const VERSION = _VERSION;    // both dev and production
+
 async function init() {    // () => Promise of ()
   const t0 = performance.now();
 
@@ -63,7 +69,9 @@ async function init() {    // () => Promise of ()
 }
 
 export {
-  init
+  init,
+  LOCAL,
+  VERSION
 }
 
 // Leak certain things to the ops level (without this, they would be tree-shaken).

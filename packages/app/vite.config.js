@@ -1,19 +1,19 @@
 // vite.config.js
 //
-import path, { join as pathJoin, dirname as pathDirname } from 'path'
+import path, { join as pJoin, dirname as pDirname } from 'path'
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 
 import vue from '@vitejs/plugin-vue'
 
-const srcPath = pathJoin( pathDirname(fileURLToPath(import.meta.url)), 'src');
+const srcPath = pJoin( pDirname(fileURLToPath(import.meta.url)), 'src');
 
 /*
 * For an absolute path 'p', provide the immediate subdirectories within it.
 */
 function getSubDirsSync(p) {    // (path-string) -> Array of string
   return readdirSync(p).filter( function (x) {
-    return statSync(pathJoin(p,x)).isDirectory();   // note: seems '.isDirectory' might need an absolute path (did not try without)
+    return statSync(pJoin(p,x)).isDirectory();   // note: seems '.isDirectory' might need an absolute path (did not try without)
   });
 }
 
@@ -148,8 +148,13 @@ export default {
   },
 
   // Means to pass build time values to the browser (in addition to '.env' files).
+  //
+  // Note: IF using in production, one needs to provide eg. the quotes, since it's a literal replace. This makes sense
+  //    for using the mechanism as a macro (to inject code). Not so nice for strings.
+  //
   define: {
-    "LOCAL_PROJECT": process.env.GCLOUD_PROJECT
+    "_LOCAL_PROJECT": process.env.GCLOUD_PROJECT,   // only used by init (dev)
+    "_VERSION": "\"0.0.0\""
   },
 
   build: {
@@ -172,7 +177,7 @@ export default {
       ],
       output: { manualChunks }
     },
-    chunkSizeWarningLimit: 1000   // Firebase chunk is >700kB but we don't export it
+    chunkSizeWarningLimit: 800    // default: 500
   },
 
   plugins: [

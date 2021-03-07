@@ -114,8 +114,6 @@ const router = createRouter({
   routes
 });
 
-//REMOVE const localUserRef = LOCAL && ref();
-
 // See: Vue Router > Navigation Guards
 //    -> https://next.router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
 //

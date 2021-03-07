@@ -547,6 +547,25 @@ Yeah, right.
 
 Ping for a day or so and eventually 8.2.9 info is out. **No other software package I use suffers from this**. Wouldn't it be nicer to have the release information out promptly, after the release? I'm okay with a 1..2 minute delay but hours. Not cool.
 
+## Firebase JS SDK: educating on differences of `local` persistent options 
+
+Firebase docs has a great [Authentication State Persistence](https://firebase.google.com/docs/auth/web/auth-state-persistence) page on the differences of the local, session and none persistence models.
+
+The JS SDK has two ways of implementing the local: 
+
+- indexedDB
+- localStorage
+
+Does the developer need to be aware of these, at all?
+
+[This thread](https://groups.google.com/g/firebase-talk/c/wgSvjniKPQI) (Firebase discussion groups, may be restricted) has a comment (Mar 2018):
+
+>I recommend that you stop relying on internal implementations of how we persist Auth state as that is subject to change and instead use our public APIs. Basically, anything that is not part of our public API is subject to change.
+
+On the other hand, the author got the feeling that in the `@exp` API's `initializeAuth`, one should / can somehow make decisions of this kind. But the [documentation](https://modularfirebase.web.app/reference/auth.initializeauth) of that function is currently (7-Mar-21) giving no details.
+
+This is LIKELY a BOGUS thing to even ask. Let's presume IndexedDB is the implementation and the developer does not need to care! :)
+
 
 ## References
 

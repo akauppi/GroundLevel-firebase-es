@@ -1,4 +1,5 @@
-# output folder
-/out/
+# output folders
+/out.vite/
+/out.rollup/
 
 /.firebase/

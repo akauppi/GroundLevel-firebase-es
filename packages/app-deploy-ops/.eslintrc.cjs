@@ -71,8 +71,8 @@ module.exports = {
       }
     },
 
-    {   // Browser bootup code
-      files: ["init/*.js"],
+    {   // Browser code
+      files: ["src/*.js"],
       env: {
         browser: true
       },

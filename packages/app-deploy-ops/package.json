@@ -9,35 +9,56 @@
   },
   "scripts": {
     "test": ">&2 echo \"No tests here. Tests are run in development projects (../app and ../backend).\"; false",
-    "lint": "eslint init",
+    "lint": "eslint src",
     "  -": "",
-    "build": "vite build",
+    "build:vite": "vite build -c vite/vite.config.js",
+    "build:rollup": "rollup -c rollup/rollup.config.js",
     "  - ": "",
-    "--serve": "vite serve --port 3012",
-    "serve": "firebase serve --only hosting --host 0.0.0.0 --port 3012",
+    "serve": "npm run --silent serve:vite",
+    "serve:vite": "vite serve -c vite/vite.config.js --port 3012",
+    "serve:rollup": "firebase serve --only hosting --host 0.0.0.0 --port 3012",
+    "  -- ": "",
     "_clean": "(rm dist/* 2> /dev/null || true)",
     "  --": "",
     "deploy": "firebase deploy --only hosting",
     "  - -": "",
-    "prebuild": "(cd ../app && npm run build)",
+    "//prebuild": "(cd ../app && npm run build)",
     "preserve": "PORT=3012 npm run --silent _checkPortIsFree",
     "_checkPortIsFree": "../app/tools/port-is-free.sh $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)",
+    "//preinstall": "(cd ../app && npm install firebase)",
     "//preserve": "npm run --silent _checkFirebaseActiveProj",
     "  -  ": "",
     "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"
   },
   "dependencies": {
-    "@local/app": "file:../app",
-    "firebase": "0.900.15"
+    "@local/app": "file:../app"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-replace": "^2.3.3",
     "eslint": "^7.21.0",
-    "rollup": "^2.40.0"
+    "rollup": "^2.40.0",
+    "rollup-plugin-analyzer": "^3.3.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-visualizer": "^4.1.1",
+    "vite": "^2.0.5"
   },
   "//comments": {
+    "scripts": {
+      "prebuild": [
+        "May be used to build '../app' but this slows down integration development so might not be the best way. tbd."
+      ]
+    },
     "dependencies": {
       "firebase": [
-        "Required for 'firebase/performance' only; other parts taken from the app. Must be the same version as used in the app."
+        "See 'APPROACH.md' for discussion of this trick. Required for 'firebase/performance', so it's not burdening",
+        "the \"app\" side."
+      ],
+      "[@]rollup...": [
+        "Needed for '[build|serve]:rollup'"
+      ],
+      "vite": [
+        "Needed for '[build|serve]:vite'"
       ]
     },
     "engines.node": [

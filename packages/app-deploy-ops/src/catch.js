@@ -1,5 +1,5 @@
 /*
-* init/catch.js
+* src/catch.js
 *
 * Catch uncaught errors and report them.
 *

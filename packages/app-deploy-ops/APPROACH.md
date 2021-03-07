@@ -36,7 +36,7 @@ Pre-fetches for one. When our `index.html` has this:
 
 ```
 <script type="module">
-  import '/init/main.js';
+  import '/src/main.js';
 </script>
 ```
 

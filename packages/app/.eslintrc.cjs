@@ -20,7 +20,11 @@ module.exports = {
   },
 
   globals: {
-    central: true
+    central: true,
+
+    // Values injected from 'vite.config.js'
+    _LOCAL: true,
+    _VERSION: true
   },
 
   parserOptions: {
