@@ -74,16 +74,6 @@ export {
   VERSION
 }
 
-// Leak certain things to the ops level (without this, they would be tree-shaken).
-//
-import { initializeApp } from 'firebase/app'
-import { getPerformance } from 'firebase/performance'
-
-export {
-  initializeApp,
-  getPerformance
-}
-
 // DID NOT WORK with @exp API ("missing or ... permissions").
 //
 // tbd. Study if there's a server-side trigger for a user authenticated; move the code there.

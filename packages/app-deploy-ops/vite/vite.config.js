@@ -7,26 +7,28 @@
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
 
-const srcPath = dirname(fileURLToPath(import.meta.url)) + '../src';
+const myPath = dirname(fileURLToPath(import.meta.url));
+const srcPath = myPath +'/../src';
 
-import { manualChunks } from '../manualChunks'
+import { manualChunks } from '../manualChunks.js'
 
 export default {
+  /* not needed
   resolve: {
     alias: {
       '/src': srcPath
     }
-  },
+  },*/
 
   define: {     // "statically replaced" for production
     "_OPS_VERSION": "\"0.0.0\""
   },
 
   build: {
-    //publicDir: "not-used",
-    // Must match 'hosting.public' in 'firebase.json'.
-    //outDir: "vite/out",
-    //assetsDir: "not-used",
+    //publicDir: myPath + "/../extras",
+
+    outDir: myPath + "/out",    // must match 'hosting.public' in 'firebase.json'.
+    assetsDir: '.',   // relative to 'outDir'
 
     minify: true,
     sourcemap: true,
@@ -36,7 +38,5 @@ export default {
     rollupOptions: {
       output: { manualChunks }
     }
-  },
-
-  clearScreen: false    // having it here doesn't matter
+  }
 }

@@ -6,3 +6,5 @@
 
 # output of rollup-plugin-visualizer
 /stats.html
+
+/.firebase.tmp.json

@@ -17,11 +17,11 @@ function manualChunks(id) {
 
   let name;
   for( const x of chunkTo ) {
-    const [re,appStuff] = Array.isArray(x) ? x : [x,false];
+    const [re,subDir] = Array.isArray(x) ? x : [x,null];
 
     const tmp = id.match(re);   // [_, capture] | null
     if (tmp) {
-      name = (appStuff ? "app/":"") + ((tmp[1] || "main").replace('/','-'));
+      name = (subDir ? `${subDir}/`:"") + ((tmp[1] || 'blah').replace('/','-'));
       break;
     }
   }
@@ -36,7 +36,20 @@ function manualChunks(id) {
 
 // Regex's for grouping the chunks.
 //
-const chunkTo = [     // Array of Regex
+const chunkTo = [     // Array of (Regex | [Regex, string, string?])
+  // Firebase app, performance used by ops
+  //
+  // /Users/.../app-deploy-ops/node_modules/firebase/app/dist/index.esm.js
+  // /Users/.../app-deploy-ops/node_modules/firebase/performance/dist/index.esm.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/performance/dist/index.esm.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/app/dist/index.esm5.js
+  //  .. + tlib, idb
+  //
+  [/\/app-deploy-ops\/node_modules\/@?(firebase\/performance)\//, 'ops'],
+  [/\/app-deploy-ops\/node_modules\/@?(firebase)\//, 'ops'],
+  [/\/app-deploy-ops\/node_modules\/(tslib)\//, 'ops'],
+  [/\/app-deploy-ops\/node_modules\/idb\//, 'ops', 'firebase-performance'],
+
   // All 'ops' things to one chunk
   //
   // /Users/.../app-deploy-ops/vite/index.html
@@ -49,7 +62,7 @@ const chunkTo = [     // Array of Regex
   /\/app-deploy-ops\//,
 
   // vite/preload-helper
-  /^(vite)\//,      // Vite runtime (small, ~600b)
+  [/^(vite)\//, 'ops'],     // Vite runtime (small, ~600b)
 
   // App and its libraries (keep the chunking)
   //
@@ -63,7 +76,7 @@ const chunkTo = [     // Array of Regex
   // /Users/.../app/vitebox/dist/firebase-performance.js
   // /Users/.../app/vitebox/dist/tslib.js
   //
-  [/\/app\/.+\/(.+?)\.js$/, true]
+  [/\/app\/.+\/(.+?)\.js$/, 'app']
 ];
 
 export {

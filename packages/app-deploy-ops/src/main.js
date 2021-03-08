@@ -5,7 +5,7 @@
 */
 import { assert } from './assert.js'
 
-import { initializeApp } from '@local/app'    // allows us to set up the Firebase the app has
+import { initializeApp } from 'firebase/app'
 
 import { central } from './central'
 import './catch'
@@ -74,7 +74,7 @@ async function initFirebase() {   // Promise of FirebaseApp
     // If Firebase Performance Monitoring is wanted, enable it
     //
     if (enableFirebasePerf) {
-      const getPerformance = import("@local/app").then( mod => mod.getPerformance );
+      const getPerformance = import("firebase/performance").then( mod => mod.getPerformance );
       const perf = getPerformance(myApp);
 
       console.debug("!!! Performance monitoring initialialized:", { perf });    // DEBUG
