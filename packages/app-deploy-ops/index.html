@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Ship the favicon from the app build, but maybe we should have 'App.vue' set it up.
+    -->
+    <link rel="icon" type="image/png" href="/node_modules/@local/app/vitebox/dist/favicon.png">
+
+    <!-- Needed as long as we need 'scss' plugin in Rollup config (see 'scssHackNeeded').   tbd. do we?
+    <link type="text/css" rel="stylesheet" href="dist/scss-hack.css" />
+    -->
+
+    <!--ROLL
+    ${PRELOADS}
+    -->
+
+    <!-- Enable 'first-input-delay' performance metrics; see -> https://firebase.google.com/docs/perf-mon/auto_duration-traces-metrics_web#input-delay
+    -
+    - Enable if in performance tracking we seem to need it (it _is_ Firebase enforced).
+    -  https://www.npmjs.com/package/first-input-delay
+    <script>
+      // $ npm install --save-dev first-input-delay
+      // $ cat node_modules/first-input-delay/dist/first-input-delay.min.js
+      !function(n,e){var t,o,i,c=[],f={passive:!0,capture:!0},r=new Date,a="pointerup",u="pointercancel";function p(n,c){t||(t=c,o=n,i=new Date,w(e),s())}function s(){o>=0&&o<i-r&&(c.forEach(function(n){n(o,t)}),c=[])}function l(t){if(t.cancelable){var o=(t.timeStamp>1e12?new Date:performance.now())-t.timeStamp;"pointerdown"==t.type?function(t,o){function i(){p(t,o),r()}function c(){r()}function r(){e(a,i,f),e(u,c,f)}n(a,i,f),n(u,c,f)}(o,t):p(o,t)}}function w(n){["click","mousedown","keydown","touchstart","pointerdown"].forEach(function(e){n(e,l,f)})}w(n),self.perfMetrics=self.perfMetrics||{},self.perfMetrics.onFirstInputDelay=function(n){c.push(n),s()}}(addEventListener,removeEventListener);
+    </script>
+    -->
+
+    <!--ROLL
+    <script type="module">
+      import '/xxx/main-#.js';
+    </script>
+    -->
+    <!--VITE -->
+    <script type="module">
+      import '/src/main.js';
+    </script>
+    <!-- -->
+
+    <link type="text/css" rel="stylesheet" href="fatal.css" />
+
+    <style>
+      /* Something brings 'margin-top: 8px'. We don't want that. */
+      body {
+        margin: 0;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <div id="fatal" class="inactive"></div>
+    <div id="app"></div>
+  </body>
+</html>

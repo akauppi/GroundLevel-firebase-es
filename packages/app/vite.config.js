@@ -116,11 +116,18 @@ const chunkTo = [     // Array of Regex
   /\/packages\/(aside-keys)\/(?!node_modules)/,     // aside itself - the library
   [/\/packages\/aside-keys\/node_modules\/(@?firebase|tslib)\//, 'aside-keys-npm-linked-deps-dev-only'],
 
+  // NOTE:
+  //  'firebase/performance' (that we want to leak to 'app-deploy-ops') is "51.69kb / brotli: 8.50kb".
+  //  IF we build it as a separate chunk, app-deploy-ops build chokes in a circular dependency (this MAY or may not
+  //    be a Firebase @exp (0.900.15) packaging bug???)
+  //  MERGING WORKS!!! 🥁🤹‍️🎪🌋🎉
+
   // Pack some packages separately:
   //  - auth to see its size implication (will be needed always)
   //  - firestore also because it can be lazy loaded (needed only after authentication)
   //
-  /\/node_modules\/@?(firebase)\/(?!(auth|firestore|performance))/,   // misc firestore packages
+  ///\/node_modules\/@?(firebase)\/(?!(auth|firestore|performance))/,   // misc firestore packages
+  /\/node_modules\/@?(firebase)\/(?!(auth|firestore))/,   // misc firestore packages + performance
   /\/node_modules\/@?(firebase\/auth)\//,
   /\/node_modules\/@?(firebase\/firestore)\//,
     // firebase/{auth|app|firestore}
@@ -128,6 +135,7 @@ const chunkTo = [     // Array of Regex
 
   /\/node_modules\/(tslib)\//,    // used by Firebase, but place in its own chunk
 
+  /*** disabled (unless we can solve the circular dependency??)
   // Things kept for the 'ops':
   //
   // /Users/.../app/node_modules/firebase/performance/dist/index.esm.js
@@ -136,6 +144,7 @@ const chunkTo = [     // Array of Regex
   //
   /\/node_modules\/@?(firebase\/performance)\//,
   [/\/node_modules\/idb\//, 'firebase-performance']
+  ***/
 ];
 
 export default {
@@ -177,7 +186,9 @@ export default {
       ],
       output: { manualChunks }
     },
-    chunkSizeWarningLimit: 800    // default: 500
+
+    //cssCodeSplit: false,    // false: "all CSS in the entire project will be extracted into a single CSS file"
+    //chunkSizeWarningLimit: 800    // default: 500
   },
 
   plugins: [

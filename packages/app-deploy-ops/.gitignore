@@ -1,5 +1,8 @@
 # output folders
-/out.vite/
-/out.rollup/
+/vite/out/
+/rollup/out/
 
 /.firebase/
+
+# output of rollup-plugin-visualizer
+/stats.html

@@ -5,7 +5,7 @@
 */
 import { assert } from './assert.js'
 
-import { initializeApp } from '@local/app'    // leak; allows us to set up the Firebase the app has
+import { initializeApp } from '@local/app'    // allows us to set up the Firebase the app has
 
 import { central } from './central'
 import './catch'
