@@ -25,30 +25,39 @@ import { readFileSync, writeFileSync } from 'fs'
 /*
 * Create a block of:
 *   <<
-*     <link rel="modulepreload" href="dist/...">     <-- tbd. update with a real value
+*     <link rel="modulepreload" href="dist/ops/firebase-6ba65e97.js">
+*     ...
+*     <link rel="preload" href="dist/app.es-36e1fd10.js">   <-- notice NO 'modulepreload'
+*     <link rel="modulepreload" href="dist/app/vue-143a5898.js">
 *     ...
 *   <<
 *
 * Note:
-*   Not all chunks are necessarily 'modulepreloaded' (that means they are not only preloaded, but compiled at will,
-*   as well). Bare 'preload' only loads, and is suitable for dynamic imports (e.g. the 'app' chunk).
+*   It's important that application chunks are 'preload'ed, not _module_preloaded. They are loaded dynamically,
+*   once the environment (especially Firebase) is initialized. 'modulepreload' can be used on anything else,
+*   including all libraries.
 *
 * modfiles:
 *   entries like 'dist/{mod}-{hash}.js'
 */
 function preloadsArr(modFiles) {   // (Array of string) => Array of "<link rel...>"
-
   console.debug("MODFILES:", modFiles);
 
+  const isAppChunk = (fn) => fn.includes('/app.');  // keep an eye on this; might vary..
+
   const ret = modFiles
-    .filter( fn => ! fn.includes("/main-"))   // skip boot chunk
-    .map( fn => `<link rel="modulepreload" href="${fn}">` );
+    .filter( fn => ! fn.includes("/ops/init-"))   // skip boot chunk
+    .map( fn => {
+      const kind = isAppChunk(fn) ? 'preload' : 'modulepreload';
+      return `<link rel="${kind}" href="${fn}">`;
+    });
   return ret;
 }
 
 /*
+* Bake a meaningful index.html out of the template and hashes.
 */
-function tunnel(contents, hashes) {    // (string, Map of string -> string) => string    // may throw
+function tunnel(template, hashes) {    // (string, Map of string -> string) => string    // may throw
 
   const modFiles = Array.from( hashes.entries() ).map( ([key,value]) =>
     `dist/${key}-${value}.js`
@@ -56,38 +65,71 @@ function tunnel(contents, hashes) {    // (string, Map of string -> string) => s
 
   const preloads = preloadsArr(modFiles);   // ["<link ...>", ...]
 
+  /*
+  * Apply templating to an uncommented 'ROLL' block.
+  *
+  * - replace '${PRELOADS}' with commands to preload the modules (with correct hashes for this build)
+  * - replate '{mod}-#.js' with the correct hash for that file
+  */
+  function rollBlock(a) {   // (string) => string
+    const lines = a.split('\n');
+
+    const arr = lines.map( s => {
+      // '${PRELOADS}'
+      const s2 = s.replace(/^(\s*)\${PRELOADS}\s*$/, (_,c1) => preloads.map(x => c1+x).join('\n') );
+      if (s2 !== s) return s2;
+
+      // Hashes
+      //
+      // Any '{file}-#.js' to be filled in the hash.
+      //
+      // Example:
+      //  <<
+      //    import { init } from './main-#.js'
+      //  <<
+      //
+      // Note: expects '-' delimiter in Rollup 'output.entryFileNames'
+      //
+      const s3 = s.replace(/'[^']+\/([\w\d]+)-#\.js'/,
+        (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
+          const hash = hashes.get(c1)
+          if (!hash) throw new Error( "No hash for: "+c1 );
+
+          return match.replace('#',hash);
+        }
+      );
+      if (s3 !== s) return s3;
+
+      return s;   // unchanged
+    });
+
+    return arr.join('\n');
+  }
+
   // Regex note: '.' for "chars within the same line" and '[\s\S]' for "chars, possibly including newline".
 
-  // The rest are per-line replacements.
+  const s0 = template;
+
+  // UNROLL blocks (remove)
   //
-  const outArr = contents.split('\n').map( s => {
-    // '${PRELOADS}'
-    const s2 = s.replace(/^(\s*)\${PRELOADS}\s*$/, (_,c1) => preloads.map(x => c1+x).join('\n') );
-    if (s2 !== s) return s2;    // note: may (does) contain newlines
+  const s1 = s0.replace(/^\s*<!--UNROLL\s.*-->[\s\S]+?^\s*<!--\s+-->\s*\n/gm,"");  // "<!-- UNROLL block REMOVED -->\n"
 
-    // Hashes
-    //
-    // Any '{file}-#.js' to be filled in the hash.
-    //
-    // Example:
-    //  <<
-    //    import { init } from './main-#.js'
-    //  <<
-    //
-    // Note: expects '-' delimiter in Rollup 'output.entryFileNames'
-    //
-    const s4 = s.replaceAll(/'[^']+\/([\w\d]+)-#\.js'/g,      // can there be multiple, per line?
-      (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
-        const hash = hashes.get(c1)
-        if (!hash) throw new Error( "No hash for: "+c1 );
+  /*** don't need
+  // DEV,PROD blocks (keep the inside)
+  //
+  const s2 = s1.replace(/^\s*<!--DEV,PROD[,\s].*-->\s*(\n[\s\S]+?)^\s*<!-- -->\s*\n/gm,"$1\n");
+  ***/
 
-        return match.replace('#',hash);
-      }
-    );
-    return (s4 !== s) ? s4 : s;
-  });
+  // ROLL blocks (uncomment)
+  //
+  // If the '<!--ROLL' has a tail, that is placed as a comment in the output.
+  //
+  // Replacements (eg. '${PRELOADS)' are only applied to the ROLL block contents.
+  //
+  const s2 = s1.replace(/^\s*<!--ROLL\s*\n([\s\S]+?)^\s*-->\s*\n/gm, (_,c1) => `\n${ rollBlock(c1) }\n` );
+  const s3 = s2.replace(/^(\s*)<!--ROLL +(.*?)\s*\n([\s\S]+?)^\s*-->\s*\n/gm, (_,c1,c2,c3) => `${c1}<!-- ${c2} -->\n${ rollBlock(c3) }\n` );
 
-  return outArr.join('\n');
+  return s3;
 }
 
 /*
@@ -100,7 +142,9 @@ const tunnelPlugin = ({ template, out /*, map*/ }) => {    // ({ string (filenam
   return {
     name: 'tunnel',
     generateBundle(options, bundle) {
-      const files /* Array of string */ = Object.entries(bundle).map( ([fileName, chunkInfo]) => {
+      const files = new Set();    // note: using a Set automatically takes care of duplicates
+
+      Object.entries(bundle).forEach( ([fileName, chunkInfo]) => {
         //console.debug('!!!', fileName, chunkInfo);
           //
           // fileName: 'main-d2008ed0.js'
@@ -137,27 +181,27 @@ const tunnelPlugin = ({ template, out /*, map*/ }) => {    // ({ string (filenam
           ]
           */
 
-          return [fileName, ...chunkInfo.imports];    // others than 'main' only show up in the imports
+          [fileName, ...chunkInfo.imports].forEach( (s) => { files.add(s); } );
+            // others than 'main' only show up in the imports
         }
-      } ).flatMap(x => x);    // merges the values to one Array
+      });
 
-      /***
+      console.debug("!!!", files);
+
       const hashes = new Map(
-        files.map( (x) => {
-          const [_,c1,c2] = x.match(/^(.+)-(.+)\.js$/);
+        Array.from(files).map( (x) => {
+          const [_,c1,c2] = x.match(/^(.+)-([a-f0-9]+)\.js$/);
           return [c1,c2];
         })
       );
 
       console.debug( "Working with module hashes:", hashes );
-      ***/
-      /*** disabled
+
       const templateText = readFileSync(template, 'utf8');
       const targetText = tunnel(templateText, hashes);
 
       // Note: Not using Rollup's 'this.emitFile' since there's no need
       writeFileSync(out, targetText);
-      ***/
     }
   };
 };

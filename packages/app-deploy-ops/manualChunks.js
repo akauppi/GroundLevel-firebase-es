@@ -9,6 +9,7 @@
 *   - Rollup docs > output.manualChunks
 *     -> https://rollupjs.org/guide/en/#outputmanualchunks
 */
+const defaultChunk = 'default';
 
 // Help Rollup in packaging (deploy & ops)
 //
@@ -21,7 +22,7 @@ function manualChunks(id) {
 
     const tmp = id.match(re);   // [_, capture] | null
     if (tmp) {
-      name = (subDir ? `${subDir}/`:"") + ((tmp[1] || 'blah').replace('/','-'));
+      name = (subDir ? `${subDir}/`:"") + ((tmp[1] || defaultChunk).replace('/','-'));
       break;
     }
   }

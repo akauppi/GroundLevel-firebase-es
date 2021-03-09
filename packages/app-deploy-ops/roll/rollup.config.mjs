@@ -61,7 +61,7 @@ export default {
   },
 
   output: {
-    dir: myPath + '/out/dist',
+    dir: myPath + '/out',
     format: 'es',
     entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
