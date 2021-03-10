@@ -11,7 +11,7 @@ import { central } from './central'
 import './catch'
 
 // tbd. to be placed in a config
-const enableFirebasePerf = true;
+const enableFirebasePerf = false;
 
 // Access values from Firebase hosting (we don't use its 'init.js').
 //
@@ -19,74 +19,44 @@ const enableFirebasePerf = true;
 //
 const firebaseProm = fetch('/__/firebase/init.json').then( resp => {
   if (!resp.ok) {
-    throw new Error(`Unable to fetch '/__/firebase/init.json':\n${{status: resp.status, message: resp.body}}`);
+    throw new Error(`Unable to fetch '/__/firebase/init.json' (${ resp.status }): ${ resp.body }`);
   } else {
-    return resp.json();
+    return resp.json();   // returns a 'Promise' but above '.then' merges them
   }
 });
 
-/* #rework
-//import {perfs as opsPerfs} from './opsConfig.js'
+window.central = central;
 
-let enableFirebasePerf;
-
-// tbd. move Firebase perf monitoring to an external file (like others, like 'central' is for ops).
-//    'perf.firebase.js'
+// Prepare all of Firebase, including performance monitoring (if enabled)
 //
-for( const o of opsPerfs ) {
-  if (o.type === 'firebase') {
-    enableFirebasePerf = true;
-  } else {
-    throw new Error(`Unexpected 'perf.type' ops config: ${o.type}`);
-      // note: Doesn't really need to be fatal, but best to have the configs sound.
+async function initFirebase() {
+  const opts = await firebaseProm.then( (o) => ({ apiKey: o.apiKey, appId: o.appId, projectId: o.projectId, authDomain: o.authDomain }));
+
+  console.debug("Received Firebase options:", opts);    // DEBUG
+
+  const myApp = initializeApp(opts);
+
+  // If Firebase Performance Monitoring is wanted, enable it
+  //
+  if (enableFirebasePerf) {
+    const getPerformance = import("firebase/performance").then( mod => mod.getPerformance );
+    const perf = getPerformance(myApp);
+
+    console.debug("!!! Performance monitoring initialialized:", { perf });    // DEBUG
   }
 }
-*/
-
-/*** disabled
-async function initFirebase() {   // Promise of FirebaseApp
-
-  /_*** #rework
-  if (enableFirebasePerf) {
-    console.info("Taking Firebase Performance client to use.");    // DEBUG
-
-    // tbd. Q: #Firebase Does it matter if this is before or after 'initializeApp'?
-    //
-    // Note: If we import dynamically, the chunk name becomes 'index.esm.js'
-    //await import('@firebase/performance');
-    firebase.performance();    // enables the basics. To use e.g. custom traces, more wiring is needed.
-  }***_/
-}**/
 
 (async () => {    // free-running tail
-  window.central = central;
+  console.debug("Initializing Firebase and ops...");
 
-  await firebaseProm.then( ({ apiKey, appId, projectId, authDomain }) => {
-    const opts = {
-      apiKey,
-      appId,    // needed for Firebase Performance Monitoring
-      projectId,
-      authDomain
-    };
-
-    const myApp = initializeApp(opts);
-
-    // If Firebase Performance Monitoring is wanted, enable it
-    //
-    if (enableFirebasePerf) {
-      const getPerformance = import("firebase/performance").then( mod => mod.getPerformance );
-      const perf = getPerformance(myApp);
-
-      console.debug("!!! Performance monitoring initialialized:", { perf });    // DEBUG
-    }
-  });
+  await Promise.all([
+    initFirebase()
+  ]);
 
   console.debug("Launching app...");
 
-  // Loading app dynamically ensures that 'central' etc. are set up before the app body (and bodies of its dependent modules!) are run.
-  //
-  const { init } = await import('@local/app');    // entry point
-  await init();
+  //const { init } = await import('@local/app');    // entry point
+  //await init();
 
   console.debug("App on its own :)");
 })();

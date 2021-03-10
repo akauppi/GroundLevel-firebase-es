@@ -8,16 +8,14 @@ import {dirname} from 'path'
 import {fileURLToPath} from 'url'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
-const srcPath = myPath +'/../src';
 
 import { manualChunks } from '../manualChunks.js'
 
 export default {
-  /* not needed
-  resolve: {
-    alias: {
-      '/src': srcPath
-    }
+  /*resolve: {
+    dedupe: [
+      'tslib'   // does not seem to help
+    ]
   },*/
 
   define: {     // "statically replaced" for production
@@ -26,11 +24,10 @@ export default {
 
   build: {
     //publicDir: myPath + "/../extras",
-
     outDir: myPath + "/out",    // must match 'hosting.public' in 'firebase.json'.
     assetsDir: '.',   // relative to 'outDir'
 
-    minify: true,
+    //minify: true,
     sourcemap: true,
     target: 'esnext',   // assumes native dynamic imports
     //polyfillDynamicImport: false
