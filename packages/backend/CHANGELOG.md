@@ -1,5 +1,9 @@
 # Changelog
 
+## 10-Mar-21
+
+- Dependency update; Jest `27.0.0.next4` fixes problems; `npm test` passes!
+
 ## 29-Jan-21
 
 - Brought `backend` back to main repo. 🥳
