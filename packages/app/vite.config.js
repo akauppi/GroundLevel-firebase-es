@@ -193,6 +193,7 @@ export default {
 
     rollupOptions: {
       external: [
+        /^@?firebase\//,     // have it here, if defined as 'peerDependency' in 'package.json' (leaves away from build)
         "/favicon.png"
       ],
       output: { manualChunks }
