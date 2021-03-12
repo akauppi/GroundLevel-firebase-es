@@ -14,14 +14,14 @@
       "Must match 'outDir' in 'vite.config.js'"
     ],
     "hosting.rewrites": [
-      "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing maps, js etc. should show as 404.",
+      "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing sourcemaps, scripts etc. should show as 404.",
       "",
       "tbd. Test this by:",
       "  /common.css -> 200",
       "  /nosuch.js -> 404",
-      "  /some -> 200 (index.prod.html)",
+      "  /some -> 200 (index.html)",
       "  /some.html -> 200",
-      "  /dist/main.{hash}.js.map (that exists) -> 200"
+      "  /main-{hash}.js.map (that exists) -> 200"
     ]
   }
 }

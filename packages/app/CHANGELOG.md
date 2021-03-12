@@ -7,6 +7,7 @@ Release dates are marked; 'latest' shows WIP window.
 ## latest
 
 - passing build version
+- **FIXED:** signing in/out in `LOCAL` mode; `user=` only needed for the initial page
 
 ## 6-Mar-2021
 

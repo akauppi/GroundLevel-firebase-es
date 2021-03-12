@@ -16,17 +16,14 @@ import { terser } from 'rollup-plugin-terser'
 import visualizer from 'rollup-plugin-visualizer'
 
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
-import { manualChunks } from '../manualChunks.js'
+import { manualChunks } from '../common/manualChunks.js'
 
 import {dirname} from "path";
 import {fileURLToPath} from "url";
 const myPath = dirname(fileURLToPath(import.meta.url));
 
-/*const sourceHtml = myPath + '../index.html';
+const templateHtml = myPath + '/../index.html';
 const targetHtml = myPath + '/out/index.html';
-*/
-const inHtml = myPath + '/../index.html';
-const outHtml = myPath + '/out/index.html';
 
 const watch = process.env.ROLLUP_WATCH;
 
@@ -43,15 +40,16 @@ const plugins = [
   !watch && terser(),
 
   tunnelPlugin({
-    template: inHtml,
-    out: outHtml
+    template: templateHtml,
+    out: targetHtml
   }),
 
   // see -> https://www.npmjs.com/package/rollup-plugin-visualizer
   !watch && visualizer({
     sourcemap: true,        // seems to show the reduced sizes (e.g. 594k instead of 1.4M)
     template: 'sunburst',   // 'sunburst'|'treemap'|'network'
-    brotliSize: true        // Show also Brotli compressed size (Firebase hosting supports it)
+    brotliSize: true,       // Show also Brotli compressed size (Firebase hosting supports it)
+    filename: 'stats.roll.html'
   })
 ];
 

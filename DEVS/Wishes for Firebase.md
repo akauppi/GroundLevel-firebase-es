@@ -9,6 +9,13 @@ Hot list: 🌶
 
 🙏
 
+Forever list:
+
+- CLI could feel more like a real command line tool (and less Python):
+  - be faster!!!!
+  - feed errors to `stderr` (not `stdout`)
+  - exit with error codes when it fails
+
 
 ## Cloud Firestore
 
@@ -428,6 +435,15 @@ Two ways to make such a change:
 1. Derive from `Date` (or make a class that behaves the same), and have it also provide the `.seconds` and `.nanos` for backwards compatibility.
 2. Have a global switch somewhere (initialization of the `.firebase.firestore`?), so application programmers can select the "old" or the "JavaScript" way.
 
+---
+
+*Edit*: Brought this up at [@exp API Discussions](https://github.com/firebase/firebase-js-sdk/discussions/4573) and got the following response from Firebase:
+
+- `Timestamp` offers sub-ms resolution (and a code sample I don't comprehend, even after reading it 4 times, showing why that matters)
+- all Firebase platforms provide dates as `Timestamp` - not the native ways
+
+---
+
 
 ## Firebase Security Rules: could allow set comparison without `.toSet()`
 
@@ -530,7 +546,9 @@ It guards the URL formatting too strictly. [Data URLs](https://developer.mozilla
 
 Also, Firebase error message states the data URLs not to be "valid URLs". But they are. Just not for Firebase.
 
+<!-- things changed
 See [/local/init.js](../local/init.js).
+-->
 
 ## Firebase JS SDK: please update the Changelog *before* publishing 
 
@@ -547,6 +565,7 @@ Yeah, right.
 
 Ping for a day or so and eventually 8.2.9 info is out. **No other software package I use suffers from this**. Wouldn't it be nicer to have the release information out promptly, after the release? I'm okay with a 1..2 minute delay but hours. Not cool.
 
+<!-- hidden (need checking whether the option really is visible to developers; if not, remove)
 ## Firebase JS SDK: educating on differences of `local` persistent options 
 
 Firebase docs has a great [Authentication State Persistence](https://firebase.google.com/docs/auth/web/auth-state-persistence) page on the differences of the local, session and none persistence models.
@@ -565,6 +584,21 @@ Does the developer need to be aware of these, at all?
 On the other hand, the author got the feeling that in the `@exp` API's `initializeAuth`, one should / can somehow make decisions of this kind. But the [documentation](https://modularfirebase.web.app/reference/auth.initializeauth) of that function is currently (7-Mar-21) giving no details.
 
 This is LIKELY a BOGUS thing to even ask. Let's presume IndexedDB is the implementation and the developer does not need to care! :)
+-->
+
+## Firebase tools: reading configuration from a scipt
+
+Many node tools (Rollup, ESLint, Vite, ...) allow the configuration to be a script. Firebase only supports JSON.
+
+Having the ability to configure by script gives more versatility. 
+
+In `packages/app-deploy-ops`, we want to support both Vite and Rollup builds, but not have two almost identical configuration files. Since Firebase CLI does not allow overriding the `hosting.public` value from command line, we do this:
+
+```
+"serve:vite": "cat firebase.json | sed 's/\\$SERVE_PATH/vite\\/out/' > .firebase.tmp.json && firebase serve --config .firebase.tmp.json --only hosting --host 0.0.0.0 --port 3012",
+```
+
+If configuration can be a script, such logic can be handled in there.
 
 
 ## References

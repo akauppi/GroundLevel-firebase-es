@@ -25,10 +25,10 @@ import { readFileSync, writeFileSync } from 'fs'
 /*
 * Create a block of:
 *   <<
-*     <link rel="modulepreload" href="dist/ops/firebase-6ba65e97.js">
+*     <link rel="modulepreload" href="/ops/firebase-6ba65e97.js">
 *     ...
-*     <link rel="preload" href="dist/app.es-36e1fd10.js">   <-- notice NO 'modulepreload'
-*     <link rel="modulepreload" href="dist/app/vue-143a5898.js">
+*     <link rel="preload" href="/app.es-36e1fd10.js">   <-- notice NO 'modulepreload'
+*     <link rel="modulepreload" href="/app/vue-143a5898.js">
 *     ...
 *   <<
 *
@@ -41,15 +41,20 @@ import { readFileSync, writeFileSync } from 'fs'
 *   entries like 'dist/{mod}-{hash}.js'
 */
 function preloadsArr(modFiles) {   // (Array of string) => Array of "<link rel...>"
-  console.debug("MODFILES:", modFiles);
 
   const isAppChunk = (fn) => fn.includes('/app.');  // keep an eye on this; might vary..
 
+  // Note: The 'crossorigin' attribute is needed. Without it, Chrome gives warnings in the browser console.
+  //
+  //    "..attribute needs to be set to match the resource's CORS and credentials mode, even when the fetch is not
+  //    cross-origin"  From -> https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content
+  //
   const ret = modFiles
     .filter( fn => ! fn.includes("/ops/init-"))   // skip boot chunk
     .map( fn => {
-      const kind = isAppChunk(fn) ? 'preload' : 'modulepreload';
-      return `<link rel="${kind}" href="${fn}">`;
+      return isAppChunk(fn)
+        ? `<link rel="preload" as="script" crossorigin href="${fn}">`
+        : `<link rel="modulepreload" href="${fn}">`;
     });
   return ret;
 }
@@ -60,7 +65,7 @@ function preloadsArr(modFiles) {   // (Array of string) => Array of "<link rel..
 function tunnel(template, hashes) {    // (string, Map of string -> string) => string    // may throw
 
   const modFiles = Array.from( hashes.entries() ).map( ([key,value]) =>
-    `dist/${key}-${value}.js`
+    `/${key}-${value}.js`
   );
 
   const preloads = preloadsArr(modFiles);   // ["<link ...>", ...]
@@ -69,7 +74,7 @@ function tunnel(template, hashes) {    // (string, Map of string -> string) => s
   * Apply templating to an uncommented 'ROLL' block.
   *
   * - replace '${PRELOADS}' with commands to preload the modules (with correct hashes for this build)
-  * - replate '{mod}-#.js' with the correct hash for that file
+  * - replace '{mod}-#.js' with the correct hash for that file
   */
   function rollBlock(a) {   // (string) => string
     const lines = a.split('\n');
@@ -79,9 +84,7 @@ function tunnel(template, hashes) {    // (string, Map of string -> string) => s
       const s2 = s.replace(/^(\s*)\${PRELOADS}\s*$/, (_,c1) => preloads.map(x => c1+x).join('\n') );
       if (s2 !== s) return s2;
 
-      // Hashes
-      //
-      // Any '{file}-#.js' to be filled in the hash.
+      // '/{file}-#.js' -> '/{file}-{hash}.js'
       //
       // Example:
       //  <<
@@ -90,9 +93,9 @@ function tunnel(template, hashes) {    // (string, Map of string -> string) => s
       //
       // Note: expects '-' delimiter in Rollup 'output.entryFileNames'
       //
-      const s3 = s.replace(/'[^']+\/([\w\d]+)-#\.js'/,
+      const s3 = s.replaceAll(/['"]\/([\w\d]+)-#\.js['"]/g,
         (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
-          const hash = hashes.get(c1)
+          const hash = hashes.get(c1);
           if (!hash) throw new Error( "No hash for: "+c1 );
 
           return match.replace('#',hash);
@@ -113,12 +116,6 @@ function tunnel(template, hashes) {    // (string, Map of string -> string) => s
   // UNROLL blocks (remove)
   //
   const s1 = s0.replace(/^\s*<!--UNROLL\s.*-->[\s\S]+?^\s*<!--\s+-->\s*\n/gm,"");  // "<!-- UNROLL block REMOVED -->\n"
-
-  /*** don't need
-  // DEV,PROD blocks (keep the inside)
-  //
-  const s2 = s1.replace(/^\s*<!--DEV,PROD[,\s].*-->\s*(\n[\s\S]+?)^\s*<!-- -->\s*\n/gm,"$1\n");
-  ***/
 
   // ROLL blocks (uncomment)
   //
@@ -186,8 +183,6 @@ const tunnelPlugin = ({ template, out /*, map*/ }) => {    // ({ string (filenam
         }
       });
 
-      console.debug("!!!", files);
-
       const hashes = new Map(
         Array.from(files).map( (x) => {
           const [_,c1,c2] = x.match(/^(.+)-([a-f0-9]+)\.js$/);
@@ -195,7 +190,7 @@ const tunnelPlugin = ({ template, out /*, map*/ }) => {    // ({ string (filenam
         })
       );
 
-      console.debug( "Working with module hashes:", hashes );
+      //console.debug( "Working with module hashes:", hashes );
 
       const templateText = readFileSync(template, 'utf8');
       const targetText = tunnel(templateText, hashes);

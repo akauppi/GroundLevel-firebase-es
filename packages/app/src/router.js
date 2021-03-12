@@ -15,8 +15,6 @@ import { auth } from '/@firebase'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-//import { ref } from 'vue'
-
 // Pages
 //
 // Note: Static import is shorter and recommended [1]. However, also the dynamic 'await import('./pages/Some.vue')'
@@ -91,9 +89,7 @@ const routes = [
   //    a designated URL for sign-in. :)
   //
   rLocked('/', Home ),
-
-  LOCAL ? rOpen('/', HomeGuest, { name: 'Home.guest' })
-        : rOpen('/', HomeGuest, { props: r => ({ final: r.query.final }), name: 'Home.guest' }),  // '[?final=/somein]'
+  rOpen('/', HomeGuest, { name: 'Home.guest' }),
 
   rLocked('/projects/:id', Project),   // '/projects/<project-id>[&user=...]'
 
@@ -105,12 +101,11 @@ const routes = [
   // Note: This covers HTML pages that the client doesn't know of. However, the status code has already been sent
   //    and it is 200 (not 404). Check server configuration for actual 404 handling.
   //
-  rOpen('/:pathMatch(.*)', NotFound )    // was: ':catchAll(.*)'
-]; //.filter( x => x !== null );
+  rOpen('/:pathMatch(.*)', NotFound )
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  //base: process.env.BASE_URL,    // tbd. what is this used for?
   routes
 });
 
@@ -122,11 +117,8 @@ router.beforeResolve(async (to, from) => {
 
   console.log(`router entering page: ${to.path}`);
 
-  // This used to be 'to.matched[0].meta.needAuth' but that's not needed: Vue router sums 'to.matched[].meta' for us.
-  const needAuth = to.meta.needAuth;
+  const needAuth = to.meta.needAuth;    // Note: For deeper URL trees, study if you need to use 'to.matched[].meta.needAuth'. Likely not.
 
-  // Vue Router (4.0.3) QUESTION:
-  //
   // What is the relationship of the router with the components being created?
   //
   // We'd like to:
@@ -142,46 +134,43 @@ router.beforeResolve(async (to, from) => {
     let ret;
 
     if (needAuth) {
-      if (to.query.user) {    // already has self-claimed uid (ie. it's been through here)
+      const currentUid = getCurrentUserWarm()?.uid;   // might already be signed in
+      const queryUser = to.query.user;   // '?user=...' in the URL
+
+      if (currentUid && (!queryUser || queryUser === currentUid)) {   // already signed in; no abrupt change of user in the URL
+        ret = true;   // proceed
+
+      } else if (queryUser) {   // uid given by the developer ('&user=...')
+        const uid = queryUser;
+        console.debug("Signing in as:", uid);
+
+        // Sign in in Firebase emulator. This
+        //  a) ensures the user existed in 'local/users.js'
+        //  b) provides the user details (displayName, photoURL) the normal route to the application (see 'user.js')
+        //
+        await signInWithCustomToken( auth, JSON.stringify({ uid }) )
+          .then( creds => {
+            console.debug("Signed in as:", { creds });
+          })
+          .catch( err => {
+            console.error("Sign-in failed:", err);
+          });
+
         ret= true;
-        // tbd. provide 'uid' also here!!
 
-      } else if (from.query.user) {   // have the 'user=' in current URL; pass it on
-        ret= {
-          ...to,
-          query: {...(to.query || {}), "user": from.query.user}
-        };
-
-      } else if (to.path === '/') {   // aiming at home; we can provide a guest version (same URL)
-        ret= { name: 'Home.guest' };
-
-      } else {   // no 'user=...'
-        console.warn("Missing 'user' parameter");
-        ret= { path: '/no-user-param' };
+      } else {    // not signed in; no 'user=' in the URL
+        if (to.path === '/') {   // aiming at home; we can provide a guest version (same URL)
+          ret= { name: 'Home.guest' };
+        } else {
+          console.warn("Missing 'user' parameter");
+          ret= { path: '/no-user-param' };
+        }
       }
-    } else {    // Home.guest
-      ret= true;   // just proceed
+    } else {    // guest pages
+      ret= true;  // just proceed
     }
+
     assert(ret !== undefined, "route missing");
-
-    // Inform 'user.js'
-    //REMOVE localUserRef.value = to.query.user || from.query.user;
-
-    // Sign in in Firebase emulator. This
-    //  a) ensures the user existed in 'local/users.js'
-    //  b) provides the user details (displayName, photoURL) the normal route to the application (see 'user.js')
-    //
-    const uid = to.query.user || from.query.user;
-    console.debug("Automatically signing in as:", uid);
-
-    await signInWithCustomToken( auth, JSON.stringify({ uid }) )   // GETS STUCK!!
-      .then( creds => {
-        console.debug("Signed in as:", { creds });
-      })
-      .catch( err => {
-        console.error("Sign-in failed:", err);
-      })
-
     return ret;
 
   } else {  // real world

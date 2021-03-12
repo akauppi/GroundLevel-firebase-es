@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "aside-keys": "^0.0.2-alpha.3",
-    "firebase": "^0.900.15",
+    "firebase": "^0.900.16",
     "vue": "^3.0.7",
     "vue-router": "^4.0.4"
   },

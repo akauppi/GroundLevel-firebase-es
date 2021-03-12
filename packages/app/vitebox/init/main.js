@@ -22,8 +22,6 @@ import { getDatabase } from 'firebase/database'
 getDatabase
 import { arrayUnion } from 'firebase/firestore'
 arrayUnion
-import { FieldPath } from 'firebase/firestore/lite'
-FieldPath
 import { getFunctions as ignore8 } from 'firebase/functions'
 ignore8
 import { getMessaging } from 'firebase/messaging'
@@ -40,16 +38,6 @@ const LOCAL = import.meta.env.MODE === "dev_local";
 
 async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   assert(LOCAL);
-
-  /*** REMOVE?
-  // For 'dev:local', one does not need a Firebase project (or even account) in the cloud.
-  //
-  // Query parameters:
-  //    - user=<uid>    bypass sign-in, as such a user (eg. values in 'local/users.js' or real Firebase uid's - NOT TESTED!)
-  //
-  const urlParams = new URLSearchParams(window.location.search);
-  const autoSignUserId = urlParams.get('user');   // e.g. 'user=dev'
-  ***/
 
   console.info("Initializing for LOCAL EMULATION");
 
@@ -98,19 +86,6 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
   useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
   useAuthEmulator(auth, AUTH_URL);
-
-  /*** disabled (moved to router)
-  if (autoSignUserId) {
-    // Note: Do allow any user id to be used, for auto signing. We just haven't tested it with real uid's, but that
-    //      may be useful (ie. customize one's 'local/docs.js' with real uid's of the team).
-
-    console.debug("Automatically signing in as:", autoSignUserId);
-
-    await signInWithCustomToken( auth, JSON.stringify({ uid: autoSignUserId }) )   // GETS STUCK!!
-
-    console.debug("!!!");
-  }
-  ***/
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //

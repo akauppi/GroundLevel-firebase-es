@@ -46,6 +46,8 @@ async function initFirebase() {
   }
 }
 
+// Note: We could use "top level await" (not in node.js 15).
+//
 (async () => {    // free-running tail
   console.debug("Initializing Firebase and ops...");
 
@@ -55,8 +57,10 @@ async function initFirebase() {
 
   console.debug("Launching app...");
 
-  //const { init } = await import('@local/app');    // entry point
-  //await init();
+  if (true) {
+    const { init } = await import('@local/app');    // entry point
+    await init();
+  }
 
   console.debug("App on its own :)");
 })();

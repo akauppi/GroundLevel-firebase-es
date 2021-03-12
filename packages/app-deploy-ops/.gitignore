@@ -4,9 +4,11 @@
 
 /.firebase/
 
-# output of rollup-plugin-visualizer
-/stats.html
-
 # temporary configs ({roll|vite})
 /firebase.*.json
 
+# output of rollup-plugin-visualizer
+/stats.*.html
+
+# temp files
+/firebase-debug.log

@@ -153,7 +153,18 @@ export default {
   resolve: {
     alias: { ...subAliases,
       '/@': srcPath
-    }
+    },
+
+    // We'd prefer all dependencies to use 'exports' but at least:
+    //
+    //  - Firebase (0.900.16) has "esm2017" (non-standard convention) for _some_ submodules ("module" for others):
+    //    - "esm2017": auth, ...
+    //    - "module": firestore, ...
+    //
+    // This makes sure we get the latest, instead of eg. Firebase "esm5" (which, by the way, is a misnomer - EcmaScript
+    // modules came in ES6).
+    //
+    mainFields: ["esm2017", "module"]
   },
 
   // Means to pass build time values to the browser (in addition to '.env' files).

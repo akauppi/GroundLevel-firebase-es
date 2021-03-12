@@ -145,13 +145,14 @@
     });
 
     async function signOut () {
-      if (!LOCAL) {
-        const auth = await import('/@firebase').then( mod => mod.auth );
-        await auth.signOut();
-      }
+      // Sign out also under emulation (LOCAL)
+      //
+      const auth = await import('/@firebase').then( mod => mod.auth );
+      await auth.signOut();
 
-      router.push('/');
       closeMe();    // avoid the dialog from popping up if re-authenticating
+
+      router.push('/');   // BUG: Under LOCAL, this doesn't remove '?user=...' from the URL (nothing happens)
     }
 
     function closeMe() {
