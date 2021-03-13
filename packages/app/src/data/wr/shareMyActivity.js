@@ -7,7 +7,7 @@
 */
 import { assert } from '/@tools/assert'
 
-import { setDoc } from 'firebase/firestore'
+import { setDoc } from '@firebase/firestore'
 
 import { getCurrentUserWarm } from "/@/user"
 import { dbDoc } from "/@firebase"

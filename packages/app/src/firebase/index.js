@@ -3,9 +3,9 @@
 *
 * Provide Firebase handles to application level.
 */
-import { getApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore, doc, collection } from 'firebase/firestore'
+import { getApp } from '@firebase/app'
+import { getAuth } from '@firebase/auth'
+import { getFirestore, doc, collection } from '@firebase/firestore'
 
 // Design consideration: We could "hide" the database part in here.
 

@@ -16,10 +16,12 @@ import { terser } from 'rollup-plugin-terser'
 import visualizer from 'rollup-plugin-visualizer'
 
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
-import { manualChunks } from '../common/manualChunks.js'
+import { manualChunks } from '../vite-and-roll/manualChunks.js'
 
-import {dirname} from "path";
-import {fileURLToPath} from "url";
+import {dirname} from "path"
+import {fileURLToPath} from "url"
+import { readdirSync } from 'fs'
+
 const myPath = dirname(fileURLToPath(import.meta.url));
 
 const templateHtml = myPath + '/../index.html';
@@ -31,36 +33,47 @@ const watch = process.env.ROLLUP_WATCH;
 * Note: The order of the plugins does sometimes matter.
 */
 const plugins = [
+
   resolve({
-    mainFields: ['module'],  // insist on importing ES6 only (default: '["module", "main"]')
-    modulesOnly: true        // "inspect resolved files to assert that they are ES2015 modules"
+    mainFields: ["esm2017", "module"],  // insist on importing ES6 only; "esm2017" is Firebase specific.
+
+    modulesOnly: true,       // "inspect resolved files to assert that they are ES2015 modules"
+
+    dedupe: allFirebaseSubpackages()    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
   }),
 
   // enable for minified output (~720 vs. ~1492 kB)
-  !watch && terser(),
+  //DISABLED: !watch && terser(),
 
-  tunnelPlugin({
-    template: templateHtml,
-    out: targetHtml
-  }),
-
+  // DOES NOT WORK right: 'stats.roll.html' only has "100%"
+  //
   // see -> https://www.npmjs.com/package/rollup-plugin-visualizer
-  !watch && visualizer({
+  /*!watch &&*/ visualizer({
     sourcemap: true,        // seems to show the reduced sizes (e.g. 594k instead of 1.4M)
     template: 'sunburst',   // 'sunburst'|'treemap'|'network'
     brotliSize: true,       // Show also Brotli compressed size (Firebase hosting supports it)
     filename: 'stats.roll.html'
-  })
+  }),
+
+  tunnelPlugin(templateHtml, targetHtml)
 ];
 
-export default {
-  input: {    // tbd. check implications to filtering if we do it like this; or 'input: "../init/main.js"'
-    main: 'src/main.js'
-  },
+/*
+* List the '@firebase/auth', '@firebase/app', ... subpackages, so that access to *any* of those is deduplicated.
+* (we cannot give a regex to dedupe)
+*
+* tbd. Is there a setting to dedupe *all* node libraries? Could do that. :)
+*/
+function allFirebaseSubpackages() {
+  const xs= readdirSync("./node_modules/@firebase");
+  return xs.map( x => `@firebase/${x}` );
+}
 
+export default {
+  input: './src/main.js',
   output: {
     dir: myPath + '/out',
-    format: 'es',
+    format: 'es',   // "required"
     entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
     manualChunks,
@@ -70,5 +83,6 @@ export default {
   },
 
   plugins,
-  preserveEntrySignatures: false,   // "recommended setting for web apps" (suppresses a warning)
+
+  preserveEntrySignatures: false,   // "recommended setting for web apps" (suppresses a warning)  <-- tbd. does it though?
 };

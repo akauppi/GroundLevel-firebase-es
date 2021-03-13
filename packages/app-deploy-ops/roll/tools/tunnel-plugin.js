@@ -1,7 +1,7 @@
 /*
 * rollup/tools/tunnel-plugin.js
 *
-* Takes in 'index.html' (aimed for Vite), and expands the template comment strings so we have a Rollup-only build.
+* Converts an 'index.html' template to being suitable for Rollup build output.
 *
 * Index syntax:
 *
@@ -9,14 +9,13 @@
 *   this will be visible
 *   -->
 *
-*   <!--VITE [...] -->
+*   <!--UNROLL [...] -->
 *   this will be removed
 *   <!-- -->
 *
 *   Within 'ROLL' blocks, replaces:
 *
-*     - ${PRELOADS}       // by a modulepreloading code for the chunks produced by Rollup
-*
+*     - ${PRELOADS}       // by 'modulepreload' and 'preload' lines, for the chunks produced by Rollup.
 *     - '.../mod-#.js"    // '#' by the hash for 'mod'
 */
 import { strict as assert } from 'assert'
@@ -27,48 +26,56 @@ import { readFileSync, writeFileSync } from 'fs'
 *   <<
 *     <link rel="modulepreload" href="/ops/firebase-6ba65e97.js">
 *     ...
-*     <link rel="preload" href="/app.es-36e1fd10.js">   <-- notice NO 'modulepreload'
+*     <link rel="preload" as="script" crossorigin href="/app.es-36e1fd10.js">
 *     <link rel="modulepreload" href="/app/vue-143a5898.js">
 *     ...
 *   <<
 *
-* Note:
-*   It's important that application chunks are 'preload'ed, not _module_preloaded. They are loaded dynamically,
-*   once the environment (especially Firebase) is initialized. 'modulepreload' can be used on anything else,
-*   including all libraries.
-*
-* modfiles:
-*   entries like 'dist/{mod}-{hash}.js'
+* The caller informs, whether a chunk is loaded dynamically. If it is, it's best to not precompile it (especially
+* important for the app chunk, which relies on the 'center', Firebase et.al. environment to be set up for it).
 */
-function preloadsArr(modFiles) {   // (Array of string) => Array of "<link rel...>"
-
-  const isAppChunk = (fn) => fn.includes('/app.');  // keep an eye on this; might vary..
+function preloadsArr(arr) {   // (Array of [string,Boolean]) => Array of "<link rel...>"
 
   // Note: The 'crossorigin' attribute is needed. Without it, Chrome gives warnings in the browser console.
   //
   //    "..attribute needs to be set to match the resource's CORS and credentials mode, even when the fetch is not
   //    cross-origin"  From -> https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content
   //
-  const ret = modFiles
-    .filter( fn => ! fn.includes("/ops/init-"))   // skip boot chunk
-    .map( fn => {
-      return isAppChunk(fn)
-        ? `<link rel="preload" as="script" crossorigin href="${fn}">`
-        : `<link rel="modulepreload" href="${fn}">`;
+  const ret = arr
+    //??? .filter( ([fn,_]) => ! fn.includes("/ops/init-"))   // skip boot chunk    // tbd. revise this line
+    .map( ([fn,dynamic]) => {
+      return dynamic ? `<link rel="preload" as="script" crossorigin href="${fn}">`
+                     : `<link rel="modulepreload" href="${fn}">`;
     });
   return ret;
 }
 
 /*
-* Bake a meaningful index.html out of the template and hashes.
+* Bake a meaningful 'index.html' out of the template and hashes.
+*
 */
-function tunnel(template, hashes) {    // (string, Map of string -> string) => string    // may throw
+function tunnel(template, map) {    // (string, Map of string -> boolean) => string    // may throw
 
-  const modFiles = Array.from( hashes.entries() ).map( ([key,value]) =>
-    `/${key}-${value}.js`
-  );
+  const preloads = preloadsArr( Array.from(map) );   // ["<link ...>", ...]
 
-  const preloads = preloadsArr(modFiles);   // ["<link ...>", ...]
+  /*
+  * Provides a hash string for the file, e.g. 'main' -> 'cb47984b'.
+  *
+  * Note: We really, only need this for 'main-#.js'. #overcomplex
+  */
+  function hashFor(s) {   // (string) => string   ; may throw
+    let found;
+    for (const k of map.keys()) {
+      const [_,c1,c2] = k.match(/^(.+?)-([a-f0-9]+)\.js$/) || [];    // JS trick: '|| []' allows us to handle did-not-match case
+      if (c1 === s) {
+        found = c2;
+        break;
+      }
+    }
+
+    if (!found) throw new Error( `No hash for: ${s}` );
+    return found;
+  }
 
   /*
   * Apply templating to an uncommented 'ROLL' block.
@@ -95,15 +102,13 @@ function tunnel(template, hashes) {    // (string, Map of string -> string) => s
       //
       const s3 = s.replaceAll(/['"]\/([\w\d]+)-#\.js['"]/g,
         (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
-          const hash = hashes.get(c1);
-          if (!hash) throw new Error( "No hash for: "+c1 );
-
+          const hash = hashFor(c1);
           return match.replace('#',hash);
         }
       );
       if (s3 !== s) return s3;
 
-      return s;   // unchanged
+      return s;   // unmatched
     });
 
     return arr.join('\n');
@@ -130,75 +135,56 @@ function tunnel(template, hashes) {    // (string, Map of string -> string) => s
 }
 
 /*
-* Rollup plugin to get the chunks and their hashes (as by the 'manualChunks' policy). Used from Rollup config.
+* Rollup plugin to convert 'template' to 'out', injecting the hashes for this build.
 *
 * Based on 'modulepreloadPlugin' by Philip Walton
 *   -> https://github.com/philipwalton/rollup-native-modules-boilerplate/blob/master/rollup.config.js#L63-L84
 */
-const tunnelPlugin = ({ template, out /*, map*/ }) => {    // ({ string (filename), string (filename), {} }) => { ...Rollup plugin object... }
+function tunnelPlugin(template, out) {    // (string (filename), string (filename)) => { ...Rollup plugin object... }
   return {
     name: 'tunnel',
     generateBundle(options, bundle) {
-      const files = new Set();    // note: using a Set automatically takes care of duplicates
+      const map1 = new Map();    // Map of <fileName> -> Boolean   ; value 'true' if used as dynamic import (even once)
 
-      Object.entries(bundle).forEach( ([fileName, chunkInfo]) => {
-        //console.debug('!!!', fileName, chunkInfo);
-          //
-          // fileName: 'main-d2008ed0.js'
-          // chunkInfo : {    // ..has tremendously much data, including sources
-          //    isDynamicEntry: false,
-          //    isEntry: true,
-          //    imports: [ '@local/app' ],
-          //    ...
-          //  }
+      Object.entries(bundle).forEach( ([fileName, info]) => {
 
-        if (chunkInfo.isEntry || chunkInfo.isDynamicEntry) {
-          //console.debug(`Chunk imports of ${fileName}:`, chunkInfo.imports);   // dependent modules
-          /*
-          Chunk imports of main-f045957a.js: [
-            'app.es-1b83be53.js',
-            'app/firebase-4bf9f9b4.js',
-            'app/vue-bd57f6db.js',
-            'app/firebase-auth-b5c3554d.js',
-            'app/tslib-f75ffd46.js',
-            'app/firebase-firestore-ecc2601c.js',
-            'app/aside-keys-a858bef9.js',
-            'app/vue-router-66ef5042.js',
-            'app/firebase-performance-79caec35.js'
-          ]
-          Chunk imports of app.es-1b83be53.js: [
-            'app/vue-bd57f6db.js',
-            'app/firebase-4bf9f9b4.js',
-            'app/firebase-auth-b5c3554d.js',
-            'app/firebase-firestore-ecc2601c.js',
-            'app/aside-keys-a858bef9.js',
-            'app/vue-router-66ef5042.js',
-            'app/firebase-performance-79caec35.js',
-            'app/tslib-f75ffd46.js'
-          ]
-          */
+        console.log("!!!", { fileName, info: { ...info, code: undefined, map: { ...info.map, mappings: "..." }  } });
 
-          [fileName, ...chunkInfo.imports].forEach( (s) => { files.add(s); } );
-            // others than 'main' only show up in the imports
+        // fileName:
+        //    main-cb47984b.js with { dynamicImports: ['firebase-performance-{hash}.js', 'app.es-{hash}.js' ] }
+        //
+        //  app.es-18ad35e0.js
+        //  app/aside-keys-fbaa78e4.js
+        //  app/vue-router-a22dd22c.js
+        //  app/vue-84867a64.js
+
+        // chunkInfo: {
+        //    exports: [ 'Deferred', 'ErrorFactory', 'FirebaseError' ],
+        //    ...
+        //    isDynamicEntry: Boolean,    // 'true' if used by 'import()'
+        //    isEntry: Boolean,           // Q: what does it mean if somethings "not entry" and "not dynamic entry"?
+        //    imports: Array of string
+        // }
+        //
+        function add(fn, dynamic) {
+          map1.set(fn, map1.get(fn) || dynamic);
+        }
+
+        if (info.isEntry || info.isDynamicEntry) {
+          add(fileName, info.isDynamicEntry);
+          info.imports.forEach( (s) => { add(s,false); } );   // libraries should be stateless in their loading; can be 'modulepreload'ed
         }
       });
 
-      const hashes = new Map(
-        Array.from(files).map( (x) => {
-          const [_,c1,c2] = x.match(/^(.+)-([a-f0-9]+)\.js$/);
-          return [c1,c2];
-        })
-      );
-
-      //console.debug( "Working with module hashes:", hashes );
+      //console.debug( "Working with modules:", map1 );
 
       const templateText = readFileSync(template, 'utf8');
-      const targetText = tunnel(templateText, hashes);
+      const targetText = tunnel(templateText, map1);
 
       // Note: Not using Rollup's 'this.emitFile' since there's no need
       writeFileSync(out, targetText);
     }
   };
-};
+}
 
 export { tunnelPlugin }

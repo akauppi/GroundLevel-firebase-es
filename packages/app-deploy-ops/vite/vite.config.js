@@ -11,15 +11,15 @@ const myPath = dirname(fileURLToPath(import.meta.url));
 
 import visualizer from 'rollup-plugin-visualizer'
 
-import { manualChunks } from '../common/manualChunks.js'
+import { manualChunks } from '../vite-and-roll/manualChunks.js'
 
 const createStats = true;
 
 export default {
   resolve: {
-    /*dedupe: [
-      'tslib'   // does not seem to help
-    ]*/
+    dedupe: [
+      'tslib'   // tbd. How should 'resolve.dedupe' be used?  Manual doesn't show. This does not seem to do it..
+    ],
     // For dear Firebase
     mainFields: ["esm2017", "module"]
   },

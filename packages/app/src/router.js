@@ -10,7 +10,7 @@
 */
 import { assert } from '/@tools/assert'
 
-import { signInWithCustomToken } from 'firebase/auth'
+import { signInWithCustomToken } from '@firebase/auth'
 import { auth } from '/@firebase'
 
 import { createRouter, createWebHistory } from 'vue-router'

@@ -5,13 +5,13 @@
 */
 import { assert } from './assert.js'
 
-import { initializeApp } from 'firebase/app'
+import { initializeApp, getApps } from '@firebase/app'
 
 import { central } from './central'
 import './catch'
 
 // tbd. to be placed in a config
-const enableFirebasePerf = false;
+const enableFirebasePerf = false;     // tbd. 'true' leads to "Cannot initialize ErrorFactory..." in browser (packaging glitch)
 
 // Access values from Firebase hosting (we don't use its 'init.js').
 //
@@ -39,7 +39,7 @@ async function initFirebase() {
   // If Firebase Performance Monitoring is wanted, enable it
   //
   if (enableFirebasePerf) {
-    const getPerformance = import("firebase/performance").then( mod => mod.getPerformance );
+    const getPerformance = import("@firebase/performance").then( mod => mod.getPerformance );
     const perf = getPerformance(myApp);
 
     console.debug("!!! Performance monitoring initialialized:", { perf });    // DEBUG
@@ -57,10 +57,8 @@ async function initFirebase() {
 
   console.debug("Launching app...");
 
-  if (true) {
-    const { init } = await import('@local/app');    // entry point
-    await init();
-  }
+  const { init } = await import('@local/app');    // entry point
+  await init();
 
   console.debug("App on its own :)");
 })();

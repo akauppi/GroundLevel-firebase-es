@@ -12,7 +12,7 @@
 */
 import { assert } from '/@tools/assert'
 
-import { collection, where } from 'firebase/firestore'
+import { collection, where } from '@firebase/firestore'
 
 import { getCurrentUserWarm } from "/@/user"
 import { collRef } from "/@tools/listen.ref"

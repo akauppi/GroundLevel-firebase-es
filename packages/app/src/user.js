@@ -14,7 +14,7 @@
 */
 import { computed, ref, watchEffect } from 'vue'
 
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged } from '@firebase/auth'
 import { auth } from '/@firebase'
 
 import { assert } from '/@tools/assert'

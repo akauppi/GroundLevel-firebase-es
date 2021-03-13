@@ -98,6 +98,7 @@ const chunkTo = [     // Array of Regex
   //
   /\/node_modules\/(aside-keys)\//,
 
+  /*** disabled: we now avoid 'npm run build' to even run, if 'aside-keys' is linked.
   // ORDER MATTERS: keep this ABOVE the app's own library handling.
   //
   // Dependencies (DEVELOPMENT ONLY!), when brought in via 'npm link'. It doesn't matter how we name these, since they
@@ -115,13 +116,9 @@ const chunkTo = [     // Array of Regex
   //
   /\/packages\/(aside-keys)\/(?!node_modules)/,     // aside itself - the library
   [/\/packages\/aside-keys\/node_modules\/(@?firebase|tslib)\//, 'aside-keys-npm-linked-deps-dev-only'],
+  */
 
-  // NOTE:
-  //  'firebase/performance' (that we want to leak to 'app-deploy-ops') is "51.69kb / brotli: 8.50kb".
-  //  IF we build it as a separate chunk, app-deploy-ops build chokes in a circular dependency (this MAY or may not
-  //    be a Firebase @exp (0.900.15) packaging bug???)
-  //  MERGING WORKS!!! 🥁🤹‍️🎪🌋🎉
-
+  /*** disabled (packaging Firebase as peer)
   // Pack some packages separately:
   //  - auth to see its size implication (will be needed always)
   //  - firestore also because it can be lazy loaded (needed only after authentication)
@@ -134,16 +131,6 @@ const chunkTo = [     // Array of Regex
     // @firebase/{auth|app|firestore|util|logger|component|webchannel-wrapper|...}
 
   /\/node_modules\/(tslib)\//,    // used by Firebase, but place in its own chunk
-
-  /*** disabled (unless we can solve the circular dependency??)
-  // Things kept for the 'ops':
-  //
-  // /Users/.../app/node_modules/firebase/performance/dist/index.esm.js
-  // /Users/.../app/node_modules/@firebase/performance/dist/index.esm.js
-  // /Users/.../app/node_modules/idb/lib/idb.mjs       # used by 'firebase/performance', only
-  //
-  /\/node_modules\/@?(firebase\/performance)\//,
-  [/\/node_modules\/idb\//, 'firebase-performance']
   ***/
 ];
 
@@ -193,8 +180,8 @@ export default {
 
     rollupOptions: {
       external: [
-        /^@?firebase\//,     // have it here, if defined as 'peerDependency' in 'package.json' (leaves away from build)
-        "/favicon.png"
+        /^@?firebase\//,    // don't try packing these - we've made them 'peerDependency'
+        //"/favicon.png"
       ],
       output: { manualChunks }
     },

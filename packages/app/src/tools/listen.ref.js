@@ -3,7 +3,7 @@
 *
 * Tools to turn Firebase doc, collection and query subscription into the UI framework's reference model.
 */
-import { query, onSnapshot, QueryConstraint, Timestamp } from 'firebase/firestore'
+import { query, onSnapshot, QueryConstraint, Timestamp } from '@firebase/firestore'
   //
   // Firebase @exp note: 'onSnapshot' brings in following both for references, and queries
 
