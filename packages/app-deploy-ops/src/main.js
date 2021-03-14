@@ -5,7 +5,7 @@
 */
 import { assert } from './assert.js'
 
-import { initializeApp, getApps } from '@firebase/app'
+import { initializeApp } from '@firebase/app'
 
 import { central } from './central'
 import './catch'

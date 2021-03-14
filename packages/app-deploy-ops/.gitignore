@@ -7,8 +7,9 @@
 # temporary configs ({roll|vite})
 /firebase.*.json
 
-# output of rollup-plugin-visualizer
-/stats.*.html
+# visualizer output
+/roll/stats.html
+/vite/stats.html
 
 # temp files
 /firebase-debug.log

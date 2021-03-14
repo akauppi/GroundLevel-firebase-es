@@ -20,6 +20,24 @@ We get the application logic as a module dependency, and don't expect anything f
 There is an active project; you've run `firebase use --add`.
 
 
+## Rollup vs. Vite
+
+We'd like to be able to build with two options: plain Rollup and Vite (that uses Rollup underneath).
+
+Unfortunately the Vite build is currently [not working](https://github.com/akauppi/GroundLevel-firebase-es/issues/35) and we cannot do output comparisons.
+
+The idea is that one can use the following commands:
+
+```
+npm run build[:roll|vite]
+npm run watch[:roll|vite]
+npm run serve[:roll|vite]
+npm run deploy[:roll|vite]
+```
+
+Below, we are using the unnamed command, which uses the best (or as it now is -- only!) working alternative.
+
+
 ## Getting started
 
 Install dependencies:
@@ -39,7 +57,7 @@ Build for deployment:
 ```
 $ npm run build
 ...
-created roll/out in 9.8s
+created roll/out in 8.1s
 ```
 
 >Note: We'd like to get a summary of the chunks produced; something like Vite does.

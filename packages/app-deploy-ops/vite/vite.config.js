@@ -12,24 +12,25 @@ const myPath = dirname(fileURLToPath(import.meta.url));
 import visualizer from 'rollup-plugin-visualizer'
 
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
+import {readdirSync} from 'fs'
 
 const createStats = true;
 
+const allFirebaseSubpackages = readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` );
+
 export default {
   resolve: {
-    dedupe: [
-      'tslib'   // tbd. How should 'resolve.dedupe' be used?  Manual doesn't show. This does not seem to do it..
-    ],
+    dedupe: allFirebaseSubpackages,   // IMPORTANT
     // For dear Firebase
     mainFields: ["esm2017", "module"]
   },
 
   define: {     // "statically replaced" for production
-    "_OPS_VERSION": "\"0.0.0\""
+    //"_OPS_VERSION": "\"0.0.0\""
   },
 
   build: {
-    //publicDir: myPath + "/../extras",
+    publicDir: 'public',    // (default)
     outDir: myPath + "/out",    // must match 'hosting.public' in 'firebase.json'.
     assetsDir: '.',   // relative to 'outDir'
 
@@ -42,11 +43,11 @@ export default {
       output: { manualChunks },
 
       plugins: [
-        createStats && visualizer({
+        createStats && visualizer({   // does not work
+          filename: 'vite/stats.html',
           sourcemap: true,
           template: 'sunburst',
-          brotliSize: true,
-          filename: 'stats.vite.html'
+          brotliSize: true
         })
       ]
     }

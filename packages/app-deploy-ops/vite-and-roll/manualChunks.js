@@ -61,30 +61,32 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   // /Users/.../app/vitebox/dist/firebase-performance.js
   // /Users/.../app/vitebox/dist/tslib.js
   //
-  [/\/app\/.+\/(.+?)\.js$/, 'app'],
+  [/(?<!node_modules.*)\/app\/.+\/(.+?)\.js$/, 'app'],      // note: 'node_modules' _not_ allowed to precede (negative look-behind)
 
   // Firebase for both app and ops (+ tslib, idb)
   //
-  //  /Users/.../app-deploy-ops/node_modules/firebase/performance/dist/index.esm.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/performance/dist/index.esm.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/component/dist/index.esm.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/logger/dist/index.esm2017.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/util/dist/index.esm.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/performance/node_modules/tslib/tslib.es6.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/installations/dist/index.esm.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/component/node_modules/tslib/tslib.es6.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/util/node_modules/tslib/tslib.es6.js
-  //  /Users/.../app-deploy-ops/node_modules/@firebase/installations/node_modules/tslib/tslib.es6.js
-  //  /Users/.../app-deploy-ops/node_modules/idb/lib/idb.mjs
+  // /Users/.../app-deploy-ops/node_modules/@firebase/app/dist/index.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/performance/dist/index.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/util/dist/index.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/logger/dist/index.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/component/dist/index.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/installations/dist/index.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/firebase/auth/dist/index.esm.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/auth/dist/esm2017/index.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/firestore/dist/exp/index.browser.esm2017.js
+  // /Users/.../app-deploy-ops/node_modules/@firebase/auth/dist/esm2017/index-2cb9d3c8.js
+  // /Users/.../app-deploy-ops/node_modules/tslib/tslib.es6.js
+  // /Users/.../app-deploy-ops/node_modules/idb/lib/idb.mjs
+  // /Users/.../app-deploy-ops/node_modules/@firebase/webchannel-wrapper/dist/index.esm2017.js
   //
-  /\/node_modules\/@?(firebase)\/(?!auth|firestore|performance)/,
-
   /\/node_modules\/@?(firebase\/auth)\//,
   /\/node_modules\/@?(firebase\/firestore)\//,
   /\/node_modules\/@?(firebase\/performance)\//,
+    //
+  /\/node_modules\/@?(firebase)\//,   // catch all of Firebase (keep AFTER the specific matches)
 
   /\/node_modules\/(tslib)\//,
-  [/\/app-deploy-ops\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack in the same chunk)
+  [/\/app-deploy-ops\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
 ];
 
 export {

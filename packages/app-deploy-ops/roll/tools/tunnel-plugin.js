@@ -147,30 +147,13 @@ function tunnelPlugin(template, out) {    // (string (filename), string (filenam
       const map1 = new Map();    // Map of <fileName> -> Boolean   ; value 'true' if used as dynamic import (even once)
 
       Object.entries(bundle).forEach( ([fileName, info]) => {
+        const condition = info.isEntry || info.isDynamicEntry;    // skip libraries
 
-        console.log("!!!", { fileName, info: { ...info, code: undefined, map: { ...info.map, mappings: "..." }  } });
-
-        // fileName:
-        //    main-cb47984b.js with { dynamicImports: ['firebase-performance-{hash}.js', 'app.es-{hash}.js' ] }
-        //
-        //  app.es-18ad35e0.js
-        //  app/aside-keys-fbaa78e4.js
-        //  app/vue-router-a22dd22c.js
-        //  app/vue-84867a64.js
-
-        // chunkInfo: {
-        //    exports: [ 'Deferred', 'ErrorFactory', 'FirebaseError' ],
-        //    ...
-        //    isDynamicEntry: Boolean,    // 'true' if used by 'import()'
-        //    isEntry: Boolean,           // Q: what does it mean if somethings "not entry" and "not dynamic entry"?
-        //    imports: Array of string
-        // }
-        //
         function add(fn, dynamic) {
           map1.set(fn, map1.get(fn) || dynamic);
         }
 
-        if (info.isEntry || info.isDynamicEntry) {
+        if (condition) {
           add(fileName, info.isDynamicEntry);
           info.imports.forEach( (s) => { add(s,false); } );   // libraries should be stateless in their loading; can be 'modulepreload'ed
         }

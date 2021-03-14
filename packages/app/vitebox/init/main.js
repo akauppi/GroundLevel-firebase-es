@@ -11,29 +11,6 @@ import { getAuth, useAuthEmulator } from 'firebase/auth'
 import { getFirestore, useFirestoreEmulator } from 'firebase/firestore'
 import { getFunctions, useFunctionsEmulator } from 'firebase/functions'
 
-/** KEEP for helping with this -> https://github.com/firebase/firebase-js-sdk/discussions/4534 **
-import { getAnalytics } from 'firebase/analytics'
-getAnalytics;
-import { getApp } from 'firebase/app'
-getApp;
-import { getIdToken } from 'firebase/auth'
-getIdToken;
-import { getDatabase } from 'firebase/database'
-getDatabase
-import { arrayUnion } from 'firebase/firestore'
-arrayUnion
-import { getFunctions as ignore8 } from 'firebase/functions'
-ignore8
-import { getMessaging } from 'firebase/messaging'
-getMessaging
-import { getPerformance } from 'firebase/performance'
-getPerformance
-import { activate } from 'firebase/remote-config'
-activate
-import { getStorage } from 'firebase/storage'
-getStorage
-//**/
-
 const LOCAL = import.meta.env.MODE === "dev_local";
 
 async function initFirebaseLocal() {   // () => Promise of FirebaseApp

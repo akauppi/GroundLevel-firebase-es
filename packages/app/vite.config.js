@@ -71,8 +71,7 @@ function manualChunks(id) {
   }
 }
 
-// Regex's for grouping the chunks. If there is a capture group, that is used for the name. Otherwise, explicit name or
-// "default".
+// Regex's for grouping the chunks.
 //
 const chunkTo = [     // Array of Regex
   // /Users/.../app/src/app.js    # ..and others
@@ -82,56 +81,12 @@ const chunkTo = [     // Array of Regex
   // vite/preload-helper
   /^vite\/preload-helper$/,      // Vite runtime (small, ~600b)
 
-  // /Users/.../node_modules/vue/dist/vue.runtime.esm-bundler.js
-  // /Users/.../node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
-  // /Users/.../node_modules/vue-router/dist/vue-router.esm-bundler.js
-  // /Users/.../node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
-  // /Users/.../node_modules/@vue/shared/dist/shared.esm-bundler.js
-  // /Users/.../node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
-  //
   /\/node_modules\/@?(vue)\//,
   /\/node_modules\/(vue-router)\//,
-
-  // Dependencies, when brought from npm registry (no 'npm link'):
-  //
-  // /Users/.../app/node_modules/aside-keys/dist/bundle.js
-  //
   /\/node_modules\/(aside-keys)\//,
 
-  /*** disabled: we now avoid 'npm run build' to even run, if 'aside-keys' is linked.
-  // ORDER MATTERS: keep this ABOVE the app's own library handling.
-  //
-  // Dependencies (DEVELOPMENT ONLY!), when brought in via 'npm link'. It doesn't matter how we name these, since they
-  // will not be there for production builds.
-  //
-  // /Users/.../packages/aside-keys/dist/bundle.js
-  // /Users/.../packages/aside-keys/node_modules/firebase/auth/dist/index.esm.js
-  // /Users/.../packages/aside-keys/node_modules/@firebase/auth/dist/esm5/index.js
-  // /Users/.../packages/aside-keys/node_modules/@firebase/app/dist/index.esm5.js
-  // /Users/.../packages/aside-keys/node_modules/tslib/tslib.es6.js
-  // /Users/.../packages/aside-keys/node_modules/@firebase/util/dist/index.esm.js
-  // /Users/.../packages/aside-keys/node_modules/@firebase/auth/dist/esm5/index-392613a3.js
-  // /Users/.../packages/aside-keys/node_modules/@firebase/logger/dist/index.esm.js
-  // /Users/.../packages/aside-keys/node_modules/@firebase/component/dist/index.esm.js
-  //
-  /\/packages\/(aside-keys)\/(?!node_modules)/,     // aside itself - the library
-  [/\/packages\/aside-keys\/node_modules\/(@?firebase|tslib)\//, 'aside-keys-npm-linked-deps-dev-only'],
-  */
-
-  /*** disabled (packaging Firebase as peer)
-  // Pack some packages separately:
-  //  - auth to see its size implication (will be needed always)
-  //  - firestore also because it can be lazy loaded (needed only after authentication)
-  //
-  ///\/node_modules\/@?(firebase)\/(?!(auth|firestore|performance))/,   // misc firestore packages
-  /\/node_modules\/@?(firebase)\/(?!(auth|firestore))/,   // misc firestore packages + performance
-  /\/node_modules\/@?(firebase\/auth)\//,
-  /\/node_modules\/@?(firebase\/firestore)\//,
-    // firebase/{auth|app|firestore}
-    // @firebase/{auth|app|firestore|util|logger|component|webchannel-wrapper|...}
-
-  /\/node_modules\/(tslib)\//,    // used by Firebase, but place in its own chunk
-  ***/
+  // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed 'aside-keys';
+  // Firebase is marked as a peer dependency, and provided by the upper level.
 ];
 
 export default {
@@ -168,7 +123,7 @@ export default {
     // tbd. Is minification required? Ops build will do it for us, right?
     //minify: true,
     minify: false,
-    sourcemap: true,    // "generate production source maps"
+    sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
     target: 'esnext',   // assumes native dynamic imports
     //polyfillDynamicImport: false
 
@@ -186,8 +141,7 @@ export default {
       output: { manualChunks }
     },
 
-    //cssCodeSplit: false,    // false: "all CSS in the entire project will be extracted into a single CSS file"
-    //chunkSizeWarningLimit: 800    // default: 500
+    cssCodeSplit: true,   // true (default): ".. CSS imported in async chunks will be inlined into the async chunk itself and inserted when the chunk is loaded."
   },
 
   plugins: [
