@@ -141,7 +141,14 @@ export default {
       output: { manualChunks }
     },
 
-    cssCodeSplit: true,   // true (default): ".. CSS imported in async chunks will be inlined into the async chunk itself and inserted when the chunk is loaded."
+    // Note:
+    //    Documentation says 'true' would have: "..CSS imported in async chunks will be inlined into the async chunk
+    //    itself and inserted when the chunk is loaded."
+    //
+    //    This is not so (Vite 2.0.5). Why is 'app.css' there, then? (expecting the CSS to be baked into .js)
+    //
+    //cssCodeSplit: true,   // true: creates 'app.css'
+    cssCodeSplit: false,   // false: creates 'style.css'
   },
 
   plugins: [

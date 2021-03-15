@@ -11,7 +11,7 @@ import { central } from './central'
 import './catch'
 
 // tbd. to be placed in a config
-const enableFirebasePerf = false;     // tbd. 'true' leads to "Cannot initialize ErrorFactory..." in browser (packaging glitch)
+const enableFirebasePerf = true;
 
 // Access values from Firebase hosting (we don't use its 'init.js').
 //
@@ -32,14 +32,12 @@ window.central = central;
 async function initFirebase() {
   const opts = await firebaseProm.then( (o) => ({ apiKey: o.apiKey, appId: o.appId, projectId: o.projectId, authDomain: o.authDomain }));
 
-  console.debug("Received Firebase options:", opts);    // DEBUG
-
   const myApp = initializeApp(opts);
 
   // If Firebase Performance Monitoring is wanted, enable it
   //
   if (enableFirebasePerf) {
-    const getPerformance = import("@firebase/performance").then( mod => mod.getPerformance );
+    const getPerformance = await import("@firebase/performance").then( mod => mod.getPerformance );
     const perf = getPerformance(myApp);
 
     console.debug("!!! Performance monitoring initialialized:", { perf });    // DEBUG

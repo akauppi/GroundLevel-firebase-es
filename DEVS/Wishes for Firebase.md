@@ -600,6 +600,18 @@ In `packages/app-deploy-ops`, we want to support both Vite and Rollup builds, bu
 
 If configuration can be a script, such logic can be handled in there.
 
+## Firebase hosting emulator: show 404's as errors
+
+Currently shown as info (same as any lines):
+
+```
+i  hosting: 127.0.0.1 - - [15/Mar/2021:00:36:30 +0000] "GET /app.css HTTP/1.1" 404 146 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"
+```
+
+Wouldn't it at least be good to show them as warnings? This would help spot places, where the front end is trying to reach a non-existing file.
+
+I'd personally expect the lines as errors, but it's not really an error of the server... Your choice, but I think `info` is unhelpful.
+
 
 ## References
 

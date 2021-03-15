@@ -5,15 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Ship the favicon from the app build, but maybe we should have 'App.vue' set it up.
-    -
-    - tbd. enable (from app), without breaking
+    <!-- Ship the favicon from the app build's 'public'
+    -->
     <link rel="icon" type="image/png" href="/favicon.png">
-    -->
 
-    <!-- Needed as long as we need 'scss' plugin in Rollup config (see 'scssHackNeeded').   tbd. do we?
-    <link type="text/css" rel="stylesheet" href="dist/scss-hack.css" />
+    <!-- CSS from the application; name depends on Vite build parameters ('app.css' or 'style.css')
     -->
+    <link type="text/css" rel="stylesheet" href="/style.css" />
 
     <!--ROLL
     ${PRELOADS}
@@ -41,6 +39,7 @@
 
     <link type="text/css" rel="stylesheet" href="/fatal.css" />
 
+    <!-- tbd. debug what's needing this. -->
     <style>
       /* Something brings 'margin-top: 8px'. We don't want that. */
       body {

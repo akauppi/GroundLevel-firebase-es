@@ -16,7 +16,10 @@ import {readdirSync} from 'fs'
 
 const createStats = true;
 
-const allFirebaseSubpackages = readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` );
+const allFirebaseSubpackages = [
+  ...readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` ),
+  ...readdirSync("./node_modules/firebase").map( x => `firebase/${x}` ),
+];
 
 export default {
   resolve: {
@@ -30,7 +33,7 @@ export default {
   },
 
   build: {
-    publicDir: 'public',    // (default)
+    publicDir: 'node_modules/@local/app/vitebox/public',    // pass any static files directly
     outDir: myPath + "/out",    // must match 'hosting.public' in 'firebase.json'.
     assetsDir: '.',   // relative to 'outDir'
 
