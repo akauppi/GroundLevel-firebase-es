@@ -16,6 +16,8 @@ import { init as initAside } from 'aside-keys'
 import { appTitle } from './config.js'
 import { router } from './router.js'
 
+import { central } from '@ops/central'
+
 import App from '/@App/index.vue'
 
 import './common.css'

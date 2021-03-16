@@ -8,6 +8,7 @@ Release dates are marked; 'latest' shows WIP window.
 
 - passing build version
 - **FIXED:** signing in/out in `LOCAL` mode; `user=` only needed for the initial page
+- **CHANGE:** bringing `central` via `import` (that has different implementation in dev vs. ops builds); was a global.
 
 ## 6-Mar-2021
 

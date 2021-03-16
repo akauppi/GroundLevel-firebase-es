@@ -1,10 +1,9 @@
 /*
-* init/central.js
+* vitebox/ops/central.js
 *
-* Central logging (for local and 'dev:online').
+* Central logging - development version
 *
-* This is a stub with the operations interface from 'GroundLevel-es-firebase-web'. It logs via REST APIs to the
-* console that started the emulator etc.
+* Logs via REST APIs to the console that started the emulator etc.
 */
 const port = import.meta.env.MODE === "dev_local" ? false : 5050;    // tbd. sync with 'package.json' #rework
 
@@ -35,7 +34,7 @@ const logGen = level => {    // (string) => (string [, object]) => ()
     if (f) f(s);
 
     try {
-      const ignore = post(url,s);    // free tail
+      /*const ignore =*/ post(url,s);    // free tail
     }
     catch(err) {
       // not so dear - we are just developing
@@ -54,7 +53,7 @@ const lf = logGen("fatal");
 *     throw log.fatal('msg', {...});
 *   <<
 */
-function logFatal(msg, opt) {
+function fatal(msg, opt) {
   const s = format(msg, opt);
   lf(msg, opt);
 
@@ -68,13 +67,13 @@ const showOnBrowser = new Map([
 ]);
 
 const central = {
-  debug: logGen("debug"),
-  info: logGen("info"),
-  warn: logGen("warn"),
-  error: logGen("error"),
-  fatal: logFatal
+  debug: logGen('debug'),
+  info: logGen('info'),
+  warn: logGen('warn'),
+  error: logGen('error'),
+  fatal
 }
 
-export {
-  central
-}
+// tbd. Do we want to use as:
+//export default central;   // import central from '@ops/central'
+export { central };       // import { central } from '@ops/central'

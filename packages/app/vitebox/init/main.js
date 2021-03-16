@@ -86,11 +86,6 @@ function initFirebaseOnline() {
   initializeApp( { apiKey, appId, authDomain, projectId } );
 }
 
-async function initCentral() {    // () => Promise of central
-
-  return await import('./central.js').then( mod => mod.central );
-}
-
 /*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
   const t0 = performance.now();
 
@@ -100,12 +95,8 @@ async function initCentral() {    // () => Promise of central
     initFirebaseOnline();
   }
 
-  const central = await initCentral();
-
   const dt = performance.now() - t0;
   console.debug(`Initializing stuff took: ${dt}ms`);        // OLD DATA: ~~90~~, ~~100~~, ~~114~~ ms
-
-  window.central = central;
 
   console.debug("Launching app...");
 

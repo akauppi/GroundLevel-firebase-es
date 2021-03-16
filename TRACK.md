@@ -32,3 +32,9 @@ They are REWRITING the JavaScript client, as `exp` (expire?).
 
 Once we have something running with `@exp`, comparison of the before/after bundle sizes is what's interesting.
 
+## WebStorm: exclude `node_modules` from searches - but keep them for symbol lookup
+
+This is a small but annoying part of WebStorm.
+
+- [How to exclude node_modules and .meteor from all searches and code inspections](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207696445-How-to-exclude-node-modules-and-meteor-from-all-searches-and-code-inspections)
+

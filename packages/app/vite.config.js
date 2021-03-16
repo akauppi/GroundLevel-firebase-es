@@ -1,12 +1,14 @@
 // vite.config.js
 //
-import path, { join as pJoin, dirname as pDirname } from 'path'
+import path, { dirname, join as pJoin } from 'path'
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 
 import vue from '@vitejs/plugin-vue'
 
-const srcPath = pJoin( pDirname(fileURLToPath(import.meta.url)), 'src');
+const myPath = dirname(fileURLToPath(import.meta.url))
+const srcPath = pJoin(myPath, 'src');
+const opsPath = pJoin(myPath, 'vitebox/ops');
 
 /*
 * For an absolute path 'p', provide the immediate subdirectories within it.
@@ -21,7 +23,7 @@ function getSubDirsSync(p) {    // (path-string) -> Array of string
 * Each subdir of 'srcPath' gets its own alias (eg. '/@auth' -> '<root>/src/auth/')
 */
 const subAliases = (() => {
-  const pairs = getSubDirsSync(srcPath).map( s => {   // [string,path-string]
+  const pairs = getSubDirsSync(srcPath).map( s => {
     const tmp = path.resolve(srcPath, s);
     return [`/@${s}`, tmp];
   });
@@ -38,6 +40,21 @@ const forcedVueComponents = new Set([
   "router-view",
   "router-link"
 ]);
+
+/*
+* Each file in 'opsPath' gets its own alias (eg. '@ops/central' -> '<root>/vitebox/ops/central.js')
+*/
+const opsAliases = (() => {
+  const pairs = readdirSync(opsPath).map( s => {    // e.g. 'central.js'
+    const [_,c1] = s.match(/(.+)\.js$/) || [];    // pick
+    if (c1) {
+      const tmp = path.resolve(opsPath, s);
+      return [`@ops/${c1}`, tmp];
+    }
+  }).filter( x => x !== undefined ); // Array of ['@ops/...', '...path...']
+
+  return Object.fromEntries(pairs);
+})();
 
 // Help Rollup in packaging.
 //
@@ -94,7 +111,8 @@ export default {
 
   resolve: {
     alias: { ...subAliases,
-      '/@': srcPath
+      '/@': srcPath,
+      ...opsAliases
     },
 
     // We'd prefer all dependencies to use 'exports' but at least:
@@ -137,6 +155,7 @@ export default {
       external: [
         /^@?firebase\//,    // don't try packing these - we've made them 'peerDependency'
         //"/favicon.png"
+        ...Object.keys(opsAliases)    // "@ops/central" et.al.
       ],
       output: { manualChunks }
     },
