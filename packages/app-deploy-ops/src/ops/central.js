@@ -1,15 +1,9 @@
 /*
-* src/central.js
+* src/ops/central.js
 *
 * Central logging.
-*
-* The idea is to be able to pass logs (also offline logging, once there is a re-connection) from the client to
-* a centralized location, for study.
 */
-//import { assert } from './assert.js'
-
-// #rework
-//import { logs as opsLogs } from './opsConfig.js'
+//import { assert } from '../assert.js'
 
 /*** #rework
 // Can have multiple logs handlers (good for comparing alternatives)

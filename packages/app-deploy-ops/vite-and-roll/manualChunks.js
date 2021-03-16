@@ -40,7 +40,7 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //  /Users/.../app-deploy-ops/src/main.js
   //  /Users/.../app-deploy-ops/src/assert.js
   //  /Users/.../app-deploy-ops/src/catch.js
-  //  /Users/.../app-deploy-ops/src/central.js
+  //  /Users/.../app-deploy-ops/src/ops/central.js
   //  /Users/.../app-deploy-ops/index.html                        <-- only in the Vite build
   //  /Users/.../app-deploy-ops/index.html?html-proxy&index=0.js  <-- -''-
   //

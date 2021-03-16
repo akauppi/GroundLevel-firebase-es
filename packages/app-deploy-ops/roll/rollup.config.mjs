@@ -11,6 +11,7 @@
 import { strict as assert } from 'assert'
 
 import sizes from '@atomico/rollup-plugin-sizes'
+import alias from '@rollup/plugin-alias'
 import resolve from '@rollup/plugin-node-resolve'
 //import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
@@ -18,6 +19,7 @@ import visualizer from 'rollup-plugin-visualizer'
 
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
+import { opsAliases } from '../vite-and-roll/opsAliases.js'
 
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
@@ -45,6 +47,9 @@ const allFirebaseSubpackages = [
 * Note: The order of the plugins does sometimes matter.
 */
 const plugins = [
+  alias({
+    entries: Object.entries(opsAliases).map( ([k,v]) => ({ find: k, replacement: v }) )   // plugin's syntax
+  }),
 
   resolve({
     mainFields: ["esm2017", "module"],  // insist on importing ES6 only; "esm2017" is Firebase specific.
@@ -94,5 +99,5 @@ export default {
 
   plugins,
 
-  //preserveEntrySignatures: false,   // "recommended setting for web apps"
+  preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
 };

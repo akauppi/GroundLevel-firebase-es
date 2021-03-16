@@ -7,7 +7,6 @@ import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
 
-import { central } from './central'
 import './catch'
 
 // tbd. to be placed in a config
@@ -24,8 +23,6 @@ const firebaseProm = fetch('/__/firebase/init.json').then( resp => {
     return resp.json();   // returns a 'Promise' but above '.then' merges them
   }
 });
-
-window.central = central;
 
 // Prepare all of Firebase, including performance monitoring (if enabled)
 //
