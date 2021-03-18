@@ -73,12 +73,10 @@ const plugins = [
   //
   !watch && sizes(240),
 
-  // DOES NOT WORK right: 'stats.roll.html' only has "100%". [#33]
-  //
   // see -> https://www.npmjs.com/package/rollup-plugin-visualizer
   !watch && visualizer({
     filename: 'roll/stats.html',
-    sourcemap: true,        // seems to show the reduced sizes (e.g. 594k instead of 1.4M)
+    sourcemap: true,        // true: shows more useful sizes (e.g. "347.96KB" vs. "1.01MB")
     template: 'sunburst',   // 'sunburst'|'treemap'|'network'
     brotliSize: true,       // Show also Brotli compressed size (Firebase hosting supports it)
   })

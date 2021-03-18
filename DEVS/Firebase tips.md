@@ -36,21 +36,23 @@ Essentially the inverse of the pros/cons above. :)
 
 ### Quotes
 
->Don't add subcollections unless you need it. I only add them when there is a large amount of related data that does not need to be pulled Everytime I retrieve root data.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
+>Don't add subcollections unless you need it. I only add them when there is a large amount of related data that does not need to be pulled everytime I retrieve root data.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
 
 Ability to do [Collection group queries](https://firebase.google.com/docs/firestore/query-data/queries#collection-group-query) (Firebase docs) has likely evened the weigh for using sub-collections (they were launched in 2019). If you read online, consider any experiences *prior* to that as potentially misleading. 🍄
 
 
 ## Syntax highlighting of Security Rules on IntelliJ IDEs (kind of...)
 
+>Note: In 2021, there now is a [Firebase Rules Syntax Highlighter](https://plugins.jetbrains.com/plugin/15189-firebase-rules-syntax-highlighter) plugin for IntelliJ IDE's.
+
 See [this answer](https://stackoverflow.com/questions/46600491/what-is-the-name-of-the-language-used-for-cloud-firestore-security-rules/60848863#60848863) (StackOverflow) about setting up "file type associations" in IntelliJ IDEA - may also work in WebStorm.
 
-In addition, set to 2 spaces:
+In addition, set to 2 spaces: *content lost*
 
 
 ## Understanding `firebase use`
 
-It defines which Firebase project your development terminal and local instance started by, say, `npm run dev`, is connected to.
+It defines which Firebase project your command line processes are connected with (e.g. `npm run dev`).
 
 |||
 |---|---|
@@ -73,13 +75,16 @@ $ more .firebaserc
 
 `firebase use --clear` logs you out of the active project, but **only if there are 2 or more aliases**. Otherwise, it silently fails (you are still having an active project).
 
-Clearing the project is useful for being able to test the developer experience, and to write right documentation. 
-
 According to Firebase, the above is **intended behavior**. They could at least print a warning, to let the user know their wish was turned down.
+
+Clearing the project is useful for being able to test the developer experience, and to write right documentation. 
 
 **Work-around:**
 
-Add your project twice, with different aliases. :)
+Either: 
+
+- Add your project twice, with different aliases. :)
+- Remove `.firebaserc` file (suggested by Firebase; not tried)
 
 
 ## Security Rules Online Simulator
@@ -106,6 +111,8 @@ There is no UI support for building a document with `FieldValue`s (e.g. server t
   _methodName: 'FieldValue.serverTimestamp'
 }
 ```
+
+>tbd. tell whether the above worked `#help`
 
 
 ## You can `debug()` security rules!
@@ -146,7 +153,7 @@ exports.blah = regionalFunctions.firestore
 Doing the same in client code (`firebase`):
 
 ```
-db.collection("userInfo/{uid}")
+collection(db, "userInfo/{uid}")
   .onSnapshot( snapshot => {
     snapshot.docChanges().forEach( change => {
       // change.type: "added"|"modified"|...
@@ -157,45 +164,15 @@ db.collection("userInfo/{uid}")
 ||Cloud Functions trigger (server)|Firestore client|
 |---|---|---|
 |Change type|implied by one's choice of listener method: `.onCreate`,`.onUpdate`,`.onWrite`,`.onDelete`|change indicated by `change.type` (enum: "added"\|"modified"\|"removed")|
-|Document id|`change.after.id`|...|
+|Document id|`change.after.id`|`change.doc.id`|
 |Previous contents|`change.before.data()`|n/a|
 |New contents|`change.after.data()`|`change.doc.data()`|
 
-These are essentially two wholly separate APIs and there are likely reasons why they are so. The first happens **on demand** at the server, whereas the client approach is an ongoing watcher for data changes.
+These are two wholly separate APIs and there are likely reasons why they are so. Using GroundLevel, you don't really face this difference much since following Firebase collections are converted to Vue.js reactive constructs. But it's good to be aware.
 
 References:
 
 - [Cloud Firestore function triggers](https://firebase.google.com/docs/functions/firestore-events#function_triggers) (Firebase docs)
 - [View changes between snapshots](https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots) (Firebase docs)
 
-
-## `firebase use --clear` does not work
-
-Reported as [https://github.com/firebase/firebase-tools/issues/2656](https://github.com/firebase/firebase-tools/issues/2656).
-
-Responded by Firebase that it is "WAI" (Works As Intended).
-
->...
->You can also work around this by deleting the .firebaserc file - then we'll just rely on the saved configstore variable, which is cleared by the --clear command.
->
->If you'd like to have version of --clear command that deletes the .firebaserc, or forces the project to be unset, please file a feature request for it.
-
-Reading the issue may be worth if you're using `firebase use --clear`. Same as with almost any Firebase tools decision, it's hard to understand the way the authors think. What am I supposed to use - what not? The UNIX command line tool thinking (one tool for a job) is strikingly absent!
-
-**Work-around:**
-
-Add two aliases to your project, e.g. 
-
-```
-$ firebase use --add    # call it anything
-...
-
-$ firebase use --add    # call it "bandaid"
-```
-
-Also: check the above issue and +1 it, to get more focus...
-
-**Alternative:**
-
-Remove `.firebaserc` like the Firebase `@kmcnellis` suggests. Did not try.
 

@@ -1,15 +1,13 @@
 # Known issues
 
-## `npm build:vite` fails
+## `npm run build:vite` fails
 
 ```
-$ npm run build:vite
-...
-RangeError: Maximum call stack size exceeded
-    at getCssTagsForChunk (/Users/asko/Git/GroundLevel-es-firebase/packages/app-deploy-ops/node_modules/vite/dist/node/chunks/dep-e0f09032.js:23223:40)
-    at /Users/asko/Git/GroundLevel-es-firebase/packages/app-deploy-ops/node_modules/vite/dist/node/chunks/dep-e0f09032.js:23228:38
-    ...
+[vite]: Rollup failed to resolve import "/style.css" from "index.html".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`
+error during build:
 ```
 
-It is not clear what causes this. Don't mind (unless you are the Vite author). We can use `npm run build:roll`.
-
+These are solvable things. At some point, Rollup just sped past Vite build and is now the #1 (or: only) deployment build. 🐇

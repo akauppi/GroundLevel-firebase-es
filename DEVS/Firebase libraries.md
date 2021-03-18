@@ -10,48 +10,39 @@ Here is a list of the ones we've come across (all authored by Firebase), to help
 
 ## Table
 
->Note: This table is a "best effort" and we aim to edit it, from time to time, when better real world knowledge of the various libraries is gained.
+>Note: This table is a "best effort" and we aim to edit it, from time to time.
+
+If we are really friendly, we'd set up an automatic page to log the trends of the GitHub issue counts.
 
 ||What is it?|When to use?|Open issues|
 |---|---|---|---|
 |**Client side**|
-|&nbsp;&nbsp;`firebase`|Main JavaScript client|Browser app or client side node.js (applies Security Rules)|[249](https://github.com/firebase/firebase-js-sdk/issues) <!-- was: 220 --> (7-Nov-20); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
-|&nbsp;&nbsp;`firebaseui-web`|Authentication UI for web|Browser app with auth|[114](https://github.com/firebase/firebaseui-web/issues) <!--was: 109--> (7-Nov-20); oldest 24-Jun-2016
+|&nbsp;&nbsp;`firebase`|JavaScript SDK|Browser app or client side node.js (applies Security Rules)|[302](https://github.com/firebase/firebase-js-sdk/issues) <!-- was: 249, 220 --> (17-Mar-21); oldest 18-May-2017; includes `@firebase/testing` (deprecated) and `@firebase/rules-unit-testing` issues|
+|&nbsp;&nbsp;`firebaseui-web` <small>Note: We don't use it</small>|Authentication UI for web|Complex authentication flows (\*)|[124](https://github.com/firebase/firebaseui-web/issues) <!--was: 114,109--> (17-Mar-21); oldest 18-May-2017|
 |**Server side**|
-|&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules.|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser.|[42](https://github.com/firebase/firebase-admin-node/issues) <!-- was: 36 --> (7-Nov-20); oldest 7-Jun-2017|
-|&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[54](https://github.com/firebase/firebase-functions/issues) <!-- was: 35 --> (7-Nov-20); oldest 19-Jun-2018|
+|&nbsp;&nbsp;`firebase-admin`|Access to Firebase data, bypassing Security Rules|Declaring Cloud Functions; Tests against an emulator; Priming data; Not for the browser|[43](https://github.com/firebase/firebase-admin-node/issues) <!-- was: 42,36 --> (17-Mar-21); oldest 7-Jun-2017|
+|&nbsp;&nbsp;`firebase-functions`|A library needed for implementing Cloud Functions||[51](https://github.com/firebase/firebase-functions/issues) <!-- was: 54,35 --> (17-Mar-21); oldest 19-Jun-2018|
 |**Testing libraries**|
-|&nbsp;&nbsp;`@firebase/rules-unit-testing`|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Firestore authentication.<br/><br/>Benefits:<ul><li>*"supports mocking auth in Security Rules"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[12](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) <!-- was: 8 --> (7-Nov-20); oldest 16-May-2019|
-|&nbsp;&nbsp;`firebase-functions-test`|Tools for making *unit tests* on Cloud Functions.|Unit testing Cloud Functions within the `functions` folder. We don't do it but run integration tests against local emulators instead, using the normal `firebase` library.|[11](https://github.com/firebase/firebase-functions-test/issues) <!-- was: 9 --> (7-Nov-20); oldest 8-Apr-2018|
+|&nbsp;&nbsp;`@firebase/rules-unit-testing` <small>Note: We don't use it directly, but via `firebase-jest-testing`</small>|".. for testing Security Rules with the Realtime Database or Cloud Firestore emulators".|Testing Security Rules<br/><br/>Benefits:<ul><li>*"supports mocking auth"*</li><li>*Any database will accept the string `"owner"` as an admin auth token.*</li></ul>|Part of the `firebase-js-sdk` repo: `packages/rules-unit-testing`. *No separate issues tracking* <br/><br/>[15](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aopen+is%3Aissue+label%3Atesting-sdk) <!-- was: 12,8 --> (17-Mar-21); oldest 16-May-2019|
+|&nbsp;&nbsp;`firebase-functions-test` <small>Note: We don't use it.</small>|Tools for making *unit tests* on Cloud Functions.|Unit testing Cloud Functions within the `functions` folder.|[18](https://github.com/firebase/firebase-functions-test/issues) <!-- was: 11,9 --> (17-Mar-20); oldest 8-Apr-2018|
 |**Developer tools**|
-|&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; Launching emulators. You need it.|[179](https://github.com/firebase/firebase-tools/issues) <!-- was: 146 --> (7-Nov-20); oldest 16-Dec-2015|
-|&nbsp;&nbsp;`superstatic`|Library used for Firebase hosting (authored by Firebase)|Firebase hosting|[18](https://github.com/firebase/superstatic/issues) <!-- was: 19 --> (7-Nov-20); oldest 25-Sep-2014|
+|&nbsp;&nbsp;`firebase-tools`|Command Line Interface (CLI)|Development and deployment; Launching emulators. You need it.|[218](https://github.com/firebase/firebase-tools/issues) <!-- was: 179,146 --> (17-Mar-21); oldest 16-Dec-2015|
 |**Deprecated**|
 |`@firebase/testing` -> `@firebase/rules-unit-testing`|Security Rules testing, until Aug 2020.|
 
-Note: There are also other, non-official packages that are *not* deployed by Firebase. **Stay clear of those!** It would be a good phishing attempt to make something people would install, by accident. **DO NOT TRUST THE NAMES**.
+There are also other, non-official packages that are *not* deployed by Firebase. **Be careful of those!**. It would be a good phishing attempt to make something people would install, by accident. **DO NOT TRUST THE NAMES**.
+
+
+*(\*): We don't use `firebaseui-web`. In fact, we cannot since it's not compatible with the "alpha" Firebase APIs. [aside-keys](https://www.npmjs.com/package/aside-keys) is, but offers only limited authentication provider support.*
 
 
 ### Why list the oldest issues?
 
-Having old (say, over 6 months) issues in a repo is unmotivating for employees and causes a jungle of discussions to browse through for visitors. A healthy repo would have relatively fast turn-around times, issues being assigned to milestones or resolved as "nah, we won't do that".
+Having old (say, over 6 months) issues in a repo is unmotivating for employees and users alike. It leaves a jungle of discussions to browse, much of it has become irrelevant. A healthy repo would have relatively few long-lasting issues, fast turn-around times, and new issues easily marked as "nah, we won't do that".
 
-Tracking a project's energy and roadmap is easier when old issues are not standing in the way.
+Community engagement is easier with a well groomed repo. For example building a repo (and running its tests) should be very, very easy. I'm afraid it's not at the moment. This all leads to cruft, confusion, anxiety and *.
 
-That's why they are listed. Once they are <1 year in the past, we'll remove the listing. 
+That's why they are listed. Once the trends show the numbers are diminishing and the oldest issues are <1 year old, the author will remove the listing. 
 
-🧹
+<font size="9">🧹🧹🧹🧹🧹🧹🧹🧹🧹🧹🧹🧽🪣🧼</font>
 
-<!-- this is confusing
-### Where does the confusion rise from??
-
-Entries like [this](https://stackoverflow.com/questions/62566957/cannot-call-firestore-from-unit-tests/62586875#62586875) show the "admin" library being used with tests (not run as a privileged environment, but just from the development environment command line).
-
-Also [Unit testing of Cloud Functions](https://firebase.google.com/docs/functions/unit-testing) (Firebase docs) is in this blurry middle kingdom.
-
-It might work.
-
-However, the author finds it way clearer to keep `firebase-admin` to the admin side (Cloud Functions run either online, or by the emulator) and client side (including tests) client side.
-
-This means no function unit tests, but integration tests instead.
--->

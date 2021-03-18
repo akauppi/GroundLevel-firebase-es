@@ -1,18 +1,8 @@
+# For all the subpackages
 /**/node_modules/
-
-# Build output
-#/public/index.html
 
 # Firebase hosting caches
 #/.firebase/
 
-# Note: Not sure if '.firebaserc' should be in the version control or not.
+# Note: Depending on your team's work habits, you might want to keep it in version control.
 /**/.firebaserc
-
-# Temporary
-#/firebase-debug.log
-#/firestore-debug.log
-#/ui-debug.log
-
-# Rollup visualization
-/stats.html

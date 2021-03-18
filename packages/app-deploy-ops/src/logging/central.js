@@ -25,9 +25,6 @@ if (true) {   // no central logging
   logGen = _ => (/*msg, opt*/) => {}
 }
 
-//REMOVE
-//const lf = logGen("fatal");
-
 const central = {
   debug: logGen("debug"),
   info: logGen("info"),

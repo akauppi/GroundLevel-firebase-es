@@ -2,7 +2,10 @@
 
 ## Prefer explicit exports over default
 
-`import { some } from 'module.js'`, even when there's just one thing to export/import. Using default export (no curly braces) is treated as a javascriptism.
+`import { some } from 'module.js'`, even when there's just one thing to export/import. 
+
+Using default export (no curly braces) is treated as an anti-pattern. It's against consistency of code and also defeats the purpose of tree-shaking.
+
 
 ## Avoid `this` - like a plague
 
@@ -16,16 +19,11 @@ The `this` mentality provides an additional axis of abstraction (a context) that
 
 ## Language over framework
 
-The sample for this is from Vue 2 but may serve a point:
+If there are overlapping features with the language (a larger context) and a framework or librari (smaller context), prefer the language.
 
----
-
-It seems Vue 2 has [injection handling](https://vuejs.org/v2/api/#provide-inject). 
-
-Instead of using that, we use ES6 modules (`mixins/user.js`).
-
----
+>*This would need to have a sample...*
 
 The problem with framework features is added learning curve - also from the reader of such code. If something can be done in the language (ES6 + async/await), let's do it there.
 
 This also makes it easier to change frameworks, or implement the template in multiple frameworks.
+

@@ -12,6 +12,7 @@ const myPath = dirname(fileURLToPath(import.meta.url));
 import visualizer from 'rollup-plugin-visualizer'
 
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
+import { opsAliases } from '../vite-and-roll/opsAliases.js'
 import {readdirSync} from 'fs'
 
 const createStats = true;
@@ -23,6 +24,7 @@ const allFirebaseSubpackages = [
 
 export default {
   resolve: {
+    alias: opsAliases,
     dedupe: allFirebaseSubpackages,   // IMPORTANT
     // For dear Firebase
     mainFields: ["esm2017", "module"]
