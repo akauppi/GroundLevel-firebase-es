@@ -8,6 +8,12 @@ It's just that.. being so beautiful, even a small annoyance stands out. Maybe yo
 
 Your fan. 🌺🌺
 
+*Edit: After having used Svelte 3, as well, it does these things (below; life span of `Readable`, for example) better. Also, it doesn't suffer from the confusion on the roles of `ref` vs. `reactive`.*
+
+<!-- Editor's note
+This entry is more **messy** than the other wish lists. Maybe the author doesn't really know what is possible / what to ask for.
+-->
+
 ---
 
 <!-- disabled (too lazy)
@@ -158,6 +164,8 @@ A garbage collection hook in the JavaScript engines would suffice, but is not av
 
 Not really. `reactive` is intended for object-like data and any streamed data that needs to be unsubscribed is likely to be object like. One can always derive `refs` from `reactive`, if need be.
 
+*Edit: That was before I started favouring `ref` with a value of `Map` or object. Not using `reactive`, any more (Mar 2021).*
+
 
 <!-- Left out: this makes sense if we deal with "Promise of `reactive`" or "Promise of `ref`" but with the above take on `undefined`, we wouldn't need to. Therefore, this is not necessarily needed.
 
@@ -199,14 +207,12 @@ const members = reactive();
 ```
 -->
 
+<!--
+*Edit: There used to be a use case for this (initializing the Router), but it was reorganized using async routes. This is no longer a pressing issue.*
 
 ## An `async setup()`?
 
 Vue implementation (3.0.0) requires the `setup` function to be synchronous.
 
 There are likely reasons for this. However, could it be possible to allow `async` and then just wait for that Promise, until proceeding further?
-
-<strike>This would simplify certain use cases, e.g. the access of Router in `AppProfile`.</strike> <sub>This is no longer a problem for us.</sub>
-
-
-
+-->

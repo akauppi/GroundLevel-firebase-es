@@ -15,12 +15,16 @@ Port 3000 is in use, trying another one...
 
 It would be nice to have a flag/config setting to disallow changing ports. It can even be the port entry itself, with "!3000" meaning we mean business - don't allow any other than 3000, ok?!
 
+**Work-around:**
+
+We now have a special script to check the availability of the wanted port. Works, but adds complexity.
+
 
 ## Firebase emulator configuration from a `.js` file
 
 It is nowadays customary (babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have comments in there.
 
-Firebase (8.6.0) seems to be fixed on `firebase.json` and providing a `firebase.js` (or `firebase.cjs`) is ignored.
+Firebase CLI (9.5.0) seems to be fixed on `firebase.json` and providing a `firebase.js` is ignored.
 
 
 ## Firebase emulators should fail fast ‼️
@@ -43,7 +47,7 @@ i  functions: Your functions could not be parsed due to an issue with your node_
 ..but the emulator keeps running. **THIS IS NOT ACCEPTABLE!** We developers lose time, because one needs to really scan the logs to find out the functions aren't really up. You are not being resilient here - you are simply pretending like things are okay when they aren't. Exit!!! (with non-zero) 👺
 
 
-## Firestore emulator: ability to load rules from multiple files
+## Firestore emulator: ability to load rules from multiple files 🌺🌸🌺
 
 Currently (8.6.0), all rules must be in a single file, defined in `firebase.json`:
 
@@ -162,7 +166,7 @@ The `firebase emulators:exec` and `emulators:start` `--only` flag works like thi
 - named services are emulated
 - for other services, the cloud instances are used
 
-What is the use case of such leaking to the cloud?
+*What is the use case of leaking to the cloud?*
 
 As a developer, I would prefer to keep emulation and cloud project completely separate. At the least, there should be (a `--only-only`?? :) ) flag, to state I just want emulated services.
 
@@ -198,4 +202,105 @@ Return code is 0, even when there's no active project. This is the problem and c
 `firebase use` could return with a non-zero exit code, if there is no current project.
 
 This is a breaking change.
+
+
+
+<!-- (moved from general "Wishes for Firebase"; are these already covered?
+
+## Firestore emulator: evaluate the rules at launch (and complain!)
+
+The Firestore emulator has just a single file of Security Rules. It could evaluate (compile) it at launch, fail if there are problems and show warnings if there are any.
+
+It does not currently (8.6.0) do so. This is a launch with a syntax error in the rules file:
+
+```
+$ firebase emulators:start --only firestore
+i  emulators: Starting emulators: firestore
+✔  hub: emulator hub started at http://localhost:4400
+i  firestore: firestore emulator logging to firestore-debug.log
+✔  firestore: firestore emulator started at http://localhost:6767
+i  firestore: For testing set FIRESTORE_EMULATOR_HOST=localhost:6767
+✔  emulators: All emulators started, it is now safe to connect.
+...
+```
+
+Now the error happens at runtime and may even get lost somewhere in test code (if it's ignored exceptions).
+
+![](.images/bad-rules.png)
+
+Warnings are shown only if the file is edited:
+
+```
+i  firestore: Change detected, updating rules...
+⚠  ../firestore.rules:98:16 - WARNING Unused function: validProject2.
+⚠  ../firestore.rules:110:35 - WARNING Invalid variable name: request.
+✔  firestore: Rules updated.
+```
+
+It would be useful and fair to show these already at the launch.
+
+
+## Firebase emulator: check for 'package.json' at launch!
+
+```
+$ npm run start
+...
+[emul] ┌───────────┬────────────────┬─────────────────────────────────┐
+[emul] │ Emulator  │ Host:Port      │ View in Emulator UI             │
+[emul] ├───────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Functions │ localhost:5002 │ http://localhost:4000/functions │
+[emul] ├───────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Firestore │ localhost:6767 │ http://localhost:4000/firestore │
+[emul] └───────────┴────────────────┴─────────────────────────────────┘
+[emul]   Emulator Hub running at localhost:4400
+[emul]   Other reserved ports: 4500
+[emul] 
+[emul] Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+[emul]  
+[init] Primed :)
+[init] GCLOUD_PROJECT=bunny npm run _start_2 exited with code 0
+
+
+[emul] ⚠  The Cloud Functions directory you specified does not have a "package.json" file, so we can't load it.
+[emul] ⚠  functions: Could not find package.json
+```
+
+That error is logged only *once running tests*. The Functions emulator could just as well check that it's environment looks cosy, at launch. 
+
+Similar to the "check rules early" mentioned above.
+
+-->
+
+## Local emulator UI
+
+..could hide the UI modules that aren't active. 
+
+E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
+
+
+## `firebase emulators:start` behaves different from `emulators:exec`
+
+This is a surprise for developers.
+
+e.g. the `debug()` feature of Security Rules (undocumented) places the notes in `stdout` with `emulators:exec` but into `firestore-debug.log` if run via `emulators:start`.
+
+The two commands look similar, and there's no cue to make us think they would work differently. 
+
+Suggestion:
+
+Bring the `:exec` and `:start` commands closer. Either merge them, or hide the internal implementation aspects (`start` is said to be a "wrapper") from the developers.
+
+
+## Firebase hosting emulator: show 404's as errors
+
+Currently shown as info (same as any lines):
+
+```
+i  hosting: 127.0.0.1 - - [15/Mar/2021:00:36:30 +0000] "GET /app.css HTTP/1.1" 404 146 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"
+```
+
+Wouldn't it at least be good to show them as warnings? This would help spot places, where the front end is trying to reach a non-existing file.
+
+I'd personally expect the lines as errors, but it's not really an error of the server... Your choice, but I think `info` is unhelpful.
+
 

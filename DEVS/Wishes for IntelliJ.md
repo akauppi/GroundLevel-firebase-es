@@ -1,5 +1,9 @@
 # Wishes for IntelliJ
 
+*The plugin has become available in the mean time. Should check it out, some day...*
+
+---
+
 Dear IntelliJ. Your IDEs are the best of the breed. I am happy to pay a yearly fee for using WebStorm.
 
 However, recently it has become painfully clear to me that your tool is unfit for editing Firebase Security Rules. The rules are hard, and I *truly* need syntax highlighting for being able to manage them.

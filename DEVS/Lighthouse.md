@@ -6,9 +6,9 @@ Before usage:
 
 - Open Chrome
 - `Show` > `Developers` > `Developer tools` (or Alt-Cmd-I shortcut on Mac)
-- Unselect ⚙️ > `Clear storage`. Otherwise running Lighthouse will log you out. <sub>[source](https://github.com/GoogleChrome/lighthouse/issues/1418) - thanks `@fdn`!!</sub>
+- Unselect ⚙️ > `Clear storage`. Otherwise running Lighthouse will log you out. <sub>[source](https://github.com/GoogleChrome/lighthouse/issues/1418)</sub>
 
-   ![](.images/lighthouse-un-clear-storage.png)
+   >![](.images/lighthouse-un-clear-storage.png)
 
 Make a report:
 
@@ -23,9 +23,9 @@ So proud of those results!! :)
 
 If there are places to improvement, Lighthouse offers you links for more information.
 
-Note that the deployment (`index.html` and Rollup configuration) is optimized for HTTP/2 delivery. At the time of writing (Sep 2020), local emulation does not work with HTTP/2<sub>[issue](https://github.com/firebase/firebase-tools/issues/2518)</sub>. We recommend using Lighthouse only on the production deployment.
+Note that the deployment (`index.html` and Rollup configuration) is optimized for HTTP/2 delivery. Use Lighthouse only on production ready build (`app-deploy-ops`), not development.
 
->Note: If your results are sub-optimal and they can be improved by settings in this project, let us know.
+>Note: If your results are less than 100 and they can be improved by settings in this project, create an Issue.
 
 
 ## References

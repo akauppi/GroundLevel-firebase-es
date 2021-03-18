@@ -1,4 +1,4 @@
-# Wishes for Firebase
+# Wishes for Firebase APIs
 
 Dear Firebase. You are awesome. If you ever run out of things to improve, here would be some ideas:
 
@@ -149,76 +149,6 @@ If the Firebase emulator provided a "dry run" flag, the library could get rid of
 The flag can also be a configuration for a particular project id, but since configuration at the moment (Aug 2020) is all over the place, I'm not advocating that unless it first gets gathered in a centralized way (e.g. `firebase.json` and emulator command line flags; away from source code!).
 
 
-## Firestore emulator: evaluate the rules at launch (and complain!)
-
-The Firestore emulator has just a single file of Security Rules. It could evaluate (compile) it at launch, fail if there are problems and show warnings if there are any.
-
-It does not currently (8.6.0) do so. This is a launch with a syntax error in the rules file:
-
-```
-$ firebase emulators:start --only firestore
-i  emulators: Starting emulators: firestore
-✔  hub: emulator hub started at http://localhost:4400
-i  firestore: firestore emulator logging to firestore-debug.log
-✔  firestore: firestore emulator started at http://localhost:6767
-i  firestore: For testing set FIRESTORE_EMULATOR_HOST=localhost:6767
-✔  emulators: All emulators started, it is now safe to connect.
-...
-```
-
-Now the error happens at runtime and may even get lost somewhere in test code (if it's ignored exceptions).
-
-![](.images/bad-rules.png)
-
-Warnings are shown only if the file is edited:
-
-```
-i  firestore: Change detected, updating rules...
-⚠  ../firestore.rules:98:16 - WARNING Unused function: validProject2.
-⚠  ../firestore.rules:110:35 - WARNING Invalid variable name: request.
-✔  firestore: Rules updated.
-```
-
-It would be useful and fair to show these already at the launch.
-
-
-## Firebase emulator: check for 'package.json' at launch!
-
-```
-$ npm run start
-...
-[emul] ┌───────────┬────────────────┬─────────────────────────────────┐
-[emul] │ Emulator  │ Host:Port      │ View in Emulator UI             │
-[emul] ├───────────┼────────────────┼─────────────────────────────────┤
-[emul] │ Functions │ localhost:5002 │ http://localhost:4000/functions │
-[emul] ├───────────┼────────────────┼─────────────────────────────────┤
-[emul] │ Firestore │ localhost:6767 │ http://localhost:4000/firestore │
-[emul] └───────────┴────────────────┴─────────────────────────────────┘
-[emul]   Emulator Hub running at localhost:4400
-[emul]   Other reserved ports: 4500
-[emul] 
-[emul] Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
-[emul]  
-[init] Primed :)
-[init] GCLOUD_PROJECT=bunny npm run _start_2 exited with code 0
-
-
-[emul] ⚠  The Cloud Functions directory you specified does not have a "package.json" file, so we can't load it.
-[emul] ⚠  functions: Could not find package.json
-```
-
-That error is logged only *once running tests*. The Functions emulator could just as well check that it's environment looks cosy, at launch. 
-
-Similar to the "check rules early" mentioned above.
-
-
-## Local emulator UI
-
-..could hide the UI modules that aren't active. 
-
-E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
-
-
 ## Config should be transparent to client code!!!
 
 The configuration story for Firebase seems unclear (Jul 2020). 
@@ -306,19 +236,6 @@ There may be a need for overriding the region on a function-by-function basis, b
 ---
 
 The [environment configuration](https://firebase.google.com/docs/functions/config-env) provides a solution to the first problem (not having regions in code). It should just be more clearly communicated in Firebase docs. (instead of recommending to stamp the region in code)
-
-
-## `firebase emulators:start` behaves different from `emulators:exec`
-
-This is a surprise for developers.
-
-e.g. the `debug()` feature of Security Rules (undocumented) places the notes in `stdout` with `emulators:exec` but into `firestore-debug.log` if run via `emulators:start`.
-
-The two commands look similar, and there's no cue to make us think they would work differently. 
-
-Suggestion:
-
-Bring the `:exec` and `:start` commands closer. Either merge them, or hide the internal implementation aspects (`start` is said to be a "wrapper") from the developers.
 
 
 ## Loading initial data - from JSON
@@ -585,33 +502,6 @@ On the other hand, the author got the feeling that in the `@exp` API's `initiali
 
 This is LIKELY a BOGUS thing to even ask. Let's presume IndexedDB is the implementation and the developer does not need to care! :)
 -->
-
-## Firebase tools: reading configuration from a scipt
-
-Many node tools (Rollup, ESLint, Vite, ...) allow the configuration to be a script. Firebase only supports JSON.
-
-Having the ability to configure by script gives more versatility. 
-
-In `packages/app-deploy-ops`, we want to support both Vite and Rollup builds, but not have two almost identical configuration files. Since Firebase CLI does not allow overriding the `hosting.public` value from command line, we do this:
-
-```
-"serve:vite": "cat firebase.json | sed 's/\\$SERVE_PATH/vite\\/out/' > .firebase.tmp.json && firebase serve --config .firebase.tmp.json --only hosting --host 0.0.0.0 --port 3012",
-```
-
-If configuration can be a script, such logic can be handled in there.
-
-## Firebase hosting emulator: show 404's as errors
-
-Currently shown as info (same as any lines):
-
-```
-i  hosting: 127.0.0.1 - - [15/Mar/2021:00:36:30 +0000] "GET /app.css HTTP/1.1" 404 146 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"
-```
-
-Wouldn't it at least be good to show them as warnings? This would help spot places, where the front end is trying to reach a non-existing file.
-
-I'd personally expect the lines as errors, but it's not really an error of the server... Your choice, but I think `info` is unhelpful.
-
 
 ## References
 
