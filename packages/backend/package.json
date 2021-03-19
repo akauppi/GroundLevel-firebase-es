@@ -49,9 +49,9 @@
     "eslint-plugin-node": "^11.1.0",
     "firebase-admin": "^9.5.0",
     "firebase-jest-testing": "^0.0.2-beta.2",
-    "jest": "^27.0.0-next.4",
-    "jest-circus": "^27.0.0-next.4",
-    "wait-on": "^5.2.1"
+    "jest": "^27.0.0-next.5",
+    "jest-circus": "^27.0.0-next.5",
+    "wait-on": "^5.3.0"
   },
   "//comments": {
     "engines.node": [

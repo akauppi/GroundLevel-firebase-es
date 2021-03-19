@@ -1,5 +1,9 @@
 # Changelog
 
+## 19-Mar-21
+
+- Dependency update; Jest `27.0.0.next5`; `npm test` still passes. :)
+
 ## 10-Mar-21
 
 - Dependency update; Jest `27.0.0.next4` fixes problems; `npm test` passes!
