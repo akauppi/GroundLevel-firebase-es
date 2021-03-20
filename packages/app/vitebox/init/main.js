@@ -77,31 +77,22 @@ function initFirebaseOnline() {
 
   const [ apiKey, appId, authDomain, projectId ] = [
     import.meta.env.VITE_API_KEY,
-    import.meta.env.VITE_APP_ID,    // only matters for Firebase Performance Monitoring
+    import.meta.env.VITE_APP_ID,    // needed for Firebase Performance Monitoring
     import.meta.env.VITE_AUTH_DOMAIN,
     import.meta.env.VITE_PROJECT_ID
   ]
-  assert(apiKey && authDomain && projectId, "Some Firebase param(s) are missing");
+  assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 
   initializeApp( { apiKey, appId, authDomain, projectId } );
 }
 
 /*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
-  const t0 = performance.now();
-
   if (LOCAL) {
     await initFirebaseLocal();
   } else {
     initFirebaseOnline();
   }
 
-  const dt = performance.now() - t0;
-  console.debug(`Initializing stuff took: ${dt}ms`);        // OLD DATA: ~~90~~, ~~100~~, ~~114~~ ms
-
-  console.debug("Launching app...");
-
   const { init } = await import('/@/app.js');
   await init();
-
-  console.debug("App on its own :)");
 })();

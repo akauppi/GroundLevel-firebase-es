@@ -3,7 +3,7 @@
 *
 * Simple assert implementation.
 *
-* This is only for the use of the 'init' code.
+* This is only for the use within the 'vitebox' code.
 */
 function assert(cond, msgOpt) {
   if (!cond) {

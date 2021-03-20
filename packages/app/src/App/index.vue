@@ -81,8 +81,7 @@
   const _MODE = import.meta.env?.MODE || 'production';    // tbd. needed? why the '|| "production"'?
   const LOCAL = import.meta.env.MODE === 'dev_local';
 
-  import { devVueWarningsToCentral } from "/@/config"
-
+  /*** disabled (infinite loop, in "npm run dev:online", opening the project). #fix #BUG
   /*
   * Vue warn handler
   *
@@ -95,10 +94,11 @@
   * all the time.
   *
   * Note: This "only works in development" (Vue docs) so let's not even override when not.
-  */
+  *_/
   const warnHandler = (_MODE !== 'production') && ((msg, vm, trace) => {
 
     // BUG: WE DON*T GET CALLED!
+    // BUG: LEADS TO INFINITE LOOP!!!
 
     // May want to suppress some warnings
     //
@@ -115,6 +115,7 @@
       return true;
     }
   });
+  ***/
 
   /*** disabled (do we need this?)
   /*
@@ -141,7 +142,7 @@
       console.log("Houston, App is mounted");
     });
 
-    const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
+    //const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
 
     /*** disabled
     // Error handler. This is called within Vue lifecycle. If we don't tap into it, Vue gives one or two warnings
@@ -154,10 +155,12 @@
       appConfig.errorHandler = errorHandler;
     }*/
 
+    /*** disabled (temporarily!)
     if (warnHandler) {
       assert (appConfig.warnHandler === undefined, "Warn handler already occupied! (refresh the browser?)");   // this can happen in HMR
       appConfig.warnHandler = warnHandler
     }
+    ***/
 
     return {
       user: userRef2,

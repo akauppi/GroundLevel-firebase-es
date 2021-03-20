@@ -12,7 +12,7 @@ When, later, we need to do some more real time dataflow, it's either Firebase Re
 
 ## No data store
 
-Data is stored distributed, in the `Ref`s and `Reactive`s around the code. There did not seem to be a need for a centralized data store, à la Vuex.
+Data is stored distributed, in the `Ref`s around the code. There did not seem to be a need for a centralized data store, à la Vuex.
 
 ## Authentication UI
 

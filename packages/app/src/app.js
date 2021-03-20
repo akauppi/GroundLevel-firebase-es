@@ -18,6 +18,8 @@ import { router } from './router.js'
 
 import { central } from '@ops/central'
 
+import { appInitTrack, someCounter } from './meas'
+
 import App from '/@App/index.vue'
 
 import './common.css'
@@ -34,12 +36,12 @@ const LOCAL = import.meta.env.MODE === 'dev_local';
 const VERSION = _VERSION;    // both dev and production
 
 async function init() {    // () => Promise of ()
-  const t0 = performance.now();
+  const tr = appInitTrack.start();
 
   // Production: Initialize the authentication system
   if (!LOCAL) {
-    initAside(auth).then( _ => {
-      console.log(`Authentication initialized (took ${(performance.now()-t0).toFixed(0)}ms)`);    // #later: candidate for ops analytics
+    /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
+      tr.lap('aside-keys initialization');    // 499..530ms
     });
   }
 
@@ -47,10 +49,14 @@ async function init() {    // () => Promise of ()
   //
   const app = createApp(App);
 
+  tr.lap('Vue initialization');
+
   app.use(router);    // needed for any use of the 'router'
 
   // Let's be curious and see whether there are ever errors from here:
-  router.isReady().catch( err => {
+  /*await*/ router.isReady().then( _ => {
+    tr.lap('Router initialization');
+  }).catch( err => {
     console.error("Router did not initialize:", err);
     throw err;
   });
@@ -67,6 +73,13 @@ async function init() {    // () => Promise of ()
   ***/
 
   app.mount('#app');
+
+  // Sample of adding a meta data to the measurement
+  tr.setAttribute('appId', app.id);   // #bogus
+  tr.end();
+
+  someCounter.inc();  // just for show
+
   central.info("App is mounted.");
 }
 

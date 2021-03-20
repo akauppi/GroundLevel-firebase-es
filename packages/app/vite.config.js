@@ -9,6 +9,9 @@ import vue from '@vitejs/plugin-vue'
 const myPath = dirname(fileURLToPath(import.meta.url))
 const srcPath = pJoin(myPath, 'src');
 const opsPath = pJoin(myPath, 'vitebox/ops');
+const fakePath = pJoin(myPath, 'vitebox/fake');
+
+const DEV_MODE = !! process.env.GCLOUD_PROJECT;
 
 /*
 * For an absolute path 'p', provide the immediate subdirectories within it.
@@ -112,7 +115,10 @@ export default {
   resolve: {
     alias: { ...subAliases,
       '/@': srcPath,
-      ...opsAliases
+      ...opsAliases,
+
+      // Redirect '@firebase/performance' if we don't have a real, online project to work against.
+      ...(DEV_MODE ? { '@firebase/performance': fakePath + '/@firebase-performance' } : {})
     },
 
     // We'd prefer all dependencies to use 'exports' but at least:

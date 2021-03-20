@@ -62,13 +62,13 @@
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.7.0",
-    "firebase": "^0.900.17",
+    "firebase": "^0.900.19",
     "firebase-admin": "^9.5.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.8",
-    "vite": "^2.1.1",
+    "vite": "^2.1.2",
     "vue-eslint-parser": "^7.6.0",
-    "wait-on": "^5.2.1"
+    "wait-on": "^5.3.0"
   },
   "//comments": {
     "scripts": {

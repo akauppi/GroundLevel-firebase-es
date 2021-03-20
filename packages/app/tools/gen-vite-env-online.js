@@ -85,6 +85,7 @@ const out =
 # DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev:online'.
 #
 VITE_API_KEY=${ pick("apiKey") }
+VITE_APP_ID=${ pick("appId") }
 VITE_AUTH_DOMAIN=${ pick("authDomain") }
 VITE_PROJECT_ID=${ pick("projectId") }
 `;

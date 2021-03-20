@@ -7,12 +7,6 @@ const allowAnonymousAuth = true;
 const appTitle = "GroundLevel - sample app"
 
 /*
-* true: Vue warnings both on browser and dev server console
-* false: only on browser
-*/
-const devVueWarningsToCentral = true;
-
-/*
 * Pick the way Firebase auth should persist (or not).
 *
 * "Authentication State Persistence" (Firebase docs)
@@ -30,6 +24,5 @@ const devVueWarningsToCentral = true;
 
 export {
   allowAnonymousAuth,
-  appTitle,
-  devVueWarningsToCentral
+  appTitle
 }

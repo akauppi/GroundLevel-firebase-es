@@ -9,9 +9,6 @@ import { initializeApp } from '@firebase/app'
 
 import './catch'
 
-// tbd. to be placed in a config
-const enableFirebasePerf = true;
-
 // Access values from Firebase hosting (we don't use its 'init.js').
 //
 // Note: Once browsers can 'import' JSON natively, we can make this a one-liner (if Firebase hosting served an ES module, we could use it).
@@ -29,16 +26,7 @@ const firebaseProm = fetch('/__/firebase/init.json').then( resp => {
 async function initFirebase() {
   const opts = await firebaseProm.then( (o) => ({ apiKey: o.apiKey, appId: o.appId, projectId: o.projectId, authDomain: o.authDomain }));
 
-  const myApp = initializeApp(opts);
-
-  // If Firebase Performance Monitoring is wanted, enable it
-  //
-  if (enableFirebasePerf) {
-    const getPerformance = await import("@firebase/performance").then( mod => mod.getPerformance );
-    const perf = getPerformance(myApp);
-
-    console.debug("!!! Performance monitoring initialialized:", { perf });    // DEBUG
-  }
+  initializeApp(opts);
 }
 
 // Note: We could use "top level await" (not in node.js 15).
