@@ -7,7 +7,6 @@ You have an eye for beauty, and want to make sure the template is not only funct
 Responsibilities:
 
 - CSS
-- Drop-down menu
 - Animations
 - Accessibility
 

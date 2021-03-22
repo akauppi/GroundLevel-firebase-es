@@ -13,13 +13,34 @@ import { initializePerformance, trace } from '@firebase/performance'
   //
   // Note: in LOCAL mode, the above module is hijacked. Firebase Performance Monitoring did not like emulation. (SDK 0.900.19; CLI 9.5.0)
 
+const DEV_MODE = import.meta.env.MODE !== "production";
+
 const dataCollectionEnabled = true;     // "..collect custom events"
 const instrumentationEnabled = true;    // "logging of automatic traces and HTTP/S network monitoring."
 
-const perf = initializePerformance( getApp(), {
+const perf = (!DEV_MODE) && initializePerformance( getApp(), {
   dataCollectionEnabled,
   instrumentationEnabled
 } );
+
+// Like 'trace()' but adds ".dev" to the name if we're in developer mode.
+//
+// tbd. Maybe we don't want to send performance at all, in dev??
+//
+function myTrace(name) {
+
+  if (DEV_MODE) {   // dev: either don't ship performance at all, or prefix with ".dev" (ends up mixed with production measures!)
+    return {
+      record() {},
+      incrementMetric() {}
+    }
+
+  } else {  // production
+    return trace(perf,name);
+  }
+}
+
+/*--- Track ---*/
 
 const namesTaken = new Set();
 
@@ -54,7 +75,7 @@ function track(name) {    // (string) => { start }
   }
   namesTaken.add(name);
 
-  const pt = trace(perf,name);
+  const mt = myTrace(name);
 
   let collectedAttrs;   // undefined | {...}
 
@@ -76,8 +97,8 @@ function track(name) {    // (string) => { start }
 
       debugLap(lapId,lapTime);
 
-      const pt2 = trace(perf,`${name}.${lap}`);
-      pt2.record(tStart, lapTime, lapId && {
+      const mt2 = myTrace(`${name}.${lap}`);
+      mt2.record(tStart, lapTime, lapId && {
         attributes: {
           lapId
         }
@@ -91,7 +112,7 @@ function track(name) {    // (string) => { start }
 
     function end() {
       const dt = performance.now() - t0;
-      pt.record(t0,dt, collectedAttrs ? { attributes: collectedAttrs } : undefined );   // over to Firebase
+      mt.record(t0,dt, collectedAttrs ? { attributes: collectedAttrs } : undefined );   // over to Firebase
     }
 
     return { lap, setAttribute, end };
@@ -109,7 +130,7 @@ function track(name) {    // (string) => { start }
 // Note: "Each custom code trace can record up to 32 metrics (including the default 'Duration' metric)". This leaves
 //    us with 31 counters. (tbd. is that enough? document the limitation, at least)
 //
-const ptCounters = trace(perf,"_counters");
+const mtCounters = myTrace("_counters");
 
 /*
 * Counter
@@ -119,7 +140,7 @@ const ptCounters = trace(perf,"_counters");
 function counter(name) {    // (string) => { start }
 
   function inc(dv) {  // (int?) => ()
-    ptCounters.incrementMetric(name, dv);
+    mtCounters.incrementMetric(name, dv);
   }
 
   return {

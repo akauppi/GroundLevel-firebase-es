@@ -1,4 +1,4 @@
-# GroundLevel ♠️ ES modules ♠️ Firebase
+# GroundLevel ♠️ Firebase ♠️ ES modules
 
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
 
@@ -11,24 +11,27 @@
 
 **A modern (ES modules based) Web App template**
 
-- great tools selected for you: [Vue.js 3](https://v3.vuejs.org), [Vite](https://github.com/vitejs/vite), [Firebase](https://firebase.google.com), [Jest](https://jestjs.io), [Cypress](https://www.cypress.io), web components [with Svelte 3](https://dev.to/silvio/how-to-create-a-web-components-in-svelte-2g4j)
+- great tools selected for you: [Vue.js 3](https://v3.vuejs.org), [Vite](https://github.com/vitejs/vite), [Firebase](https://firebase.google.com), [Jest](https://jestjs.io), [Cypress](https://www.cypress.io), web components [with Svelte 3](https://dev.to/silvio/how-to-create-a-web-components-in-svelte-2g4j), [Cloud Build](https://cloud.google.com/build), [Cloud Logging](https://cloud.google.com/logging/)
+- buildable with [Jailed!](https://github.com/akauppi/Jailed); no need to expose one's development maching to all those `npm` dependencies
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
+- covers all the way to deployment (CI/CD) and operations
 
 <!-- tbd. add operational tools to the mix, once selected
 -->
 
 <br clear=all />
 
-><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think "[Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe "post-modern" is a more appropriate term for GroundLevel. 😛
+><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think "[Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe "post-modern" is a more appropriate term for this repo. 😛
 
-This repo is intended for professionals and beginners, alike. Its main point is to showcase how easy, and effective, making Web Applications in the 2020's is, when (only) modern tools are used.
+This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making Web Applications in the 2020's is, when (only) modern tools are used.
 
 
 ## Easy for beginners
 
-One learns best by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't create a to-do list.
+We learn by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't create a to-do list.
 
-There's going to be a [narrative](...) that discusses the design in more detail. Some comments for such are left in the `APPROACH.md` files so you can not only read the code but see what choices needed to be made, and why.
+<!-- tbd.
+There's going to be a [narrative](...) that discusses the design in more detail. -->
 
 For medium and pro level software engineers, you should still get something out of this. The project features e.g.
 
@@ -37,49 +40,45 @@ For medium and pro level software engineers, you should still get something out 
 - interactive SVG graphics
 - testing
 - production builds
+- CI/CD setup
 - operations / metrics
 
 This hopefully makes the app not only easy, but interesting as well.
 
 But let's cut the chace and get started! 😀
 
+>Note: Many of the features are still pending (the sample itself has become the *last* thing to finish!). Don't let that discourage yourself - head further and see whether dragons lie there! <font size="+5">🐉</font>
 
 
 ## Firebase
 
-<img src="https://firebase.google.com/downloads/brand-guidelines/SVG/logo-logomark.svg" align="left" style="padding: 1em" />
+<a href="https://firebase.google.com"><img src="https://firebase.google.com/downloads/brand-guidelines/SVG/logo-logomark.svg" align="left" style="padding: 1em" /></a>
 
-This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, background functions, data storage, operational monitoring.
+This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, database, background functions, performance monitoring.
 
 Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API / GraphQL world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
 
 >![](.images/backend-vs-firebase.png)
 
-*Figure 1. Traditional cloud vs. Firebase approach <sub>[source](https://docs.google.com/drawings/d/15_rPDZDOCHwdL0RIX8Rg3Der1tb4mx2tMi9asQ_aegw)</sub>*
+*Figure 1. Traditional microservice vs. Firebase approach <sub>[source](https://docs.google.com/drawings/d/15_rPDZDOCHwdL0RIX8Rg3Der1tb4mx2tMi9asQ_aegw)</sub>*
 
 There are similar offerings from other companies, but they are a year or two behind, in the ease of use, based on the author's opinion.
 
 >Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun. It's recommended to check those out in parallel with this repo.
 
-There are links to Firebase resources at the [References](#References).
 
-<!-- tbd. check whether the link works in GitHub -->
+## Google Cloud
 
+Firebase and Google Cloud have a relation. Firebase runs on top of Google Cloud (and is owned by Google, as a sub-brand). They have separate dashboards, but some Firebase tasks require one to visit the Google Cloud tools side.
 
-<!-- Edit: too much talk. Place this somewhere else
-## Where are you now?
+In this repo, we stay at the Firebase side of things, except for CI/CD which is done with Cloud Build and logging, where Cloud Logging is used.
 
-><font color=red>tbd. a map here, showing the `app`, `background`, `deploy` and their relationsships to cloud presence (auth, hosting, database, ops)
-</font>
+This is clearly a balancing of simplicity vs. advanced features.
 
-The repo grew. Though simplicity is the aim, there are things that simply need to be there. Anything extra should be considered for abandoning, since it makes learning more difficult.
-
-The aim is that a single person (you) can be in charge of all this (and more since you'll likely want your app on top of it).
-
->Note: Let the author know if there's something unnecessary in the repos.
--->
 
 ## Requirements
+
+As global tools, you will need:
 
 - `npm`
 - `firebase` CLI (Command Line Interface)
@@ -88,54 +87,74 @@ The aim is that a single person (you) can be in charge of all this (and more sin
   $ npm install -g firebase-tools
   ```
 
-<!-- Editor's note:
--- unnecessary to mention about the version. Also, better that we check it in software. ;)
-You should use `firebase-tools` >= 8.11.1.
--->
-
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-<!--
-Developed with:
-- npm (7.5.3) 
-- macOS
-- node (15.8.0)
+The project is developed on macOS, but with the dawn of [Jailed!](...), we'll be able to make it more OS agnostic. The aim is that you can develop on Linux, Windows or Mac, alike.
+
+### An editor
+
+You need an editor for seeing and modifying the code. 
+
+- [WebStorm](https://www.jetbrains.com/webstorm/) (€ 59 -> 47 -> 35 per year for individual use with [discounts / free licenses for selected groups](https://www.jetbrains.com/webstorm/buy/#discounts?billing=yearly))
+- [Visual Studio Code](https://code.visualstudio.com)
+
+*Please suggest other IDEs you feel are good for a newcomer. Oldtimers likely won't convert, anyhow. ;)*
+
+<!-- tbd.
+### Big enough screen
+
+In programming, the more you can see on the screen at once, the better. The author is very pleased with a single 4K screen, while others use multiple displays. Don't try to cram your vision to an old HD monitor - at least have two. It's like tunnel vision with eye glasses.
+
+![](.images/tunnel-vision.jpg)
+
+<_!-- tbd. make own photo, with code and blur everything but center 
 -->
-
-The repo is developed on macOS, with latest `npm` and `node`.
-
->Note: Eventually, we'll test it also on Linux and Windows (maybe restricting to Linux Subsystem for Windows that has Bash). We're not there yet - issues or PRs are welcome! 
 
 
 ## Getting started
 
->![](.images/y-sign.png)
->
->There's a choice you can do now. Are you more interested in:
->
->- A: seeing your app work in the cloud
->- B: UI development
->
->For route A, sign up to Firebase "blaze" plan and [create a project](README.firebase.md). Then proceed with these instructions.
->
->For route B, change to `packages/app` folder and see the `README` therein. You will be able to play around with the UI <u>without the need to create a Firebase account</u> right now.
+<img width="180px" align=left src=".images/y-sign.png" style="padding: 1em" />
 
-<a name="back"></a>   <!-- comes back here from Blaze setup -->
-<!-- Editor's note:
-- Having self-terminating tag messed up markdown editor.
--->
+There's a choice you need to make. 
+
+Are you more interested in:
+
+<font color=green>🅐</font> - [Run for the Cloud](#choice-a)<br />
+<font color=lilac>🅑</font> - [UI development, first](#choice-b)
+
+<br clear=all />
+
+
+<a name="choice-a"></a>
+### <font size="+3" color=green>🅐</font> - Run for the Cloud
+
+With this route, we'll sign you up to Firebase "blaze" plan and create a project. Then proceed to build and deploy the application online, without making any changes to it, yet.
+
+After the application works, you can look into the various parts of it and start making changes.
 
 ---
 
-### Fetch dependencies
 
-```
-$ npm install
-```
 
-This prepares the UI (under `packages/app` folder) and the backend (under `packages/backend`). 
+<a name="choice-b"></a>
+### <font size="+3" color=lilac>🅑</font> - UI development, first
 
-We'll come to these later. For now, the aim is to get the application deployed, under your Firebase account. Then we'll look into development and making changes.
+With this route, we focus on the application source code and set it up, running locally under emulation. You can make changes to the code and see them pop up on the screen.
+
+Here, you don't need to set up a Firebase account, at all. 
+
+Later, you can look at the deployment part. At this point, you need a Firebase account and project.
+
+---
+
+
+
+
+
+
+<!-- disabled...
+
+
 
 ### Tie to your Firebase project
    
@@ -189,7 +208,7 @@ Responsibilities:
 
 <!-- Editor's note
 Using 'table' to be able to merge cells. Seems 'rowspan' is "on GitHub markdown whitelist"
--->
+--_>
 
 Because the back-end sub-project takes care of its own deployment, we need to visit there in order to get things up in the cloud.
 
