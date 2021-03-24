@@ -1,0 +1,68 @@
+#
+# .gcloudignore
+#
+# Defines the files *not* sent to Cloud Build.
+#
+# Note: we could go with the default (that is built by '.gitignore' files), but there
+#   are some other, unnecessary paths that don't need to be in the build.
+#
+
+# Default (follow the '.gitignore's):
+#
+.gcloudignore
+.git
+.gitignore
+#!include:.gitignore
+
+# ^-- Note: '#!include' is a command; not a comment!
+
+# Global '.gitignore' (of the author); not observed by Cloud Build defaults
+#
+# The idea has been that not all cruft needs to be in '.gitignore'. Add here globally known editor stuff or similar
+# (not project specific).
+#
+/.idea/
+.DS_Store
+
+# Subpackage '.gitignore's
+#
+# NOTE: These are NOT observed by default by 'gcloud', and the '#!include' syntax does NOT allow paths in subdirectories.
+#
+# We can live with this. It's still nice to have '.gitignore' in the 'packages/*' subfolders, since they are so
+# autonomous. They are the truth - list here should reflect them. If it doesn't, no big harm - just more stuff gets
+# shipped at CI/CD builds.
+#
+# #!include:packages/app/.gitignore
+# #!include:packages/app-deploy-ops/.gitignore
+# #!include:packages/backend/.gitignore
+#   ^-- ERROR: "May only include files in the same directory." (Google Cloud SDK 332.0.0)
+
+.firebase/
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.lock
+vitebox/dist/
+.screenshots/
+out/
+firebase.*.json
+stats.html
+
+# Documentation-like folders (irrelevant for build)
+#
+/branding/
+/DEVS/
+/**/.images/
+#*.md
+
+*.disabled
+*.delme
+
+# Possible left-overs
+*.tgz
+
+# Cruft
+/ops.#rework/
+/_Dear_/
+/_Waiting_/

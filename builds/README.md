@@ -89,7 +89,7 @@ $ gcloud components install cloud-build-local
 ```
 
 ```
-$ cloud-build-local ..
+$ cloud-build-local dryrun=true ..
 ```
 
 <details>
@@ -123,6 +123,8 @@ DONE
 $ cloud-build-local --dryrun=false ..
 ```
 
+>*<font color=red>BUG: The above command currently gets stuck. See [#37](https://github.com/akauppi/GroundLevel-firebase-es/issues/37).</font>*
+
 <details>
 <summary>Build output</summary>
 
@@ -142,12 +144,11 @@ information of your project, but the build itself happens locally.
 
 
 
-...
-
-
-
 ## CI/CD
 
+```
+$ gcloud builds submit --config cloudbuild.yaml
+```
 
 ## References
 
@@ -155,4 +156,5 @@ information of your project, but the build itself happens locally.
 - [Creating GitHub App triggers](https://cloud.google.com/build/docs/automating-builds/create-github-app-triggers) (Cloud Build docs)
 - [Deploying to Firebase](https://cloud.google.com/build/docs/deploying-builds/deploy-firebase) (Cloud Build docs)
 - [Building and debugging locally](https://cloud.google.com/build/docs/build-debug-locally) (Cloud Build docs)
+- `gcloud builds submit --help`
 
