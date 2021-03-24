@@ -1,0 +1,26 @@
+#
+# builds/cloudbuild.yaml
+#
+
+# - when push or PR targeting 'master'
+#   - if changes in 'packages/backend' (other than '.md' or '.images'):
+#     - cd packages/backend
+#     - npm install
+#     - npm test
+#     - npm run deploy
+
+# tbd. app, app-deploy-ops
+
+
+steps:
+  - name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        npm install
+        npm test
+        #npm run deploy
+    dir: packages/backend
+
+#included files: packages/backend/* but not .md, .images

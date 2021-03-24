@@ -134,53 +134,281 @@ After the application works, you can look into the various parts of it and start
 
 ---
 
+There are three subpackages in the repo: `backend`, `app` and `app-deploy-ops`. In this tour, we are visiting them all. For more details on each one of them, check their particular `README` files.
 
+#### 0. Create a Firebase project
+
+Follow the instructions in [README.firebase.md](./README.firebase.md) so that you have a Firebase project created.
+
+#### 1. Build and deploy the back-end
+
+```
+$ cd packages/backend
+```
+
+```
+$ firebase use --add
+```
+
+Select the project you want to use and give it an alias. The alias doesn't really matter, `abc` is just fine..
+
+Now, you should be able to see your selected project:
+
+```
+$ firebase use
+Active Project: testing-220321
+...
+```
+
+Next, we'll install the dependencies and deploy the database access rules and Cloud Functions:
+
+```
+$ npm install
+```
+
+```
+$ npm run deploy
+...
+
+=== Deploying to 'testing-220321'...
+
+i  deploying firestore, functions
+i  firestore: reading indexes from ./firestore.indexes.json...
+i  cloud.firestore: checking ./firestore.rules for compilation errors...
+✔  cloud.firestore: rules file ./firestore.rules compiled successfully
+i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
+i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
+✔  functions: required API cloudbuild.googleapis.com is enabled
+✔  functions: required API cloudfunctions.googleapis.com is enabled
+i  functions: preparing ./functions directory for uploading...
+i  functions: packaged ./functions (32.02 KB) for uploading
+✔  firestore: deployed indexes in ./firestore.indexes.json successfully
+i  firestore: latest version of ./firestore.rules already up to date, skipping upload...
+✔  functions: ./functions folder uploaded successfully
+✔  firestore: released rules ./firestore.rules to cloud.firestore
+i  functions: updating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
+i  functions: updating Node.js 14 (Beta) function logs_1(europe-west6)...
+✔  functions[userInfoShadow_2(europe-west6)]: Successful update operation. 
+✔  functions[logs_1(europe-west6)]: Successful update operation. 
+✔  Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/testing-220321/overview
+```
+
+If you saw that, the backend is now ready in the cloud. Well done!
+
+You can visit the given URL to see the dashboard. Check the `Firestore` and `Functions` pages.
+
+Next, we'll prepare the front end and deploy it as well.
+
+#### 2. Build the front end
+
+```
+$ cd ../app
+```
+
+Do again the `firebase use` - we haven't synchronized the subpackages on this, but could.
+
+```
+$ firebase use --add
+```
+
+```
+$ npm install
+```
+
+The web app needs to be built.
+
+```
+$ npm run build
+...
+vite v2.1.2 building for production...
+✓ 47 modules transformed.
+dist/aside-keys.js   17.85kb / brotli: 5.62kb
+dist/aside-keys.js.map 28.60kb
+dist/style.css       5.21kb / brotli: 1.45kb
+dist/app.es.js       35.40kb / brotli: 8.86kb
+dist/app.es.js.map   72.08kb
+dist/vue-router.js   51.80kb / brotli: 11.50kb
+dist/vue-router.js.map 169.41kb
+dist/vue.js          127.87kb / brotli: 25.31kb
+dist/vue.js.map      465.31kb
+```
+
+What we now have is the web app's *logic*. It is not ready for deployment, yet. We'll handle that next.
+
+#### 3. Deploy the front end
+
+>Note: In this repo, developing and packaging the app for deployment are separated. This is not a normal pattern in front end development but has its benefits: separation of concerns, allows different teams to have ownership of the features vs. how those features are kept alive on the cloud.
+
+```
+$ cd ../app-deploy-ops
+```
+
+You know the drill:
+
+```
+$ firebase use --add
+```
+
+```
+$ npm install
+```
+
+```
+$ npm run build
+```
+
+```
+$ npm run deploy
+...
+
+=== Deploying to 'testing-220321'...
+
+i  deploying hosting
+i  hosting[groundlevel-160221]: beginning deploy...
+i  hosting[groundlevel-160221]: found 3 files in roll/out
+✔  hosting[groundlevel-160221]: file upload complete
+i  hosting[groundlevel-160221]: finalizing version...
+✔  hosting[groundlevel-160221]: version finalized
+i  hosting[groundlevel-160221]: releasing new version...
+✔  hosting[groundlevel-160221]: release complete
+
+✔  Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/testing-220321/overview
+Hosting URL: https://testing-220321.web.app
+```
+
+Now, head to the provided URL and you should see the app alive and kicking!!!
+
+[https://testing-220321.web.app](https://testing-220321.web.app)
+
+As you can imagine, there are *tons* of details around each of the phases we took. 
+
+We didn't touch testing at all (each stage has tests).
+
+Deployment is normally done using CI/CD - there's a [separate story](...) for setting that up. *🚧Work in progress*
+
+..but the purpose was to get you from 0 to Cloud as fast as possible, and hopefully that happened!
+
+Next, have a look at each of the subpackages in the order you like:
+
+- [packages/backend](packages/backend/README.md)
+- [packages/app](packages/app/README.md)
+- [packages/app-deploy-ops](packages/app-deploy-ops/README.md)
+
+You can start developing your own app, now. See [README.2-yours](README.2-yours.md).
+
+---
 
 <a name="choice-b"></a>
 ### <font size="+3" color=lilac>🅑</font> - UI development, first
 
 With this route, we focus on the application source code and set it up, running locally under emulation. You can make changes to the code and see them pop up on the screen.
 
-Here, you don't need to set up a Firebase account, at all. 
+You don't need to set up a Firebase account, just yet. 
 
-Later, you can look at the deployment part. At this point, you need a Firebase account and project.
+Later, you'll continue to the deployment part. At that point, you need a Firebase account and project.
 
 ---
 
-
-
-
-
-
-<!-- disabled...
-
-
-
-### Tie to your Firebase project
-   
 ```
-$ firebase use --add
+$ cd packages/app
 ```
-   
-The alias you choose doesn't really matter. `"abc"` is okay.
-
-This creates the file `.firebaserc`. You can now use the project from `firebase` command.
 
 ```
-$ firebase use
-Active Project: prod-zurich (groundlevel-160221)
+$ npm install
+```
+
+```
+$ npm run dev
 ...
+[emul] i  emulators: Starting emulators: auth, functions, firestore
+[emul] ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project app. This may result in unexpected behavior.
+[emul] ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: database, hosting, pubsub
+[emul] ⚠  Your requested "node" version "14 || >=15" doesn't match your global version "15"
+[emul] ⚠  functions: Unable to fetch project Admin SDK configuration, Admin SDK behavior in Cloud Functions emulator may be incorrect.
+[emul] i  firestore: Firestore Emulator logging to firestore-debug.log
+[emul] i  ui: Emulator UI logging to ui-debug.log
+[emul] i  functions: Watching "/Users/asko/Git/GroundLevel-es-firebase/packages/app/node_modules/@local/backend/functions/" for Cloud Functions...
+[init] (node:20644) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+[init] (Use `node --trace-warnings ...` to show where the warning was created)
+[emul] ✔  functions[userInfoShadow_2]: firestore function initialized.
+[emul] ✔  functions[logs_1]: http function initialized (http://localhost:5002/app/us-central1/logs_1).
+[emul] 
+[emul] ┌─────────────────────────────────────────────────────────────┐
+[emul] │ ✔  All emulators ready! It is now safe to connect your app. │
+[emul] │ i  View Emulator UI at http://localhost:4000                │
+[emul] └─────────────────────────────────────────────────────────────┘
+[emul] 
+[emul] ┌────────────────┬────────────────┬─────────────────────────────────┐
+[emul] │ Emulator       │ Host:Port      │ View in Emulator UI             │
+[emul] ├────────────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Authentication │ localhost:9100 │ http://localhost:4000/auth      │
+[emul] ├────────────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Functions      │ localhost:5002 │ http://localhost:4000/functions │
+[emul] ├────────────────┼────────────────┼─────────────────────────────────┤
+[emul] │ Firestore      │ localhost:6767 │ http://localhost:4000/firestore │
+[emul] └────────────────┴────────────────┴─────────────────────────────────┘
+[emul]   Emulator Hub running at localhost:4400
+[emul]   Other reserved ports: 4500
+[emul] 
+[emul] Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+[emul]  
+[init] Primed :)
+[init] Pre-bundling dependencies:
+[init]   firebase/app
+[init]   firebase/auth
+[init]   firebase/firestore
+[init]   firebase/functions
+[init]   vue
+[init]   (...and 5 more)
+[init] (this will be run only when your dependencies or config have changed)
+[init] 
+[init]   vite v2.1.2 dev server running at:
+[init] 
+[init]   > Local:    http://localhost:3000/
+[init]   > Network:  http://192.168.1.62:3000/
+[init] 
+[init]   ready in 912ms.
+[init] 
 ```
 
-### No tests?
+Open [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 
-The `app` and `backend` sub-packages have tests. By the time code reaches us, it's expected to pass the tests.
+You should see a simple UI:
 
-- The application package is responsible for front-end development and testing.
-- We are responsible for front-end *deployment* and *operational monitoring* (of both the app and back-end).
-- The back-end package is responsible for back-end development, testing, *and deployment*.
+>![](.images/app-dev.png)
 
-Responsibilities:
+&nbsp;
+>Note: In "dev:local" mode, you claim to be a certain user by the query param `user=<uid>`. There are premade material for some users.
+
+Good.
+
+Now, let's make changes to the source code. Open your IDE and edit ..hmm.. the file `src/pages/Project.vue` (you can edit absolutely anything you want, of course).
+
+```
+    <div>
+      PROJECT PAGE YIPPIYAY!
+    </div>
+```
+
+Switch back to the app. Open a project. Do you see the new text?
+
+>*tbd. This part is broken in the app. Please use your imagination, for now...*
+
+Note: You don't have to build the app when making changes. Vite - a tool we use underneath - does it for you.
+
+For more details, check out the [packages/app/README.md](packages/app/README.md) guidance.
+
+When ready, please finish by following the [🅐 route](#choice-a). Then, forward to [Making it Yours](README.2-yours.md).
+
+
+<!-- Keep around
+## Subpackage organization
+
+There are three subpackages. This table shows their responsibilites:
 
 <table>
   <thead>
@@ -196,185 +424,20 @@ Responsibilities:
     <tr>
       <td>app</td>
       <td colspan=2><pre>packages/app</pre></td>
-      <td colspan=2>us</td>
+      <td colspan=2><pre>packages/app-deploy-ops</pre></td>
     </tr>
     <tr>
       <td>back-end</td>
       <td colspan=3><pre>packages/backend</pre></td>
-      <td>us</td>
+      <td>open</td>
     </tr>
   </tbody>
 </table>
 
-<!-- Editor's note
-Using 'table' to be able to merge cells. Seems 'rowspan' is "on GitHub markdown whitelist"
---_>
+<! -- what does back-end monitoring mean (checking the logs); where is it 
 
-Because the back-end sub-project takes care of its own deployment, we need to visit there in order to get things up in the cloud.
-
-## Deployment of back-end
-
-We'll just do this fast. There are more information in [packages/backend/README.md](packages/backend/README.md).
-
-```
-$ pushd packages/backend
-
-$ npm test     
-...
-```
-
-The tests should all pass, or be ignored. Note that they run with local emulation; cloud is not involved, yet.
-
-```
-$ firebase use --add    # provide the same id as above
-```
-
-We need to do this `firebase use --add` separately for each directory where `firebase` CLI is used.
-
-<details style="background-color: #eff; cursor: pointer">
-<summary>The longer story..</summary>
-<div style="margin: 0 1em">
-<p>Firebase stores its state in `~/.config/configstore/firebase-tools.json`. The active projects are stored per folder path:
-
-<pre>
-"activeProjects": {
-  "/Users/asko/Git/cicp-proto": "cicp-proto-240219",
-  "/Users/asko/Git/vue-rollup-example-with-firebase-auth": "dev",
-  ...
-</pre>
-
-This means if you eg. rename a folder, you'll likely need to redo `firebase use --add`.
-</div>
-</details>
-
-### State your region
-
-```
-$ firebase functions:config:set regions.0="europe-west6"
-```
-
->Note: The convention of `regions.0` is picked up from [here](https://firebase-wordpress-docs.readthedocs.io/en/latest/intro/cloud-functions-deployment.html#change-cloud-functions-regions).
-
-
-### Deploy
-
->Note: Check that your Firebase CLI version is >= 9.4.0. There was a bug with deployment (affecting Node 15) in prior versions.
->
-```
-$ firebase --version
-9.4.0
-```
-
-```
-$ npm run deploy
-...
-> firebase deploy --only functions,firestore
-
-
-=== Deploying to 'groundlevel-160221'...
-
-i  deploying firestore, functions
-i  firestore: reading indexes from ./firestore.indexes.json...
-i  cloud.firestore: checking ./firestore.rules for compilation errors...
-✔  cloud.firestore: rules file ./firestore.rules compiled successfully
-i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
-i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
-✔  functions: required API cloudfunctions.googleapis.com is enabled
-✔  functions: required API cloudbuild.googleapis.com is enabled
-i  functions: preparing ./functions directory for uploading...
-i  functions: packaged ./functions (31.44 KB) for uploading
-✔  firestore: deployed indexes in ./firestore.indexes.json successfully
-i  firestore: latest version of ./firestore.rules already up to date, skipping upload...
-✔  functions: ./functions folder uploaded successfully
-✔  firestore: released rules ./firestore.rules to cloud.firestore
-...
-i  functions: creating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
-✔  functions[userInfoShadow_2(europe-west6)]: Successful create operation. 
-
-✔  Deploy complete!
-
-Project Console: https://console.firebase.google.com/project/groundlevel-160221/overview
-
-> postdeploy
-> tools/hack.sh 2
-
-```
-
-Now your data base access rules and background functions are running in Google cloud. 👏🙂
-
-```
-$ popd    # back to root
-```
-
-
-## Front end build & deployment
-
-This is done in the `packages/app-deploy-ops` sub-package.
-
-```
-$ pushd packages/app-deploy-ops
-
-$ npm run build
-...
-688	public/dist
-0	public/hack
-720	public
-```
-
-This uses Rollup to build the sample app for good tightness. The final numbers indicate the size of your application, in kB.
-
->Note: In addition, there is a `stats.html` file generated that shows the contents of the output in detail.
-
-But... it's more fun to RUN an application! Unfortunately, this means we must take a side tour to the back end repo in order to have the back end deployed.
-
-
-`<CLIP>`
-
-### Running the production build, locally
-
-```
-$ npm run serve
-...
-i  hosting: Serving hosting files from: public
-✔  hosting: Local server: http://0.0.0.0:3012
-```
-
-Open [localhost:3012](http://localhost:3012) and you should see something like:
-
->![](.images/app.png)
-
-You can try the application. It should work against the back-end of the Firebase project you created, storing data there. Close and re-open the browser. You should be able to see your data.
-
-
-### Deploying
-
-The front-end you were using was still running locally. Let's get also it online.
-
-```
-$ firebase deploy --only hosting
-...
-
-✔  Deploy complete!
-
-Project Console: https://console.firebase.google.com/project/YOUR_PROJECT/overview
-Hosting URL: https://YOUR_PROJECT.web.app
-```
-
-That's it. You should now be able to reach your application at the given URL (`https://YOUR_PROJECT.web.app`).
-
-
----
-
-Next: [Make it Yours](README.2-yours.md)
-
-<!--
-## Next steps
-
-- [Make it Yours](README.yours.md)
-   - How to edit the application front-end and back-end, to make the app Yours. 😀
-- [Operations](README.operations.md)
-- [Design approaches](README.design.md)
-   - Discussion on the decisions taken and how you can do things differently.
-- [Credits and References](README.credits.md)
-   - Credits to people who've helped in the project and references to further reading.
 -->
+
+
+
+
