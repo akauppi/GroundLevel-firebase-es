@@ -11,6 +11,7 @@ $ gcloud meta list-files-for-upload
 
 ## Build logs
 
+<!-- disabled: tbd. update with working build logs
 Logs seem to be made to a folder such as:
 
 ```
@@ -41,35 +42,17 @@ $ tree ~/.config/gcloud/logs/2021.03.24/
 ├── 15.00.53.808320.log
 └── 15.02.09.599417.log
 ```
+-->
 
 ## `.gcloudignore`
 
 Cloud Build ignores the files in the *root*'s `.gitignore` automatically but:
 
-- it does not check the global `.gitignore` (that's fine)
+- it does not check the global `.gitignore`
 - it does not check `.gitignore`s in subdirectories (this one is not so fine)
 
-For these reasons, the repo has its own `.gcloudignore` in the root, to keep the transports small.
+For these reasons, the repo has its own `.gcloudignore`, to keep the transports small.
 
-
-
-<!-- remove
-## Build logs
-
-These are store by default to: 
-
-```
-gs://[PROJECT_NUMBER].cloudbuild-logs.googleusercontent.com/
-```
-
-## Sources copied
-
-Stored by default to:
-
-```
-gs://[PROJECT_ID]_cloudbuild/source 
-```
--->
 
 ## Use of Cloud Storage 
 
@@ -82,8 +65,6 @@ The `groundlevel-160221_cloudbuild` is the important one for us.
 It has a `source/` folder with `.tgz` packages.
 
 If you have problems, check that the packaging is how you'd imagine it to be.
-
->*tbd. Is there a way, in the command line, to tell which files Cloud Build would include?*
 
 
 ### Build logs

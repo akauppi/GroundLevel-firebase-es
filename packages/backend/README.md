@@ -13,7 +13,7 @@ Responsible for:
 ## Requirements
 
 - `npm`
-- `firebase-tools` >= 8.11.1
+- `firebase-tools`
 
    ```
    $ npm install -g firebase-tools
@@ -23,10 +23,10 @@ It's good to update `firebase-tools` every now and then, especially if you have 
 
 <!-- 
 developed with:
-- macOS 11.1
+- macOS 11.2
 - node 15.x
 - npx 7.x
-- firebase CLI 9.2
+- firebase CLI 9.6.x
 -->
 
 ## Getting started

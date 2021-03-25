@@ -1,6 +1,9 @@
 #
 # builds/cloudbuild.yaml
 #
+# Environment:
+#   - pwd: /workspace (that has a copy of the sources)
+#
 
 # - when push or PR targeting 'master'
 #   - if changes in 'packages/backend' (other than '.md' or '.images'):
@@ -11,16 +14,24 @@
 
 # tbd. app, app-deploy-ops
 
-
+# Non-DRY and verbose, since we cannot use '<<: &anchor' and '<<: *anchor' YAML syntax. 😢
+#
 steps:
-  - name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
-    entrypoint: bash
-    args:
-      - '-c'
-      - |
-        npm install
-        npm test
-        #npm run deploy
-    dir: packages/backend
+- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+  entrypoint: bash
+  args: ['-c', 'pwd', 'env']
+  dir: packages/backend
+- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+  entrypoint: npm
+  args: ['install']
+  dir: packages/backend
+- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+  entrypoint: npm
+  args: ['test']
+  dir: packages/backend
+- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+  entrypoint: npm
+  args: ['run deploy']
+  dir: packages/backend
 
 #included files: packages/backend/* but not .md, .images

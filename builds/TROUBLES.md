@@ -5,11 +5,9 @@
 ```
 $ cloud-build-local --dryrun=false ..
 2021/03/24 16:03:52 Warning: there are left over step containers from a previous build, cleaning them.
-
-
 ```
 
-If this happens to you, and nothing more.
+If this happens to you (and nothing more is output).
 
 ```
 $ docker ps -a
@@ -25,7 +23,6 @@ Pick the container with `cloudbuild_` in its name.
 ```
 $ docker container stop cloudbuild_vol_59342577-7885-416e-b3aa-a310d84af208-helper
 cloudbuild_vol_59342577-7885-416e-b3aa-a310d84af208-helper
-asko@Asko-Macmini builds (master) $ docker container rm cloudbuild_vol_59342577-7885-416e-b3aa-a310d84af208-helper
+$ docker container rm cloudbuild_vol_59342577-7885-416e-b3aa-a310d84af208-helper
 cloudbuild_vol_59342577-7885-416e-b3aa-a310d84af208-helper
 ```
-
