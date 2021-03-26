@@ -93,6 +93,43 @@ This allows Cloud Build to use the `firebase` CLI as your project's admin.
 
 >![](.images/firebase-admin-enabled.png)
 
+#### +1: `iam.serviceAccountUser` role
+
+There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
+
+Get the number from the "Service account email" (above screenshot).
+
+Use the Firebase project id.
+
+```
+$ MEMBER=serviceAccount:337......369@cloudbuild.gserviceaccount.com
+$ PROJECT_ID=...
+$ gcloud iam service-accounts add-iam-policy-binding $PROJECT_ID@appspot.gserviceaccount.com --member=$MEMBER --role=roles/iam.serviceAccountUser
+Updated IAM policy for serviceAccount [...]
+...
+```
+
+<!-- Error that brought to this (from CI/CD log):
+...
+Step #4: i  functions: updating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
+Step #4: ⚠  functions: failed to update function userInfoShadow_2
+Step #4: HTTP Error: 403, Missing necessary permission iam.serviceAccounts.actAs for $MEMBER on the service account groundlevel-160221@appspot.gserviceaccount.com.
+Step #4: Grant the role 'roles/iam.serviceAccountUser' to $MEMBER on the service account groundlevel-160221@appspot.gserviceaccount.com.
+Step #4: You can do that by running 'gcloud iam service-accounts add-iam-policy-binding groundlevel-160221@appspot.gserviceaccount.com --member=$MEMBER --role=roles/iam.serviceAccountUser'.
+Step #4: In case the member is a service account please use the prefix 'serviceAccount:' instead of 'user:'.
+Step #4: If this is a cross-project service account usage. Ask a project owner to grant you the iam.serviceAccountUser role on the service account and/or set the iam.disableCrossProjectServiceAccountUsage org policy to NOT ENFORCED on the service account project. Please visit https://cloud.google.com/functions/docs/troubleshooting for in-depth troubleshooting documentation.
+Step #4: 
+-->
+
+---
+
+With that, deploying a Cloud Function in Cloud Build succeeds. 😅
+
+>Note: Would changing the `Service Account User` in the screenshot have done the same? Likely. 
+>
+>Interestingly, the GUI does not change the state of `Service Account User` to `ENABLED` - maybe it contains more roles than the one we changed at the command line?
+
+---
 
 ### 3. Add "API Keys Admin" role to the Cloud Build service account
 

@@ -59,16 +59,6 @@ It's cheap for you to use. No Docker instances; just ~0.5MB upload to the cloud,
 
 Maybe useful.
 
-### Enable Kaniko caching
-
->If you run builds using the gcloud builds submit --tag [IMAGE] command, you can enable Kaniko cache by setting the property builds/use_kaniko to True as shown below:
->
->```
->$ gcloud config set builds/use_kaniko True
->```
-
-Do it. 
-
 ## Troubleshoot manually
 
 To launch a Docker container, similar to what `gcloud builds submit` does:
@@ -90,6 +80,16 @@ You can now execute the build steps and debug, if something doesn't work right. 
 >Docker default for the author was 2GB. Things work, but performance is *really* sluggish. (may not be the RAM, though...)
 
 ---
+
+## Viewing builds
+
+See -> [Viewing build results](https://cloud.google.com/build/docs/view-build-results) (Cloud Build docs)
+
+
+## Misc notes
+
+- Timeout for the builds seems to be 10min (600s); seen in `
+
 
 ## References
 

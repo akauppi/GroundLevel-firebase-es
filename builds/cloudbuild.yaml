@@ -47,13 +47,16 @@ steps:
   entrypoint: npm
   args: ['test']
   dir: packages/backend
+#
+# --- Deploy
+#
 - name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: firebase
   args: ['use', '--add', '$PROJECT_ID']
   dir: packages/backend
 #
 # Deploy fails. We can live with manual deployments, for a while...
-#- - name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
-#  entrypoint: npm
-#  args: ['run', 'deploy']
-#  dir: packages/backend
+- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+  entrypoint: npm
+  args: ['run', 'deploy']
+  dir: packages/backend
