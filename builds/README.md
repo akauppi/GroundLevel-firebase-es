@@ -378,6 +378,15 @@ If that fails, creating such a PR would fail.
 Note that pushing changes to `packages/app` should trigger deployment, even if the deployment harness (`packages/app-deploy-ops`) is unchanged.
 
 
+## Maintenance
+
+>Cloud Build does not automatically delete contents in this bucket. To delete objects you're no longer using for builds, you can either set up lifecycle configuration on the bucket or manually delete the objects.
+
+So each build you do (at least using the `gcloud builds submit` command) adds to a pile of sources.
+
+Pay it a visit some day.
+
+
 ## Sum it up
 
 Setting up the *culture* of CI/CD and a working *delivery pipeline* may be the most important things to do *early on*. It should not be hard, and hopefully this page and folder has made it easy for you.

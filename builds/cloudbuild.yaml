@@ -8,17 +8,23 @@
 #     PWD=/workspace
 #     HOME=/builder/home
 #
-# Trigger:
-#   ...
+# Triggers:
+#   - changes in 'packages/backend'
 
-# - when push or PR targeting 'master'
+# tbd. app, app-deploy-ops (maybe in separate YAML files??)
+
+# - when push or merge targeting 'master'
 #   - if changes in 'packages/backend' (other than '.md' or '.images'):
 #     - cd packages/backend
 #     - npm install
 #     - npm test
 #     - npm run deploy
 
-# tbd. app, app-deploy-ops
+# - when a PR targeting 'master' is being created
+#   - if changes in 'packages/backend' (other than '.md' or '.images'):
+#     - cd packages/backend
+#     - npm install
+#     - npm test
 
 # Non-DRY and verbose, since we cannot use '<<: &anchor' and '<<: *anchor' YAML syntax. 😢
 #
@@ -45,7 +51,9 @@ steps:
   entrypoint: firebase
   args: ['use', '--add', '$PROJECT_ID']
   dir: packages/backend
-- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
-  entrypoint: npm
-  args: ['run', 'deploy']
-  dir: packages/backend
+#
+# Deploy fails. We can live with manual deployments, for a while...
+#- - name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#  entrypoint: npm
+#  args: ['run', 'deploy']
+#  dir: packages/backend
