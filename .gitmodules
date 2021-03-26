@@ -1,0 +1,3 @@
+[submodule "builds/firebase-custom-builder"]
+	path = builds/firebase-custom-builder
+	url = git@github.com:akauppi/firebase-custom-builder.git

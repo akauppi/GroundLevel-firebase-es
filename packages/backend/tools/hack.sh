@@ -16,13 +16,15 @@ fi
 MODE=$1
 
 ORIG=functions/package.json
-BU_EXT=bu
+BU_EXT=.~
+
+# Note: 'sed' used so that it's compatible with both macOS (BSD) and GNU variants.
 
 case $1 in
 1)
-  sed -i .$BU_EXT -E 's/("node": ")(.+)(")/\114\3/' $ORIG
+  sed -i$BU_EXT -E 's/("node": ")(.+)(")/\114\3/' $ORIG
 ;;
 2)
-  [ -f $ORIG.$BU_EXT ] && mv $ORIG.$BU_EXT $ORIG
+  [ -f $ORIG$BU_EXT ] && mv $ORIG$BU_EXT $ORIG
 ;;
 esac

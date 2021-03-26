@@ -7,6 +7,9 @@
 #   - env.variables (just some):
 #     PWD=/workspace
 #     HOME=/builder/home
+#
+# Trigger:
+#   ...
 
 # - when push or PR targeting 'master'
 #   - if changes in 'packages/backend' (other than '.md' or '.images'):
@@ -20,24 +23,29 @@
 # Non-DRY and verbose, since we cannot use '<<: &anchor' and '<<: *anchor' YAML syntax. 😢
 #
 steps:
-- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: bash
   args: ['-c', 'pwd']
   dir: packages/backend
-#- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
-#  entrypoint: bash
-#  args: ['-c', 'env']
-- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+#
+- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: npm
   args: ['install']
   dir: packages/backend
-- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#  entrypoint: bash
+#  args: ['-c', 'ls -al']
+#  dir: packages/backend/functions
+#
+- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: npm
   args: ['test']
   dir: packages/backend
-- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+  entrypoint: firebase
+  args: ['use', '--add', '$PROJECT_ID']
+  dir: packages/backend
+- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: npm
   args: ['run', 'deploy']
   dir: packages/backend
-
-#included files: packages/backend/* but not .md, .images

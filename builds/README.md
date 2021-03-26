@@ -4,7 +4,7 @@ This folder contains the guidance for Cloud Build to automatically test and depl
 
 <!-- tbd. explain more -->
 
-*Note: Commands in this document are intended to be executed in the `builds` folder.*
+>Note: Commands in this document are intended to be executed in the `builds` folder.
 
 ## Requirements
 
@@ -12,69 +12,72 @@ This folder contains the guidance for Cloud Build to automatically test and depl
 
    Follow [Installing Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
 	
-	```
-	$ gcloud components install beta
-	```
-
-   ```
-   $ gcloud --version
-	Google Cloud SDK 332.0.0
-	beta 2021.03.12
-	...
-   ```
-
 	>Note: At least earlier, on macOS, it was best to run the `./google-cloud-sdk/install.sh` in the folder that would remain the install target. 
 	>
 	>The author has `gcloud` under `~/bin/google-cloud-sdk`.
 
-- `docker` (optional)
+   ```
+   $ gcloud --version
+	Google Cloud SDK 332.0.0
+	...
+   ```
 
-   We are using a custom build step. If you develop that further, you might want to have Docker installed.
+- `docker`
+- GNU `make`
+
+   The last two are needed for creating a custom builder.
    
-### Set your `gcloud` project
+## Build the builder 👷👷
 
-Using the same project name as with `firebase use`:
+We need a Cloud Build builder image that contains:
+
+- `firebase` with emulators
+- `npm`
+- some command line tools
+
+Such an image is available at [akauppi/firebase-custom-builder](https://github.com/akauppi/firebase-custom-builder). You could clone that repo, but we've already set it up for you as a [Git submodule](https://gist.github.com/gitaarik/8735255) of the [akauppi/firebase-custom-builder](https://github.com/akauppi/firebase-custom-builder) for convenience.
+
+>Submodules are great, but rarely used. This is the first time the author uses them in an open source project.
+
+To build the builder and push it to your Container Registry:
 
 ```
-$ gcloud config set project testing-230321
-Updated property [core/project].
+$ cd firebase-custom-builder
+$ make build push-latest
+...
+$ cd ..
 ```
 
-<!-- disabled (enable if we get problems; for the author Resource Manager APIs were both enabled; normal and "v2"
-### Enable GCP APIs
+>Note: For more details, and/or contributions, consult the builder's repo stated above.
 
-GCP docs state:
+### Why a custom builder?
 
->Enable the Cloud Build, Firebase, and Resource Manager APIs.
+There is a [community builder for Firebase](https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/firebase) but it's no match to what we need.
 
-Check these by:
+- no emulation support (no Java) 
 
-- GCP Console > Getting Started > `Enable and disable APIs` (you can get there also via the left side menu)
-- `Enable APIs and Services` 
+Ideally, one of you reading this takes on the challenge of bringing the image we use to the community level. Even then, it is possible that you'd want to curry up some additions to it, as part of your project build chain, so this "building the builder" is not completely in vain.
 
-  ![](.images/enable-apis-and-services.png)     
+### Why not host the custom builder image publicly?
 
-This really sucks; there are N APIs for Firebase. Forget it!
--->
+Costs. A builder is ~700MB and easily gathers download costs if even 100's of people start pulling it. 
 
-### Build the builder 👷👷
+>Note: If you have a solution for this issue, the author is happy to hear!
 
-Follow the instructions in [akauppi/firebase-custom-builder](https://github.com/akauppi/firebase-custom-builder) (GitHub).
+### How to update the submodule?
 
-The outcome is an image in *your* Container Registry that can be used for running our tests, under Cloud Build.
+Just `cd` into it, and do the normal `git pull`.
 
-Check the image: 
+### Check the image got pushed
 
-- GCP console > `Container Registry` > `Images`
+GCP console > `Container Registry` > `Images`:
 
 >![](.images/cr-images-hostname.png)
 
 Note that the "hostname" should be something near you. If you got it wrong, just remove the image and rebuild with another domain.
 
->Note: Push the image also as `:latest`.
 
 ## Setting up Cloud Build
-
 
 ### 1. Enable GitHub App triggers
 
@@ -100,6 +103,36 @@ This allows Cloud Build to use the `firebase` CLI as your project's admin.
 - Add the `API Keys Admin` role:
 
 >![](.images/add-api-keys-admin.png)
+
+
+## Set your `gcloud` project
+
+<!-- Edirot's note: Not sure if this is the best place? 
+-->
+
+Using the same project name as with `firebase use`:
+
+```
+$ gcloud config set project testing-230321
+Updated property [core/project].
+```
+
+<!-- disabled (enable if we get problems; for the author Resource Manager APIs were both enabled; normal and "v2"
+### Enable GCP APIs
+
+GCP docs state:
+
+>Enable the Cloud Build, Firebase, and Resource Manager APIs.
+
+Check these by:
+
+- GCP Console > Getting Started > `Enable and disable APIs` (you can get there also via the left side menu)
+- `Enable APIs and Services` 
+
+  ![](.images/enable-apis-and-services.png)     
+
+This really sucks; there are N APIs for Firebase. Forget it!
+-->
 
 
 ## Building locally (optional)
@@ -310,15 +343,52 @@ Check the Issues if you have problems with the tool. Especially [Gets stuck duri
 
 Cloud Build > `Triggers` > `Create Trigger`
 
-<font color=orange>...tbd. details and a screenshot</font>
+Something like this:
 
+>![](.images/trigger-sample.png)
 
+Note: The intention is not to give a 100% working set of properties.
 
 ## Manual run
 
 You can trigger new runs (say, for debugging) by the `Run` button under Cloud Build > `Triggers`:
 
 >![](.images/run-trigger.png)
+
+
+## CI/CD
+
+The author's intention is that the following would happen:
+
+- When someone pushes changes to `master` (or merges a PR to it), and if the changes have to do with `packages/backend/**` (except for `*.md` and documentation images),
+  - `npm test` would need to pass, in that folder
+  - `npm deploy` would automatically be run; keeping the cloud backend always on-par with `master`
+
+If either of these fails, such a push would fail.
+
+- When someone creates a PR that targets `master`, and (..same conditions on source as above..),
+  - `npm test` would need to pass
+
+If that fails, creating such a PR would fail.
+
+---
+
+...and the same, with `packages/app/` and `packages/app-deploy-ops`, with slight modifications.
+
+Note that pushing changes to `packages/app` should trigger deployment, even if the deployment harness (`packages/app-deploy-ops`) is unchanged.
+
+
+## Sum it up
+
+Setting up the *culture* of CI/CD and a working *delivery pipeline* may be the most important things to do *early on*. It should not be hard, and hopefully this page and folder has made it easy for you.
+
+Once you have the road clear, it's motivating to build the product. CI/CD's job is to *reduce the friction* of shipping working features to your audience, for receiving their feedback, in turn.
+
+That sounds important, right?
+
+Now, go build the product!! 💪🤩🎉
+
+
 
 
 

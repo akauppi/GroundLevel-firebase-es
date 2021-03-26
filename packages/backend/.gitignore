@@ -12,4 +12,4 @@ firestore-debug.log
 ui-debug.log
 
 # Temporary file
-/functions/package.json.bu
+/functions/package.json.~
