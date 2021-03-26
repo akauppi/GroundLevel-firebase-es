@@ -27,8 +27,6 @@ This folder contains the guidance for Cloud Build to automatically test and depl
 	>
 	>The author has `gcloud` under `~/bin/google-cloud-sdk`.
 
-	**Beta needed:** We need the `beta` features because `gcloud build submit ..` did not work (`gcloud` SDK 332.0.0), but `gcloud beta build submit ..` (beta 2021.03.12) seems to.
-
 - `docker` (optional)
 
    We are using a custom build step. If you develop that further, you might want to have Docker installed.
@@ -104,53 +102,27 @@ This allows Cloud Build to use the `firebase` CLI as your project's admin.
 >![](.images/add-api-keys-admin.png)
 
 
-<!-- tbd. SKIP - did not work; #fix one day?
 ## Building locally (optional)
 
-There is a `cloud-build-local` tool that should be able to run builds on your computer, but the author did not get it to work. Let's skip it (it would be optional, anyhow).
+There is a `cloud-build-local` tool that allows one to run Cloud Build scripts, locally. Let's try it!
 
 >Note: The local builder can build on only Linux or macOS.<sub>[source](https://cloud.google.com/build/docs/build-debug-locally#restrictions_and_limitations)</sub>
-
-We should now be able to run Cloud Builds locally on the repo.
 
 ```
 $ gcloud components install cloud-build-local
 ```
 
+We should now be able to run Cloud Builds locally on the repo.
+
 ```
 $ cloud-build-local -dryrun=true ..
 ```
 
-<details>
-<summary>Dry run output</summary>
-
-```
-$ cloud-build-local ..
-2021/03/24 10:33:55 RUNNER - [docker ps -a -q --filter name=step_[0-9]+|cloudbuild_|metadata]
-2021/03/24 10:33:55 RUNNER - [docker network ls -q --filter name=cloudbuild]
-2021/03/24 10:33:55 RUNNER - [docker volume ls -q --filter name=homevol|cloudbuild_]
-2021/03/24 10:33:57 Build id = localbuild_b29c87e8-e15a-4e8c-85cc-e85256dc94e6
-2021/03/24 10:33:57 RUNNER - [docker volume create --name homevol]
-2021/03/24 10:33:57 status changed to "BUILD"
-BUILD
-2021/03/24 10:33:57 RUNNER - [docker inspect eu.gcr.io/groundlevel-160221/firebase-custom-builder]
-: Already have image: eu.gcr.io/groundlevel-160221/firebase-custom-builder
-2021/03/24 10:33:57 RUNNER - [docker run --rm --name step_0 --volume /var/run/docker.sock:/var/run/docker.sock --privileged --volume cloudbuild_vol_a42441e7-7d53-4971-afdd-9f75bbb59f5f:/workspace --workdir /workspace/packages/backend --volume homevol:/builder/home --env HOME=/builder/home --network cloudbuild --volume /tmp/step-0/:/builder/outputs --env BUILDER_OUTPUT=/builder/outputs --entrypoint bash eu.gcr.io/groundlevel-160221/firebase-custom-builder -c npm install
-npm test
-npm run deploy
-]
-2021/03/24 10:33:57 Step  finished
-2021/03/24 10:33:57 RUNNER - [docker rm -f step_0]
-2021/03/24 10:33:57 status changed to "DONE"
-DONE
-2021/03/24 10:33:57 RUNNER - [docker volume rm homevol]
-2021/03/24 10:33:57 Warning: this was a dry run; add --dryrun=false if you want to run the build locally.
-```
-</details>
-
 The dry run proves that the build configuration looks solid but does not execute the build steps.
 
 ### Real build
+
+>Note: If you execute the below command, it will carry on a deployment!
 
 ```
 $ cloud-build-local -dryrun=false ..
@@ -160,38 +132,194 @@ $ cloud-build-local -dryrun=false ..
 <summary>Build output</summary>
 
 ```
-$ cloud-build-local -config cloudbuild.yaml -dryrun=false ..
-2021/03/25 12:59:02 Warning: there are left over step containers from a previous build, cleaning them.
-2021/03/25 12:59:03 Warning: there are left over step volumes from a previous build, cleaning it.
-2021/03/25 12:59:11 Warning: The server docker version installed (19.03.12) is different from the one used in GCB (19.03.8)
-2021/03/25 12:59:11 Warning: The client docker version installed (19.03.12) is different from the one used in GCB (19.03.8)
-2021/03/25 12:59:50 Error copying source to docker volume: exit status 1
+$ cloud-build-local -dryrun=false ..
+2021/03/26 10:03:52 Warning: The server docker version installed (20.10.5) is different from the one used in GCB (19.03.8)
+2021/03/26 10:03:52 Warning: The client docker version installed (20.10.5) is different from the one used in GCB (19.03.8)
+Using default tag: latest
+latest: Pulling from cloud-builders/metadata
+Digest: sha256:ac630903464f3fa39c8c1698c9d867dfdbc66d55e09c0518725440af1bf95b18
+Status: Image is up to date for gcr.io/cloud-builders/metadata:latest
+gcr.io/cloud-builders/metadata:latest
+2021/03/26 10:04:35 Started spoofed metadata server
+2021/03/26 10:04:35 Build id = localbuild_7b99d6da-d98f-4954-bca4-88f59486a339
+2021/03/26 10:04:35 status changed to "BUILD"
+BUILD
+Starting Step #0
+Step #0: Already have image (with digest): eu.gcr.io/groundlevel-160221/firebase-custom-builder
+Step #0: /workspace/packages/backend
+Finished Step #0
+2021/03/26 10:04:36 Step Step #0 finished
+Starting Step #1
+Step #1: Already have image (with digest): eu.gcr.io/groundlevel-160221/firebase-custom-builder
+Step #1: npm WARN deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+Step #1: npm WARN deprecated har-validator@5.1.5: this library is no longer supported
+Step #1: npm WARN deprecated request-promise-native@1.0.9: request-promise-native has been deprecated because it extends the now deprecated request package, see https://github.com/request/request/issues/3142
+Step #1: 
+Step #1: > core-js@3.6.5 postinstall /workspace/packages/backend/node_modules/core-js
+Step #1: > node -e "try{require('./postinstall')}catch(e){}"
+Step #1: 
+Step #1: Thank you for using core-js ( https://github.com/zloirock/core-js ) for polyfilling JavaScript standard library!
+Step #1: 
+Step #1: The project needs your help! Please consider supporting of core-js on Open Collective or Patreon: 
+Step #1: > https://opencollective.com/core-js 
+Step #1: > https://www.patreon.com/zloirock 
+Step #1: 
+Step #1: Also, the author of core-js ( https://github.com/zloirock ) is looking for a good job -)
+Step #1: 
+Step #1: 
+Step #1: > protobufjs@6.10.2 postinstall /workspace/packages/backend/node_modules/protobufjs
+Step #1: > node scripts/postinstall
+Step #1: 
+Step #1: npm WARN lifecycle @local/back-end@~postinstall: cannot run in wd @local/back-end@ (cd functions && npm install) (wd=/workspace/packages/backend)
+Step #1: npm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@^2.2.1 (node_modules/jest-haste-map/node_modules/fsevents):
+Step #1: npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@2.3.2: wanted {"os":"darwin","arch":"any"} (current: {"os":"linux","arch":"x64"})
+Step #1: 
+Step #1: added 9 packages from 20 contributors, removed 12 packages, updated 613 packages and audited 580 packages in 57.549s
+Step #1: 
+Step #1: 42 packages are looking for funding
+Step #1:   run `npm fund` for details
+Step #1: 
+Step #1: found 0 vulnerabilities
+Step #1: 
+Finished Step #1
+2021/03/26 10:05:36 Step Step #1 finished
+Starting Step #2
+Step #2: Already have image (with digest): eu.gcr.io/groundlevel-160221/firebase-custom-builder
+Step #2: 
+Step #2: > @local/back-end@ test /workspace/packages/backend
+Step #2: > npm run ci
+Step #2: 
+Step #2: 
+Step #2: > @local/back-end@ ci /workspace/packages/backend
+Step #2: > npm run ci:seq
+Step #2: 
+Step #2: 
+Step #2: > @local/back-end@ ci:seq /workspace/packages/backend
+Step #2: > firebase emulators:exec --project=bunny --only firestore,functions "npm run _ci_init && npm run --silent _ci_fns && npm run --silent _ci_rules"
+Step #2: 
+Step #2: i  emulators: Starting emulators: functions, firestore
+Step #2: ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, database, hosting, pubsub
+Step #2: ⚠  Your requested "node" version "^14 || ^15" doesn't match your global version "14"
+Step #2: ⚠  functions: You are not signed in to the Firebase CLI. If you have authorized this machine using gcloud application-default credentials those may be discovered and used to access production services.
+Step #2: ⚠  functions: Unable to fetch project Admin SDK configuration, Admin SDK behavior in Cloud Functions emulator may be incorrect.
+Step #2: i  firestore: downloading cloud-firestore-emulator-v1.11.12.jar...
+Step #2: 
+Step #2: i  firestore: Firestore Emulator logging to firestore-debug.log
+Step #2: i  functions: Watching "/workspace/packages/backend/functions" for Cloud Functions...
+Step #2: ✔  functions[userInfoShadow_2]: firestore function initialized.
+Step #2: ✔  functions[logs_1]: http function initialized (http://localhost:5002/bunny/us-central1/logs_1).
+Step #2: i  Running script: npm run _ci_init && npm run --silent _ci_fns && npm run --silent _ci_rules
+Step #2: 
+Step #2: > @local/back-end@ _ci_init /workspace/packages/backend
+Step #2: > node test/prime-docs.js
+Step #2: 
+Step #2: Primed :)
+Step #2: (node:124) ExperimentalWarning: VM Modules is an experimental feature. This feature could change at any time
+Step #2: (Use `node --trace-warnings ...` to show where the warning was created)
+Step #2: PASS test-fns/userInfo.test.js
+Step #2:   userInfo shadowing
+Step #2:     ✓ Central user information is not distributed to a project where the user is not a member (315 ms)
+Step #2:     ○ skipped Central user information is distributed to a project where the user is a member
+Step #2: 
+Step #2: Test Suites: 1 passed, 1 total
+Step #2: Tests:       1 skipped, 1 passed, 2 total
+Step #2: Snapshots:   0 total
+Step #2: Time:        1.399 s
+Step #2: Ran all test suites.
+Step #2: i  functions: Beginning execution of "userInfoShadow_2"
+Step #2: >  Global userInfo/xyz change detected:  { displayName: 'blah', photoURL: 'https://no-such.png' }
+Step #2: >  User 'xyz' not found in any of the projects.
+Step #2: i  functions: Finished "userInfoShadow_2" in ~1s
+Step #2: (node:172) ExperimentalWarning: VM Modules is an experimental feature. This feature could change at any time
+Step #2: (Use `node --trace-warnings ...` to show where the warning was created)
+Step #2: Cleared and primed!
+Step #2: Docs primed for test-rules.
+Step #2: PASS test-rules/projectsC/index.test.js
+Step #2:   '/projects' rules
+Step #2:     ✓ unauthenticated access should fail (593 ms)
+Step #2:     ✓ user who is not part of the project shouldn't be able to read it (175 ms)
+Step #2:     ✓ user who is an author or a collaborator can read a project (that is not 'removed') (272 ms)
+Step #2:     ✓ user needs to be an author, to read a 'removed' project (46 ms)
+Step #2:     ✓ any authenticated user may create a project, but must include themselves as an author (429 ms)
+Step #2:     ✓ An author can change '.title' (122 ms)
+Step #2:     ✓ An author can not change the creation time (96 ms)
+Step #2:     ✓ An author can mark a project '.removed' (94 ms)
+Step #2:     ✓ An author can remove the '.removed' mark (109 ms)
+Step #2:     ✓ An author can add new authors, and remove authors as long as one remains (313 ms)
+Step #2:     ✓ no user should be able to delete a project (only cloud functions or manual) (42 ms)
+Step #2: 
+Step #2: PASS test-rules/projectsC/symbolsC.test.js
+Step #2:   '/projects/.../symbols' rules
+Step #2:     ✓ unauthenticated access should fail (131 ms)
+Step #2:     ✓ user who is not part of the project shouldn't be able to read (73 ms)
+Step #2:     ✓ project members may read all symbols (306 ms)
+Step #2:     ✓ all members may create; creator needs to claim the symbol to themselves (391 ms)
+Step #2:     ✓ members may claim a non-claimed symbol (269 ms)
+Step #2:     ✓ members may do changes to an already claimed (by them) symbol (125 ms)
+Step #2:     ✓ claim cannot be changed (e.g. extended) (50 ms)
+Step #2:     ✓ members may delete a symbol claimed to themselves (103 ms)
+Step #2:     ○ skipped members may revoke a claim
+Step #2: 
+Step #2: PASS test-rules/invitesC.test.js
+Step #2:   '/invites' rules
+Step #2:     ✓ no-one should be able to read (254 ms)
+Step #2:     ✓ only a member of a project can invite; only author can invite as-author (484 ms)
+Step #2:     ✓ validity: server time; identifying oneself; 'email:project' as id (189 ms)
+Step #2: 
+Step #2: PASS test-rules/userInfoC.test.js
+Step #2:   '/userInfo' rules
+Step #2:     ✓ no-one should be able to read (169 ms)
+Step #2:     ✓ only the user themselves can write the info (443 ms)
+Step #2: 
+Step #2: PASS test-rules/projectsC/userInfoC.test.js
+Step #2:   '/projects/.../userInfo/' rules
+Step #2:     ✓ unauthenticated access should fail (115 ms)
+Step #2:     ✓ user who is not part of the project shouldn't be able to read (61 ms)
+Step #2:     ✓ project members may read all symbols (74 ms)
+Step #2:     ✓ all members may create their own entry (133 ms)
+Step #2:     ✓ one cannot create an entry for another member (36 ms)
+Step #2:     ✓ members may update the 'lastActive' field (of their own doc) (45 ms)
+Step #2:     ✓ members may not update the 'lastActive' field of other members (46 ms)
+Step #2:     ✓ members may not update fields that Cloud Function updates (42 ms)
+Step #2:     ✓ members may not delete their document (47 ms)
+Step #2: 
+Step #2: Test Suites: 5 passed, 5 total
+Step #2: Tests:       1 skipped, 33 passed, 34 total
+Step #2: Snapshots:   0 total
+Step #2: Time:        7.951 s
+Step #2: Ran all test suites.
+Step #2: ✔  Script exited successfully (code 0)
+Step #2: i  emulators: Shutting down emulators.
+Step #2: i  functions: Stopping Functions Emulator
+Step #2: i  firestore: Stopping Firestore Emulator
+Step #2: i  hub: Stopping emulator hub
+Finished Step #2
+2021/03/26 10:06:11 Step Step #2 finished
+Starting Step #3
+...
 ```
 </details>
 
->*<font color=red>BUG: As you can see, the build fails. Have not debugged it further. See [#37](https://github.com/akauppi/GroundLevel-firebase-es/issues/37) and `#help`? 😊.</font>*
--->
 
-## Running Cloud Build manually
+**Troubleshooting**
 
->As of 25-Mar-21, `gcloud builds submit ..` causes an error. Let's use the "beta" version, instead.
-
-<!-- Editor's note:
-tbd. Occasionally test whether the normal version starts to work. Then remove notions of beta.
--->
-
-```
-$ gcloud beta builds submit ..
-```
-
-<font color=orange>...tbd. continue...</font>
+Check the Issues if you have problems with the tool. Especially [Gets stuck during build](https://github.com/GoogleCloudPlatform/cloud-build-local/issues/79).
 
 
 ## Setting up Triggers
 
-GCP Console > Cloud Build > Triggers > Create Trigger
+Cloud Build > `Triggers` > `Create Trigger`
 
 <font color=orange>...tbd. details and a screenshot</font>
+
+
+
+## Manual run
+
+You can trigger new runs (say, for debugging) by the `Run` button under Cloud Build > `Triggers`:
+
+>![](.images/run-trigger.png)
+
 
 
 ## References

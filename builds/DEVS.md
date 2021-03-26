@@ -9,41 +9,6 @@ $ gcloud meta list-files-for-upload
 ```
 
 
-## Build logs
-
-<!-- disabled: tbd. update with working build logs
-Logs seem to be made to a folder such as:
-
-```
-$ tree ~/.config/gcloud/logs/2021.03.24/
-...
-├── 10.28.56.820434.log
-├── 10.33.56.087111.log
-├── 10.33.56.633430.log
-├── 10.40.40.522820.log
-├── 10.40.41.091705.log
-├── 10.42.38.271254.log
-├── 10.42.38.876390.log
-├── 11.29.27.531947.log
-├── 11.29.28.084373.log
-├── 11.36.11.061691.log
-├── 11.36.11.598513.log
-├── 11.36.50.785258.log
-├── 11.36.51.330953.log
-├── 11.48.46.244448.log
-├── 11.48.46.778526.log
-├── 11.49.35.273838.log
-├── 11.49.35.796257.log
-├── 12.30.09.503711.log
-├── 12.31.35.041018.log
-├── 14.31.10.294233.log
-├── 14.44.21.216922.log
-├── 14.57.16.315666.log
-├── 15.00.53.808320.log
-└── 15.02.09.599417.log
-```
--->
-
 ## `.gcloudignore`
 
 Cloud Build ignores the files in the *root*'s `.gitignore` automatically but:

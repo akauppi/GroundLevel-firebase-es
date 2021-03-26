@@ -1,9 +1,12 @@
 #
 # builds/cloudbuild.yaml
 #
-# Environment:
-#   - pwd: /workspace (that has a copy of the sources)
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
 #
+#   - env.variables (just some):
+#     PWD=/workspace
+#     HOME=/builder/home
 
 # - when push or PR targeting 'master'
 #   - if changes in 'packages/backend' (other than '.md' or '.images'):
@@ -19,8 +22,11 @@
 steps:
 - name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
   entrypoint: bash
-  args: ['-c', 'pwd', 'env']
+  args: ['-c', 'pwd']
   dir: packages/backend
+#- name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
+#  entrypoint: bash
+#  args: ['-c', 'env']
 - name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
   entrypoint: npm
   args: ['install']
@@ -31,7 +37,7 @@ steps:
   dir: packages/backend
 - name: eu.gcr.io/groundlevel-160221/firebase-custom-builder
   entrypoint: npm
-  args: ['run deploy']
+  args: ['run', 'deploy']
   dir: packages/backend
 
 #included files: packages/backend/* but not .md, .images
