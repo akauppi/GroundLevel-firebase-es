@@ -85,12 +85,20 @@ You can now execute the build steps and debug, if something doesn't work right. 
 
 See -> [Viewing build results](https://cloud.google.com/build/docs/view-build-results) (Cloud Build docs)
 
+>Note: You are able to transport build logs to Cloud Logging. Google has documentation on this; the author hasn't tried it yet. (please do and share the experiences!)
+
+## Kaniko caching
+
+Not for us. It seems a technology worth if one builds Docker containers (this is *not* clearly stated in its documentation, but implied).
+
 
 ## Misc notes
 
-- Timeout for the builds seems to be 10min (600s); seen in `
+- Timeout for the builds seems to be 10min (600s); seen in `gcloud builds describe <id>`.
 
 
 ## References
 
 - `gcloud topic gcloudignore`
+- `gcloud builds submit --help`
+

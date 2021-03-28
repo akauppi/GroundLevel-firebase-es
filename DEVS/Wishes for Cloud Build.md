@@ -43,3 +43,13 @@ ERROR: (gcloud.beta.builds.submit) interpreting cloudbuild.yaml as build config:
 Tried other ways as well. To me, it seems the YAML parser is not capable of expanding the `&npmStep` (anchor) and `*npmStep` (reference). Maybe it is a matter of just configuring it, so it can? 
 
 Beta v. 2021.03.19
+
+
+## Regional builds
+
+As described in [FR: Select build region](https://issuetracker.google.com/issues/63480105) (Google IssueTracker)
+
+The slowness of image pull seems a bit ridiculous. This would likely help, plus simply make things "more local" for people in EU / Asia corners of the world.
+
+*tbd. list how long it takes for Cloud Build to pull the custom builder (once per build)*
+

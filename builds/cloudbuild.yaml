@@ -29,10 +29,16 @@
 # Non-DRY and verbose, since we cannot use '<<: &anchor' and '<<: *anchor' YAML syntax. 😢
 #
 steps:
+# Move pre-downloaded emulator images to where Cloud Build sees them.
+# Note: It would be much better if it observed the builder image's own 'HOME', instead.
+#
 - name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: bash
-  args: ['-c', 'pwd']
-  dir: packages/backend
+  args: ['-c', 'mv /root/.cache ~/.cache']
+  #
+#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#  entrypoint: bash
+#  args: ['-c', 'ls -al ~/.cache/firebase/emulators']
 #
 - name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: npm
@@ -47,16 +53,16 @@ steps:
   entrypoint: npm
   args: ['test']
   dir: packages/backend
-#
+
 # --- Deploy
 #
-- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
-  entrypoint: firebase
-  args: ['use', '--add', '$PROJECT_ID']
-  dir: packages/backend
+# tbd. Move away, to a trigger that happens when 'master' has already been merged.
+#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#  entrypoint: firebase
+#  args: ['use', '--add', '$PROJECT_ID']
+#  dir: packages/backend
 #
-# Deploy fails. We can live with manual deployments, for a while...
-- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
-  entrypoint: npm
-  args: ['run', 'deploy']
-  dir: packages/backend
+#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#  entrypoint: npm
+#  args: ['run', 'deploy']
+#  dir: packages/backend
