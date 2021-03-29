@@ -19,6 +19,8 @@ Responsible for:
    $ npm install -g firebase-tools
    ```
 
+   >Note: We recommend `npm` 7.7.0+ due to some inconsistencies found with `npm` 6. If you need to use `npm` 6, run `npm run prepare` manually.
+
 It's good to update `firebase-tools` every now and then, especially if you have some difficulties.
 
 <!-- 

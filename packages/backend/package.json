@@ -10,17 +10,18 @@
     "firestore.indexes.json"
   ],
   "engines": {
-    "node": ">=13.2"
+    "node": ">=13.2",
+    "npm": "^7.7.0"
   },
   "scripts": {
     "test": "npm run ci",
     "ci": "npm run ci:seq",
     "  ": "",
-    "ci:seq": "firebase emulators:exec --project=bunny --only firestore,functions \"npm run _ci_init && npm run --silent _ci_fns && npm run --silent _ci_rules\"",
+    "ci:seq": "BACKEND_TEST=true firebase emulators:exec --project=bunny --only firestore,functions \"npm run _ci_init && npm run --silent _ci_fns && npm run --silent _ci_rules\"",
     "_ci_init": "node test/prime-docs.js",
     "_ci_fns": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-fns/jest.config.cjs --verbose --detectOpenHandles",
     "_ci_rules": "npm run test:rules:all",
-    "ci:par": "firebase emulators:exec --project=bunny --only firestore,functions \"npm run --silent _ci_par_2\"",
+    "ci:par": "BACKEND_TEST=true firebase emulators:exec --project=bunny --only firestore,functions \"npm run --silent _ci_par_2\"",
     "_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_init && npm run _ci_fns\" \"npm run _ci_rules\"",
     "  -": "",
     "start": "concurrently -n emul,init \"firebase emulators:start --project=bunny --only functions,firestore\" \"GCLOUD_PROJECT=bunny npm run _start_2\"",
@@ -36,11 +37,11 @@
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.cjs --verbose --detectOpenHandles --all",
     " -- ": "",
     "deploy": "firebase deploy --only functions,firestore",
-    "predeploy": "npm run --silent _functionsNpmInstall && tools/hack.sh 1",
+    "predeploy": "tools/hack.sh 1",
     "postdeploy": "tools/hack.sh 2",
     " -- -": "",
-    "_functionsNpmInstall": "(cd functions && npm install)",
-    "//pretest, prestart, predeploy": "tbd. Test that 'firebase' version >= 9.4.0 (has a fix for deploying with Node 15)",
+    "prepare": "(cd functions && npm install)",
+    " -- - ": "",
     "//predeploy": "npm run --silent _checkFirebaseActiveProj",
     "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)"
   },
@@ -58,10 +59,24 @@
       "'>=14.3' for '—harmony-top-level-await'",
       "'>=13.2' for ES module support"
     ],
+    "engines.npm": [
+      "Why demand npm 7?",
+      "- 'prepare' doesn't get run on npm 6.14.11 for some reason (does on 7.7.5)",
+      "- their 'npm install' performance seems comparable (user:33 + sys:14s on 6.14.11, user:35 + sys:14s on 7.7.5; just a single measurement)",
+      "",
+      "There is no single *pressing* reason why, but the two seem slightly incompatible. Instead of being bitten by this,",
+      "since npm 7 is now stable and released, let's require it (or yarn, or pnpm, maybe, #later).",
+      "",
+      "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
+    ],
     "scripts": {
       "//preinstall": [
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
         "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
+      ],
+      "prepare": [
+        "It is important someone runs 'npm install' also for the 'functions'. This is needed for: deployment, CI/CD tests.",
+        "We rather do it here, quietly, than expose such details to the CI/CD script."
       ]
     }
   }

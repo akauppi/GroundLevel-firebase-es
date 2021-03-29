@@ -38,3 +38,8 @@ This is a small but annoying part of WebStorm.
 
 - [How to exclude node_modules and .meteor from all searches and code inspections](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207696445-How-to-exclude-node-modules-and-meteor-from-all-searches-and-code-inspections)
 
+## npm - what is the point of workspaces?
+
+If they leak all the files through, what's the point?
+
+- [NPM Workspaces monorepo - share local package's distribution folder as root instead of the entire source files](https://stackoverflow.com/questions/66785791/npm-workspaces-monorepo-share-local-packages-distribution-folder-as-root-inst) (StackOverflow, 2021)

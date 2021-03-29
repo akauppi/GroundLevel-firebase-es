@@ -72,7 +72,7 @@ describe("userInfo shadowing", () => {
   // Note: We don't declare 'async done => ...' for Jest. That is an oxymoron: only either 'done' or the end of an
   //    async/await body would resolve a test but not both.
   //
-  test('Central user information is distributed to a project where the user is a member', async () => {
+  test.skip ('Central user information is distributed to a project where the user is a member', async () => {
     const william = {
       displayName: "William D.",
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"

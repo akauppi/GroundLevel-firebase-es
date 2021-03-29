@@ -29,9 +29,15 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 //import * as admin from 'firebase-admin';
 
+const {Logging} = require('@google-cloud/logging');
+// import { Logging } from '@google-cloud/logging'
+
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;
+const BACKEND_TEST = !! process.env.BACKEND_TEST;   // to differentiate between backend 'npm test' and use in app development
 
 admin.initializeApp();
+
+const logger = functions.logger;    // for backend logging
 
 /*
 * For production (not emulation), provide the region where the Firebase project has been set up (Firestore,
@@ -122,33 +128,97 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
   })
 */
 
-/***  // sample of using REST API
-* Note: There's little benefit for making REST API for the client (use 'callables' instead). If you wish to do those
-*      for other integrations, that's another case (i.e. not requiring the user to have a Firebase client). /AK
-*
-// POST /logs
-//    body: { level: "debug"|"info"|"warn"|"error", msg: string }
+const severityMap = new Map([
+  ['debug', 'DEBUG'],
+  ['info', 'INFO'],
+  ['warn', 'WARNING'],
+  ['error', 'ERROR'],
+  ['fatal', 'CRITICAL']
+]);
+
+// Logs, as "callable function"
 //
-// Usage:
-//    <<
-//      curl -X POST -H "Content-Type:application/json" $ENDPOINT -d '{"level":"debug", "msg":"Hey Earth!"}'
-//    <<
+// Receive an array of logging messages. The front end batches them together to reduce the number of calls, but also
+// for the sake of offline mode.
 //
-exports.logs = regionalFunctions
- .https.onRequest((req, resp) => {
+// arr: Array of {
+//    level: "debug"|"info"|"warn"|"error"|"fatal"
+//    msg: string
+//    created: long       // original time in epoch ms's ('Date.now()')
+//    payload: object?
+// }
+//
+// Ideally, the front end could log directly to Cloud Logging, instead of via us. It probably can, by using the
+// node version of the library (though in browser), but needs to do some OAuth authentication. We did not try out
+// this option. (Some logging frameworks allow browsers to log directly; Cloud Logging *does not mention this* in
+// the docs.)
+//
+const logging = new Logging();    // @google-cloud/logging
 
-  const level = req.body.level;
-  const msg = req.body.msg;
+const appLogName = `app-central${ EMULATION ? (BACKEND_TEST ? ".test" : ".dev"):"" }`;
+const appLog = logging.log(appLogName);
 
-  switch (level) {
-    case "debug":
-      console.debug(msg);
-      break;
-    default:
-      resp.status(400).send("Unknown level: "+level);
-      return;
-  }
+exports.logs_v1 = regionalFunctions
+  //const logs_v1 = regionalFunctions
+  .https.onCall((arr /*, context*/) => {
 
-  resp.status(200).send("");
-});
-***/
+    // Convert our API to Cloud Logging.
+    //
+    const les = arr.map( ({ level, msg, created, payload }) => {
+      const severity = severityMap.get(level);
+      if (!severity) {
+        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
+      }
+
+      const t = new Date(created);
+
+      const metadata = {
+        severity,
+        //labels: { a: 'b' }
+        //resource: { type: 'global' }
+
+        //created: t    // tbd. can we somehow pass this as the real LogEntry's created timestamp
+      };
+
+      const message = { msg };    // tbd. can we send just text, this way (sample has object of a king..)
+
+      return appLog.entry(metadata, message);
+    });
+
+    // NOTE: Within emulation, Firebase (rightfully) does not auth us to use the Cloud Logging.
+    //  <<
+    //    ⚠  Google API requested!
+    //    - URL: "https://oauth2.googleapis.com/token"
+    //    - Be careful, this may be a production service.
+    //    {"severity":"ERROR","message":"Failure to ship application logs: Error: 7 PERMISSION_DENIED: The caller does not have permission\n
+    //    at Object.callErrorFromStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/call.js:31:26)\n
+    //    at Object.onReceiveStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/client.js:176:52)\n
+    //    at Object.onReceiveStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:336:141)\n
+    //    at Object.onReceiveStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/bui PASS  test-fns/userInfo.test.js9:181)\n
+    //    at /Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/call-stream.js:130:78\n
+    //    at processTicksAndRejections (node:internal/process/task_queues:76:1  userInfo shadowing
+    //  <<
+    //
+    // Note that we could excercise the production logging; now part of the functionality goes untested! :S
+    //
+    if (EMULATION) {
+      logger.info( "NOT testing the Cloud Logging API - no access to it.")
+    } else {
+      // Write them at once
+      //
+      const prom = appLog.write(les);
+
+      prom.then(_ => {
+        logger.info(`Logged to ${appLogName}: ${les.size()} entries`);
+      }).catch(err => {
+        logger.error("Failure to ship application logs:", err);
+      })
+    }
+  });
+
+/*
+export {
+  userInfoShadow_2,
+  logs_1
+}
+*/
