@@ -32,24 +32,24 @@ steps:
 # Move pre-downloaded emulator images to where Cloud Build sees them.
 # Note: It would be much better if it observed the builder image's own 'HOME', instead.
 #
-- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+- name: gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: bash
   args: ['-c', 'mv /root/.cache ~/.cache']
   #
-#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#- name: gcr.io/$PROJECT_ID/firebase-custom-builder
 #  entrypoint: bash
 #  args: ['-c', 'ls -al ~/.cache/firebase/emulators']
 #
-- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+- name: gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: npm
   args: ['install']
   dir: packages/backend
-#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#- name: gcr.io/$PROJECT_ID/firebase-custom-builder
 #  entrypoint: bash
 #  args: ['-c', 'ls -al']
 #  dir: packages/backend/functions
 #
-- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+- name: gcr.io/$PROJECT_ID/firebase-custom-builder
   entrypoint: npm
   args: ['test']
   dir: packages/backend
@@ -57,12 +57,21 @@ steps:
 # --- Deploy
 #
 # tbd. Move away, to a trigger that happens when 'master' has already been merged.
-#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#- name: gcr.io/$PROJECT_ID/firebase-custom-builder
 #  entrypoint: firebase
 #  args: ['use', '--add', '$PROJECT_ID']
 #  dir: packages/backend
 #
-#- name: eu.gcr.io/$PROJECT_ID/firebase-custom-builder
+#- name: gcr.io/$PROJECT_ID/firebase-custom-builder
 #  entrypoint: npm
 #  args: ['run', 'deploy']
 #  dir: packages/backend
+
+# --- Non-step fields
+#
+# <<
+#   ID                                    CREATE_TIME                DURATION  SOURCE                                                                                            IMAGES  STATUS
+#   3bf12914-a311-419b-925e-996c18e6b2cd  2021-03-30T17:02:11+00:00  1M47S     gs://groundlevel-160221_cloudbuild/source/1617123736.938627-dbb9a8576fe34236a8443ff9462a18df.tgz  -       SUCCESS
+# <<
+#
+timeout: 240s

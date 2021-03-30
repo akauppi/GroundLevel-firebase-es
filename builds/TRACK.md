@@ -1,12 +1,7 @@
 # Track
 
-## Regional builds?
+## Regional builds
 
-There is a possibility for `--region=europe-west3` in `gcloud [beta] builds submit`, but using such leads to an error:
+- [FR: Select build region](https://issuetracker.google.com/issues/63480105) (Google IssueTracker)
 
-```
-PERMISSION_DENIED: project is not on the allowlist for Regional Cloud Build, please contact Google Cloud Support at https://cloud.google.com/support-hub
-```
-
-- [ ] What are regional builds?  Would they be beneficial?
-- [ ] How to get a project to the "allowlist"? (check the "support-hub" link in the error message)
+Currently (Mar 2021) non-US builds are only for organizations willing to set up "worker pools".

@@ -1,0 +1,3 @@
+{
+  "//": "Needed at the root, to be able to use 'firebase use --add'."
+}

@@ -3,6 +3,8 @@
 
 ## Managing a monorepo
 
+>The author tried `npm@7` workspaces. They did not provide anything new. See -> [Wishes for npm.md](DEVS/Wishes%20for%20npm.md).
+
 This is a monorepo. That means that there are multiple subprojects under the one umbrella. These have to do with each other, but could also be kept in separate repos.
 
 |||dev|testing|deploy|monitoring|
@@ -19,11 +21,7 @@ The three repos are connected, of course. They have `file:...` links which means
 
 At places, this arrangement is a bit tedious. You must separately update dependencies in all three repos, but now you know it's by design and the alternative would - likely - be (much) worse.
 
-### Alternative: `npm@7` workspaces?
-
-Tried it. Did I miss something?
-
-See [Wishes for npm.md](DEVS/Wishes%20for%20npm.md).
+>Suggestions on how dependency management (`npm install`) could be centralized are welcome!
 
 
 ## IDE freedom

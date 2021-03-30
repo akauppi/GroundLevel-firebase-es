@@ -304,3 +304,24 @@ Wouldn't it at least be good to show them as warnings? This would help spot plac
 I'd personally expect the lines as errors, but it's not really an error of the server... Your choice, but I think `info` is unhelpful.
 
 
+## Faster launch
+
+```
+$ time firebase use
+Active Project: prod-zurich (groundlevel-160221)
+...
+real	0m2.338s
+user	0m1.291s
+sys	0m0.396s
+```
+
+That 2.4 seconds means I might not want to keep a project check in the `package.json`, for each serve.
+
+Not sure where it spends the time.
+
+
+## Using `firebase use` in a monorepo
+
+Currently (`firebase` CLI 9.8.0), the activation of a project is per directory.
+
+How could we make it so that the folders `packages/*` each can use the same project, without the person needing to `firebase use --add` three times?

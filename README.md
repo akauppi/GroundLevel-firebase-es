@@ -16,22 +16,20 @@
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 - covers all the way to deployment (CI/CD) and operations
 
-<!-- tbd. add operational tools to the mix, once selected
--->
-
 <br clear=all />
 
-><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think "[Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe "post-modern" is a more appropriate term for this repo. 😛
+><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think "[Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe "post-modern" is a more appropriate term for this repo.
 
 This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making Web Applications in the 2020's is, when (only) modern tools are used.
 
 
+<!-- too much???
 ## Easy for beginners
 
 We learn by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't create a to-do list.
 
-<!-- tbd.
-There's going to be a [narrative](...) that discusses the design in more detail. -->
+<!_-- tbd.
+There's going to be a [narrative](...) that discusses the design in more detail. --_>
 
 For medium and pro level software engineers, you should still get something out of this. The project features e.g.
 
@@ -45,10 +43,10 @@ For medium and pro level software engineers, you should still get something out 
 
 This hopefully makes the app not only easy, but interesting as well.
 
-But let's cut the chace and get started! 😀
+But let's cut the chase and get started! 😀
 
 >Note: Many of the features are still pending (the sample itself has become the *last* thing to finish!). Don't let that discourage yourself - head further and see whether dragons lie there! <font size="+5">🐉</font>
-
+-->
 
 ## Firebase
 
@@ -69,12 +67,11 @@ There are similar offerings from other companies, but they are a year or two beh
 
 ## Google Cloud
 
-Firebase and Google Cloud have a relation. Firebase runs on top of Google Cloud (and is owned by Google, as a sub-brand). They have separate dashboards, but some Firebase tasks require one to visit the Google Cloud tools side.
+Firebase and Google Cloud have a relation. Firebase runs on top of Google Cloud (and is owned by Google). They have separate dashboards, but some Firebase tasks require one to visit the Google Cloud tools side.
 
-In this repo, we stay at the Firebase side of things, except for CI/CD which is done with Cloud Build and logging, where Cloud Logging is used.
+We stay at the Firebase side of things most of the time, exceptions being CI/CD (Cloud Build) and central logging (Cloud Logging).
 
-This is clearly a balancing of simplicity vs. advanced features.
-
+You'll be instructed about Google Cloud where necessary, and both of the above mentioned services can be replaced by others, of your choice (but you'll need to make the necessary changes).
 
 ## Requirements
 
@@ -89,8 +86,13 @@ As global tools, you will need:
 
 >💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
 
-The project is developed on macOS, but with the dawn of [Jailed!](...), we'll be able to make it more OS agnostic. The aim is that you can develop on Linux, Windows or Mac, alike.
+<!--
+### OS support
 
+The project is developed on macOS.
+-->
+
+<!-- too hand holding (to separate narration, for beginners)
 ### An editor
 
 You need an editor for seeing and modifying the code. 
@@ -99,20 +101,26 @@ You need an editor for seeing and modifying the code.
 - [Visual Studio Code](https://code.visualstudio.com)
 
 *Please suggest other IDEs you feel are good for a newcomer. Oldtimers likely won't convert, anyhow. ;)*
+-->
 
 <!-- tbd.
 ### Big enough screen
 
 In programming, the more you can see on the screen at once, the better. The author is very pleased with a single 4K screen, while others use multiple displays. Don't try to cram your vision to an old HD monitor - at least have two. It's like tunnel vision with eye glasses.
-
-![](.images/tunnel-vision.jpg)
-
-<_!-- tbd. make own photo, with code and blur everything but center 
 -->
 
 
 ## Getting started
 
+If you are mostly interested in UI development, and don't want to create a Firebase project just yet, go to the `packages/app` directory and see its `README.md`.
+
+If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
+through the tree subpackages, and end up having a clone of the sample application installed *on your Firebase account*, in the cloud. 
+
+---
+
+
+<!-- disabled
 <img width="180px" align=left src=".images/y-sign.png" style="padding: 1em" />
 
 There's a choice you need to make. 
@@ -123,7 +131,6 @@ Are you more interested in:
 <font color=lilac>🅑</font> - [UI development, first](#choice-b)
 
 <br clear=all />
-
 
 <a name="choice-a"></a>
 ### <font size="+3" color=green>🅐</font> - Run for the Cloud
@@ -136,15 +143,17 @@ After the application works, you can look into the various parts of it and start
 
 There are three subpackages in the repo: `backend`, `app` and `app-deploy-ops`. In this tour, we are visiting them all. For more details on each one of them, check their particular `README` files.
 
-#### 0. Create a Firebase project
+-->
+
+### Create a Firebase project
 
 Follow the instructions in [README.firebase.md](./README.firebase.md) so that you have a Firebase project created.
 
-#### 1. Build and deploy the back-end
+You *will* need a credit card for creating the "Blaze" plan. If you don't want to do that yet, choose the free plan and continue as far as you can. 👍
 
-```
-$ cd packages/backend
-```
+---
+
+Okay, have the Firebase project? Let's check in.
 
 ```
 $ firebase use --add
@@ -158,6 +167,33 @@ Now, you should be able to see your selected project:
 $ firebase use
 Active Project: testing-220321
 ...
+```
+
+<!-- tbd. Here could be a step to distribute the check-in to subpackages:
+./tools/check-em-all.sh
+
+- copy '.firebaserc' (no links needed) and 
+- modify the state file 
+-->
+
+
+The repo has three subpackages:
+
+- `packages/backend`
+- `packages/app`
+- `packages/app-deploy`
+
+At the moment, each one of these needs to be activated separately, for Firebase. We're [considering](https://github.com/akauppi/GroundLevel-firebase-es/issues/41) making this easier for you. It's like a hotel with three separate check-in counters. That would be strange, right?
+
+
+### Back-end: build and deploy
+
+```
+$ cd packages/backend
+```
+
+```
+$ firebase use --add
 ```
 
 Next, we'll install the dependencies and deploy the database access rules and Cloud Functions:
@@ -201,13 +237,13 @@ You can visit the given URL to see the dashboard. Check the `Firestore` and `Fun
 
 Next, we'll prepare the front end and deploy it as well.
 
-#### 2. Build the front end
+### Front end: build
 
 ```
 $ cd ../app
 ```
 
-Do again the `firebase use` - we haven't synchronized the subpackages on this, but could.
+Do again the `firebase use`:
 
 ```
 $ firebase use --add
@@ -237,9 +273,9 @@ dist/vue.js.map      465.31kb
 
 What we now have is the web app's *logic*. It is not ready for deployment, yet. We'll handle that next.
 
-#### 3. Deploy the front end
+### Front end: deploy
 
->Note: In this repo, developing and packaging the app for deployment are separated. This is not a normal pattern in front end development but has its benefits: separation of concerns, allows different teams to have ownership of the features vs. how those features are kept alive on the cloud.
+>Note: In this repo, developing and packaging the app for deployment are separated. This is not a normal pattern but has its benefits: separation of concerns, allows different teams to have ownership of the features vs. how those features are operated in the cloud.
 
 ```
 $ cd ../app-deploy-ops
@@ -258,6 +294,12 @@ $ npm install
 ```
 $ npm run build
 ```
+
+This build used the previously built *app logic* and wrapped it with code involved in running an app on the cloud.
+
+The build *does not* run the app build (you could change that pretty easily); you'd go to the `packages/app` to build and test changes there, then come back here for deploying them. 
+
+In practise, CI/CD takes care of such details, but that's the last thing we'll cover. 🙂
 
 ```
 $ npm run deploy
@@ -280,129 +322,50 @@ Project Console: https://console.firebase.google.com/project/testing-220321/over
 Hosting URL: https://testing-220321.web.app
 ```
 
-Now, head to the provided URL and you should see the app alive and kicking!!!
+Now, head to the provided URL and you should see the app alive and kicking!!! 👶
 
-[https://testing-220321.web.app](https://testing-220321.web.app)
+Have a go with it!
+
+---
 
 As you can imagine, there are *tons* of details around each of the phases we took. 
 
-We didn't touch testing at all (each stage has tests).
+We didn't touch testing at all (backend and front end have tests).
 
-Deployment is normally done using CI/CD - there's a [separate story](...) for setting that up. *🚧Work in progress*
+..but the purpose was to get you from 0 to cloud as fast as possible, and hopefully that happened!
 
-..but the purpose was to get you from 0 to Cloud as fast as possible, and hopefully that happened!
 
-Next, have a look at each of the subpackages in the order you like:
+## Where to go next?
 
-- [packages/backend](packages/backend/README.md)
-- [packages/app](packages/app/README.md)
-- [packages/app-deploy-ops](packages/app-deploy-ops/README.md)
+You have some options. 
 
-You can start developing your own app, now. See [README.2-yours](README.2-yours.md).
+If you pick one, come back for the rest later. It doesn't really matter, in which order you cover these, but it would be useful to cover them all.
 
----
+- Backend development ([`packages/backend`](packages/backend/README.md))
 
-<a name="choice-b"></a>
-### <font size="+3" color=lilac>🅑</font> - UI development, first
+  All the cloud services that your front end relies on: database, server-side functions, data models and access rights of the stored data.
 
-With this route, we focus on the application source code and set it up, running locally under emulation. You can make changes to the code and see them pop up on the screen.
+- Front-end development ([`packages/app`](packages/app/README.md))
 
-You don't need to set up a Firebase account, just yet. 
+  Developing the front end. You can do this without a Firebase project.
+  
+- Front-end deployment ([`packages/app-deploy-ops`](packages/app-deploy-ops/README.md))
 
-Later, you'll continue to the deployment part. At that point, you need a Firebase account and project.
+  Deploying the front end, with a logging adapter attached.
 
----
+- CI/CD ([`builds/`](builds/README.md))
 
-```
-$ cd packages/app
-```
+  Making sure PRs don't break the code; deploying code that gets merged to `master`.
 
-```
-$ npm install
-```
+- Operations ([`ops/`](ops/README.md))
 
-```
-$ npm run dev
-...
-[emul] i  emulators: Starting emulators: auth, functions, firestore
-[emul] ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project app. This may result in unexpected behavior.
-[emul] ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: database, hosting, pubsub
-[emul] ⚠  Your requested "node" version "14 || >=15" doesn't match your global version "15"
-[emul] ⚠  functions: Unable to fetch project Admin SDK configuration, Admin SDK behavior in Cloud Functions emulator may be incorrect.
-[emul] i  firestore: Firestore Emulator logging to firestore-debug.log
-[emul] i  ui: Emulator UI logging to ui-debug.log
-[emul] i  functions: Watching "/Users/asko/Git/GroundLevel-es-firebase/packages/app/node_modules/@local/backend/functions/" for Cloud Functions...
-[init] (node:20644) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
-[init] (Use `node --trace-warnings ...` to show where the warning was created)
-[emul] ✔  functions[userInfoShadow_2]: firestore function initialized.
-[emul] ✔  functions[logs_1]: http function initialized (http://localhost:5002/app/us-central1/logs_1).
-[emul] 
-[emul] ┌─────────────────────────────────────────────────────────────┐
-[emul] │ ✔  All emulators ready! It is now safe to connect your app. │
-[emul] │ i  View Emulator UI at http://localhost:4000                │
-[emul] └─────────────────────────────────────────────────────────────┘
-[emul] 
-[emul] ┌────────────────┬────────────────┬─────────────────────────────────┐
-[emul] │ Emulator       │ Host:Port      │ View in Emulator UI             │
-[emul] ├────────────────┼────────────────┼─────────────────────────────────┤
-[emul] │ Authentication │ localhost:9100 │ http://localhost:4000/auth      │
-[emul] ├────────────────┼────────────────┼─────────────────────────────────┤
-[emul] │ Functions      │ localhost:5002 │ http://localhost:4000/functions │
-[emul] ├────────────────┼────────────────┼─────────────────────────────────┤
-[emul] │ Firestore      │ localhost:6767 │ http://localhost:4000/firestore │
-[emul] └────────────────┴────────────────┴─────────────────────────────────┘
-[emul]   Emulator Hub running at localhost:4400
-[emul]   Other reserved ports: 4500
-[emul] 
-[emul] Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
-[emul]  
-[init] Primed :)
-[init] Pre-bundling dependencies:
-[init]   firebase/app
-[init]   firebase/auth
-[init]   firebase/firestore
-[init]   firebase/functions
-[init]   vue
-[init]   (...and 5 more)
-[init] (this will be run only when your dependencies or config have changed)
-[init] 
-[init]   vite v2.1.2 dev server running at:
-[init] 
-[init]   > Local:    http://localhost:3000/
-[init]   > Network:  http://192.168.1.62:3000/
-[init] 
-[init]   ready in 912ms.
-[init] 
-```
+  Advice on what to do once the app is out.
 
-Open [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 
-You should see a simple UI:
+## Making it yours
 
->![](.images/app-dev.png)
+To start developing your own app, see [README.2-yours](README.2-yours.md).
 
-&nbsp;
->Note: In "dev:local" mode, you claim to be a certain user by the query param `user=<uid>`. There are premade material for some users.
-
-Good.
-
-Now, let's make changes to the source code. Open your IDE and edit ..hmm.. the file `src/pages/Project.vue` (you can edit absolutely anything you want, of course).
-
-```
-    <div>
-      PROJECT PAGE YIPPIYAY!
-    </div>
-```
-
-Switch back to the app. Open a project. Do you see the new text?
-
->*tbd. This part is broken in the app. Please use your imagination, for now...*
-
-Note: You don't have to build the app when making changes. Vite - a tool we use underneath - does it for you.
-
-For more details, check out the [packages/app/README.md](packages/app/README.md) guidance.
-
-When ready, please finish by following the [🅐 route](#choice-a). Then, forward to [Making it Yours](README.2-yours.md).
 
 
 <!-- Keep around
