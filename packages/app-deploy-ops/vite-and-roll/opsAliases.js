@@ -10,9 +10,12 @@ import {fileURLToPath} from 'url'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
+const adaptersPath = myPath + "/../adapters";
 
 const opsAliases = {
-  ["@ops/central"]: srcPath + "/logging/central.js"
+  ["@ops/central"]: srcPath + "/ops/central.js",
+  ["/@adapters"]: adaptersPath,
+  ["/@src"]: srcPath
 };
 
 export {

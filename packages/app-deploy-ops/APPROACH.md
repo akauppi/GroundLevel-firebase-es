@@ -13,6 +13,7 @@ In a nutshell, this approach puts the **production build** responsibility on the
 Importing as ES sources. This would mean that we *at least* need to be aware of the web framework used in building the app, and provide right build plugins for it. Since the App side already does this, it would be a duplicated effort.
 
 
+<!-- disabled
 ## Using Rollup vs. Vite
 
 Vite is mainly a rapid development tool (HMR = Hot Module Reload). Why would we use it for just building the final stage?
@@ -46,30 +47,46 @@ By using Rollup, we need to code something like the above ourselves (which isn't
 Ideally, we do both, allowing us to compare the output sizes and ease of development.
 
 >Edit: Did the Rollup side. Now Vite doesn't fully work.
-
+-->
 
 ## Where to log?
 
 This should be simple, but...
 
-- Google Cloud Logging (that eg. Cloud Functions automatically uses) doesn't have a browser client
-- Firebase [Log Events](https://firebase.google.com/docs/analytics/events) (part of Analytics) says:
+Firebase doesn't have a clear solution for central logging of web applications. 
 
-  > Events provide insight on what is happening in your app, such as user actions, system events, or errors.
-  
-  Well, that sounds awefully sweet.
- 
-What are our criteria?
+### Log Events
 
-- being offline friendly, without needing to code it
-- able to convey things like application errors, crashes, success (i.e. logging levels)
-- having a good UI for filtering the logs (*fast*, too; part of the usability of such tools)
+There is [Log Events](https://firebase.google.com/docs/analytics/events) (part of Analytics) that states:
 
-I first thought Cloud Logging, then Log Events, now Cloud Logging again... The big negative of Log Events is that it forces Google Analytics to be switched on for the Firebase project [^1]. Also otherwise, it seems to push terms like "conversion" to the dashboard UI where I'm not really (at the moment, at least) concerned about thouse. I.e. it's *biased* towards a certain kind of use.
+> Events provide insight on what is happening in your app, such as user actions, system events, or errors.
 
-And that's fine. But in such a case, developers can use it *within their apps* as a dependency, and the *ops* side of GroundLevel can do without `@firebase/analytics`. Hip, hip, ....? 🥳
+That's great! Pretty much what I want. Except...
 
-[^1]: Nothing against that, just wouldn't like to make it so central -- *pun intended*.
+To use "Log Events" one needs to enable Google Analytics for the Firebase project. The author would rather not have that, as such a central (*pun*) step as logging is.
 
+>Sideline: You can of course use Log Events if that suits your application! Just bake it into your app in the `app` subpackage.
 
+### Cloud Logging
 
+The two most important aspects in selecting a logging system (according to the author) neither have to do with the applications being logged.
+
+1. Familiarity. Does your team/company already use a logging system? It makes sense to keep all logs available with the same UI, commands and integrations.
+2. Ease and speed of UI (with *large* amounts of logs). If you have a great logging system, but it's sluggish, it's no good. We need logs most urgently in times of <strike>panic</strike> high anxiety, and them behaving swiftly and being easy to steer are what saves the day! 🌞
+
+The GroundLevel logging system is designed for adapters, allowing one to support the selected logging provider, rather easily.
+
+<!-- Not implemented. Open up, once functional.
+
+As an initial adapter, we support [Cloud Logging](https://cloud.google.com/logging/docs). This is where your Cloud Functions logs are going, anyhow. The product also passes the "ease and speed" test above, in the author's opinion.
+
+For some reason, there is no direct web app -> Cloud Logging possibility (without possibly complex authentication dances?). This is why the Cloud Logging adapter batches and ships the logs to your Cloud Functions, which then pass them on to Cloud Logging - which makes them visible for you in the dashboard.
+
+This is not ideal. It means we need to cater for offline mode, transmission failures and optimize for batch size. But heck, it seems it's the way to go. 
+-->
+
+**References:**
+
+- [Collecting browser console logs in Stackdriver](https://medium.com/google-cloud/collecting-browser-console-logs-in-stackdriver-fa388a90d32b) (blog, Dec 2019)
+
+   *Stackdriver was the earlier name for Cloud Logging*

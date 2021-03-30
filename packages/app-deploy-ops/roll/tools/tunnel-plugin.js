@@ -15,8 +15,9 @@
 *
 *   Within 'ROLL' blocks, replaces:
 *
-*     - ${PRELOADS}       // by 'modulepreload' and 'preload' lines, for the chunks produced by Rollup.
-*     - '.../mod-#.js"    // '#' by the hash for 'mod'
+*     - ${PRELOADS}     // by 'modulepreload' and 'preload' lines, for the chunks produced by Rollup.
+*     - '.../mod-#.js"  // '#' by the hash for 'mod'
+*     - ${INCLUDE filepath}  // replace by the contents of such file
 */
 import { strict as assert } from 'assert'
 import { readFileSync, writeFileSync } from 'fs'
@@ -41,12 +42,10 @@ function preloadsArr(arr) {   // (Array of [string,Boolean]) => Array of "<link 
   //    "..attribute needs to be set to match the resource's CORS and credentials mode, even when the fetch is not
   //    cross-origin"  From -> https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content
   //
-  const ret = arr
-    //??? .filter( ([fn,_]) => ! fn.includes("/ops/init-"))   // skip boot chunk    // tbd. revise this line
-    .map( ([fn,dynamic]) => {
-      return dynamic ? `<link rel="preload" as="script" crossorigin href="${fn}">`
-                     : `<link rel="modulepreload" href="${fn}">`;
-    });
+  const ret = arr.map( ([fn,dynamic]) => {
+    return dynamic ? `<link rel="preload" as="script" crossorigin href="${fn}">`
+                   : `<link rel="modulepreload" href="${fn}">`;
+  });
   return ret;
 }
 
@@ -91,6 +90,18 @@ function tunnel(template, map) {    // (string, Map of string -> boolean) => str
       const s2 = s.replace(/^(\s*)\${PRELOADS}\s*$/, (_,c1) => preloads.map(x => c1+x).join('\n') );
       if (s2 !== s) return s2;
 
+      // '${INCLUDE filepath}'
+      const s3 = s.replace(/^(\s*)\${INCLUDE\s+(.+)}\s*$/, (_,c1,c2) => {
+        const tmp = readFileSync(c2);     // tbd. test that gives nice error on non-existing file
+        return `${c1}${tmp}`;
+      } );
+      if (s3 !== s) return s3;
+
+      // '${...}'; catch use of non-existing commands (or typos)
+      s.match(/^\s*\${(.+?)}/, (_,c1) => {
+        throw new Error(`No such command: {${c1}}`)
+      } );
+
       // '/{file}-#.js' -> '/{file}-{hash}.js'
       //
       // Example:
@@ -100,13 +111,13 @@ function tunnel(template, map) {    // (string, Map of string -> boolean) => str
       //
       // Note: expects '-' delimiter in Rollup 'output.entryFileNames'
       //
-      const s3 = s.replaceAll(/['"]\/([\w\d]+)-#\.js['"]/g,
+      const s4 = s.replaceAll(/['"]\/([\w\d]+)-#\.js['"]/g,
         (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
           const hash = hashFor(c1);
           return match.replace('#',hash);
         }
       );
-      if (s3 !== s) return s3;
+      if (s4 !== s) return s4;
 
       return s;   // unmatched
     });

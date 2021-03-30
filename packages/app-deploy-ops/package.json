@@ -28,8 +28,8 @@
     "deploy:roll": "firebase deploy --config firebase.roll.json --only hosting",
     "deploy:vite": "firebase deploy --config firebase.vite.json --only hosting",
     "  - -": "",
-    "preserve:roll": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _prepare_roll",
-    "preserve:vite": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _prepare_vite",
+    "preserve:roll": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _checkFirebaseActiveProj && npm run --silent _prepare_roll",
+    "preserve:vite": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _checkFirebaseActiveProj && npm run --silent _prepare_vite",
     "predeploy:roll": "npm run --silent _prepare_roll",
     "predeploy:vite": "npm run --silent _prepare_vite",
     "_prepare_roll": "KIND=roll npm run --silent _prepare_kind",
@@ -37,19 +37,23 @@
     "_prepare_kind": "cat firebase.json | sed \"s/\\$SERVE_PATH/$KIND\\/out/\" > firebase.$KIND.json",
     "prewatch:roll": "(cd roll/out && ln -fs ../../public/* .) && npm run --silent _prepRollOut",
     " - - --": "",
+    "postbuild:roll": "cp public/* roll/out/",
+    " - - -- ": "",
     "postserve:roll": "rm -f firebase.*.json",
     "postserve:vite": "rm -f firebase.*.json",
     "postdeploy:roll": "rm -f firebase.*.json",
     "postdeploy:vite": "rm -f firebase.*.json",
     "  -  ": "",
-    "//preserve": "npm run --silent _checkFirebaseActiveProj",
-    "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)",
+    "_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)",
     "  -  --": "",
     "_checkPortIsFree": "../app/tools/port-is-free.sh $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)"
   },
   "dependencies": {
     "@local/app": "file:../app",
     "firebase": "^0.900.19"
+  },
+  "//dependencies": {
+    "//@google-cloud/logging": "^9.1.0"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
@@ -58,24 +62,28 @@
     "@rollup/plugin-replace": "^2.4.1",
     "concurrently": "^6.0.0",
     "eslint": "^7.22.0",
-    "rollup": "^2.42.1",
+    "first-input-delay": "^0.1.3",
+    "rollup": "^2.42.3",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-visualizer": "^4.2.1",
     "vite": "^2.1.2",
     "wait-on": "^5.3.0"
   },
+  "//devDependencies": {
+    "//@rollup/plugin-commonjs": "^18.0.0"
+  },
   "//comments": {
     "scripts": {
       "prebuild": [
         "May be used to build '../app' but this slows down integration development so might not be the best way. tbd."
+      ],
+      "postbuild:roll": [
+        "We _could_ use a Rollup plugin for copying (and watching) public files, but now, since only one CSS file,",
+        "mere copy at each build is enough. (public/*.css)"
       ]
     },
     "dependencies": {
-      "firebase": [
-        "See 'APPROACH.md' for discussion of this trick. Required for 'firebase/performance', so it's not burdening",
-        "the \"app\" side."
-      ],
       "[@]rollup...": [
         "Needed for '[build|serve]:rollup'"
       ],

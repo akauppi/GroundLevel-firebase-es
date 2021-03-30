@@ -46,6 +46,9 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //
   /\/app-deploy-ops\/(?:src\/|index\.html)/,
 
+  // /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
+  /\/app-deploy-ops\/(adapters)/,
+
   // vite/preload-helper
   /^(vite)\//,      // Vite runtime (small, ~600b)
 

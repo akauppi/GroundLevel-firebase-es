@@ -5,22 +5,19 @@ Takes the app developed in `../app` sister package and prepares it for operation
 Adds:
 
 - `@ops/central` implementation that connects the app's logging calls to a cloud service
-- `@ops/perf` performance monitoring
 - crash reporting
-
 - Firebase production initialization
 
-We get the application logic as a module dependency, and don't expect anything from it (apart from it needing Firebase initialized and implementations for `@ops` modules). It can use any web framework, for example.
+We get the application logic as a module dependency, and don't expect anything from it (apart from it needing Firebase initialized and an implementation for `@ops/central`). It can use any web framework, and any libraries.
 
 Available integrations:
 
-|||
-|---|---|
-|Logging|tbd.|
-|Performance monitoring|tbd.|
-|Crash reporting|tbd.|
+||||
+|---|---|---|
+|Logging|[Cloud Logging](https://cloud.google.com/logging)|Status: work in progress 🚧🚧🚧|
+|Crash reporting|Writes to the logs|
 
->🌺 Note: You can tie any ops to more than one back-end at the same time. This may be useful if evaluating vendors or transitioning between them.
+You can tie logging to more than one logging adapter at any one time. This may be useful if evaluating vendors or transitioning between them.
 
 
 ## Requirements
@@ -28,21 +25,6 @@ Available integrations:
 - npm
 - `firebase-tools`
 
-### Firebase
-
-There is an active project; you've run `firebase use --add`.
-
-<!-- disabled
-## Rollup vs. Vite
-
-We'd like to be able to build with two options: plain Rollup and Vite (that uses Rollup underneath).
-
-Unfortunately the Vite build is currently [not working](https://github.com/akauppi/GroundLevel-firebase-es/issues/35) ...snipped...
-
->Edit: We got to Vite vs. Rollup size comparisons. Vite 488kB vs. Rollup 496kB (these likely are from different code bases, but there is no big sway one way or the other).
->
->One day, let's decide to have them both up - or toss one permanently aside?
--->
 
 ## Getting started
 
@@ -103,22 +85,19 @@ $ npm run watch:roll
 
 It's good to keep an eye on the packaging sizes.
 
-There are many Rollup packages for this, and the choices done in this repo may not be the best.
+There are many Rollup packages for this, and the choices done in this repo may *not* be the best.
 
 We have:
 
-- `rollup-plugin-analyzer` showing the output sizes on every build; this is nice
-- `rollup-plugin-visualizer` creates `roll/stats.html` (that you can open in Chrome) showing the same info in a graphical manner
-
->Warning: Don't open `roll/stats.html` with Safari.
+- `rollup-plugin-analyzer` showing the output sizes on every build
+- `rollup-plugin-visualizer` creates `roll/stats.html` showing the same info in a graphical manner
 
 >💡: Please suggest your favourite plugins to the author; we can also think of stripping these completely away - it's a very personal thing and maybe best left for tools that visualize a directory already created (not needing to be part of the build setup).
 
 
 ## Deploying
 
-*This will eventually be made to use CI/CD for deployments: whenever there is a working set pushed to `master`, your cloud setup (eg. GitHub) takes care of deploying it to the larger audience. Such a setup is intended to be part of this repo. Until then...*
-
+This shows how one can manually deploy the site to cloud. Such commands will be called by CI/CD, when one eg. merges new stuff to `master` in version control.
 
 ```
 $ npm run deploy
@@ -146,17 +125,49 @@ You can now try the web app at the URL shown on the console:
 [https://&lt;<i>your project id</i>&gt;.web.app](https://YOUR-PROJECT-ID.web.app)
 
 
-<!-- tbd. maybe this motivation to the root README? -->
-## Op[eration]s
+## Logging
 
-Deploying an app is like only starting a race.
+The logging adapters are added in this stage.
 
-You want people to find your app, and you want it to remain in good health for them. This is the "ops" (operations) side of things.
+This is a very organization specific (or personal, if you are a one-person organization) choice. The reasons to pick a logging system might be:
 
-The whole layout of this repo is based on enabling different people (or teams) to work on the app and on the ops. These are often conflicting disciplines but it's also very beneficial to take turns in both worlds, whether you are a sole developer or member of a team. The best results are gained by developers who understand operations - and operations people who understand the underlying code.
+1. **You already have one.** 
 
-The [SRE (Site Reliability Engineering)](https://en.wikipedia.org/wiki/Site_reliability_engineering) movement states this wonderfully in one of their books. Developers aim for feature delivery; ops aims for reliability. This is a philosophical realm, too deep to cover here, and well structured in the work you can [read online](https://sre.google/books/).
+	There's no choice - you are told which one to use and how to use it.
 
----
+2. **Integrations**
 
-<p align=right>Next: <a href="./README.2-logging.md">Logging</a></p>
+	It's part of your larger ops framework and you know a certain logging provider fits in well (to have alerts etc. function).
+
+3. **The user interface**
+
+	Logs are analyzed by people. The speed, ease of use and familiarity of the user interface matters, greatly!
+	
+	Don't burden yourself with a clumsy logging provider. Switch them! Compete them! We give you the means for that.
+
+### Adapters
+
+The GroundLevel central logging is based on adapters, allowing you to ship logs to or **or multiple** providers. You can eg. ship them both to the company standard logging provider, and a secondary one that you prefer for manual analysis.
+
+You can create adapters yourself, and even publish and share them with others as npm packages.
+
+>**Current state**
+>
+>The [Cloud Logging](https://cloud.google.com/logging) adapter is intended to be the initial one, but it's **work in progress** since Cloud Logging does not provide a browser facing logging client.
+>
+>Another nice one could be [Datadog](https://www.datadoghq.com). 
+
+
+## Final yards
+
+Getting your application deployed is simply the beginning of your journey.
+
+The author hopes that this repo helped you to get *there* fast. 😋 
+But now what?
+
+Have a look at the [`ops`](../../ops) folder in this repo. It has documentation about how one can build operational prowness on top of a running product.
+
+Then... build features... test... deploy... monitor... 🔁
+
+Be your bugs be simple 🐞 and users friendly.
+

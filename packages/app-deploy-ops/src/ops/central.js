@@ -2,47 +2,31 @@
 * src/ops/central.js
 *
 * Central logging.
+* - application provides the calls
+* - 'options.js' provides the adapter setup
 */
 //import { assert } from '../assert.js'
 
-/*** #rework
-// Can have multiple logs handlers (good for comparing alternatives)
-//  - { }   // ignore
-//  - { type: ..., ..custom fields }
-//
-for( const o of opsLogs ) {
-  if (!o.type) {
-    // skip
-  } else {
-    throw new Error( `Unexpected 'logs[].type' in ops config: ${o.type}`);
+import { logging } from './options'
+
+const adapters = Array.isArray(logging) ? logging : [logging];  // allow single value instead of an array
+
+function logGen(level) {    // ("debug"|"info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
+
+  function f(msg, opt) {
+    adapters.forEach( (a) => {
+      a.log(level, msg, opt);
+    });
   }
-}
-***/
-
-let logGen;   // (string) => (string [, object]) => ()
-
-if (true) {   // no central logging
-  logGen = _ => (/*msg, opt*/) => {}
+  return f;
 }
 
 const central = {
-  debug: logGen("debug"),
-  info: logGen("info"),
-  warn: logGen("warn"),
-  error: logGen("error"),
-
-  /** considering (maybe we just want to throw errors; catch those into 'central' in 'catch')
-  fatal: (msg, opt) => {    // (msg,object|XxxError|undefined) => Error;    use as 'throw central.fatal(...,{ opt } | err)'
-    if (opt instanceof Error) {
-      lf(msg, { error: opt });    // #tune
-
-      return new WrappedError(msg,opt);
-    } else {
-      lf(msg,opt);
-      return new Error( `${msg} ${ JSON.stringify(opt) }` );
-    }
-  }
-  **/
+  debug: logGen('debug'),
+  info: logGen('info'),
+  warn: logGen('warn'),
+  error: logGen('error'),
+  fatal: logGen('fatal')
 }
 
 export {

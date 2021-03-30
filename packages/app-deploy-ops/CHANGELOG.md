@@ -1,9 +1,17 @@
 # Changelog
 
+## 30-Mar-21
+
+- Revised; deploys work.
+
+---
+
+*Early history; at this time all app, backend and web (later: `app-deploy-ops`) were covered in one changelog.*
+
 ## 7-Oct-20
 
 - Revised documentation to match the split to "web", "app" and "backend" repos.
-- BUGFIX: Made error banner to show (TBD.)
+- BUGFIX: Made error banner to show
 
 ## 1-Oct-20
 

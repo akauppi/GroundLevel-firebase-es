@@ -9,6 +9,12 @@ import { initializeApp } from '@firebase/app'
 
 import './catch'
 
+// tbd. Find a way to differentiate between:
+//    - running in a developer's maching ('npm run serve')
+//    - production
+//
+//let stage = "???";
+
 // Access values from Firebase hosting (we don't use its 'init.js').
 //
 // Note: Once browsers can 'import' JSON natively, we can make this a one-liner (if Firebase hosting served an ES module, we could use it).
@@ -24,7 +30,18 @@ const firebaseProm = fetch('/__/firebase/init.json').then( resp => {
 // Prepare all of Firebase, including performance monitoring (if enabled)
 //
 async function initFirebase() {
-  const opts = await firebaseProm.then( (o) => ({ apiKey: o.apiKey, appId: o.appId, projectId: o.projectId, authDomain: o.authDomain }));
+  const opts = await firebaseProm.then( (o) => {
+
+    // tbd. If we need 'locationId' it needs to be baked in at the build.
+    //
+    // Has '.locationId' (e.g. "europe-west6") but only under emulation; not when deployed to the cloud.
+    //disabled locationId = o.locationId;
+
+    assert(o.projectId, "No '.projectId' in Firebase '/__/firebase/init.json'");
+    projectId = o.projectId;
+
+    return { apiKey: o.apiKey, appId: o.appId, projectId: o.projectId, authDomain: o.authDomain };
+  });
 
   initializeApp(opts);
 }
@@ -46,4 +63,10 @@ async function initFirebase() {
   console.debug("App on its own :)");
 })();
 
-export { };
+let locationId;
+let projectId;
+
+export {
+  locationId,   // currently NOT set (needed for httpsCallable use; we might not even need it; depends on logging)
+  projectId
+};
