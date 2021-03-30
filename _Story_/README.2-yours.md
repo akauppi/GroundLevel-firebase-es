@@ -1,6 +1,6 @@
 # Make it Yours!
 
-In the previous section, you have deployed the sample app to your own Firebase project. It's now an independent *instance* of that application, unattached to the one run by the original authors.
+By now, you have deployed the sample app to your own Firebase project. It's now an independent *instance* of that application, unattached to the one run by the original authors.
 
 The obvious next step is to make changes to it.
 
@@ -8,7 +8,6 @@ The obvious next step is to make changes to it.
 
 *Figure 1. Relation of the repos* <sub>[source](https://docs.google.com/drawings/d/1hryjNmrH8A04NNpIBBTWMkGabpLAawsN1xiGY9c7ZBE/edit?usp=sharing)</sub>
 
-Figure 1 shows the relationships of the various repos involved.
 
 Important catches from the figure:
 
@@ -108,74 +107,3 @@ Change to the browser. Before you're there, the change should already have been 
 You can create new files, route them, whatever, and the browser should simply be able to keep up and refresh. If not, do a manual refresh.
 
 >Note: The UI framework used in the sample app is Vue.js 3. It's great, but only an implementation detail of the `app` repo. You can use e.g. Svelte, React, or something else if you wish. You might need to re-engineer a bit since Vite is from the same lab as Vue, but.. good luck!
-
-
-### Making it your repo
-
-The above edit is of course just a gimmick. You're still working in a *clone* of the *sample app* - not your own. Let's changed that.
-
-```
-$ rm -rf .git     # cuts the cord
-
-$ git init .      # creates a new repo
-```
-
-Then, create a repo in your favourite version control host, and push the code there. Now it's under *your command*.
-
->Reminder: Please read in the app repo docs about re-branding, essentially removing any mention of "GroundLevel" and the default icons. 🤨
-
-How to deploy this, then? The deployment is in the `web` repo and it depends on the original sample app.
-
-Make a fork of the web repo (or cut the cord like presented above). Then, replace this line in `package.json` with one that points to your application repo:
-
-```
-  "dependencies": {
-    "@app/groundlevel-es-firebase-app": "git://github.com/akauppi/groundLevel-es-firebase-app",
-``
-
-Do `npm install` and your new "web" repo should get your "app". Do the deployment (as presented earlier in these readmes). Did you get there?? :)
-
->Note: If not, use the project [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) to ask for help!
-
-You now have an edited front end, deployed to your Firebase project. Before we run further to back-end, let's check one hint.
-
-### Hint: tying the repos
-
-You don't want a slow commit-app-pull-web-try-to-deploy loop. You don't need to.
-
-You should be able to use the normal `npm link` command, to link the two folders together. NOTE: THIS IS SLIGHTLY UNTESTED AT THE MOMENT (OCT-2020) BUT IT'S INTENDED TO WORK. LET'S MAKE IT SO!
-
-In the app project:
-
-```
-$ npm link
-```
-
-In the web project:
-
-```
-$ npm link YOUR-PROJECT-NPM-NAME
-```
-
->Oh yes: Forgot to mention you likely should change the npm name of your app package (though it doesn't get pushed to any registry). It's in the `package.json` of both "app" and "web" repos.
-
-With this in place (and you might need to repeat those commands at times), there should be a link between the two folders on your development system. Change things in app. Do a `npm run serve` for production. Fast cycle.
-
-Once you get further with your product, you'll likely automate the heck out of the workflow. Meaning your deployment repo's CI (continuous integration) takes care of deploying new versions, taking the cue from a new version being pushed to "app" repo's `master` branch. The aim is not to polish such manual tricks as presented here, but it's good to have a few up your sleeve, for those rare cases. CI should be the norm (more about that, later).
-
-
-## Back end
-
-The back end repo is more of a hermit. It has the implementation, docs, tests and deployment of back end features.
-
-To take ownership of it, fork or "cut the cord" and change the dependency line in "app" repo's `package.json`. This will have your back end being emulated, instead of the sample app's.
-
-Should be simple, by now?
-
-Again, please have a look at the "backend" repo's own documentation. There's a lot there.
-
-You now have taken over all the three repos, and are able to make changes to them, at will.
-
----
-
-Next: [Operations](./README.3-operations.md)

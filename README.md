@@ -362,45 +362,80 @@ If you pick one, come back for the rest later. It doesn't really matter, in whic
   Advice on what to do once the app is out.
 
 
-## Making it yours
+## Making it yours!
 
-To start developing your own app, see [README.2-yours](README.2-yours.md).
+By now, you have deployed the sample app to your own Firebase project. It's now an independent *instance* of that application, unattached to the one run by the original authors.
+
+Once you start making heavier modifications - that's why the repo exists, it's intended as a "ground level" of your spectacular app! - we hope that you remove the "GroundLevel" branding. Do so:
+
+```
+$ git rm -rf branding 
+```
+
+```
+$ git grep GroundLevel
+...
+```
+
+We don't mind you keeping the reference, but many `.md` files likely deserve to be removed/edited, for your app. That command helps you find the mentions.
+
+You *may* mention in your docs that the app was based on GroundLevel, but are not required to do so. See the [LICENSE.md](LICENSE.md).
+
+Apropos, the License. 
+
+You may now remove the top part of it:
+
+>This license applies to the software (contents of the GitHub repo), except
+graphic art.
+>
+>In particular:
+>
+>- `branding/*`
+>- `**/public/favicon.*`
+>
+>Those files are PROPRIETARY to this project, and not to be used in other circumstances.
+>You may, however, create a fork of this GitHub repo and continue working with the graphic
+>files. Forks are regarded as just a way to collaborate and contribute, for the sake of
+>the project itself.
+>
+>For the rest of the repo (code, configs and textual documentation), this applies:
+>...
+
+Live Long and Prosper! 
+
+🛸🪐
 
 
 
-<!-- Keep around
-## Subpackage organization
+# Credits
 
-There are three subpackages. This table shows their responsibilites:
+Thanks to Jaakko Roppola for wonderful icon art!! 🙌
 
-<table>
-  <thead>
-    <tr>
-      <th></th>
-      <th>development</th>
-      <th>testing</th>
-      <th>deployment</th>
-      <th>monitoring</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>app</td>
-      <td colspan=2><pre>packages/app</pre></td>
-      <td colspan=2><pre>packages/app-deploy-ops</pre></td>
-    </tr>
-    <tr>
-      <td>back-end</td>
-      <td colspan=3><pre>packages/backend</pre></td>
-      <td>open</td>
-    </tr>
-  </tbody>
-</table>
+Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it, then changed a few things.
 
-<! -- what does back-end monitoring mean (checking the logs); where is it 
+Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 
--->
+Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 
 
 
+# References
+
+### Serving ES6 modules, HTTP/2 etc.
+
+- [Using Native JavaScript Modules in Production Today](https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/) (blog, Aug 2019)
+   - this step-by-step guidance was instrumental in making the production build work with ES modules. Brilliant write!!! 💎
+
+### Other app templates
+
+- [Firelayer](https://firelayer.io)
+  - seems visually pleasing!
+  - likely Vue.js 2?
+  - likely uses bundling
+
+*tbd. When someone has checked Firelayer in detail, and can make a brief (2 sentence!) summary on how it differs from GroundLevel, that is a welcome #contribution!*
+
+### Online forums
+
+- [Firebase developers](https://discord.gg/BN2cgc3) (Discord server)
 
