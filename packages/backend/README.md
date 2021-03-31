@@ -1,6 +1,6 @@
 # Back-end
 
-Back-end features for [GroundLevel-es-firebase](https://github.com/akauppi/GroundLevel-es-firebase) sample application.
+Back-end features for GroundLevel sample application.
 
 Responsible for:
 
@@ -27,7 +27,7 @@ It's good to update `firebase-tools` every now and then, especially if you have 
 developed with:
 - macOS 11.2
 - node 15.x
-- npx 7.x
+- npx 7.7.x
 - firebase CLI 9.6.x
 -->
 
@@ -63,22 +63,18 @@ $ npm run test:fns:userInfo
 
 ## Deploying
 
+### Select the Firebase project
+
 ```
 $ firebase use --add
 ```
 
-Inform the project's location to Firebase Functions by:
+### Let functions know their region
 
-```
-$ firebase functions:config:set regions.0="(your project's location)"
-```
+Check your project's location either in [Firebase Console](https://console.firebase.google.com) > Project > App > ⚙️ > `Default GCP resource location`
 
----
+..or by:
 
->You can see the project's location either in [Firebase Console](https://console.firebase.google.com) > Project > App > ⚙️ > `Default GCP resource location`.
->
->..or by:
->
 ```
 $ firebase apps:sdkconfig
 ...
@@ -90,7 +86,43 @@ firebase.initializeApp({
 });
 ```
 
+It seems the functions are not able to know this from Firebase itself; we need to set it to a config that the functions run with. This is a one time thing.
+
+```
+$ firebase functions:config:set regions.0="europe-west6"   # use the 'locationId' from above
+```
+
+### Actual deployment
+
 ```
 $ npm run deploy
+...
+
+=== Deploying to 'groundlevel-160221'...
+
+i  deploying firestore, functions
+i  firestore: reading indexes from ./firestore.indexes.json...
+i  cloud.firestore: checking ./firestore.rules for compilation errors...
+✔  cloud.firestore: rules file ./firestore.rules compiled successfully
+i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
+i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
+✔  functions: required API cloudbuild.googleapis.com is enabled
+✔  functions: required API cloudfunctions.googleapis.com is enabled
+i  functions: preparing ./functions directory for uploading...
+i  functions: packaged ./functions (38.53 KB) for uploading
+✔  firestore: deployed indexes in ./firestore.indexes.json successfully
+i  firestore: latest version of ./firestore.rules already up to date, skipping upload...
+✔  functions: ./functions folder uploaded successfully
+✔  firestore: released rules ./firestore.rules to cloud.firestore
+...
+i  functions: creating Node.js 14 (Beta) function logs_v1(europe-west6)...
+✔  functions[logs_1(europe-west6)]: Successful delete operation. 
+i  functions: updating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
+✔  functions[logs_v1(europe-west6)]: Successful create operation. 
+✔  functions[userInfoShadow_2(europe-west6)]: Successful update operation. 
+
+✔  Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/groundlevel-160221/overview
 ```
 

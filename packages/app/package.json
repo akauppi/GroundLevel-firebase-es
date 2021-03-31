@@ -50,7 +50,7 @@
     "vue-router": "^4.0.4"
   },
   "peerDependencies": {
-    "firebase": "^0.900.17"
+    "firebase": "^0.900.19"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
@@ -66,7 +66,7 @@
     "firebase-admin": "^9.5.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.8",
-    "vite": "^2.1.2",
+    "vite": "^2.1.5",
     "vue-eslint-parser": "^7.6.0",
     "wait-on": "^5.3.0"
   },
