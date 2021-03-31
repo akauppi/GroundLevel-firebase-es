@@ -43,3 +43,16 @@ This is a small but annoying part of WebStorm.
 If they leak all the files through, what's the point?
 
 - [NPM Workspaces monorepo - share local package's distribution folder as root instead of the entire source files](https://stackoverflow.com/questions/66785791/npm-workspaces-monorepo-share-local-packages-distribution-folder-as-root-inst) (StackOverflow, 2021)
+
+
+## Firebase Performance Monitoring: "near real time" is coming "soon"...?
+
+- [Near real time data processing and display](https://firebase.google.com/docs/perf-mon/troubleshooting?authuser=0&platform=web#faq-real-time-data) (Firebase docs)
+
+>Although the listed SDK versions enable Performance Monitoring to process your collected data in near real time, the Firebase console does not yet display your data in near real time.
+
+- [ ] When will it?  
+- [ ] How to know when "near real time" is enabled?
+
+Note that "alpha" (obviously) isn't mentioned in the supported SDKs.
+
