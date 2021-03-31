@@ -2,6 +2,8 @@
 
 You have deployed the app. Made changes to it. Have users.
 
+You have logs rolling and maybe have set up some alerts, to feel relaxed.
+
 Now what?
 
 I'd like to leave you with two thoughts, and some pointers to get discussion partners.
@@ -14,7 +16,7 @@ It's what matters to your *users* that defines your product's success.
 
 Invest in thinking like this. Be the manager. Read books that make you a better manager. Be gentle on yourself (and your colleagues, plus users). Try to have fun!
 
-**Recommended books**
+Recommended books:
 
 - [Inspired](https://play.google.com/store/books/details/Marty_Cagan_Inspired?id=S8Q_DwAAQBAJ) by Marty Gagan (2nd ed, 2017)
 
@@ -35,3 +37,7 @@ It's always good to ask for advice. Here are some forums where people like you h
 
   [<img width="250" src=".images/discord-welcome.png" style="box-shadow: 5px 5px 8px #ccc;" />](https://discord.com/invite/BN2cgc3)
   
+  
+---
+
+This is the end.
