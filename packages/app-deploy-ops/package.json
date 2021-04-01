@@ -38,6 +38,7 @@
     "prewatch:roll": "(cd roll/out && ln -fs ../../public/* .) && npm run --silent _prepRollOut",
     " - - --": "",
     "postbuild:roll": "cp public/* roll/out/",
+    "postinstall": "patch -p0 --forward -i @firebase-performance-0.900.20.patch",
     " - - -- ": "",
     "postserve:roll": "rm -f firebase.*.json",
     "postserve:vite": "rm -f firebase.*.json",
