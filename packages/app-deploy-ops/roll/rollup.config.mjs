@@ -15,7 +15,7 @@ import alias from '@rollup/plugin-alias'
 //import commonjs from '@rollup/plugin-commonjs'      // needed by '@google-cloud/logging' (not available as ES)
 import resolve from '@rollup/plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
-import visualizer from 'rollup-plugin-visualizer'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
 import { manualChunks } from '../vite-and-roll/manualChunks.js'

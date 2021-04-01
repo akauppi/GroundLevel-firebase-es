@@ -1,0 +1,284 @@
+--- ../app/node_modules/@firebase/performance/dist/index.esm2017.js	1985-10-26 10:15:00.000000000 +0200
++++ node_modules/@firebase/performance/dist/index.esm2017.js	2021-04-01 11:49:45.000000000 +0300
+@@ -1,12 +1,12 @@
+-import { ErrorFactory, isIndexedDBAvailable, validateIndexedDBOpenable, getModularInstance } from '@firebase/util';
+-import { Logger, LogLevel } from '@firebase/logger';
+-import '@firebase/installations';
+-import { _getProvider, registerVersion, _registerComponent } from '@firebase/app';
+-import { Component } from '@firebase/component';
+-
+-const name = "@firebase/performance-exp";
+-const version = "0.0.900";
+-
++import { ErrorFactory, isIndexedDBAvailable, validateIndexedDBOpenable, getModularInstance } from '@firebase/util';
++import { Logger, LogLevel } from '@firebase/logger';
++import '@firebase/installations';
++import { _getProvider, registerVersion, _registerComponent } from '@firebase/app';
++import { Component } from '@firebase/component';
++
++const name = "@firebase/performance-exp";
++const version = "0.0.900";
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -38,8 +38,8 @@
+ const CONFIG_LOCAL_STORAGE_KEY = '@firebase/performance/config';
+ const CONFIG_EXPIRY_LOCAL_STORAGE_KEY = '@firebase/performance/configexpire';
+ const SERVICE = 'performance';
+-const SERVICE_NAME = 'Performance';
+-
++const SERVICE_NAME = 'Performance';
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -74,8 +74,16 @@
+     ["invalid String merger input" /* INVALID_STRING_MERGER_PARAMETER */]: 'Input for String merger is invalid, contact support team to resolve.',
+     ["already initialized" /* ALREADY_INITIALIZED */]: 'Performance can only be initialized once.'
+ };
+-const ERROR_FACTORY = new ErrorFactory(SERVICE, SERVICE_NAME, ERROR_DESCRIPTION_MAP);
+-
++//const ERROR_FACTORY = new ErrorFactory(SERVICE, SERVICE_NAME, ERROR_DESCRIPTION_MAP);
++
++const ERROR_FACTORY = {
++  create(...args) {   // First time here. Replace ourselves
++    const { create } = new ErrorFactory(SERVICE, SERVICE_NAME, ERROR_DESCRIPTION_MAP);
++    ERROR_FACTORY.create = create;
++    return create(...args);
++  }
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -92,9 +100,22 @@
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+-const consoleLogger = new Logger(SERVICE_NAME);
+-consoleLogger.logLevel = LogLevel.INFO;
+-
++//const consoleLogger = new Logger(SERVICE_NAME);
++//consoleLogger.logLevel = LogLevel.INFO;
++
++let consoleLogger = {
++  info: _consoleLoggerFirst('info')
++};
++function _consoleLoggerFirst(level) {
++  return (...args) => {
++    const logger = new Logger(SERVICE_NAME);
++    logger.logLevel = LogLevel.INFO;
++
++    consoleLogger= logger;
++    logger[level](...args);
++  }
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -206,8 +227,8 @@
+ }
+ function setupApi(window) {
+     windowInstance = window;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -243,8 +264,8 @@
+     authTokenPromise.then((authTokenVal) => {
+     });
+     return authTokenPromise;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -274,8 +295,8 @@
+         }
+     }
+     return resultArray.join('');
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2019 Google LLC
+@@ -327,8 +348,8 @@
+         }
+         return settingsServiceInstance;
+     }
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -407,8 +428,8 @@
+ }
+ function isValidCustomAttributeValue(value) {
+     return value.length !== 0 && value.length <= MAX_ATTRIBUTE_VALUE_LENGTH;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -448,8 +469,8 @@
+         throw ERROR_FACTORY.create("no api key" /* NO_API_KEY */);
+     }
+     return apiKey;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -481,7 +502,7 @@
+     }
+     return getRemoteConfig(performanceController, iid)
+         .then(processConfig)
+-        .then(config => storeConfig(config), 
++        .then(config => storeConfig(config),
+     /** Do nothing for error, use defaults set in settings service. */
+     () => { });
+ }
+@@ -597,8 +618,8 @@
+ }
+ function shouldLogAfterSampling(samplingRate) {
+     return Math.random() <= samplingRate;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -655,8 +676,8 @@
+ }
+ function changeInitializationStatus() {
+     initializationStatus = 3 /* initialized */;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -785,8 +806,8 @@
+             eventTime: Date.now()
+         });
+     };
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -928,8 +949,8 @@
+         },
+         application_process_state: 0
+     };
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -978,8 +999,8 @@
+         consoleLogger.info(`Metric value should be an Integer, setting the value as : ${valueAsInteger}.`);
+     }
+     return valueAsInteger;
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -1226,8 +1247,8 @@
+         const trace = new Trace(performanceController, measureName, false, measureName);
+         logTrace(trace);
+     }
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -1266,8 +1287,8 @@
+         timeToResponseCompletedUs
+     };
+     logNetworkRequest(networkRequest);
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -1346,8 +1367,8 @@
+         return;
+     }
+     Trace.createUserTimingTrace(performanceController, measureName);
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -1419,8 +1440,8 @@
+     get dataCollectionEnabled() {
+         return SettingsService.getInstance().dataCollectionEnabled;
+     }
+-}
+-
++}
++
+ /**
+  * @license
+  * Copyright 2020 Google LLC
+@@ -1498,8 +1519,24 @@
+ function registerPerformance() {
+     _registerComponent(new Component('performance-exp', factory, "PUBLIC" /* PUBLIC */));
+ }
+-registerPerformance();
+-registerVersion(name, version);
+-
+-export { getPerformance, initializePerformance, trace };
+-//# sourceMappingURL=index.esm2017.js.map
++//registerPerformance();
++//registerVersion(name, version);
++
++let registered;
++function wrap(f) {
++  return (...args) => {
++    if (!registered) {
++      registerPerformance();
++      registerVersion(name, version);
++      registered = true;
++    }
++    return f(...args);
++  }
++}
++const getPerformanceWrapper = wrap(getPerformance);
++const initializePerformanceWrapper = wrap(initializePerformance);
++
++//export { getPerformance, initializePerformance, trace };
++export { getPerformanceWrapper as getPerformance, initializePerformanceWrapper as initializePerformance, trace };
++
++//# sourceMappingURL=index.esm2017.js.map

@@ -52,3 +52,8 @@ We didn't, but until this is fixed we likely also cannot.
 - [ ] keep an eye on. Having `package-lock.json` there is okay.
 
 
+## `@google-cloud/logging` ESM support
+
+- [es6 import not able to import Logging](https://github.com/googleapis/nodejs-logging/issues/559)
+
+Note: We won't need it, until `firebase-functions` runs with ESM. And even then, node allows using `require` in `type: "module"` packages.

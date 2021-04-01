@@ -34,6 +34,24 @@ Install dependencies:
 $ npm install
 ```
 
+---
+
+> Depending on the Firebase version, you need to apply a patch to the Firebase Performance Monitoring file. See [Discussion #4636](https://github.com/firebase/firebase-js-sdk/discussions/4636)
+> 
+> ```
+> $ patch -p0 -i @firebase-performance-0.900.20.patch
+> patching file node_modules/@firebase/performance/dist/index.esm2017.js
+> ```
+> 
+> Versions that need the patch:
+> 
+> |||
+> |---|---|
+> |0.900.20|&check;|
+> |0.900.19|&check;|
+> 
+---
+
 Prepare and build `../app`:
 
 ```
