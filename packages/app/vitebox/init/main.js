@@ -28,8 +28,7 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
 
   const fah= initializeApp( {
     projectId,
-    apiKey: "none",
-    authDomain: "no.such.com"   // tbd. is this needed?
+    apiKey: "none"
   } );
 
   // Set up local emulation. Needs to be before any 'firebase.firestore()' use.

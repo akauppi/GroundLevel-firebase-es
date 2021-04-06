@@ -13,6 +13,10 @@
 *   - [ ] Firebase Emulator allows Cloud Functions to be expressed as ECMAScript modules (not yet)
 *   - [ ] 'firebase-functions' and 'firebase-admin' are available as ESM exports (not yet)
 *
+* Configuration:
+*   For production regional deployments, mention your region:
+*     regions.0: e.g. "europe-west6"
+*
 * Note:
 *   'HttpsError' 'code' values must be from a particular set
 *     -> https://firebase.google.com/docs/reference/js/firebase.functions#functionserrorcode
@@ -25,11 +29,12 @@
 */
 const functions = require('firebase-functions');
 //import * as functions from 'firebase-functions';
+const logger = functions.logger;    // for backend logging
 
 const admin = require('firebase-admin');
 //import * as admin from 'firebase-admin';
 
-const {Logging} = require('@google-cloud/logging');
+const { Logging } = require('@google-cloud/logging');
 // import { Logging } from '@google-cloud/logging'
 
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;
@@ -37,19 +42,13 @@ const BACKEND_TEST = !! process.env.BACKEND_TEST;   // to differentiate between 
 
 admin.initializeApp();
 
-const logger = functions.logger;    // for backend logging
-
 /*
-* For production (not emulation), provide the region where the Firebase project has been set up (Firestore,
-* in particular).
+* For production (not emulation) and deploying to a region, provide the region where the Firebase project has been set up.
 */
-function prodRegion() {   // () => string
+function prodRegion() {   // () => string|null
   const arr = functions.config().regions;
-  const reg0 = arr && arr[0];
-  if (!reg0) {
-    throw new Error("Please provide Firebase region by 'firebase functions:config:set regions.0=[europe-...|us-...|asia-...]'");
-  }
-  return reg0;
+  const ret = arr && arr[0];
+  return ret;
 }
 
 // To have your Functions work, if you chose *ANY* other location than 'us-central1', you need to mention the region
@@ -57,7 +56,10 @@ function prodRegion() {   // () => string
 //
 // See -> https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246
 //
-const regionalFunctions = EMULATION ? functions : functions.region( prodRegion() );
+const regionalFunctions = EMULATION ? functions : (() => {
+  const reg = prodRegion();
+  return !reg ? functions : functions.region(reg);
+})();
 
 // UserInfo shadowing
 //
@@ -128,16 +130,11 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
   })
 */
 
-const severityMap = new Map([
-  ['debug', 'DEBUG'],
-  ['info', 'INFO'],
-  ['warn', 'WARNING'],
-  ['error', 'ERROR'],
-  ['fatal', 'CRITICAL']
-]);
-
-// Logs, as "callable function"
+// --- Logging
 //
+// Cloud Logging does not support delivery of logs directly from browsers. They need to be routed through us.
+// This allows us to e.g. limit logging to only authenticated users.
+
 // Receive an array of logging messages. The front end batches them together to reduce the number of calls, but also
 // for the sake of offline mode.
 //
@@ -153,10 +150,10 @@ const severityMap = new Map([
 // this option. (Some logging frameworks allow browsers to log directly; Cloud Logging *does not mention this* in
 // the docs.)
 //
-const logging = new Logging();    // @google-cloud/logging
+const gcLogging = new Logging();    // @google-cloud/logging
 
 const appLogName = `app-central${ EMULATION ? (BACKEND_TEST ? ".test" : ".dev"):"" }`;
-const appLog = logging.log(appLogName);
+const appLog = gcLogging.log(appLogName);
 
 exports.logs_v1 = regionalFunctions
   //const logs_v1 = regionalFunctions
@@ -215,6 +212,14 @@ exports.logs_v1 = regionalFunctions
       })
     }
   });
+
+const severityMap = new Map([
+  ['debug', 'DEBUG'],
+  ['info', 'INFO'],
+  ['warn', 'WARNING'],
+  ['error', 'ERROR'],
+  ['fatal', 'CRITICAL']
+]);
 
 /*
 export {

@@ -1,8 +1,8 @@
-// jest.config.default.cjs
+// jest.config.default.js
 //
 // Common values to 'test-fns' and 'test-rules'
 
-module.exports = {
+const opts = {
   // Recommended for native ES6 use (Aug-20):
   testEnvironment: 'jest-environment-node',
   transform: {},
@@ -18,6 +18,10 @@ module.exports = {
   //
   // See -> https://github.com/akauppi/firebase-jest-testing/blob/master/TRACK.md#jest-cannot-handle-package-exports-%EF%B8%8F%EF%B8%8F%EF%B8%8F
   //
+  // Still needed with 27.0.0-next.7
+  //
   //resolver: "firebase-jest-testing/cjs/jestResolver"
   resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
 };
+
+export default opts;

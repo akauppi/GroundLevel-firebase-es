@@ -1,5 +1,10 @@
 # Changelog
 
+## 6-Apr-21
+
+- Jest configuration as ES
+- Dependency updates; Jest `27.0.0.next7`
+
 ## 19-Mar-21
 
 - Dependency update; Jest `27.0.0.next5`; `npm test` still passes. :)

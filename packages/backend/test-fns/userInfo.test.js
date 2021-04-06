@@ -1,5 +1,5 @@
 /*
-* back-end/test-fns/userInfo.test.js
+* test-fns/userInfo.test.js
 *
 * Test that '/projectsC/.../userInfoC' gets updated, by cloud functions, when the global '/userInfoC' changes (if
 * users are in the project).
@@ -72,7 +72,7 @@ describe("userInfo shadowing", () => {
   // Note: We don't declare 'async done => ...' for Jest. That is an oxymoron: only either 'done' or the end of an
   //    async/await body would resolve a test but not both.
   //
-  test.skip ('Central user information is distributed to a project where the user is a member', async () => {
+  test('Central user information is distributed to a project where the user is a member', async () => {
     const william = {
       displayName: "William D.",
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"

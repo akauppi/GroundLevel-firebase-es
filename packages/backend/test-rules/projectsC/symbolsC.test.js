@@ -93,7 +93,7 @@ describe("'/projects/.../symbols' rules", () => {
   });
 
   // tbd. Cannot figure out why this fails. #help
-  test .skip ('members may revoke a claim', async () => {
+  test.skip ('members may revoke a claim', async () => {
     const s2_revoke = { claimed: FieldValue.delete() };
 
     await Promise.all([
