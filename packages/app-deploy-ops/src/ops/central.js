@@ -13,9 +13,11 @@ const adapters = Array.isArray(logging) ? logging : [logging];  // allow single 
 
 function logGen(level) {    // ("debug"|"info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
 
+  const fns= adapters.map( a => a(level) );
+
   function f(msg, opt) {
-    adapters.forEach( (a) => {
-      a.log(level, msg, opt);
+    fns.forEach( fn => {
+      fn(msg, opt);
     });
   }
   return f;

@@ -3,13 +3,11 @@
 *
 * You can bring in adapters from the provided ones, or pull from npm.
 */
+import { createLogger } from '/@adapters/logging/proxy.js'
 
-/* tbd. #on-a-break Stuck at trying to build CJS(?) '@google-cloud/logging' in
-import { createLogger } from '/@adapters/logging/googleCloudLogging'
-const gcl = createLogger("appLogger");
-*/
-const logging = []; // [gcl];
+const cfLoggerGen = createLogger(/*{..}*/);    // tbd. options?
 
+const logging = [cfLoggerGen];
 export {
   logging
 }

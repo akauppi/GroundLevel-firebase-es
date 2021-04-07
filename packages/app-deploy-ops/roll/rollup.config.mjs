@@ -12,7 +12,6 @@ import { strict as assert } from 'assert'
 
 import sizes from '@atomico/rollup-plugin-sizes'
 import alias from '@rollup/plugin-alias'
-//import commonjs from '@rollup/plugin-commonjs'      // needed by '@google-cloud/logging' (not available as ES)
 import resolve from '@rollup/plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -58,10 +57,6 @@ const plugins = [
 
     dedupe: allFirebaseSubpackages    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
   }),
-
-  /* commonjs({
-    include: "**\/@google-cloud/logging\/**"
-  }), */
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
   !watch && terser(),

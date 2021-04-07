@@ -27,23 +27,21 @@ import { readFileSync, writeFileSync } from 'fs'
 *   <<
 *     <link rel="modulepreload" href="/ops/firebase-6ba65e97.js">
 *     ...
-*     <link rel="preload" as="script" crossorigin href="/app.es-36e1fd10.js">
+*     <link rel="prefetch" as="script" href="/app.es-36e1fd10.js">
 *     <link rel="modulepreload" href="/app/vue-143a5898.js">
 *     ...
 *   <<
 *
-* The caller informs, whether a chunk is loaded dynamically. If it is, it's best to not precompile it (especially
-* important for the app chunk, which relies on the 'center', Firebase et.al. environment to be set up for it).
+* For some chunks, the 'app' in particular, only fetching is requested. This is because it relies on 'central' and
+* the eg. the Firebase environment to have been set up.
+*
+* Note: "preload" doesn't work for the 'app' chunk: Chrome would give an error about the type not matching; and since
+*     loading with 'type: module' would be "modulepreload", ... :)
 */
 function preloadsArr(arr) {   // (Array of [string,Boolean]) => Array of "<link rel...>"
 
-  // Note: The 'crossorigin' attribute is needed. Without it, Chrome gives warnings in the browser console.
-  //
-  //    "..attribute needs to be set to match the resource's CORS and credentials mode, even when the fetch is not
-  //    cross-origin"  From -> https://developer.mozilla.org/en-US/docs/Web/HTML/Preloading_content
-  //
   const ret = arr.map( ([fn,dynamic]) => {
-    return dynamic ? `<link rel="preload" as="script" crossorigin href="${fn}">`
+    return dynamic ? `<link rel="prefetch" as="script" href="${fn}">`
                    : `<link rel="modulepreload" href="${fn}">`;
   });
   return ret;

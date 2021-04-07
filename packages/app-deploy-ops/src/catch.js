@@ -9,9 +9,7 @@
 *     should be seen in both log collection and crash reporting. #later
 */
 import { assert } from './assert.js'
-
-// #rework
-//import { crashs as opsCrashes } from './opsConfig.js'
+import { central } from '@ops/central'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
@@ -54,8 +52,10 @@ function hub(err) {    // (Error) => ()
 /*
 * Catch any (uncaught by app) exceptions; show in the UI and report to central.
 */
-const prevOnError = window.onerror;   // function|undefined
-assert(!prevOnError, "'window.onerror' already defined!");    // some third party could have done this
+const noop = () => {}
+
+const prevOnError = window.onerror || noop;
+const prevOnUnhandledRejection = window.onunhandledrejection || noop;
 
 // BUG:
 //    Errors during application loading (e.g. press 'MakeError' right after load) don't seem to reach here.
@@ -66,9 +66,22 @@ window.onerror = function (msg, source, lineNbr, colNbr, error) {
 
   hub(error);
 
-  //if (prevOnError) prevOnError(arguments);
-
+  prevOnError(arguments);
   return true;    // "prevents the firing of the default error handler" (what would that do?)
+}
+
+window.onunhandledrejection = function (promiseRejectionEvent) {
+  const { reason } = promiseRejectionEvent;
+
+  console.debug("centralError saw:", promiseRejectionEvent);    // DEBUG
+
+  central.fatal("Unhandled Promise rejection:", reason);
+
+  // tbd. if these occur in real life, add the showing of '#fatal' (or would 'central' do that, that'd be sweet)!
+
+  prevOnUnhandledRejection(arguments);
+
+  // Samples don't return anything; see -> https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
 }
 
 export { }

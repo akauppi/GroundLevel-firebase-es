@@ -14,12 +14,21 @@ For Cloud Functions to work, you need a "Blaze" account. This involves giving cr
 
 ## Set up a Firebase project
 
->Note: We'll come back with more pictures, one day.
+<!-- tbd. pictures, one day -->
 
 - Create a project in the [Firebase console](https://console.firebase.google.com/)
-	- leave Google Analytics unchecked (you can activate it later) 
-   - register an app (needed for authentication)
-   - enable hosting, authentication, Cloud Firestore and Cloud Functions
+	- Disable Google Analytics - you don't need it and can activate it later
+   - Register an app (needed for authentication)
+     - enable hosting
+
+>Hint: You can use a date postfix for the project name, eg. `test-060421`. This way you'll always see when something was created and it makes it easier to recycle projects.
+
+While Google Analytics sounds tempting:
+
+>Google Analytics is a free and unlimited analytics solution that enables targeting, reporting, and more in Firebase Crashlytics, Cloud Messaging, In-App Messaging, Remote Config, A/B Testing, Predictions, and Cloud Functions.
+
+..we don't need it in this project. Most of the products mentioned are more useful (or only available) for mobile clients; eg. Crashlytics is not available for web apps (as of Apr 2021). It adds to complexity and the author steers clear of things where "Google" and "analytics" occur in the same sentence.
+
 
 ### Authentication
 

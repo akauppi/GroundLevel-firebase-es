@@ -1,0 +1,17 @@
+{
+  "name": "@root/abc",
+  "private": true,
+  "scripts": {
+    "//firebase-use": "firebase use --add && tools/sync-firebase-projects.sh",
+    "--": "",
+    "no": "npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
+    "_no1": "npm --prefix packages/app outdated",
+    "_no2": "npm --prefix packages/app-deploy-ops outdated",
+    "_no3": "npm --prefix packages/backend outdated"
+  },
+  "//comments": {
+    "_": [
+      "This 'package.json' serves as a place for build-time tooling common to the subpackages."
+    ]
+  }
+}

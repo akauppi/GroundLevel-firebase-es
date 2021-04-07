@@ -83,7 +83,7 @@ describe("userInfo shadowing", () => {
     await db.collection("userInfo").doc("abc").set(william);
 
     await expect( eventually( _ => shadow.get("abc") ) ).resolves.toContainObject(william);
-  });
+  }, 5000 /*ms*/);    // known to time out with 3000ms (default); normally eg. 915, 1119 [ms]
 
   test('Central user information is not distributed to a project where the user is not a member', async () => {
 

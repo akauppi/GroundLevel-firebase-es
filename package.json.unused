@@ -1,8 +1,0 @@
-{
-  "name": "my-workspaces-powered-project",
-  "private": true,
-  "workspaces": [
-    "packages/*",
-    "packages/backend/functions"
-  ]
-}

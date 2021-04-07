@@ -12,41 +12,77 @@
 **A modern (ES modules based) Web App template**
 
 - great tools selected for you: [Vue.js 3](https://v3.vuejs.org), [Vite](https://github.com/vitejs/vite), [Firebase](https://firebase.google.com), [Jest](https://jestjs.io), [Cypress](https://www.cypress.io), web components [with Svelte 3](https://dev.to/silvio/how-to-create-a-web-components-in-svelte-2g4j), [Cloud Build](https://cloud.google.com/build), [Cloud Logging](https://cloud.google.com/logging/)
-- buildable with [Jailed!](https://github.com/akauppi/Jailed); no need to expose one's development maching to all those `npm` dependencies
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 - covers all the way to deployment (CI/CD) and operations
 
+<!-- (after "great tools", but it's waporware)
+- buildable with [Jailed!](https://github.com/akauppi/Jailed); no need to expose one's development maching to all those `npm` dependencies
+-->
+
 <br clear=all />
 
-><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think "[Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe "post-modern" is a more appropriate term for this repo.
+><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think ["Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe *post-modern* is the appropriate term for this repo.
 
-This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making Web Applications in the 2020's is, when (only) modern tools are used.
+[painting]
 
+This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making web applications in the 2020's can be, when modern tools and techniques are used.
 
-<!-- too much???
-## Easy for beginners
+The repo showcases a full, social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. In fact, you can see it as course material for modern web development, if you want.
 
-We learn by reading other people's code. Actual code. This template is made with that in mind. It's not a partial template, and doesn't create a to-do list.
+## Pre-requisites and tools
 
-<!_-- tbd.
-There's going to be a [narrative](...) that discusses the design in more detail. --_>
+To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
-For medium and pro level software engineers, you should still get something out of this. The project features e.g.
+- **A computer** with the following tools installed:
 
-- social invites
-- collaboration
-- interactive SVG graphics
-- testing
-- production builds
-- CI/CD setup
-- operations / metrics
+   - `node` v. 14.3 or later
+   - `npm` - preferably version 7.7
+   - `bash`, `sed` etc. command line tools
 
-This hopefully makes the app not only easy, but interesting as well.
+  For Windows development, we recommend the [WSL2]() environment with eg. Ubuntu Linux variant. The [Microsoft article]() is worth a read.
 
-But let's cut the chase and get started! 😀
+- **A capable IDE**
 
->Note: Many of the features are still pending (the sample itself has become the *last* thing to finish!). Don't let that discourage yourself - head further and see whether dragons lie there! <font size="+5">🐉</font>
--->
+  An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are two suggestions:
+  
+  - [Visual Studio Code](https://code.visualstudio.com) - free
+  - [WebStorm](https://www.jetbrains.com/webstorm/) - free 30 days trial, then € 59 / 47 / 35 /year - worth it!!
+
+- **Basic Knowledge** of:
+  - HTML
+  - JavaScript
+  - CSS
+
+  We use the EcmaScript 6 (and 2018) features in the code, where-ever possible. Meaning no `var`, no `this` 😡, yes Promises and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
+
+  >Hint: [MDN resources](https://developer.mozilla.org) are a great place to learn the basics, and advanced material alike. Eg. [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) You might even have it in your native language! Check the ![Change language](.images/mdn-change-language.png) button.
+
+- A **credit card** to deploy Cloud Functions
+
+  While most Firebase features are available in the free (and default) "Spark" plan, Cloud Functions require the "Blaze" plan since summer 2020.
+  
+  This might not be that bad.
+  
+  - you can still play with the emulators even completely without a Firebase account
+  - if your application doesn't need Cloud Functions, remove those code and deploy.
+  - even if you use Cloud Functions, chances are *there are not actual costs* since the Firebase free tiers apply to the "Blaze" plan as well.
+
+  For more information: [Firebase pricing](https://firebase.google.com/pricing)
+
+- A **decent resolution screen** or two. 
+
+  In web development, this should not be overlooked. If you need to work on a low-resolution laptop screen (most PCs!), consider adding an external monitor.
+  
+  You will need to leave things like backend monitoring open while doing development. And it's often best to be able to view 2-3 files, *at once* in one's IDE. The more pixels you have, the better. Having more pixel real estate [has been shown](https://insights.samsung.com/2019/12/05/pushing-productivity-with-pixels-why-monitor-resolution-matters/) to have a direct correlation with productivity.
+
+  The author is pleased with a single LG UltraFine 4K monitor.
+
+## Additional material
+
+The material supporting setting up the development environment, or teaching deeper knowledge, is available separately:
+
+- [Setting up a Firebase project](Setting up Firebase project)
+
 
 ## Firebase
 
@@ -400,10 +436,6 @@ graphic art.
 >
 >For the rest of the repo (code, configs and textual documentation), this applies:
 >...
-
-Live Long and Prosper! 
-
-🛸🪐
 
 
 
