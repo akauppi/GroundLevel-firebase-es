@@ -49,7 +49,6 @@ function preloadsArr(arr) {   // (Array of [string,Boolean]) => Array of "<link 
 
 /*
 * Bake a meaningful 'index.html' out of the template and hashes.
-*
 */
 function tunnel(template, map) {    // (string, Map of string -> boolean) => string    // may throw
 

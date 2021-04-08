@@ -5,11 +5,10 @@
 *
 * Also indicates to the user (shows and fills the '#fatal' element) that there is a problem.
 *
-* Note: We *can* integrate this with 'central' logging; it is up to the operational preferences whether a crash
-*     should be seen in both log collection and crash reporting. #later
+* Note: We *can* integrate this with '@ops/central' logging, but it is not imperative. It is up to the operational preferences
+*     whether a crash should be seen in both log collection and crash reporting.
 */
 import { assert } from './assert.js'
-import { central } from '@ops/central'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
@@ -50,6 +49,21 @@ function hub(err) {    // (Error) => ()
 }
 
 /*
+* Integration with '@ops/central' (if used), is *lazy* on purpose.
+*
+* '@ops/central' is mainly intended for the app's logging. This allows us to be imported by 'main.js' statically,
+* early on, without pulling also '@ops/central' with us - when we don't even need it yet, unless something goes bad
+* before the app launches.
+*
+* Note: We don't *actually* know when the message would have been sent to the back end logging. Logging has its own
+*   adapters and what not: '.fatal' returning only means the log entry is on the way.
+*/
+async function centralFatal(...args) {
+  const central = await import('@ops/central').then( mod => mod.central );
+  central.fatal(...args);
+}
+
+/*
 * Catch any (uncaught by app) exceptions; show in the UI and report to central.
 */
 const noop = () => {}
@@ -75,7 +89,7 @@ window.onunhandledrejection = function (promiseRejectionEvent) {
 
   console.debug("centralError saw:", promiseRejectionEvent);    // DEBUG
 
-  central.fatal("Unhandled Promise rejection:", reason);
+  centralFatal("Unhandled Promise rejection:", reason);   // let run loosely
 
   // tbd. if these occur in real life, add the showing of '#fatal' (or would 'central' do that, that'd be sweet)!
 

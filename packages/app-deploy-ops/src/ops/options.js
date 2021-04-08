@@ -5,7 +5,10 @@
 */
 import { createLogger } from '/@adapters/logging/proxy.js'
 
-const cfLoggerGen = createLogger(/*{..}*/);    // tbd. options?
+const cfLoggerGen = createLogger( {
+  maxBatchDelayMs: 5000,
+  maxBatchEntries: 100
+} );
 
 const logging = [cfLoggerGen];
 export {

@@ -2,7 +2,10 @@
 * src/ops/central.js
 *
 * Central logging.
-* - application provides the calls
+*
+* We are imported by _application_ code; unless 'catch.js' imports us dynamically, which may happen prior to
+* the application being initialized.
+*
 * - 'options.js' provides the adapter setup
 */
 //import { assert } from '../assert.js'

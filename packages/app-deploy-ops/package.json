@@ -18,7 +18,9 @@
     "_watch_roll_rollup": "rollup -c roll/rollup.config.mjs -w",
     "_watch_roll_host": "npm run --silent serve:roll",
     "  - ": "",
-    "build:roll": "(cd roll/out && rm -f *.* app/* ops/*) && npm run --silent _prepRollOut && rollup -c roll/rollup.config.mjs",
+    "build:roll": "npm run -s _clean && npm run --silent _prepRollOut && REGION=europe-west6 rollup -c roll/rollup.config.mjs",
+    "//_clean0": "(cd roll/out && rm -f *.* workers/* app/* ops/*)",
+    "_clean": "find roll/out -type f \\! -name '.*' -delete && rm -f roll/out/*.*",
     "_prepRollOut": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/public/* .) && npm run --silent _prepRollOut2",
     "_prepRollOut2": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/dist/*.css .)",
     "build:vite": "vite build -c vite/vite.config.js",
@@ -53,9 +55,6 @@
     "@local/app": "file:../app",
     "firebase": "^0.900.20"
   },
-  "//dependencies": {
-    "//@google-cloud/logging": "^9.1.0"
-  },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
     "@rollup/plugin-alias": "^3.1.2",
@@ -70,9 +69,6 @@
     "rollup-plugin-visualizer": "^5.0.4",
     "vite": "^2.1.5",
     "wait-on": "^5.3.0"
-  },
-  "//devDependencies": {
-    "//@rollup/plugin-commonjs": "^18.0.0"
   },
   "//comments": {
     "scripts": {

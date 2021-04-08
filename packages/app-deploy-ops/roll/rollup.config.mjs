@@ -13,6 +13,7 @@ import { strict as assert } from 'assert'
 import sizes from '@atomico/rollup-plugin-sizes'
 import alias from '@rollup/plugin-alias'
 import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
 
@@ -24,12 +25,17 @@ import {dirname} from 'path'
 import {fileURLToPath} from 'url'
 import { readdirSync } from 'fs'
 
+import workerConfig, { loggingAdapterProxyHash } from './rollup.config.worker.js'
+
 const myPath = dirname(fileURLToPath(import.meta.url));
 
 const templateHtml = myPath + '/../index.html';
 const targetHtml = myPath + '/out/index.html';
 
 const watch = process.env.ROLLUP_WATCH;
+
+const REGION = process.env.REGION;
+if (!REGION) throw new Error("'REGION' env.var. not provided");
 
 /*
 * List the '@firebase/auth', '@firebase/app', ... subpackages, so that access to *any* of those is deduplicated.
@@ -58,8 +64,19 @@ const plugins = [
     dedupe: allFirebaseSubpackages    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
   }),
 
+  replace({
+    'env.PROXY_WORKER_HASH': () => {
+      const hash= loggingAdapterProxyHash;
+      assert(hash, "Worker hash not available, yet!");
+      return JSON.stringify(hash);
+    },
+    'env.REGION': JSON.stringify(REGION),
+    //
+    preventAssignment: true   // to mitigate a console warning (Rollup 2.44.0); remove with 2.45?
+  }),
+
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
-  !watch && terser(),
+  //!watch && terser(),
 
   tunnelPlugin(templateHtml, targetHtml),
 
@@ -81,20 +98,24 @@ const plugins = [
   })
 ];
 
-export default {
-  input: './src/main.js',
-  output: {
-    dir: myPath + '/out',
-    format: 'es',   // "required"
-    entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
+export default [
+  // Worker config needs to be first; the main config needs hashes from it.
+  workerConfig,
+  {
+    input: './src/main.js',
+    output: {
+      dir: myPath + '/out',
+      format: 'es',   // "required"
+      entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
-    manualChunks,
-    sourcemap: true,   // have source map even for production
+      manualChunks,
+      sourcemap: true,   // have source map even for production
 
-    //intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
-  },
+      //intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
+    },
 
-  plugins,
+    plugins: plugins,
 
-  preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
-};
+    preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
+  }
+];
