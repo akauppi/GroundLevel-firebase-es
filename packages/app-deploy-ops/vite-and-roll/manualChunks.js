@@ -35,16 +35,18 @@ function manualChunks(id) {
 //
 const chunkTo = [     // Array of (Regex | [Regex, string, string?])
 
-  // All 'ops' things to one chunk
+  // All 'src' things to one chunk (except for 'src/ops' - those are loaded by the app code)
   //
   //  /Users/.../app-deploy-ops/src/main.js
   //  /Users/.../app-deploy-ops/src/assert.js
   //  /Users/.../app-deploy-ops/src/catch.js
-  //  /Users/.../app-deploy-ops/src/ops/central.js
   //  /Users/.../app-deploy-ops/index.html                        <-- only in the Vite build
   //  /Users/.../app-deploy-ops/index.html?html-proxy&index=0.js  <-- -''-
   //
-  /\/app-deploy-ops\/(?:src\/|index\.html)/,
+  /\/app-deploy-ops\/(?:src\/(?!ops\/)|index\.html)/,
+
+  //  /Users/.../app-deploy-ops/src/ops/central.js
+  /\/app-deploy-ops\/src\/(ops)\//,
 
   // /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
   /\/app-deploy-ops\/(adapters)/,

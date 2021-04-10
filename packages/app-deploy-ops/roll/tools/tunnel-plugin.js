@@ -32,17 +32,14 @@ import { readFileSync, writeFileSync } from 'fs'
 *     ...
 *   <<
 *
-* For some chunks, the 'app' in particular, only fetching is requested. This is because it relies on 'central' and
-* the eg. the Firebase environment to have been set up.
-*
-* Note: "preload" doesn't work for the 'app' chunk: Chrome would give an error about the type not matching; and since
-*     loading with 'type: module' would be "modulepreload", ... :)
+* For those chunks that want Firebase to have been initialized (the 'app', 'central' and its adapters), only fetching
+* is requested.
 */
 function preloadsArr(arr) {   // (Array of [string,Boolean]) => Array of "<link rel...>"
 
-  const ret = arr.map( ([fn,dynamic]) => {
-    return dynamic ? `<link rel="prefetch" as="script" href="${fn}">`
-                   : `<link rel="modulepreload" href="${fn}">`;
+  const ret = arr.map( ([fn,eager]) => {
+    return !eager ? `<link rel="prefetch" as="script" href="${fn}">`
+                  : `<link rel="modulepreload" href="${fn}">`;
   });
   return ret;
 }
@@ -152,18 +149,56 @@ function tunnelPlugin(template, out) {    // (string (filename), string (filenam
   return {
     name: 'tunnel',
     generateBundle(options, bundle) {
-      const map1 = new Map();    // Map of <fileName> -> Boolean   ; value 'true' if used as dynamic import (even once)
+      const map1 = new Map();    // Map of <fileName> -> Boolean   ; value 'false' for prefetch (lazy); 'true' for modulepreload (eager)
 
       Object.entries(bundle).forEach( ([fileName, info]) => {
         const condition = info.isEntry || info.isDynamicEntry;    // skip libraries
 
-        function add(fn, dynamic) {
-          map1.set(fn, map1.get(fn) || dynamic);
+        // Collect dependencies + their lazy-ness.
+        //
+        function add(fn, eager) {
+          const was = map1.get(fn);
+
+          // If a library is used both eagerly and lazily, eager wins.
+          if (was === undefined || eager) {
+            map1.set(fn, eager);
+          }
         }
 
         if (condition) {
-          add(fileName, info.isDynamicEntry);
-          info.imports.forEach( (s) => { add(s,false); } );   // libraries should be stateless in their loading; can be 'modulepreload'ed
+          const eager = !info.isDynamicEntry;
+          add(fileName, eager);
+
+          // Handling dependencies of a lazy-loading module (the app itself).
+          //
+          // Some of those might require lazy-loading (availability of 'central', and Firebase being initialized):
+          //  - logging adapters
+          //
+          // Others might be generic in nature, and completely fine being eager-loaded (which improves performance,
+          // presumably):
+          //  - Firebase
+          //  - UI framework
+          //  - ...other app libs
+          //
+          // There can be many approaches taken here. One is to prefer performance (that is, eager loading) and
+          // separately white list the dependencies we *know* must only be fetched, not loaded.
+          //
+          // The other (conservative one) would keep everything below the app in the import tree as lazy, leading to:
+          //
+          // Check out the output in 'roll/out/index.html' to see, which of the modules are 'modulepreload'ed, which
+          // only fetched.
+          //
+          //  - adapters needs to be fetched
+          //
+          //console.log("!!!", { fileName, info: { ...info, code: undefined, map: undefined } });
+
+          info.imports.forEach( (s) => {
+            const eager2 =
+              s.startsWith("adapters") ? false :   // we KNOW it must be lazy loaded ("main" calls it, dynamically, but we don't see it here)
+              true;                                // trust others to be fine eagerly loaded (generic in nature)
+
+            add(s,eager2);
+          } );
         }
       });
 
