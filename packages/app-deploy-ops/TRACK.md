@@ -11,3 +11,11 @@ Explains the surprising behaviour we've seen.
 - [Unexpected naming of chunks after manualChunks function](https://github.com/rollup/rollup/issues/3973)
 -->
 
+## ECMAScript module support for web workers
+
+- [https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker/Worker)
+
+   ![](.images/worker-esm-support.png)
+
+i.e. with Firefox and Safari one needs to transpile modules
+

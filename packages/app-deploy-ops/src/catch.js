@@ -29,26 +29,6 @@ for( const o of opsCrashes ) {
 ***/
 
 /*
-* Report an error.
-*
-* Returns right away. If there are problems with reporting the errors, somehow reports those (at least on the UI,
-* maybe central logging) but does not influence the caller.
-*/
-function hub(err) {    // (Error) => ()
-
-  // Always show in browser console
-  //
-  console.error("Unexpected error:", err);
-
-  // If the page has a '#fatal' element, show also there (always the latest message only).
-  //
-  if (elFatal) {
-    elFatal.innerText = `Unexpected ERROR: "${err.stack}"`;
-    elFatal.classList.remove("inactive");     // tbd. too tightly coupled with 'index.html' (can we just show/hide, yet have animations??)
-  }
-}
-
-/*
 * Integration with '@ops/central' (if used), is *lazy* on purpose.
 *
 * '@ops/central' is mainly intended for the app's logging. This allows us to be imported by 'main.js' statically,
@@ -58,9 +38,21 @@ function hub(err) {    // (Error) => ()
 * Note: We don't *actually* know when the message would have been sent to the back end logging. Logging has its own
 *   adapters and what not: '.fatal' returning only means the log entry is on the way.
 */
-async function centralFatal(...args) {
+async function centralFatal(msg, ...args) {
+
   const central = await import('@ops/central').then( mod => mod.central );
-  central.fatal(...args);
+  central.fatal(msg, ...args);
+
+  // If the page has a '#fatal' element, show also there (always the latest message only).
+  //
+  if (elFatal) {
+    const errStack = args?.error?.stack;
+
+    elFatal.innerText = `Unexpected ERROR: "${msg}"` +
+      errStack ? `\n\n${errStack}` : "";
+
+    elFatal.classList.remove("inactive");     // tbd. too tightly coupled with 'index.html' (can we just show/hide, yet have animations??)
+  }
 }
 
 /*
@@ -77,8 +69,12 @@ const prevOnUnhandledRejection = window.onunhandledrejection || noop;
 //
 window.onerror = function (msg, source, lineNbr, colNbr, error) {
   console.debug("centralError saw:", {msg, source, lineNbr, colNbr});    // DEBUG
+    //
+    // {msg: "Uncaught ReferenceError: env is not defined", source: "http://localhost:3012/worker/proxy.worker-62db5bc8…st6&max-batch-delay-ms=5000&max-batch-entries=100", lineNbr: 1307, colNbr: 16}
 
-  hub(error);
+  // Note: If the error comes from web worker, 'error' is 'undefined'
+
+  centralFatal(msg, { source, lineNbr, colNbr, error });
 
   prevOnError(arguments);
   return true;    // "prevents the firing of the default error handler" (what would that do?)

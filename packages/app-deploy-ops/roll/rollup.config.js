@@ -4,7 +4,7 @@
 * Used by:
 *   $ npm run build:rollup
 *
-* Note:
+* Note: REMOVE?
 *   The '.mjs' extension tells Rollup not to transpile this configuration to CommonJS.
 *     See -> https://rollupjs.org/guide/en/#using-untranspiled-config-files
 */
@@ -25,7 +25,7 @@ import {dirname} from 'path'
 import {fileURLToPath} from 'url'
 import { readdirSync } from 'fs'
 
-import workerConfig, { loggingAdapterProxyHash } from './rollup.config.worker.js'
+import workerConfig, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 
@@ -33,9 +33,6 @@ const templateHtml = myPath + '/../index.html';
 const targetHtml = myPath + '/out/index.html';
 
 const watch = process.env.ROLLUP_WATCH;
-
-const REGION = process.env.REGION;
-if (!REGION) throw new Error("'REGION' env.var. not provided");
 
 /*
 * List the '@firebase/auth', '@firebase/app', ... subpackages, so that access to *any* of those is deduplicated.
@@ -65,13 +62,11 @@ const plugins = [
   }),
 
   replace({
-    'env.PROXY_WORKER_HASH': () => {
-      const hash= loggingAdapterProxyHash;
-      assert(hash, "Worker hash not available, yet!");
-      return JSON.stringify(hash);
+    'env.PROXY_WORKER_HASHES': () => {    // () => "[ esm_hash, iife_hash ]"
+      const arr= loggingAdapterProxyHashes;
+      assert(arr && arr[0] && arr[1], "Worker hash(es) not available, yet!");
+      return JSON.stringify(arr);
     },
-    'env.REGION': JSON.stringify(REGION),
-    //
     preventAssignment: true   // to mitigate a console warning (Rollup 2.44.0); remove with 2.45?
   }),
 
@@ -99,8 +94,9 @@ const plugins = [
 ];
 
 export default [
-  // Worker config needs to be first; the main config needs hashes from it.
-  workerConfig,
+  // Worker config(s) need(s) to be first; the main config needs hashes from it.
+  workerConfig(true),
+  workerConfig(false),
   {
     input: './src/main.js',
     output: {
@@ -109,9 +105,7 @@ export default [
       entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
       manualChunks,
-      sourcemap: true,   // have source map even for production
-
-      //intro: "const ROLLUP = true;"   // TESTING; gets prepended to each chunk
+      sourcemap: true     // have source map even for production
     },
 
     plugins: plugins,
