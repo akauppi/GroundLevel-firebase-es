@@ -192,12 +192,15 @@ function tunnelPlugin(template, out) {    // (string (filename), string (filenam
           //
           //console.log("!!!", { fileName, info: { ...info, code: undefined, map: undefined } });
 
-          info.imports.forEach( (s) => {
-            const eager2 =
-              s.startsWith("adapters") ? false :   // we KNOW it must be lazy loaded ("main" calls it, dynamically, but we don't see it here)
-              true;                                // trust others to be fine eagerly loaded (generic in nature)
+          const lazyLoad = [    // we _know_ that these must be lazy loaded ('main' calls them dynamically)
+            /^adapters-/,
+            /^ops-/,
+            /^central-/     // 'ops' is sometimes called this, due to Rollup bug
+          ];
 
-            add(s,eager2);
+          info.imports.forEach( (s) => {
+            const b = !lazyLoad.some( re => s.match(re) );
+            add(s,b);
           } );
         }
       });

@@ -3,56 +3,45 @@
 *
 * Catch uncaught errors and report them.
 *
-* Also indicates to the user (shows and fills the '#fatal' element) that there is a problem.
+* Note: This is imported by 'main.js, statically. The idea is that during launch, any fatal errors get caught.
 *
-* Note: We *can* integrate this with '@ops/central' logging, but it is not imperative. It is up to the operational preferences
-*     whether a crash should be seen in both log collection and crash reporting.
+* Loads '@ops/central' (which is otherwise only used from application code) lazily. IF there are problems not related
+* to loading central itself, keep those until central is available.
+*
+* Also indicates to the user (shows and fills the '#fatal' element) that there is a problem.
 */
 import { assert } from './assert.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
-/*** #rework
-// Can have multiple error handlers (good for comparing alternatives)
-//  - { }   // ignore
-//  - { type: 'xxx', projectId: ..., projectKey: ... }
+// 'central' is still being initialized. Observe 'central.isReady' (a Promise) before referencing its other fields.
 //
-for( const o of opsCrashes ) {
-  if (!o.type) {
-    // skip
-
-  } else {
-    throw new Error( `Unexpected 'fatal[].type' in ops config: ${o.type}` );
-      // Note: No eternal loop - we're just loading the module.
-  }
-}
-***/
+import { central } from '@ops/central'
 
 /*
-* Integration with '@ops/central' (if used), is *lazy* on purpose.
-*
-* '@ops/central' is mainly intended for the app's logging. This allows us to be imported by 'main.js' statically,
-* early on, without pulling also '@ops/central' with us - when we don't even need it yet, unless something goes bad
-* before the app launches.
-*
-* Note: We don't *actually* know when the message would have been sent to the back end logging. Logging has its own
-*   adapters and what not: '.fatal' returning only means the log entry is on the way.
+* Send to 'central.fatal' once it is available.
 */
 async function centralFatal(msg, ...args) {
 
-  const central = await import('@ops/central').then( mod => mod.central );
-  central.fatal(msg, ...args);
-
   // If the page has a '#fatal' element, show also there (always the latest message only).
+  //
+  // Note: This is before calling 'central.fatal' in case the problem was exactly in loading of it.
   //
   if (elFatal) {
     const errStack = args?.error?.stack;
 
     elFatal.innerText = `Unexpected ERROR: "${msg}"` +
-      errStack ? `\n\n${errStack}` : "";
+      (errStack ? `\n\n${errStack}` : "");
 
     elFatal.classList.remove("inactive");     // tbd. too tightly coupled with 'index.html' (can we just show/hide, yet have animations??)
   }
+
+  const f = await central.isReady.then( _ => central.fatal );
+
+  // Note: Unlike other 'central' functions, 'central.fatal' could be 'async', and only fulfill the promise when the
+  //    message has shipped.
+  //
+  /*await*/ f(msg, ...args);
 }
 
 /*
@@ -63,12 +52,8 @@ const noop = () => {}
 const prevOnError = window.onerror || noop;
 const prevOnUnhandledRejection = window.onunhandledrejection || noop;
 
-// BUG:
-//    Errors during application loading (e.g. press 'MakeError' right after load) don't seem to reach here.
-//    But once the app is up, they do. Bearable, for now. #help
-//
 window.onerror = function (msg, source, lineNbr, colNbr, error) {
-  console.debug("centralError saw:", {msg, source, lineNbr, colNbr});    // DEBUG
+  console.debug("onerror saw:", {msg, source, lineNbr, colNbr});    // DEBUG
     //
     // {msg: "Uncaught ReferenceError: env is not defined", source: "http://localhost:3012/worker/proxy.worker-62db5bc8…st6&max-batch-delay-ms=5000&max-batch-entries=100", lineNbr: 1307, colNbr: 16}
 
@@ -83,15 +68,19 @@ window.onerror = function (msg, source, lineNbr, colNbr, error) {
 window.onunhandledrejection = function (promiseRejectionEvent) {
   const { reason } = promiseRejectionEvent;
 
-  console.debug("centralError saw:", promiseRejectionEvent);    // DEBUG
+  console.debug("onunhandledrejection saw:", promiseRejectionEvent);    // DEBUG
+    //
+    // PromiseRejectionEvent{ isTrusted: true, promise: ..., reason: "TypeError: a is not a function" }
 
-  centralFatal("Unhandled Promise rejection:", reason);   // let run loosely
-
-  // tbd. if these occur in real life, add the showing of '#fatal' (or would 'central' do that, that'd be sweet)!
+  // "TypeError: a is not a function\n..." is likely a failure importing 'central' (a bug); skip such to avoid eternal loops.
+  //
+  if (! /^TypeError: [a-z] is not a function/.test(reason)) {
+    centralFatal("Unhandled Promise rejection:", reason);   // let run loosely
+  }
 
   prevOnUnhandledRejection(arguments);
 
-  // Samples don't return anything; see -> https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
+  return; // samples don't return anything; see -> https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
 }
 
 export { }
