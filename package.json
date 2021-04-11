@@ -7,7 +7,12 @@
     "no": "npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no1": "npm --prefix packages/app outdated",
     "_no2": "npm --prefix packages/app-deploy-ops outdated",
-    "_no3": "npm --prefix packages/backend outdated"
+    "_no3": "npm --prefix packages/backend outdated",
+    "-- ": "",
+    "postinstall": "patch -p0 --forward -i @firebase-performance-0.900.20.patch"
+  },
+  "devDependencies": {
+    "firebase": "0.900.23"
   },
   "//comments": {
     "_": [

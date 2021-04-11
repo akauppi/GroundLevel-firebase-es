@@ -70,19 +70,19 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
 
   // Firebase for both app and ops (+ tslib, idb)
   //
-  // /Users/.../app-deploy-ops/node_modules/@firebase/app/dist/index.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/performance/dist/index.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/util/dist/index.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/logger/dist/index.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/component/dist/index.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/installations/dist/index.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/firebase/auth/dist/index.esm.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/auth/dist/esm2017/index.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/firestore/dist/exp/index.browser.esm2017.js
-  // /Users/.../app-deploy-ops/node_modules/@firebase/auth/dist/esm2017/index-2cb9d3c8.js
-  // /Users/.../app-deploy-ops/node_modules/tslib/tslib.es6.js
-  // /Users/.../app-deploy-ops/node_modules/idb/lib/idb.mjs
-  // /Users/.../app-deploy-ops/node_modules/@firebase/webchannel-wrapper/dist/index.esm2017.js
+  // /Users/.../node_modules/@firebase/app/dist/index.esm2017.js
+  // /Users/.../node_modules/@firebase/performance/dist/index.esm2017.js
+  // /Users/.../node_modules/@firebase/util/dist/index.esm2017.js
+  // /Users/.../node_modules/@firebase/logger/dist/index.esm2017.js
+  // /Users/.../node_modules/@firebase/component/dist/index.esm2017.js
+  // /Users/.../node_modules/@firebase/installations/dist/index.esm2017.js
+  // /Users/.../node_modules/firebase/auth/dist/index.esm.js
+  // /Users/.../node_modules/@firebase/auth/dist/esm2017/index.js
+  // /Users/.../node_modules/@firebase/firestore/dist/exp/index.browser.esm2017.js
+  // /Users/.../node_modules/@firebase/auth/dist/esm2017/index-2cb9d3c8.js
+  // /Users/.../node_modules/tslib/tslib.es6.js
+  // /Users/.../node_modules/idb/lib/idb.mjs
+  // /Users/.../node_modules/@firebase/webchannel-wrapper/dist/index.esm2017.js
   //
   /\/node_modules\/@?(firebase\/auth)\//,
   /\/node_modules\/@?(firebase\/firestore)\//,
@@ -91,7 +91,7 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   /\/node_modules\/@?(firebase)\//,   // catch all of Firebase (keep AFTER the specific matches)
 
   /\/node_modules\/(tslib)\//,
-  [/\/app-deploy-ops\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
+  [/\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
 ];
 
 export {
