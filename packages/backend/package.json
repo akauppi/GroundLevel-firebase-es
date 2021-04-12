@@ -38,7 +38,7 @@
     "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules npx jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
     " -- ": "",
-    "deploy": "firebase deploy --only functions,firestore",
+    "deploy": "npx firebase-tools deploy --only functions,firestore",
     "predeploy": "tools/hack.sh 1",
     "postdeploy": "tools/hack.sh 2",
     " -- -": "",
@@ -72,6 +72,11 @@
       "",
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
+    "devDependencies": {
+      "firebase": [
+        "Must be 8.x because of this: https://github.com/akauppi/firebase-jest-testing/issues/13"
+      ]
+    },
     "scripts": {
       "//preinstall": [
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",

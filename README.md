@@ -79,9 +79,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
 ## Additional material
 
-The material supporting setting up the development environment, or teaching deeper knowledge, is available separately:
-
-- [Setting up a Firebase project](Setting up Firebase project)
+The [wiki](https://github.com/akauppi/GroundLevel-firebase-es/wiki) has supporting matterial on setting up the development environment, or teaching deeper knowledge. Wiki material is localized, unlike the repo.
 
 
 ## Firebase
@@ -114,36 +112,15 @@ You'll be instructed about Google Cloud where necessary, and both of the above m
 As global tools, you will need:
 
 - `npm`
-- `firebase` CLI (Command Line Interface)
+- `bash`
 
-  ```
-  $ npm install -g firebase-tools
-  ```
+We aim to support development on:
 
->💡 From time to time, run the `npm install -g firebase-tools` command again, to update the tools. Especially worth it if you run into problems.
+- Any Linux
+- Windows 10: Ubuntu under WSL2
+- latest macOS version
 
-<!--
-### OS support
-
-The project is developed on macOS.
--->
-
-<!-- too hand holding (to separate narration, for beginners)
-### An editor
-
-You need an editor for seeing and modifying the code. 
-
-- [WebStorm](https://www.jetbrains.com/webstorm/) (€ 59 -> 47 -> 35 per year for individual use with [discounts / free licenses for selected groups](https://www.jetbrains.com/webstorm/buy/#discounts?billing=yearly))
-- [Visual Studio Code](https://code.visualstudio.com)
-
-*Please suggest other IDEs you feel are good for a newcomer. Oldtimers likely won't convert, anyhow. ;)*
--->
-
-<!-- tbd.
-### Big enough screen
-
-In programming, the more you can see on the screen at once, the better. The author is very pleased with a single 4K screen, while others use multiple displays. Don't try to cram your vision to an old HD monitor - at least have two. It's like tunnel vision with eye glasses.
--->
+>The author has an idea on how to bring these closer to each other, via the tooling we use for CI/CD, but that's going to wait for a while. Please ask, if you are interested.
 
 
 ## Getting started
@@ -212,7 +189,7 @@ Select the project you want to use and give it an alias. The alias doesn't reall
 Now, you should be able to see your selected project:
 
 ```
-$ firebase use
+$ npx firebase-tools use
 Active Project: testing-220321
 ...
 ```

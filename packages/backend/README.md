@@ -13,22 +13,15 @@ Responsible for:
 ## Requirements
 
 - `npm`
-- `firebase-tools`
-
-   ```
-   $ npm install -g firebase-tools
-   ```
 
    >Note: We recommend `npm` 7.7.0+ due to some inconsistencies found with `npm` 6. If you need to use `npm` 6, run `npm run prepare` manually.
-
-It's good to update `firebase-tools` every now and then, especially if you have some difficulties.
 
 <!-- 
 developed with:
 - macOS 11.2
 - node 15.x
 - npx 7.7.x
-- firebase CLI 9.6.x
+- firebase CLI 9.9.0 (via 'npx')
 -->
 
 ## Getting started
@@ -63,12 +56,6 @@ $ npm run test:fns:userInfo
 
 ## Deploying
 
-### Select the Firebase project
-
-```
-$ firebase use --add
-```
-
 ### Let functions know their region
 
 Check your project's location either in [Firebase Console](https://console.firebase.google.com) > Project > App > ⚙️ > `Default GCP resource location`
@@ -76,7 +63,7 @@ Check your project's location either in [Firebase Console](https://console.fireb
 ..or by:
 
 ```
-$ firebase apps:sdkconfig
+$ npx firebase-tools apps:sdkconfig
 ...
 firebase.initializeApp({
   "projectId": "groundlevel-160221",
@@ -89,8 +76,11 @@ firebase.initializeApp({
 It seems the functions are not able to know this from Firebase itself; we need to set it to a config that the functions run with. This is a one time thing.
 
 ```
-$ firebase functions:config:set regions.0="europe-west6"   # use the 'locationId' from above
+$ npx firebase-tools functions:config:set regions.0="europe-west6"   # use the 'locationId' from above
 ```
+
+This setting is a one-time errand unless you change regions. You can now forget about it.
+
 
 ### Actual deployment
 
