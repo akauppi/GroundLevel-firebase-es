@@ -1,22 +1,25 @@
 {
-  "name": "@root/abc",
+  "name": "@local/root",
   "private": true,
   "scripts": {
-    "//firebase-use": "firebase use --add && tools/sync-firebase-projects.sh",
+    "activate": "firebase use --add && tools/spread-activation.sh",
     "--": "",
     "no": "npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no1": "npm --prefix packages/app outdated",
     "_no2": "npm --prefix packages/app-deploy-ops outdated",
     "_no3": "npm --prefix packages/backend outdated",
     "-- ": "",
-    "postinstall": "patch -p0 --forward -i @firebase-performance-0.900.20.patch"
+    "postinstall": "patch -p0 --forward -i @firebase-performance-0.900.23.patch"
   },
   "devDependencies": {
-    "firebase": "0.900.23"
+    "eslint": "^7.24.0",
+    "firebase": "^0.900.23",
+    "firebase-tools": "^9.9.0"
   },
   "//comments": {
     "_": [
-      "This 'package.json' serves as a place for build-time tooling common to the subpackages."
+      "This 'package.json' serves as a place for build-time tooling common to the subpackages, and as the source",
+      "for 'firebase' and '@firebase' packages. This saves disk space and keeps all subpackages using the same version."
     ]
   }
 }

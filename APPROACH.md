@@ -9,9 +9,10 @@ This is a monorepo. That means that there are multiple subprojects under the one
 
 |||dev|testing|deploy|monitoring|
 |---|---|---|---|---|---|
-|`packages/app`|Front-end application|☑️|☑️|-|-|
-|`packages/app-deploy-ops`|Front-end application|-|-|☑️|☑️|
-|`packages/backend`|Back-end|☑️|☑️|☑️|?|
+|`packages/app`|Front-end application|&check;|&check;|-|
+|`packages/app-deploy-ops`|Front-end application|-|-|&check;|
+|`packages/backend`|Back-end|&check;|&check;|&check;|
+|`ops`|Whole app|-|-|-|&check;|
 
 This splitting is an important thing. It allows you - as a lone developer - to focus on a certain subdomain of your application instead of the overwhelming feeling when there are simply too many things "up in the air". It facilitates *interfaces*, and interfaces are good for *testability*.
 
@@ -19,9 +20,19 @@ Most repos the author has seen are not like this. Either one has separate (teams
 
 The three repos are connected, of course. They have `file:...` links which means you don't have to publish any of the repos anywhere. They are simply build-walled separations of concern.
 
-At places, this arrangement is a bit tedious. You must separately update dependencies in all three repos, but now you know it's by design and the alternative would - likely - be (much) worse.
-
+<!--
 >Suggestions on how dependency management (`npm install`) could be centralized are welcome!
+-->
+
+### Common dependencies
+
+Packages used by multiple subpackages are installed at the *root* and accessed by the subpackages via `"file:../../node_modules/*package*" links. 
+
+This has the following benefits:
+
+- uses less disk space on traditional `npm` (eg. Firebase JS SDK is installed only once, saving over 150MB)
+- same version used by all subpackages
+- one update per package
 
 
 ## IDE freedom

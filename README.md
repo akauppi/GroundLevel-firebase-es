@@ -148,10 +148,18 @@ In programming, the more you can see on the screen at once, the better. The auth
 
 ## Getting started
 
+```
+$ npm install
+```
+
+This installs some common packages, Firebase JS SDK as the most important one. Subpackages use them from the root, and this is where you update the common ones.
+
+---
+
 If you are mostly interested in UI development, and don't want to create a Firebase project just yet, go to the `packages/app` directory and see its `README.md`.
 
 If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
-through the tree subpackages, and end up having a clone of the sample application installed *on your Firebase account*, in the cloud. 
+through the three subpackages, and end up having a clone of the sample application installed *on your Firebase account*, in the cloud. 
 
 ---
 
@@ -183,7 +191,9 @@ There are three subpackages in the repo: `backend`, `app` and `app-deploy-ops`. 
 
 ### Create a Firebase project
 
-Follow the instructions in [README.firebase.md](./README.firebase.md) so that you have a Firebase project created.
+Follow the instructions in [the wiki](https://github.com/akauppi/GroundLevel-firebase-es/wiki/FI%200.1-firebase) so that you have a Firebase project created.
+
+>Hey, what language is this?? It's Finnish. Try your luck. Contribution of translating those instructions to English is welcome! 🙂
 
 You *will* need a credit card for creating the "Blaze" plan. If you don't want to do that yet, choose the free plan and continue as far as you can. 👍
 
@@ -192,10 +202,12 @@ You *will* need a credit card for creating the "Blaze" plan. If you don't want t
 Okay, have the Firebase project? Let's check in.
 
 ```
-$ firebase use --add
+$ npm run activate
 ```
 
 Select the project you want to use and give it an alias. The alias doesn't really matter, `abc` is just fine..
+
+>Note: The repo uses `firebase use --add` underneath, and distributes your selection to the subpackages. If you need to change your active project, do it here at the root level - otherwise your packages will be using different Firebase projects and that'd be... unhelpful.
 
 Now, you should be able to see your selected project:
 
@@ -205,21 +217,13 @@ Active Project: testing-220321
 ...
 ```
 
-<!-- tbd. Here could be a step to distribute the check-in to subpackages:
-./tools/check-em-all.sh
-
-- copy '.firebaserc' (no links needed) and 
-- modify the state file 
--->
-
-
 The repo has three subpackages:
 
 - `packages/backend`
 - `packages/app`
 - `packages/app-deploy`
 
-At the moment, each one of these needs to be activated separately, for Firebase. We're [considering](https://github.com/akauppi/GroundLevel-firebase-es/issues/41) making this easier for you. It's like a hotel with three separate check-in counters. That would be strange, right?
+We'll briefly visit each of these, in turn.
 
 
 ### Back-end: build and deploy
@@ -228,11 +232,7 @@ At the moment, each one of these needs to be activated separately, for Firebase.
 $ cd packages/backend
 ```
 
-```
-$ firebase use --add
-```
-
-Next, we'll install the dependencies and deploy the database access rules and Cloud Functions:
+Install the dependencies and deploy the database access rules and Cloud Functions:
 
 ```
 $ npm install
@@ -279,12 +279,6 @@ Next, we'll prepare the front end and deploy it as well.
 $ cd ../app
 ```
 
-Do again the `firebase use`:
-
-```
-$ firebase use --add
-```
-
 ```
 $ npm install
 ```
@@ -315,12 +309,6 @@ What we now have is the web app's *logic*. It is not ready for deployment, yet. 
 
 ```
 $ cd ../app-deploy-ops
-```
-
-You know the drill:
-
-```
-$ firebase use --add
 ```
 
 ```

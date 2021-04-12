@@ -50,7 +50,7 @@
     "vue-router": "^4.0.6"
   },
   "peerDependencies": {
-    "firebase": "^0.900.20"
+    "firebase": "^0.900.23"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
@@ -58,12 +58,12 @@
     "@vue/compiler-sfc": "^3.0.11",
     "concurrently": "^6.0.0",
     "cypress": "^6.5.0",
-    "eslint": "^7.22.0",
+    "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.8.0",
-    "firebase": "^0.900.20",
-    "firebase-admin": "^9.5.0",
+    "firebase": "file:../../node_modules/firebase",
+    "firebase-admin": "^9.6.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.8",
     "vite": "^2.1.5",
