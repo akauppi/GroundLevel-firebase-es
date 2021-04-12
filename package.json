@@ -9,7 +9,7 @@
     "_no2": "npm --prefix packages/app-deploy-ops outdated",
     "_no3": "npm --prefix packages/backend outdated",
     "-- ": "",
-    "postinstall": "patch -p0 --forward -i @firebase-performance-0.900.23.patch"
+    "postinstall": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
   },
   "devDependencies": {
     "eslint": "^7.24.0",

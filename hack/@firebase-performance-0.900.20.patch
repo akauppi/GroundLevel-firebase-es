@@ -1,12 +1,10 @@
- /**
-  * @license
-  * Copyright 2020 Google LLC
-@@ -74,8 +74,16 @@
+--- index.esm2017.js.untouched	2021-04-12 21:26:44.000000000 +0300
++++ node_modules/@firebase/performance/dist/index.esm2017.js	2021-04-12 21:28:21.000000000 +0300
+@@ -74,7 +74,15 @@
      ["invalid String merger input" /* INVALID_STRING_MERGER_PARAMETER */]: 'Input for String merger is invalid, contact support team to resolve.',
      ["already initialized" /* ALREADY_INITIALIZED */]: 'Performance can only be initialized once.'
  };
 -const ERROR_FACTORY = new ErrorFactory(SERVICE, SERVICE_NAME, ERROR_DESCRIPTION_MAP);
--
 +//const ERROR_FACTORY = new ErrorFactory(SERVICE, SERVICE_NAME, ERROR_DESCRIPTION_MAP);
 +
 +const ERROR_FACTORY = {
@@ -16,17 +14,15 @@
 +    return create(...args);
 +  }
 +}
-+
+ 
  /**
   * @license
-  * Copyright 2020 Google LLC
-@@ -92,9 +100,22 @@
+@@ -92,8 +100,21 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
 -const consoleLogger = new Logger(SERVICE_NAME);
 -consoleLogger.logLevel = LogLevel.INFO;
--
 +//const consoleLogger = new Logger(SERVICE_NAME);
 +//consoleLogger.logLevel = LogLevel.INFO;
 +
@@ -42,19 +38,15 @@
 +    logger[level](...args);
 +  }
 +}
-+
+ 
  /**
   * @license
-  * Copyright 2020 Google LLC
 @@ -1498,8 +1519,24 @@
  function registerPerformance() {
      _registerComponent(new Component('performance-exp', factory, "PUBLIC" /* PUBLIC */));
  }
 -registerPerformance();
 -registerVersion(name, version);
--
--export { getPerformance, initializePerformance, trace };
--//# sourceMappingURL=index.esm2017.js.map
 +//registerPerformance();
 +//registerVersion(name, version);
 +
@@ -74,5 +66,6 @@
 +
 +//export { getPerformance, initializePerformance, trace };
 +export { getPerformanceWrapper as getPerformance, initializePerformanceWrapper as initializePerformance, trace };
-+
-+//# sourceMappingURL=index.esm2017.js.map
+ 
+-export { getPerformance, initializePerformance, trace };
+ //# sourceMappingURL=index.esm2017.js.map
