@@ -139,7 +139,6 @@ export default {
   //    for using the mechanism as a macro (to inject code). Not so nice for strings.
   //
   define: {
-    "_LOCAL_PROJECT": process.env.GCLOUD_PROJECT,   // only used by init (dev)
     "_VERSION": "\"0.0.0\""
   },
 

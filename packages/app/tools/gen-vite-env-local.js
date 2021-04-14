@@ -33,6 +33,7 @@ if (! (a && b && c)) {
   console.error("Faulty input - unable to read all ports!", { emulators });
   process.exit(3);
 }
+const projectId='app';    // fixed for now (could come from the caller)
 
 const out =
 `# Generated based on 'firebase.json'.
@@ -41,6 +42,7 @@ const out =
 VITE_FIRESTORE_PORT=${a}
 VITE_FUNCTIONS_PORT=${b}
 VITE_AUTH_PORT=${c}
+VITE_PROJECT_ID=${projectId}
 `;
 
 process.stdout.write(out);

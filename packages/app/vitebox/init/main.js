@@ -18,13 +18,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   console.info("Initializing for LOCAL EMULATION");
 
-  // For Firestore, we need to match the project id given in launching the emulators.
-  //
-  const projectId = window._LOCAL_PROJECT || (() => {    // "app"
-    throw new Error("'_LOCAL_PROJECT' not defined");
-  })();
-
-  console.debug("Project id:", projectId);
+  const projectId = import.meta.env.VITE_PROJECT_ID;
 
   const fah= initializeApp( {
     projectId,

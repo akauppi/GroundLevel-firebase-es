@@ -534,6 +534,8 @@ useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
 useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
 ```
 
+Mentioned in [#4781](https://github.com/firebase/firebase-js-sdk/issues/4781).
+
 
 ## References
 
