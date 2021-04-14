@@ -5,11 +5,6 @@ Web application sample project.
 ## Requirements
 
 - `npm`
-- `firebase-tools`
-
-   ```
-   $ npm install -g firebase-tools
-   ```
 
 <!--
 Development is done with: 
@@ -17,7 +12,7 @@ Development is done with:
 - latest macOS (11.2.x)
 - latest node (15.x)
 - npm (7.5.x)
-- firebase CLI (9.5.0)
+- firebase CLI (9.9.0 via 'npx')
 -->
 
 ## Getting started
@@ -46,11 +41,6 @@ This serves the UI locally, against an emulated Firebase back-end, with Security
 Authentication is not included in this "local" mode. Instead, you provide the user name as a query parameter. Try it out:
 
 [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
-
-<!-- (future me: can I make any sense of this??)
-
-Tests use the same server and there are tests for the sign-in, so we didn't want to just automatically sign you in. Now you know. Now, you can forget..
--->
 
 Try making some changes in the `src/**` files and see that they are reflected in the browser.
 
@@ -99,10 +89,10 @@ Use this mode when:
 
 - you are developing back-end features (Firestore security rules, Cloud Functions) and want to test that they work with the front-end. <font color=gray>*[instructions later in this doc]*</font>
 - you want to start with primed data and users, each time, instead of persisting the changes
-- you want to use automatic sign-in, to speed up development a few clicks
+- you want to skip the sign-in dialog, to speed up development a few clicks
 - you don't have a Firebase account (yet?)
 
-With local mode, you can test back-end features while developing them, and only deploy working back-end stuff. This means you should not need a "development environment" in the cloud, but only "staging" and production (more of those, later).
+With local mode, you can test back-end features while developing them, and only deploy working back-end stuff.
 
 <!-- tbd. eventually, move workflow discussions to the root level
 -->
@@ -179,22 +169,23 @@ Use this when:
 - you have a Firebase account
 - you want to sign in as a real user
 
-#### Firebase project
-
-Check the [main repo](https://github.com/akauppi/GroundLevel-es-firebase-web) for instructions on how to create a Firebase project. Then:
-
-```
-$ firebase use --add
-```
-
->**Deep note**: 
->When using Firebase hosting, one's project configuration is offered automatically at `/__/firebase/init.js[on]`. We use Vite so an extra step is needed: the `package.json` scripts ask Firebase CLI for the active project each time you run `npm run dev:online`, and write the information to `vitebox/.env.development` file, from where browsers get it.
-
 #### Security note
 
-The access values ("apiKey" and "authDomain") needed for Firebase authentication are not exactly secret. This repo has been created in a way that you don't need to store them in the version control, but they are visible for anyone having access to your web app.
+Firebase web apps use certain access keys to identify themselves to the backend. Firebase hosting provides them at `/__/firebase/init.js[on]` but since we use Vite, those are placed at build time to `vitebox/.env.development`.
 
-The guidance on how to deal with these values varies a bit between Firebase and Google Identity Platform (superset of Firebase):
+```
+# Access values for the Firebase project.
+# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev:online'.
+#
+VITE_API_KEY=AIza...-MIo
+VITE_APP_ID=1:337...:web:277...be8
+VITE_AUTH_DOMAIN=groundlevel-160221.firebaseapp.com
+VITE_PROJECT_ID=groundlevel-160221
+```
+
+Those values (API key and App id) are not exactly secret. This repo has been created in a way that you don't need to store them in the version control, but they are visible for anyone having access to your web app.
+
+The guidance on how to deal with these values varies a bit between Firebase and Google Identity Platform (superset of Firebase Auth):
 
 - [Learn about using and managing API keys for Firebase](https://firebase.google.com/docs/projects/api-keys) (Firebase docs)
 - Google Identity Platform: [Using API keys](https://cloud.google.com/docs/authentication/api-keys) (Google Cloud docs)
@@ -225,11 +216,11 @@ You can run the two modes simultaneously, in different terminals. By default, lo
 
 Just try, which suits your way. :)
 
-As a guideline, if you work on UI features only, `dev:online` may be better.
+As mentioned above, if you work on UI features only, `dev:online` may be better.
 
-If you work on removing data, `dev:local` may suit best, since it makes it always boots from a known-good data set (and users).
+If you work on removing data, `dev:local` may suit best, since it always boots from a known-good data set (and users).
 
-You can customize the `local/*` setup to your development needs. Tests use something similar to "local" mode, but carry their own data and users. Thus, they are safe from your changes.
+You can customize the `local/*` setup to your development needs. Tests carry their own data and users, so they are safe from your changes.
 
 Before we look at tests (separate page), a brief mention on linting:
 
@@ -243,7 +234,7 @@ $ npm run lint
 
 This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
 
->Note: At the moment (Jan 2021) we're not focused on reducing the number of lints (if they are warnings).
+>Note: At the moment (Apr 2021) we're not focused on reducing the number of lint warnings (or even errors).
 
 With the sample app, there may be warnings but there should not be errors.
 

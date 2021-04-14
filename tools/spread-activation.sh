@@ -19,29 +19,26 @@ set -eu -o pipefail
 #     $ tools/spread-activation.sh
 #   <<
 #
-# Requires:
-#   - firebase
-#
 #if [ $# -eq 0 ]; then
 #  echo "Usage: $0 version"
 #  exit 1
 #fi
 
-FIREBASE=`pwd`/node_modules/.bin/firebase
+#FIREBASE=`pwd`/node_modules/.bin/firebase
+#
+#if [[ ! -x $FIREBASE ]]; then
+#  echo "Firebase CLI not found; please run 'npm install'"
+#  exit 3
+#fi
 
-if [[ ! -x $FIREBASE ]]; then
-  echo "Firebase CLI not found; please run 'npm install'"
-  exit 3
-fi
+FIREBASE="npx firebase-tools"
 
 # Check that there is an active project
 #
-# BUG: This DOES NOT RETURN if there's not an active project. Why? Would like to if/else. #help
-#
 _PROJ=$($FIREBASE use | cat)
 
-if [ "${_PROJ}" == "\nError: No active project" ]; then   # tbd. this line not tested
-  echo "NO "
+if [[ "${_PROJ}" != *"No active project"* ]]; then   # tbd. test that this works
+  >&2 echo "ERROR: No active project."
   exit 88
 fi
 
@@ -52,4 +49,3 @@ for subPath in packages/backend packages/app packages/app-deploy-ops ; do
   cp .firebaserc $subPath
   (cd $subPath && $FIREBASE use $_PROJ)
 done
-

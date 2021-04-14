@@ -7,19 +7,25 @@
     "no": "npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no1": "npm --prefix packages/app outdated",
     "_no2": "npm --prefix packages/app-deploy-ops outdated",
-    "_no3": "npm --prefix packages/backend outdated",
+    "_no3": "npm --prefix packages/backend outdated && npm --prefix packages/backend/functions outdated",
     "-- ": "",
     "postinstall": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
   },
   "devDependencies": {
     "eslint": "^7.24.0",
-    "firebase": "^0.900.23",
+    "firebase": "^9.0.0-beta.1",
     "firebase-tools": "^9.9.0"
   },
   "//comments": {
     "_": [
       "This 'package.json' serves as a place for build-time tooling common to the subpackages, and as the source",
       "for 'firebase' and '@firebase' packages. This saves disk space and keeps all subpackages using the same version."
-    ]
+    ],
+    "devDependencies": {
+      "firebase-tools": [
+        "We only use this via 'npx firebase-tools'. Should be confirmed, whether installing it up-front provides any benefit,",
+        "over just leaving uninstalled. (at the least, we notice when there are version updates!)"
+      ]
+    }
   }
 }

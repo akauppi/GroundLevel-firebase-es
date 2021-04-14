@@ -37,7 +37,10 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
    - `node` v. 14.3 or later
    - `npm` - preferably version 7.7
-   - `bash`, `sed` etc. command line tools
+   - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
+
+<!-- tbd. update above list of command line tools (it's not complete)
+--> 
 
   For Windows development, we recommend the [WSL2]() environment with eg. Ubuntu Linux variant. The [Microsoft article]() is worth a read.
 

@@ -1,0 +1,15 @@
+{
+  "description": "Tools common to the subpackages",
+  "private": true,
+  "bin": {
+    "abc": "./abc.sh",
+    "check-activation": "./check-activation",
+    "port-is-free": "./port-is-free.sh"
+  },
+  "//": {
+    "": [
+      "Provides tools for the subpackages. When they add a 'file' dependency to us, all the above commands become ",
+      "instantly available!"
+    ]
+  }
+}
