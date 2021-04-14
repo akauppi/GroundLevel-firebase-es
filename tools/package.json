@@ -3,7 +3,7 @@
   "private": true,
   "bin": {
     "abc": "./abc.sh",
-    "check-activation": "./check-activation",
+    "check-activation": "./check-activation.sh",
     "port-is-free": "./port-is-free.sh"
   },
   "//": {

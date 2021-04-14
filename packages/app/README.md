@@ -11,8 +11,7 @@ Development is done with:
 
 - latest macOS (11.2.x)
 - latest node (15.x)
-- npm (7.5.x)
-- firebase CLI (9.9.0 via 'npx')
+- npm (7.9.x)
 -->
 
 ## Getting started

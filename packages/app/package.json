@@ -32,20 +32,19 @@
     "  ---": "",
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
+    "//test": "which firebase",
     "  - ": "",
     "prebuild": "npm run --silent _checkNoLinks",
-    "predev:local": "npm run --silent _checkFirebaseEmulVer && (PORT=3000 npm run --silent _checkPortIsFree) && npm run --silent _genEnvLocal",
+    "predev:local": "(PORT=3000 npm run --silent _checkPortIsFree) && npm run --silent _genEnvLocal",
     "predev:online": "(PORT=3001 npm run --silent _checkPortIsFree) && npm run --silent _genEnvOnline",
-    "//predev:online": "npm run --silent _checkFirebaseActiveProj && (PORT=3001 npm run --silent _checkPortIsFree) && npm run --silent _genEnvOnline",
-    "_checkFirebaseEmulVer": "tools/firebase-ver-check.sh 8.15.0 || ( >&2 echo \"Please install 'firebase-tools' 8.15.0 or later.\n\"; exit 8)",
-    "//_checkFirebaseActiveProj": "[[ $(firebase use | cat) != *\"No active project\"* ]] || ( >&2 echo \"ERROR: No active project. Please run 'firebase use <alias>' or 'firebase use --add'.\n\"; exit 1)",
-    "_checkPortIsFree": "tools/port-is-free.sh $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)",
+    "_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)",
     "_checkNoLinks": "tools/check-no-links.sh || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; exit 8)",
     "_genEnvLocal": "node --harmony-top-level-await --experimental-json-modules tools/gen-vite-env-local.js firebase.json > vitebox/.env.dev_local",
-    "_genEnvOnline": "node --harmony-top-level-await tools/gen-vite-env-online.js > vitebox/.env.development"
+    "_genEnvOnline": "node --harmony-top-level-await tools/gen-vite-env-online.js > vitebox/.env.development",
+    "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
   },
   "dependencies": {
-    "aside-keys": "^0.0.2-alpha.3",
+    "aside-keys": "^0.0.2-alpha.4",
     "vue": "^3.0.11",
     "vue-router": "^4.0.6"
   },
@@ -54,6 +53,7 @@
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
+    "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.11",
     "concurrently": "^6.0.0",
@@ -88,9 +88,6 @@
         "in the browser: '[plugin:vite:css] Preprocessor dependency \"sass\" not found. Did you install it?\n'"
       ]
     },
-    "files": [
-      "Leaving intentionally out Firebase (and tslib); index.html; those are provided by the production build."
-    ],
     "engines": [
       "'>=14.3' for '—-harmony-top-level-await'",
       "'>=13.2' for ES module support",

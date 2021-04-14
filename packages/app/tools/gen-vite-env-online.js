@@ -32,7 +32,7 @@ function execProm(cmd) {    // string => Promise of { stdout: string, stderr: st
 
 // Get access values of the active Firebase project (fail when no active project).
 //
-const cmd = 'firebase apps:sdkconfig';
+const cmd = 'npx firebase-tools apps:sdkconfig';
 
 const { stdout } = await( execProm(cmd) ).catch( ({ err, stdout, stderr }) => {
   // err.code: 1

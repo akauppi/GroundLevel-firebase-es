@@ -24,25 +24,27 @@ set -eu -o pipefail
 #  exit 1
 #fi
 
-#FIREBASE=`pwd`/node_modules/.bin/firebase
+# Using a locally installed 'firebase-tools' over using 'npx firebase-tools' has an advantage. 'npx firebase-tools'
+# would prompt for installation from the user, when operating in the subpackages. Also, this allows us to keep track
+# of the package version.
 #
-#if [[ ! -x $FIREBASE ]]; then
-#  echo "Firebase CLI not found; please run 'npm install'"
-#  exit 3
-#fi
+FIREBASE=`pwd`/node_modules/.bin/firebase
 
-FIREBASE="npx firebase-tools"
+if [[ ! -x $FIREBASE ]]; then
+  echo "Firebase CLI not found; please run 'npm install'"
+  exit 3
+fi
+
+#FIREBASE="npx firebase-tools"
 
 # Check that there is an active project
 #
 _PROJ=$($FIREBASE use | cat)
 
-if [[ "${_PROJ}" != *"No active project"* ]]; then   # tbd. test that this works
+if [[ "${_PROJ}" == *"No active project"* ]]; then
   >&2 echo "ERROR: No active project."
-  exit 88
+  exit 2
 fi
-
-# Have active project.
 
 for subPath in packages/backend packages/app packages/app-deploy-ops ; do
   echo "Activating in: $subPath ..."
