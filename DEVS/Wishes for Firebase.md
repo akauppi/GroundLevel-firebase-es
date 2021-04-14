@@ -503,6 +503,38 @@ On the other hand, the author got the feeling that in the `@exp` API's `initiali
 This is LIKELY a BOGUS thing to even ask. Let's presume IndexedDB is the implementation and the developer does not need to care! :)
 -->
 
+## Tiny: Document the default logging level
+
+https://modularfirebase.web.app/reference/firestore_.setloglevel
+
+Documentation should state which is the default level.
+
+Similarly [here](https://modularfirebase.web.app/reference/auth.getauth): 
+
+>Initializes an Auth instance with platform specific default dependencies.
+
+[and](https://modularfirebase.web.app/reference/firestore_.getfirestore):
+
+>with default settings.
+
+## API inconsistency: `getFunctions` behaves like `initializeFunctions` (which doesn't exist)
+
+```
+  // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
+  // takes parameters (that it doesn't, on other subpackages). #firebase
+```
+
+## API inconsistency: `useAuthEmulator` takes a URL whereas others prefer host + port
+
+API 9.0-beta.1
+
+```
+useAuthEmulator(auth, AUTH_URL);
+useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
+useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
+```
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

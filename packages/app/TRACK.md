@@ -43,37 +43,10 @@ Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 
 If they react on the issue, we can remove the extra plugin.
 
-
-<strike>
-## Loading FirebaseUI as ES module
-
-After updating to FirebaseUI 4.7.1, we are close to importing it as ES module. These remain:
-
-- ["updateCurrentUser failed" error on screen, after using 4.7.1 via ES module import](https://github.com/firebase/firebaseui-web/issues/776)
-  - no work-around known!
-  
-- [Importing as ES module should bring in the CSS](https://github.com/firebase/firebaseui-web/issues/777)
-  - have work-around
-</strike>
-
-
-## @vitejs/plugin-vue - don't use 1.1.1 .. 1.1.2
-
-- [1726](https://github.com/vitejs/vite/issues/1726)
-- [ ] should we modify something?
-
-Vite does not tell. Even if I asked.
-
-Version is now fixed to 1.1.0.
-
-`#help`
-
-
-## Rollup-plugin-vue dependency
-
+<!--
 This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs/rollup-plugin-vue/issues/364) and thus with us not needing to load a plugin.
 
 - [https://github.com/Norserium/vue-advanced-cropper/issues/72](https://github.com/Norserium/vue-advanced-cropper/issues/72)
-
+-->
 
 

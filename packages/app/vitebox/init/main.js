@@ -7,13 +7,13 @@
 import { assert } from './assert.js'
 
 import { initializeApp } from 'firebase/app'
-import { getAuth, useAuthEmulator } from 'firebase/auth'
-import { getFirestore, useFirestoreEmulator } from 'firebase/firestore'
+import { /*getAuth,*/ initializeAuth, useAuthEmulator } from 'firebase/auth'
+import { /*getFirestore,*/ initializeFirestore, useFirestoreEmulator, setLogLevel as setFirestoreLogLevel } from 'firebase/firestore'
 import { getFunctions, useFunctionsEmulator } from 'firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-async function initFirebaseLocal() {   // () => Promise of FirebaseApp
+async function initFirebaseLocal() {   // () => Promise of ()
   assert(LOCAL);
 
   console.info("Initializing for LOCAL EMULATION");
@@ -47,6 +47,7 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
+  /*** was
   // Firebase note:
   //    'getAuth' initializes the default authentication and (it or 'initializeAuth') MUST BE CALLED BEFORE any other
   //    SDK access.
@@ -58,6 +59,30 @@ async function initFirebaseLocal() {   // () => Promise of FirebaseApp
   //
   //const [firestore, fns, auth] = [getFirestore(fah), getFunctions(fah), getAuth(fah)];  // fails
   const [auth, firestore, fns] = [getAuth(fah), getFirestore(fah), getFunctions(fah)];  // ok :)
+  ***/
+
+  // Prefer 'initializeX' over 'getX' since the latter is simply a proxy to the former. More explicit, this way.
+  //
+  const auth = initializeAuth(fah);
+  const firestore = initializeFirestore(fah, {
+    //experimentalAutoDetectLongPolling: true,
+    //experimentalForceLongPolling: true,
+    //host: `localhost:${FIRESTORE_PORT}`,
+    //ssl: false
+  });
+
+  // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
+  // takes parameters (that it doesn't, on other subpackages). #firebase
+  //
+  const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
+
+  /*
+  * <<
+  *   If these issues persist, please provide debug logs for Firestore with and without experimentalForceLongPolling.
+  *   This will give us some insight into the network traffic.
+  * <<
+  */
+  setFirestoreLogLevel('debug');
 
   useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
   useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
