@@ -224,6 +224,54 @@ You can customize the `local/*` setup to your development needs. Tests carry the
 Before we look at tests (separate page), a brief mention on linting:
 
 
+## Tuning Security Rules
+
+Note that in "local" mode, also changes to security rules are picked up without need to restart the emulator - though the file being edited is in another subpackage, `../backend`.
+
+Edit the rules, refresh the browser; the new rules are in effect!
+
+If rules have problems, check the output on the terminal where `npm run dev` was run:
+
+```
+[emul] ⚠  node_modules/@local/backend/firestore.rules:110:16 - WARNING Unused function: isMember.
+[emul] ⚠  node_modules/@local/backend/firestore.rules:112:11 - WARNING Invalid variable name: request.
+[emul] ⚠  node_modules/@local/backend/firestore.rules:115:16 - WARNING Unused function: isRemoved.
+[emul] ⚠  node_modules/@local/backend/firestore.rules:116:29 - WARNING Invalid variable name: resource.
+[emul] ✔  firestore: Rules updated.
+```
+
+### Rules log
+
+Also keep an eye on `firestore-debug.log`. The Firestore emulator writes information to it that might help in debugging.
+
+```
+$ tail -n 20 -f firestore-debug.log 
+...
+```
+
+### `debug` directive
+
+By surrounding any value in the Rules with `[debug](https://firebase.google.com/docs/reference/rules/rules.debug)`, you can output its value in the Rules log.
+
+```
+null_value: NULL_VALUE
+```
+
+>Hint: Add an otherwise unnecessary `debug` to provide diagnostics labels in the output:
+>
+>```
+>allow read: if debug("request.auth") && debug(request.auth)
+>```
+>
+>Generates output:
+>
+>```
+>string_value: "request.auth"
+>
+>null_value: NULL_VALUE
+>```
+
+
 ## Linting
 
 ```

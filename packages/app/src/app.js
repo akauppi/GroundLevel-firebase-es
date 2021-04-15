@@ -25,7 +25,7 @@ import { appInitTrack, someCounter } from './meas'
 import App from '/@App/index.vue'
 
 import './common.css'
-import { assert } from '/@tools/assert'
+//import { assert } from '/@tools/assert'
 
 document.title = appTitle;
 
@@ -43,7 +43,7 @@ async function init() {    // () => Promise of ()
   // Production: Initialize the authentication system
   if (!LOCAL) {
     // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
-    //    the requested persistence. #rework
+    //    the requested persistence (or can we change the persistence once initialized?). #rework
 
     /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
       tr.lap('aside-keys initialization');    // 499..530ms

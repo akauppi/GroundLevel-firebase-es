@@ -45,7 +45,7 @@
 </style>
 
 <script>
-  import { computed, onMounted, onUpdated, onUnmounted, toRefs, watch, ref } from 'vue'
+  import { computed, onMounted, onUpdated, onUnmounted } from 'vue'
 
   import NewTile from './NewTile.vue'
   import ProjectTile from './ProjectTile/index.vue'

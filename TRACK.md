@@ -56,3 +56,8 @@ If they leak all the files through, what's the point?
 
 Note that "alpha" (obviously) isn't mentioned in the supported SDKs.
 
+
+## Firebase SDK: peer dependency warnings
+
+- [peerDependency warnings when installed with yarn@1/npm@7](https://github.com/firebase/firebase-js-sdk/issues/4789)
+
