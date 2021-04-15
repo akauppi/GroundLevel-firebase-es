@@ -60,7 +60,7 @@
     "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.1.5",
     "@vue/compiler-sfc": "^3.0.11",
-    "concurrently": "^6.0.0",
+    "concurrently": "^6.0.2",
     "cypress": "^7.1.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.2",

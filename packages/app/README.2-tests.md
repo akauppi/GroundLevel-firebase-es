@@ -3,9 +3,7 @@ Prev: [README](./README.md)
 *This second half of the `README` discusses tests and co-developing with the back-end.*
 
 
-## Running tests
-
-### Introducing Cypress
+## Introducing Cypress
 
 We use [Cypress](http://cypress.io) for testing the front-end.
 
@@ -20,15 +18,16 @@ Cypress is a full desktop application. It carries its own browser (Electron), bu
 Why do we want to install it via `npm`?
 
 - Cypress [recommends](https://docs.cypress.io/guides/getting-started/installing-cypress.html) doing so.
-- It is a versioned tool: this way we can hopefully steer clear of version incompatibilities (less annoyance)
+- It is a versioned tool: this way we can hopefully steer clear of version incompatibilities (no surprises)
 - It does cache the binary parts, and they are reused across projects.
 
 Learning Cypress is a worthy thing. Please have a look at their [documentation](https://docs.cypress.io/guides/overview/why-cypress.html#In-a-nutshell) to "learn the ropes".
 
+## Testing
 
-### Testing approach
+### Approach
 
-We don't use (need to use) any stubs or proxies that Cypress mentions in their doc. Since a full Firebase back-end is emulated, all necessary features are available for the front-end.
+Some Cypress features like "stubs" and "proxies" we don't need, at all. Those are intended as scaffolding when running things locally, but we have the whole Firebase emulators behaving like the Real Thing.
 
 
 ### Run them all (CI style)
@@ -46,7 +45,7 @@ $ npm test
 
 ### Test based development
 
-The other way is to keep `npm run dev` running, and edit both one's code and tests while keeping an eye on the test results.
+The other way is to keep `npm run dev` running, and edit both one's code and tests (and Security Rules) while keeping an eye on the test results.
 
 Have `npm run dev` running in the background. Then:
 
@@ -75,38 +74,8 @@ In short, you can:
 
 The Cypress approach changes the way we do software. The more time you spend with it, the more time it likely will save you.
 
->Hint: It's practical to launch Cypress from an OS icon. To do this in macOS, first launch like above. Then make the icon permanent (right click > Options > Keep in Dock). Other OS'es have similar mechanisms.
+>Hint: It's practical to launch Cypress from an OS icon. To do this in macOS, first launch like above. Then make the icon permanent (right click > `Options` > `Keep in Dock`). Other OS'es have similar mechanisms.
 
-#### Give feedback!
+---
 
-If you find that some tests can be implemented better, do the Right Thing and tell the author. The tests we sport are intended to showcase good, modern way of testing web applications.
-
-
-### Tests as a communication medium
-
-You probably are already doing this... 
-
-Tests are often simpler than actual code. They are more readable. This makes them something that one can discuss with one's Mom, Grandma, kids, or... the boss. Even a project manager.
-
-Maybe you wish to write tests together. Heck! Teach them Cypress and they can write tests for you (to refine, and pass).
-
-Let us know in the [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web) how it went! 🤡🤖👩‍🔧👨‍🎨
-
-
-
-<!-- disabled (we don't need to mention it; used to be trickier)
-## Changes to the back-end
-
-If you need to do changes to the back-end, while test-based developing the front, just restart the server (`npm run dev`) and refresh the browser.
--->
-
-
-## Contribution
-
-As always, contributions and discussions are welcome.
-
-Please use primarily the [GitHub Issues](https://github.com/akauppi/GroundLevel-es-firebase/issues) for questions and bug reports.
-
-For casual conversation, head to the [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web). 
-
-Have Fun, and spread the word!!
+<p align=right>Next: <a href="README.3-forward.md">Feedback and FWD</a></p>
