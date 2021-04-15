@@ -16,9 +16,7 @@ import { central } from '@ops/central'
 * Follow a certain collection, or query, as a 'Ref of Map'.
 */
 function collRef(_C, ...args) {    // (CollectionReference, QueryConstraint?, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
-  const [qc,opts] = (args.length >= 1 && args[0] instanceof QueryConstraint) ? [...args]
-    : [undefined,args[args.length-1]];
-
+  const [qc,opts] = (args.length >= 1 && args[0] instanceof QueryConstraint) ? [...args] : [undefined,...args];
   const { conv } = opts;
 
   const [ref, ssHandler] = mapRefHandlerGen({ conv });

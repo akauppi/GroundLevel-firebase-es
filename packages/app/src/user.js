@@ -14,8 +14,8 @@
 */
 import { computed, ref, watchEffect } from 'vue'
 
-import { onAuthStateChanged } from '@firebase/auth'
-import { auth } from '/@firebase'
+import { onAuthStateChanged, getAuth } from '@firebase/auth'
+const auth = getAuth();
 
 import { assert } from '/@tools/assert'
 
@@ -25,7 +25,7 @@ const authRef = ref();   // Ref of undefined | null | { displayName: string, pho
 
 // Start tracking the user (turn a callback into Vue 'ref').
 //
-onAuthStateChanged(auth, user => {
+onAuthStateChanged( auth, user => {
 
   authRef.value = user;    // null | { ..Firebase User object }
 

@@ -33,6 +33,7 @@
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
     "//test": "which firebase",
+    "//tmp": "firebase setup:emulators:firestore",
     "  - ": "",
     "prebuild": "npm run --silent _checkNoLinks",
     "predev:local": "(PORT=3000 npm run --silent _checkPortIsFree) && npm run --silent _genEnvLocal",
@@ -52,6 +53,9 @@
     "firebase": "^9.0.0-beta.1"
   },
   "devDependencies": {
+    "@firebase/app": "file:../../node_modules/@firebase/app",
+    "@firebase/auth": "file:../../node_modules/@firebase/auth",
+    "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@local/backend": "file:../backend",
     "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.1.5",
@@ -62,7 +66,6 @@
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.9.0",
-    "firebase": "file:../../node_modules/firebase",
     "firebase-admin": "^9.6.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.8",

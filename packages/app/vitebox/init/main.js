@@ -55,28 +55,18 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const [auth, firestore, fns] = [getAuth(fah), getFirestore(fah), getFunctions(fah)];  // ok :)
   ***/
 
-  // Prefer 'initializeX' over 'getX' since the latter is simply a proxy to the former. More explicit, this way.
+  // Prefer 'initializeX' over 'getX' since the latter is simply a proxy to the former.
   //
   const auth = initializeAuth(fah);
-  const firestore = initializeFirestore(fah, {
-    //experimentalAutoDetectLongPolling: true,
-    //experimentalForceLongPolling: true,
-    //host: `localhost:${FIRESTORE_PORT}`,
-    //ssl: false
-  });
+  const firestore = initializeFirestore(fah,{});
 
   // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
   // takes parameters (that it doesn't, on other subpackages). #firebase
   //
   const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
 
-  /*
-  * <<
-  *   If these issues persist, please provide debug logs for Firestore with and without experimentalForceLongPolling.
-  *   This will give us some insight into the network traffic.
-  * <<
-  */
-  setFirestoreLogLevel('debug');
+  // In case one needs to debug the Firestore client/server connection
+  //setFirestoreLogLevel('debug');
 
   useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
   useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);

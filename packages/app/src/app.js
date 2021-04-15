@@ -9,7 +9,9 @@
 */
 import { createApp } from 'vue'
 
-import { auth } from '/@firebase'
+import { getAuth } from '@firebase/auth'
+const auth = getAuth();
+
 import { init as initAside } from 'aside-keys'
   // Only needed in 'online' mode but import always (optimize for production)
 
@@ -40,6 +42,9 @@ async function init() {    // () => Promise of ()
 
   // Production: Initialize the authentication system
   if (!LOCAL) {
+    // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
+    //    the requested persistence. #rework
+
     /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
       tr.lap('aside-keys initialization');    // 499..530ms
     });
