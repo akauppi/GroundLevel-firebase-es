@@ -18,7 +18,7 @@ const opts = {
   //
   // See -> https://github.com/akauppi/firebase-jest-testing/blob/master/TRACK.md#jest-cannot-handle-package-exports-%EF%B8%8F%EF%B8%8F%EF%B8%8F
   //
-  // Still needed with 27.0.0-next.7
+  // Still needed with 27.0.0-next.8
   //
   //resolver: "firebase-jest-testing/cjs/jestResolver"
   resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"

@@ -1,7 +1,28 @@
 # Track (backend)
 
-## Jest: native ES module support
+## 🍒 Jest: native ES module support
 
+- [Support ESM versions of all pluggable modules](https://github.com/facebook/jest/issues/11167)
+
+  - [ ] `globalSetup` allows those to be ESM
+     - try with 27.0.0-next.9; issue merged 15-Apr-21
+  - [ ] `resolver`: when checked, try without the custom resolver in `jest.config.default.js`
+
+<!-- tried with -next.8 but not there
+
+>Note: It's merged *yesterday* so likely `next.9` can have it.
+>
+>Note: Though `globalSetup` is checked in the above page, I cannot use 
+`globalSetup: "./setup.jest.js"` (Jest 27.0.0-next.8), gives this:
+>
+>```
+>Error [ERR_REQUIRE_ESM]: Must use import to load ES Module: /Users/asko/Git/GroundLevel-firebase-es/packages/backend/test-rules/setup.jest.js
+require() of ES modules is not supported.
+>```
+-->
+
+
+<!-- disabled (above link is enough)
 - In StackOverflow: [https://stackoverflow.com/questions/60372790/node-v13-jest-es6-native-support-for-modules-without-babel-or-esm](https://stackoverflow.com/questions/60372790/node-v13-jest-es6-native-support-for-modules-without-babel-or-esm)
 
   - [ ] write a solution if we get one
@@ -23,6 +44,7 @@ The support is not quite there (tried, briefly).
 However, experiment in `firebase-jest-testing` since we'd *anyways* need to import it. Build from there up.
 
 ---
+-->
 
 ## `firebase-functions`: ES module, anyone?
 
