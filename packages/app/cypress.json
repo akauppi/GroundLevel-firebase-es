@@ -4,13 +4,23 @@
   "screenshotsFolder": ".screenshots",
   "video": false,
   "fixturesFolder": false,
+  "pluginsFile": false,
+  "supportFile": "cypress/support/index.js",
+  "modifyObstructiveCode": false,
 
   "//": {
+    "": [
+      "Cypress config -> https://docs.cypress.io/guides/references/configuration#cypress-json"
+    ],
     "testFiles": [
       "There so that we can disable whole files by rename (eg. 'some.js.disabled'). Default '**/*.*' would run them."
     ],
     "fixturesFolder": [
-      "Did not need it. Remove the =false if you do."
+      "Did not need it. Remove the entry if you do."
+    ],
+    "modifyObstructiveCode": [
+      "See https://docs.cypress.io/guides/references/configuration#modifyObstructiveCode",
+      "Switched 'false' simply for hygiene: we're shipping modern code and there shouldn't be any antiquated tricks."
     ]
   }
 }

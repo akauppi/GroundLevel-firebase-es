@@ -75,6 +75,8 @@ In short, you can:
 The Cypress approach changes the way we do software. The more time you spend with it, the more time it likely will save you.
 
 >Hint: It's practical to launch Cypress from an OS icon. To do this in macOS, first launch like above. Then make the icon permanent (right click > `Options` > `Keep in Dock`). Other OS'es have similar mechanisms.
+>
+>Next time, launch Cypress from the icon instead of the `npx cypress open`.
 
 ---
 
