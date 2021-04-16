@@ -2,10 +2,10 @@
 #
 # Usage:
 #   <<
-#     $ tools/port-is-free.sh <port>
+#     $ tools/port-is-free.sh <port[,port2[,...]]>
 #   <<
 #
-# Returns as success, if 'port' is available; with non-zero if taken
+# Returns as success, if all the mentioned ports are available; with non-zero if taken.
 #
 # Requires:
 #   - curl
@@ -15,10 +15,13 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-_PORT=$1
+_PORTS=$1
 
-curl -o /dev/null --silent --fail http://localhost:$_PORT
-RC=$?
-if [[ $RC -eq 0 ]]; then
-  exit 5
-fi
+for port in ${_PORTS//,/ }; do
+  curl -o /dev/null --silent --fail http://localhost:$port
+  RC=$?
+  if [[ $RC -eq 0 ]]; then
+    >&2 echo "ERROR: Port ${port} is taken!"
+    exit 2
+  fi
+done

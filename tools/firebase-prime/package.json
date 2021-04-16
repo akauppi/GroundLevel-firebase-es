@@ -1,0 +1,29 @@
+{
+  "name": "firebase-prime",
+  "description": "Priming an emulated Firestore instance with users and data, from ESM files.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "firebase-prime": "./index.js"
+  },
+  "dependencies": {
+    "commander": "^7.2.0"
+  },
+  "//dependencies": {
+    "": "Leftovers; tried to import the 'module' (instead of 'main') but cannot steer it from here.",
+    "@firebase/app": "file:../../node_modules/@firebase/app/dist/esm2017/index.js",
+    "@firebase/auth": "file:../../node_modules/@firebase/auth/dist/esm2017/index.js",
+    "@firebase/firestore": "file:../../node_modules/@firebase/firestore/dist/exp/index.node.esm2017.js"
+  },
+  "//": {
+    "usage": [
+      "'prime --project=xyz docs.js users.js"
+    ],
+    "dependencies": {
+      "@firebase/...": [
+        "Weirdly, we don't seem to need *any* references to the Firebase dependencies.",
+        "Is node picking them up from upstream (../../node_modules), or from the cwd?"
+      ]
+    }
+  }
+}
