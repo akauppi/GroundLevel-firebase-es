@@ -57,6 +57,7 @@
     "@firebase/app": "file:../../node_modules/@firebase/app",
     "@firebase/auth": "file:../../node_modules/@firebase/auth",
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
+    "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "@local/backend": "file:../backend",
     "@local/firebase-prime": "file:../../tools/firebase-prime",
     "@local/tools": "file:../../tools",

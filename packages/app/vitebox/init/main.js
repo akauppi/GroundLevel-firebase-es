@@ -6,10 +6,10 @@
 */
 import { assert } from './assert.js'
 
-import { initializeApp } from 'firebase/app'
-import { /*getAuth,*/ initializeAuth, useAuthEmulator } from 'firebase/auth'
-import { /*getFirestore,*/ initializeFirestore, useFirestoreEmulator, setLogLevel as setFirestoreLogLevel } from 'firebase/firestore'
-import { getFunctions, useFunctionsEmulator } from 'firebase/functions'
+import { initializeApp } from '@firebase/app'
+import { getAuth, useAuthEmulator } from '@firebase/auth'
+import { getFirestore, useFirestoreEmulator /*, setLogLevel as setFirestoreLogLevel*/ } from '@firebase/firestore'
+import { getFunctions, useFunctionsEmulator } from '@firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
@@ -41,24 +41,8 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
-  /*** was
-  // Firebase note:
-  //    'getAuth' initializes the default authentication and (it or 'initializeAuth') MUST BE CALLED BEFORE any other
-  //    SDK access.
-  //
-  //    The error message is slightly confusing, since we only have one SDK in use:
-  //    <<
-  //      Firebase: Another Firebase SDK was initialized and is trying to use Auth before Auth is initialized. Please be sure to call `initializeAuth` or `getAuth` before starting any other Firebase SDK. (auth/dependent-sdk-initialized-before-auth).
-  //    <<
-  //
-  //const [firestore, fns, auth] = [getFirestore(fah), getFunctions(fah), getAuth(fah)];  // fails
-  const [auth, firestore, fns] = [getAuth(fah), getFirestore(fah), getFunctions(fah)];  // ok :)
-  ***/
-
-  // Prefer 'initializeX' over 'getX' since the latter is simply a proxy to the former.
-  //
-  const auth = initializeAuth(fah);
-  const firestore = initializeFirestore(fah,{});
+  const firestore = getFirestore();
+  const auth = getAuth();
 
   // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
   // takes parameters (that it doesn't, on other subpackages). #firebase
@@ -74,10 +58,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
-  // tbd. #rework now that we're in '@exp' land! :)
-  //window["TESTS_GO!"] = firebase;   // expose our Firebase app; otherwise Cypress seems to have problems
-
-  return;   // No need to return 'fah'
+  window["Let's test!"] = true;   // (value doesn't matter)
 }
 
 function initFirebaseOnline() {
