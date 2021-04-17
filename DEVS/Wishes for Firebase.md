@@ -536,6 +536,24 @@ useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
 
 Mentioned in [#4781](https://github.com/firebase/firebase-js-sdk/issues/4781).
 
+## FR: Ability to cloak as admin, with Firestore emulator (documenting this)
+
+The Firestore emulator treats access token `"owner"` as a free-pass, already:
+
+>We treat "owner" as a valid account token for the default projectId.
+
+Did not find this behaviour documented, though. How can I - with the client side Firebase JS SDK - make requests to the Firestore emulator that would bypass Security Rules?
+
+This would be useful for priming the emulated data. Instead of needing to bring in `firebase-admin` (a new dependency), one could prime the data with the client side JS SDK.
+
+>Note: Firebase provides the [import/export](https://firebase.google.com/docs/firestore/manage-data/export-import) functionality for this, but I and some other developers prefer to work with JSON instead of binary blocks. This for example allows them to be hand crafted.
+
+Work-arounds:
+
+1. Using `firebase-admin` (obviously)
+2. Using import/export
+3. ...looking for the right way...
+
 
 ## References
 

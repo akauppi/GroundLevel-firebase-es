@@ -13,7 +13,7 @@ import { docRef } from '/@tools/listen.ref'
 import { doc, collection } from '@firebase/firestore'
 
 function projectPair(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]
-  const projectD = doc( collection(db, 'projects'), projectId);
+  const projectD = doc( collection(db, 'projects/'), projectId);
   return docRef( projectD );
 }
 

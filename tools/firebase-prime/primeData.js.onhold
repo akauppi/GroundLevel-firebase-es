@@ -4,7 +4,7 @@
 * Prime the Firestore emulator with data.
 */
 import { getFirestore, writeBatch, doc } from '@firebase/firestore'
-import { getAuth, signInWithCustomToken } from '@firebase/auth'
+import { signInWithCustomToken } from '@firebase/auth'
 
 // NOTE: Firebase 9.0.0-beta.1 'getAuth' seems broken, so we need to pass 'auth_WORK_AROUND' down here.
 //
@@ -12,9 +12,13 @@ async function primeData(auth /*WORK AROUND*/, data) {    // ({ <docKey>: object
 
   // Claim admin rights (bypasses Security Rules)
   //
-  const { user } = await signInWithCustomToken( auth, JSON.stringify( { uid: "owner" }));
+  const { user } = await signInWithCustomToken( auth, JSON.stringify( {
+    uid: "blah",            // needed; otherwise "auth/missing-identifier"
 
-  console.debug("!!! Signed in for admin as:", user);
+    access_token: "owner"
+  }));
+
+  //console.debug("!!! Signed in for admin as:", user);
 
   const db = getFirestore();
 
@@ -25,6 +29,7 @@ async function primeData(auth /*WORK AROUND*/, data) {    // ({ <docKey>: object
     batch.set( doc(db, docPath), value );
   }
   await batch.commit();
+    // ^-- BUG: That fails with access denial.
 }
 
 export {

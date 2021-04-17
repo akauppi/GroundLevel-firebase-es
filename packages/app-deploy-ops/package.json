@@ -54,7 +54,7 @@
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
     "@firebase/performance": "file:../../node_modules/@firebase/performance",
-    "@local/app": "file:../app",
+    "@local/app": "file:../app"
   },
   "//dependencies": {
     "firebase": "file:../../node_modules/firebase"

@@ -49,7 +49,7 @@ function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <ui
     }
   }
 
-  const [ref, unsub] = collRef( collection(db, `projects/${projectId}/userInfo`), where(documentIdSentinel, '!=', myUid), {
+  const [ref, unsub] = collRef( collection(db, `projects/${projectId}/userInfo/`), where(documentIdSentinel, '!=', myUid), {
     conv
   } );
 

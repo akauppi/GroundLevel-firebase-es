@@ -7,7 +7,8 @@
     "firebase-prime": "./index.js"
   },
   "dependencies": {
-    "commander": "^7.2.0"
+    "commander": "^7.2.0",
+    "firebase-admin": "^9.6.0"
   },
   "//dependencies": {
     "": "Leftovers; tried to import the 'module' (instead of 'main') but cannot steer it from here.",

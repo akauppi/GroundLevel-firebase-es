@@ -9,7 +9,9 @@
     "_no2": "npm --prefix packages/app-deploy-ops outdated",
     "_no3": "npm --prefix packages/backend outdated && npm --prefix packages/backend/functions outdated",
     "-- ": "",
-    "postinstall": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
+    "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2",
+    "_postinstall1": "npm --prefix tools/firebase-prime install",
+    "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
   },
   "devDependencies": {
     "eslint": "^7.24.0",
