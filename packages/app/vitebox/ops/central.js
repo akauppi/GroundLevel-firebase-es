@@ -17,17 +17,33 @@ async function post(url, s) {
   });
 }
 
-const format = (msg, opt) => !opt ? msg : `${msg} ${JSON.stringify(opt)}`;   // tbd. white space
+function fail(msg) { throw new Error(msg); }
+
+/*
+* Format like 'console.log' would: allows for 0..n extra args.
+*/
+function format(msg, ...args) {
+  const tmp = [msg, ...args.map( JSON.stringify )];
+  return tmp.join(' ');
+}
 
 const logGen = level => {    // (string) => (string [, object]) => ()
   if (!port) {    // LOCAL mode
-    return () => { /*eat up*/ }
+
+    // Show on browser console; it's best to get eg. Firestore errors seen.
+    //
+    const i = level === 'fatal' ? 'error':level;
+    const logF = console[i] || fail(`No such function: 'console.${level}'` );
+
+    return (msg, ...args) => {
+      logF( format(`[central] ${format(msg,...args)}`));
+    }
   }
 
   const url = `http://localhost:${port}/${level}`;
 
-  return (msg, opt) => {
-    const s = format(msg,opt);
+  return (msg, ...args) => {
+    const s = format(msg,...args);
 
     // Also print on browser console, if warn/error/fatal
     const f = showOnBrowser.get(level);
@@ -76,4 +92,4 @@ const central = {
 
 // tbd. Do we want to use as:
 //export default central;   // import central from '@ops/central'
-export { central };       // import { central } from '@ops/central'
+export { central }       // import { central } from '@ops/central'
