@@ -13,6 +13,7 @@ Responsible for:
 ## Requirements
 
 - `npm`
+- Java Runtime Engine (JRE) "version 1.8 or later"
 
    >Note: We recommend `npm` 7.7.0+ due to some inconsistencies found with `npm` 6. If you need to use `npm` 6, run `npm run prepare` manually.
 
@@ -20,8 +21,7 @@ Responsible for:
 developed with:
 - macOS 11.2
 - node 15.x
-- npx 7.7.x
-- firebase CLI 9.9.0 (via 'npx')
+- npm 7.9.x
 -->
 
 ## Getting started

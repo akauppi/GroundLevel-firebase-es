@@ -6,10 +6,10 @@ Release dates are marked; 'latest' shows WIP window.
 
 ## latest
 
-- passing build version
 - **FIXED:** signing in/out in `LOCAL` mode; `user=` only needed for the initial page
 - **CHANGE:** bringing `central` via `import` (that has different implementation in dev vs. ops builds); was a global.
 - **FEATURE**: `track` and `counter` in the app side (Performance Monitoring)
+- **FIX**: `npm run build` corrected
 
 ## 6-Mar-2021
 

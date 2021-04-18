@@ -38,8 +38,9 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `node` v. 14.3 or later
    - `npm` - preferably version 7.7
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
+   - Java Runtime Environment (JRE) -- Java SE 8 or later
 
-<!-- tbd. update above list of command line tools (it's not complete)
+  <!-- tbd. update above list of command line tools (it's not complete)
 --> 
 
   For Windows development, we recommend the [WSL2]() environment with eg. Ubuntu Linux variant. The [Microsoft article]() is worth a read.

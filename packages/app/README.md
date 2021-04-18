@@ -5,6 +5,9 @@ Web application sample project.
 ## Requirements
 
 - `npm`
+- Java runtime environment (JRE), needed by Firebase emulator
+   - the author recommends Java 11 JRE or later
+   - [more info](https://firebase.google.com/docs/emulator-suite) about the emulators
 
 <!--
 Development is done with: 
