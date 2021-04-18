@@ -41,7 +41,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - Java Runtime Environment (JRE) -- Java SE 8 or later
 
   <!-- tbd. update above list of command line tools (it's not complete)
---> 
+  --> 
 
   For Windows development, we recommend the [WSL2]() environment with eg. Ubuntu Linux variant. The [Microsoft article]() is worth a read.
 
@@ -143,32 +143,6 @@ If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
 through the three subpackages, and end up having a clone of the sample application installed *on your Firebase account*, in the cloud. 
 
 ---
-
-
-<!-- disabled
-<img width="180px" align=left src=".images/y-sign.png" style="padding: 1em" />
-
-There's a choice you need to make. 
-
-Are you more interested in:
-
-<font color=green>🅐</font> - [Run for the Cloud](#choice-a)<br />
-<font color=lilac>🅑</font> - [UI development, first](#choice-b)
-
-<br clear=all />
-
-<a name="choice-a"></a>
-### <font size="+3" color=green>🅐</font> - Run for the Cloud
-
-With this route, we'll sign you up to Firebase "blaze" plan and create a project. Then proceed to build and deploy the application online, without making any changes to it, yet.
-
-After the application works, you can look into the various parts of it and start making changes.
-
----
-
-There are three subpackages in the repo: `backend`, `app` and `app-deploy-ops`. In this tour, we are visiting them all. For more details on each one of them, check their particular `README` files.
-
--->
 
 ### Create a Firebase project
 
