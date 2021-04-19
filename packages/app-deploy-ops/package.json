@@ -49,7 +49,7 @@
     "//test": "abc",
     "  -  --": "",
     "_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at the repo root.\n\"; exit 8)",
-    "_checkPortIsFree": "portIsFree $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)"
+    "_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)"
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
