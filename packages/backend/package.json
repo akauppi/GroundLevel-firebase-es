@@ -38,14 +38,14 @@
     "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
     " -- ": "",
-    "deploy": "npx firebase-tools deploy --only functions,firestore",
+    "deploy": "../../node_modules/.bin/firebase deploy --only functions,firestore",
     "predeploy": "tools/hack.sh 1",
     "postdeploy": "tools/hack.sh 2",
     " -- -": "",
     "prepare": "npm --prefix functions install",
     " -- - ": "",
-    "predeploy": "npm run --silent _checkActivation",
-    "_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
+    "//predeploy": "npm run --silent _checkActivation",
+    "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
@@ -82,7 +82,7 @@
       ],
       "firebase-tools (commented out)": [
         "Would _like_ to have it as 'devDependency', linking to the root level, but 'firebase-tools' contains some",
-        "TypeScript-related build 💩 that obstructs such use."
+        "TypeScript-related build 💩 that obstructs such use.",
         "This is _interim_ anyhow, since eventually deployments should/must happen from CI/CD. Until then, the",
         "workaround of 'npx firebase-tools' (asks to download the package again; thus feels a bit limping) is there.",
         "Maybe no-one will notice until CI/CD is finished. 👍"
@@ -92,6 +92,10 @@
       "//preinstall": [
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
         "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
+      ],
+      "deploy": [
+        "The use of '../../node_modules/.bin/firebase' is simply a work-around because we cannot link to 'firebase-tools'",
+        "in the root (see comments on it). Will disappear once CI/CD does deployments. Good Enough For Now!!"
       ],
       "prepare": [
         "It is important someone runs 'npm install' also for the 'functions'. This is needed for: deployment, CI/CD tests.",
