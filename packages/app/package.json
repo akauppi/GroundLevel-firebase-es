@@ -46,12 +46,13 @@
     "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
   },
   "dependencies": {
+    "@firebase/app": "file:../../node_modules/@firebase/app",
+    "@firebase/auth": "file:../../node_modules/@firebase/auth",
+    "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
+    "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
     "vue": "^3.0.11",
     "vue-router": "^4.0.6"
-  },
-  "peerDependencies": {
-    "firebase": "^9.0.0-beta.1"
   },
   "devDependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
