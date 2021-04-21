@@ -51,3 +51,4 @@ for subPath in packages/backend packages/app packages/app-deploy-ops ; do
   cp .firebaserc $subPath
   (cd $subPath && $FIREBASE use $_PROJ)
 done
+echo ""

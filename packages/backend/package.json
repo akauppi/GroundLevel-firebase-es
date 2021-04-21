@@ -38,7 +38,7 @@
     "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
     " -- ": "",
-    "deploy": "npx firebase-tools deploy --only functions,firestore",
+    "deploy": "firebase deploy --only functions,firestore",
     "predeploy": "tools/hack.sh 1",
     "postdeploy": "tools/hack.sh 2",
     " -- -": "",
@@ -48,6 +48,7 @@
     "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
   },
   "devDependencies": {
+    "@local/root": "file:../..",
     "@local/tools": "file:../../tools",
     "concurrently": "^6.0.2",
     "eslint-plugin-node": "^11.1.0",
@@ -74,6 +75,9 @@
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
     "devDependencies": {
+      "@local/root": [
+        "This link brings the _binary_ commands installed at the project root (eg. 'firebase' CLI) to us."
+      ],
       "firebase": [
         "Must be 8.x because of this: https://github.com/akauppi/firebase-jest-testing/issues/13"
       ]

@@ -108,8 +108,9 @@
 <script>
   import { assert } from '/@tools/assert'
 
-  import { ref, onMounted, onUnmounted } from 'vue'
+  import { onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
+  import { getAuth, signOut as fbSignOut } from '@firebase/auth'
 
   import { userRef2 as user } from '/@/user'
 
@@ -145,10 +146,7 @@
     });
 
     async function signOut () {
-      // Sign out also under emulation (LOCAL)
-      //
-      const auth = await import('/@firebase').then( mod => mod.auth );
-      await auth.signOut();
+      await fbSignOut( getAuth() );    // sign out also under emulation (LOCAL)
 
       closeMe();    // avoid the dialog from popping up if re-authenticating
 

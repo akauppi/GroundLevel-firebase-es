@@ -19,7 +19,7 @@ const createStats = true;
 
 const allFirebaseSubpackages = [
   ...readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` ),
-  ...readdirSync("./node_modules/firebase").map( x => `firebase/${x}` ),
+  //...readdirSync("./node_modules/firebase").map( x => `firebase/${x}` ),
 ];
 
 export default {

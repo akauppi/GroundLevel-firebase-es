@@ -42,7 +42,7 @@ const watch = process.env.ROLLUP_WATCH;
 */
 const allFirebaseSubpackages = [
   ...readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` ),
-  ...readdirSync("./node_modules/firebase").map( x => `firebase/${x}` )
+  //...readdirSync("./node_modules/firebase").map( x => `firebase/${x}` )
 ];
 
 /*
