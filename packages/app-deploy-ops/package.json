@@ -24,11 +24,11 @@
     "_prepRollOut": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/public/* .) && npm run --silent _prepRollOut2",
     "_prepRollOut2": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/dist/*.css .)",
     "build:vite": "vite build -c vite/vite.config.js",
-    "serve:roll": "npx firebase-tools serve --config firebase.roll.json --only hosting --host 0.0.0.0 --port 3012",
-    "serve:vite": "npx firebase-tools serve --config firebase.vite.json --only hosting --host 0.0.0.0 --port 3012",
+    "serve:roll": "firebase serve --config firebase.roll.json --only hosting --host 0.0.0.0 --port 3012",
+    "serve:vite": "firebase serve --config firebase.vite.json --only hosting --host 0.0.0.0 --port 3012",
     "  ---": "",
-    "deploy:roll": "npx firebase-tools deploy --config firebase.roll.json --only hosting",
-    "deploy:vite": "npx firebase-tools deploy --config firebase.vite.json --only hosting",
+    "deploy:roll": "firebase deploy --config firebase.roll.json --only hosting",
+    "deploy:vite": "firebase deploy --config firebase.vite.json --only hosting",
     "  - -": "",
     "preserve:roll": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _checkActivation && npm run --silent _prepare_roll",
     "preserve:vite": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _checkActivation && npm run --silent _prepare_vite",
@@ -56,11 +56,9 @@
     "@firebase/performance": "file:../../node_modules/@firebase/performance",
     "@local/app": "file:../app"
   },
-  "//dependencies": {
-    "firebase": "file:../../node_modules/firebase"
-  },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
+    "@local/root": "file:../..",
     "@local/tools": "file:../../tools",
     "@rollup/plugin-alias": "^3.1.2",
     "@rollup/plugin-node-resolve": "^11.2.0",
@@ -91,6 +89,11 @@
       ],
       "vite": [
         "Needed for '[build|serve]:vite'"
+      ]
+    },
+    "devDependencies": {
+      "@local/root": [
+        "Brings binary commands of the root (in particular, 'firebase') to us."
       ]
     },
     "engines.node": [
