@@ -6,7 +6,6 @@ Web application sample project.
 
 - `npm`
 - Java runtime environment (JRE), needed by Firebase emulator
-   - the author recommends Java 11 JRE or later
    - [more info](https://firebase.google.com/docs/emulator-suite) about the emulators
 
 <!--
@@ -20,10 +19,12 @@ Development is done with:
 ## Getting started
 
 ```
-$ CYPRESS_INSTALL_BINARY=0 npm install
+$ npm install
 ```
 
->Note: The `CYPRESS_INSTALL_BINARY=0` speeds up the install by skipping downloading the binary part of Cypress. It's only needed for running tests - we'll get back to it.
+>Note: This will take *ages* on the first time, since it's loading not only the `npm` dependencies but a ~600MB Cypress binary, as well.
+>
+>If you don't need Cypress (yet), `CYPRESS_INSTALL_BINARY=0 npm install` speeds up the install by skipping downloading the binary part.
 
 Launch the app:
 
@@ -79,8 +80,8 @@ Differences of these modes:
 
 ||Back-end|Data|Users|Authentication|Central logging|
 |---|---|---|---|---|---|
-|`local`|emulated|primed from `local/docs.js`|primed from `local/users.js`|sign-in with `&user=<id>`|none|
-|`online`|in the cloud|←<br/>changes are persistent|←|←|shown on console|
+|`local`|emulated|primed from `local/docs.js`, at each server start|←|sign-in with `&user=<id>`|browser console|
+|`online`|in the cloud|in the cloud; changes are persistent|←|←|command line|
 
 >**Note:** Tests (`npm test`) also use local mode but don't rely on the primed data or users. The benefit is that one can keep `npm run dev` running, and use it both for browser development and as a test back-end. The two use different Firebase projects so their data and users won't overlap.
 
@@ -227,9 +228,9 @@ You can customize the `local/*` setup to your development needs. Tests carry the
 Before we look at tests (separate page), a brief mention on linting:
 
 
-## Tuning Security Rules
+## Tuning Security Rules (`dev:local`)
 
-Note that in "local" mode, also changes to security rules are picked up without need to restart the emulator - though the file being edited is in another subpackage, `../backend`.
+Note that in "local" mode, also changes to security rules are picked up without need to restart the emulator - though the file being edited is in another subpackage, `@local/backend`.
 
 Edit the rules, refresh the browser; the new rules are in effect!
 
@@ -288,6 +289,74 @@ This gives you warnings that you may or may not wish to fix. Steer them at `.esl
 
 With the sample app, there may be warnings but there should not be errors.
 
----
 
-Next: [Running tests](./README.2-tests.md)
+## Testing
+
+```
+$ npm install   	# ensures Cypress binary app is available
+```
+
+### Running all the tests
+
+```
+$ npm test
+```
+
+`npm test` launches the same local server as `npm run dev`. If you already have that running, please close it first. `npm test` is intended for things like CI systems where no prior processes are running.
+
+### Test based development
+
+The other way is to keep `npm run dev` running, and edit both one's code and tests (and Security Rules) while keeping an eye on the test results.
+
+Have `npm run dev` running in the background. Then:
+
+#### Launch Cypress
+
+You can launch it from a desktop icon. If you don't have one yet, do this:
+   
+```
+$ npx cypress open		# launches the binary
+...
+```
+
+The desktop app opens. Now:
+
+- macOS: Siirrä ikoni haluamaasi kohtaan, (oikea painallus) > `Options` > `Keep in Dock`
+- Windows: 
+
+Close the app so that you get the terminal back. Now try launching it from the icon, instead.
+
+<!-- tbd. instructions on 
+- Using 
+
+-->
+
+#### Using Cypress
+
+You should see:
+
+![](.images/cypress-launch.png)
+
+Try to run the tests.
+
+![](.images/cypress-run.png)
+
+><font color=red>tbd. change image once tests pass</font>
+
+
+Now edit some test in the IDE (they are under `cypress/integration/`).
+
+Cypress will automatically re-run tests while you make changes to the source - or the tests. A big display may become useful, here!
+
+In short, you can:
+
+- *time travel* to see what the UI looked, at the time the tests were executed.
+
+The Cypress approach changes the way we do software. The more time you spend with it, the more time it likely will save you.
+
+
+### Notes
+
+Some Cypress features like "stubs" and "proxies" are not need, at all. Those are intended for building scaffolding when running things locally, but we have the whole Firebase emulators so we can work against the Real Thing.
+
+

@@ -20,8 +20,6 @@
     "__": "",
     "test": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-on http://localhost:3000 && cypress run\"",
     "  -": "",
-    "cy:run": "cypress run",
-    "  -- ": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"firebase emulators:start --project=app --only auth,functions,firestore\" \"npm run --silent _dev_local_init && npm run --silent _dev_local_vite\"",
     "_dev_local_init": "wait-on http://localhost:4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js",
     "_dev_local_vite": "vite --port 3000 --mode dev_local --clearScreen false",
@@ -55,10 +53,6 @@
     "vue-router": "^4.0.6"
   },
   "devDependencies": {
-    "@firebase/app": "file:../../node_modules/@firebase/app",
-    "@firebase/auth": "file:../../node_modules/@firebase/auth",
-    "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
-    "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "@local/backend": "file:../backend",
     "@local/firebase-prime": "file:../../tools/firebase-prime",
     "@local/tools": "file:../../tools",

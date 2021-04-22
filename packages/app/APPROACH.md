@@ -48,3 +48,28 @@ Both the Cypress tests (`npm test`) and `npm run dev` want to have local data an
 One could separate these, but there's no real benefit from doing so. Our approach is to keep the same local mode for both but differentiate in the data (and users) being loaded.
 
 This might even provide benefits, because you are able to sign in as one of the Daltons, under `npm run dev`.
+
+
+## Installing Cypress as a dependency
+
+Because:
+
+- It is a versioned tool: this way we can hopefully steer clear of version incompatibilities
+- Cypress [recommends](https://docs.cypress.io/guides/getting-started/installing-cypress.html) doing so.
+
+Cypress does cache the binary parts, across `npm` projects, so the disk space use (about 637MB for Cypress 7.1.0 on macOS) is similar to installing it on the desktop.
+
+
+## Naming of the Cypress folders
+
+We're trying to stick with the Cypress default conventions.
+
+- tests under `integration` subfolder
+- custom commands under `support`
+
+These terms are a bit tedious in our project, though. Could think of:
+
+- `commands` instead of `support`
+- `tests` or lifting the tests to the main `cypress` level
+
+Even calling the folder `cypress` is not how the author would like things to be (these are tests; the product matters less), but deviating from conventions of an established tool is also bad.

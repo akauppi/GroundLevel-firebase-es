@@ -393,6 +393,17 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 
 
+# Contribution
+
+As always, contributions and discussions are welcome.
+
+- Please use primarily [GitHub Issues](https://github.com/akauppi/GroundLevel-es-firebase/issues) for questions and bug reports.
+- For casual conversation, head to the [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web).
+
+   *We'll head for a Discord server, once more people are involved.*
+
+Have Fun, and spread the word!!
+
 
 # References
 

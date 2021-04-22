@@ -3,6 +3,14 @@
 *
 * Provides signing in/out from Firebase auth.
 */
+import { getAuth, signInWithCustomToken, onAuthStateChanged, updateProfile } from '@firebase/auth'
+
+/*
+* Wait until the current page has initialized Firebase ('src/main' flags us by setting 'window["Let's test!"]').
+*/
+function firebaseIsReady() {    // () => Chainable<FirebaseAuth>
+  return cy.window().its("Let's test!").then( _ => getAuth() );
+}
 
 /*
 * Clear IndexedDB used by Firebase auth. Clad as a normal Promise.
@@ -49,26 +57,34 @@ Cypress.Commands.add('signAs', (uid, opt) => {
 
   cy.visit('/');    // initialize the app; wait for knowledge that it's opened
 
-  cy.firebase().then( firebase => {
-
-    // Only now initiate anything 'firebase'.
-    const fbAuth = firebase.auth();
-    assert(fbAuth);
-
+  firebaseIsReady().then( auth => {
     cy.wrap( (async _ => {
       // Create a user based on the provided token (only '.uid' is used by Firebase)
       //
-      await fbAuth.signInWithCustomToken( JSON.stringify({ uid }) );
+      const { user: /*as*/ currentUser } = await signInWithCustomToken( auth, JSON.stringify({ uid }) );
+
+      /*** remove
+      // Pick the current signed-in-user.
+      //
+      const currentUser = await new Promise( (resolve,reject) => {
+        const unsub = onAuthStateChanged( auth, user => {
+          resolve(user);
+          unsub();
+        }, reject );
+      });***/
+
+      assert(currentUser.uid === uid);
 
       // Set '.displayName', '.photoURL'; for email and password, other functions exist (not implemented)
-      await fbAuth.currentUser.updateProfile(opt);
+      const cred2 = await updateProfile(currentUser, opt);
 
-      assert(fbAuth.currentUser.uid === uid);
-      assert( (!opt.displayName) || fbAuth.currentUser.displayName === opt.displayName);
-      assert( (!opt.email) || fbAuth.currentUser.email === opt.email )   // not set
-      assert( (!opt.photoURL) || fbAuth.currentUser.photoURL === opt.photoURL);
-    })() ).then( _ =>
-      cy.log(`Signed as: ${ JSON.stringify(fbAuth.currentUser) }` )   // DEBUG
+      assert( (!opt.displayName) || cred2.user.displayName === opt.displayName);
+      assert( (!opt.photoURL) || cred2.user.photoURL === opt.photoURL);
+
+      return currentUser;
+
+    })() ).then( user =>
+      cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
     )
   })
 })
