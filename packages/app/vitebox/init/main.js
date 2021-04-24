@@ -7,7 +7,7 @@
 import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
-import { getAuth, useAuthEmulator } from '@firebase/auth'
+import { getAuth, initializeAuth, useAuthEmulator } from '@firebase/auth'
 import { getFirestore, useFirestoreEmulator /*, setLogLevel as setFirestoreLogLevel*/ } from '@firebase/firestore'
 import { getFunctions, useFunctionsEmulator } from '@firebase/functions'
 
@@ -42,7 +42,8 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
   const firestore = getFirestore();
-  const auth = getAuth();
+  //const auth = getAuth();
+  const auth = initializeAuth(fah);
 
   // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
   // takes parameters (that it doesn't, on other subpackages). #firebase
@@ -58,7 +59,16 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
-  window["Let's test!"] = true;   // (value doesn't matter)
+  // Note: Was NOT able to do 'getAuth()' on the Cypress side so we pass the auth handle (and whatever else is necessary?)
+  //    from here. Not sure why this is so.
+  //
+  // Importing anything from the app side must be done dynamically.
+  //
+  if (true) {
+    const piggy1 = await import('/@/user.js').then( mod => mod.onAuthStateChanged_HACK );
+
+    window["Let's test!"] = [auth,piggy1];   // [FirebaseAuth,...]
+  }
 }
 
 function initFirebaseOnline() {

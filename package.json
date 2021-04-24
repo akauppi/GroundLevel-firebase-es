@@ -10,7 +10,7 @@
     "_no3": "npm --prefix packages/backend outdated && npm --prefix packages/backend/functions outdated",
     "-- ": "",
     "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2",
-    "_postinstall1": "npm --prefix tools/firebase-prime install",
+    "_postinstall1": "npm --prefix tools install",
     "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh",
     "-- -": "",
     "prepare": "tools/check-npm-version.sh"

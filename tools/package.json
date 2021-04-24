@@ -1,10 +1,18 @@
 {
   "description": "Tools common to the subpackages",
   "private": true,
+  "type": "module",
   "bin": {
     "abc": "./abc.sh",
     "check-activation": "./check-activation.sh",
-    "port-is-free": "./port-is-free.sh"
+    "port-is-free": "./port-is-free.sh",
+    "wait-for": "./wait-for.js"
+  },
+  "scripts": {
+    "postinstall": "npm --prefix firebase-prime install"
+  },
+  "dependencies": {
+    "node-fetch": "3.0.0-beta.9"
   },
   "//": {
     "": [

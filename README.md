@@ -425,3 +425,9 @@ Have Fun, and spread the word!!
 
 - [Firebase developers](https://discord.gg/BN2cgc3) (Discord server)
 
+
+# Other full app templates
+
+||Front-end framework|Database|Auth|bundler|purpose|
+|---|---|---|---|---|---|
+|[cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app)|React|(none)|local JSON database|??|Showcasing use of Cypress]

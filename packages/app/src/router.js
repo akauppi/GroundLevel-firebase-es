@@ -15,6 +15,9 @@ const auth = getAuth();
 
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { onAuthStateChanged_HACK } from './user'
+import { users as localUsers } from '../local/docs'
+
 // Pages
 //
 // Note: Static import is shorter and recommended [1]. However, also the dynamic 'await import('./pages/Some.vue')'
@@ -62,6 +65,7 @@ function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
   } else {
     uid = getCurrentUserWarm()?.uid;
   }
+
   assert(uid, _ => "[INTERNAL]: 'lockedProps' called without an active user");
 
   console.debug("'lockedProps' passing uid:", uid);    // DEBUG
@@ -151,6 +155,12 @@ router.beforeResolve(async (to, from) => {
         await signInWithCustomToken( auth, JSON.stringify({ uid }) )
           .then( creds => {
             console.debug("Signed in as:", { creds });
+
+            // HACK:
+            //
+            // This code path is only used by 'dev:local', so we can spice up the user info from 'local/docs.js'.
+            //
+            onAuthStateChanged_HACK({ uid, ...(localUsers[uid] || {}) });
           })
           .catch( err => {
             console.error("Sign-in failed:", err);

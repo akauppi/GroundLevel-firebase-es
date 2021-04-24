@@ -3,5 +3,4 @@
 *
 * Collects together custom Cypress commands.
 */
-//import './firebase'
 import './auth'

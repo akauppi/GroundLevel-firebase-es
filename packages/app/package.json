@@ -18,15 +18,16 @@
   "scripts": {
     "dev": "npm run dev:local",
     "__": "",
-    "test": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-on http://localhost:3000 && cypress run\"",
+    "test": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-for 3000 && cypress run\"",
+    "//": "wait-for 3000 && echo ABC",
     "  -": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"firebase emulators:start --project=app --only auth,functions,firestore\" \"npm run --silent _dev_local_init && npm run --silent _dev_local_vite\"",
-    "_dev_local_init": "wait-on http://localhost:4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js",
+    "_dev_local_init": "wait-for 4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js",
     "_dev_local_vite": "vite --port 3000 --mode dev_local --clearScreen false",
     "  --": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run --silent _dev_online_vite\"",
     "_dev_online_log": "PORT=5050 node tools/printout.js",
-    "_dev_online_vite": "wait-on http://localhost:5050 && vite --port 3001 --clearScreen false",
+    "_dev_online_vite": "wait-for 5050 && vite --port 3001 --clearScreen false",
     "  ---": "",
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
@@ -65,10 +66,9 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.9.0",
     "prettier": "^2.2.0",
-    "sass": "^1.32.8",
+    "sass": "^1.32.11",
     "vite": "^2.2.1",
-    "vue-eslint-parser": "^7.6.0",
-    "wait-on": "^5.3.0"
+    "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {
     "scripts": {

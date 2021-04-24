@@ -325,3 +325,39 @@ Not sure where it spends the time.
 Currently (`firebase` CLI 9.8.0), the activation of a project is per directory.
 
 How could we make it so that the folders `packages/*` each can use the same project, without the person needing to `firebase use --add` three times?
+
+
+## Firebase Hosting Emulator: does it support `HEAD`?
+
+Doesn't seem to:
+
+```
+$ curl --head -v http://localhost:3000
+*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 3000 (#0)
+> HEAD / HTTP/1.1
+> Host: localhost:3000
+> User-Agent: curl/7.64.1
+> Accept: */*
+> 
+< HTTP/1.1 404 Not Found
+HTTP/1.1 404 Not Found
+< Access-Control-Allow-Origin: *
+Access-Control-Allow-Origin: *
+< Date: Thu, 22 Apr 2021 23:17:02 GMT
+Date: Thu, 22 Apr 2021 23:17:02 GMT
+< Connection: keep-alive
+Connection: keep-alive
+< Keep-Alive: timeout=5
+Keep-Alive: timeout=5
+< Content-Length: 0
+Content-Length: 0
+
+< 
+* Connection #0 to host localhost left intact
+* Closing connection 0
+```
+
+This is when the same `http://localhost:3000` returns 200 for `GET`.
+

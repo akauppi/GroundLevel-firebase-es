@@ -7,6 +7,7 @@ Web application sample project.
 - `npm`
 - Java runtime environment (JRE), needed by Firebase emulator
    - [more info](https://firebase.google.com/docs/emulator-suite) about the emulators
+- [Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress) as a desktop install (optional; for test based development)
 
 <!--
 Development is done with: 
@@ -112,7 +113,7 @@ $ npm run dev:local
 
 [dev-local] 
 [dev-local] > groundlevel-es6-firebase@0.0.0 _dev_local_2 /Users/asko/Git/GroundLevel-es6-firebase-web
-[dev-local] > wait-on http://localhost:4000 && node ./local/init.js && npx vite --port 3001 --mode dev_local
+[dev-local] > wait-for 4000 && node ./local/init.js && npx vite --port 3001 --mode dev_local
 [dev-local] 
 [emul] i  emulators: Starting emulators: functions, firestore
 [emul] ⚠  Your requested "node" version "10" doesn't match your global version "14"
@@ -138,7 +139,7 @@ $ npm run dev:local
 [emul]  
 ```
 
-The emulators are started in the background. A `wait-on` module waits for them to be up and then launches a script that primes the emulated Firestore instance with data and local users:
+The emulators are started in the background. The `wait-for` tool waits for them to be up and then launches a script that primes the emulated Firestore instance with data and local users:
 
 ```
 [init] Primed :)
@@ -292,9 +293,8 @@ With the sample app, there may be warnings but there should not be errors.
 
 ## Testing
 
-```
-$ npm install   	# ensures Cypress binary app is available
-```
+For tests, you must have the Cypress desktop application separately installed.
+
 
 ### Running all the tests
 
@@ -308,32 +308,9 @@ $ npm test
 
 The other way is to keep `npm run dev` running, and edit both one's code and tests (and Security Rules) while keeping an eye on the test results.
 
-Have `npm run dev` running in the background. Then:
+Have `npm run dev` running in the background. 
 
-#### Launch Cypress
-
-You can launch it from a desktop icon. If you don't have one yet, do this:
-   
-```
-$ npx cypress open		# launches the binary
-...
-```
-
-The desktop app opens. Now:
-
-- macOS: Siirrä ikoni haluamaasi kohtaan, (oikea painallus) > `Options` > `Keep in Dock`
-- Windows: 
-
-Close the app so that you get the terminal back. Now try launching it from the icon, instead.
-
-<!-- tbd. instructions on 
-- Using 
-
--->
-
-#### Using Cypress
-
-You should see:
+Launch Cypress and pick the `packages/app` subfolder.
 
 ![](.images/cypress-launch.png)
 

@@ -47,6 +47,15 @@ onAuthStateChanged( auth, user => {
     throw err;
 });
 
+/*
+* Work-around, until Firestore Emulator 1.11.15 arrives!!!  # HACK
+*
+* Called by code that calls 'signInWithCustomToken' (or 'signOut'), which (until the fix) doesn't really change the detected user.
+*/
+function onAuthStateChanged_HACK(user) {
+  authRef.value = user;    // null | { uid: ..., displayName?, photoURL? }
+}
+
 const isReadyProm = new Promise( (resolve /*,reject*/) => {
   const unsub = watchEffect(() => {
     if (authRef.value !== undefined) {  // auth is awake
@@ -101,5 +110,7 @@ export {
   userRef2,
   getCurrentUserWarm,
   isReadyProm,
-  uidValidator
+  uidValidator,
+
+  onAuthStateChanged_HACK
 }

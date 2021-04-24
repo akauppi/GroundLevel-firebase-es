@@ -117,7 +117,7 @@ http.createServer( (req, res) => {
       });
     }
 
-  } else if (req.method === 'HEAD') {    // 'wait-on' pings with the 'HEAD' method
+  } else if (req.method === 'HEAD') {    // good manners to respond to both 'HEAD' and 'GET', alike
     res.write("OK");
     res.end();
   }

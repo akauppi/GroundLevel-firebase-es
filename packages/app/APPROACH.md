@@ -50,6 +50,8 @@ One could separate these, but there's no real benefit from doing so. Our approac
 This might even provide benefits, because you are able to sign in as one of the Daltons, under `npm run dev`.
 
 
+<!-- tbd. replace:
+--
 ## Installing Cypress as a dependency
 
 Because:
@@ -58,6 +60,31 @@ Because:
 - Cypress [recommends](https://docs.cypress.io/guides/getting-started/installing-cypress.html) doing so.
 
 Cypress does cache the binary parts, across `npm` projects, so the disk space use (about 637MB for Cypress 7.1.0 on macOS) is similar to installing it on the desktop.
+-->
+
+## Windows 10: Cypress *both* as a desktop installation and via `npm`?
+
+Yeah. 🤪💪
+
+The `npm`-installed version is for `npm test`.
+
+The Windows version is for test based development.
+
+This in completely in line with the mental model that editing one's files is in Windows, while builds (and command line things like `npm test`) happen in WSL2.
+
+Unfortunately (because Cypress doesn't have Windows 10 + WSL2 support where it could eg. provide a browser UI to the Cypress running within WSL2 `#wink^2` 😉), we force the developer to install *two* separate Cypresses.
+
+Cons:
+
+- double the disk use
+- different versions
+- no upgrade path for the Windows version[^1-cypress-update]
+
+Pros:
+
+- no need for X Server setup!
+
+[^1-cypress-update]: To manage the version of the Cypress on Windows, one could set up a dummy Node package there (instead of WSL2), and use `npx cypress open` to pull the binary app.
 
 
 ## Naming of the Cypress folders
