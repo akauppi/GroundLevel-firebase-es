@@ -11,7 +11,7 @@ const srcPath = pJoin(myPath, 'src');
 const opsPath = pJoin(myPath, 'vitebox/ops');
 const fakePath = pJoin(myPath, 'vitebox/fake');
 
-const DEV_MODE = !! process.env.GCLOUD_PROJECT;
+const DEV_BUILD = false;  // !! process.env.VUE_DEV;    // #cleanup
 
 /*
 * For an absolute path 'p', provide the immediate subdirectories within it.
@@ -116,9 +116,21 @@ export default {
     alias: { ...subAliases,
       '/@': srcPath,
       ...opsAliases,
+      ...(DEV_BUILD ? {
+        // REMOVE?
+        // Redirect '@firebase/performance' if we don't have a real, online project to work against.
+        //'@firebase/performance': fakePath + '/@firebase-performance',
 
-      // Redirect '@firebase/performance' if we don't have a real, online project to work against.
-      ...(DEV_MODE ? { '@firebase/performance': fakePath + '/@firebase-performance' } : {})
+        // KEEP for a while
+        //
+        // Developer versions of Vue.js 3 (and Vue Router) *may* be needed for the Developer Tools to work right.
+        // Or not. Keep until we have practical experience.
+        //  ---
+        // Use development versions so that Vue Developer tools would pick them up. EXPERIMENTAL
+        //
+        //'vue': 'vue/dist/vue.esm-browser.js',
+        //'vue-router': 'vue-router/dist/vue-router.esm-browser.js'
+      } : {})
     },
 
     // Until Firebase 9.0.0-beta.1, we needed to override the 'mainFields' (since 'auth' was not providing a "module"

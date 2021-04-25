@@ -16,7 +16,7 @@ const auth = getAuth();
 import { createRouter, createWebHistory } from 'vue-router'
 
 import { onAuthStateChanged_HACK } from './user'
-import { users as localUsers } from '../local/docs'
+import { users as localUsers } from '../local/users'
 
 // Pages
 //

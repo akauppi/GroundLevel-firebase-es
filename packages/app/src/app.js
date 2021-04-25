@@ -68,16 +68,15 @@ async function init() {    // () => Promise of ()
     throw err;
   });
 
-  /*** HOLD
-  // Vue-router note:
-  //    It may be that we need to wait for router to be ready. Check here -> https://next.router.vuejs.org/guide/migration/#all-navigations-are-now-always-asynchronous
+  // Enable Vue.js 3 Developer Tools (if the user has them installed on the browser).
   //
-  // tbd. "block the app render" until authentication has been done.
+  // NOTE: This is *not documented* at the time of writing (Apr-21). Based on:
+  //    - https://github.com/vuejs/vue-devtools/issues/1308
   //
-  await router.isReady().then( _ => {
-    console.debug("Router is ready");   // note: it DOES NOT get ready!!
-  } );
-  ***/
+  window.postMessage({
+    devtoolsEnabled: true,
+    vueDetected: true
+  }, '*')
 
   app.mount('#app');
 

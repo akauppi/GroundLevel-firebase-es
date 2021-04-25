@@ -6,6 +6,7 @@ Release dates are marked; 'latest' shows WIP window.
 
 ## 25-Apr-2021
 
+- **FIX:** Vue.js 3 Developer Tools enabled (without official documentation)
 - **FIX:** Cypress tests Back Functional!!
 - **FIXED:** signing in/out in `LOCAL` mode; `user=` only needed for the initial page
 - **CHANGE:** bringing `central` via `import` (that has different implementation in dev vs. ops builds); was a global.
