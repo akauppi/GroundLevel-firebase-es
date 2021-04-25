@@ -7,7 +7,7 @@
 import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
-import { getAuth, initializeAuth, useAuthEmulator } from '@firebase/auth'
+import { getAuth, useAuthEmulator } from '@firebase/auth'
 import { getFirestore, useFirestoreEmulator /*, setLogLevel as setFirestoreLogLevel*/ } from '@firebase/firestore'
 import { getFunctions, useFunctionsEmulator } from '@firebase/functions'
 
@@ -42,8 +42,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
   const firestore = getFirestore();
-  //const auth = getAuth();
-  const auth = initializeAuth(fah);
+  const auth = getAuth();
 
   // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
   // takes parameters (that it doesn't, on other subpackages). #firebase

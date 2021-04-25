@@ -41,13 +41,22 @@ We reserve that for externally imported web components, and have our own Vue com
 Externally imported *Vue* components must be white listed.
 
 
-## One `local` or two?
+## Cypress: Sharing the `dev:local` server
 
-Both the Cypress tests (`npm test`) and `npm run dev` want to have local data and users for the emulation. They can work completely offline.
+Running Cypress tests requires `npm run dev` to be running (or launches it, in the case of `npm test` if it's not running). It uses the same server as our "local" development mode.
 
-One could separate these, but there's no real benefit from doing so. Our approach is to keep the same local mode for both but differentiate in the data (and users) being loaded.
+However, tests have *different users*, and therefore different data. The local development (`local/**`) and the tests (`cypress/**`) are detached from each other.
 
-This might even provide benefits, because you are able to sign in as one of the Daltons, under `npm run dev`.
+||`dev:local`|Cypress|
+|---|---|---|
+|users|`dev`|`joe`, `william`, ...|
+|data|`local/`|`cypress/`|
+
+Why do it so?
+
+Because there doesn't seem to be much harm, and this seems least overall complexity.
+
+One can now keep `npm run dev` running, use the local development mode (browser and IDE), or hop over to Cypress if one feels like.
 
 
 <!-- tbd. replace:
@@ -62,7 +71,7 @@ Because:
 Cypress does cache the binary parts, across `npm` projects, so the disk space use (about 637MB for Cypress 7.1.0 on macOS) is similar to installing it on the desktop.
 -->
 
-## Windows 10: Cypress *both* as a desktop installation and via `npm`?
+## Cypress & Windows 10: *both* as a desktop installation and via `npm`
 
 Yeah. 🤪💪
 
@@ -87,16 +96,22 @@ Pros:
 [^1-cypress-update]: To manage the version of the Cypress on Windows, one could set up a dummy Node package there (instead of WSL2), and use `npx cypress open` to pull the binary app.
 
 
-## Naming of the Cypress folders
+## Cypress: Naming of the folders
 
-We're trying to stick with the Cypress default conventions.
+Comparision to Cypress folder naming conventions:
 
-- tests under `integration` subfolder
-- custom commands under `support`
+||us|Cypress defaults|
+|---|---|---|
+|commands|`cypress/commands`|`cypress/support`|
+|tests|`cypress/**.spec.js`|`cypress/integration/*.js`|
 
-These terms are a bit tedious in our project, though. Could think of:
+This was a *hard call*. Often, it's best to follow established conventions for familiarity if one uses the tool elsewhere. However, in our case:
 
-- `commands` instead of `support`
-- `tests` or lifting the tests to the main `cypress` level
+- There's no point in calling tests "integration". They are just tests.
+- What does "support" really mean? Those files initialise the Cypress *commands* (`cy.something`).
 
-Even calling the folder `cypress` is not how the author would like things to be (these are tests; the product matters less), but deviating from conventions of an established tool is also bad.
+The ability to have multiple test folders within `cypress` is intentional. This helps separate different *testing stories* from each other - and these can be many. Initially we have:
+
+- `anonymous`: testing what a guest sees and anonymous login
+- `joe`: testing the UI from Joe D.'s point of view
+

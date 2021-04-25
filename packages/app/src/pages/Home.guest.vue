@@ -8,7 +8,7 @@
 
   <p>This is a guest page. It can have a presentation of your application.</p>
 
-  <p v-if="LOCAL">Provide a <span class="tt">?user=dev</span> parameter to sign in.</p>
+  <p v-if="LOCAL && !TEST">Provide a <span class="tt">?user=dev</span> parameter to sign in.</p>
   <p v-else>To the right, there should be a sign-in panel visible.</p>
 </template>
 
@@ -37,8 +37,10 @@ span.tt {
 <script>
 function setup() {
   const LOCAL = import.meta.env.MODE === 'dev_local';
+  const TEST = LOCAL && window.Cypress;
+
   return {
-    LOCAL
+    LOCAL, TEST
   }
 }
 

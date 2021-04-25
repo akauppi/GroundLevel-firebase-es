@@ -10,13 +10,13 @@
 <template>
   <header>
     <AppLogo />
-    <div id="mode" v-bind:class="{ devLocal: LOCAL /*, devOnline: mode === 'development'*/ }">
+    <div id="mode" v-bind:class="{ devLocal: LOCAL && !TESTING, devTest: TESTING }">
     </div>
     <UserProfile v-if="user" />    <!-- 'user' is Ref of (undefined | null | { ..Firebase user object }) -->
   </header>
   <main>
     <router-view />
-    <aside-keys v-show="!LOCAL" />
+    <aside-keys v-show="!LOCAL || TESTING" />
   </main>
   <footer>
     <AppFooter />
@@ -39,6 +39,13 @@
     background-color: #ffc800;
     &:after {
       content: 'LOCAL MODE';
+    }
+  }
+  #mode.devTest {
+    display: block;
+    background-color: steelblue;
+    &:after {
+      content: 'TEST MODE';
     }
   }
 
@@ -78,8 +85,8 @@
 
   import { userRef2 } from '/@/user'
 
-  const _MODE = import.meta.env?.MODE || 'production';    // tbd. needed? why the '|| "production"'?
   const LOCAL = import.meta.env.MODE === 'dev_local';
+  const TESTING = LOCAL && window.Cypress;
 
   /*** disabled (infinite loop, in "npm run dev:online", opening the project). #fix #BUG
   /*
@@ -164,7 +171,8 @@
 
     return {
       user: userRef2,
-      LOCAL: _MODE === 'dev_local',
+      LOCAL,
+      TESTING,
       makeError   // IDE note: used though dimmed
     }
   }

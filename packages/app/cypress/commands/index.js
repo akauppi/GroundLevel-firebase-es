@@ -51,26 +51,23 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 
   cy.visit('/');    // initialize the app; wait for knowledge that it's opened
 
-  firebaseAuthChainable().then( auth => {
-    cy.wrap( (async _ => {
-      console.log("Signing in as:", { uid } );
+  firebaseAuthChainable().then( async auth => {
+    console.log("Signing in as:", { uid } );
 
-      // Create a user based on the provided token (only '.uid' is used by Firebase)
-      //
-      const { user: /*as*/ currentUser } = await signInWithCustomToken( auth, JSON.stringify({ uid }) );
-      assert(currentUser.uid === uid);
+    // Create a user based on the provided token (only '.uid' is used by Firebase)
+    //
+    const { user: /*as*/ currentUser } = await signInWithCustomToken( auth, JSON.stringify({ uid }) );
+    assert(currentUser.uid === uid);
 
-      // Set '.displayName', '.photoURL'; for email and password, other functions exist (not implemented)
-      await updateProfile(currentUser, { displayName, photoURL });
+    // Set '.displayName', '.photoURL'; for email and password, other functions exist (not implemented)
+    await updateProfile(currentUser, { displayName, photoURL });
+    onAuthStateChanged_HACK({ uid, displayName, photoURL });
 
-      onAuthStateChanged_HACK({ uid, displayName, photoURL });
+    return currentUser;
 
-      return currentUser;
-
-    })() ).then( user =>
-      cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
-    )
-  })
+  }).then( user =>
+    cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
+  )
 })
 
 /*

@@ -1,12 +1,13 @@
 {
   "baseUrl": "http://localhost:3000",
-  "testFiles": "**/*.js",
+  "testFiles": "**/*.spec.js",
   "screenshotsFolder": ".screenshots",
   "video": false,
   "fixturesFolder": false,
   "pluginsFile": false,
-  "supportFile": "cypress/support/index.js",
+  "supportFile": "cypress/commands/index.js",
   "modifyObstructiveCode": false,
+  "integrationFolder": "cypress",
 
   "//": {
     "": [

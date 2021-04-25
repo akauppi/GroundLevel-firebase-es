@@ -30,6 +30,7 @@ import './common.css'
 document.title = appTitle;
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
+const TESTING = LOCAL && (!! window.Cypress);
 
 // Build values:
 //
@@ -40,8 +41,9 @@ const VERSION = _VERSION;    // both dev and production
 async function init() {    // () => Promise of ()
   const tr = appInitTrack.start();
 
-  // Production: Initialize the authentication system
-  if (!LOCAL) {
+  // Load the web component for 'aside-keys' tag.
+  //
+  if (!LOCAL || TESTING) {
     // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
     //    the requested persistence (or can we change the persistence once initialized?). #rework
 

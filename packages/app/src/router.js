@@ -60,8 +60,8 @@ async function getCurrentUserProm_online() {
 */
 function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
   let uid;
-  if (LOCAL) {
-    uid = r.query.user;
+  if (LOCAL && r.query.user) {
+    uid = r.query.user;   // 'dev:local' (not tests)
   } else {
     uid = getCurrentUserWarm()?.uid;
   }
