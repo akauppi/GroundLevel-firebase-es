@@ -16,7 +16,7 @@ describe('Sign In as Joe', () => {
   })
 
   it('See one\'s name', () => {
-    cy.get('div.user-profile #user-name')
+    cy.get('[data-cy=user-name]')
       .contains(joe.displayName)
   })
 })

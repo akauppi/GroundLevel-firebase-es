@@ -23,7 +23,7 @@
     "_test_dev": "( >&2 echo \"Running Cypress against existing service.\" ) && cypress run",
     "  -": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"firebase emulators:start --project=app --only auth,functions,firestore\" \"npm run --silent _dev_local_init && npm run --silent _dev_local_vite\"",
-    "_dev_local_init": "wait-for 4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js",
+    "_dev_local_init": "wait-for 4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js local/users.js",
     "_dev_local_vite": "vite --port 3000 --mode dev_local --clearScreen false",
     "  --": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run --silent _dev_online_vite\"",
@@ -35,7 +35,6 @@
     "//test": "which firebase",
     "//tmp": "firebase setup:emulators:firestore",
     "//tmp2": "npm run _dev_local_init && npm run _dev_local_vite",
-    "//tmp3": "GCLOUD_PROJECT=app firebase-prime local/docs.js",
     "  - ": "",
     "prebuild": "npm run --silent _checkNoLinks",
     "predev:local": "port-is-free 3000,5002 && npm run --silent _genEnvLocal",
@@ -68,7 +67,7 @@
     "eslint-plugin-vue": "^7.9.0",
     "prettier": "^2.2.0",
     "sass": "^1.32.11",
-    "vite": "^2.2.2",
+    "vite": "^2.2.3",
     "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {

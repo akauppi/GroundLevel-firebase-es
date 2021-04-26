@@ -5,7 +5,7 @@
 *
 * Change this to your liking, or remove.
 */
-import { users } from './users'
+import { users } from './users.js'
 
 // Users used in the data
 //

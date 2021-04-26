@@ -38,20 +38,21 @@ const firebaseJson = "./firebase.json";
 const getAuth_WORK_AROUND = true;
 
 program
-  .arguments('<docs-and-users-file>')
+  .arguments('<docs-file> <users-file>')
   //.option('--project <project-id>', 'Firebase project id')
   .action(main)
   .parse(process.argv);
 
-async function main(fn) {
+async function main(docsFn, usersFn) {
   //console.log("!!!", { projectId, fn });
 
   // Little trickery to import relative to current directory.
   //
-  const { docs, users } = await import(`${ process.cwd() }/${fn}`);
+  const { docs } = await import(`${ process.cwd() }/${docsFn}`);
+  const { users } = await import(`${ process.cwd() }/${usersFn}`);
 
-  if (!docs) fail(`Missing 'docs' export in: ${fn}`);
-  if (!users) fail( `Missing 'users' export in: ${fn}`);
+  if (!docs) fail(`Missing 'docs' export in: ${docsFn}`);
+  if (!users) fail( `Missing 'users' export in: ${usersFn}`);
 
   // Get the Firebase emulator ports from Firebase configuration file.
   //
