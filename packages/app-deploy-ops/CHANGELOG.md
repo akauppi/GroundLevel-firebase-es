@@ -1,5 +1,10 @@
 # Changelog
 
+## 27-Apr-21
+
+- Revised the Web workers code. Disabled IIFE output as not needed.
+- Most client-side logging code (proxy) now done; no nasty errors.
+
 ## 30-Mar-21
 
 - Revised; deploys work.

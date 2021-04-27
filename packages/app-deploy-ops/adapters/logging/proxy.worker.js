@@ -20,21 +20,34 @@
 *
 *   [ ] Make more detailed helps in '../../DEVS/Debugging\ Web\ Workers\ (Chrome).md'?
 */
-import { getApp } from '@firebase/app'
+import { initializeApp } from '@firebase/app'
 import { getFunctions, httpsCallable } from '@firebase/functions'
 
-// Launch parameters via the URL.
+function fail(msg) { throw new Error(msg); }
+
+function assert(cond,msg) { if (!cond) fail(msg); }
+
+// Launch parameters via the URL
+//
+// Approach: One can configure a worker either via query params (here) or via the 'init' message. We do both but you can
+//    certainly prefer one over the other. Few params is good as query; a lot feels easier via the message.
 //
 const args = new URLSearchParams(location.search);
 
-const region = args.get("region"),
-  maxBatchDelayMs = args.get("max-batch-delay-ms"),
+const maxBatchDelayMs = args.get("max-batch-delay-ms"),
   maxBatchEntries = args.get("max-batch-entries");
 
 if (/*!locationId ||*/ !maxBatchDelayMs || !maxBatchEntries) {
   throw new Error( "Expecting web worker to be launched with '?locationId=...&max-batch-delay-ms=...&max-batch-entries=...");
 }
 
+let logs_v1;
+
+/*
+* Initialize the worker
+*
+*   config:   Necessary fields for Firebase app initialization (since we are not in the main thread)
+*/
 /*
 * 🔥 It is despicable that Firebase requires the *CODE* to provide the "region or custom domain" where it's been
 *   deployed to. This should be configuration, and Firebase client should just know it!!!
@@ -43,9 +56,20 @@ if (/*!locationId ||*/ !maxBatchDelayMs || !maxBatchEntries) {
 *   should be _just_ a configuration entry to change it to something else.
 * /🔥
 */
-const fnsRegional = getFunctions( getApp(), region );
+function init({ apiKey, appId, locationId, projectId, authDomain }) {
+  assert(locationId,"Missing 'locationId' in proxy worker.");
 
-const logs_v1 = httpsCallable(fnsRegional,"logs_v1");
+  const fah = initializeApp({
+    apiKey,
+    projectId
+  });
+
+  const fnsRegional = getFunctions( fah, locationId );
+
+  logs_v1 = httpsCallable(fnsRegional,"logs_v1");
+
+  console.log("Worker initialized");
+}
 
 console.log("Worker loaded");
 
@@ -55,12 +79,28 @@ console.log("Worker loaded");
   createdMs: t,
 }*/
 
+function logGen(level) {
+  return (msg, ...args) => {
+    logs_v1(level,msg,...args);
+  }
+}
+
+const lookup = {
+  init,
+  ...Object.fromEntries( ["info","warn","error","fatal"].map( s =>
+    [s,logGen(s)]
+  ))
+};
+
 /*
 * Messages:
 *
-* "init", { regionOrCustomDomain: string }
+* "init", {
+*   regionOrCustomDomain: string,
+*   config: { appId, ... }
+* }
 *
-*     Initialize the worker. First message after creation (since one cannot provide construction parameters for a worker?)
+*     Initialize the worker. First message after creation.
 *
 * "debug"|"info"|"warning"|"error"|"fatal", object?
 *
@@ -68,4 +108,10 @@ console.log("Worker loaded");
 */
 onmessage = function(e) {
   console.log("Worker received:", e);
+
+  const t = e.data[""] || fail("No '_' field to indicate msg type.");    // just our convention
+  const data = e.data;
+
+  const f = lookup[t] || fail(`Unknown message: ${ JSON.stringify(e.data) }`);
+  f(data);
 }

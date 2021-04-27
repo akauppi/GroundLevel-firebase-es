@@ -19,9 +19,9 @@
     "_watch_roll_rollup": "rollup -c roll/rollup.config.js -w",
     "_watch_roll_host": "npm run --silent serve:roll",
     "  - ": "",
-    "build:roll": "npm run -s _clean && npm run --silent _prepRollOut && rollup -c roll/rollup.config.js",
-    "//_clean0": "(cd roll/out && rm -f *.* workers/* app/* ops/*)",
-    "_clean": "find roll/out -type f \\! -name '.*' -delete && rm -f roll/out/*.*",
+    "klean": "rm -rf roll/out/*",
+    "  - - ": "",
+    "build:roll": "npm run --silent _prepRollOut && rollup -c roll/rollup.config.js",
     "_prepRollOut": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/public/* .) && npm run --silent _prepRollOut2",
     "_prepRollOut2": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/dist/*.css .)",
     "build:vite": "vite build -c vite/vite.config.js",
@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
+    "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "@firebase/performance": "file:../../node_modules/@firebase/performance",
     "@local/app": "file:../app"
   },
