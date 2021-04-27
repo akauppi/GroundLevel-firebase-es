@@ -20,29 +20,13 @@ Note: The ideology of the repo is to work close to what plain browsers offer. Th
 >
 >[ ] Going to handle ops side, once the repo is otherwise done! 🐤
 
-## `firebase@exp` for tree-shaking!!!
-
-They are REWRITING the JavaScript client, as `exp` (expire?). 
-
-- [ ] Check out, especially when auth support is there: [https://github.com/firebase/firebase-js-sdk/issues/2241](https://github.com/firebase/firebase-js-sdk/issues/2241)
-
-"A couple of months" further down the road (Nov 2020).
-
->Still not there (Jan 2021).
-
-Once we have something running with `@exp`, comparison of the before/after bundle sizes is what's interesting.
-
 ## WebStorm: exclude `node_modules` from searches - but keep them for symbol lookup
 
 This is a small but annoying part of WebStorm.
 
+Likely the author has managed to mess up its configuration?=
+
 - [How to exclude node_modules and .meteor from all searches and code inspections](https://intellij-support.jetbrains.com/hc/en-us/community/posts/207696445-How-to-exclude-node-modules-and-meteor-from-all-searches-and-code-inspections)
-
-## npm - what is the point of workspaces?
-
-If they leak all the files through, what's the point?
-
-- [NPM Workspaces monorepo - share local package's distribution folder as root instead of the entire source files](https://stackoverflow.com/questions/66785791/npm-workspaces-monorepo-share-local-packages-distribution-folder-as-root-inst) (StackOverflow, 2021)
 
 
 ## Firebase Performance Monitoring: "near real time" is coming "soon"...?
@@ -54,10 +38,10 @@ If they leak all the files through, what's the point?
 - [ ] When will it?  
 - [ ] How to know when "near real time" is enabled?
 
-Note that "alpha" (obviously) isn't mentioned in the supported SDKs.
-
 
 ## Firebase SDK: peer dependency warnings
 
 - [peerDependency warnings when installed with yarn@1/npm@7](https://github.com/firebase/firebase-js-sdk/issues/4789)
+
+- [ ] Once 9.0.0-beta.2 is out, check whether this still occurs. If it does, comment and try to get reopened (the issue was about 8 API, so not sure if they applied change to 9.x).
 

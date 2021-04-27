@@ -12,6 +12,7 @@
     "lint": "eslint src",
     "build": "npm run --silent build:roll",
     "serve": "npm run --silent serve:roll",
+    "watch": "npm run --silent watch:roll",
     "deploy": "npm run --silent deploy:roll",
     "  -": "",
     "watch:roll": "concurrently -k -n roll,host \"npm run --silent _watch_roll_rollup\" \"npm run --silent _watch_roll_host\"",

@@ -18,22 +18,25 @@ const elFatal = document.getElementById("fatal");   // Element | ...
 //
 import { central } from '@ops/central'
 
+function isVisible(el) {
+  const tmp= window.getComputedStyle(el).display;   // "block" if already shown
+  return tmp !== 'none';
+}
+
 /*
 * Send to 'central.fatal' once it is available.
 */
 async function centralFatal(msg, ...args) {
 
-  // If the page has a '#fatal' element, show also there (always the latest message only).
+  // If the page has a '#fatal' element, show also there (always the FIRST message only, since a failure can lead to
+  // others).
   //
   // Note: This is before calling 'central.fatal' in case the problem was exactly in loading of it.
   //
-  if (elFatal) {
-    const errStack = args?.error?.stack;
-
-    elFatal.innerText = `Unexpected ERROR: "${msg}"` +
-      (errStack ? `\n\n${errStack}` : "");
-
-    elFatal.classList.remove("inactive");     // tbd. too tightly coupled with 'index.html' (can we just show/hide, yet have animations??)
+  if (elFatal && !isVisible(elFatal)) {
+    const s = [msg, ...args].join(" ");
+    elFatal.innerText = `Unexpected ERROR\n"${s}"`;
+    elFatal.style.display = 'block';
   }
 
   const f = await central.isReady.then( _ => central.fatal );
@@ -65,22 +68,26 @@ window.onerror = function (msg, source, lineNbr, colNbr, error) {
   return true;    // "prevents the firing of the default error handler" (what would that do?)
 }
 
+/*
+* Catches errors that happen within a Promise.
+*
+* This can be essentially anything.
+*/
 window.onunhandledrejection = function (promiseRejectionEvent) {
   const { reason } = promiseRejectionEvent;
 
   console.debug("onunhandledrejection saw:", promiseRejectionEvent);    // DEBUG
     //
-    // PromiseRejectionEvent{ isTrusted: true, promise: ..., reason: "TypeError: a is not a function" }
+    // PromiseRejectionEvent{ isTrusted: true, promise: ..., reason: string }
 
   // "TypeError: a is not a function\n..." is likely a failure importing 'central' (a bug); skip such to avoid eternal loops.
   //
-  if (! /^TypeError: [a-z] is not a function/.test(reason)) {
-    centralFatal("Unhandled Promise rejection:", reason);   // let run loosely
+  if (/^TypeError: [a-z] is not a function/.test(reason)) {
+    prevOnUnhandledRejection(arguments);
+
+ } else {
+    centralFatal("Unhandled rejection:", reason);   // let run loosely
   }
-
-  prevOnUnhandledRejection(arguments);
-
-  return; // samples don't return anything; see -> https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
 }
 
 export { }
