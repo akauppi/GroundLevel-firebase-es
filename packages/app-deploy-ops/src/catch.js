@@ -14,34 +14,53 @@ import { assert } from './assert.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
-// 'central' is still being initialized. Observe 'central.isReady' (a Promise) before referencing its other fields.
-//
-import { central } from '@ops/central'
+import { fatalProm } from '@ops/central'
+
+function isVisible(el) {
+  const tmp= window.getComputedStyle(el).display;   // "block" if already shown
+  return tmp !== 'none';
+}
 
 /*
 * Send to 'central.fatal' once it is available.
 */
-async function centralFatal(msg, ...args) {
+async function centralFatal(uiTitle, msg, { source, lineNbr, colNbr, error }) {
 
-  // If the page has a '#fatal' element, show also there (always the latest message only).
+  // If the page has a '#fatal' element, show also there (always the FIRST message only, since a failure can lead to
+  // others).
   //
   // Note: This is before calling 'central.fatal' in case the problem was exactly in loading of it.
   //
-  if (elFatal) {
-    const errStack = args?.error?.stack;
-
-    elFatal.innerText = `Unexpected ERROR: "${msg}"` +
-      (errStack ? `\n\n${errStack}` : "");
-
-    elFatal.classList.remove("inactive");     // tbd. too tightly coupled with 'index.html' (can we just show/hide, yet have animations??)
+  if (elFatal && !isVisible(elFatal)) {
+    const s = msg;
+    elFatal.innerText = `${uiTitle}\n"${s}"`;
+    elFatal.style.display = 'block';
   }
 
-  const f = await central.isReady.then( _ => central.fatal );
-
-  // Note: Unlike other 'central' functions, 'central.fatal' could be 'async', and only fulfill the promise when the
-  //    message has shipped.
+  // If the error is from proxy-worker (adapter internals), let's not even consider feeding it to 'central.log'.
+  // This may be errors during loading of the worker.
   //
-  /*await*/ f(msg, ...args);
+  if (source && source.includes("/worker/")) {
+    console.warn("Skipping sending this to 'central.fatal':", msg, { source, lineNbr, colNbr, error });
+    return;
+  }
+
+  // Catch errors that would happen within calling 'central.fatal' (via adapters), so that there's no eternal looping.
+  //
+  try {
+    const f = await fatalProm;
+
+    // Note: Unlike other 'central' functions, 'central.fatal' could be 'async', and only fulfill the promise when the
+    //    message has shipped.
+    //
+    /*await*/ f(msg, { source, lineNbr, colNbr, error });
+  }
+  catch(err) {
+    // Seen:
+    //    - DataCloneError: The object cannot be cloned.
+
+    console.error("Failure calling 'central.fatal':", err);
+  }
 }
 
 /*
@@ -56,31 +75,41 @@ window.onerror = function (msg, source, lineNbr, colNbr, error) {
   console.debug("onerror saw:", {msg, source, lineNbr, colNbr});    // DEBUG
     //
     // {msg: "Uncaught ReferenceError: env is not defined", source: "http://localhost:3012/worker/proxy.worker-62db5bc8…st6&max-batch-delay-ms=5000&max-batch-entries=100", lineNbr: 1307, colNbr: 16}
+    // {msg: "Error: Unknown message: [object Object]", source: ".../worker/proxy.worker-...", ... }
 
   // Note: If the error comes from web worker, 'error' is 'undefined'
 
-  centralFatal(msg, { source, lineNbr, colNbr, error });
+  centralFatal("Unexpected ERROR", msg, { source, lineNbr, colNbr, error });
 
   prevOnError(arguments);
   return true;    // "prevents the firing of the default error handler" (what would that do?)
 }
 
+/*
+* Catches errors that happen within a Promise.
+*
+* This can be essentially anything.
+*/
 window.onunhandledrejection = function (promiseRejectionEvent) {
   const { reason } = promiseRejectionEvent;
 
   console.debug("onunhandledrejection saw:", promiseRejectionEvent);    // DEBUG
     //
-    // PromiseRejectionEvent{ isTrusted: true, promise: ..., reason: "TypeError: a is not a function" }
+    // PromiseRejectionEvent{ isTrusted: true, promise: ..., reason: string }
 
-  // "TypeError: a is not a function\n..." is likely a failure importing 'central' (a bug); skip such to avoid eternal loops.
+  /*** Not needed? (different protection
+  // Beware for getting in eternal loop (seen cases):
   //
-  if (! /^TypeError: [a-z] is not a function/.test(reason)) {
-    centralFatal("Unhandled Promise rejection:", reason);   // let run loosely
-  }
+  //  - "TypeError: a is not a function\n..." is likely a failure importing 'central' (a bug); skip such to avoid eternal loops.
+  //
+  if (/^TypeError: [a-z] is not a function/.test(reason) ||
+    /_*reason.contains("Cannot be cloned")*_/ true) {
+    prevOnUnhandledRejection(arguments);
 
-  prevOnUnhandledRejection(arguments);
+ } else {
+  ***/
 
-  return; // samples don't return anything; see -> https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
+  centralFatal("Unhandled rejection", reason, {});   // let run loosely
 }
 
 export { }

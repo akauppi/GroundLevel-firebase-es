@@ -16,39 +16,13 @@ import { logging } from '../options'
 
 let resolveBreak;
 
-const central = {
-  isReady: new Promise((resolve) => {
-    resolveBreak = resolve;   // allows setting the promise from outside
-  })
-};    // { debug: (msg, ...) => (), info, warn, error, fatal }
+const central = {};    // { info|warn|error: (msg, ...) => () }
 
-/*** NOTE: Not sure why the below causes:
- * <<
- *    Cannot access 'logging' before initialization
- * <<
- *
-// Wait for 'initializedProm' before using 'central'. Application code doesn't need it since 'main.js' has made sure
-// logging is available.
+// Fatal logging is only available for 'catch.js'; not to be used directly.
 //
-const initializedProm = Promise.all(logging).then( arr => {
-  function logGen(level) {    // ("debug"|"info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
-    const fns= arr.map( gen => gen(level) );
-
-    function f(msg, opt) {
-      fns.forEach( fn => {
-        fn(msg, opt);
-      });
-    }
-    return f;
-  }
-
-  central.debug = logGen('debug');
-  central.info = logGen('info');
-  central.warn = logGen('warn');
-  central.error = logGen('error');
-  central.fatal = logGen('fatal');
+const fatalProm = new Promise((resolve) => {
+  resolveBreak = resolve;   // allows setting the promise from outside
 });
-***/
 
 async function init() {
   const arr = await Promise.all(logging);
@@ -56,24 +30,24 @@ async function init() {
   function logGen(level) {    // ("debug"|"info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
     const fns= arr.map( gen => gen(level) );
 
-    function f(msg, opt) {
+    function f(msg, ...args) {
       fns.forEach( fn => {
-        fn(msg, opt);
+        fn(msg, ...args);
       });
     }
     return f;
   }
 
-  central.debug = logGen('debug');
   central.info = logGen('info');
   central.warn = logGen('warn');
   central.error = logGen('error');
-  central.fatal = logGen('fatal');
 
-  resolveBreak();
+  const fatal = logGen('fatal');
+  resolveBreak(fatal);
 }
 
 export {
   init,   // called by one place only ('main')
-  central
+  central,
+  fatalProm
 }

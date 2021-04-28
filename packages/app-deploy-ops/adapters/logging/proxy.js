@@ -7,11 +7,12 @@
 *
 * Note:
 *   Must implement batching of logs and support for offline mode. Not sure why Firebase doesn't have central logging
-*   (it has "Events" but won't turn there because they require Analytics).
+*   (it has "Events" but won't turn to those because they require Google Analytics).
 *
 *   Initialized in parallel with 'main.js' initializing Firebase for itself.
 */
-const [esmHash, iifeHash] = env.PROXY_WORKER_HASHES;    // injected by Rollup build
+const esmHash = env.PROXY_WORKER_HASH;    // injected by Rollup build
+//const iifeHash = env.PROXY_WORKER_HASH_IIFE;    // not needed
 
 import { firebaseProm } from "../../src/firebaseConfig"
 
@@ -19,13 +20,15 @@ function fail(msg) {
   throw new Error(msg);
 }
 
-// Some browsers (Firebase, Safari, as of April 2021) don't yet support ES modules, for workers:
-//
 // MDN > Web APIs > Worker > Browser compatibility (Support for ECMAScript modules):
 //  -> https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 //
+// The page seems to be behind:
+//  - Safari 14.0.3 (macOS) looks fine with ESM Worker threads.
+//  - Firefox 88 (macOS) seems fine with ESM Worker threads.
+//
 const PROXY_WORKER_PATH = `/worker/proxy.worker-${esmHash}.js`;
-const PROXY_WORKER_IIFE_PATH = `/worker/proxy.worker-${iifeHash}.iife.js`;
+//const PROXY_WORKER_IIFE_PATH = `/worker/proxy.worker-${iifeHash}.iife.js`;
 
 function paramCheck(opts,k) {
   const v= opts[k] || fail(`Missing adapter param: ${k}`);
@@ -33,7 +36,7 @@ function paramCheck(opts,k) {
   return v;
 }
 
-async function createLogger(opts) {   // ({ maxBatchDelayMs, maxBatchEntries }) => Promise of (string) => (msg, opt) => ()
+async function loggerGenGen(opts) {   // ({ maxBatchDelayMs, maxBatchEntries }) => Promise of (string) => (msg, opt) => ()
   const
     maxBatchDelayMs = paramCheck(opts,'maxBatchDelayMs'),
     maxBatchEntries = paramCheck(opts,'maxBatchEntries');
@@ -49,45 +52,42 @@ async function createLogger(opts) {   // ({ maxBatchDelayMs, maxBatchEntries }) 
     { type: 'module' }
   );
 
-  const o = await firebaseProm;
-  const fbConfig = {
-    //apiKey: o.apiKey,
-    //appId: o.appId,
-    locationId: o.locationId,
-    //projectId: o.projectId,
-    //authDomain: o.authDomain
-  };
+  const {
+    apiKey,
+    //appId,
+    locationId,
+    projectId,
+    //authDomain
+  } = await firebaseProm;
 
   // tbd. Test with Firebase and Safari: what kind of error - then load IIFE.
 
-  myWorker.postMessage("init", fbConfig );
+  myWorker.postMessage({ "":"init",
+    apiKey,
+    locationId,
+    projectId
+  });
 
-  return function (level) {    // ("debug"|"info"|"warn"|"error"|"fatal") => (msg, opts) => ()
+  return (level) => {    // ("debug"|"info"|"warn"|"error"|"fatal") => (msg, ...) => ()
 
-    return function log(/*msg, payload*/) {   // (string, object?) => ()
-      const o = workerData(arguments);
+    return (msg, ...args) => {   // (string [,any [,...]]) => ()
+      // JavaScript
+      const now = Date.now();   // e.g. 1619536750627
+
+      const o = {
+        msg,
+        args,
+        createdMs: now
+      };
 
       // Sending to the worker is a fire-and-forget operation. It bundles the log entries together, and may send them
       // only later.
       //
-      myWorker.postMessage(level,o);
+      myWorker.postMessage({ "":level, ...o });
     }
   }
 }
 
-/*
-* Convert (and enrich with time stamp) a log entry for transmission to the worker.
-*/
-function workerData(msg,payLoad) {
-  const t = Date.now();   // time now, in Epoch ms's
-
-  return {
-    msg,
-    payLoad,
-    createdMs: t,
-  }
-}
-
 export {
-  createLogger
+  loggerGenGen
 }

@@ -12,8 +12,6 @@ const t0 = performance.now();   // start ⏱
 
 import { init as centralInit } from '@ops/central'
 
-// Catch may use '@ops/central' but it observes 'central.isReady'. Application code doesn't need to do that.
-//
 // It's important we get the error catching up early. Another way would be to chain this to 'central' initialization.
 //
 import './catch'

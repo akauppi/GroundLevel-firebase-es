@@ -18,24 +18,23 @@
   "scripts": {
     "dev": "npm run dev:local",
     "__": "",
-    "test": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-on http://localhost:3000 && cypress run\"",
+    "test": "if port-is-free --silent 3000 ; then npm run _test_ci ; else npm run --silent _test_dev ; fi",
+    "_test_ci": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-for 3000 && cypress run\"",
+    "_test_dev": "( >&2 echo \"Running Cypress against existing service.\" ) && cypress run",
     "  -": "",
-    "cy:run": "cypress run",
-    "  -- ": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"firebase emulators:start --project=app --only auth,functions,firestore\" \"npm run --silent _dev_local_init && npm run --silent _dev_local_vite\"",
-    "_dev_local_init": "wait-on http://localhost:4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js",
+    "_dev_local_init": "wait-for 4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js local/users.js",
     "_dev_local_vite": "vite --port 3000 --mode dev_local --clearScreen false",
     "  --": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run --silent _dev_online_vite\"",
     "_dev_online_log": "PORT=5050 node tools/printout.js",
-    "_dev_online_vite": "wait-on http://localhost:5050 && vite --port 3001 --clearScreen false",
+    "_dev_online_vite": "wait-for 5050 && vite --port 3001 --clearScreen false",
     "  ---": "",
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
     "//test": "which firebase",
     "//tmp": "firebase setup:emulators:firestore",
     "//tmp2": "npm run _dev_local_init && npm run _dev_local_vite",
-    "//tmp3": "GCLOUD_PROJECT=app firebase-prime local/docs.js",
     "  - ": "",
     "prebuild": "npm run --silent _checkNoLinks",
     "predev:local": "port-is-free 3000,5002 && npm run --silent _genEnvLocal",
@@ -46,22 +45,19 @@
     "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
   },
   "dependencies": {
-    "aside-keys": "^0.0.2-alpha.4",
-    "vue": "^3.0.11",
-    "vue-router": "^4.0.6"
-  },
-  "peerDependencies": {
-    "firebase": "^9.0.0-beta.1"
-  },
-  "devDependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
     "@firebase/auth": "file:../../node_modules/@firebase/auth",
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
+    "aside-keys": "^0.0.2-alpha.5",
+    "vue": "^3.0.11",
+    "vue-router": "^4.0.6"
+  },
+  "devDependencies": {
     "@local/backend": "file:../backend",
     "@local/firebase-prime": "file:../../tools/firebase-prime",
     "@local/tools": "file:../../tools",
-    "@vitejs/plugin-vue": "^1.1.5",
+    "@vitejs/plugin-vue": "^1.2.2",
     "@vue/compiler-sfc": "^3.0.11",
     "concurrently": "^6.0.2",
     "cypress": "^7.1.0",
@@ -70,13 +66,15 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.9.0",
     "prettier": "^2.2.0",
-    "sass": "^1.32.8",
-    "vite": "^2.1.5",
-    "vue-eslint-parser": "^7.6.0",
-    "wait-on": "^5.3.0"
+    "sass": "^1.32.11",
+    "vite": "^2.2.3",
+    "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {
     "scripts": {
+      "test": [
+        "Made so that if 'npm run dev' is running, it automatically uses that. Otherwise (in CI/CD) launches and shuts down the emulators."
+      ],
       "predev:local": [
         "'firebase' CLI version (>= 8.15.0) matters for the use of auth emulation."
       ]

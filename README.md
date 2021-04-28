@@ -36,14 +36,14 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 - **A computer** with the following tools installed:
 
    - `node` v. 14.3 or later
-   - `npm` - preferably version 7.7
+   - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
-   - Java Runtime Environment (JRE) -- Java SE 8 or later
+   - Java Runtime Environment (JRE) -- SE 8 or later
 
   <!-- tbd. update above list of command line tools (it's not complete)
   --> 
 
-  For Windows development, we recommend the [WSL2]() environment with eg. Ubuntu Linux variant. The [Microsoft article]() is worth a read.
+  For Windows development, we recommend the [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) environment with eg. Ubuntu LTS.
 
 - **A capable IDE**
 
@@ -393,6 +393,17 @@ Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://
 Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 
 
+# Contribution
+
+As always, contributions and discussions are welcome.
+
+- Please use primarily [GitHub Issues](https://github.com/akauppi/GroundLevel-es-firebase/issues) for questions and bug reports.
+- For casual conversation, head to the [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web).
+
+   *We'll head for a Discord server, once more people are involved.*
+
+Have Fun, and spread the word!!
+
 
 # References
 
@@ -414,3 +425,9 @@ Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
 
 - [Firebase developers](https://discord.gg/BN2cgc3) (Discord server)
 
+
+# Other full app templates
+
+||Front-end framework|Database|Auth|bundler|purpose|
+|---|---|---|---|---|---|
+|[cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app)|React|(none)|local JSON database|??|Showcasing use of Cypress]

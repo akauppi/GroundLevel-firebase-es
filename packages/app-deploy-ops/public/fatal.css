@@ -1,4 +1,6 @@
 #fatal {
+  display: none;
+
   position: fixed;
   top: 0.5em;
   z-index: 999;
@@ -17,7 +19,7 @@
 #fatal::before {
   content: "⚠️ "
 }
-#fatal.inactive {
+/*#fatal.inactive {
   padding: 0 1em;
   height: 0;
   border-style: none;
@@ -25,4 +27,4 @@
 }
 #fatal.inactive::before {
   content: ""
-}
+}*/

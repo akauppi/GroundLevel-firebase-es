@@ -27,7 +27,7 @@ function format(msg, ...args) {
   return tmp.join(' ');
 }
 
-const logGen = level => {    // (string) => (string [, object]) => ()
+const logGen = level => {    // ("info"|"warn"|"error") => (string [, object]) => ()
   if (!port) {    // LOCAL mode
 
     // Show on browser console; it's best to get eg. Firestore errors seen.
@@ -59,35 +59,18 @@ const logGen = level => {    // (string) => (string [, object]) => ()
   }
 };
 
-const lf = logGen("fatal");
-
-/*
-* Log, but also return an error with the logged message.
-*
-* Use:
-*   <<
-*     throw log.fatal('msg', {...});
-*   <<
-*/
-function fatal(msg, opt) {
-  const s = format(msg, opt);
-  lf(msg, opt);
-
-  return new Error(s);    // tbd. ideally, with the caller's stack (maybe 'throw' does it?)
-}
-
 const showOnBrowser = new Map([
   ["warn", console.warn],
-  ["error", console.error],
-  ["fatal", console.error]    // '.error' is highest level in browsers
+  ["error", console.error]
 ]);
 
+// Note: We don't implement '.fatal', at all. It's available in ops wrapping, but via catching an exception / rejected
+//    promise.
+//
 const central = {
-  debug: logGen('debug'),
   info: logGen('info'),
   warn: logGen('warn'),
-  error: logGen('error'),
-  fatal
+  error: logGen('error')
 }
 
 // tbd. Do we want to use as:

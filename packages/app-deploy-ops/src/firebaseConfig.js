@@ -9,11 +9,19 @@ const fail = (msg) => { throw new Error(msg); }
 //
 // Note: Once browsers can 'import' JSON natively, we can make this a one-liner.
 //
-const firebaseProm = fetch('/__/firebase/init.json').then( resp => {
+const firebaseProm = fetch('/__/firebase/init.json').then( async resp => {
   if (!resp.ok) {
     throw new Error(`Unable to fetch '/__/firebase/init.json' (${ resp.status }): ${ resp.body }`);
   } else {
-    return resp.json();   // returns a 'Promise' but above '.then' merges them
+    const o = await resp.json();
+
+    // Do minimal sanity checking, e.g. 'appId' is required but will not be there if the person didn't create an app
+    // in Firebase Console.
+    //
+    if (!o.appId) {
+      fail("No '.appId' in Firebase configuration - have you created a web app in Firebase Console?")
+    }
+    return o;
   }
 });
 

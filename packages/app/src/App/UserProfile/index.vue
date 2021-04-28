@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="user-profile fixed-top-right" @click.stop="openDialog">
-    <div id="user-name">
+    <div id="user-name" data-cy="user-name">
       {{ user.isAnonymous ? 'anonymous user' : user.displayName || '(missing name!)' }}
     </div>
     <!--

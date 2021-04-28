@@ -25,7 +25,7 @@ import {dirname} from 'path'
 import {fileURLToPath} from 'url'
 import { readdirSync } from 'fs'
 
-import workerConfig, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
+import workerConfigGen, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 
@@ -62,12 +62,22 @@ const plugins = [
   }),
 
   replace({
-    'env.PROXY_WORKER_HASHES': () => {    // () => "[ esm_hash, iife_hash ]"
+    'env.PROXY_WORKER_HASH': () => {    // () => string
       const arr= loggingAdapterProxyHashes;
-      assert(arr && arr[0] && arr[1], "Worker hash(es) not available, yet!");
+      assert(arr && arr[0], "Worker hash (ESM) not available, yet!");
       return JSON.stringify(arr);
     },
-    preventAssignment: true   // to mitigate a console warning (Rollup 2.44.0); remove with 2.45?
+    /*'env.PROXY_WORKER_HASH_IIFE': () => {    // () => string
+      const arr= loggingAdapterProxyHashes;
+      assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
+      return JSON.stringify(arr);
+    },*/
+
+    // Mitigate warning (Rollup 2.45.2):
+    //  <<
+    //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
+    //  <<
+    preventAssignment: true
   }),
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
@@ -95,8 +105,8 @@ const plugins = [
 
 export default [
   // Worker config(s) need(s) to be first; the main config needs hashes from it.
-  workerConfig(true),
-  workerConfig(false),
+  workerConfigGen(true),
+  //workerConfigGen(false),   // DISABLED: also Safari (14.0.3) and Firefox (88) seem fine with ESM code (kept for maybe needing to support older versions)
   {
     input: './src/main.js',
     output: {

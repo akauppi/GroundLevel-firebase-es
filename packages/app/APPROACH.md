@@ -41,10 +41,77 @@ We reserve that for externally imported web components, and have our own Vue com
 Externally imported *Vue* components must be white listed.
 
 
-## One `local` or two?
+## Cypress: Sharing the `dev:local` server
 
-Both the Cypress tests (`npm test`) and `npm run dev` want to have local data and users for the emulation. They can work completely offline.
+Running Cypress tests requires `npm run dev` to be running (or launches it, in the case of `npm test` if it's not running). It uses the same server as our "local" development mode.
 
-One could separate these, but there's no real benefit from doing so. Our approach is to keep the same local mode for both but differentiate in the data (and users) being loaded.
+However, tests have *different users*, and therefore different data. The local development (`local/**`) and the tests (`cypress/**`) are detached from each other.
 
-This might even provide benefits, because you are able to sign in as one of the Daltons, under `npm run dev`.
+||`dev:local`|Cypress|
+|---|---|---|
+|users|`dev`|`joe`, `william`, ...|
+|data|`local/`|`cypress/`|
+
+Why do it so?
+
+Because there doesn't seem to be much harm, and this seems least overall complexity.
+
+One can now keep `npm run dev` running, use the local development mode (browser and IDE), or hop over to Cypress if one feels like.
+
+
+<!-- tbd. replace:
+--
+## Installing Cypress as a dependency
+
+Because:
+
+- It is a versioned tool: this way we can hopefully steer clear of version incompatibilities
+- Cypress [recommends](https://docs.cypress.io/guides/getting-started/installing-cypress.html) doing so.
+
+Cypress does cache the binary parts, across `npm` projects, so the disk space use (about 637MB for Cypress 7.1.0 on macOS) is similar to installing it on the desktop.
+-->
+
+## Cypress & Windows 10: *both* as a desktop installation and via `npm`
+
+Yeah. 🤪💪
+
+The `npm`-installed version is for `npm test`.
+
+The Windows version is for test based development.
+
+This in completely in line with the mental model that editing one's files is in Windows, while builds (and command line things like `npm test`) happen in WSL2.
+
+Unfortunately (because Cypress doesn't have Windows 10 + WSL2 support where it could eg. provide a browser UI to the Cypress running within WSL2 `#wink^2` 😉), we force the developer to install *two* separate Cypresses.
+
+Cons:
+
+- double the disk use
+- different versions
+- no upgrade path for the Windows version[^1-cypress-update]
+
+Pros:
+
+- no need for X Server setup!
+
+[^1-cypress-update]: To manage the version of the Cypress on Windows, one could set up a dummy Node package there (instead of WSL2), and use `npx cypress open` to pull the binary app.
+
+
+## Cypress: Naming of the folders
+
+Comparision to Cypress folder naming conventions:
+
+||us|Cypress defaults|
+|---|---|---|
+|commands|`cypress/commands`|`cypress/support`|
+|tests|`cypress/**.spec.js`|`cypress/integration/*.js`|
+
+This was a *hard call*. Often, it's best to follow established conventions for familiarity if one uses the tool elsewhere. However, in our case:
+
+- There's no point in calling tests "integration". They are just tests.
+- What does "support" really mean? Those files initialise the Cypress *commands* (`cy.something`).
+
+The ability to have multiple test folders within `cypress` is intentional. This helps separate different *testing stories* from each other - and these can be many. Initially we have:
+
+- `anonymous`: testing what a guest sees and anonymous login
+- `joe`: testing the UI from Joe D.'s point of view
+

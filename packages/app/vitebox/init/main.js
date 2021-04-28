@@ -58,7 +58,16 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
-  window["Let's test!"] = true;   // (value doesn't matter)
+  // Note: Was NOT able to do 'getAuth()' on the Cypress side so we pass the auth handle (and whatever else is necessary?)
+  //    from here. Not sure why this is so.
+  //
+  // Importing anything from the app side must be done dynamically.
+  //
+  if (true) {
+    const piggy1 = await import('/@/user.js').then( mod => mod.onAuthStateChanged_HACK );
+
+    window["Let's test!"] = [auth,piggy1];   // [FirebaseAuth,...]
+  }
 }
 
 function initFirebaseOnline() {
