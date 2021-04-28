@@ -77,7 +77,7 @@
 <script>
   import { assert } from '/@tools/assert'
 
-  import { onMounted, getCurrentInstance } from 'vue'
+  import { onMounted } from 'vue'
 
   import AppLogo from './AppLogo.vue'
   import UserProfile from './UserProfile/index.vue'
@@ -87,42 +87,6 @@
 
   const LOCAL = import.meta.env.MODE === 'dev_local';
   const TESTING = LOCAL && window.Cypress;
-
-  /*** disabled (infinite loop, in "npm run dev:online", opening the project). #fix #BUG
-  /*
-  * Vue warn handler
-  *
-  * This gets called e.g. with:
-  *   msg = "Invalid prop: type check failed for prop "url". Expected ..."
-  *   vm: null
-  *   trace: "at <MemberFace>\nat <RouterLink>..."
-  *
-  * May be nice to have on the development console. This way, we don't have to have the browser dev tools open,
-  * all the time.
-  *
-  * Note: This "only works in development" (Vue docs) so let's not even override when not.
-  *_/
-  const warnHandler = (_MODE !== 'production') && ((msg, vm, trace) => {
-
-    // BUG: WE DON*T GET CALLED!
-    // BUG: LEADS TO INFINITE LOOP!!!
-
-    // May want to suppress some warnings
-    //
-    if (msg.startsWith("You are using the Auth Emulator, ")) {   // ".. which is intended for local testing only.  Do not use with production credentials."
-      return true;   // done
-    }
-
-    // Replicate default functionality (suppressed if we do override):
-    //
-    if (devVueWarningsToCentral) {
-      console.warn(`[Vue warn]: ${msg}\n${trace}`);
-
-      central.warn(`Vue warning: ${msg}`, {trace});
-      return true;
-    }
-  });
-  ***/
 
   /*** disabled (do we need this?)
   /*
@@ -161,13 +125,6 @@
       assert (appConfig.errorHandler === undefined);    // we're not overwriting anything
       appConfig.errorHandler = errorHandler;
     }*/
-
-    /*** disabled (temporarily!)
-    if (warnHandler) {
-      assert (appConfig.warnHandler === undefined, "Warn handler already occupied! (refresh the browser?)");   // this can happen in HMR
-      appConfig.warnHandler = warnHandler
-    }
-    ***/
 
     return {
       user: userRef2,

@@ -55,7 +55,7 @@
   import { assert } from '/@tools/assert'
   import { uidValidator } from '/@/user'
 
-  // The UI uses projects sorted
+  // Sort projects by creation time (for now)
   //
   function sort(projects) {   // (Map of <id> -> { ..projectsC doc }) => Array of [<id>, { ..projectsC doc }]; sorted by recency
     const dataRaw = Array.from(projects);   // Array of [<id>, { ..projectsC doc }]
@@ -129,7 +129,7 @@
         validator: uidValidator
       }
     },
-    components: {   // tbd. Do I still need to mention components?
+    components: {
       NewTile,
       ProjectTile
     },

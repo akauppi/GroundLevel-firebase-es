@@ -5,16 +5,63 @@ Web application sample project.
 ## Requirements
 
 - `npm`
-- Java runtime environment (JRE), needed by Firebase emulator
-   - [more info](https://firebase.google.com/docs/emulator-suite) about the emulators
-- [Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress) as a desktop install (optional; for test based development)
+- Java runtime environment (JRE), needed by Firebase emulator<sub>[details](https://firebase.google.com/docs/emulator-suite)</sub>
+- [Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress) for test based development
+
+### Cypress setup
+
+We bring in Cypress via `npm`, but in order to use it as a desktop application, please take the following steps, depending on your operating system:
+
+<details><summary>**macOS**</summary>
+
+After `npm install`:
+
+```
+$ npx cypress open
+```
+
+This opens Cypress for the first time. 
+
+Move the icon to your favourite location and right click > `Options` > `Keep in Dock`.
+
+This helps you launch the tool as a desktop application, in the future.
+</details>
+
+<details><summary>**Linux**</summary>
+
+As per the Cypress [installation instructions](https://docs.cypress.io/guides/getting-started/installing-cypress#Linux):
+
+```
+$ sudo apt-get update
+$ sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+```
+
+That's all. You'll be using the Cypress version installed via `npm`. Launch it with `npx cypress open` after the install.
+</details>
+
+<details><summary>**Windows 10 + WSL2**</summary>
+
+Windows and WSL2 duo is not a supported Cypress platform. This means you will need to do a little bit more than the other OSes. In short, you'll use *one* Cypress via `npm`, within WSL2, for "headless" testing (`npm test`).
+
+For test based development, we recommend installing *another* instance, this time on the Windows side.
+
+- Within WSL2, follow the above instructions for Linux. This prepares the headless Cypress.
+- Within Windows, follow the [direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) (desktop install) guide
+   - Download `cypress.zip` 
+   - Extract it at a temporary location
+   - Move the resulting folder into a suitable place (eg. under your user's folder), from where you'll launch the application.
+
+   Note that Cypress does not install as a normal Windows program, and it does not show in the `Start` menu. To uninstall Cypress, just trash the whole folder it's in.
+
+Try launching the `Cypress.exe` app.
+</details>
 
 <!--
 Development is done with: 
 
-- latest macOS (11.2.x)
+- latest macOS (11.2)
 - latest node (15.x)
-- npm (7.9.x)
+- npm (7.11.x)
 -->
 
 ## Getting started
@@ -293,7 +340,9 @@ With the sample app, there may be warnings but there should not be errors.
 
 ## Testing
 
-For tests, you must have the Cypress desktop application separately installed.
+You can use Cypress for test based development as well as running all the tests, from command line.
+
+Make sure you have followed the instructions in the "Requirements" section, concerning Cypress desktop application.
 
 
 ### Running all the tests
@@ -318,10 +367,11 @@ Try to run the tests.
 
 ![](.images/cypress-run.png)
 
-><font color=red>tbd. change image once tests pass</font>
+As you can see in the image, always keep the developer tools open while running Cypress tests. It helps.
 
+Now edit some test in the IDE (they are under `cypress/anonymous` and `cypress/joe`).
 
-Now edit some test in the IDE (they are under `cypress/integration/`).
+>Note: After long retaining to the Cypress convention of `cypress/integration`, the author changed the folder structure to reflect the various user stories a front end might have. Thus, within `cypress` folder, tests for a certain user story are in their own folder. Naturally, you may set this back to Cypress defaults if you wish. Also, `cypress/support` was renamed to `commands` since it's where custom commands come from.
 
 Cypress will automatically re-run tests while you make changes to the source - or the tests. A big display may become useful, here!
 
@@ -336,4 +386,10 @@ The Cypress approach changes the way we do software. The more time you spend wit
 
 Some Cypress features like "stubs" and "proxies" are not need, at all. Those are intended for building scaffolding when running things locally, but we have the whole Firebase emulators so we can work against the Real Thing.
 
+
+## What next?
+
+The output of this subpackage is a production-ready build that passes tests in `roll/out/dist`.
+
+You can now move to `../app-deploy-ops` which takes such a build, wraps a cloak of operational awareness around it, and deploys it to the Cloud.
 
