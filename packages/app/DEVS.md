@@ -14,7 +14,7 @@ npm ERR!   dev @vue/compiler-sfc@"^3.0.6" from the root project
 ...
 ```
 
-If you run into such problems, remove the existing installation eg. by:
+If you run into such problems, remove the existing installation by:
 
 ```
 $ rm -rf node_modules/@vue node_modules/vue
@@ -23,7 +23,19 @@ $ rm -rf node_modules/@vue node_modules/vue
 Try again.
 
 
-## Using `npm link`
+## Cypress naming conventions
 
-If you co-create packages and use `npm link`, you need to relink after each `npm install`.
+We're taking liberties naming the folders differently.
 
+||us|Cypress default|
+|---|---|---|
+|tests|`cypress/<story>`|`cypress/integration`|
+|commands|`cypress/commands`|`cypress/support`|
+
+The `integration` just felt uncomfortable, since all our tests are integration tests. It doesn't add value.
+
+Similarly, anything non-test is "support" but what the folder really carries are custom `cy.` commands.
+
+Sorry about this. It's normally a good deed to follow a tool's conventions. It makes moving between projects easier, for one.
+
+Let the author know if you feel strongly about this - or have a suggestion for a better naming convention!

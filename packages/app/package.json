@@ -20,7 +20,7 @@
     "__": "",
     "test": "if port-is-free --silent 3000 ; then npm run _test_ci ; else npm run --silent _test_dev ; fi",
     "_test_ci": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-for 3000 && cypress run\"",
-    "_test_dev": "( >&2 echo \"Running Cypress against existing service.\" ) && cypress run",
+    "_test_dev": "( >&2 echo \"Found 'npm run dev' already running -- good..\" ) && cypress run",
     "  -": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"firebase emulators:start --project=app --only auth,functions,firestore\" \"npm run --silent _dev_local_init && npm run --silent _dev_local_vite\"",
     "_dev_local_init": "wait-for 4000 && GCLOUD_PROJECT=app firebase-prime local/docs.js local/users.js",
@@ -32,9 +32,7 @@
     "  ---": "",
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
-    "//test": "which firebase",
-    "//tmp": "firebase setup:emulators:firestore",
-    "//tmp2": "npm run _dev_local_init && npm run _dev_local_vite",
+    "//": "which firebase",
     "  - ": "",
     "prebuild": "npm run --silent _checkNoLinks",
     "predev:local": "port-is-free 3000,5002 && npm run --silent _genEnvLocal",
@@ -95,6 +93,15 @@
       "'>=14.3' for '—-harmony-top-level-await'",
       "'>=13.2' for ES module support",
       "'--experimental-json-modules' seems to be available for Node 12"
-    ]
+    ],
+    "peerDependencies": {
+      "/not/ firebase": [
+        "It's important we *don't* list 'firebase' as a peer dependency, though mentally it is. Because:",
+        "- we don't want to mention the version twice (only at the root level)",
+        "- we'd force 'app-ops-deploy' to pull in *all* of 'firebase' (and it would likely do it locally, which is unnecessary)",
+        "",
+        "Instead, root defines the version and both us and 'app-ops-deploy' pull in the necessary '@firebase' modules, directly."
+      ]
+    }
   }
 }
