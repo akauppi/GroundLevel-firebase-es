@@ -51,8 +51,10 @@ const pluginsWorkerGen = (esm) => [
 /*
 * Create a Rollup config for building the proxy worker.
 *
-* Only Chromium-based browsers (Chrome, Edge, Opera) currently support modules as workers. [1] For Firefox and Safari,
-* you need to use 'esm == false'.
+* Only Chromium-based browsers (Chrome, Edge, Opera) currently support modules as workers ('type: "module"') [1].
+* However, the way our ESM build works (gathers all imports in the same chunk, does not use 'import' keyword) seems to
+* work as-such also for Firefox (version 88 on macOS) and Safari (14.0.3 on macOS). IIFE production is not used, since
+* not needed, but kept for the day it might.
 *
 * [1]: https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 */

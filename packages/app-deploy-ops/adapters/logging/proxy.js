@@ -23,7 +23,7 @@ function fail(msg) {
 // MDN > Web APIs > Worker > Browser compatibility (Support for ECMAScript modules):
 //  -> https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 //
-// The page seems to be behind:
+// The page is correct, but our build still runs also on:
 //  - Safari 14.0.3 (macOS) looks fine with ESM Worker threads.
 //  - Firefox 88 (macOS) seems fine with ESM Worker threads.
 //
