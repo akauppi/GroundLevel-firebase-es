@@ -6,9 +6,6 @@
   "functions": {
     "source": "node_modules/@local/backend/functions/"
   },
-  "hosting": {
-    "public": "nope"
-  },
   "emulators": {
     "firestore": {
       "port": 6767
@@ -19,10 +16,5 @@
     "auth": {
       "port": 9100
     }
-  },
-  "//": {
-    "hosting.public": [
-      "Need to provide this, so the '__' Firebase configs can be picked up. The directory does not need to exist."
-    ]
   }
 }

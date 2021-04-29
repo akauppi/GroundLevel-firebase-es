@@ -22,7 +22,12 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   const fah= initializeApp( {
     projectId,
-    apiKey: "none"
+    apiKey: "none",
+    authDomain: "no.domain"
+      //
+      // Mitigates an alert that would otherwise occur if the user presses 'Sign in with Google' in local mode.
+      // This is uncharted waters; the main means for local mode authentication is intended to be the '?user=dev' query
+      // param.
   } );
 
   // Set up local emulation. Needs to be before any 'firebase.firestore()' use.

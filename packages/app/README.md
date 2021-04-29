@@ -4,9 +4,11 @@ Web application sample project.
 
 ## Requirements
 
-- `npm`
+- `npm` >= 7.7.0
 - Java runtime environment (JRE), needed by Firebase emulator<sub>[details](https://firebase.google.com/docs/emulator-suite)</sub>
 - [Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress) for test based development
+
+>Note: The repo uses techniques for reaching packages in the top level (`firebase` in particular) and commands in the top level `/tools`. These DO NOT work with `npm@6`. Because of some minor glitches (forgotten) in `npm` 7.6.x, the 7.7.0+ became the recommended version.
 
 ### Cypress setup
 
@@ -89,7 +91,11 @@ $ npm run dev
 
 This serves the UI locally, against an emulated Firebase back-end, with Security Rules applied.
 
-Authentication is not included in this "local" mode. Instead, you provide the user name as a query parameter. Try it out:
+Documents and users come from `local/`.
+
+Please, instead of the Google sign-in, force a user by `?user=dev` query parameter (this is a method unique to the local mode).
+
+Try it out:
 
 [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 

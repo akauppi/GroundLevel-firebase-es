@@ -16,7 +16,7 @@
   </header>
   <main>
     <router-view />
-    <aside-keys v-show="!LOCAL || TESTING" />
+    <aside-keys />
   </main>
   <footer>
     <AppFooter />
@@ -77,7 +77,7 @@
 <script>
   import { assert } from '/@tools/assert'
 
-  import { onMounted } from 'vue'
+  import { onMounted, getCurrentInstance } from 'vue'
 
   import AppLogo from './AppLogo.vue'
   import UserProfile from './UserProfile/index.vue'

@@ -13,7 +13,6 @@ import { getAuth } from '@firebase/auth'
 const auth = getAuth();
 
 import { init as initAside } from 'aside-keys'
-  // Only needed in 'online' mode but import always (optimize for production)
 
 import { appTitle } from './config.js'
 import { router } from './router.js'
@@ -30,7 +29,6 @@ import './common.css'
 document.title = appTitle;
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
-const TESTING = LOCAL && (!! window.Cypress);
 
 // Build values:
 //
@@ -43,14 +41,14 @@ async function init() {    // () => Promise of ()
 
   // Load the web component for 'aside-keys' tag.
   //
-  if (!LOCAL || TESTING) {
-    // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
-    //    the requested persistence (or can we change the persistence once initialized?). #rework
+  // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
+  //    the requested persistence (or can we change the persistence once initialized?). #rework
 
-    /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
-      tr.lap('aside-keys initialization');    // 499..530ms
-    });
-  }
+  /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
+    tr.lap('aside-keys initialization');    // 499..530ms
+  }).catch(err => {
+    debugger;
+  });
 
   // Initialize Vue App
   //

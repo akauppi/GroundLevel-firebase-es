@@ -4,6 +4,10 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
+## 29-Apr-2021
+
+- **CHANGE:** enabling the social sign-in also in local mode (but still recommending to use `?user=dev`)
+
 ## 25-Apr-2021
 
 - **FIX:** Vue.js 3 Developer Tools enabled (without official documentation)
