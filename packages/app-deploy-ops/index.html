@@ -13,6 +13,39 @@
     -->
     <link type="text/css" rel="stylesheet" href="/style.css" />
 
+    <style>
+        #fatal {
+            display: none;
+
+            position: fixed;
+            top: 0.5em;
+            z-index: 999;
+
+            background-color: orangered;
+            padding: 1em;
+            border-style: dotted;
+            box-shadow: #ccc 3px 3px;
+
+            line-height: 1.5em;
+            transition: height 0.3s, padding 0.3s;
+
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #fatal::before {
+            content: "⚠️ "
+        }
+        /*#fatal.inactive {
+          padding: 0 1em;
+          height: 0;
+          border-style: none;
+          margin-bottom: 0;
+        }
+        #fatal.inactive::before {
+          content: ""
+        }*/
+    </style>
+
     <!--ROLL
     ${PRELOADS}
     -->
@@ -45,14 +78,11 @@
     </script>
     <!-- -->
 
-    <link type="text/css" rel="stylesheet" href="/fatal.css" />
-
-    <!-- tbd. debug what's needing this. -->
     <style>
-      /* Something brings 'margin-top: 8px'. We don't want that. */
+      /* Something brings 'margin-top: 8px'. We don't want that. *_/
       body {
         margin: 0;
-      }
+      }*/
     </style>
 
   </head>

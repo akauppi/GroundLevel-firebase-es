@@ -1,5 +1,5 @@
 /*
-* adapters/logging/proxy.worker.js
+* adapters/cloudLogging/proxy.worker.js
 *
 * WEB WORKER side for 'proxy.js'.
 *
@@ -37,8 +37,8 @@ const args = new URLSearchParams(location.search);
 const maxBatchDelayMs = args.get("max-batch-delay-ms"),
   maxBatchEntries = args.get("max-batch-entries");
 
-if (/*!locationId ||*/ !maxBatchDelayMs || !maxBatchEntries) {
-  throw new Error( "Expecting web worker to be launched with '?locationId=...&max-batch-delay-ms=...&max-batch-entries=...");
+if (!maxBatchDelayMs || !maxBatchEntries) {
+  fail( "Expecting web worker to be launched with '?max-batch-delay-ms=...&max-batch-entries=...");
 }
 
 let logs_v1;
@@ -95,21 +95,26 @@ const lookup = {
 /*
 * Messages:
 *
-* "init", {
-*   regionOrCustomDomain: string,
-*   config: { appId, ... }
+* {
+*   "": "init",
+*   apiKey: string,
+*   locationId: string,
+*   projectId: string
 * }
 *
-*     Initialize the worker. First message after creation.
+* Initialize the worker. First message after creation.
 *
-* "debug"|"info"|"warning"|"error"|"fatal", object?
+* {
+*   "": "info"|"warning"|"error"|"fatal",
+*   args: [...]
+* }
 *
-*     Logging.
+* Logging.
 */
 onmessage = function(e) {
   console.log("Worker received:", e);
 
-  const t = e.data[""] || fail("No '_' field to indicate msg type.");    // just our convention
+  const t = e.data[""] || fail("No '' field to indicate msg type.");    // just our convention
   const data = e.data;
 
   const f = lookup[t] || fail(`Unknown message: ${ JSON.stringify(e.data) }`);

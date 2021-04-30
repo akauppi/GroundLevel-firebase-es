@@ -3,51 +3,41 @@
 *
 * Central logging.
 *
-* Imported by _application_ code; unless 'catch.js' imports us dynamically, which may happen prior to the application
-* being initialized.
+* Imported directly by _application_ code; also used by eg. 'crash.js'.
 *
-* - 'options.js' provides the adapter setup
+* Edit the file to change, which adapter(s) are active (and their parameters).
+*
+* Note: Unlike with 'perf', this is not just a pass-through but also
 */
-//import { assert } from '../assert.js'
 
-import { logging } from '../options'
-  //
-  // logging: Array of (Promise of?) (level) => (msg, ...) => ()
+import { firebaseProm } from "../firebaseConfig";
 
-let resolveBreak;
+// Cloud Logging, via proxy
+import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/proxy.js'
 
 const central = {};    // { info|warn|error: (msg, ...) => () }
+let fatal;
 
-// Fatal logging is only available for 'catch.js'; not to be used directly.
-//
-const fatalProm = new Promise((resolve) => {
-  resolveBreak = resolve;   // allows setting the promise from outside
-});
+const initializedProm = firebaseProm.then( config => {
 
-async function init() {
-  const arr = await Promise.all(logging);
+  cloudLoggingInit( {
+    maxBatchDelayMs: 5000,
+    maxBatchEntries: 100,
+    fbConfig: config
+  } );
 
-  function logGen(level) {    // ("debug"|"info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
-    const fns= arr.map( gen => gen(level) );
-
-    function f(msg, ...args) {
-      fns.forEach( fn => {
-        fn(msg, ...args);
-      });
-    }
-    return f;
-  }
-
+  const logGen = cloudLoggingLoggerGen;    // ("info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
   central.info = logGen('info');
   central.warn = logGen('warn');
   central.error = logGen('error');
 
-  const fatal = logGen('fatal');
-  resolveBreak(fatal);
-}
+  fatal = logGen('fatal');
+})
+
+const fatalProm = initializedProm.then( _ => fatal );
 
 export {
-  init,   // called by one place only ('main')
+  initializedProm,    // indicates when loading is complete
   central,
-  fatalProm
+  fatalProm   // for 'crash.js', only
 }

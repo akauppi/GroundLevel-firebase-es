@@ -9,7 +9,6 @@ import vue from '@vitejs/plugin-vue'
 const myPath = dirname(fileURLToPath(import.meta.url))
 const srcPath = pJoin(myPath, 'src');
 const opsPath = pJoin(myPath, 'vitebox/ops');
-const fakePath = pJoin(myPath, 'vitebox/fake');
 
 const DEV_BUILD = false;  // !! process.env.VUE_DEV;    // #cleanup
 
@@ -117,10 +116,6 @@ export default {
       '/@': srcPath,
       ...opsAliases,
       ...(DEV_BUILD ? {
-        // REMOVE?
-        // Redirect '@firebase/performance' if we don't have a real, online project to work against.
-        //'@firebase/performance': fakePath + '/@firebase-performance',
-
         // KEEP for a while
         //
         // Developer versions of Vue.js 3 (and Vue Router) *may* be needed for the Developer Tools to work right.
@@ -133,13 +128,15 @@ export default {
       } : {})
     },
 
+    // Let's stick to *only* 'module' for a while; this can be completely removed once we know things are stable.
+    //
     // Until Firebase 9.0.0-beta.1, we needed to override the 'mainFields' (since 'auth' was not providing a "module"
     // field). Now the Vite defaults are fine.
     //
-    // Note:
-    //    '@firebase/xyz' packaging varies from subpackage to subpackage, but they all carry "module" which is enough
-    //    (and part of Vite default 'resolve.mainFields' list).
-    //mainFields: ["module"]
+    // With 9.0.0-beta.1, '@firebase/...' packaging varies from subpackage to subpackage, but they all now carry "module"
+    // which is enough (and part of Vite default 'resolve.mainFields' list).
+    //
+    mainFields: ["module"]    // KEEP for a while
   },
 
   // Means to pass build time values to the browser (in addition to '.env' files).

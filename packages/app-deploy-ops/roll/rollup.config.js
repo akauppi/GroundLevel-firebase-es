@@ -3,10 +3,6 @@
 *
 * Used by:
 *   $ npm run build:rollup
-*
-* Note: REMOVE?
-*   The '.mjs' extension tells Rollup not to transpile this configuration to CommonJS.
-*     See -> https://rollupjs.org/guide/en/#using-untranspiled-config-files
 */
 import { strict as assert } from 'assert'
 
@@ -19,7 +15,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
-import { opsAliases } from '../vite-and-roll/opsAliases.js'
+import { aliases } from '../vite-and-roll/aliases.js'
 
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
@@ -35,14 +31,11 @@ const targetHtml = myPath + '/out/index.html';
 const watch = process.env.ROLLUP_WATCH;
 
 /*
-* List the '@firebase/auth', '@firebase/app', ... subpackages, so that access to *any* of those is deduplicated.
-* (we cannot give a regex to dedupe)
-*
-* tbd. Is there a setting to dedupe *all* node libraries? Could do that. :)
+* List the '@firebase/auth', '@firebase/app', ... subpackages, so that access to *any* of those is deduplicated
+* (cannot give a regex to dedupe).
 */
 const allFirebaseSubpackages = [
-  ...readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` ),
-  //...readdirSync("./node_modules/firebase").map( x => `firebase/${x}` )
+  ...readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` )
 ];
 
 /*
@@ -50,15 +43,15 @@ const allFirebaseSubpackages = [
 */
 const plugins = [
   alias({
-    entries: Object.entries(opsAliases).map( ([k,v]) => ({ find: k, replacement: v }) )   // plugin's syntax
+    entries: Object.entries(aliases).map( ([k,v]) => ({ find: k, replacement: v }) )   // plugin's syntax
   }),
 
   resolve({
-    mainFields: ["esm2017", "module"],  // insist on importing ES6 only; "esm2017" is Firebase specific.
-
+    mainFields: ["module"],  // insist on importing ES6 only (tbd. remove at some point; Rollup defaults work with Firebase, since 9.0.0-beta.1?)
     modulesOnly: true,       // "inspect resolved files to assert that they are ES2015 modules"
 
     dedupe: allFirebaseSubpackages    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
+                                      // tbd. is there a way to dedupe *any* Rollup packages?
   }),
 
   replace({

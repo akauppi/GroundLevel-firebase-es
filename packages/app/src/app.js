@@ -19,7 +19,7 @@ import { router } from './router.js'
 
 import { central } from '@ops/central'
 
-import { appInitTrack, someCounter } from './meas'
+import { appInitTrack } from './track'
 
 import App from '/@App/index.vue'
 
@@ -36,7 +36,7 @@ const LOCAL = import.meta.env.MODE === 'dev_local';
 //
 const VERSION = _VERSION;    // both dev and production
 
-async function init() {    // () => Promise of ()
+const initializedProm = (async () => {    // Promise of ()
   const tr = appInitTrack.start();
 
   // Load the web component for 'aside-keys' tag.
@@ -82,13 +82,11 @@ async function init() {    // () => Promise of ()
   tr.setAttribute('appId', app.id);   // #bogus
   tr.end();
 
-  someCounter.inc();  // just for show
-
   central.info("App is mounted.");
-}
+})();
 
 export {
-  init,
+  initializedProm,
   LOCAL,
   VERSION
 }

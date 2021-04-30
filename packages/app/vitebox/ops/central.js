@@ -64,15 +64,10 @@ const showOnBrowser = new Map([
   ["error", console.error]
 ]);
 
-// Note: We don't implement '.fatal', at all. It's available in ops wrapping, but via catching an exception / rejected
-//    promise.
-//
 const central = {
   info: logGen('info'),
   warn: logGen('warn'),
   error: logGen('error')
 }
 
-// tbd. Do we want to use as:
-//export default central;   // import central from '@ops/central'
-export { central }       // import { central } from '@ops/central'
+export { central }

@@ -25,9 +25,10 @@ const firebaseProm = fetch('/__/firebase/init.json').then( async resp => {
   }
 });
 
+/*** disabled
 // The logging adapter web worker needs to initialize Firebase separately. By that time, 'firebaseProm' is already
 // known (since 'main.js' initializes it prior to running app code, and logging only happens there). Thus, we can
-// provide a synchronic copy to the worker.
+// provide a synchronous copy to the worker.
 //
 let firebaseDirect;
 
@@ -36,32 +37,9 @@ firebaseProm.then( o => { firebaseDirect = o });
 function getFirebase() {
   if (!firebaseDirect) { fail("Too early. Firebase config not received, yet."); }
   return firebaseDirect;
-}
-
-/*** not needed
-// The proxy logging adapter may need to know the 'locationId' (it's currently provided at build time; this would be
-// the runtime alternative).
-//
-// Since we already get this information for 'main.js', we can pick the 'locationId' field and keep it aside. No Promise
-// is needed (it would complicate the use), since the logging adapters _only_ get initialized when the app is running;
-// and at that point Firebase has been initialized.
-//
-// This is timing-wise a bit so-and-so approach, but stable.
-//
-let locationId;   // needed for using regional Cloud Functions
-
-firebaseProm.then( o => {
-  console.log("!!! received", o);
-  locationId = o.locationId || fail("Firebase configuration without '.locationId'!");
-});
-
-function getLocationId() {
-  if (!locationId) fail("Too early! 'locationId' not initialized.");
-  return locationId;
-}
-***/
+}***/
 
 export {
   firebaseProm,
-  getFirebase
+  //getFirebase
 }

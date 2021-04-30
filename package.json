@@ -16,7 +16,7 @@
     "_postinstall1": "npm --prefix tools install",
     "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh",
     "-- -": "",
-    "prepare": "tools/npm-version-check.sh"
+    "preinstall": "tools/npm-version-check.sh"
   },
   "devDependencies": {
     "eslint": "^7.25.0",

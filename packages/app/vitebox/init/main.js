@@ -96,6 +96,6 @@ function initFirebaseOnline() {
     initFirebaseOnline();
   }
 
-  const { init } = await import('/@/app.js');
-  await init();
+  const { initializedProm } = await import('/@/app.js');
+  return initializedProm;
 })();

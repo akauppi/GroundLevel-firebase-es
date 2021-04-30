@@ -3,14 +3,14 @@
 *
 * Entry point for production build.
 */
-import { assert } from './assert.js'
+//import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
 import { firebaseProm } from './firebaseConfig'
 
 const t0 = performance.now();   // start ⏱
 
-import { init as centralInit } from '@ops/central'
+import { initializedProm as centralInitializedProm } from '@ops/central'
 
 // It's important we get the error catching up early. Another way would be to chain this to 'central' initialization.
 //
@@ -32,15 +32,13 @@ const fbInitializedProm = firebaseProm.then( (o) => {
 
 Promise.all([
   fbInitializedProm.then( _ => { console.debug("Firebase ready:", performance.now() - t0); } ),
-  centralInit().then( _ => { console.debug("Central ready:", performance.now() - t0); } )
+  centralInitializedProm.then( _ => { console.debug("Central ready:", performance.now() - t0); } )
 ]).then( async _ => {
   console.debug("Launching app...");
 
-  const { init } = await import('@local/app');    // entry point
+  const { initializedProm } = await import('@local/app');
+  await initializedProm;
 
-  // Launch the app
-  //
-  await init();
   console.debug("App on its own :)", performance.now() - t0);
 });   // free-running tail
 
