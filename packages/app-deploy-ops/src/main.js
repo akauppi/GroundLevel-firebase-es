@@ -10,8 +10,6 @@ import { firebaseProm } from './firebaseConfig'
 
 const t0 = performance.now();   // start ⏱
 
-import { initializedProm as centralInitializedProm } from '@ops/central'
-
 // It's important we get the error catching up early. Another way would be to chain this to 'central' initialization.
 //
 import './catch'
@@ -31,8 +29,8 @@ const fbInitializedProm = firebaseProm.then( (o) => {
 });
 
 Promise.all([
-  fbInitializedProm.then( _ => { console.debug("Firebase ready:", performance.now() - t0); } ),
-  centralInitializedProm.then( _ => { console.debug("Central ready:", performance.now() - t0); } )
+  fbInitializedProm.then( _ => { console.debug("Firebase ready:", performance.now() - t0); } ) //,
+  //REMOVE centralInitializedProm.then( _ => { console.debug("Central ready:", performance.now() - t0); } )
 ]).then( async _ => {
   console.debug("Launching app...");
 

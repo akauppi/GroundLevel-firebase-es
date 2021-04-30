@@ -1,43 +1,62 @@
 /*
 * src/ops/central.js
 *
-* Central logging.
+* Central logging. Imported by application code (or 'fatalProm' from 'crash.js').
 *
-* Imported directly by _application_ code; also used by eg. 'crash.js'.
+* Loads asynchronously, so that application launch is not held back by logging adapter initialization. During
+* the loading, possible logs are still accepted.
 *
 * Edit the file to change, which adapter(s) are active (and their parameters).
 *
-* Note: Unlike with 'perf', this is not just a pass-through but also
+* Unlike 'ops/perf.js', this also converts the adapter API to that used in application code.
 */
-
 import { firebaseProm } from "../firebaseConfig";
+import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/proxy.js';
 
-// Cloud Logging, via proxy
-import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/proxy.js'
+let initialLogs=[];   // Array of [level, msg, ...]
 
-const central = {};    // { info|warn|error: (msg, ...) => () }
-let fatal;
+function initialLogGen(level) {
+  return (...args) => { initialLogs.push(level, ...args); }
+}
 
-const initializedProm = firebaseProm.then( config => {
+const central = Object.fromEntries( ['info','warn','error'].map( level =>
+  [level, initialLogGen(level)]
+));    // { info|warn|error: (msg, ...) => () }
 
-  cloudLoggingInit( {
-    maxBatchDelayMs: 5000,
-    maxBatchEntries: 100,
-    fbConfig: config
-  } );
+let fatal = initialLogGen('fatal');
 
-  const logGen = cloudLoggingLoggerGen;    // ("info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
-  central.info = logGen('info');
-  central.warn = logGen('warn');
-  central.error = logGen('error');
+verySoon(_ => {   // Without this, gives "Cannot access 'firebaseProm' before initialization".
+  firebaseProm.then( async _ => {
+    // Cloud Logging, via proxy
 
-  fatal = logGen('fatal');
-})
+    cloudLoggingInit( {
+      maxBatchDelayMs: 5000,
+      maxBatchEntries: 100
+    } );
 
-const fatalProm = initializedProm.then( _ => fatal );
+    const f = cloudLoggingLoggerGen;    // ("info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
+    central.info = f('info');
+    central.warn = f('warn');
+    central.error = f('error');
+
+    fatal = f('fatal');
+
+    // These calls happen in the original order, before further ones.
+    //
+    initialLogs.forEach( ([level, ...args]) => {
+      (central[level] || (level === 'fatal' && fatal))(...args);
+    })
+    initialLogs = null;
+
+    console.debug("Central initialized.");
+  });
+});
+
+function verySoon(f) {
+  setTimeout(f,0);
+}
 
 export {
-  initializedProm,    // indicates when loading is complete
   central,
-  fatalProm   // for 'crash.js', only
+  fatal   // for 'crash.js', only
 }

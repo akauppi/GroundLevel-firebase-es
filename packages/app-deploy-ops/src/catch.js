@@ -14,7 +14,7 @@ import { assert } from './assert.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
 
-import { fatalProm } from '@ops/central'
+import { fatal } from '@ops/central'
 
 function isVisible(el) {
   const tmp= window.getComputedStyle(el).display;   // "block" if already shown
@@ -22,14 +22,11 @@ function isVisible(el) {
 }
 
 /*
-* Send to 'central.fatal' once it is available.
+* Send to 'central.fatal', and show a banner for the first such message (because first might cause others).
 */
-async function centralFatal(uiTitle, msg, { source, lineNbr, colNbr, error }) {
+function centralFatal(uiTitle, msg, { source, lineNbr, colNbr, error }) {
 
-  // If the page has a '#fatal' element, show also there (always the FIRST message only, since a failure can lead to
-  // others).
-  //
-  // Note: This is before calling 'central.fatal' in case the problem was exactly in loading of it.
+  // Note: This is before calling 'central.fatal' in case the problem was exactly in loading of it.  (tbd. revise comment???)
   //
   if (elFatal && !isVisible(elFatal)) {
     const s = msg;
@@ -48,12 +45,9 @@ async function centralFatal(uiTitle, msg, { source, lineNbr, colNbr, error }) {
   // Catch errors that would happen within calling 'central.fatal' (via adapters), so that there's no eternal looping.
   //
   try {
-    const f = await fatalProm;
-
-    // Note: Unlike other 'central' functions, 'central.fatal' could be 'async', and only fulfill the promise when the
-    //    message has shipped.
+    // Note: Unlike 'central' functions, 'fatal' could be 'async', and only fulfill the promise when the message has shipped.
     //
-    /*await*/ f(msg, { source, lineNbr, colNbr, error });
+    /*await*/ fatal(msg, { source, lineNbr, colNbr, error });
   }
   catch(err) {
     // Seen:

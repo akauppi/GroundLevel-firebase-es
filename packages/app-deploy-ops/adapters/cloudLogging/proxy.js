@@ -11,10 +11,13 @@
 *
 *   Initialized in parallel with 'main.js' initializing Firebase for itself.
 */
+import { getApp } from '@firebase/app'
+
 const esmHash = env.PROXY_WORKER_HASH;    // injected by Rollup build
 //const iifeHash = env.PROXY_WORKER_HASH_IIFE;    // not needed
 
 function fail(msg) { throw new Error(msg); }
+function assert(cond,msg) { if (!cond) fail(msg || "(assert failed)"); }
 
 // MDN > Web APIs > Worker > Browser compatibility (Support for ECMAScript modules):
 //  -> https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
@@ -31,7 +34,17 @@ const PROXY_WORKER_PATH = `/worker/proxy.worker-${esmHash}.js`;
 
 let myWorker;
 
-function init({ maxBatchDelayMs, maxBatchEntries, fbConfig }) {   // ({ maxBatchDelayMs: int, maxBatchEntries: int }) => Promise of ()
+/*
+* To be called _after_ Firebase app is initialized.
+*/
+function init({ maxBatchDelayMs, maxBatchEntries }) {   // ({ maxBatchDelayMs: int, maxBatchEntries: int }) => Promise of ()
+
+  // Pick Firebase app information, to be passed to the Worker.
+  //
+  // We _could_ also bake this in at build time (but at the least it'd make it impossible to detach the adapter as a separate package).
+  //
+  const fah = getApp();
+  console.debug("OPTIONS", { options: fah.options })
 
   myWorker = new Worker(`${PROXY_WORKER_PATH}?` +
     `max-batch-delay-ms=${maxBatchDelayMs}` +
@@ -43,7 +56,8 @@ function init({ maxBatchDelayMs, maxBatchEntries, fbConfig }) {   // ({ maxBatch
     apiKey,
     locationId,
     projectId
-  } = fbConfig;
+  } = fah.options;
+  assert(locationId, "No 'locationId'!");
 
   myWorker.postMessage({ "":"init",
     apiKey,
