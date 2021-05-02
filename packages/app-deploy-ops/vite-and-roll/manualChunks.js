@@ -43,13 +43,16 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //  /Users/.../app-deploy-ops/index.html                        <-- only in the Vite build
   //  /Users/.../app-deploy-ops/index.html?html-proxy&index=0.js  <-- -''-
   //
-  /\/app-deploy-ops\/(?:src\/(?!ops\/)|index\.html)/,
+  /\/app-deploy-ops\/(?:src\/(?!ops\/)|index\.html)/,   // to main chunk
 
   //  /Users/.../app-deploy-ops/src/ops/central.js
+  //  /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
+  //
   /\/app-deploy-ops\/src\/(ops)\//,
+  [/\/app-deploy-ops\/adapters/, undefined, 'ops'],
 
-  // /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
-  /\/app-deploy-ops\/(adapters)/,
+  //  /Users/.../app-deploy-ops/.env.js
+  /\/app-deploy-ops\/\.env\.js/,    // to main chunk
 
   // vite/preload-helper
   /^(vite)\//,      // Vite runtime (small, ~600b)

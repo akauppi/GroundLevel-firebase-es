@@ -5,6 +5,9 @@
 *
 * Provide means to log to Google Cloud Logging, via the app's Cloud Functions backend.
 *
+* Context:
+*   Firebase is initialized before the adapter is loaded.
+*
 * Note:
 *   Must implement batching of logs and support for offline mode. Not sure why Firebase doesn't have central logging
 *   (it has "Events" but won't turn to those because they require Google Analytics).
@@ -41,10 +44,17 @@ function init({ maxBatchDelayMs, maxBatchEntries }) {   // ({ maxBatchDelayMs: i
 
   // Pick Firebase app information, to be passed to the Worker.
   //
-  // We _could_ also bake this in at build time (but at the least it'd make it impossible to detach the adapter as a separate package).
+  // Note: The options are available as 'meta.import.env.[API_KEY|...]' as well, but reading it like this keeps us
+  //    a bit detached from the app.
   //
   const fah = getApp();
-  console.debug("OPTIONS", { options: fah.options })
+  //console.debug("OPTIONS", { options: fah.options })  // DEBUG
+
+  const {
+    apiKey,
+    projectId,
+    locationId    // available if 'main.js' has placed it, at initialization (also available as 'meta.import.env.LOCATION_ID')
+  } = fah.options;
 
   myWorker = new Worker(`${PROXY_WORKER_PATH}?` +
     `max-batch-delay-ms=${maxBatchDelayMs}` +
@@ -52,17 +62,10 @@ function init({ maxBatchDelayMs, maxBatchEntries }) {   // ({ maxBatchDelayMs: i
     { type: 'module' }
   );
 
-  const {
-    apiKey,
-    locationId,
-    projectId
-  } = fah.options;
-  assert(locationId, "No 'locationId'!");
-
   myWorker.postMessage({ "":"init",
     apiKey,
-    locationId,
-    projectId
+    projectId,
+    locationId
   });
 }
 
@@ -70,13 +73,11 @@ function loggerGen(level) {   // ("info"|"warn"|"error"|"fatal") => (msg, ...) =
   myWorker || fail("Call 'init' first");
 
   return (msg, ...args) => {   // (string [,any [,...]]) => ()
-    // JavaScript
-    const now = Date.now();   // e.g. 1619536750627
-
+    const createdMs = Date.now();   // e.g. 1619536750627
     const o = {
       msg,
       args,
-      createdMs: now
+      createdMs
     };
 
     // Sending to the worker is a fire-and-forget operation. It bundles the log entries together, and may send them

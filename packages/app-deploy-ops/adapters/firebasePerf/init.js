@@ -2,7 +2,7 @@
 * adapters/firebasePerf/adapter.js
 *
 * Context:
-*   Firebase has been initialized when the adapter is loaded.
+*   Firebase has been initialized before the adapter is loaded.
 */
 import { getApp } from '@firebase/app'
 import { initializePerformance, trace } from '@firebase/performance'
@@ -11,63 +11,54 @@ function assert(cond,msg) {
   if (!cond) { throw new Error(msg || "(assert failed)"); }
 }
 
-// Note: 'initializePerformance' cannot be called at the body of an ES module (causes: "No Firebase App '[DEFAULT]' has been created")
+// Let's define all parameters since what 'getPerformance' (the easier way) provides *is not documented*.
 //
-function init() {   // () => { reportTrack, counterInc }
-  // Let's define all parameters since what 'getPerformance' (the easier way) provides *is not documented*.
-  //
-  //  - Firebase API Reference > Performance (v9)
-  //    -> https://firebase.google.com/docs/reference/js/v9/performance
-  //
-  const h = initializePerformance(getApp(), {
-    dataCollectionEnabled: true,      // collect "custom events" (tbd. what are they; describe)
-    instrumentationEnabled: true      // collect "out of the box events" (tbd. what are they; describe)
+//  - Firebase API Reference > Performance (v9)
+//    -> https://firebase.google.com/docs/reference/js/v9/performance
+//
+const h = initializePerformance(getApp(), {
+  dataCollectionEnabled: true,      // collect "custom events" (tbd. what are they; describe)
+  instrumentationEnabled: true      // collect "out of the box events" (tbd. what are they; describe)
+});
+
+// Use one 'PeformanceTrace' for all counters
+//
+let countersTrace = trace(h, '$counters');
+
+const trackTraces = new Map();    // Map of PerformanceTrace
+
+/*
+* Store (send to Firebase back-end) an already instrumented section of code.
+*
+* stamps[0]:    Start of the measurement
+* stamps[mid]:  "lap times" (optional)
+* stamps[last]: End of the measurement
+*
+* Note: This approach does not measure things that did not reach the finish line.
+*/
+function reportTrack(name, stamps) {    // (string, Array of integer /*ms of epoch*/) => ()
+  const tr = mapUpsert(trackTraces, name, () => trace(h, name));
+
+  assert(stamps.length >= 2);
+  const start = stamps[0];
+  const duration = stamps[stamps.length - 1];
+  const laps = stamps.slice(1, -1).map(x => x - start);
+
+  const metrics = Object.fromEntries(laps.map((v, i) => [`lap${i}`, v]));
+
+  tr.record(start, duration, {
+    metrics
   });
+}
 
-  // Use one 'PeformanceTrace' for all counters
-  //
-  const countersTrace = trace(h, '$counters');
+/*
+* Create a counter towards Firebase Performance Monitoring.
+*/
+// tbd. Do these values accumulate globally, when used eg. for counting sign-ins?
+//
+function counterInc(name, num) {    // (string, num) => ()
 
-  const trackTraces = new Map();    // Map of PerformanceTrace
-
-  /*
-  * Store (send to Firebase back-end) an already instrumented section of code.
-  *
-  * stamps[0]:    Start of the measurement
-  * stamps[mid]:  "lap times" (optional)
-  * stamps[last]: End of the measurement
-  *
-  * Note: This approach does not measure things that did not reach the finish line.
-  */
-  function reportTrack(name, stamps) {    // (string, Array of integer /*ms of epoch*/) => ()
-    const tr = mapUpsert(trackTraces, name, () => trace(h, name));
-
-    assert(stamps.length >= 2);
-    const start = stamps[0];
-    const duration = stamps[stamps.length - 1];
-    const laps = stamps.slice(1, -1).map(x => x - start);
-
-    const metrics = Object.fromEntries(laps.map((v, i) => [`lap${i}`, v]));
-
-    tr.record(start, duration, {
-      metrics
-    });
-  }
-
-  /*
-  * Create a counter towards Firebase Performance Monitoring.
-  */
-  // tbd. Do these values accumulate globally, when used eg. for counting sign-ins?
-  //
-  function counterInc(name, num) {    // (string, num) => ()
-
-    countersTrace.incrementMetric(name, num)
-  }
-
-  return {
-    reportTrack,
-    counterInc
-  }
+  countersTrace.incrementMetric(name, num)
 }
 
 /*
@@ -85,5 +76,6 @@ function mapUpsert(m, k, f) {
 }
 
 export {
-  init
+  reportTrack,
+  counterInc
 }

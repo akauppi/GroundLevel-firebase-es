@@ -1,62 +1,47 @@
 /*
 * src/ops/central.js
 *
-* Central logging. Imported by application code (or 'fatalProm' from 'crash.js').
+* Central logging. Imported by either:
+*   - application code (uses 'central')
+*   - 'main.js' after Firebase has been set up
 *
-* Loads asynchronously, so that application launch is not held back by logging adapter initialization. During
-* the loading, possible logs are still accepted.
+* Context:
+*   - Firebase has been initialized when we are loaded
 *
 * Edit the file to change, which adapter(s) are active (and their parameters).
 *
 * Unlike 'ops/perf.js', this also converts the adapter API to that used in application code.
 */
-import { firebaseProm } from "../firebaseConfig";
+import { LOCATION_ID } from '../../.env.js'
+
+import { centralIsAvailable } from '../catch'
+
+// Cloud Logging, via proxy
 import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/proxy.js';
 
-let initialLogs=[];   // Array of [level, msg, ...]
+cloudLoggingInit( {
+  maxBatchDelayMs: 5000,
+  maxBatchEntries: 100,
+  locationId: LOCATION_ID
+} );
 
-function initialLogGen(level) {
-  return (...args) => { initialLogs.push(level, ...args); }
-}
+const gen = cloudLoggingLoggerGen;    // ("info"|"warn"|"error"|"fatal") => ((msg, ...args) => ())
 
-const central = Object.fromEntries( ['info','warn','error'].map( level =>
-  [level, initialLogGen(level)]
-));    // { info|warn|error: (msg, ...) => () }
+const central = {
+  info: gen('info'),
+  warn: gen('warn'),
+  error: gen('error')
+};
 
-let fatal = initialLogGen('fatal');
+const fatal = gen('fatal');
 
-verySoon(_ => {   // Without this, gives "Cannot access 'firebaseProm' before initialization".
-  firebaseProm.then( async _ => {
-    // Cloud Logging, via proxy
-
-    cloudLoggingInit( {
-      maxBatchDelayMs: 5000,
-      maxBatchEntries: 100
-    } );
-
-    const f = cloudLoggingLoggerGen;    // ("info"|"warn"|"error"|"fatal") => ((msg, opt) => ())
-    central.info = f('info');
-    central.warn = f('warn');
-    central.error = f('error');
-
-    fatal = f('fatal');
-
-    // These calls happen in the original order, before further ones.
-    //
-    initialLogs.forEach( ([level, ...args]) => {
-      (central[level] || (level === 'fatal' && fatal))(...args);
-    })
-    initialLogs = null;
-
-    console.debug("Central initialized.");
-  });
-});
-
-function verySoon(f) {
-  setTimeout(f,0);
-}
+// Inform 'crash.js' that fatal logging is now available.
+//
+// Note: This allows 'crash' to be loaded before Firebase is initialized, and also allows us to expose 'fatal' only
+//    targeted to that module. :)
+//
+centralIsAvailable(fatal);
 
 export {
-  central,
-  fatal   // for 'crash.js', only
+  central
 }

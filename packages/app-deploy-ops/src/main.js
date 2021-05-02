@@ -6,38 +6,48 @@
 //import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
-import { firebaseProm } from './firebaseConfig'
+
+import './catch'
+
+import { API_KEY, APP_ID, PROJECT_ID, AUTH_DOMAIN, LOCATION_ID } from '../.env.js'
+
+const opts = {
+  apiKey: API_KEY,
+  appId: APP_ID,
+  projectId: PROJECT_ID,
+  authDomain: AUTH_DOMAIN,
+
+  // 'locationId' is not needed by Firebase itself, but is now available to code that uses 'httpsCallables' (eg. adapters),
+  // via 'getApp()'.
+  locationId: LOCATION_ID
+};
 
 const t0 = performance.now();   // start ⏱
 
-// It's important we get the error catching up early. Another way would be to chain this to 'central' initialization.
+// Others can use 'getApp()' to get a handle
 //
-import './catch'
+initializeApp(opts);
 
 // tbd. Find a way to differentiate between:
-//    - running in a developer's maching ('npm run serve')
+//    - running in a developer's machine ('npm run serve')
 //    - production
 //
 //let stage = "???";
 
-// Prepare all of Firebase, including performance monitoring (if enabled)
-//
-const fbInitializedProm = firebaseProm.then( (o) => {
-  const opts = { apiKey: o.apiKey, appId: o.appId, projectId: o.projectId, authDomain: o.authDomain };
+/*await*/ (async _ => {
+  console.debug("Firebase ready (launching app):", performance.now() - t0);
 
-  initializeApp(opts);
-});
-
-Promise.all([
-  fbInitializedProm.then( _ => { console.debug("Firebase ready:", performance.now() - t0); } ) //,
-  //REMOVE centralInitializedProm.then( _ => { console.debug("Central ready:", performance.now() - t0); } )
-]).then( async _ => {
-  console.debug("Launching app...");
-
-  const { initializedProm } = await import('@local/app');
-  await initializedProm;
+  await import('@local/app').then( mod => mod.initializedProm );
 
   console.debug("App on its own :)", performance.now() - t0);
-});   // free-running tail
 
-export {};
+  // Import 'ops/central' now that Firebase is initialized, and the app is on its way.
+  //
+  // Note: This matters for:
+  //    - allowing 'crash.js' to see 'fatal' early on (but thing are crooked already, if it has messages)
+  //    - seeing possible loading problems at launch, even if the app wouldn't use 'central' logging
+  //
+  await import('./ops/central');
+  console.debug("Central initialized:", performance.now() - t0);
+
+})();   // free-running tail

@@ -1,15 +1,24 @@
 /*
 * Provide access to the '/__/firebase/init.json' information.
 *
+* This is used by 'main.js' to initialize Firebase. Other code can also use 'locationId' (which is not available via
+* '<FirebaseApp>.options', for some reason).
+*
+* Note: It would be easier to get to this, via '.options'.
+*
 * This is served automatically by Firebase hosting.
 */
-const fail = (msg) => { throw new Error(msg); }
+function fail(msg) { throw new Error(msg); }
+function assert(cond,msg) { if (!cond) fail(msg); }
+
+let locationId;
+let resolved = false;
 
 // Access values from Firebase hosting (we don't use its 'init.js').
 //
 // Note: Once browsers can 'import' JSON natively, we can make this a one-liner.
 //
-const firebaseProm = fetch('/__/firebase/init.json').then( async resp => {
+const configProm = fetch('/__/firebase/init.json').then( async resp => {
   if (!resp.ok) {
     throw new Error(`Unable to fetch '/__/firebase/init.json' (${ resp.status }): ${ resp.body }`);
   } else {
@@ -21,11 +30,23 @@ const firebaseProm = fetch('/__/firebase/init.json').then( async resp => {
     if (!o.appId) {
       fail("No '.appId' in Firebase configuration - have you created a web app in Firebase Console?")
     }
+
+    // 'locationId' may be missing - just means default region
+    locationId = o.locationId;
+    resolved = true;
     return o;
   }
 });
 
-/*** disabled
+/*
+* To be called
+*/
+function getLocationId() {  // () => string
+  assert(resolved, "Too early");
+  return locationId;    // undefined | string
+}
+
+/*** REMOVE
 // The logging adapter web worker needs to initialize Firebase separately. By that time, 'firebaseProm' is already
 // known (since 'main.js' initializes it prior to running app code, and logging only happens there). Thus, we can
 // provide a synchronous copy to the worker.
@@ -40,6 +61,7 @@ function getFirebase() {
 }***/
 
 export {
-  firebaseProm,
+  configProm,
+  getLocationId
   //getFirebase
 }

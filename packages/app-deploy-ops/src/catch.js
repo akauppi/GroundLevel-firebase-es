@@ -3,18 +3,13 @@
 *
 * Catch uncaught errors and report them.
 *
-* Note: This is imported by 'main.js, statically. The idea is that during launch, any fatal errors get caught.
-*
-* Loads '@ops/central' (which is otherwise only used from application code) lazily. IF there are problems not related
-* to loading central itself, keep those until central is available.
-*
-* Also indicates to the user (shows and fills the '#fatal' element) that there is a problem.
+* Context:
+*   Is loaded *before* Firebase is initialized. Initializes central logging only after 'ops/central.js' has set it up
+*   (it informs us; the two know about each other).
 */
 import { assert } from './assert.js'
 
 const elFatal = document.getElementById("fatal");   // Element | ...
-
-import { fatal } from '@ops/central'
 
 function isVisible(el) {
   const tmp= window.getComputedStyle(el).display;   // "block" if already shown
@@ -22,39 +17,57 @@ function isVisible(el) {
 }
 
 /*
-* Send to 'central.fatal', and show a banner for the first such message (because first might cause others).
+* Show a banner for the first such message (because first might cause others).
 */
-function centralFatal(uiTitle, msg, { source, lineNbr, colNbr, error }) {
+function revealUI(uiTitle, msg) {    // (string, string) => ()
 
   // Note: This is before calling 'central.fatal' in case the problem was exactly in loading of it.  (tbd. revise comment???)
   //
   if (elFatal && !isVisible(elFatal)) {
-    const s = msg;
-    elFatal.innerText = `${uiTitle}\n"${s}"`;
+    elFatal.innerText = `${uiTitle}\n"${msg}"`;   // don't show args (just a decision)
     elFatal.style.display = 'block';
   }
+}
 
-  // If the error is from proxy-worker (adapter internals), let's not even consider feeding it to 'central.log'.
-  // This may be errors during loading of the worker.
+/*
+* Show a banner and log to 'central.fatal' (or place messages pending, until - hopefully - it's up).
+*/
+function revealUIAndLog(uiTitle, msg, ...args) {    // (string, string, ...any) => ()
+  revealUI(uiTitle, msg);
+  logFatal(msg, ...args);
+}
+
+let initialMsgs = [];   // Array of [msg, ...args] | null
+
+/*
+* Log to 'central.fatal' if it's initialized. Otherwise, hold to the entries until - maybe - it becomes available.
+*/
+let logFatal = (msg, ...args) => {
+  initialMsgs.push([msg,...args]);
+}
+
+/*
+* Called by 'ops/central' when it's available (no guarantee it is, an early problem may cause it not to load, in which
+* case we only get the on-screen crash announcement).
+*/
+function centralIsAvailable( fatal ) {    // ((msg,...args) => ()) => ()
+
+  // Catch problems within logging itself (eg. adapters), so that those won't cause eternal recursion.
   //
-  if (source && source.includes("/worker/")) {
-    console.warn("Skipping sending this to 'central.fatal':", msg, { source, lineNbr, colNbr, error });
-    return;
+  function guardedFatal(...all) {   // (msg, ...args) => ()
+    try {
+      fatal(...all);
+    }
+    catch(err) {
+      revealUI(true, "Failure within logging", err.reason);
+      console.error("Failure within logging", err);
+    }
   }
 
-  // Catch errors that would happen within calling 'central.fatal' (via adapters), so that there's no eternal looping.
-  //
-  try {
-    // Note: Unlike 'central' functions, 'fatal' could be 'async', and only fulfill the promise when the message has shipped.
-    //
-    /*await*/ fatal(msg, { source, lineNbr, colNbr, error });
-  }
-  catch(err) {
-    // Seen:
-    //    - DataCloneError: The object cannot be cloned.
+  initialMsgs.forEach( guardedFatal );
+  initialMsgs = null;
 
-    console.error("Failure calling 'central.fatal':", err);
-  }
+  logFatal = guardedFatal;
 }
 
 /*
@@ -73,7 +86,7 @@ window.onerror = function (msg, source, lineNbr, colNbr, error) {
 
   // Note: If the error comes from web worker, 'error' is 'undefined'
 
-  centralFatal("Unexpected ERROR", msg, { source, lineNbr, colNbr, error });
+  revealUIAndLog("Unexpected ERROR", msg, { source, lineNbr, colNbr, error });
 
   prevOnError(arguments);
   return true;    // "prevents the firing of the default error handler" (what would that do?)
@@ -103,7 +116,22 @@ window.onunhandledrejection = function (promiseRejectionEvent) {
  } else {
   ***/
 
-  centralFatal("Unhandled rejection", reason, {});   // let run loosely
+  revealUIAndLog("Unhandled rejection", reason);
 }
 
-export { }
+/*** remove
+let resolveBroken;
+
+const firebaseIsInitializedProm = new Promise( (resolve) => {   // resolves when 'canImportLogging' has been called (by 'main.js')
+  resolveBroken = resolve;
+})
+
+function canImportLogging() {
+  resolveBroken();
+}
+
+export { canImportLogging }
+***/
+export {
+  centralIsAvailable
+}

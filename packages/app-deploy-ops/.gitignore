@@ -1,3 +1,5 @@
+/.env.js
+
 # output folders
 /vite/out/
 /roll/out/

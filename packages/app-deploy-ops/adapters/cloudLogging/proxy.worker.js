@@ -56,8 +56,8 @@ let logs_v1;
 *   should be _just_ a configuration entry to change it to something else.
 * /🔥
 */
-function init({ apiKey, appId, locationId, projectId, authDomain }) {
-  assert(locationId,"Missing 'locationId' in proxy worker.");
+function init({ apiKey, projectId, locationId }) {    // appId, authDomain not needed
+  // 'locationId' is optional (undefined == default region)
 
   const fah = initializeApp({
     apiKey,
@@ -73,15 +73,9 @@ function init({ apiKey, appId, locationId, projectId, authDomain }) {
 
 console.log("Worker loaded");
 
-/* {
-  msg,
-  payLoad,
-  createdMs: t,
-}*/
-
 function logGen(level) {
-  return (msg, ...args) => {
-    logs_v1(level,msg,...args);
+  return ({createdMs, msg, args}) => {
+    logs_v1(level,createdMs,msg,...args);
   }
 }
 
@@ -106,6 +100,8 @@ const lookup = {
 *
 * {
 *   "": "info"|"warning"|"error"|"fatal",
+*   createdMs: int,
+*   msg: string
 *   args: [...]
 * }
 *
