@@ -6,6 +6,13 @@
         "source": "!**/*.@(css|js|map)",
         "destination": "/index.html"
       }
+    ],
+    "redirects": [
+      {
+        "source": "/old-sample",
+        "destination": "/new-sample",
+        "type": 301
+      }
     ]
   },
 
@@ -22,6 +29,10 @@
       "  /some -> 200 (index.html)",
       "  /some.html -> 200",
       "  /main-{hash}.js.map (that exists) -> 200"
+    ],
+    "hosting.redirects": [
+      "If you change the app's routing, consider adding a redirect so that users' existing bookmarks and what-not",
+      "can remain functional, despite the change (if it's just a rework)."
     ]
   }
 }

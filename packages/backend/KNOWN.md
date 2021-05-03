@@ -18,3 +18,24 @@ These come from (used `npm list`):
 |`har-validator`|`firebase-jest-testing@0.0.2-beta.0`|
 |`request`|`firebase-jest-testing@0.0.2-beta.0`, `jest-circus@27.0.0-next.2`|
 
+
+## `npm run test:fns:all` fails
+
+```
+$ npm run test:fns:all
+
+> test:fns:all
+> GCLOUD_PROJECT=bunny NODE_OPTIONS="--experimental-vm-modules --experimental-json-modules" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all
+
+(node:67098) ExperimentalWarning: VM Modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ FAIL  test-fns/logging.8x.test.js
+  Can proxy application logs
+    ✕ accepts Cloud Logging log entries (16 ms)
+
+  ● Can proxy application logs › accepts Cloud Logging log entries
+
+    internal
+```
+
+- [ ] Gets fixed once userdata management is rewritten (making backend function triggered by authentication).

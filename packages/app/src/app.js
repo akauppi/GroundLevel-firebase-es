@@ -78,8 +78,9 @@ const initializedProm = (async () => {    // Promise of ()
 
   app.mount('#app');
 
-  // Sample of adding a meta data to the measurement
-  tr.setAttribute('appId', app.id);   // #bogus
+  // Sample of adding a meta data to the measurement (not sure if we need that)
+  //tr.setAttribute('appId', app.id);
+
   tr.end();
 
   central.info("App is mounted.");

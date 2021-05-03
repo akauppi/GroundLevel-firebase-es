@@ -22,6 +22,10 @@ const esmHash = env.PROXY_WORKER_HASH;    // injected by Rollup build
 function fail(msg) { throw new Error(msg); }
 function assert(cond,msg) { if (!cond) fail(msg || "(assert failed)"); }
 
+// If we are hosted at 'localhost', use a separate log online.
+//
+const ignore = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
 // MDN > Web APIs > Worker > Browser compatibility (Support for ECMAScript modules):
 //  -> https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 //
@@ -58,7 +62,8 @@ function init({ maxBatchDelayMs, maxBatchEntries }) {   // ({ maxBatchDelayMs: i
 
   myWorker = new Worker(`${PROXY_WORKER_PATH}?` +
     `max-batch-delay-ms=${maxBatchDelayMs}` +
-    `&max-batch-entries=${maxBatchEntries}`,
+    `&max-batch-entries=${maxBatchEntries}` +
+    ignore ? '&ignore=true':'',
     { type: 'module' }
   );
 
@@ -73,17 +78,11 @@ function loggerGen(level) {   // ("info"|"warn"|"error"|"fatal") => (msg, ...) =
   myWorker || fail("Call 'init' first");
 
   return (msg, ...args) => {   // (string [,any [,...]]) => ()
-    const createdMs = Date.now();   // e.g. 1619536750627
-    const o = {
-      msg,
-      args,
-      createdMs
-    };
 
-    // Sending to the worker is a fire-and-forget operation. It bundles the log entries together, and may send them
-    // only later.
+    // Sending to the worker is a fire-and-forget operation. It converts the log entry to 'LogEntry', bundles them
+    // together, for shipment, and retries over offline gaps.
     //
-    myWorker.postMessage({ "":level, ...o });
+    myWorker.postMessage({ "":"log", level, msg, args });
   }
 }
 

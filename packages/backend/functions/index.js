@@ -37,8 +37,10 @@ const admin = require('firebase-admin');
 const { Logging } = require('@google-cloud/logging');
 // import { Logging } from '@google-cloud/logging'
 
-const EMULATION = !! process.env.FUNCTIONS_EMULATOR;
-const BACKEND_TEST = !! process.env.BACKEND_TEST;   // to differentiate between backend 'npm test' and use in app development
+function fail(msg) { throw new Error(msg); }
+
+const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
+//const BACKEND_TEST = !! process.env.BACKEND_TEST;   // to differentiate between backend 'npm test' and use in app development
 
 admin.initializeApp();
 
@@ -61,6 +63,7 @@ const regionalFunctions = EMULATION ? functions : (() => {
   return !reg ? functions : functions.region(reg);
 })();
 
+/*** #rework tbd. Tie to authentication, instead
 // UserInfo shadowing
 //
 // Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
@@ -106,12 +109,11 @@ exports.userInfoShadow_2 = regionalFunctions.firestore
     }
   });
 
-
 // UserInfo cleanup
 //
 // Occasionally, see if there are projects where users have left, but their userInfo sticks around.
 //
-/** tbd. likely not doing it so. Could track all changes to '.members'. If a uid is removed, remove the data
+/_** tbd. likely not doing it so. Could track all changes to '.members'. If a uid is removed, remove the data
 *     immediately also from 'userInfo'. Or... the removal of a user can do that. :)
 *
 exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // tbd. syntax?
@@ -128,102 +130,120 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
 
      ***_/
   })
-*/
+*_/
+***/
 
 // --- Logging
 //
 // Cloud Logging does not support delivery of logs directly from browsers. They need to be routed through us.
-// This allows us to e.g. limit logging to only authenticated users.
+// This allows us to e.g. limit logging to authenticated users only, or provide other kinds of throttling.
+//
+// The data schema is Cloud Logging's 'LogEntry':
+//  -> https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
+//
+// References:
+//    - Logging Client Libraries
+//      https://cloud.google.com/logging/docs/reference/libraries
+//    - Cloud Logging > Basic Concepts > Log Entries
+//      https://cloud.google.com/logging/docs/basic-concepts#log-entries
+
 
 // Receive an array of logging messages. The front end batches them together to reduce the number of calls, but also
-// for the sake of offline mode.
+// for the sake of offline gaps.
 //
-// arr: Array of {
-//    level: "debug"|"info"|"warn"|"error"|"fatal"
-//    msg: string
-//    created: long       // original time in epoch ms's ('Date.now()')
-//    payload: object?
-// }
+// les: Array of 'LogEvent'
 //
-// Ideally, the front end could log directly to Cloud Logging, instead of via us. It probably can, by using the
-// node version of the library (though in browser), but needs to do some OAuth authentication. We did not try out
-// this option. (Some logging frameworks allow browsers to log directly; Cloud Logging *does not mention this* in
-// the docs.)
+//    LogEvent:
+//    {
+//      severity: "INFO"|"WARNING"|"ERROR"|"CRITICAL"
+//      timestamp: ISO 8601 string, eg. "2021-05-02T15:08:09.073Z"
+//      jsonPayload: {
+//        msg: string,
+//        args: Array of any
+//      }
+//    }
 //
-const gcLogging = new Logging();    // @google-cloud/logging
+// ignore: undefined | true | string
+//    provided if the logging arises from:
+//      - tests
+//      - 'npm run serve' under localhost
+//
+//    If so, place the logs in another log, keeping the production log prestine (otherwise 1-to-1 behaviour!)
 
-const appLogName = `app-central${ EMULATION ? (BACKEND_TEST ? ".test" : ".dev"):"" }`;
-const appLog = gcLogging.log(appLogName);
+/*
+* EMULATION variant
+*
+* Used when running against locally emulated Cloud Functions:
+*   - backend 'npm test'
+*   - app 'npm run dev[:local]'
+*   - app 'npm run dev:online'    <-- tbd. currently using its own logging server.
+*
+* Logs using Cloud Function 'logger' (since we don't have Cloud Logging credentials, nor want to rely on online-needing
+* services).
+*/
+const cloudLoggingProxy_v0_EMUL = EMULATION && (les => {
 
-exports.logs_v1 = regionalFunctions
-  //const logs_v1 = regionalFunctions
-  .https.onCall((arr /*, context*/) => {
+  const backLookup = new Map([   // 'LogEvent' '.severity' to Cloud Function logging level
+    ['INFO','info'],
+    ['WARNING','warn'],
+    ['ERROR','error'],
+    ['CRITICAL','error']    // no 'logger.fatal' in Cloud Functions
+  ]);
 
-    // Convert our API to Cloud Logging.
-    //
-    const les = arr.map( ({ level, msg, created, payload }) => {
-      const severity = severityMap.get(level);
-      if (!severity) {
-        throw new functions.https.HttpsError('invalid-argument', `Unknown level: ${level}`);
-      }
+  les.forEach( le => {
+    function failLE(prefix) { fail(`${prefix} ${ JSON.stringify(le) }`); }
 
-      const t = new Date(created);
+    const level = backLookup.get(le.severity) || failLE("Unexpected 'severity' in:");
+    const timestamp = le.timestamp || failLE("No 'timestamp' in:");
+    const msg = le.jsonPayload?.msg || failLE("No 'jsonPayload.msg' in:");
+    const args = le.jsonPayload?.args;    // omit from output if not there
 
-      const metadata = {
-        severity,
-        //labels: { a: 'b' }
-        //resource: { type: 'global' }
+    logger[level](msg, { timestamp, ...(args ? {args}:{}) } );
+  })
+});
 
-        //created: t    // tbd. can we somehow pass this as the real LogEntry's created timestamp
-      };
+/*
+* REAL variant
+*
+* Used by:
+*   - app-deploy-ops 'npm serve' (with 'ignore' marker in the calls)
+*   - production deployed front-end
+*
+* Firebase provides credentials automatically so that we can use Cloud Logging APIs in production.
+*/
+const cloudLoggingProxy_v0 = (!EMULATION) && (_ => {
+  // GCP project id is the same as Firebase project id
+  const projectId = process.env.GCLOUD_PROJECT || fail("Env.var 'GCLOUD_PROJECT' not available!");
 
-      const message = { msg };    // tbd. can we send just text, this way (sample has object of a king..)
+  const logging = new Logging({ projectId });    // @google-cloud/logging
 
-      return appLog.entry(metadata, message);
-    });
+  // Note: The same implementation may be taking in both production and development ('ignore == true') logs. Thus,
+  //    it's not an either-or.
+  //
+  const appLog = logging.log('app-central');
+  const appLog2 = logging.log('app-central.ignore');    // logs from development client
 
-    // NOTE: Within emulation, Firebase (rightfully) does not auth us to use the Cloud Logging.
-    //  <<
-    //    ⚠  Google API requested!
-    //    - URL: "https://oauth2.googleapis.com/token"
-    //    - Be careful, this may be a production service.
-    //    {"severity":"ERROR","message":"Failure to ship application logs: Error: 7 PERMISSION_DENIED: The caller does not have permission\n
-    //    at Object.callErrorFromStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/call.js:31:26)\n
-    //    at Object.onReceiveStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/client.js:176:52)\n
-    //    at Object.onReceiveStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/client-interceptors.js:336:141)\n
-    //    at Object.onReceiveStatus (/Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/bui PASS  test-fns/userInfo.test.js9:181)\n
-    //    at /Users/asko/Git/GroundLevel-es-firebase/packages/backend/functions/node_modules/@grpc/grpc-js/build/src/call-stream.js:130:78\n
-    //    at processTicksAndRejections (node:internal/process/task_queues:76:1  userInfo shadowing
-    //  <<
-    //
-    // Note that we could excercise the production logging; now part of the functionality goes untested! :S
-    //
-    if (EMULATION) {
-      logger.info( "NOT testing the Cloud Logging API - no access to it.")
-    } else {
-      // Write them at once
-      //
-      const prom = appLog.write(les);
+  return (les, ignore) => {
+    const log = (!ignore) ? appLog:appLog2;
+    const prom = log.write(les);
 
-      prom.then(_ => {
-        logger.info(`Logged to ${appLogName}: ${les.size()} entries`);
-      }).catch(err => {
-        logger.error("Failure to ship application logs:", err);
-      })
-    }
+    prom.then(_ => {
+      //logger.info(`Logged to ${log.name}: ${les.size()} entries`);
+    }).catch(err => {
+      logger.error("Failure to ship application logs:", err);
+    })
+  }
+})();
+
+exports.cloudLoggingProxy_v0 = regionalFunctions
+  //const cloudLoggingProxy_v0 = regionalFunctions
+  .https.onCall(({ les, ignore } /*, context*/) => {
+    (cloudLoggingProxy_v0 || cloudLoggingProxy_v0_EMUL)(les, ignore);
   });
-
-const severityMap = new Map([
-  ['debug', 'DEBUG'],
-  ['info', 'INFO'],
-  ['warn', 'WARNING'],
-  ['error', 'ERROR'],
-  ['fatal', 'CRITICAL']
-]);
 
 /*
 export {
   userInfoShadow_2,
-  logs_1
+  cloudLoggingProxy_v0
 }
 */

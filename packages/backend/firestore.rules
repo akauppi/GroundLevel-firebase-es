@@ -11,7 +11,8 @@ service cloud.firestore {
     // HACK and WORK-AROUND, until this is solved -> https://github.com/firebase/firebase-tools/issues/3258
     //
     function uid_HACK() {
-      return 'dev';   // for Asko to be able to develop Cypress tests!!
+      return request.auth.uid;    // what it needs to BE!
+      //return 'dev';               // for being able to develop, under 9.0.0-beta.1 !!!
     }
 
     // Access cost:

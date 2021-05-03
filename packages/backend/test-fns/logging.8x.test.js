@@ -40,17 +40,43 @@ afterAll( async () => {
 
 describe ('Can proxy application logs', () => {
 
-  test ('good log entries', async () => {
-    const msgs = [
-      { level:'info', msg:'Jack says hi!' },
-      { level:'warn', msg:'Avrell is hungry!' },
-      { level:'error', msg:'William' },
-      { level:'fatal', msg:'Joe is in jail!' }
+  test ('accepts Cloud Logging log entries', async () => {
+      const ts = new Date().toISOString();
+
+    // Entries must follow the CloudLogging 'LogEntry' schema:
+    //  -> https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
+    //
+    // {
+    //    "severity": "INFO"|"WARNING"|"ERROR"|"CRITICAL",
+    //    "timestamp": ISO, eg. "2021-05-02T15:08:09.073Z",
+    //    "jsonPayload": {
+    //      "msg": string                     // actual message
+    //      "args": undefined | Array of any  // additional parameters
+    //    }
+    // }
+    //
+    function le(severity, msg, ...args) {
+      return {
+        severity,
+        timestamp: ts,
+        jsonPayload: {
+          msg,
+          args: args.length > 0 ? args : undefined
+        }
+      }
+    }
+
+    const les = [
+      le("INFO", 'Jack says hi!' ),
+      le('WARNING', 'Avrell is hungry!' ),
+      le('ERROR', 'William', 1, 2, { more: 3 } ),
+      le('CRITICAL', 'Joe is in jail!' )
     ];
 
-    const fnLog = fns.httpsCallable("logs_v1");
+    const fnLog = fns.httpsCallable("cloudLoggingProxy_v0");
 
-    const data = (await fnLog(msgs)).data;    // null
+    const data = (await fnLog({ les, ignore: "test" })).data;    // null
     expect(data).toBeNull();
   });
 });
+

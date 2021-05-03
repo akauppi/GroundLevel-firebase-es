@@ -6,7 +6,9 @@ import { test, expect, describe, beforeAll } from '@jest/globals'
 
 import { dbAuth } from 'firebase-jest-testing/firestoreReadOnly'
 
-describe("'/userInfo' rules", () => {
+// tbd. userinfo likely going to be handled differently (no need for clients to write to it)
+//
+describe.skip("'/userInfo' rules", () => {
   let unauth_userinfoC, abc_userinfoC, def_userinfoC;
 
   beforeAll( () => {

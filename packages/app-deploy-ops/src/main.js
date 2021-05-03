@@ -39,7 +39,7 @@ initializeApp(opts);
 
   await import('@local/app').then( mod => mod.initializedProm );
 
-  console.debug("App on its own :)", performance.now() - t0);
+  console.debug("App on its own :)", performance.now() - t0);   // 101
 
   // Import 'ops/central' now that Firebase is initialized, and the app is on its way.
   //
@@ -48,6 +48,6 @@ initializeApp(opts);
   //    - seeing possible loading problems at launch, even if the app wouldn't use 'central' logging
   //
   await import('./ops/central');
-  console.debug("Central initialized:", performance.now() - t0);
+  console.debug("Central initialized:", performance.now() - t0);    // 157
 
 })();   // free-running tail

@@ -35,13 +35,14 @@ function assert(cond,msg) { if (!cond) fail(msg); }
 const args = new URLSearchParams(location.search);
 
 const maxBatchDelayMs = args.get("max-batch-delay-ms"),
-  maxBatchEntries = args.get("max-batch-entries");
+  maxBatchEntries = args.get("max-batch-entries"),
+  ignore = args.get("ignore");
 
 if (!maxBatchDelayMs || !maxBatchEntries) {
   fail( "Expecting web worker to be launched with '?max-batch-delay-ms=...&max-batch-entries=...");
 }
 
-let logs_v1;
+let cloudLoggingProxy_v0;
 
 /*
 * Initialize the worker
@@ -56,8 +57,7 @@ let logs_v1;
 *   should be _just_ a configuration entry to change it to something else.
 * /🔥
 */
-function init({ apiKey, projectId, locationId }) {    // appId, authDomain not needed
-  // 'locationId' is optional (undefined == default region)
+function init({ apiKey, projectId, locationId }) {    // 'locationId' is optional (undefined == default region)
 
   const fah = initializeApp({
     apiKey,
@@ -66,24 +66,65 @@ function init({ apiKey, projectId, locationId }) {    // appId, authDomain not n
 
   const fnsRegional = getFunctions( fah, locationId );
 
-  logs_v1 = httpsCallable(fnsRegional,"logs_v1");
+  cloudLoggingProxy_v0 = httpsCallable(fnsRegional,"cloudLoggingProxy_v0");
 
   console.log("Worker initialized");
 }
 
 console.log("Worker loaded");
 
-function logGen(level) {
-  return ({createdMs, msg, args}) => {
-    logs_v1(level,createdMs,msg,...args);
+/*
+* Queue a log entry for shipping.
+*/
+function log({ msg, args, level }) {    // ({ msg: string, args: Array of any, level: string }) => ()
+
+  const le = createLogEntry(level, msg, args);
+
+  cloudLoggingProxy_v0( { les: [le], ignore } );
+}
+
+/*
+* Turn the received format to CloudLogging 'LogEntry'.
+*
+* Note: The documentation for such is not very clear (as often the case with log entries). It is preferable to
+*   support preferred schema, but the docs don't clearly state such. This is our best effort - please suggest
+*   improvements! :)
+*
+*   Cloud Logging API docs > LogEntry
+*     -> https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
+*/
+function createLogEntry(level, msg, args) {    // (string, string, Array of any) => LogEntry
+  const severity = severityLookup[level] || fail(`Unknown logging level: ${level}`);
+
+  const timestamp = new Date().toISOString();   // "2021-05-02T15:08:09.073Z"
+
+  /*** consider:
+   *
+   * - should we use 'textPayload' if there are no args?
+   const textPayload = (args.length == 0) ? msg : undefined;
+   * - ..and otherwise this?
+   const jsonPayload = (args.length > 0) ? { msg, args };
+   ***/
+
+  const jsonPayload = { msg, args };    // to get things started (#tmp?)
+
+  return {
+    severity,
+    timestamp,
+    jsonPayload
   }
 }
 
+const severityLookup = new Map([
+  ["info","INFO"],
+  ["warn","WARNING"],
+  ["error","ERROR"],
+  ["fatal","CRITICAL"]
+]);
+
 const lookup = {
   init,
-  ...Object.fromEntries( ["info","warn","error","fatal"].map( s =>
-    [s,logGen(s)]
-  ))
+  log
 };
 
 /*
@@ -92,20 +133,20 @@ const lookup = {
 * {
 *   "": "init",
 *   apiKey: string,
-*   locationId: string,
-*   projectId: string
+*   projectId: string,
+*   locationId: string
 * }
 *
 * Initialize the worker. First message after creation.
 *
 * {
-*   "": "info"|"warning"|"error"|"fatal",
-*   createdMs: int,
-*   msg: string
-*   args: [...]
+*   "": "log",
+*   msg: string,
+*   args: Array of any,
+*   level: "info"|"warn"|"error"|"fatal"
 * }
 *
-* Logging.
+* Logging. Handles that the message gets delivered - eventually - if possible.
 */
 onmessage = function(e) {
   console.log("Worker received:", e);

@@ -12,8 +12,6 @@
 *
 * Unlike 'ops/perf.js', this also converts the adapter API to that used in application code.
 */
-import { LOCATION_ID } from '../../.env.js'
-
 import { centralIsAvailable } from '../catch'
 
 // Cloud Logging, via proxy
@@ -21,8 +19,7 @@ import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@
 
 cloudLoggingInit( {
   maxBatchDelayMs: 5000,
-  maxBatchEntries: 100,
-  locationId: LOCATION_ID
+  maxBatchEntries: 100
 } );
 
 const gen = cloudLoggingLoggerGen;    // ("info"|"warn"|"error"|"fatal") => ((msg, ...args) => ())
