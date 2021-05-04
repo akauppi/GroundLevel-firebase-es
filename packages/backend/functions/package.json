@@ -5,6 +5,10 @@
   "engines": {
     "node": "14 || >=15"
   },
+  "files": [
+    "src/**/*.js",
+    "index.js"
+  ],
   "dependencies": {
     "@google-cloud/logging": "^9.2.1",
     "firebase-admin": "^9.7.0",

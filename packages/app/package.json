@@ -12,7 +12,7 @@
     ".": "./vitebox/dist/app.es.js"
   },
   "engines": {
-    "node": ">=14.3 || ^15"
+    "node": ">=14.3 || ^15 || ^16"
   },
   "--": "-- following stuff matters for development, only --",
   "scripts": {

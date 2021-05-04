@@ -11,7 +11,8 @@
 * ES modules support:
 *   - [x] Cloud Functions supports node.js 14
 *   - [ ] Firebase Emulator allows Cloud Functions to be expressed as ECMAScript modules (not yet)
-*   - [ ] 'firebase-functions' and 'firebase-admin' are available as ESM exports (not yet)
+*   - [ ] 'firebase-functions' is available as ESM exports (not; there's an issue about it though)
+*   - [ ] 'firebase-admin' is available as ESM exports (work in progress; alpha)
 *
 * Configuration:
 *   For production regional deployments, mention your region:
@@ -27,42 +28,20 @@
 *   - Add the Firebase Admin SDK to your server (Firebase docs)
 *     -> https://firebase.google.com/docs/admin/setup
 */
-const functions = require('firebase-functions');
-//import * as functions from 'firebase-functions';
-const logger = functions.logger;    // for backend logging
-
 const admin = require('firebase-admin');
 //import * as admin from 'firebase-admin';
 
-const { Logging } = require('@google-cloud/logging');
-// import { Logging } from '@google-cloud/logging'
-
-function fail(msg) { throw new Error(msg); }
-
-const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
-//const BACKEND_TEST = !! process.env.BACKEND_TEST;   // to differentiate between backend 'npm test' and use in app development
-
 admin.initializeApp();
 
-/*
-* For production (not emulation) and deploying to a region, provide the region where the Firebase project has been set up.
-*/
-function prodRegion() {   // () => string|null
-  const arr = functions.config().regions;
-  const ret = arr && arr[0];
-  return ret;
-}
+const { cloudLoggingProxy_v0 } = require('./src/cloudLoggingProxy.js');
 
-// To have your Functions work, if you chose *ANY* other location than 'us-central1', you need to mention the region
-// in CODE (that's against good principles of programming; this should be a CONFIGURATION!!!)
+// Note: Seems vital that we export the functions from 'index.js' (otherwise they don't show up as activated).
 //
-// See -> https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246
-//
-const regionalFunctions = EMULATION ? functions : (() => {
-  const reg = prodRegion();
-  return !reg ? functions : functions.region(reg);
-})();
+exports.cloudLoggingProxy_v0 = cloudLoggingProxy_v0;
 
+
+
+//--- TRASH THE END at #rework ---
 /*** #rework tbd. Tie to authentication, instead
 // UserInfo shadowing
 //
@@ -133,117 +112,3 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
 *_/
 ***/
 
-// --- Logging
-//
-// Cloud Logging does not support delivery of logs directly from browsers. They need to be routed through us.
-// This allows us to e.g. limit logging to authenticated users only, or provide other kinds of throttling.
-//
-// The data schema is Cloud Logging's 'LogEntry':
-//  -> https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
-//
-// References:
-//    - Logging Client Libraries
-//      https://cloud.google.com/logging/docs/reference/libraries
-//    - Cloud Logging > Basic Concepts > Log Entries
-//      https://cloud.google.com/logging/docs/basic-concepts#log-entries
-
-
-// Receive an array of logging messages. The front end batches them together to reduce the number of calls, but also
-// for the sake of offline gaps.
-//
-// les: Array of 'LogEvent'
-//
-//    LogEvent:
-//    {
-//      severity: "INFO"|"WARNING"|"ERROR"|"CRITICAL"
-//      timestamp: ISO 8601 string, eg. "2021-05-02T15:08:09.073Z"
-//      jsonPayload: {
-//        msg: string,
-//        args: Array of any
-//      }
-//    }
-//
-// ignore: undefined | true | string
-//    provided if the logging arises from:
-//      - tests
-//      - 'npm run serve' under localhost
-//
-//    If so, place the logs in another log, keeping the production log prestine (otherwise 1-to-1 behaviour!)
-
-/*
-* EMULATION variant
-*
-* Used when running against locally emulated Cloud Functions:
-*   - backend 'npm test'
-*   - app 'npm run dev[:local]'
-*   - app 'npm run dev:online'    <-- tbd. currently using its own logging server.
-*
-* Logs using Cloud Function 'logger' (since we don't have Cloud Logging credentials, nor want to rely on online-needing
-* services).
-*/
-const cloudLoggingProxy_v0_EMUL = EMULATION && (les => {
-
-  const backLookup = new Map([   // 'LogEvent' '.severity' to Cloud Function logging level
-    ['INFO','info'],
-    ['WARNING','warn'],
-    ['ERROR','error'],
-    ['CRITICAL','error']    // no 'logger.fatal' in Cloud Functions
-  ]);
-
-  les.forEach( le => {
-    function failLE(prefix) { fail(`${prefix} ${ JSON.stringify(le) }`); }
-
-    const level = backLookup.get(le.severity) || failLE("Unexpected 'severity' in:");
-    const timestamp = le.timestamp || failLE("No 'timestamp' in:");
-    const msg = le.jsonPayload?.msg || failLE("No 'jsonPayload.msg' in:");
-    const args = le.jsonPayload?.args;    // omit from output if not there
-
-    logger[level](msg, { timestamp, ...(args ? {args}:{}) } );
-  })
-});
-
-/*
-* REAL variant
-*
-* Used by:
-*   - app-deploy-ops 'npm serve' (with 'ignore' marker in the calls)
-*   - production deployed front-end
-*
-* Firebase provides credentials automatically so that we can use Cloud Logging APIs in production.
-*/
-const cloudLoggingProxy_v0 = (!EMULATION) && (_ => {
-  // GCP project id is the same as Firebase project id
-  const projectId = process.env.GCLOUD_PROJECT || fail("Env.var 'GCLOUD_PROJECT' not available!");
-
-  const logging = new Logging({ projectId });    // @google-cloud/logging
-
-  // Note: The same implementation may be taking in both production and development ('ignore == true') logs. Thus,
-  //    it's not an either-or.
-  //
-  const appLog = logging.log('app-central');
-  const appLog2 = logging.log('app-central.ignore');    // logs from development client
-
-  return (les, ignore) => {
-    const log = (!ignore) ? appLog:appLog2;
-    const prom = log.write(les);
-
-    prom.then(_ => {
-      //logger.info(`Logged to ${log.name}: ${les.size()} entries`);
-    }).catch(err => {
-      logger.error("Failure to ship application logs:", err);
-    })
-  }
-})();
-
-exports.cloudLoggingProxy_v0 = regionalFunctions
-  //const cloudLoggingProxy_v0 = regionalFunctions
-  .https.onCall(({ les, ignore } /*, context*/) => {
-    (cloudLoggingProxy_v0 || cloudLoggingProxy_v0_EMUL)(les, ignore);
-  });
-
-/*
-export {
-  userInfoShadow_2,
-  cloudLoggingProxy_v0
-}
-*/
