@@ -47,7 +47,9 @@ initializeApp(opts);
   //    - allowing 'crash.js' to see 'fatal' early on (but thing are crooked already, if it has messages)
   //    - seeing possible loading problems at launch, even if the app wouldn't use 'central' logging
   //
-  await import('./ops/central');
+  const { central } = await import('./ops/central');
   console.debug("Central initialized:", performance.now() - t0);    // 157
+
+  window.central = central;   // TEMP; for use from console
 
 })();   // free-running tail

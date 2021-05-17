@@ -25,8 +25,6 @@ import { getFunctions, httpsCallable } from '@firebase/functions'
 
 function fail(msg) { throw new Error(msg); }
 
-function assert(cond,msg) { if (!cond) fail(msg); }
-
 // Launch parameters via the URL
 //
 // Approach: One can configure a worker either via query params (here) or via the 'init' message. We do both but you can
@@ -34,12 +32,12 @@ function assert(cond,msg) { if (!cond) fail(msg); }
 //
 const args = new URLSearchParams(location.search);
 
-const maxBatchDelayMs = args.get("max-batch-delay-ms"),
-  maxBatchEntries = args.get("max-batch-entries"),
+const maxBatchDelayMs = parseInt( args.get("max-batch-delay-ms") ),
+  maxBatchEntries = parseInt( args.get("max-batch-entries") ),
   ignore = args.get("ignore");
 
 if (!maxBatchDelayMs || !maxBatchEntries) {
-  fail( "Expecting web worker to be launched with '?max-batch-delay-ms=...&max-batch-entries=...");
+  fail( "Expecting web worker to be launched with '?max-batch-delay-ms=...&max-batch-entries=...[&ignore=...]'");
 }
 
 let cloudLoggingProxy_v0;
@@ -73,6 +71,34 @@ function init({ apiKey, projectId, locationId }) {    // 'locationId' is optiona
 
 console.log("Worker loaded");
 
+const pending= [];
+let timer = schedule();    // ongoing timer, which forces a shipment
+
+function schedule() {   // () => Timer
+  return setTimeout(ship, maxBatchDelayMs);
+}
+
+/*
+* Ship things; don't alter the schedule.
+*/
+function ship() {
+  clearTimeout(timer);
+
+  if (pending.length === 0) {
+    // nada
+  } else {
+    console.debug(`Shipping ${pending.length} 🪵🪵...`);
+
+    // tbd. handle offline
+
+    cloudLoggingProxy_v0({les: pending, ignore});
+    pending.length = 0;   // clear
+  }
+
+  // Reschedule after each successful shipment / empty visit.
+  timer = schedule();
+}
+
 /*
 * Queue a log entry for shipping.
 */
@@ -80,7 +106,13 @@ function log({ msg, args, level }) {    // ({ msg: string, args: Array of any, l
 
   const le = createLogEntry(level, msg, args);
 
-  cloudLoggingProxy_v0( { les: [le], ignore } );
+  pending.push(le);
+
+  // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
+  //
+  if (level === 'fatal' || pending.length >= maxBatchEntries) {   // always max 'maxBatchEntries' long (==)
+    ship();
+  }
 }
 
 /*
@@ -94,19 +126,10 @@ function log({ msg, args, level }) {    // ({ msg: string, args: Array of any, l
 *     -> https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
 */
 function createLogEntry(level, msg, args) {    // (string, string, Array of any) => LogEntry
-  const severity = severityLookup[level] || fail(`Unknown logging level: ${level}`);
+  const severity = severityLookup.get(level) || fail(`Unknown logging level: ${level}`);
 
   const timestamp = new Date().toISOString();   // "2021-05-02T15:08:09.073Z"
-
-  /*** consider:
-   *
-   * - should we use 'textPayload' if there are no args?
-   const textPayload = (args.length == 0) ? msg : undefined;
-   * - ..and otherwise this?
-   const jsonPayload = (args.length > 0) ? { msg, args };
-   ***/
-
-  const jsonPayload = { msg, args };    // to get things started (#tmp?)
+  const jsonPayload = { msg, args };
 
   return {
     severity,

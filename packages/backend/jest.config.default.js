@@ -13,14 +13,11 @@ const opts = {
   testTimeout: 2000,
 
   // Without this, the 'firebase-jest-testing' modules are not correctly loaded, due to being declared using 'exports'.
-  // This is a perfectly valid way of declaring modules, but Jest 26.x resolver (aka browserify resolver) is not up to it,
-  // yet (Aug-2020).
+  // Jest 27.0.0-next.9 resolver (aka browserify resolver) is not up to this, yet (May 2021).
   //
   // See -> https://github.com/akauppi/firebase-jest-testing/blob/master/TRACK.md#jest-cannot-handle-package-exports-%EF%B8%8F%EF%B8%8F%EF%B8%8F
   //
-  // Still needed with 27.0.0-next.8
-  //
-  //resolver: "firebase-jest-testing/cjs/jestResolver"
+  // Comment out to test whether Jest needs it.
   resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
 };
 

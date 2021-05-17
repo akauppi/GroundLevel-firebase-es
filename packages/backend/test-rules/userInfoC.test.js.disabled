@@ -4,7 +4,7 @@
 import { strict as assert } from 'assert'
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { dbAuth } from 'firebase-jest-testing/firestoreReadOnly'
+import { collection } from 'firebase-jest-testing/firestoreRules'
 
 // tbd. userinfo likely going to be handled differently (no need for clients to write to it)
 //
@@ -12,31 +12,19 @@ describe.skip("'/userInfo' rules", () => {
   let unauth_userinfoC, abc_userinfoC, def_userinfoC;
 
   beforeAll( () => {
-    try {
-      const coll = dbAuth.collection('userInfo');   // root collection
+    const coll = dbAuth.collection('userInfo');   // root collection
 
-      unauth_userinfoC = coll.as(null);
-      abc_userinfoC = coll.as({uid:'abc'});
-      def_userinfoC = coll.as({uid:'def'});
-
-      assert(unauth_userinfoC && abc_userinfoC && def_userinfoC);
-    }
-    catch (err) {
-      // tbd. How to cancel the tests if we end up here? #help
-      console.error( "Failed to initialize the database: ", err );    // not happened
-      throw err;
-    }
+    unauth_userinfoC = coll.as(null);
+    abc_userinfoC = coll.as({uid:'abc'});
+    def_userinfoC = coll.as({uid:'def'});
   });
 
   //--- UserInfoC read rules ---
 
-  test('no-one should be able to read', async () => {
-
-    await Promise.all([
+  test('no-one should be able to read', () => Promise.all([
       expect( unauth_userinfoC.get("abc") ).toDeny(),   // unauthenticated
       expect( abc_userinfoC.get("abc") ).toDeny(),     // valid user (cannot read even one's own)
-    ]);
-  });
+  ]));
 
   //--- UserInfoC write (create/update) rules ---
 

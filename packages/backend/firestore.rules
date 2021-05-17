@@ -8,13 +8,6 @@ service cloud.firestore {
 
     // tbd. removed projects likely to get their own collection (simpler)
 
-    // HACK and WORK-AROUND, until this is solved -> https://github.com/firebase/firebase-tools/issues/3258
-    //
-    function uid_HACK() {
-      return request.auth.uid;    // what it needs to BE!
-      //return 'dev';               // for being able to develop, under 9.0.0-beta.1 !!!
-    }
-
     // Access cost:
     //    read: 1
     //    write: 1
@@ -39,7 +32,7 @@ service cloud.firestore {
         && validProjectWrite()
         && after().created == request.time
         && !isRemovedAfter()
-        && /*request.auth.uid*/ uid_HACK() in after().authors    // creator added as an author (we could go soft on this..)
+        && request.auth.uid in after().authors    // creator added as an author (we could go soft on this..)
 
       // Update
       //    | field    | mutability |
@@ -106,12 +99,12 @@ service cloud.firestore {
 
       function isAuthor() {
         return isSignedIn() &&
-          /*request.auth.uid*/ uid_HACK() in prior().authors
+          request.auth.uid in prior().authors
       }
 
       function isMember() {
         return isSignedIn() &&
-          /*request.auth.uid*/ uid_HACK() in prior().members
+          request.auth.uid in prior().members
       }
 
       function isRemoved() {
@@ -143,7 +136,7 @@ service cloud.firestore {
         //
         allow create: if EXT_isMember_COST1()
           && validSymbolWrite()
-          && after().claimed.by == /*request.auth.uid*/ uid_HACK()
+          && after().claimed.by == request.auth.uid
           && after().claimed.at == request.time
 
         // Updates:
@@ -156,7 +149,7 @@ service cloud.firestore {
           && validSymbolWrite()
           && (
             !isClaimed() ? (        // case A: claiming an unclaimed symbol
-              after().claimed.by == /*request.auth.uid*/ uid_HACK() &&		// I make the claim
+              after().claimed.by == request.auth.uid &&		// I make the claim
               after().claimed.at == request.time
             ) : isClaimedByMe() && (  // case B: changing other fields while claimed
                   after().claimed == prior().claimed
@@ -195,7 +188,7 @@ service cloud.firestore {
         }
 
         function isClaimedByMe() {
-          return isClaimed() && prior().claimed.by == /*request.auth.uid*/ uid_HACK()
+          return isClaimed() && prior().claimed.by == request.auth.uid
         }
 
         function isClaimed() {
@@ -222,7 +215,7 @@ service cloud.firestore {
         //
         allow write: if EXT_isMember_COST1()
           && validProjectsUserInfoWrite()
-          && userId == /*request.auth.uid*/ uid_HACK()
+          && userId == request.auth.uid
           && after().lastActive == request.time
 
         allow delete: if false
@@ -246,7 +239,7 @@ service cloud.firestore {
 
       function EXT_isMember_COST1() {
         return isSignedIn() && (
-          /*request.auth.uid*/ uid_HACK() in get( /databases/$(database)/documents/projects/$(projectId) ).data.members
+          request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.members
         )
       }
     }   // project
@@ -291,7 +284,7 @@ service cloud.firestore {
           && after().email is string
           && after().project is string
           && after().asAuthor is bool
-          && after().by == /*request.auth.uid*/ uid_HACK()
+          && after().by == request.auth.uid
           && after().at == request.time
       }
 
@@ -307,8 +300,8 @@ service cloud.firestore {
         let data = isSignedIn() ? get( /databases/$(database)/documents/projects/$(projectId) ).data : {};
 
         return isSignedIn() && (
-          mustBeAuthor ? /*request.auth.uid*/ uid_HACK() in data.authors
-            : /*request.auth.uid*/ uid_HACK() in data.members
+          mustBeAuthor ? request.auth.uid in data.authors
+            : request.auth.uid in data.members
         )
       }
       function PROJ_isAuthor_COST1(projectId) { return _PROJ_isMember_COST1(projectId, true); }
@@ -330,7 +323,7 @@ service cloud.firestore {
       allow read: if false
 
       allow write: if true
-        && isSignedIn() && /*request.auth.uid*/ uid_HACK() == userId
+        && isSignedIn() && request.auth.uid == userId
         && validUserInfoWrite()
 
       function validUserInfoWrite() {
@@ -371,8 +364,8 @@ service cloud.firestore {
     }
 
     function isSignedIn() {
-      //return request.auth != null && request.auth.uid != null;    // PLACE THIS BACK once hack is gone
-      return /*request.auth != null &&*/ uid_HACK() != null;
+      //return request.auth != null && request.auth.uid != null;    // extra check was needed long ago
+      return request.auth.uid != null;    // tbd. are we fine with this? ('request.auth' never null?)
     }
   } // database
 }

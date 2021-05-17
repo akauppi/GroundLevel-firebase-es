@@ -119,19 +119,8 @@ window.onunhandledrejection = function (promiseRejectionEvent) {
   revealUIAndLog("Unhandled rejection", reason);
 }
 
-/*** remove
-let resolveBroken;
+console.debug("catch.js active"); // DEBUG
 
-const firebaseIsInitializedProm = new Promise( (resolve) => {   // resolves when 'canImportLogging' has been called (by 'main.js')
-  resolveBroken = resolve;
-})
-
-function canImportLogging() {
-  resolveBroken();
-}
-
-export { canImportLogging }
-***/
 export {
   centralIsAvailable
 }

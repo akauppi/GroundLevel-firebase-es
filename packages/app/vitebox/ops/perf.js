@@ -12,10 +12,14 @@ function reportTrack(name, stamps) {    // (string, Array of integer /*ms of epo
   assert(stamps.length >= 2);
 
   const start = stamps[0];
-  const duration = stamps[stamps.length-1];
+  const duration = stamps[stamps.length-1] - start;
   const laps = stamps.length > 2 ? stamps.slice(1,-1).map( x => x-start ) : undefined;
 
-  console.debug(`[PERF ${name}]:`, { start, duration, laps });
+  console.debug(`[PERF ${name}]:`, {
+    start: start.toFixed(1),
+    duration: duration.toFixed(1),
+    laps: laps.map( n => n.toFixed(1) )
+  });
 }
 
 const counters = new Map();

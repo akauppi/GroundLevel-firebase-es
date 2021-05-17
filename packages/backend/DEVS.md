@@ -30,6 +30,10 @@ When a test fails, there's a "L15" or similar mention:
 
 Use this to pinpoint the rule that caused the unexpected behaviour.
 
+-- 
+
+*Edit*: We've given Firebase the [idea](https://github.com/firebase/firebase-js-sdk/issues/4793) of attaching also possible `debug` output here.
+
 
 ## WARNING: Firestore emulator does *not* change the rules
 
@@ -46,7 +50,7 @@ One would expect the rules are changed. DO NOT TRUST IT. At least `firebase-tool
 
 Always Ctrl-C + `npm run start`, to have rule changes actually applied.
 
-( This is obviously a bug. If you wish to `#help`, please inform Firebase about it.. ;) )
+( This is obviously a bug. If you wish to `#help`, try to reproduce it and please inform Firebase about it.. )
 
 
 ## WARNING: Use of dates in `docs.js`

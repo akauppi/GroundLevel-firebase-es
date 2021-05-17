@@ -14,12 +14,14 @@ These come from (used `npm list`):
 
 ||caused by|
 |---|---|
-|`request-promise-native`|`jest-circus@27.0.0-next.2`|
-|`har-validator`|`firebase-jest-testing@0.0.2-beta.0`|
-|`request`|`firebase-jest-testing@0.0.2-beta.0`, `jest-circus@27.0.0-next.2`|
+|`request` `request-promise-native`|`jest@27.0.0-next.9` (via `jsdom@16.5.3`)|
+|`har-validator`|via `request`|
 
 
 ## `npm run test:fns:all` fails
+
+><font color=red>Userdata testing currently disabled.
+</font>
 
 ```
 $ npm run test:fns:all

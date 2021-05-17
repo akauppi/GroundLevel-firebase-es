@@ -20,7 +20,7 @@
   </main>
   <footer>
     <AppFooter />
-    <button id="errorBtn" v-on:click="makeError">Make error!</button>
+    <button id="errorBtn" v-on:click="makeError">Make error!</button>   <!-- tbd. to index.html -->
   </footer>
 </template>
 
@@ -88,7 +88,7 @@
   const LOCAL = import.meta.env.MODE === 'dev_local';
   const TESTING = LOCAL && window.Cypress;
 
-  /*** disabled (do we need this?)
+  /*** disabled
   /*
   * Vue error handler
   *
@@ -101,8 +101,8 @@
   *_/
   const errorHandler = (err, vm, info) => {   // (Error, Proxy, string) => ()
     console.debug("In Vue error handler:", info);
-    debugger;
-  }*/
+    throw err;
+  } ***/
 
   function makeError() {
     throw new Error("Error for testing!");
@@ -113,24 +113,27 @@
       console.log("Houston, App is mounted");
     });
 
-    //const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
+    const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
 
     /*** disabled
-    // Error handler. This is called within Vue lifecycle. If we don't tap into it, Vue gives one or two warnings
-    // about "Unhandled error during..." and eventually the error is passed to (console / central catch in ops).
+    // Activate the error handler.
     //
-    // The warnings etc. give us all the info we need for development. No benefit in catching the error.
+    // This is called within Vue lifecycle. If we don't tap into it, Vue gives one or two warnings about
+    // "Unhandled error during..." and eventually the error is passed to (console / central catch in ops).
+    //
+    // tbd. It is unclear, whether catching the error here gives added value. (Vue errors were NOT caught by ops,
+    //    which is serious!!!)
     //
     if (errorHandler) {
       assert (appConfig.errorHandler === undefined);    // we're not overwriting anything
       appConfig.errorHandler = errorHandler;
-    }*/
+    }***/
 
     return {
       user: userRef2,
       LOCAL,
       TESTING,
-      makeError   // IDE note: used though dimmed
+      makeError
     }
   }
 

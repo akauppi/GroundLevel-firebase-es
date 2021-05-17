@@ -1,5 +1,10 @@
 # Changelog
 
+## 17-May-21
+
+- Changing to `firebase-jest-testing` 0.0.3-alpha.2
+  - no need for a JS client!!!! 😄🚀
+
 ## 6-Apr-21
 
 - Jest configuration as ES

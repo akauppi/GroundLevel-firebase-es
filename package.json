@@ -9,9 +9,6 @@
     "_no2": "npm --prefix packages/app-deploy-ops outdated",
     "_no3": "npm --prefix packages/backend outdated && npm --prefix packages/backend/functions outdated",
     "-- ": "",
-    "install:all": "npm install && npm --prefix packages/backend install && npm --prefix packages/app install && npm --prefix packages/app-deploy-ops install",
-    "prune:all": "npm prune && npm --prefix packages/backend prune && npm --prefix packages/app prune && npm --prefix packages/app-deploy-ops prune",
-    "-- -- ": "",
     "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2",
     "_postinstall1": "npm --prefix tools install",
     "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh",
@@ -19,14 +16,17 @@
     "preinstall": "tools/npm-version-check.sh"
   },
   "devDependencies": {
-    "eslint": "^7.25.0",
+    "eslint": "^7.26.0",
     "firebase": "^9.0.0-beta.1",
-    "firebase-tools": "^9.10.0"
+    "firebase-tools": "^9.10.2"
   },
   "//": {
-    "_": [
-      "This 'package.json' serves as a place for build-time tooling common to the subpackages, and as the source",
-      "for 'firebase' and '@firebase' packages. This saves disk space and keeps all subpackages using the same version."
+    "": [
+      "This serves for pulling in libraries and tools used commonly in the subpackages, so that a) version choice is in",
+      "one place and b) we save both download bandwidth and disk space.",
+      "",
+      "Some tools ('wait-on', 'concurrently') are not here. Those are seen as implementation details of the particular",
+      "submodules (so if you use a package in two subpackages, it does not mean you must declare it here)."
     ]
   }
 }

@@ -1,9 +1,8 @@
 /*
-* back-end/test-rules/docs.cjs
+* back-end/test-rules/docs.js
 *
 * Constant data used for the rules test cases
 */
-
 const anyPastDate = new Date();
 
 /*
@@ -86,5 +85,4 @@ const docs = {
   }
 };
 
-//export { docs }
-module.exports = docs;
+export { docs }

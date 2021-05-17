@@ -39,6 +39,17 @@ const VERSION = _VERSION;    // both dev and production
 const initializedProm = (async () => {    // Promise of ()
   const tr = appInitTrack.start();
 
+  // Set an error handler.
+  //
+  // Note: For some reason, doing this in 'app-deploy-ops' wrapper didn't catch errors within the application.
+  //    Never mind - we can get them here and pass on.
+  //
+  window.onerror = function (msg, source, lineNbr, colNbr, error) {
+    console.debug("onerror saw:", {msg, source, lineNbr, colNbr});    // DEBUG
+
+    //caught
+  }
+
   // Load the web component for 'aside-keys' tag.
   //
   // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with

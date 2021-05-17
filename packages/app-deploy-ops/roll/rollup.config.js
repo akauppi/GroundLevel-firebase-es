@@ -74,7 +74,7 @@ const plugins = [
   }),
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
-  //!watch && terser(),
+  !watch && terser(),
 
   tunnelPlugin(templateHtml, targetHtml),
 

@@ -60,10 +60,10 @@
     "concurrently": "^6.0.2",
     "cypress": "^7.1.0",
     "eslint": "file:../../node_modules/eslint",
-    "eslint-plugin-cypress": "^2.11.2",
+    "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.9.0",
-    "prettier": "^2.2.0",
+    "prettier": "2.2.1",
     "sass": "^1.32.11",
     "vite": "^2.2.3",
     "vue-eslint-parser": "^7.6.0"
@@ -94,7 +94,13 @@
       "'>=13.2' for ES module support",
       "'--experimental-json-modules' seems to be available for Node 12"
     ],
-    "peerDependencies": {
+    "devDependencies": {
+      "prettier": [
+        "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
+        "Thus, following suit."
+      ]
+    },
+    "peerDependencies (_not_ using it)": {
       "/not/ firebase": [
         "It's important we *don't* list 'firebase' as a peer dependency, though mentally it is. Because:",
         "- we don't want to mention the version twice (only at the root level)",

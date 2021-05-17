@@ -3,7 +3,7 @@
   "private": true,
   "//type": "module",
   "engines": {
-    "node": "14 || >=15"
+    "node": "14 || ^15 || ^16"
   },
   "files": [
     "src/**/*.js",
@@ -24,7 +24,8 @@
       "Change to 'type: module' when Firebase is ready for it (not yet in Feb 2021)."
     ],
     "engines.node": [
-      "We prefer e.g. \"14 || >=15\". During deployment, the scripts turn this into \"14\", which is acceptable to Firebase CLI (9.4.0)"
+      "During deployment, the scripts turn this into \"14\", which is acceptable to Firebase CLI (9.4.0).",
+      "tbd. Make an issue."
     ]
   }
 }

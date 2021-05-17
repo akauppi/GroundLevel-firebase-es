@@ -11,25 +11,22 @@
   ],
   "engines": {
     "node": ">=13.2",
-    "npm": "^7.7.0"
+    "npm": ">= 7.7.0"
   },
   "scripts": {
     "test": "npm run ci",
     "ci": "npm run ci:seq",
     "  ": "",
-    "ci:seq": "BACKEND_TEST=true firebase emulators:exec --project=bunny --only firestore,functions \"npm run --silent _ci_init && npm run --silent _ci_fns && npm run --silent _ci_rules\"",
-    "_ci_init": "node test/prime-docs.js",
-    "_ci_fns": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles",
+    "ci:seq": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_fns && npm run --silent _ci_rules\"",
+    "_ci_fns": "npm run test:fns:all",
     "_ci_rules": "npm run test:rules:all",
-    "ci:par": "BACKEND_TEST=true firebase emulators:exec --project=bunny --only firestore,functions \"npm run --silent _ci_par_2\"",
-    "_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_init && npm run _ci_fns\" \"npm run _ci_rules\"",
+    "ci:par": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_par_2\"",
+    "_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_fns\" \"npm run _ci_rules\"",
     "  -": "",
-    "start": "concurrently -n emul,init \"firebase emulators:start --project=bunny --only functions,firestore\" \"GCLOUD_PROJECT=bunny npm run _start_2\"",
-    "_start_2": "wait-for 4000 && node test/prime-docs.js",
-    "test:fns:logging": "GCLOUD_PROJECT=bunny NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
-    "test:fns:logging.8x.debug": "GCLOUD_PROJECT=bunny NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.8x.test.js --verbose --detectOpenHandles --all",
-    "//test:fns:userInfo": "GCLOUD_PROJECT=bunny NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
-    "test:fns:all": "GCLOUD_PROJECT=bunny NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
+    "start": "firebase emulators:start --project=fns-test --only functions,firestore",
+    "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
+    "//test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
+    "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
     "  --": "",
     "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f invitesC.test.js --verbose --detectOpenHandles --all",
     "test:rules:projects": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/index.test.js --verbose --detectOpenHandles --all",
@@ -44,22 +41,17 @@
     " -- -": "",
     "prepare": "npm --prefix functions install",
     " -- - ": "",
+    "//": "firebase --version",
     "//predeploy": "npm run --silent _checkActivation",
     "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
   },
   "devDependencies": {
-    "@local/root": "file:../..",
     "@local/tools": "file:../../tools",
     "concurrently": "^6.0.2",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^8.3.2",
-    "firebase-admin": "^9.6.0",
-    "firebase-jest-testing": "^0.0.2-beta.5",
-    "jest": "^27.0.0-next.8",
-    "jest-circus": "^27.0.0-next.8"
-  },
-  "//devDependencies": {
-    "firebase-tools": "file:../../node_modules/firebase-tools"
+    "firebase-jest-testing": "^0.0.3-alpha.2",
+    "jest": "^27.0.0-next.9",
+    "jest-circus": "^27.0.0-next.9"
   },
   "//comments": {
     "engines.node": [
@@ -67,31 +59,20 @@
       "'>=13.2' for ES module support"
     ],
     "engines.npm": [
-      "Why demand npm 7?",
-      "- 'prepare' doesn't get run on npm 6.14.11 for some reason (does on 7.7.5)",
-      "- their 'npm install' performance seems comparable (user:33 + sys:14s on 6.14.11, user:35 + sys:14s on 7.7.5; just a single measurement)",
-      "",
-      "There is no single *pressing* reason why, but the two seem slightly incompatible. Instead of being bitten by this,",
-      "since npm 7 is now stable and released, let's require it (or yarn, or pnpm, maybe, #later).",
+      "There is no single *pressing* reason why, but the two (6 vs. 7) seem slightly incompatible. Instead of being",
+      "bitten by this, since npm 7 is now stable and released, let's require it.",
       "",
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
     "devDependencies": {
-      "@local/root": [
-        "This link brings the _binary_ commands installed at the project root (eg. 'firebase' CLI) to us."
-      ],
-      "firebase": [
-        "Must be 8.x because of this: https://github.com/akauppi/firebase-jest-testing/issues/13"
+      "NOT having firebase-tools": [
+        "It seems to get detected from the project root (npm 7.11.2, node 16.0.0). That's brilliant! Is it documented??"
       ]
     },
     "scripts": {
       "//preinstall": [
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
         "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
-      ],
-      "deploy": [
-        "The use of '../../node_modules/.bin/firebase' is simply a work-around because we cannot link to 'firebase-tools'",
-        "in the root (see comments on it). Will disappear once CI/CD does deployments. Good Enough For Now!!"
       ],
       "prepare": [
         "It is important someone runs 'npm install' also for the 'functions'. This is needed for: deployment, CI/CD tests.",

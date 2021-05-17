@@ -63,7 +63,7 @@ function init({ maxBatchDelayMs, maxBatchEntries }) {   // ({ maxBatchDelayMs: i
   myWorker = new Worker(`${PROXY_WORKER_PATH}?` +
     `max-batch-delay-ms=${maxBatchDelayMs}` +
     `&max-batch-entries=${maxBatchEntries}` +
-    ignore ? '&ignore=true':'',
+    (ignore ? '&ignore=true':''),
     { type: 'module' }
   );
 
