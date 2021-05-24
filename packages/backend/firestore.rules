@@ -121,7 +121,7 @@ service cloud.firestore {
       //    read: 2
       //    write: 2
       //
-      // tbd. Observe access cost in real world scenerio: user tracking changes to all symbols, within a project.
+      // tbd. Observe access cost in real world scenario: user tracking changes to all symbols, within a project.
       //      Is it acceptable?
       //
       match /symbols/{symbolId} {
@@ -151,13 +151,13 @@ service cloud.firestore {
             !isClaimed() ? (        // case A: claiming an unclaimed symbol
               after().claimed.by == request.auth.uid &&		// I make the claim
               after().claimed.at == request.time
-            ) : isClaimedByMe() && (  // case B: changing other fields while claimed
-                  after().claimed == prior().claimed
-                ) || (              // case C: revoking the claim
-                  diff().affectedKeys() == ["claimed"].toSet() &&     // only '.claimed' affected
-                  !("claimed" in after())                             // ..and it is removed
-                )
-            )
+            ) : isClaimedByMe() ? ( // case B: changing other fields while claimed
+              after().claimed == prior().claimed
+                ||                  // case C: revoking the claim
+              diff().affectedKeys() == ["claimed"].toSet() &&     // only '.claimed' affected
+              !("claimed" in after())                             // ..and it is removed
+            ): false
+          )
 
         // Delete:
         //	- can delete a symbol claimed to themselves

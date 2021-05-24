@@ -3,10 +3,7 @@
 *
 * Cloud Functions for our app.
 *
-* Back-end chores like moving data when triggered.
-*
-* Note! If one's front end code uses callables, it is no longer tolerant to offline work. Using Firestore with the
-*     official client is; thus rather deal with database as the interface.
+* This level handles the Functions API nuances; individual functions are in their own files.
 *
 * ES modules support:
 *   - [x] Cloud Functions supports node.js 14
@@ -31,14 +28,38 @@
 const admin = require('firebase-admin');
 //import * as admin from 'firebase-admin';
 
+const functions = require('firebase-functions');
+//import * as functions from 'firebase-functions';
+const logger = functions.logger;
+
+const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
+
 admin.initializeApp();
 
-const { cloudLoggingProxy_v0 } = require('./src/cloudLoggingProxy.js');
-
-// Note: Seems vital that we export the functions from 'index.js' (otherwise they don't show up as activated).
+// To have your Functions work, if you chose *ANY* other location than 'us-central1', you need to mention the region
+// in CODE (that's against good principles of programming; this should be a CONFIGURATION!!!)
 //
-exports.cloudLoggingProxy_v0 = cloudLoggingProxy_v0;
+// See -> https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246
+//
+const regionalFunctions = EMULATION ? functions : (() => {
 
+  // Region where the Firebase project has been set up.
+  //
+  const tmp = functions.config().regions[0];
+  return !tmp ? functions : functions.region(tmp);
+})();
+
+const { cloudLoggingProxy_v0 } = require('./cloudLoggingProxy.js');
+
+exports.cloudLoggingProxy_v0 = regionalFunctions
+  //const cloudLoggingProxy_v0 = regionalFunctions
+  .https.onCall(({ les, ignore }, context) => {
+    const uid = context.auth?.uid;
+
+    logger.debug("Logging request from:", uid || "(unknown user)");
+
+    return cloudLoggingProxy_v0(les, { ignore, uid });
+  });
 
 
 //--- TRASH THE END at #rework ---

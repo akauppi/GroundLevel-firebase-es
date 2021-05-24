@@ -6,46 +6,12 @@
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
-import { dbUnlimited as db } from 'firebase-jest-testing/firestore'
+import { dbUnlimited as db } from 'firebase-jest-testing/firestoreAdmin'
 import { eventually } from 'firebase-jest-testing/jest'
 
 import './matchers/toContainObject'
 
-// Clear '/projects/1/userInfo/abc'
-//
-// Note: Since we leave the end result of running tests in the server, this is needed in case (in dev) the test is
-//    run multiple times.
-//
-beforeAll( async () => {    // takes about 456, 419 ms
-
-  try {
-    await db.doc("projects/1/userInfo/abc").delete();    // left-overs from earlier tests - maybe
-
-    // Delete all "userInfo/*"
-    await wipe( db.collection("userInfo") );
-  }
-  catch(err) {
-    console.error("Initialization failed:", err);   // not seen in wild
-    throw err;
-  }
-});
-
-async function wipe(collection) {   // CollectionReference => Promise of ()
-  const qss = await collection.get();
-  const proms = qss.docs.map( qdss => {
-    return qdss.ref.delete()
-  } );
-  await Promise.all(proms);
-}
-
-/*
-* Cleanup
-*/
-afterAll( async () => {
-  //await db.app.delete();    // would fail; 'firebase-jest-testing' cleanup story a bit unclear
-});
-
-describe("userInfo shadowing", () => {
+describe.skip("userInfo shadowing", () => {
 
   // During execution of the tests, collect changes to 'projects/1/userInfo/{uid}' here:
   //

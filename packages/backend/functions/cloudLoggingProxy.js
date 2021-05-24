@@ -2,11 +2,18 @@
 * functions/src/cloudLoggingProxy.js
 *
 * Proxy for passing log entries to Cloud Logging. Back-end for the 'app-deploy-ops' proxy logging adapter.
+*
+* Note:
+*   We shouldn't need to do any Cloud Functions specific imports here; adaption done elsewhere.
 */
-const { Logging } = require('@google-cloud/logging');
-// import { Logging } from '@google-cloud/logging'
+const { EMULATION, logger, fail, failInvalidArgument } = require('./common.js');
 
-const { EMULATION, logger, regionalFunctions, fail } = require('./common.js');
+const { Logging } = require('@google-cloud/logging');
+// const Logging = import('@google-cloud/logging');
+
+function failWhileLoading(msg) {
+  throw new Error(msg);
+}
 
 //---
 // Cloud Logging does not support delivery of logs directly from browsers. They need to be routed through us.
@@ -54,7 +61,7 @@ const { EMULATION, logger, regionalFunctions, fail } = require('./common.js');
 * Logs using Cloud Function 'logger' (since we don't have Cloud Logging credentials, nor want to rely on online-needing
 * services).
 */
-const cloudLoggingProxy_v0_EMUL = EMULATION && (les => {
+const cloudLoggingProxy_v0_EMUL = EMULATION && ((les, { _ }) => {    // (Array of LogEntry, { }) => ()
 
   const backLookup = new Map([   // 'LogEvent' '.severity' to Cloud Function logging level
     ['INFO','info'],
@@ -64,7 +71,7 @@ const cloudLoggingProxy_v0_EMUL = EMULATION && (les => {
   ]);
 
   les.forEach( le => {
-    function failLE(prefix) { fail(`${prefix} ${ JSON.stringify(le) }`); }
+    function failLE(prefix) { failInvalidArgument(`${prefix} ${ JSON.stringify(le) }`); }
 
     const level = backLookup.get(le.severity) || failLE("Unexpected 'severity' in:");
     const timestamp = le.timestamp || failLE("No 'timestamp' in:");
@@ -73,6 +80,8 @@ const cloudLoggingProxy_v0_EMUL = EMULATION && (les => {
 
     logger[level](msg, { timestamp, ...(args ? {args}:{}) } );
   })
+
+  return true;    // to help tests and make sure the emulation variant was run
 });
 
 /*
@@ -84,9 +93,9 @@ const cloudLoggingProxy_v0_EMUL = EMULATION && (les => {
 *
 * Firebase provides credentials automatically so that we can use Cloud Logging APIs in production.
 */
-const cloudLoggingProxy_v0 = (!EMULATION) && (_ => {
+const cloudLoggingProxy_v0_PROD = (!EMULATION) && (_ => {
   // GCP project id is the same as Firebase project id
-  const projectId = process.env.GCLOUD_PROJECT || fail("Env.var 'GCLOUD_PROJECT' not available!");
+  const projectId = process.env.GCLOUD_PROJECT || failWhileLoading("Env.var 'GCLOUD_PROJECT' not available!");
 
   const logging = new Logging({ projectId });    // @google-cloud/logging
 
@@ -110,12 +119,4 @@ const cloudLoggingProxy_v0 = (!EMULATION) && (_ => {
   }
 })();
 
-exports.cloudLoggingProxy_v0 = regionalFunctions
-  //const cloudLoggingProxy_v0 = regionalFunctions
-  .https.onCall(({ les, ignore }, context) => {
-    const uid = context.auth?.uid;    // tbd. does Node.js 14 support this?
-
-    logger.debug("Logging request from:", uid || "(unknown user)");
-
-    (cloudLoggingProxy_v0 || cloudLoggingProxy_v0_EMUL)(les, { ignore, uid });
-  });
+exports.cloudLoggingProxy_v0 = cloudLoggingProxy_v0_PROD || cloudLoggingProxy_v0_EMUL;

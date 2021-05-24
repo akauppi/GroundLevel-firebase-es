@@ -21,9 +21,6 @@
 
 # Global '.gitignore' (of the author); not observed by Cloud Build defaults
 #
-# The idea has been that not all cruft needs to be in '.gitignore'. Add here globally known editor stuff or similar
-# (not project specific).
-#
 /.idea/
 .DS_Store
 

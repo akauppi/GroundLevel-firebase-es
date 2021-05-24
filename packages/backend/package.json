@@ -25,7 +25,7 @@
     "  -": "",
     "start": "firebase emulators:start --project=fns-test --only functions,firestore",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
-    "//test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
+    "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
     "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
     "  --": "",
     "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f invitesC.test.js --verbose --detectOpenHandles --all",
@@ -49,9 +49,9 @@
     "@local/tools": "file:../../tools",
     "concurrently": "^6.0.2",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.3-alpha.2",
-    "jest": "^27.0.0-next.9",
-    "jest-circus": "^27.0.0-next.9"
+    "firebase-jest-testing": "^0.0.3-alpha.3",
+    "jest": "^27.0.0-next.11",
+    "jest-circus": "^27.0.0-next.11"
   },
   "//comments": {
     "engines.node": [
