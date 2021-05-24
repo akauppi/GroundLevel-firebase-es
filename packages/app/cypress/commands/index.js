@@ -12,9 +12,6 @@
 */
 import { signInWithCustomToken, updateProfile } from '@firebase/auth'
 
-// Initialised once Firebase is up
-let onAuthStateChanged_HACK;
-
 /*
 * 'cy.clearAuthState'
 *
@@ -61,7 +58,6 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 
     // Set '.displayName', '.photoURL'; for email and password, other functions exist (not implemented)
     await updateProfile(currentUser, { displayName, photoURL });
-    onAuthStateChanged_HACK({ uid, displayName, photoURL });
 
     return currentUser;
 
@@ -78,8 +74,7 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 *   uses '/@xyz' module redirects that Cypress doesn't know of.
 */
 function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
-  return cy.window().its("Let's test!").then( ([auth,piggy1]) => {
-    onAuthStateChanged_HACK = piggy1;
+  return cy.window().its("Let's test!").then( ([auth]) => {
     return auth;
   });
 }

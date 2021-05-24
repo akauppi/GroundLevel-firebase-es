@@ -149,11 +149,9 @@ export default {
   },
 
   build: {
-    // tbd. Is minification required? Ops build will do it for us, right?
-    //minify: true,
     minify: false,
     sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
-    target: 'esnext',   // assumes native dynamic imports
+    target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
     //polyfillDynamicImport: false
 
     // Expose the code side, with a predictable export path.
@@ -186,6 +184,13 @@ export default {
       isCustomElement: tag => tag.includes('-') && !forcedVueComponents.has(tag)
     }}})
   ],
+
+  // Vite 2.3.1: "The fsServe restrictions are going to be enabled by default in a future version."
+  server: {
+    fsServe: {
+      strict: true    // preparing for the future version
+    }
+  },
 
   // This doesn't cut it, from config file (vite 2.0.0-beta.52). Using it as command line parameter does. Weird.
   clearScreen: false

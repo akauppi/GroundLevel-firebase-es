@@ -43,18 +43,9 @@ onAuthStateChanged( auth, user => {
   // Documentation does NOT state what will happen if we don't provide an error handler. So let's provide one. #firebase
   //
   (err) => {
-    central.fatal("Auth failed:", err);   // never seen?
+    //central.error("Auth failed:", err);   // never seen
     throw err;
 });
-
-/*
-* Work-around, until Firestore Emulator 1.11.15 arrives!!!  # HACK
-*
-* Called by code that calls 'signInWithCustomToken' (or 'signOut'), which (until the fix) doesn't really change the detected user.
-*/
-function onAuthStateChanged_HACK(user) {
-  authRef.value = user;    // null | { uid: ..., displayName?, photoURL? }
-}
 
 const isReadyProm = new Promise( (resolve /*,reject*/) => {
   const unsub = watchEffect(() => {
@@ -110,7 +101,5 @@ export {
   userRef2,
   getCurrentUserWarm,
   isReadyProm,
-  uidValidator,
-
-  onAuthStateChanged_HACK
+  uidValidator
 }

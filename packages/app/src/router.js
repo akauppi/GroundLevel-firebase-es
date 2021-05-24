@@ -15,9 +15,6 @@ const auth = getAuth();
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { onAuthStateChanged_HACK } from './user'
-import { users as localUsers } from '../local/users'
-
 // Pages
 //
 // Note: Static import is shorter and recommended [1]. However, also the dynamic 'await import('./pages/Some.vue')'
@@ -135,6 +132,8 @@ router.beforeResolve(async (to, from) => {
   // If not... need to have components ask for it when entered.
 
   if (LOCAL) {
+    // Import 'users' dynamically, so it doesn't get dragged to 'npm run build'
+    const localUsers = import('../local/users').then( mod => mod.users );
     let ret;
 
     if (needAuth) {
@@ -155,12 +154,6 @@ router.beforeResolve(async (to, from) => {
         await signInWithCustomToken( auth, JSON.stringify({ uid }) )
           .then( creds => {
             console.debug("Signed in as:", { creds });
-
-            // HACK:
-            //
-            // This code path is only used by 'dev:local', so we can spice up the user info from 'local/docs.js'.
-            //
-            onAuthStateChanged_HACK({ uid, ...(localUsers[uid] || {}) });
           })
           .catch( err => {
             console.error("Sign-in failed:", err);

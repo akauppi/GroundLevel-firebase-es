@@ -49,7 +49,7 @@
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
     "vue": "^3.0.11",
-    "vue-router": "^4.0.6"
+    "vue-router": "^4.0.8"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
@@ -57,15 +57,15 @@
     "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.2.2",
     "@vue/compiler-sfc": "^3.0.11",
-    "concurrently": "^6.0.2",
+    "concurrently": "^6.2.0",
     "cypress": "^7.1.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.9.0",
-    "prettier": "2.2.1",
+    "prettier": "2.3.0",
     "sass": "^1.32.11",
-    "vite": "^2.2.3",
+    "vite": "^2.3.3",
     "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {
