@@ -132,8 +132,6 @@ router.beforeResolve(async (to, from) => {
   // If not... need to have components ask for it when entered.
 
   if (LOCAL) {
-    // Import 'users' dynamically, so it doesn't get dragged to 'npm run build'
-    const localUsers = import('../local/users').then( mod => mod.users );
     let ret;
 
     if (needAuth) {
