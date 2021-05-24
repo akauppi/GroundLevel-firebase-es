@@ -52,6 +52,7 @@ stats.html
 
 # Builds itself
 /builds/
+/ci/
 
 # Documentation-like folders (irrelevant for build)
 #
@@ -68,6 +69,4 @@ stats.html
 *.tgz
 
 # Cruft
-/ops.#rework/
-/_Dear_/
-/_Waiting_/
+/_*/

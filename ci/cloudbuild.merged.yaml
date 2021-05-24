@@ -1,0 +1,71 @@
+#
+# builds/cloudbuild.merged.yaml
+#
+# Triggers:
+#   - new stuff is merged either to 'master' or 'staging' branch
+#
+# Responsibility:
+#   - runs tests (once more..) and
+#   - deploys the backend if any backend files changed
+#   - packages and deploys the front end if any 'app' or 'app-deploy-ops' files changed
+#
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
+#
+#   - env.variables (just some):
+#     PWD=/workspace
+#     HOME=/builder/home
+
+# tbd. How to know if we're aiming at 'master' or 'staging'?
+#   $BRANCH_NAME   <-- echo it
+
+substitutions:
+  _BUILDER_TAG: 9.11.0-node16-npm7
+
+# Non-DRY and verbose, since we cannot use '<<: &anchor' and '<<: *anchor' YAML syntax.. 💧😥
+#
+steps:
+# DEBUG
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: bash
+  args: ['-c', 'echo' '1: ${BRANCH_NAME} 2: ${$_HEAD_BRANCH} 3: ${$_BASE_BRANCH}']
+
+# Root install
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['install']
+
+# Backend
+#
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['install']
+  dir: packages/backend
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['test']
+  dir: packages/backend
+
+# tbd. If backend files changed, deploy it.
+
+# App
+#
+# tbd. See how much time it takes to download Cypress - should we use a pre-loaded image??
+#
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['install']
+  dir: packages/app
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['test']
+  dir: packages/app
+
+# tbd. If 'package/app' and/or 'package/app-deploy-ops' files changed, build and deploy the front end.
+
+# --- Timeout
+#
+# Local:        ...
+# Cloud Build:  ...
+#
+timeout: 240s

@@ -1,20 +1,12 @@
 # Developer notes
 
-## Hints 🤫
-
-Run at project root:
-
-```
-$ gcloud meta list-files-for-upload
-```
-
 
 ## `.gcloudignore`
 
 Cloud Build ignores the files in the *root*'s `.gitignore` automatically but:
 
 - it does not check the global `.gitignore`
-- it does not check `.gitignore`s in subdirectories (this one is not so fine)
+- it does not check `.gitignore`s in subdirectories
 
 For these reasons, the repo has its own `.gcloudignore`, to keep the transports small.
 
@@ -23,20 +15,18 @@ For these reasons, the repo has its own `.gcloudignore`, to keep the transports 
 
 Cloud Build uses Cloud Storage (of the same project) to store files. During the development of the repo, the buckets looked like this:
 
->![](.images/gcs-list.png)
+>![](.images/storage-list.png)
 
-The `groundlevel-160221_cloudbuild` is the important one for us.
+The `*_cloudbuild` bucket has a `source/` folder with `.tgz` packages.
 
-It has a `source/` folder with `.tgz` packages.
+>Note: These `.tgz` files are not big (~120 kB) but they do add up. You may want to wipe the folder, or set a lifecycle for it.
+>
+>(Please suggest the steps for adding the lifecycle, eg. retain for 30 days only. `#help`)
 
-If you have problems, check that the packaging is how you'd imagine it to be.
 
+## Build logs
 
-### Build logs
-
-One omission in the above screen capture is build logs.
-
-`gcloud builds submit --help` states that they should be stored (by default) in a bucket:
+`gcloud builds submit --help` states that build logs should be stored (by default) in a bucket:
 
 ```
 gs://[PROJECT_NUMBER].cloudbuild-logs.googleusercontent.com/
@@ -45,27 +35,12 @@ gs://[PROJECT_NUMBER].cloudbuild-logs.googleusercontent.com/
 >*tbd. Where can I see Cloud Build logs?*
 
 
-## Semi-cloud builds
-
-This command is a middle ground between the local build and Cloud Build. If the author understands right, it:
-
-- runs a Cloud Build run, triggered from the command line
-
-```
-$ gcloud builds submit ..
-```
-
-It's cheap for you to use. No Docker instances; just ~0.5MB upload to the cloud, and you see the console output in real time.
-
-Maybe useful.
-
-## Troubleshoot manually
+## Troubleshoot locally
 
 To launch a Docker container, similar to what `gcloud builds submit` does:
 
 ```
-# at project root
-$ docker run -it --volume `pwd`:/workspace eu.gcr.io/groundlevel-160221/firebase-custom-builder:latest /bin/bash
+$ docker run -it --volume `pwd`/..:/workspace gcr.io/groundlevel-160221/firebase-ci-builder:9.11.0-node16-npm7 /bin/bash
 bash-5.0#
 ```
 
@@ -85,7 +60,6 @@ You can now execute the build steps and debug, if something doesn't work right. 
 
 See -> [Viewing build results](https://cloud.google.com/build/docs/view-build-results) (Cloud Build docs)
 
->Note: You are able to transport build logs to Cloud Logging. Google has documentation on this; the author hasn't tried it yet. (please do and share the experiences!)
 
 ## Kaniko caching
 
