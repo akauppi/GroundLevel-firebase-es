@@ -4,6 +4,8 @@
 * From -> https://medium.com/@andrei.pfeiffer/jest-matching-objects-in-array-50fe2f4d6b98
 *   (but against a single object, not array)
 */
+import { expect } from '@jest/globals'
+
 expect.extend({
   toContainObject(received, argument) {
     const { printReceived, printExpected } = this.utils;

@@ -45,9 +45,11 @@ const initializedProm = (async () => {    // Promise of ()
   //    Never mind - we can get them here and pass on.
   //
   window.onerror = function (msg, source, lineNbr, colNbr, error) {
-    console.debug("onerror saw:", {msg, source, lineNbr, colNbr});    // DEBUG
+    console.debug("onerror saw:", {msg, source, lineNbr, colNbr, error});    // DEBUG
 
     //caught
+
+    throw new Error("tbd.!!! Something should be here!!");
   }
 
   // Load the web component for 'aside-keys' tag.
@@ -58,7 +60,8 @@ const initializedProm = (async () => {    // Promise of ()
   /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
     tr.lap('aside-keys initialization');    // 499..530ms
   }).catch(err => {
-    debugger;
+    console.error("'Aside-keys' did not initialize:", err);   // never seen
+    throw err;
   });
 
   // Initialize Vue App
@@ -73,7 +76,7 @@ const initializedProm = (async () => {    // Promise of ()
   /*await*/ router.isReady().then( _ => {
     tr.lap('Router initialization');
   }).catch( err => {
-    console.error("Router did not initialize:", err);
+    console.error("Router did not initialize:", err);   // never seen
     throw err;
   });
 

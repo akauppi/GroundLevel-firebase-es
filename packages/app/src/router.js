@@ -113,7 +113,7 @@ const router = createRouter({
 // See: Vue Router > Navigation Guards
 //    -> https://next.router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
 //
-router.beforeResolve(async (to, from) => {
+router.beforeResolve(async (to, _from) => {
   assert(to.path !== null);   // "/some"
 
   console.log(`router entering page: ${to.path}`);

@@ -40,6 +40,10 @@ steps:
   entrypoint: npm
   args: ['test']
   dir: packages/backend
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run lint']
+  dir: packages/backend
 
 # App
 #
@@ -56,6 +60,17 @@ steps:
 #  entrypoint: npm
 #  args: ['test']
 #  dir: packages/app
+
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run lint']
+  dir: packages/app
+
+# App-deploy-ops
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run lint']
+  dir: packages/app-deploy-ops
 
 # --- Timeout
 #

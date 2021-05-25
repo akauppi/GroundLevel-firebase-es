@@ -11,7 +11,7 @@ import { reportTrack } from '@ops/perf'
 
 import { assert } from '/@tools/assert.js'
 
-function fail(msg) { throw new Error(msg); }
+//function fail(msg) { throw new Error(msg); }
 
 const namesTaken = new Set();
 
@@ -38,7 +38,7 @@ function track(name) {    // (string) => { start }
   function start() {  // () => { lap, /*setAttribute,*/ end }
     stamps[0] = performance.now();   // "epoch in ms"
 
-    function lap(lapId) {   // (string?) => ()
+    function lap(/*lapId*/) {   // (string?) => ()    // tbd. should 'lapId' be used?
       const t = performance.now();
       stamps.push(t);
     }

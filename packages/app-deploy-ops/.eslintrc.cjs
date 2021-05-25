@@ -13,6 +13,7 @@ module.exports = {
     'eslint:recommended'
   ],
 
+  // Defaults for browser sources
   env: {
     browser: true,
     es6: true     // 'Promise'
@@ -40,12 +41,13 @@ module.exports = {
   },
 
   overrides: [
-    {   // general non-browser JS ('vite.config.js' etc.); not Node sources
-      files: ["*.js"],
+    {   // Config files; not Node sources
+      files: ["./*.js", "vite/**.js", "roll/**.js", "vite-and-roll/**.js"],
       extends: ['eslint:recommended'],
       env: {
       },
       globals: {
+        process: true
       }
     },
 
@@ -68,15 +70,6 @@ module.exports = {
       },
       globals: {
         module: true
-      }
-    },
-
-    {   // Browser code
-      files: ["src/*.js"],
-      env: {
-        browser: true
-      },
-      globals: {
       }
     }
   ]

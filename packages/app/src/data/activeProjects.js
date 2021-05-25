@@ -6,7 +6,6 @@
 * Used by:
 *   - Home
 */
-import { assert } from '/@tools/assert'
 import { collection, where } from '@firebase/firestore'
 
 import { db } from '/@firebase'

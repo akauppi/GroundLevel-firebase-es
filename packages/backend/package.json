@@ -16,6 +16,7 @@
   "scripts": {
     "test": "npm run ci",
     "ci": "npm run ci:seq",
+    "lint": "eslint .",
     "  ": "",
     "ci:seq": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_fns && npm run --silent _ci_rules\"",
     "_ci_fns": "npm run test:fns:all",

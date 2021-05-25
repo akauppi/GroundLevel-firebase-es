@@ -6,8 +6,6 @@
 * Used by:
 *   - Project page
 */
-import { assert } from '/@tools/assert'
-
 import { db } from '/@firebase'
 import { docRef } from '/@tools/listen.ref'
 import { doc, collection } from '@firebase/firestore'
