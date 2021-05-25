@@ -41,7 +41,7 @@ export default {
 
     //minify: true,
     sourcemap: true,
-    target: 'esnext',   // assumes native dynamic imports
+    target: 'esnext',   // assumes native dynamic imports (also default in Vite 2.3.x)
     //polyfillDynamicImport: false
 
     rollupOptions: {

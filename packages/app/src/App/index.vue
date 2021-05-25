@@ -20,7 +20,6 @@
   </main>
   <footer>
     <AppFooter />
-    <button id="errorBtn" v-on:click="makeError">Make error!</button>   <!-- tbd. to index.html -->
   </footer>
 </template>
 
@@ -47,13 +46,6 @@
     &:after {
       content: 'TEST MODE';
     }
-  }
-
-  #errorBtn {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    margin: 0.3em;
   }
 
   /* Theming the side panel
@@ -104,10 +96,6 @@
     throw err;
   } ***/
 
-  function makeError() {
-    throw new Error("Error for testing!");
-  }
-
   function setup() {
     onMounted(() => {
       console.log("Houston, App is mounted");
@@ -132,8 +120,7 @@
     return {
       user: userRef2,
       LOCAL,
-      TESTING,
-      makeError
+      TESTING
     }
   }
 

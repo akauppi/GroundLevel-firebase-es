@@ -69,9 +69,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
   // Importing anything from the app side must be done dynamically.
   //
   if (true) {
-    const piggy1 = await import('/@/user.js').then( mod => mod.onAuthStateChanged_HACK );
-
-    window["Let's test!"] = [auth,piggy1];   // [FirebaseAuth,...]
+    window["Let's test!"] = [auth];   // [FirebaseAuth]
   }
 }
 

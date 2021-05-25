@@ -83,6 +83,13 @@
       body {
         margin: 0;
       }*/
+
+      #errorBtn {
+        position: fixed;
+        bottom: 0;
+        right: 2em;
+        margin: 0.3em;
+      }
     </style>
 
   </head>
@@ -90,5 +97,7 @@
   <body>
     <div id="fatal"></div>
     <div id="app"></div>
+
+    <button id="errorBtn" onclick="throw new Error('you pushed me!');">Make error!</button>
   </body>
 </html>

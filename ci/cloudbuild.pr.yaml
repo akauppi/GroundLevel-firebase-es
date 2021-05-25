@@ -60,6 +60,6 @@ steps:
 # --- Timeout
 #
 # Local:        ...
-# Cloud Build:  ...
+# Cloud Build:  2m58s (Cypress tests skipped)
 #
 timeout: 240s
