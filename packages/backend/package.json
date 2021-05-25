@@ -50,9 +50,8 @@
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.3-alpha.3",
-    "jest": "^27.0.0-next.11",
-    "jest-circus": "^27.0.0-next.11"
+    "firebase-jest-testing": "^0.0.3-beta.2",
+    "jest": "^27.0.1"
   },
   "//comments": {
     "engines.node": [
