@@ -12,56 +12,56 @@ import './matchers/toContainObject'
 
 describe("userInfo shadowing", () => {
 
-  // During execution of the tests, collect changes to 'projects/1/userInfo/{uid}' here:
-  //
-  const shadow = new Map();   // { <uid>: { ... } }
-
-  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
   test('Central user information is distributed to a project where the user is a member', async () => {
     const william = {
       displayName: "William D.",
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"
     };
 
-    // Listen to the shadow doc
-    //
-    const changedProm = waitForNextChange( db.doc("projects/1/userInfo/abc") );   // document contents, once changed
-
     // Write in 'userInfo' -> causes Cloud Function to update 'projectC/{project-id}/userInfo/{uid}' -> resolves the Promise
     //
-    await db.collection("userInfo").doc("abc").set(william);
+    const changedProm = waitForNextChange( db.doc("projects/1/userInfo/abc"),   // Promise of { ...changed doc... }
+      _ => db.collection("userInfo").doc("abc").set(william)    // trigger
+    );
 
     await expect(changedProm).resolves.toContainObject(william);
   });    // 270, 268 ms
 
-  test.skip('Central user information is not distributed to a project where the user is not a member', async () => {
+  test('Central user information is not distributed to a project where the user is not a member', async () => {
 
     // Write in central -> should NOT turn up
     //
-    await db.collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" });
+    const prom = waitForNextChange( db.doc("projects/1/userInfo/xyz"),
+      _ => db.collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" }),   // trigger
+      390, null
+    );
 
-    await sleep(200).then( _ => expect( shadow.keys() ).not.toContain("xyz") );    // should pass
+    await expect(prom).resolves.toBe(null);
 
-  }, 500 /*ms*/ );
+    // ideally:
+    //await expect(prom).not.toComplete;
+
+  }, 400 /*ms*/ );
 });
 
 /*
-* Observe the given document
+* Observe a given document, with an optional timeout
 *
-* Resolves:
+* Resolves with:
 *   - when the document changes the next time, with its contents as the value
+*   - 'undefined' if the change removes the document (RESERVED; NOT TESTED)
+*   - 'timeoutValue' if timed out and a specific value given (default: 'undefined')
 *
 * Note: This only checks for the next change. If you want, a predicate parameter can be added, to make it work as
-*     eventual check (i.e. resolves only if the predicate becomes true, at some point before timeout).
+*     eventuality check (i.e. resolves only if the predicate becomes true, at some point before timeout).
 */
-function waitForNextChange(docRef) {   // (documentRef) => Promise of { ..document from 'docPath'.. }
-  return new Promise( (resolve) => {
-    let count=0;
+async function waitForNextChange(docRef, trigger, timeout, timeoutValue) {   // (documentRef, _ => Promise of any, ms?, any?) => Promise of { ..document from 'docPath'.. }
+  const ret = new Promise( (resolve) => {
+    let skip= true;
 
     const unsub = docRef.onSnapshot(dss => {
-      if (count === 0) {    // initial value; not interested
-        count = count+1;
+      if (skip) {    // initial value; not interested
+        skip = false;
         return;
       }
 
@@ -69,5 +69,20 @@ function waitForNextChange(docRef) {   // (documentRef) => Promise of { ..docume
       unsub();
       resolve(data);
     });
-  })
+
+    // We can implement a timeout within the Promise easier than from the outside (Jest doesn't seem to be able to
+    // kill dangling promises properly).
+    //
+    if (timeout) {
+      setTimeout(_ => {
+        unsub();
+        resolve(timeoutValue);
+      }, timeout);
+    }
+  });
+
+  /*await*/ trigger();
+  return ret;
 }
+
+//REMOVE? const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
