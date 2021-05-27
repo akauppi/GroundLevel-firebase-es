@@ -36,6 +36,9 @@ const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 
 admin.initializeApp();
 
+// Under emulation, run as the default region (makes testing simpler).
+// In production, the region is brought via Cloud Function configuration.
+//
 // To have your Functions work, if you chose *ANY* other location than 'us-central1', you need to mention the region
 // in CODE (that's against good principles of programming; this should be a CONFIGURATION!!!)
 //
@@ -62,12 +65,12 @@ exports.cloudLoggingProxy_v0 = regionalFunctions
   });
 
 
-//--- TRASH THE END at #rework ---
-/*** #rework tbd. Tie to authentication, instead
 // UserInfo shadowing
 //
 // Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
 // renewed user info.
+//
+// tbd. Needs #rework
 //
 exports.userInfoShadow_2 = regionalFunctions.firestore
   .document('/userInfo/{uid}')
@@ -109,13 +112,12 @@ exports.userInfoShadow_2 = regionalFunctions.firestore
     }
   });
 
+/** tbd. likely not doing it so. Could track all changes to '.members'. If a uid is removed, remove the data
+ *     immediately also from 'userInfo'. Or... the removal of a user can do that. :)
 // UserInfo cleanup
 //
 // Occasionally, see if there are projects where users have left, but their userInfo sticks around.
 //
-/_** tbd. likely not doing it so. Could track all changes to '.members'. If a uid is removed, remove the data
-*     immediately also from 'userInfo'. Or... the removal of a user can do that. :)
-*
 exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // tbd. syntax?
   .onRun( async context => {
 
@@ -130,6 +132,5 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
 
      ***_/
   })
-*_/
-***/
+*/
 
