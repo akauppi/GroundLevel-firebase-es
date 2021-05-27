@@ -60,8 +60,8 @@
     "concurrently": "^6.2.0",
     "cypress": "^7.1.0",
     "eslint": "file:../../node_modules/eslint",
+    "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
     "eslint-plugin-cypress": "^2.11.3",
-    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^7.9.0",
     "prettier": "2.3.0",
     "sass": "^1.32.11",
@@ -90,7 +90,7 @@
       ]
     },
     "engines": [
-      "'>=14.3' for '—-harmony-top-level-await'",
+      "'>=14.3' for '—-harmony-top-level-await' (flag not needed in 16)",
       "'>=13.2' for ES module support",
       "'--experimental-json-modules' seems to be available for Node 12"
     ],

@@ -3,6 +3,9 @@
 *
 * Print messages from browser to the console log.
 *
+* A development level capture of the 'central' logging. There is no benefit in burdening the cloud with these; better
+* to show them locally.
+*
 * Usage:
 *   <<
 *     $ PORT=8080 node tools/printout.js
@@ -117,8 +120,10 @@ http.createServer( (req, res) => {
       });
     }
 
-  } else if (req.method === 'HEAD') {    // good manners to respond to both 'HEAD' and 'GET', alike
-    res.write("OK");
+  } else if (req.method === 'GET') {    // used by 'wait-for' to check when we are up
+    res.write("OK\n");
+    res.end();
+  } else if (req.method === 'HEAD') {    // good manners to respond to both 'HEAD' and 'GET', from same path
     res.end();
   }
 })

@@ -49,8 +49,11 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const firestore = getFirestore();
   const auth = getAuth();
 
-  // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
-  // takes parameters (that it doesn't, on other subpackages). #firebase
+  // If you use a region when Cloud Functions are emulated, set it here.
+  //
+  // Firebase API inconsistency (9.0-beta.1):
+  //    For some reason, there is no 'initializeFunctions' but the 'getFunctions' takes parameters (which it doesn't,
+  //    on other subpackages). #firebase
   //
   const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
 
@@ -68,9 +71,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
   //
   // Importing anything from the app side must be done dynamically.
   //
-  if (true) {
-    window["Let's test!"] = [auth];   // [FirebaseAuth]
-  }
+  window["Let's test!"] = [auth];   // [FirebaseAuth]
 }
 
 function initFirebaseOnline() {

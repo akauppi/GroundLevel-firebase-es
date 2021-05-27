@@ -51,16 +51,17 @@ module.exports = {
       }
     },
 
-    /***
     {   // run under node (ES modules sources)
-      files: ["local/*.js"],
+      files: ["tools/*.js"],
       extends: ['plugin:node/recommended'],
       env: {
         node: true
       },
-      globals: {}
+      globals: {},
+      parserOptions: {
+        sourceType: "module"
+      }
     },
-    ***/
 
     // cjs build files (including this one)
     {
@@ -70,6 +71,16 @@ module.exports = {
       },
       globals: {
         module: true
+      }
+    },
+
+    // files with 'process.env.' injection
+    {
+      files: ["adapters/**.js"],
+      globals: {
+        process: {
+          env: true
+        }
       }
     }
   ]

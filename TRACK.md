@@ -35,13 +35,20 @@ Likely the author has managed to mess up its configuration?=
 
 >Although the listed SDK versions enable Performance Monitoring to process your collected data in near real time, the Firebase console does not yet display your data in near real time.
 
-- [ ] When will it?  
-- [ ] How to know when "near real time" is enabled?
+- [x] Did come
+- [ ] gather experience
 
 
-## Firebase SDK: peer dependency warnings
+## ES Lint: Top-level-await support
 
-- [peerDependency warnings when installed with yarn@1/npm@7](https://github.com/firebase/firebase-js-sdk/issues/4789)
+Anything needs to be "stage 4", for ES Lint to touch it. TLA is stage 3, though stable (and not behind flags) in Node.js 16.
 
-- [ ] Once 9.0.0-beta.2 is out, check whether this still occurs. If it does, comment and try to get reopened (the issue was about 8 API, so not sure if they applied change to 9.x).
+- tc39/[proposal-top-level-await](https://github.com/eslint/eslint/issues/13178)
+- [Enable Top Level Await](https://github.com/eslint/eslint/issues/13178)
+
+  Though those are closed, it doesn't mean top-level-await support is there. It's not, unless one uses Babel parser.
+  
+- [ ] Check when the [proposal](https://github.com/tc39/proposal-top-level-await) reaches Stage 4. 
+
+>This means there's bleed on `await` when we use it at top level. Nothing more.
 

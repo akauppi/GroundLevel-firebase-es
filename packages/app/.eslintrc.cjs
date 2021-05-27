@@ -79,12 +79,14 @@ module.exports = {
     },
 
     {   // run under node (ES modules sources)
-      files: ["local/*.js"],
+      files: ["local/*.js", "tools/*.js"],
       extends: ['plugin:node/recommended'],
       env: {
         node: true
       },
-      globals: {}
+      globals: {
+        Buffer: true
+      }
     },
 
     // We use "top level await" in some node js files. Unfortunately, cannot tell ESLint to understand them, since

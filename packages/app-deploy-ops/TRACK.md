@@ -8,3 +8,6 @@
 
 i.e. with Firefox and Safari one needs to transpile modules
 
+>NOTE: 
+>
+>This is *not* according to our practical evidence. Safari nor Firefox needed the IIFE build.

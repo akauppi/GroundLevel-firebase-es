@@ -54,27 +54,35 @@ const plugins = [
                                       // tbd. is there a way to dedupe *any* Rollup packages?
   }),
 
+  // Inject build-time knowledge to the sources, at some places.
+  //
+  // NOTE: The replaced strings _must_ begin with 'process.env.' (or '__...'); otherwise the plugin quietly leaves them
+  //    unchanged!
+  //
   replace({
-    'env.PROXY_WORKER_HASH': () => {    // () => string
-      const arr= loggingAdapterProxyHashes;
-      assert(arr && arr[0], "Worker hash (ESM) not available, yet!");
-      return JSON.stringify(arr);
+    include: ['adapters/cloudLogging/proxy.js'],
+    values: {
+      'process.env.PROXY_WORKER_HASH': () => {    // () => string
+        const arr = loggingAdapterProxyHashes;
+        assert(arr && arr[0], "Worker hash (ESM) not available, yet!");
+        return JSON.stringify(arr);
+      },
+      /*'process.env.PROXY_WORKER_HASH_IIFE': () => {    // () => string
+        const arr= loggingAdapterProxyHashes;
+        assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
+        return JSON.stringify(arr);
+      }*/
     },
-    /*'env.PROXY_WORKER_HASH_IIFE': () => {    // () => string
-      const arr= loggingAdapterProxyHashes;
-      assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
-      return JSON.stringify(arr);
-    },*/
 
-    // Mitigate warning (Rollup 2.45.2):
+    // Mitigate warning (@rollup/plugin-replace 2.4.2):
     //  <<
     //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
     //  <<
-    preventAssignment: true
+    preventAssignment: true   // likely not needed with plugin 2.5.x
   }),
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
-  !watch && terser(),
+  //TEMP disabled: !watch && terser(),
 
   tunnelPlugin(templateHtml, targetHtml),
 
