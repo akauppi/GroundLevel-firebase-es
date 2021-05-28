@@ -76,11 +76,9 @@ module.exports = {
 
     // files with 'process.env.' injection
     {
-      files: ["adapters/**.js"],
+      files: ["adapters/**/*.js"],
       globals: {
-        process: {
-          env: true
-        }
+        process: true
       }
     }
   ]

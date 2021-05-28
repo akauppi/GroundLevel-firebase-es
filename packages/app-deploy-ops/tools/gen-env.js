@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
-* tools/gen-env-js.js
+* tools/gen-env.js
 *
 * Usage:
 *   <<
@@ -9,7 +9,7 @@
 *   <<
 *
 * Writes the access values for the active Firebase project for browser consumption, as an ES module that can be
-* 'import'ed to the sources.
+* imported to the sources.
 *
 * Output to stdout.
 *
@@ -34,6 +34,10 @@ function execProm(cmd) {    // string => Promise of { stdout: string, stderr: st
 }
 
 // Get access values of the active Firebase project (fail when no active project).
+//
+// PERFORMANCE:
+//    Running the command takes 5..6s (macOS; firebase-tools 9.12.0). We can likely make our own tool that fetches
+//    these in a blink, from '~/.config/configstore/firebase-tools.json'. tbd.
 //
 const cmd = 'npx firebase-tools apps:sdkconfig';
 

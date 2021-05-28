@@ -23,7 +23,7 @@
     "hosting.rewrites": [
       "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing sourcemaps, scripts etc. should show as 404.",
       "",
-      "tbd. Test this by:",
+      "Test this (manually) by:",
       "  /common.css -> 200",
       "  /nosuch.js -> 404",
       "  /some -> 200 (index.html)",
