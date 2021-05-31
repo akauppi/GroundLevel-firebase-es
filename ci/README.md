@@ -38,7 +38,7 @@ For merge to `master`:
 
 - Docker
 
-   Needed for building the builder image, and for local builds with `cloud-build-local`.
+   Needed for building the builder image.
 
 ## See what is going out
 
@@ -47,22 +47,6 @@ $ gcloud meta list-files-for-upload ..
 ```
 
 This set of files is controlled by `.gcloudignore` in the project root.
-
-
-## <strike>Run CI locally
-
-```
-$ gcloud components install cloud-build-local
-```
-
-Make sure Docker is running.
-
-```
-$ cloud-build-local -dryrun=false --config=cloudbuild.pr.yaml ..
-```
-
-</strike>
-><font color=red>BROKEN! Gives error 1, see `KNOWN.md`</font>
 
 
 ## Build the Builder
@@ -85,6 +69,15 @@ You need this, in order to create Cloud Build triggers on GitHub PRs:
 - In [GitHub Marketplace](https://github.com/marketplace), enable the "Google Cloud Build" application
 - Add your GitHub repo to the Cloud Build app
 
+
+### Enable `Cloud Build API` 
+
+- [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
+- `+ Enable APIs and Services`
+- Search for: `Cloud Build`
+- `Enable`
+
+*Without this, you might get into problems, later. Instructions normally don't mention this step.*
 
 <!-- Q: is this needed?
 ### Set your `gcloud` project
