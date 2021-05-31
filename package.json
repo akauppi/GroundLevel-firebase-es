@@ -2,7 +2,7 @@
   "name": "@local/root",
   "private": true,
   "scripts": {
-    "activate": "firebase use --add && tools/spread-activation.sh",
+    "activate": "firebase use --add && sh/spread-activation.sh",
     "--": "",
     "no": "npm run -s _no0 && npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no0": "npm --prefix tools outdated",
@@ -18,8 +18,10 @@
   "devDependencies": {
     "eslint": "^7.27.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.0.0-beta.2",
-    "firebase-tools": "^9.12.0"
+    "firebase": "^9.0.0-beta.2"
+  },
+  "//devDependencies": {
+    "//firebase-tools": "^9.12.0"
   },
   "//": {
     "": [

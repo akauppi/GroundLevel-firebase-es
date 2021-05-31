@@ -20,7 +20,7 @@ if (!projectId) {
 
 const firebaseJson = "./firebase.json";
 
-/* Firebase 9.0.0.beta-1 'getAuth' seems broken. Gives us this ('initializeAuth' works):    #unreported
+/* Firebase 9.0.0.beta-2 'getAuth' seems broken. Gives us this ('initializeAuth' works):    #unreported
 *
 *  <<
 *   [init] Creating users...
@@ -73,7 +73,7 @@ async function main(docsFn, usersFn) {
   });
 
   const auth = !getAuth_WORK_AROUND ? getAuth()   // should work, right?
-    : initializeAuth(fah);   // use this; 'getAuth()' gives an error ('firebase' 9.0.0-beta.1)
+    : initializeAuth(fah);   // use this; 'getAuth()' gives an error ('firebase' 9.0.0-beta.[1..2])
 
   const db = getFirestore();
 

@@ -6,3 +6,6 @@
 
 # Note: Depending on your team's work habits, you might want to keep it in version control.
 /**/.firebaserc
+
+# Remove this line, to have config in GitHub (it's not, because this is a template)
+/config.online.js

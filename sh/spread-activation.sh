@@ -16,7 +16,7 @@ set -eu -o pipefail
 #
 # Usage:
 #   <<
-#     $ tools/spread-activation.sh
+#     $ sh/spread-activation.sh
 #   <<
 #
 #if [ $# -eq 0 ]; then

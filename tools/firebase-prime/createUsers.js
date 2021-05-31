@@ -1,13 +1,11 @@
 /*
 * firebase-prime/createUsers.js
 *
-* Create the provided users to the Firebase emulator, using a Firebase client library (and '{ uid: "owner" }' trick).
+* Create the provided users to the Firebase emulator.
 */
-import { signInWithCustomToken, updateProfile } from '@firebase/auth'
+import { signInWithCustomToken, updateProfile, getAuth } from '@firebase/auth'
 
-// NOTE: Firebase 9.0.0-beta.1 'getAuth' seems broken, so we need to pass 'auth_WORK_AROUND' down here.
-//
-async function createUsers(auth /*WORK AROUND*/, users) {    // ({ <uid>: { displayName: string, photoURL: string } }) => Promise of ()
+async function createUsers(auth, users) {    // (FirebaseAuth, { <uid>: { displayName: string, photoURL: string } }) => Promise of ()
 
   // The thinking is.. we don't need to create the user, just sign in and add the profile data.
 
