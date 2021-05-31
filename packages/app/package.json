@@ -36,11 +36,10 @@
     "  - ": "",
     "prebuild": "npm run --silent _checkNoLinks",
     "predev:local": "port-is-free 3000,5002 && npm run --silent _genEnvLocal",
-    "predev:online": "port-is-free 3001 && npm run --silent _genEnvOnline",
+    "predev:online": "port-is-free 3001 && npm run --silent _checkOnline",
     "_checkNoLinks": "tools/check-no-links.sh || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; exit 8)",
-    "_genEnvLocal": "node --harmony-top-level-await --experimental-json-modules tools/gen-vite-env-local.js firebase.json > vitebox/.env.dev_local",
-    "_genEnvOnline": "node --harmony-top-level-await tools/gen-vite-env-online.js > vitebox/.env.development",
-    "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
+    "_checkOnline": "[[ -f .firebase.online.js ]] || ( >&2 echo \"ERROR: '.firebase.online.js' file is missing; see 'README.md' on how to create one.\n\"; exit 7)",
+    "_genEnvLocal": "node --harmony-top-level-await --experimental-json-modules tools/gen-vite-env-local.js firebase.json > vitebox/.env.dev_local"
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",

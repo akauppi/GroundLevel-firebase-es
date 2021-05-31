@@ -74,15 +74,14 @@ async function initFirebaseLocal() {   // () => Promise of ()
   window["Let's test!"] = [auth];   // [FirebaseAuth]
 }
 
-function initFirebaseOnline() {
-  assert(!LOCAL);
+/*
+* Running against an online project (staging or production); access values from '.firebase.online.js'.
+*/
+async function initFirebaseOnline() {
+  const { apiKey, appId, authDomain, projectId } = await import('../../.firebase.online.js').then( mod => mod.default );
+    //
+    // appId needed for Firebase Performance Monitoring (only)
 
-  const [ apiKey, appId, authDomain, projectId ] = [
-    import.meta.env.VITE_API_KEY,
-    import.meta.env.VITE_APP_ID,    // needed for Firebase Performance Monitoring
-    import.meta.env.VITE_AUTH_DOMAIN,
-    import.meta.env.VITE_PROJECT_ID
-  ]
   assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 
   initializeApp( { apiKey, appId, authDomain, projectId } );
@@ -92,7 +91,7 @@ function initFirebaseOnline() {
   if (LOCAL) {
     await initFirebaseLocal();
   } else {
-    initFirebaseOnline();
+    await initFirebaseOnline();
   }
 
   const { initializedProm } = await import('/@/app.js');

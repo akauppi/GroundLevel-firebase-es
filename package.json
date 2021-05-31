@@ -2,8 +2,6 @@
   "name": "@local/root",
   "private": true,
   "scripts": {
-    "activate": "firebase use --add && sh/spread-activation.sh",
-    "--": "",
     "no": "npm run -s _no0 && npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no0": "npm --prefix tools outdated",
     "_no1": "npm --prefix packages/app outdated",
