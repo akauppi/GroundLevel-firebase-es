@@ -4,7 +4,6 @@
   "type": "module",
   "bin": {
     "abc": "./abc.sh",
-    "check-activation": "./check-activation.sh",
     "port-is-free": "./port-is-free.sh",
     "wait-for": "./wait-for.js"
   },

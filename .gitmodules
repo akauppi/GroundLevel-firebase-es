@@ -1,3 +1,6 @@
 [submodule "builds/firebase-custom-builder"]
 	path = builds.delme/firebase-custom-builder
 	url = git@github.com:akauppi/firebase-custom-builder.git
+[submodule "firebase-ci-builder"]
+	path = firebase-ci-builder
+	url = git@github.com:akauppi/firebase-ci-builder.git

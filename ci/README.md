@@ -74,10 +74,12 @@ You need this, in order to create Cloud Build triggers on GitHub PRs:
 
 - [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
 - `+ Enable APIs and Services`
-- Search for: `Cloud Build`
-- `Enable`
 
-*Without this, you might get into problems, later. Instructions normally don't mention this step.*
+   ![](.images/enable-apis-and-services.png)
+
+- `Cloud Build` > `Enable`
+
+*Without this, you might get into problems, later. Google's instructions  did not mention this step, for some reason.*
 
 <!-- Q: is this needed?
 ### Set your `gcloud` project

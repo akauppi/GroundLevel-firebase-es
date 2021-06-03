@@ -31,7 +31,7 @@ const url = `http://localhost:${port}`;
 
 //console.log('Waiting for GET to succeed (2xx) on:', url);
 
-const POLL_INTERVAL_MS = 400;
+const POLL_INTERVAL_MS = 300;
 
 function areWeThereYet() {
   fetch(url).then( res => {
@@ -44,12 +44,16 @@ function areWeThereYet() {
 
   }).catch( err => {    // FetchError => ()
 
-    if (err.code === 'ECONNREFUSED') {    // port not open (yet); "FetchError: request to http://localhost:3001/ failed, reason: connect ECONNREFUSED 127.0.0.1:3001"
+    if (err.code === 'ECONNREFUSED') {    // port not open (yet)
+      setTimeout(areWeThereYet, POLL_INTERVAL_MS);
+
+    } else if (err.code === 'ECONNRESET') {   // "request to http://localhost:4000/ failed, reason: socket hang up" (type: 'system'; errno: 'ECONNRESET', code: 'ECONNRESET')
+      // This came when Firebase is running under Docker, and getting ready for action (but not quite, yet..)
       setTimeout(areWeThereYet, POLL_INTERVAL_MS);
 
     } else {
       console.error("Unexpected error:", err);
-      // keep trying...
+      process.exit(-9);   // better to fail (and exit also the 'npm' command)
     }
   })
 }

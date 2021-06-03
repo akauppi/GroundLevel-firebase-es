@@ -9,24 +9,16 @@ import { initializeApp } from '@firebase/app'
 
 import './catch'
 
-import { API_KEY, APP_ID, PROJECT_ID, AUTH_DOMAIN, LOCATION_ID } from '../.env.js'
-
-const opts = {
-  apiKey: API_KEY,
-  appId: APP_ID,
-  projectId: PROJECT_ID,
-  authDomain: AUTH_DOMAIN,
-
-  // 'locationId' is not needed by Firebase itself, but is now available to code that uses 'httpsCallables' (eg. adapters),
-  // via 'getApp()'.
-  locationId: LOCATION_ID
-};
+import { default as config } from '/@env'
 
 const t0 = performance.now();   // start ⏱
 
 // Others can use 'getApp()' to get a handle
 //
-initializeApp(opts);
+// Note: 'locationId' is not needed (or recognized!) by Firebase itself, but is anyways passed to 'httpsCallables'
+//      (eg. adapters), via 'getApp()'.
+//
+initializeApp(config);
 
 // tbd. Find a way to differentiate between:
 //    - running in a developer's machine ('npm run serve')

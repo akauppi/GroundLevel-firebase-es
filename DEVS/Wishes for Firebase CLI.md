@@ -319,13 +319,18 @@ That 2.4 seconds means I might not want to keep a project check in the `package.
 
 Not sure where it spends the time.
 
+>This has been reported, and Firebase are looking into it (`gcloud --version` is 2x faster than `firebase --version`). 
 
+>*Less of interest since we don't deal with an active Firebase project, any more (though CI runs will benefit).*
+
+
+<!-- Irrelevant, when going the Docker (no activation) way.
 ## Using `firebase use` in a monorepo
 
 Currently (`firebase` CLI 9.8.0), the activation of a project is per directory.
 
 How could we make it so that the folders `packages/*` each can use the same project, without the person needing to `firebase use --add` three times?
-
+-->
 
 ## Firebase Hosting Emulator: does it support `HEAD`?
 
@@ -360,4 +365,47 @@ Content-Length: 0
 ```
 
 This is when the same `http://localhost:3000` returns 200 for `GET`.
+
+
+## Cloud Functions (or Firestore) emulator: doesn't warm up at launch
+
+**Expected**
+
+Just launching emulators would provide consistent performance, as if the functions are warmed up.
+
+**Actual**
+
+In running the backend tests, tests dealing with Cloud Functions take considerably longer on the first run (run under Docker):
+
+```
+[test-fns]   userInfo shadowing
+[test-fns]     ✓ Central user information is distributed to a project where the user is a member (6395 ms)
+...
+[test-fns]   Can proxy application logs
+[test-fns]     ✓ good log entries (3040 ms)
+```
+
+vs. subsequent runs:
+
+```
+[test-fns]   userInfo shadowing
+[test-fns]     ✓ Central user information is distributed to a project where the user is a member (313 ms)
+...
+[test-fns]   Can proxy application logs
+[test-fns]     ✓ good log entries (112 ms)
+```
+
+- 20 and 27 times more
+
+**Why this matters**
+
+If the user is instructed to launch a backend server in a separate window, it would be reasonable to presume full and consistent behaviour from such launch onwards.
+
+This is not the case.
+
+While it makes sense in the cloud that Cloud Functions need to be warmed up, there is no benefit from this under emulation. The request is that the emulators be changed so that the "subsequent" (lesser) timings start instantly (or, at the least, some 5..10 seconds after) the server has started.
+
+---
+
+- [ ] Report to Firebase `#contribute`
 

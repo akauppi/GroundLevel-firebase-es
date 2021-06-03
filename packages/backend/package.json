@@ -42,16 +42,14 @@
     " -- -": "",
     "prepare": "npm --prefix functions install",
     " -- - ": "",
-    "//": "firebase --version",
-    "//predeploy": "npm run --silent _checkActivation",
-    "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at project root.\n\"; exit 1)"
+    "//": "firebase --version"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.3-beta.2",
-    "jest": "^27.0.1"
+    "jest": "^27.0.3"
   },
   "//comments": {
     "engines.node": [
@@ -64,11 +62,6 @@
       "",
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
-    "devDependencies": {
-      "NOT having firebase-tools": [
-        "It seems to get detected from the project root (npm 7.11.2, node 16.0.0). That's brilliant! Is it documented??"
-      ]
-    },
     "scripts": {
       "//preinstall": [
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",

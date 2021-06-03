@@ -19,9 +19,9 @@ Responsible for:
 
 <!-- 
 developed with:
-- macOS 11.2
-- node 15.x
-- npm 7.9.x
+- macOS 11.4
+- node 16.x
+- npm 7.x
 -->
 
 ## Getting started

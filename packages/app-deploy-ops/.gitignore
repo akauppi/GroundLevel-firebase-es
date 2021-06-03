@@ -15,3 +15,6 @@
 
 # temp files
 /firebase-debug.log
+
+# remove this line if you wish to have the setting in version control
+/.firebase.online.js
