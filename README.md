@@ -15,19 +15,15 @@
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 - covers all the way to deployment (CI/CD) and operations
 
-<!-- (after "great tools", but it's waporware)
-- buildable with [Jailed!](https://github.com/akauppi/Jailed); no need to expose one's development maching to all those `npm` dependencies
--->
-
 <br clear=all />
 
+<!-- maybe better without..?
 ><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think ["Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe *post-modern* is the appropriate term for this repo.
-
-[painting]
+-->
 
 This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making web applications in the 2020's can be, when modern tools and techniques are used.
 
-The repo showcases a full, social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. In fact, you can see it as course material for modern web development, if you want.
+The repo showcases a full, social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. You can also see it as course material for modern web development (see [Training](TRAINING.md) for courses).
 
 ## Pre-requisites and tools
 
@@ -38,26 +34,27 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `node` v. 14.3 or later
    - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
-   - Java Runtime Environment (JRE) -- SE 8 or later
+   - Docker
 
-  <!-- tbd. update above list of command line tools (it's not complete)
-  --> 
+  Docker is used for launching the Firebase Emulators, which are used both in development, testing and CI. Alternatively, one can install the `firebase-tools` CLI on one's machine.
+  
+  For Windows development, we require the [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) environment with eg. Ubuntu LTS.[^1]
 
-  For Windows development, we recommend the [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) environment with eg. Ubuntu LTS.
+[^1]: Also Docker Desktop requires WSL2 to be installed.
 
 - **A capable IDE**
 
   An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are two suggestions:
   
   - [Visual Studio Code](https://code.visualstudio.com) - free
-  - [WebStorm](https://www.jetbrains.com/webstorm/) - free 30 days trial, then € 59 / 47 / 35 /year - worth it!!
+  - [WebStorm](https://www.jetbrains.com/webstorm/) - free 30 days trial, then € 59 / 47 / 35 /year
 
 - **Basic Knowledge** of:
   - HTML
   - JavaScript
   - CSS
 
-  We use the EcmaScript 6 (and 2018) features in the code, where-ever possible. Meaning no `var`, no `this` 😡, yes Promises and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
+  We use the ECMAScript 6 (up to ES2018) features in the code, where-ever possible. Meaning no `var`, no `this` 😡, yes Promises and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
 
   >Hint: [MDN resources](https://developer.mozilla.org) are a great place to learn the basics, and advanced material alike. Eg. [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) You might even have it in your native language! Check the ![Change language](.images/mdn-change-language.png) button.
 
@@ -67,23 +64,9 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   
   This might not be that bad.
   
-  - you can still play with the emulators even completely without a Firebase account
-  - if your application doesn't need Cloud Functions, remove those code and deploy.
-  - even if you use Cloud Functions, chances are *there are not actual costs* since the Firebase free tiers apply to the "Blaze" plan as well.
-
-  For more information: [Firebase pricing](https://firebase.google.com/pricing)
-
-- A **decent resolution screen** or two. 
-
-  In web development, this should not be overlooked. If you need to work on a low-resolution laptop screen (most PCs!), consider adding an external monitor.
-  
-  You will need to leave things like backend monitoring open while doing development. And it's often best to be able to view 2-3 files, *at once* in one's IDE. The more pixels you have, the better. Having more pixel real estate [has been shown](https://insights.samsung.com/2019/12/05/pushing-productivity-with-pixels-why-monitor-resolution-matters/) to have a direct correlation with productivity.
-
-  The author is pleased with a single LG UltraFine 4K monitor.
-
-## Additional material
-
-The [wiki](https://github.com/akauppi/GroundLevel-firebase-es/wiki) has supporting matterial on setting up the development environment, or teaching deeper knowledge. Wiki material is localized, unlike the repo.
+  - you can still play with the emulators completely without a Firebase account
+  - if your application doesn't need Cloud Functions, remove them and deploy
+  - even if you use Cloud Functions, chances are *there aren't actual costs* since the Firebase free tiers apply to the "Blaze" plan as well.
 
 
 ## Firebase
@@ -92,7 +75,7 @@ The [wiki](https://github.com/akauppi/GroundLevel-firebase-es/wiki) has supporti
 
 This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, database, background functions, performance monitoring.
 
-Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API / GraphQL world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
+Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
 
 >![](.images/backend-vs-firebase.png)
 
@@ -100,7 +83,11 @@ Firebase allows a mere mortal to create fully functional cloud-based application
 
 There are similar offerings from other companies, but they are a year or two behind, in the ease of use, based on the author's opinion.
 
->Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun. It's recommended to check those out in parallel with this repo.
+>*This field is changing, though. [AWS Amplify](https://aws.amazon.com/amplify/?nc=sn&loc=0) offers a similar, but less tightly knit solution, based on GraphQL. [Supabase](http://supabase.io/) directly claims to be a Firebase alternative, based on PostgreSQL and an open source approach.*
+
+<p />
+
+>Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun (Youtube, especially!). It's recommended to check those out in parallel with this repo.
 
 
 ## Google Cloud
@@ -113,18 +100,27 @@ You'll be instructed about Google Cloud where necessary, and both of the above m
 
 ## Requirements
 
-As global tools, you will need:
-
-- `npm`
-- `bash`
-
 We aim to support development on:
 
-- Any Linux
+- Latest macOS version
 - Windows 10: Ubuntu under WSL2
-- latest macOS version
+- Any Linux
 
->The author has an idea on how to bring these closer to each other, via the tooling we use for CI/CD, but that's going to wait for a while. Please ask, if you are interested.
+## Folder structure
+
+```
+├── DEVS     # notes about developing the repo (optional)
+├── ci       # all CI/CD setup
+├── firebase-ci-builder.sub   # sub-repo for the Docker image
+├── hack     # needed until Firebase fixes one thing
+├── packages
+│   ├── app
+│   ├── app-deploy-ops
+│   └── backend
+└── tools    # common scripts to the `packages`
+```
+
+The three `packages` each contain their own documentation.
 
 
 ## Getting started
@@ -133,185 +129,127 @@ We aim to support development on:
 $ npm install
 ```
 
-This installs some common packages, Firebase JS SDK as the most important one. Subpackages use them from the root, and this is where you update the common ones.
+This installs some common packages, such as Firebase JS SDK. Subpackages use them from the root, and this is where you update their versions.
 
----
 
-If you are mostly interested in UI development, and don't want to create a Firebase project just yet, go to the `packages/app` directory and see its `README.md`.
+### Build the Docker image
+
+If you use Docker for running the Firebase emulators, do this:
+
+```
+$ (cd firebase-ci-buildder.sub && make build)
+...
+ => => naming to docker.io/library/firebase-ci-builder:9.11.0-node16-npm7                                                                                                                                                                              0.0s 
+```
+
+That builds a Docker image on your development machine that contains Firebase CLI, emulators (and JRE needed by them). This image is used by the sub-packages whenever Firebase Emulators are required.
+
+>You can test it:
+>
+>```
+>$ docker run -it firebase-ci-builder:9.11.0-node16-npm7 firebase --version
+9.11.0
+>```
+
+Alternatively, you can use a native `firebase-tools` installation. See [Docker vs. native `firebase-tools`](Docker%20vs.%20native%20firebase-tools.md).
+
+
+## Speed run 
 
 If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
-through the three subpackages, and end up having a clone of the sample application installed *on your Firebase account*, in the cloud. 
+through the three subpackages, set up a Firebase project (and account), CI/CD to Cloud Build and end up having a clone of the sample application installed *on your Firebase account*, in the cloud.
 
----
+Alternatively, you can study the individual sub-packages' `README`s and come back here later..
+
+
+### Backend
+
+```
+$ cd backend
+$ npm install
+...
+$ npm test
+...
+```
+
+The tests should pass, running against the Docker image we built.
+
+Leave the backend running in its own terminal (speeds up our work in `app`, slightly):
+
+```
+$ npm run start
+...
+```
+
+Finally, `cd ..`.
+
+### App
+
+```
+$ cd app
+$ npm install
+...
+$ npm run build
+...
+$ npm test
+...
+```
+
+These tests are done using [Cypress](https://www.cypress.io). They work against the backend we left running - if you didn't, they'll launch the back-end automatically, but that is a bit slower.
+
+The output of this stage (in `vitebox/dist/`) *is* the web app. All the looks, styling and front end features are done here.
+
+What's missing is the operational readiness that adds performance monitoring, central logging and crash detection to the app.
+
+`$ cd ..`
+
+### App-deploy-ops
+
+This sub-package wraps the output of the "app" build to be ready for deployment.
+
+```
+$ cd app-deploy-ops
+$ npm install
+...
+$ npm run build
+...
+```
+
+There are no tests here.
+
+Next, in order to deploy the app (backend and front-end) we need a Firebase project.
+
+With the project in place, we *could* proceed with a manual deployment of the backend and front-end, but that involves tying your local developer terminal with credentials that allow full control of the Firebase project.
+
+This is seen as a potential security threat, as well as unnecessary, by the author.
+
+Instead, we set up the whole CI/CD pipeline already now, and let it do the deployments for you.
+
 
 ### Create a Firebase project
 
-Follow the instructions in [the wiki](https://github.com/akauppi/GroundLevel-firebase-es/wiki/FI%200.1-firebase) so that you have a Firebase project created.
+Follow the instructions in the wiki > [0.1 Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN%200.1-firebase) to create a project.
 
->Hey, what language is this?? It's Finnish. Try your luck. Contribution of translating those instructions to English is welcome! 🙂
-
-You *will* need a credit card for creating the "Blaze" plan. If you don't want to do that yet, choose the free plan and continue as far as you can. 👍
-
----
-
-Okay, have the Firebase project? Let's check in.
-
-```
-$ npm run activate
-```
-
-Select the project you want to use and give it an alias. The alias doesn't really matter, `abc` is just fine..
-
->Note: The repo uses `firebase use --add` underneath, and distributes your selection to the subpackages. If you need to change your active project, do it here at the root level - otherwise your packages will be using different Firebase projects and that'd be... unhelpful.
-
-Now, you should be able to see your selected project:
-
-```
-$ npx firebase-tools use
-Active Project: testing-220321
-...
-```
-
-The repo has three subpackages:
-
-- `packages/backend`
-- `packages/app`
-- `packages/app-deploy`
-
-We'll briefly visit each of these, in turn.
+>You *will* need a credit card for creating the "Blaze" plan. If you don't want to do that yet, choose the free plan and continue as far as you can. 👍
 
 
-### Back-end: build and deploy
+### Setting up CI/CD
 
-```
-$ cd packages/backend
-```
+See the [ci/README](ci/README.md) for instructions on how to set up the CI/CD pipeline.
 
-Install the dependencies and deploy the database access rules and Cloud Functions:
+This expects you to have a GitHub fork of the repo, and to want to use Cloud Build for running the CI/CD.
 
-```
-$ npm install
-```
+Also other vendors provide cloud CI/CD. GitHub has one, and setting it up is simpler than the dance needed to get two cloud services to collaborate. Using Cloud Build was selected because of the Firebase Google background, and because it allows Docker images to be used as build steps.
 
-```
-$ npm run deploy
-...
+<!-- tbd....
+If you have problems, see [Manual deployment](Manual%20deployment.md).
+-->
 
-=== Deploying to 'testing-220321'...
+### Trying your deployment
 
-i  deploying firestore, functions
-i  firestore: reading indexes from ./firestore.indexes.json...
-i  cloud.firestore: checking ./firestore.rules for compilation errors...
-✔  cloud.firestore: rules file ./firestore.rules compiled successfully
-i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
-i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
-✔  functions: required API cloudbuild.googleapis.com is enabled
-✔  functions: required API cloudfunctions.googleapis.com is enabled
-i  functions: preparing ./functions directory for uploading...
-i  functions: packaged ./functions (32.02 KB) for uploading
-✔  firestore: deployed indexes in ./firestore.indexes.json successfully
-i  firestore: latest version of ./firestore.rules already up to date, skipping upload...
-✔  functions: ./functions folder uploaded successfully
-✔  firestore: released rules ./firestore.rules to cloud.firestore
-i  functions: updating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
-i  functions: updating Node.js 14 (Beta) function logs_1(europe-west6)...
-✔  functions[userInfoShadow_2(europe-west6)]: Successful update operation. 
-✔  functions[logs_1(europe-west6)]: Successful update operation. 
-✔  Deploy complete!
+Once you have the CI/CD deployment running, visit the application's web site:
 
-Project Console: https://console.firebase.google.com/project/testing-220321/overview
-```
-
-If you saw that, the backend is now ready in the cloud. Well done!
-
-You can visit the given URL to see the dashboard. Check the `Firestore` and `Functions` pages.
-
-Next, we'll prepare the front end and deploy it as well.
-
-### Front end: build
-
-```
-$ cd ../app
-```
-
-```
-$ npm install
-```
-
-The web app needs to be built.
-
-```
-$ npm run build
-...
-vite v2.1.2 building for production...
-✓ 47 modules transformed.
-dist/aside-keys.js   17.85kb / brotli: 5.62kb
-dist/aside-keys.js.map 28.60kb
-dist/style.css       5.21kb / brotli: 1.45kb
-dist/app.es.js       35.40kb / brotli: 8.86kb
-dist/app.es.js.map   72.08kb
-dist/vue-router.js   51.80kb / brotli: 11.50kb
-dist/vue-router.js.map 169.41kb
-dist/vue.js          127.87kb / brotli: 25.31kb
-dist/vue.js.map      465.31kb
-```
-
-What we now have is the web app's *logic*. It is not ready for deployment, yet. We'll handle that next.
-
-### Front end: deploy
-
->Note: In this repo, developing and packaging the app for deployment are separated. This is not a normal pattern but has its benefits: separation of concerns, allows different teams to have ownership of the features vs. how those features are operated in the cloud.
-
-```
-$ cd ../app-deploy-ops
-```
-
-```
-$ npm install
-```
-
-```
-$ npm run build
-```
-
-This build used the previously built *app logic* and wrapped it with code involved in running an app on the cloud.
-
-The build *does not* run the app build (you could change that pretty easily); you'd go to the `packages/app` to build and test changes there, then come back here for deploying them. 
-
-In practise, CI/CD takes care of such details, but that's the last thing we'll cover. 🙂
-
-```
-$ npm run deploy
-...
-
-=== Deploying to 'testing-220321'...
-
-i  deploying hosting
-i  hosting[groundlevel-160221]: beginning deploy...
-i  hosting[groundlevel-160221]: found 3 files in roll/out
-✔  hosting[groundlevel-160221]: file upload complete
-i  hosting[groundlevel-160221]: finalizing version...
-✔  hosting[groundlevel-160221]: version finalized
-i  hosting[groundlevel-160221]: releasing new version...
-✔  hosting[groundlevel-160221]: release complete
-
-✔  Deploy complete!
-
-Project Console: https://console.firebase.google.com/project/testing-220321/overview
-Hosting URL: https://testing-220321.web.app
-```
-
-Now, head to the provided URL and you should see the app alive and kicking!!! 👶
-
-Have a go with it!
-
----
-
-As you can imagine, there are *tons* of details around each of the phases we took. 
-
-We didn't touch testing at all (backend and front end have tests).
-
-..but the purpose was to get you from 0 to cloud as fast as possible, and hopefully that happened!
+e.g. [https://groundlevel-160221.web.app](https://groundlevel-160221.web.app)
 
 
 ## Where to go next?
@@ -328,18 +266,19 @@ If you pick one, come back for the rest later. It doesn't really matter, in whic
 
   Developing the front end. You can do this without a Firebase project.
   
-- Front-end deployment ([`packages/app-deploy-ops`](packages/app-deploy-ops/README.md))
+- Front-end ops ([`packages/app-deploy-ops`](packages/app-deploy-ops/README.md))
 
-  Deploying the front end, with a logging adapter attached.
+  Adding operational robustness to the app's front end.
 
-- CI/CD ([`builds/`](builds/README.md))
+- CI/CD ([`ci/`](ci/README.md))
 
   Making sure PRs don't break the code; deploying code that gets merged to `master`.
 
+<!-- disabled
 - Operations ([`ops/`](ops/README.md))
 
   Advice on what to do once the app is out.
-
+-->
 
 ## Making it yours!
 
@@ -356,7 +295,7 @@ $ git grep GroundLevel
 ...
 ```
 
-We don't mind you keeping the reference, but many `.md` files likely deserve to be removed/edited, for your app. That command helps you find the mentions.
+We don't mind you keeping the reference, but many `.md` files likely deserve to be removed/edited. That command helps you find the mentions.
 
 You *may* mention in your docs that the app was based on GroundLevel, but are not required to do so. See the [LICENSE.md](LICENSE.md).
 
@@ -370,7 +309,7 @@ graphic art.
 >In particular:
 >
 >- `branding/*`
->- `**/public/favicon.*`
+>- symbolic links to `branding`
 >
 >Those files are PROPRIETARY to this project, and not to be used in other circumstances.
 >You may, however, create a fork of this GitHub repo and continue working with the graphic
@@ -380,6 +319,14 @@ graphic art.
 >For the rest of the repo (code, configs and textual documentation), this applies:
 >...
 
+### Follow the letter of the license
+
+Notice that the license states:
+
+>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+ie. do not remove the license. You may, of course, become active in further developing the app template and we'd like to hear if you use it.
 
 
 # Credits
@@ -390,8 +337,6 @@ Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://gith
 
 Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 
-Thanks to [Bootstrap Icons](https://icons.getbootstrap.com/) for SVG icon art.
-
 
 # Contribution
 
@@ -400,7 +345,7 @@ As always, contributions and discussions are welcome.
 - Please use primarily [GitHub Issues](https://github.com/akauppi/GroundLevel-es-firebase/issues) for questions and bug reports.
 - For casual conversation, head to the [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web).
 
-   *We'll head for a Discord server, once more people are involved.*
+*We'll move to a Discord server, once more people are involved.*
 
 Have Fun, and spread the word!!
 
@@ -419,15 +364,13 @@ Have Fun, and spread the word!!
   - likely Vue.js 2?
   - likely uses bundling
 
-*tbd. When someone has checked Firelayer in detail, and can make a brief (2 sentence!) summary on how it differs from GroundLevel, that is a welcome #contribution!*
+- [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app)
+  - Showcasing use of Cypress
+
+*tbd. When someone has checked Firelayer in detail, and can make a brief (2 sentence!) summary on how it differs from this repo, that is a welcome `#contribution`!*
 
 ### Online forums
 
 - [Firebase developers](https://discord.gg/BN2cgc3) (Discord server)
 
 
-# Other full app templates
-
-||Front-end framework|Database|Auth|bundler|purpose|
-|---|---|---|---|---|---|
-|[cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app)|React|(none)|local JSON database|??|Showcasing use of Cypress]

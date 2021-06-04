@@ -18,9 +18,6 @@
     "eslint-plugin-node": "^11.1.0",
     "firebase": "^9.0.0-beta.2"
   },
-  "//devDependencies": {
-    "//firebase-tools": "^9.12.0"
-  },
   "//": {
     "": [
       "This serves for pulling in libraries and tools used commonly in the subpackages, so that a) version choice is in",

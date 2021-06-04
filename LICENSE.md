@@ -4,7 +4,7 @@ graphic art.
 In particular:
 
 - `branding/*`
-- `**/public/favicon.*`
+- any symbolic links to that folder
 
 Those files are PROPRIETARY to this project, and not to be used in other circumstances.
 You may, however, create a fork of this GitHub repo and continue working with the graphic
