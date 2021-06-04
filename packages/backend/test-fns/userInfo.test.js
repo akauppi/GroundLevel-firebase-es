@@ -4,13 +4,17 @@
 * Test that '/projectsC/.../userInfoC' gets updated, by cloud functions, when the global '/userInfoC' changes (if
 * users are in the project).
 */
-import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
+import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { dbUnlimited as db } from 'firebase-jest-testing/firestoreAdmin'
+import { collection, listener_EXP } from 'firebase-jest-testing/firestoreAdmin'
 
 import './matchers/toContainObject'
 
 describe("userInfo shadowing", () => {
+  let l;
+  beforeAll( () => {
+    l = listener_EXP("projects/1/userInfo");
+  })
 
   test('Central user information is distributed to a project where the user is a member', async () => {
     const william = {
@@ -18,30 +22,29 @@ describe("userInfo shadowing", () => {
       photoURL: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Dalton_Bill-edit.png"
     };
 
-    // Write in 'userInfo' -> causes Cloud Function to update 'projectC/{project-id}/userInfo/{uid}' -> resolves the Promise
+    // Write in 'userInfo' -> causes Cloud Function to update 'projectC/{project-id}/userInfo/{uid}'
     //
-    const changedProm = waitForNextChange( db.doc("projects/1/userInfo/abc"),   // Promise of { ...changed doc... }
-      _ => db.collection("userInfo").doc("abc").set(william)    // trigger
-    );
+    await collection("userInfo").doc("abc").set(william);
 
-    await expect(changedProm).resolves.toContainObject(william);
-  });    // 270, 268 ms
+    await expect( l("abc") ).resolves.toContainObject(william);
+  });    // 300 ms
 
-  test('Central user information is not distributed to a project where the user is not a member', async () => {
+  test ('Central user information is not distributed to a project where the user is not a member', async () => {
 
-    // Write in central -> should NOT turn up
+    // Write in 'userInfo' -> should NOT turn up in project 1.
     //
-    const prom = waitForNextChange( db.doc("projects/1/userInfo/xyz"),
-      _ => db.collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" }),   // trigger
-      390, null
-    );
+    await collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" });
 
-    await expect(prom).resolves.toBe(null);
+    // firebase-jest-testing 0.0.3-beta.3
+    await expect( l("xyz", o => !!o, 800 /*ms*/) ).resolves.toBeUndefined();
+
+    // EXPLORING
+    // tbd.
 
     // ideally:
-    //await expect(prom).not.toComplete;
+    //await expect(prom).not.toComplete;    // ..but with cancelling such a promise
 
-  }, 400 /*ms*/ );
+  }, 9999 /*ms*/ );
 });
 
 /*

@@ -5,7 +5,7 @@
 # Requires:
 #   - curl
 #
-usage() { >&2 echo "Usage: $0 [--silent] port[,port2[,...]]"; exit $1; }
+usage() { >&2 echo "Usage: $0 [--silent] port[,port2[,...]]"; exit 1; }
 
 _SILENT=
 
@@ -19,7 +19,7 @@ do
 done
 
 if [ $# -eq 0 ]; then
-  usage 1
+  usage
 fi
 
 _PORTS=$1

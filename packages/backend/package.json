@@ -5,26 +5,28 @@
   "private": true,
   "type": "module",
   "files": [
-    "functions/*.js",
+    "firebase.json",
+    "firestore.indexes.json",
     "firestore.rules",
-    "firestore.indexes.json"
+    "functions/*.js"
   ],
   "engines": {
     "node": ">=13.2",
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "npm run ci",
-    "ci": "npm run ci:seq",
-    "lint": "eslint .",
+    "test": "if port-is-free --silent 4000 ; then npm run -s ci ; else npm run -s _ci_seq ; fi",
+    "  - ": "",
+    "ci": "concurrently --kill-others -n emul,test \"npm run -s start\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
     "  ": "",
-    "ci:seq": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_fns && npm run --silent _ci_rules\"",
-    "_ci_fns": "npm run test:fns:all",
-    "_ci_rules": "npm run test:rules:all",
-    "ci:par": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_par_2\"",
-    "_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_fns\" \"npm run _ci_rules\"",
+    "//ci:seq": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_fns && npm run --silent _ci_rules\"",
+    "//ci:par": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_par_2\"",
+    "//_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_fns\" \"npm run _ci_rules\"",
+    "//_ci_fns": "npm run test:fns:all",
+    "//_ci_rules": "npm run test:rules:all",
     "  -": "",
-    "start": "firebase emulators:start --project=fns-test --only functions,firestore",
+    "start": "sh/docker-run.sh \"firebase emulators:start --project=fns-test --only functions,firestore\"",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
     "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
@@ -36,20 +38,22 @@
     "//test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
     " -- ": "",
+    "__test:native": "concurrently --kill-others -n emul,test \"npm run -s __start:native\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "__start:native": "firebase emulators:start --project=fns-test --only functions,firestore",
+    " -- --": "",
+    "lint": "eslint .",
     "deploy": "firebase deploy --only functions,firestore",
     "predeploy": "tools/hack.sh 1",
     "postdeploy": "tools/hack.sh 2",
     " -- -": "",
-    "prepare": "npm --prefix functions install",
-    " -- - ": "",
-    "//": "firebase --version"
+    "postinstall": "npm --prefix functions install"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.3-beta.2",
-    "jest": "^27.0.3"
+    "firebase-jest-testing": "^0.0.3-beta.3",
+    "jest": "^27.0.4"
   },
   "//comments": {
     "engines.node": [

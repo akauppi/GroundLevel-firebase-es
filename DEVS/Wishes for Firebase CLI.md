@@ -278,7 +278,30 @@ Similar to the "check rules early" mentioned above.
 E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
 
 
+## Way to suppress the "Received SIGTERM 2 times" warning
+
+Running under Docker, this isn't relevant to our users:
+
+```
+[emul] ⚠  emulators: Received SIGTERM 2 times. You have forced the Emulator Suite to exit without waiting for 1 subprocess to finish. These processes may still be running on your machine: 
+[emul] 
+[emul] ┌────────────────────┬──────────────┬─────┐
+[emul] │ Emulator           │ Host:Port    │ PID │
+[emul] ├────────────────────┼──────────────┼─────┤
+[emul] │ Firestore Emulator │ 0.0.0.0:6767 │ 30  │
+[emul] └────────────────────┴──────────────┴─────┘
+[emul] 
+[emul] To force them to exit run:
+[emul] 
+[emul] kill 30
+```
+
+Would like to have a parameter (or `firebase.json` configuration) that allows this to be suppressed. Since we run under Docker, no unterminated processes will remain.
+
+
 ## `firebase emulators:start` behaves different from `emulators:exec`
+
+<!-- Note: This is no longer an issue for this project - we don't use `emulators:exec` at all. -->
 
 This is a surprise for developers.
 
