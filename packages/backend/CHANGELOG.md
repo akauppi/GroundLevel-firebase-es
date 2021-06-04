@@ -1,5 +1,9 @@
 # Changelog
 
+## 4-Jun-21
+
+- Testing using Docker.
+
 ## 17-May-21
 
 - Changing to `firebase-jest-testing` 0.0.3-alpha.2

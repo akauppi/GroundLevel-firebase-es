@@ -74,18 +74,3 @@ Firebase Console > project > `Functions` > `Logs`
 >![](.images/firebase-console-functions-logs.png)
 
 This was enough detail to fix it.
-
-
-## If `npm test` fails on Cloud Functions
-
-You may need to:
-
-```
-cd functions && npm install
-```
-
-This makes `package-lock.json` be in sync with `package.json`. Note that we don't do this automatically in `package.json` scripts, to save your time. Having those two out of sync is seen as a repo misalignment.
-
-Note: This can happen "all by itself", since e.g. `^1.2.3` may bring in a version `1.2.4` and `package-lock.json` is now aged.
-
-Better solutions are welcome.

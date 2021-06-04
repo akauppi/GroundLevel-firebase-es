@@ -15,18 +15,19 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-free --silent 4000 ; then npm run -s ci ; else npm run -s _ci_seq ; fi",
+    "test": "if port-is-free --silent 4000 ; then npm run -s _test_1 ; else npm run -s _ci_seq ; fi",
+    "_test_1": "concurrently --kill-others -n emul,test \"npm run -s start\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "ci": "npm run -s ci:seq",
     "  - ": "",
-    "ci": "concurrently --kill-others -n emul,test \"npm run -s start\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "ci:seq": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "ci:start": "firebase emulators:start --project=fns-test --only functions,firestore",
     "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
     "  ": "",
-    "//ci:seq": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_fns && npm run --silent _ci_rules\"",
-    "//ci:par": "firebase emulators:exec --project=fns-test --only firestore,functions \"npm run --silent _ci_par_2\"",
-    "//_ci_par_2": "concurrently -n test-fns,test-rules \"npm run _ci_fns\" \"npm run _ci_rules\"",
-    "//_ci_fns": "npm run test:fns:all",
-    "//_ci_rules": "npm run test:rules:all",
+    "ci:par": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_par\"",
+    "_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
     "  -": "",
     "start": "sh/docker-run.sh \"firebase emulators:start --project=fns-test --only functions,firestore\"",
+    "  -  ": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
     "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
@@ -35,18 +36,16 @@
     "test:rules:projects": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/index.test.js --verbose --detectOpenHandles --all",
     "test:rules:projectsSymbols": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/symbolsC.test.js --verbose --detectOpenHandles --all",
     "test:rules:projectsUserInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --detectOpenHandles --all",
-    "//test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
+    "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
     " -- ": "",
-    "__test:native": "concurrently --kill-others -n emul,test \"npm run -s __start:native\" \"wait-for 4000 && npm run -s _ci_seq\"",
-    "__start:native": "firebase emulators:start --project=fns-test --only functions,firestore",
-    " -- --": "",
     "lint": "eslint .",
+    " - -": "",
     "deploy": "firebase deploy --only functions,firestore",
-    "predeploy": "tools/hack.sh 1",
-    "postdeploy": "tools/hack.sh 2",
-    " -- -": "",
-    "postinstall": "npm --prefix functions install"
+    "ci-prepare": "npm --prefix functions install && tools/hack.sh",
+    " - --": "",
+    "prestart": "npm --prefix functions install",
+    "pre_ci_start": "npm run -s prestart"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
@@ -71,9 +70,11 @@
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
         "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
       ],
-      "prepare": [
-        "It is important someone runs 'npm install' also for the 'functions'. This is needed for: deployment, CI/CD tests.",
-        "We rather do it here, quietly, than expose such details to the CI/CD script."
+      "ci": [
+        "For the CI (as name implies), runs the tests against native 'firebase-tools'."
+      ],
+      "ci-prepare": [
+        "Something the CI should run, before it proceeds with 'npm run ci'."
       ]
     }
   }
