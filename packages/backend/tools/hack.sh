@@ -6,6 +6,7 @@
 # Firebase CLI to be fine with '14 || >=15' -like strings.
 #
 if [ $# -eq 0 ]; then
+  #echo "Usage: $(basename $0) 1|2"
   echo "Usage: $(basename $0) 1"
   exit 1
 fi

@@ -52,3 +52,4 @@ Docker Desktop doesn't allow using certain Docker version.
 For the moment, cannot use `cloud-build-local`.
 
 
+<font color=red>You can run Docker directly, instead of `cloud-build-local`. See `DEVS.md`. The difference is that with `cloud-build-local` (which we'd prefer to use) files are copied, whereas with the Docker command we bind the host folder.</font>

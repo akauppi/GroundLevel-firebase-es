@@ -24,6 +24,7 @@ The `*_cloudbuild` bucket has a `source/` folder with `.tgz` packages.
 >(Please suggest the steps for adding the lifecycle, eg. retain for 30 days only. `#help`)
 
 
+<!-- hidden; not really a problem?
 ## Build logs
 
 `gcloud builds submit --help` states that build logs should be stored (by default) in a bucket:
@@ -33,7 +34,7 @@ gs://[PROJECT_NUMBER].cloudbuild-logs.googleusercontent.com/
 ```
 
 >*tbd. Where can I see Cloud Build logs?*
-
+-->
 
 ## Troubleshoot locally
 
@@ -48,13 +49,6 @@ You can now execute the build steps and debug, if something doesn't work right. 
 
 >Note DIFFERENCES: Whereas Cloud Build copies files and **excludes** certain ones, here you see a mapping of the actual disk contents on your host. If you remove something, it's removed in the host.
 
----
-
->**Have enough RAM in Docker**
->
->Docker default for the author was 2GB. Things work, but performance is *really* sluggish. (may not be the RAM, though...)
-
----
 
 ## Viewing builds
 

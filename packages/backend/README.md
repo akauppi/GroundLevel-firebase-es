@@ -65,36 +65,15 @@ $ npm run ci        # instead of 'npm test'
 $ npm run ci:start  # instead of 'npm start'
 ```
 
-## Before deploying
+## Deploying
 
-Actual deploying is expected to be done via Continuous Integration (see `ci` at the repo root). 
-
-If you deploy to a region other than Firebase default (`us-central1`), follow these one-time rules (or edit the functions sources so that the regions are fixed):
+Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
 
 
-### Let functions know their region
+## Role of `npm run start`
 
-Check your project's location either in [Firebase Console](https://console.firebase.google.com) > Project > App > ⚙️ > `Default GCP resource location`
+If you leave the `npm run start` running, it will be picked up by front-end development and testing (`packages/app`), as well.
 
-..or by:
+If you don't, those tests will automatically restart the emulators.
 
-```
-$ npx firebase-tools apps:sdkconfig
-...
-firebase.initializeApp({
-  "projectId": "groundlevel-160221",
-    ...
-  "locationId": "europe-west6",
-    ...
-});
-```
-
-It seems the functions are not able to know this from Firebase itself; we need to set it to a config that the functions run with (or write within the function sources).
-
-```
-$ npx firebase-tools functions:config:set regions.0="europe-west6"   
-  # use the 'locationId' from above
-```
-
-This setting is a one-time errand unless you change regions.
-
+It is up to you, which way of working you prefer, but now you know that the same instance is usable for both backend and front-end development.
