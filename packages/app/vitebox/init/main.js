@@ -8,7 +8,7 @@ import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
 import { getAuth, useAuthEmulator } from '@firebase/auth'
-import { getFirestore, useFirestoreEmulator /*, setLogLevel as setFirestoreLogLevel*/ } from '@firebase/firestore'
+import { getFirestore, useFirestoreEmulator } from '@firebase/firestore'
 import { getFunctions, useFunctionsEmulator } from '@firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";

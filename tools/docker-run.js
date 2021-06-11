@@ -1,15 +1,22 @@
+#!/usr/bin/env node
+
 /*
+* Helps launch Firebase Emulators, under Docker.
+*
+* Used by both packages/backend and packages/app, but both running within the 'packages/backend' folder. There's just
+* one 'firebase.json', but the launch command differs (app needs auth; backend doesn't).
+*
 * Usage:
 *   <<
 *     $ docker-run "firebase emulators:start ..."
 *   <<
 *
-* Helps launch Firebase Emulators, under Docker.
-*
-*   - reads 'firebase.json' and binds the ports found there, to the Docker image
+* Reads 'firebase.json' and binds the ports found there, to the Docker image.
 */
-import { spawn } from 'child_process'
+import { spawnSync } from 'child_process'
 import { readFileSync } from 'fs'
+
+const IMAGE="firebase-ci-builder:9.12.1-node16-npm7"
 
 const [cmd] = process.argv.slice(2);
 
@@ -32,8 +39,6 @@ const ports = (_ => {   // => Array of integer
   return arr;
 })();
 
-const IMAGE="firebase-ci-builder:9.12.1-node16-npm7"
-
 const pwd=process.cwd()
 
 // Launch Docker and keep it running
@@ -50,7 +55,7 @@ console.info("Launching Docker... 🐳\n");
 // Reference:
 //    https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
 //
-if (true) /*const childProcess =*/ spawn('docker',[
+/*const childProcess =*/ spawnSync('docker',[
   ...dockerCmd.split(' ').slice(1),
   ...cmd.split(' ')
 ], {
