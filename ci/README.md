@@ -268,10 +268,18 @@ The same CI step takes care of deploying both backend and app.
 ## Run CI jobs manually
 
 >You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
->
->```
->$ cloud-build-local  --config=cloudbuild.merged.yaml ..
->```
+
+<!-- details
+```
+$ cloud-build-local  --config=cloudbuild.merged.yaml --dryrun=false ..
+2021/06/06 20:01:25 Warning: there are left over step volumes from a previous build, cleaning it.
+2021/06/06 20:01:31 Warning: The server docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
+2021/06/06 20:01:31 Warning: The client docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
+2021/06/06 20:02:34 Error copying source to docker volume: exit status 1
+```
+-->
+
+This works better (runs the build in the cloud):
 
 ```
 $ gcloud builds submit --config=cloudbuild.master-pr.app.yaml ..
