@@ -43,9 +43,13 @@ const pwd=process.cwd()
 
 // Launch Docker and keep it running
 //
-const dockerCmd=`docker run --rm --sig-proxy=true -v ${pwd}:/work -w /work ${
-  ports.map(p => `-p ${p}:${p}`).join(' ')
-} ${IMAGE}`
+const args=[
+  'run', '--rm',
+  '--sig-proxy=true',
+  '-v', `${pwd}:/work`, '-w', '/work',
+  ...( ports.flatMap(p => ['-p', `${p}:${p}`] ) ),
+  IMAGE
+];
 
 console.info("Launching Docker... 🐳\n");
 
@@ -56,7 +60,7 @@ console.info("Launching Docker... 🐳\n");
 //    https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
 //
 /*const childProcess =*/ spawnSync('docker',[
-  ...dockerCmd.split(' ').slice(1),
+  ...args,
   ...cmd.split(' ')
 ], {
   stdio: 'inherit',

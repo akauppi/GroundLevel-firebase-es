@@ -26,13 +26,13 @@
     "_ci_dev_local_emul": "cd ../backend && firebase emulators:start --project=app --only auth,functions,firestore",
     "  - -": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"npm run --silent _dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
-    "_dev_local_emul": "cd ../backend && docker-run \"firebase emulators:start --project=app --only auth,functions,firestore\"",
-    "_dev_local_init": "wait-for 4000 && firebase-prime --project=app local/docs.js local/users.js",
-    "_dev_local_vite": "vite --port 3000 --mode dev_local --clearScreen__ false",
+    "_dev_local_emul": "npm run -s _checkPort4000 && (cd ../backend && docker-run \"firebase emulators:start --project=app --only auth,functions,firestore\")",
+    "_dev_local_init": "wait-for 4000 && firebase-prime --project=app local/docs.js local/users.js | grep -v -E 'WARNING.+Do not use with production credentials'",
+    "_dev_local_vite": "vite --port 3000 --mode dev_local",
     "  --": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run --silent _dev_online_vite\"",
     "_dev_online_log": "PORT=5050 node tools/printout.js",
-    "_dev_online_vite": "wait-for 5050 && vite --port 3001 --clearScreen false",
+    "_dev_online_vite": "wait-for 5050 && vite --port 3001",
     "  ---": "",
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
@@ -42,6 +42,7 @@
     "predev:online": "port-is-free 3001 && npm run --silent _checkOnline",
     "_checkNoLinks": "tools/check-no-links.sh || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; exit 8)",
     "_checkOnline": "[[ -f .firebase.online.js ]] || ( >&2 echo \"ERROR: '.firebase.online.js' file is missing; see 'README.md' on how to create one.\n\"; exit 7)",
+    "_checkPort4000": "port-is-free --silent 4000 || ( >&2 echo \"ERROR: Port 4000 is taken. You might have left the backend server running (hint: use this for both).\n\"; exit 8)",
     "_genEnvLocal": "node --harmony-top-level-await --experimental-json-modules tools/gen-vite-env-local.js ../backend/firebase.json > vitebox/.env.dev_local"
   },
   "dependencies": {
@@ -50,7 +51,7 @@
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
-    "vue": "^3.0.11",
+    "vue": "^3.1.1",
     "vue-router": "^4.0.8"
   },
   "devDependencies": {
@@ -59,14 +60,14 @@
     "@vitejs/plugin-vue": "^1.2.2",
     "@vue/compiler-sfc": "^3.0.11",
     "concurrently": "^6.2.0",
-    "cypress": "^7.1.0",
+    "cypress": "^7.5.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
     "eslint-plugin-vue": "^7.9.0",
     "prettier": "2.3.0",
     "sass": "^1.32.11",
-    "vite": "^2.3.3",
+    "vite": "^2.3.7",
     "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {
@@ -77,19 +78,17 @@
         "Thus, following suit."
       ]
     },
+    "dependencies": {
+      "/not/ firebase": [
+        "It's important we don't list 'firebase' as a peer dependency. Doing so would force 'app-ops-deploy' to pull in",
+        "*all* the sub-packages (most of which are unnecessary).",
+        "Instead, root defines the version and both us and 'app-ops-deploy' pull in the necessary '@firebase' modules, directly."
+      ]
+    },
     "engines": [
       "'>=14.3' for '—-harmony-top-level-await' (flag not needed in 16)",
       "'>=13.2' for ES module support",
       "'--experimental-json-modules' seems to be available for Node 12"
-    ],
-    "peerDependencies (_not_ using it)": {
-      "/not/ firebase": [
-        "It's important we *don't* list 'firebase' as a peer dependency, though mentally it is. Because:",
-        "- we don't want to mention the version twice (only at the root level)",
-        "- we'd force 'app-ops-deploy' to pull in *all* of 'firebase' (and it would likely do it locally, which is unnecessary)",
-        "",
-        "Instead, root defines the version and both us and 'app-ops-deploy' pull in the necessary '@firebase' modules, directly."
-      ]
-    }
+    ]
   }
 }

@@ -186,12 +186,11 @@ export default {
   ],
 
   // Vite 2.3.1: "The fsServe restrictions are going to be enabled by default in a future version."
+  //    -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md#231-2021-05-12
+  //
   server: {
     fsServe: {
-      strict: true    // preparing for the future version
+      strict: true    // restrict access to the work directory
     }
-  },
-
-  // This doesn't cut it, from config file (vite 2.0.0-beta.52). Using it as command line parameter does. Weird.
-  clearScreen: false
+  }
 }

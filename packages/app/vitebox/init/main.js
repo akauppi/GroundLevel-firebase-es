@@ -25,9 +25,9 @@ async function initFirebaseLocal() {   // () => Promise of ()
     apiKey: "none",
     authDomain: "no.domain"
       //
-      // Mitigates an alert that would otherwise occur if the user presses 'Sign in with Google' in local mode.
-      // This is uncharted waters; the main means for local mode authentication is intended to be the '?user=dev' query
-      // param.
+      // Mitigates a browser console error (and another one that would otherwise occur if the user presses
+      // 'Sign in with Google' in local mode). This is uncharted waters; the main means for local mode authentication
+      // is intended to be the '?user=dev' query param.
   } );
 
   // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
@@ -47,18 +47,15 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
 
   const firestore = getFirestore();
-  const auth = getAuth();
 
   // If you use a region when Cloud Functions are emulated, set it here.
   //
-  // Firebase API inconsistency (9.0-beta.1):
+  // Firebase API inconsistency (9.0-beta.{1..3}):
   //    For some reason, there is no 'initializeFunctions' but the 'getFunctions' takes parameters (which it doesn't,
   //    on other subpackages). #firebase
   //
   const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
-
-  // In case one needs to debug the Firestore client/server connection
-  //setFirestoreLogLevel('debug');
+  const auth = getAuth();
 
   useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
   useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);

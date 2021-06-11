@@ -14,7 +14,7 @@ import { primeData } from './primeData/index.js'
 import { wipe } from './primeData/wipe.js'
 import { firestorePort, authPort } from './config.js'
 
-/* Firebase 9.0.0.beta-2 'getAuth' seems broken. Gives us this ('initializeAuth' works):    #unreported
+/* Firebase 9.0.0.beta-{1..3} 'getAuth' seems broken. Gives us this ('initializeAuth' works):    #unreported
 *
 *  <<
 *   [init] Creating users...

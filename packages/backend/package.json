@@ -25,7 +25,7 @@
     "//ci:par": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_par\"",
     "//_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
     "  -": "",
-    "start": "node docker-run \"firebase emulators:start --project=bunny --only functions,firestore\"",
+    "start": "docker-run \"firebase emulators:start --project=bunny --only functions,firestore\"",
     "  -  ": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
