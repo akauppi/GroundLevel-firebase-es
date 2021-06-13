@@ -16,7 +16,8 @@
 import { spawnSync } from 'child_process'
 import { readFileSync } from 'fs'
 
-const IMAGE="firebase-ci-builder:9.12.1-node16-npm7"
+const IMAGE = "firebase-ci-builder:9.12.1-node16-npm7"
+  //"firebase-ci-builder:9.11.0-node16-npm7"
 
 const [cmd] = process.argv.slice(2);
 

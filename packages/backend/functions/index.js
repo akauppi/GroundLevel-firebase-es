@@ -11,14 +11,6 @@
 *   - [ ] 'firebase-functions' is available as ESM exports (not; there's an issue about it though)
 *   - [ ] 'firebase-admin' is available as ESM exports (work in progress; alpha)
 *
-* Configuration:
-*   For production regional deployments, mention your region:
-*     regions.0: e.g. "europe-west6"
-*
-* Note:
-*   'HttpsError' 'code' values must be from a particular set
-*     -> https://firebase.google.com/docs/reference/js/firebase.functions#functionserrorcode
-*
 * References:
 *   - Call functions from your app (Firebase docs)
 *     -> https://firebase.google.com/docs/functions/callable
@@ -39,24 +31,13 @@ admin.initializeApp();
 // Under emulation, run as the default region (makes testing simpler).
 // In production, the region is brought via Cloud Function configuration.
 //
-// To have your Functions work, if you chose *ANY* other location than 'us-central1', you need to mention the region
-// in CODE (that's against good principles of programming; this should be a CONFIGURATION!!!)
-//
-// See -> https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246
-//
-const regionalFunctions = EMULATION ? functions : (() => {
-
-  // Region where the Firebase project has been set up.
-  //
-  const tmp = functions.config().regions[0];
-  return !tmp ? functions : functions.region(tmp);
-})();
+const region = EMULATION ? null : functions.config().regions[0];
+const regionalFunctions = region ? functions.region(region) : functions;
 
 const { cloudLoggingProxy_v0 } = require('./cloudLoggingProxy.js');
 
-exports.cloudLoggingProxy_v0 = regionalFunctions
-  //const cloudLoggingProxy_v0 = regionalFunctions
-  .https.onCall(({ les, ignore }, context) => {
+exports.cloudLoggingProxy_v0 = regionalFunctions.https
+  .onCall(({ les, ignore }, context) => {
     const uid = context.auth?.uid;
 
     logger.debug("Logging request from:", uid || "(unknown user)");

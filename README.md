@@ -31,16 +31,14 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
 - **A computer** with the following tools installed:
 
-   - `node` v. 14.3 or later
+   - `node` v. 14.3+ or 16.x
    - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
    - Docker
 
   Docker is used for launching the Firebase Emulators, which are used both in development, testing and CI. Alternatively, one can install the `firebase-tools` CLI on one's machine.
   
-  For Windows development, we require the [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) environment with eg. Ubuntu LTS.[^1]
-
-[^1]: Also Docker Desktop requires WSL2 to be installed.
+  For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS.(*)
 
 - **A capable IDE**
 
@@ -68,6 +66,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   - if your application doesn't need Cloud Functions, remove them and deploy
   - even if you use Cloud Functions, chances are *there aren't actual costs* since the Firebase free tiers apply to the "Blaze" plan as well.
 
+*(\*) Docker Desktop for Windows itself requires WSL2.*
 
 ## Firebase
 

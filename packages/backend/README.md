@@ -14,17 +14,39 @@ Responsible for:
 
 ## Requirements
 
-- `npm`
-- Docker, or `firebase-tools` globally installed
+- Node 14 or 16
+- `npm` >= 7.7.0
 
-   >Note: We recommend `npm` 7.7.0+ due to some inconsistencies found with `npm` 6.
+   `npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
+
+- Docker Desktop
 
 <!-- 
 developed with:
 - macOS 11.4
 - node 16.2
 - npm 7.13
+
+- Docker Desktop 3.3.4 with: 1 CPU core, 1.5 GB RAM
 -->
+
+### Docker settings
+
+Using Docker makes launching Firebase Emulators a little bit (5..7 s) slower than if they were run natively. However, you don't need to restart the emulators that often, so this is deemed as tolerable.
+
+<!-- 13..16 vs. 8..9 s -->
+
+If you experience time-outs with the tests, check your Docker settings and/or restart it. We've noticed that performance with 1 CPU core may be better than with 2.
+
+Author's settings:
+
+- 1 CPU core
+- 1.5 GB RAM
+
+<!-- whisper
+As a native solution, you can use `npm run ci:start`, and `npm run ci`.
+-->
+
 
 ## Getting started
 
