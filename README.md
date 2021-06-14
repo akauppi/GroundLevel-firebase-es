@@ -17,10 +17,6 @@
 
 <br clear=all />
 
-<!-- maybe better without..?
-><font size="+5">🪤</font> Calling something "modern" seems to be a subjective term (always is). If you think ["Angular, React and Vue" are modern](https://stackoverflow.blog/2021/02/24/what-i-wish-i-had-known-about-single-page-applications/) (in 2021), maybe *post-modern* is the appropriate term for this repo.
--->
-
 This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making web applications in the 2020's can be, when modern tools and techniques are used.
 
 The repo showcases a full, social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. You can also see it as course material for modern web development (see [Training](TRAINING.md) for courses).
@@ -38,8 +34,12 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
   Docker is used for launching the Firebase Emulators, which are used both in development, testing and CI. Alternatively, one can install the `firebase-tools` CLI on one's machine.
   
-  For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS.(*)
+  For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS image.
 
+  ><details><summary>**Important note for Windows users..**</summary>
+  The folder you clone the repo to *must reside within the WSL2 file system*. Docker performance is dismal if you link to (or directly use) `/mnt/c/` or the like. Don't. Instead create the folder within WSL2 and have the IDE tools reach it, remotely.
+  </details>
+  
 - **A capable IDE**
 
   An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are two suggestions:
@@ -66,7 +66,6 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   - if your application doesn't need Cloud Functions, remove them and deploy
   - even if you use Cloud Functions, chances are *there aren't actual costs* since the Firebase free tiers apply to the "Blaze" plan as well.
 
-*(\*) Docker Desktop for Windows itself requires WSL2.*
 
 ## Firebase
 
@@ -130,18 +129,24 @@ $ npm install
 
 This installs some common packages, such as Firebase JS SDK. Subpackages use them from the root, and this is where you update their versions.
 
+```
+$ git submodule update
+```
+
+This updates the contents of `firebase-ci-builder.sub` submodule.
+
 
 ### Build the Docker image
 
-If you use Docker for running the Firebase emulators, do this:
+We use a Docker image for running Firebase Emulators. Before advancing, let's build that image:
 
 ```
-$ (cd firebase-ci-buildder.sub && make build)
+$ (cd firebase-ci-builder.sub && ./build)
 ...
  => => naming to docker.io/library/firebase-ci-builder:9.11.0-node16-npm7                                                                                                                                                                              0.0s 
 ```
 
-That builds a Docker image on your development machine that contains Firebase CLI, emulators (and JRE needed by them). This image is used by the sub-packages whenever Firebase Emulators are required.
+You don't need to push this image anywhere - it's enough that it resides on your development machine. This image is launched by the sub-packages whenever Firebase Emulators are required.
 
 >You can test it:
 >
@@ -150,42 +155,46 @@ That builds a Docker image on your development machine that contains Firebase CL
 9.11.0
 >```
 
+<!-- hidden
 Alternatively, you can use a native `firebase-tools` installation. See [Docker vs. native `firebase-tools`](Docker%20vs.%20native%20firebase-tools.md).
-
+-->
 
 ## Speed run 
 
 If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
-through the three subpackages, set up a Firebase project (and account), CI/CD to Cloud Build and end up having a clone of the sample application installed *on your Firebase account*, in the cloud.
+through the three sub-packages, set up a Firebase project (and account), CI/CD to Cloud Build and end up having a clone of the sample application installed *on your Firebase account*, in the cloud.
 
-Alternatively, you can study the individual sub-packages' `README`s and come back here later..
+Alternatively, you can study each of the individual sub-packages' `README`s (plus `ci`) and come back here later..
 
 
 ### Backend
 
 ```
-$ cd backend
+$ cd packages/backend
 $ npm install
 ...
 $ npm test
 ...
 ```
 
-The tests should pass, running against the Docker image we built.
+The tests should pass, running against the Docker image you built.
 
-Leave the backend running in its own terminal (speeds up our work in `app`, slightly):
+>**Windows users:**
+>
+>![](.images/defender-docker.png)
+>
+>If you get this warning about Docker Desktop, at least
+>
+>- **uncheck the "public networks" checkbox**. It's not needed.
+>
+>It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least **do not press OK** without removing that one checkbox.
 
-```
-$ npm run start
-...
-```
-
-Finally, `cd ..`.
+Let's proceed to the front end.
 
 ### App
 
 ```
-$ cd app
+$ cd ../app
 $ npm install
 ...
 $ npm run build
@@ -200,14 +209,12 @@ The output of this stage (in `vitebox/dist/`) *is* the web app. All the looks, s
 
 What's missing is the operational readiness that adds performance monitoring, central logging and crash detection to the app.
 
-`$ cd ..`
-
 ### App-deploy-ops
 
 This sub-package wraps the output of the "app" build to be ready for deployment.
 
 ```
-$ cd app-deploy-ops
+$ cd ../app-deploy-ops
 $ npm install
 ...
 $ npm run build
