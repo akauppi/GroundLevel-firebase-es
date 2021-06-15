@@ -56,6 +56,10 @@ steps:
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app-deploy-ops
 
 # --- Timeout
 #

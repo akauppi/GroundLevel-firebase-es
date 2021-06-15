@@ -22,8 +22,10 @@
 #
 
 substitutions:
-  _BUILDER_TAG: 9.11.0-node16-npm7
-  #_BUILDER_IMG: gcr.io/${PROJECT_ID}/firebase-ci-builder:9.11.0-node16-npm7
+  _BUILDER_TAG: 9.12.1-node16-npm7
+  #_BUILDER_IMG: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+  _CYPRESS_TAG: 9.12.1-7.4.0-14-7
+  #_CYPRESS_IMG: gcr.io/${PROJECT_ID}/firebase-cypress-node-npm:${_CYPRESS_TAG}
 
 steps:
 # DEBUG
@@ -47,16 +49,16 @@ steps:
   dir: packages/backend
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run ci']
+  args: ['run', 'ci:test']
   dir: packages/backend
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run lint']
+  args: ['run', 'lint']
   dir: packages/backend
 # DEPLOY
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run deploy']
+  args: ['run', 'deploy']
   dir: packages/backend
 
 # App
@@ -65,24 +67,34 @@ steps:
 #
 # tbd. Is it possible to skip, if neither 'package/app' nor 'package/app-deploy-ops' (nor 'tools', nor 'package.json') files changed.
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+# Note: By using the Cypress image also in 'npm install', we don't need to specifically disable loading the Cypress binary.
+#
+- name: gcr.io/$PROJECT_ID/firebase-cypress-node-npm:${_CYPRESS_TAG}
   entrypoint: npm
   args: ['install']
   dir: packages/app
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: gcr.io/$PROJECT_ID/firebase-cypress-node-npm:${_CYPRESS_TAG}
   entrypoint: npm
-  args: ['run ci']
+  args: ['run', 'ci:test']
   dir: packages/app
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run lint']
+  args: ['run', 'lint']
   dir: packages/app
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app-deploy-ops
 
 # App-deploy-ops
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['install']
+  dir: packages/app-deploy-ops
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'build']
   dir: packages/app-deploy-ops
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm

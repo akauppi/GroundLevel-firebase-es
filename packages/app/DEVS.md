@@ -39,3 +39,12 @@ Similarly, anything non-test is "support" but what the folder really carries are
 Sorry about this. It's normally a good deed to follow a tool's conventions. It makes moving between projects easier, for one.
 
 Let the author know if you feel strongly about this - or have a suggestion for a better naming convention!
+
+
+## Firebase `--project` affects Cloud Functions
+
+Only the project mentioned in the launch command gets Cloud Functions applied. The rest don't.
+
+One can use eg. Firestore with any number of projects, on the same emulator instance but Cloud Functions background logic is only connected to the project named at the launch command.
+
+>This behaviour isn't documented by Firebase. In fact, the author remembers seeing somewhere that the `--project` flag would "only affect hosting", but this is unconfirmed, without a source link. It does clearly affect Cloud Functions, as well.
