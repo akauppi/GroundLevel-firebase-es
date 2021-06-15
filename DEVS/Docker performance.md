@@ -61,7 +61,7 @@ Requirements:
 ||instead of|use this|
 |---|---|---|
 |backend|`npm run start`|`npm run ci:start`|
-||`npm test`|`npm run ci`|
+||`npm test`|`npm run ci:test`|
 |app|`npm run dev`|`npm run ci:dev`|
 
 Other commands (like `npm run test:rules:all` and `cypress run`/`npm test` for the app) are unchanged (both open the same ports).

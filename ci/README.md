@@ -6,36 +6,38 @@ All command line commands are expected to be run in the `ci` folder.
 
 For a PR to `master`:
 
-1. test `backend`
-2. test `app`
+1. If files in `backend` (or root `package.json`, or `tools`) changed:
+  - test `backend`
+2. If files in `app` changed:
+  - test `app`
 
-For changes to `master`:
+For changes already merged to `master`:
 
-1. If files in `backend` changed:
+1. If files in `backend` (or root `package.json`, or `tools`) changed:
   - deploy `backend`
 2. If files in `app` or `app-deploy-ops` changed:
   - build `app`
   - build `app-deploy-ops`
   - deploy `app-deploy-ops`
 
->Note: With Cloud Build, one cannot check or limit direct pushes to `master`. It's a convention that PRs should be used.
+>Note: With Cloud Build integrated with GitHub, one cannot restrict merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.
 
 <!-- author's note:
 
 We'd like to:
 - restrict merges to `master` altogether (#help: how is that possible?)
 - have two people approve PRs
+  - [ ] check what options GitHub itself provides
 -->
 
 ## Requirements
 
 - `gcloud`
 
+   <details><summary>Installation on macOS</summary>
    Follow [Installing Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
 	
-	>Note: At least earlier, on macOS, it was best to run the `./google-cloud-sdk/install.sh` in the folder that would remain the install target. 
-	>
-	>The author has `gcloud` under `~/bin/google-cloud-sdk`.
+	After unpacking, move the folder to a permament location (author uses `~/bin/google-cloud-sdk`). The installation is on that directory only, and uninstalling means removing the directory.
 
    ```
    $ gcloud --version
@@ -44,17 +46,70 @@ We'd like to:
    ```
 
    Update by: `gcloud components update`
+	</details>
+
+   <details><summary>Installation on Windows 10 + WSL2</summary>
+   tbd.. `#contribute`
+   </details>
 
 - Docker
 
-   Needed for building the builder image.
+   Needed for building the builders.
+
+
+### Set up a GCP project for CI/CD jobs
+
+The model recommended by the author is such:
+
+```
+         xxxxxx                     ┌─────────────────────┐      ┌────────────────────────┐
+    x   x     xxxx         deploy   │                     │      │                        │
+  xxxxxxx         xxxxxx  ┌─────────┤   Application       │      │   CI/CD project        │
+ xx    xx         x     x │         │   projects          │      │                        │   PR changed    GitHub repos
+x       x                xxx        │                     ├───┬──┤   - builder images     ◄────────────────     - PRs
+xx                         x        │   - deploy CI task  │   │  │   - PR CI tasks        │
+ xx                     xxx         │                     │   │  │     "does it pass?"    ├───────────────►
+  xxxxxxxxxxxxxxxxxxxxxxx           │                     │   │  │                        │   pass/fail
+                                    └─────────────────────┘   │  └────────────────────────┘
+                                                              │
+                                    ┌─────────────────────┐   │
+                                    │                     │   │              branch changed
+                                    │   ...               │   │   ◄────────────────────────────────────────
+                                    │                     ├───┤  
+                                    └─────────────────────┘   │
+                                                              │
+                                    ┌─────────────────────┐   │
+                                    │                     │   │
+                                    │   ...               │   │
+                                    │                     ├───┘
+                                    └─────────────────────┘
+```
+<!-- drawing with Asciiflow -->
+
+There is a single, CI/CD centric GCP project (e.g. `ci-builder`).
+
+It...
+
+- runs any "does this pass the tests?" CI tests (that don't need access rights to deploy)
+- holds the custom Docker images used in the organization 
+  - grants the other projects (below) access to its Container Registry
+
+In addition, each GCP project (responsible for a certain product's certain tier, e.g. `swapper-staging`) has a CI/CD aspect:
+
+- runs deployments, if the suitable branch changes.
+
+This organization seems light enough, yet flexible, to recommend. In the following text we expect you have it in place.
+
+>One benefit of the above model is that *deployment keys* don't need to be shared much (well, at all).
+
+<!-- tbd. Separate (and link to):
+Guidance on setting up the GCP projects.
+-->
 
 
 ### Log in to the GCP project
 
-To use `gcloud builds submit`, for example, you need to be logged in to the CI project (see "our model", below). Note that this *does not* need to be the same GCP project as used for the application's deployment.
-
-Thus, deployment keys (access eg. to the data) can be kept at a smaller group of people.
+To use `gcloud builds submit`, for example, you need to be logged in to the CI project. This can be either the central `ci-builder` or a product specific project - your call.
 
 ```
 $ gcloud auth login
@@ -66,52 +121,28 @@ Your active configuration is: [...]
 groundlevel-160221
 ```
 
-This should be the project id you use for the CI (running tests, storing Docker images).
+### Build the Builders
 
+The CI scripts require `ci-builder` Container Registry to have the following builder images:
 
-## Our model
+- `firebase-emulators:9.12.1-node16-npm7`
+- `firebase-emulators-cypress:9.12.1-7.5.0-node14-npm7`
 
-There are numerous ways one can set up CI/CD pipelines.
-
-The approach we are taken here is:
-
-- Use [Google Cloud Build GitHub Application](https://github.com/marketplace/google-cloud-build) to keep code in GitHub; run CI/CD workloads in Cloud Build
-
-   >Reasons:
-   >
-   >- Cloud Build uses Docker images as build steps; the author likes this abstraction.
-   >- Cloud Build has generous (120 build min/day) free tier
-
-- Within Cloud Build, we split the CI/CD workloads between two projects (this is optional):
-
-   - CI: runs tests, does not need deployment rights
-   - CD: the project itself, does deployment
-
-The split allows you to gather "just test" steps in one project, separate from the operational details. Then you can have "just deploy" projects for eg. staging and production (or only one).
-
-See [APPROACH.md](APPROACH.md) for more details.
-
-
-## See what is going out
+<details><summary>Instruction for building and pushing them..</summary>
 
 ```
-$ gcloud meta list-files-for-upload ..
+$ cd firebase-emulators.sub
+$ ./build
+$ ./push-to-gcr
+  # agree with the prompt...
 ```
 
-This set of files is controlled by `.gcloudignore` in the project root.
-
-
-## Build the Builder
-
-The `firebase-ci-builder:<tag>` builder used in `cloudbuild.*.yaml` files needs to be published to this GCP project's Container Registry.
-
 ```
-# in ../firebase-ci-builder.sub
-$ make build
-$ make push
+$ cd ../firebase-emulators-cypress.sub  # tbd.
 ```
+<!-- tbd. check the instructions; THIS IS REALLY LEFT UNDONE!! -->
+</details>
 
-Now Cloud Build can use it.
 
 ## GitHub Marketplace: set up Cloud Build integration
 
@@ -265,7 +296,7 @@ The same CI step takes care of deploying both backend and app.
 >*tbd. We might revisit this later, but it's important that if both change, backend is updated first.*
 
 
-## Run CI jobs manually
+## Run CI jobs manually (`cloud-build-local`)
 
 >You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
 
@@ -279,6 +310,8 @@ $ cloud-build-local  --config=cloudbuild.merged.yaml --dryrun=false ..
 ```
 -->
 
+## Run CI jobs manually II (`gcloud builds submit`)
+
 This works better (runs the build in the cloud):
 
 ```
@@ -287,10 +320,21 @@ $ gcloud builds submit --config=cloudbuild.master-pr.app.yaml ..
 
 This command packs the source files, runs the CI in the cloud. It saves you from `git commit` and awkward PRs just for testing.
 
+### See what is going out
 
-## More details..
+It makes sense to optimize the "tarball" going out. Not shipping unnecessary files speeds your debug cycles, and also saves storage space (Cloud Build keeps these around). 
 
-See [APPROACH.md](APPROACH.md) for details on why certain decisions were taken.
+```
+$ gcloud meta list-files-for-upload ..
+```
+
+This set of files is controlled by `.gcloudignore` in the project root.
+
+## Maintenance: clean up the tarballs
+
+*tbd. Where are they; what do we need to do?*
+
+`#contribute` by suggesting text, maybe?? ;M
 
 
 ## References

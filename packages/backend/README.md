@@ -34,18 +34,10 @@ developed with:
 
 Using Docker makes launching Firebase Emulators a little bit (5..7 s) slower than if they were run natively. However, you don't need to restart the emulators that often, so this is deemed as tolerable.
 
-<!-- 13..16 vs. 8..9 s -->
-
-If you experience time-outs with the tests, check your Docker settings and/or restart it. We've noticed that performance with 1 CPU core may be better than with 2.
-
-Author's settings:
-
-- 1 CPU core
-- 1.5 GB RAM
-
-<!-- whisper
-As a native solution, you can use `npm run ci:start`, and `npm run ci`.
+<!-- 13..16 vs. 8..9 s (on macOS) 
 -->
+
+>If you experience time-outs with the tests, see [DEVS/Docker Performance.md](../../DEVS/Docker%20Performance.md).
 
 
 ## Getting started
@@ -83,7 +75,7 @@ The above instructions require you to have Docker running.
 If you rather develop with Firebase CLI (globally installed), use these commands:
 
 ```
-$ npm run ci        # instead of 'npm test'
+$ npm run ci:test   # instead of 'npm test'
 $ npm run ci:start  # instead of 'npm start'
 ```
 

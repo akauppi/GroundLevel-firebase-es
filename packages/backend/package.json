@@ -18,12 +18,12 @@
     "test": "if port-is-taken --silent 4000 ; then npm run -s _ci_seq ; else npm run -s _test_1 ; fi",
     "_test_1": "concurrently --kill-others --success=first -n emul,test \"npm run -s start\" \"wait-for 4000 && npm test\"",
     "  - ": "",
-    "ci": "npm run -s ci:seq",
-    "ci:start": "npx firebase emulators:start --project=fns-test --only functions,firestore",
+    "ci:test": "npm run -s ci:seq",
     "ci:seq": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
     "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
     "//ci:par": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_par\"",
     "//_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
+    "ci:start": "npx firebase emulators:start --project=fns-test --only functions,firestore",
     "  -": "",
     "start": "docker-run \"firebase emulators:start --project=fns-test --only functions,firestore\"",
     "  -  ": "",
@@ -67,12 +67,6 @@
       "//preinstall": [
         "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
         "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
-      ],
-      "ci": [
-        "For the CI (as name implies), runs the tests against native 'firebase-tools'."
-      ],
-      "ci-prepare": [
-        "Something the CI should run, before it proceeds with 'npm run ci'."
       ],
       "start": [
         "The parameters are selected so that this can be used also for front end testing:",

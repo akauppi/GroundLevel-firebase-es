@@ -21,7 +21,7 @@
     "test": "if port-is-taken --silent 3000 ; then cypress run ; else npm run -s _test_1 ; fi",
     "_test_1": "concurrently --kill-others --success=first -n dev,cy \"npm run -s dev:local\" \"wait-for 3000 && npm run -s test\"",
     "  -": "",
-    "ci": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run\"",
+    "ci:test": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run\"",
     "ci:dev": "concurrently --kill-others-on-fail -n emul,init \"npm run --silent _ci_dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
     "_ci_dev_local_emul": "cd ../backend && firebase emulators:start --project=app --only auth,functions,firestore",
     "  - -": "",
