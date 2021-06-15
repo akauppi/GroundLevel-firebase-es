@@ -1,8 +1,8 @@
 #
-# builds/cloudbuild.pr.yaml
+# ci/cloudbuild.pr.app.yaml
 #
-# Triggers:
-#   - PR towards 'master' or 'staging' branch
+# Trigger:
+#   - PR is made or changed; changes affect 'packages/app' or 'packages/app-deploy-ops'
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -13,68 +13,53 @@
 #
 
 substitutions:
-  _BUILDER_TAG: 9.11.0-node16-npm7
+  _BUILDER_TAG: 9.12.1-node16-npm7
+  #_CYPRESS_IMAGE: cypress/included:7.4.0
 
-# Non-DRY and verbose, since we cannot use '<<: &anchor' and '<<: *anchor' YAML syntax.. 💧😥
-#
 steps:
-# DEBUG
-
 # Root install
 #
-# Note: 'patch' is added and used within the same CI step, since changes outside of '/workspace' don't carry from step to step.
+# Note: 'patch' (not part of the builder image) must be added and used within the same CI step, since changes outside
+#       of '/workspace' don't carry from step to step.
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: bash
   args: ['-c', 'apk --no-cache add patch && npm install']
 
-# Backend
+# --- Backend
 #
-# Install 'app' dependencies only if backend passes.
+# Do not care to test it - separate PR task does it.
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['install']
   dir: packages/backend
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['test']
-  dir: packages/backend
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run lint']
-  dir: packages/backend
 
-# App
+# --- App
 #
 # tbd. Cypress is not available on images based on Alpine.
 #     - track https://github.com/cypress-io/cypress/issues/419
-#     - build our own, based on Cypress node image (add JVM, emulators, ...)
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['install']
   dir: packages/app
-
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  env:
+  - 'CYPRESS_CACHE_FOLDER=/workspace/.tmp/Cypress'
+#- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
 #  entrypoint: npm
-#  args: ['test']
+#  args: ['run ci:test']
 #  dir: packages/app
-
+#  env:
+#  - 'CYPRESS_CACHE_FOLDER=/workspace/.tmp/Cypress'
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run lint']
+  args: ['run', 'lint']
   dir: packages/app
-
-# App-deploy-ops
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run lint']
-  dir: packages/app-deploy-ops
 
 # --- Timeout
 #
 # Local:        ...
-# Cloud Build:  2m58s (Cypress tests skipped)
+# Cloud Build:  1:52 (without Cypress tests)
 #
-timeout: 240s
+#timeout: 240s

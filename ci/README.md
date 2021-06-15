@@ -116,10 +116,24 @@ $ gcloud auth login
 ```
 
 ```
+$ gcloud projects list
+```
+
+Pick the right one, then:
+
+```
+$ gcloud config set project my-project-id
+```
+
+<!-- whisper
+Observe your current project by:
+
+```
 $ gcloud config get-value project
 Your active configuration is: [...]
-groundlevel-160221
+ci-builder-21
 ```
+-->
 
 ### Build the Builders
 
@@ -144,15 +158,14 @@ $ cd ../firebase-emulators-cypress.sub  # tbd.
 </details>
 
 
-## GitHub Marketplace: set up Cloud Build integration
+## GitHub Marketplace: enable Cloud Build application
 
-You need this, in order to create Cloud Build triggers on GitHub PRs:
+- [Google Cloud Build](https://github.com/marketplace/google-cloud-build) (GitHub Marketplace) application > `Enable`
+- Add your GitHub repo to the Cloud Build app (covers all GCP projects where Cloud Build is enabled)
 
-- Visit [GitHub Marketplace](https://github.com/marketplace)
-- Enable the "Google Cloud Build" application
-- Add your GitHub repo to the Cloud Build app
+You need this, in order to create Cloud Build triggers on GitHub PRs.
 
->Note: The UI uses the term "purchase", but installing this application should be completely free. The costs - if any - are based on your agreements with GitHub and Cloud Build.
+>Note: The UI uses the term "purchase", but installing the application is completely free (Jun 2021). The costs - if any - are based on your agreements with GitHub and Cloud Build.
 
 
 ## Cloud Build setup
@@ -177,39 +190,48 @@ The difference is marked in the table below, showing the details of setting up C
 *Without this, you run into problems. Google's instructions did not mention this step, for some reason. (May 2021)*
 
 
-### Grant Firebase IAM roles to the Cloud Build service account
+### Steps for the deploying project
 
-This is needed for the GCP projects handling deployment (not for the one simply running tests).
+For the GCP project that handles deployment (author recommends the deployment project itself), in addition to the above, do these steps:
+
+<details><summary>Grant Firebase IAM roles to the Cloud Build service account</summary>
 
 - Google Cloud console > `Cloud Build` > `Settings`
 - Change `Firebase Admin` to `Enabled`
 
 >![](.images/firebase-admin-enabled.png)
 
-<font color=orange>There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
+There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
 
-Get the number from the "Service account email" (above screenshot).
+- Get the number from the "Service account email" (above screenshot).
+- Using the Firebase project id:
 
-Use the Firebase project id.
+   ```
+   $ MEMBER=serviceAccount:337......369@cloudbuild.gserviceaccount.com
+   $ PROJECT_ID=...
+   $ gcloud iam service-accounts add-iam-policy-binding $PROJECT_ID@appspot.gserviceaccount.com --member=$MEMBER --role=roles/iam.serviceAccountUser
+   Updated IAM policy for serviceAccount [...]
+   ...
+   ```
 
->*Note: For using the `gcloud` command, you need to log in from your terminal. Rather, try enabling the `Service Account User` in the screenshot and `#help` make these instructions clearer. The idea is that you would not need to tie your local terminal to Google Cloud, at any stage (see APPROACH files).*
-
-```
-$ MEMBER=serviceAccount:337......369@cloudbuild.gserviceaccount.com
-$ PROJECT_ID=...
-$ gcloud iam service-accounts add-iam-policy-binding $PROJECT_ID@appspot.gserviceaccount.com --member=$MEMBER --role=roles/iam.serviceAccountUser
-Updated IAM policy for serviceAccount [...]
-...
-```
-
-With that, deploying a Cloud Function in Cloud Build succeeds. 😅
-
->Note: Would changing the `Service Account User` in the screenshot have done the same? Likely. 
+>Note:
 >
->Interestingly, the GUI does not change the state of `Service Account User` to `ENABLED` - maybe it contains more roles than the one we changed at the command line?
-</font>
+>You may consider doing this on a *separate local account* to not need to log in as the production account, ever. Think of it as admin-level stuff.
+>
+>Q: Is there a way to do this on the Google Cloud Console? We'd rather give those instructions. `#help`
 
-### Add "API Keys Admin" role to the Cloud Build service account
+```
+$ gcloud auth logout
+```
+
+>Note: Would changing the `Service Account User` in the screenshot have done the same? Likely. (tbd. test) 
+
+<!-- whisper
+Interestingly, the GUI does not change the state of `Service Account User` to `ENABLED` - maybe it contains more roles than the one we changed at the command line?
+-->
+</details>
+
+<details><summary>Add "API Keys Admin" role to the Cloud Build service account</summary>
 
 >*Note: [Deploying to Firebase](https://cloud.google.com/build/docs/deploying-builds/deploy-firebase) mentions this but the community Firebase builder `README` doesn't. Things might work without it, too?*
 
@@ -218,6 +240,7 @@ With that, deploying a Cloud Function in Cloud Build succeeds. 😅
 - Add the `API Keys Admin` role:
 
 >![](.images/add-api-keys-admin.png)
+</details>
 
 
 ## Create the triggers
@@ -232,11 +255,12 @@ GCP Console > (project) > `Cloud Build` > `Triggers` > `+ Create Trigger`
 
 For the GCP project responsible of running tests.
 
-||**`master-pr-backend`**|
+||`master-pr-backend`|
 |---|---|
 |Description|PR targets "master" with changes on the backend|
 |Event|(●) Pull Request (GitHub App only)|
 |**Source**|
+|Repository|*pick (\*)*|
 |Base branch|`^master$`|
 |Comment control|(●) Required except for owners and collaborators|
 |Included files filter (glob)|`packages/backend/**`, `package.json`, `tools/**`|
@@ -245,26 +269,45 @@ For the GCP project responsible of running tests.
 |Type|(●) Cloud Build configuration file (yaml or json)|
 |Location|(●) Repository: `ci/cloudbuild.master-pr.backend.yaml`|
 
->Hint: It makes sense to keep the name of the CI entry and the respective `yaml` file the same.
+It makes sense to keep the name of the CI entry and the respective `yaml` file the same (but the name cannot have a `.`).
 
-Below is a screenshot of the actual dialog (UI things may change):
+<p />
+
+>*(\*): The `Connect New Repository` uses a popup to connect GitHub Cloud Build Application and the Cloud Build project, to access a certain repo. THIS DOES NOT WORK ON SAFARI (unless popups are enabled). Follow setup below or use eg. Chrome for connecting a repo.*
+>
+><details><summary>Allow popups on Safari for `cloud.google.com`</summary>
+>![](.images/safari-enable-popup.png)
+><ul>
+>  <li>`Preferences` > `Websites` > `Pop-up Windows` (lowest in left pane)</li>
+>  <li>`cloud.google.com`: `Allow`</li>
+></ul> 
+></details>
+
+Screenshot of the actual dialog (UI things may change):
 
 >![](.images/edit-trigger.png)
 
-||**`master-pr-app`**|
+||`master-pr-app`|
 |---|---|
 |Description|PR that affects `packages/app`|
 |Event|(●) Pull Request (GitHub App only)|
 |**Source**|
+|Repository|*pick*|
 |Base branch|`^master$`|
 |Comment control|(●) Required except for owners and collaborators|
-|Included files filter (glob)|`packages/app/**`, `package.json`, `tools/**`|
+|Included files filter (glob)|`packages/app/**`|
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
 |Location|(●) Repository: `ci/cloudbuild.master-pr.app.yaml`|
 
-These two CI steps should allow seeing the 🟢🟠🔴 status of pull requests, targeting `master`.
+>Hint: The easiest way to do the secondary triggers is `⋮` > `Duplicate`.
+
+<p />
+
+>Note: We consciously have omitted changes to (only) `package.json` (in the root) and `tools/**` from running app tests. These *may* affect that such tests would break but it's relatively unlikely. **Tests do not need to be perfect**; it's enough that they are useful.
+
+These two CI steps now allow seeing the 🟢🟠🔴 status of pull requests that target `master`.
 
 **Test it!**
 
@@ -275,9 +318,15 @@ You should see these:
 <font color=red>...tbd...</font>
 
 
+<!-- #later (maybe move deployment stuff together???). tbd. check the details!!!
+
 ### Deploy
 
-For each GCP (also Firebase) project responsible of deployments.
+You may have 1..n deployment projects (eg. production and staging).
+
+Each such would listen to a different branch of the GitHub repo.
+
+Create these triggers in the project that gets deployed, itself. This way, you don't need to spread deployment rights. (blah-blah)
 
 ||**`master-merged`**|
 |---|---|
@@ -294,28 +343,29 @@ For each GCP (also Firebase) project responsible of deployments.
 The same CI step takes care of deploying both backend and app. 
 
 >*tbd. We might revisit this later, but it's important that if both change, backend is updated first.*
+-->
 
+## Run CI jobs manually (`cloud-build-local`; doesn't work)
 
-## Run CI jobs manually (`cloud-build-local`)
+You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
 
->You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
-
-<!-- details
 ```
-$ cloud-build-local  --config=cloudbuild.merged.yaml --dryrun=false ..
-2021/06/06 20:01:25 Warning: there are left over step volumes from a previous build, cleaning it.
+$ cloud-build-local  --config=cloudbuild.master-pr.backend.yaml --dryrun=false ..
 2021/06/06 20:01:31 Warning: The server docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
 2021/06/06 20:01:31 Warning: The client docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
 2021/06/06 20:02:34 Error copying source to docker volume: exit status 1
 ```
--->
+
+`cloud-build-local` seems to be pretty abandoned by Google, so the author looked further... 
+
+>`#help`: Anyone know how to fix this?
 
 ## Run CI jobs manually II (`gcloud builds submit`)
 
-This works better (runs the build in the cloud):
+This works (runs the build in the cloud; requires you to have logged into the GCP project):
 
 ```
-$ gcloud builds submit --config=cloudbuild.master-pr.app.yaml ..
+$ gcloud builds submit --config=cloudbuild.master-pr.backend.yaml ..
 ```
 
 This command packs the source files, runs the CI in the cloud. It saves you from `git commit` and awkward PRs just for testing.
