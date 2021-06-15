@@ -2,14 +2,16 @@
 
 ## What about IE11 support?
 
-It doesn't support ES6 modules. If you need IE11 support, it's fairly easily doable.
+It doesn't support ES6 modules.
+
+If you need it, here are some pointers.
 
 - Check out [@rollup/plugin-buble](https://github.com/rollup/plugins/tree/master/packages/buble) and take it to use
 - Change the Rollup output format from `esm` to e.g. `iife`
 
 You may need to experiment. Once done - and if you wish to maintain the work - it could be incorperated as an `ie11` branch.
 
-The reason this is not default is just avoiding any complexity. The template aims to be slender and smooth.
+The reason this is not default is just avoiding any complexity, and because the author doesn't have a need to support other than "evergreen" browsers.
 
 
 ## Firestore
@@ -65,19 +67,9 @@ Alternatives:
 The use of [regions](https://firebase.google.com/docs/functions/locations) (Firebase docs) is not well laid out. 
 
 - [ ] When and how should one use them?
-- [ ] Can we just ignore them at testing?
+- [x] Can we just ignore them at testing?
 - [ ] Why do regions need to be specified in code, per function. There doesn't seem to be a way to change the default from `us-central1`, is there?
 
-
-## Does Vue.js 3 have a corresponding thing to `renderError`?
-
-Vue.js 2 had this this - what's a similar way with Vue 3 (beta)? Do we need this?
-
-```
-  renderError: (h, err) => {  // pour runtime problems on the screen, if we have them (may help in development);
-                              // in production we may want to pour these to central monitoring
-    return h('pre', { style: { color: 'red' }}, err.message)    // has 'err.stack'
-```
 
 ## Vue.js 3: is the renderer optimized for changing object but fields remaining the same?
 

@@ -4,7 +4,7 @@
 * Usage:
 *   <<
 *     node --harmony-top-level-await --experimental-json-modules
-*       tools/... firebase.json
+*       tools/... {path-to-firebase-json}
 *   <<
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
@@ -15,7 +15,7 @@
 const [firebaseJson] = process.argv.slice(2);
 
 if (!firebaseJson) {
-  process.stderr.write(`\nUsage: node --harmony-top-level-await --experimental-json-modules ${ process.argv[1] } firebase.json\n`);
+  process.stderr.write(`\nUsage: node --harmony-top-level-await --experimental-json-modules ${ process.argv[1] } {path}/firebase.json\n`);
   process.exit(1);
 }
 

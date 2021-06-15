@@ -15,9 +15,10 @@ _WANT="7.7"
 
 # Pass always with Alpine - we know the image has npm high enough.
 #
-( 2>&1 sort --help) | grep -q 'BusyBox' && (
+if sort --help 2>&1 | grep BusyBox; then
   >&2 echo "Alpine: skipping npm version check ($_HAVE)."
-) && exit 0
+  exit 0
+fi
 
 printf "%s\n" "7.0" $_HAVE | sort -C -V || (
   >&2 echo "ERROR: Please upgrade to npm >= $_WANT"

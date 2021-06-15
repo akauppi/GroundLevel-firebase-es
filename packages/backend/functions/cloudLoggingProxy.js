@@ -4,6 +4,10 @@
 * Proxy for passing log entries to Cloud Logging. Back-end for the 'app-deploy-ops' proxy logging adapter.
 *
 * Note:
+*   'HttpsError' 'code' values must be from a particular set
+*     -> https://firebase.google.com/docs/reference/js/firebase.functions#functionserrorcode
+*
+* Note:
 *   We shouldn't need to do any Cloud Functions specific imports here; adaption done elsewhere.
 */
 const { EMULATION, logger, fail, failInvalidArgument } = require('./common.js');

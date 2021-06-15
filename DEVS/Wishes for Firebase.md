@@ -482,6 +482,15 @@ Work-arounds:
 2. Using import/export
 3. ...looking for the right way...
 
+## Firebase JS SDK 9.0.0-beta.X No `initializeFunctions`?
+
+Firebase 9.0.0-beta.{1..3} API is inconsistent.
+
+>For some reason, there is no `initializeFunctions` but the `getFunctions` takes parameters (which it doesn't, on other subpackages).
+
+```
+const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
+```
 
 ## References
 

@@ -278,7 +278,30 @@ Similar to the "check rules early" mentioned above.
 E.g. if we start with `--only functions,firestore`, only those boxes need to be visible in the UI.
 
 
+## Way to suppress the "Received SIGTERM 2 times" warning
+
+Running under Docker, this isn't relevant to our users:
+
+```
+[emul] ⚠  emulators: Received SIGTERM 2 times. You have forced the Emulator Suite to exit without waiting for 1 subprocess to finish. These processes may still be running on your machine: 
+[emul] 
+[emul] ┌────────────────────┬──────────────┬─────┐
+[emul] │ Emulator           │ Host:Port    │ PID │
+[emul] ├────────────────────┼──────────────┼─────┤
+[emul] │ Firestore Emulator │ 0.0.0.0:6767 │ 30  │
+[emul] └────────────────────┴──────────────┴─────┘
+[emul] 
+[emul] To force them to exit run:
+[emul] 
+[emul] kill 30
+```
+
+Would like to have a parameter (or `firebase.json` configuration) that allows this to be suppressed. Since we run under Docker, no unterminated processes will remain.
+
+
 ## `firebase emulators:start` behaves different from `emulators:exec`
+
+<!-- Note: This is no longer an issue for this project - we don't use `emulators:exec` at all. -->
 
 This is a surprise for developers.
 
@@ -319,13 +342,18 @@ That 2.4 seconds means I might not want to keep a project check in the `package.
 
 Not sure where it spends the time.
 
+>This has been reported, and Firebase are looking into it (`gcloud --version` is 2x faster than `firebase --version`). 
 
+>*Less of interest since we don't deal with an active Firebase project, any more (though CI runs will benefit).*
+
+
+<!-- Irrelevant, when going the Docker (no activation) way.
 ## Using `firebase use` in a monorepo
 
 Currently (`firebase` CLI 9.8.0), the activation of a project is per directory.
 
 How could we make it so that the folders `packages/*` each can use the same project, without the person needing to `firebase use --add` three times?
-
+-->
 
 ## Firebase Hosting Emulator: does it support `HEAD`?
 
@@ -360,4 +388,47 @@ Content-Length: 0
 ```
 
 This is when the same `http://localhost:3000` returns 200 for `GET`.
+
+
+## Cloud Functions (or Firestore) emulator: doesn't warm up at launch
+
+**Expected**
+
+Just launching emulators would provide consistent performance, as if the functions are warmed up.
+
+**Actual**
+
+In running the backend tests, tests dealing with Cloud Functions take considerably longer on the first run (run under Docker):
+
+```
+[test-fns]   userInfo shadowing
+[test-fns]     ✓ Central user information is distributed to a project where the user is a member (6395 ms)
+...
+[test-fns]   Can proxy application logs
+[test-fns]     ✓ good log entries (3040 ms)
+```
+
+vs. subsequent runs:
+
+```
+[test-fns]   userInfo shadowing
+[test-fns]     ✓ Central user information is distributed to a project where the user is a member (313 ms)
+...
+[test-fns]   Can proxy application logs
+[test-fns]     ✓ good log entries (112 ms)
+```
+
+- 20 and 27 times more
+
+**Why this matters**
+
+If the user is instructed to launch a backend server in a separate window, it would be reasonable to presume full and consistent behaviour from such launch onwards.
+
+This is not the case.
+
+While it makes sense in the cloud that Cloud Functions need to be warmed up, there is no benefit from this under emulation. The request is that the emulators be changed so that the "subsequent" (lesser) timings start instantly (or, at the least, some 5..10 seconds after) the server has started.
+
+---
+
+- [ ] Report to Firebase `#contribute`
 

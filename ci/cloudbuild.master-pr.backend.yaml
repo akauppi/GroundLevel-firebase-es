@@ -1,0 +1,50 @@
+#
+# ci/cloudbuild.master-pr.backend.yaml
+#
+# Triggers:
+#   - PR is made or changed; changes affect 'packages/backend' (or '/package.json', or 'tools/**')
+#
+# Cloud Build project:
+#   - Common CI builder (not project specific; no deploys!)
+#
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
+#
+#   - env.variables (just some):
+#     PWD=/workspace
+#     HOME=/builder/home
+#
+
+substitutions:
+  _BUILDER_TAG: 9.12.1-node16-npm7
+
+steps:
+# Root install
+#
+# Note: 'patch' is added and used within the same CI step, since changes outside of '/workspace' don't carry from step to step.
+#
+- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: bash
+  args: ['-c', 'apk --no-cache add patch && npm install']
+
+# Backend
+#
+- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['install']
+  dir: packages/backend
+- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'ci:test']
+  dir: packages/backend
+#- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+#  entrypoint: npm
+#  args: ['run', 'lint']
+#  dir: packages/backend
+
+# --- Timeout
+#
+# Local:        ...
+# Cloud Build:  1:51
+#
+timeout: 240s

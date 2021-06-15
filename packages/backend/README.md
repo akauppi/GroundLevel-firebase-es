@@ -7,22 +7,38 @@ Responsible for:
 - implementation and documentation of the back-end
    - data structures
    - access rights
+   - database back-end processes 
+   - proxying to Cloud Logging (ops)
 - testing the back-end
 
 
 ## Requirements
 
-- `npm`
-- Java Runtime Engine (JRE) "version 1.8 or later"
+- Node 14 or 16
+- `npm` >= 7.7.0
 
-   >Note: We recommend `npm` 7.7.0+ due to some inconsistencies found with `npm` 6. If you need to use `npm` 6, run `npm run prepare` manually.
+   `npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
+
+- Docker Desktop
 
 <!-- 
 developed with:
-- macOS 11.2
-- node 15.x
-- npm 7.9.x
+- macOS 11.4
+- node 16.2
+- npm 7.13
+
+- Docker Desktop 3.3.4 with: 1 CPU core, 1.5 GB RAM
 -->
+
+### Docker settings
+
+Using Docker makes launching Firebase Emulators a little bit (5..7 s) slower than if they were run natively. However, you don't need to restart the emulators that often, so this is deemed as tolerable.
+
+<!-- 13..16 vs. 8..9 s (on macOS) 
+-->
+
+>If you experience time-outs with the tests, see [DEVS/Docker Performance.md](../../DEVS/Docker%20Performance.md).
+
 
 ## Getting started
 
@@ -30,10 +46,8 @@ developed with:
 $ npm install
 ```
 
->Note: There is a separate `functions/node_modules` for the emulated Cloud Functions. Its packages will be installed/updated automatically, with this command.
-
 ```
-$ npm run ci
+$ npm test
 ```
 
 The tests should pass, or be skipped.
@@ -41,10 +55,10 @@ The tests should pass, or be skipped.
 ## Development workflow
 
 ```
-$ npm run start
+$ npm start
 ```
 
-This launches the Firebase emulator in one console, and automatically picks up changes to the sources.
+This launches the Firebase emulator in one terminal, and automatically picks up changes to the sources.
 
 You can then run individual tests against it (see `package.json` for the precise name of commands).
 
@@ -54,65 +68,26 @@ e.g.
 $ npm run test:fns:userInfo
 ```
 
+## Alternative: use native `firebase-tools`
+
+The above instructions require you to have Docker running.
+
+If you rather develop with Firebase CLI (globally installed), use these commands:
+
+```
+$ npm run ci:test   # instead of 'npm test'
+$ npm run ci:start  # instead of 'npm start'
+```
+
 ## Deploying
 
-### Let functions know their region
-
-Check your project's location either in [Firebase Console](https://console.firebase.google.com) > Project > App > ⚙️ > `Default GCP resource location`
-
-..or by:
-
-```
-$ npx firebase-tools apps:sdkconfig
-...
-firebase.initializeApp({
-  "projectId": "groundlevel-160221",
-   	 ...
-  "locationId": "europe-west6",
-    ...
-});
-```
-
-It seems the functions are not able to know this from Firebase itself; we need to set it to a config that the functions run with. This is a one time thing.
-
-```
-$ npx firebase-tools functions:config:set regions.0="europe-west6"   # use the 'locationId' from above
-```
-
-This setting is a one-time errand unless you change regions. You can now forget about it.
+Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
 
 
-### Actual deployment
+## Role of `npm run start`
 
-```
-$ npm run deploy
-...
+If you leave the `npm run start` running, it will be picked up by front-end development and testing (`packages/app`), as well.
 
-=== Deploying to 'groundlevel-160221'...
+If you don't, those tests will automatically restart the emulators.
 
-i  deploying firestore, functions
-i  firestore: reading indexes from ./firestore.indexes.json...
-i  cloud.firestore: checking ./firestore.rules for compilation errors...
-✔  cloud.firestore: rules file ./firestore.rules compiled successfully
-i  functions: ensuring required API cloudfunctions.googleapis.com is enabled...
-i  functions: ensuring required API cloudbuild.googleapis.com is enabled...
-✔  functions: required API cloudbuild.googleapis.com is enabled
-✔  functions: required API cloudfunctions.googleapis.com is enabled
-i  functions: preparing ./functions directory for uploading...
-i  functions: packaged ./functions (38.53 KB) for uploading
-✔  firestore: deployed indexes in ./firestore.indexes.json successfully
-i  firestore: latest version of ./firestore.rules already up to date, skipping upload...
-✔  functions: ./functions folder uploaded successfully
-✔  firestore: released rules ./firestore.rules to cloud.firestore
-...
-i  functions: creating Node.js 14 (Beta) function logs_v1(europe-west6)...
-✔  functions[logs_1(europe-west6)]: Successful delete operation. 
-i  functions: updating Node.js 14 (Beta) function userInfoShadow_2(europe-west6)...
-✔  functions[logs_v1(europe-west6)]: Successful create operation. 
-✔  functions[userInfoShadow_2(europe-west6)]: Successful update operation. 
-
-✔  Deploy complete!
-
-Project Console: https://console.firebase.google.com/project/groundlevel-160221/overview
-```
-
+It is up to you, which way of working you prefer, but now you know that the same instance is usable for both backend and front-end development.

@@ -43,13 +43,8 @@
     "postserve": "rm -f firebase.*.json",
     "postdeploy": "rm -f firebase.*.json",
     "--": "",
-    "prebuild": "npm run -s _prepare_env",
-    "prewatch": "npm run -s _prepare_env",
-    "  --": "",
     "_prepare_kind": "cat firebase.json | sed \"s/\\$SERVE_PATH/$KIND\\/out/\" > firebase.$KIND.json",
-    "_prepare_env": "node --harmony-top-level-await tools/gen-env.js > .env.js",
     "-- - ": "",
-    "//_checkActivation": "check-activation || ( >&2 echo \"ERROR: No active project. Please run 'npm run activate' at the repo root.\n\"; exit 8)",
     "_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)"
   },
   "dependencies": {
@@ -60,7 +55,6 @@
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
-    "@local/root": "file:../..",
     "@local/tools": "file:../../tools",
     "@rollup/plugin-alias": "^3.1.2",
     "@rollup/plugin-node-resolve": "^13.0.0",
@@ -93,11 +87,6 @@
       ],
       "vite": [
         "Needed for '[build|serve]:vite'"
-      ]
-    },
-    "devDependencies": {
-      "@local/root": [
-        "Brings binary commands of the root (in particular, 'firebase') to us."
       ]
     },
     "engines.node": [

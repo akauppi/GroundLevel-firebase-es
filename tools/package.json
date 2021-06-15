@@ -4,8 +4,9 @@
   "type": "module",
   "bin": {
     "abc": "./abc.sh",
-    "check-activation": "./check-activation.sh",
-    "port-is-free": "./port-is-free.sh",
+    "docker-run": "./docker-run.js",
+    "port-is-free": "./port-is.sh",
+    "port-is-taken": "./port-is.sh",
     "wait-for": "./wait-for.js"
   },
   "scripts": {

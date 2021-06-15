@@ -15,6 +15,7 @@ const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
 const opsPath = srcPath + "/ops";
 const adaptersPath = myPath + "/../adapters";
+const firebaseOnlineJs = myPath + "/../.firebase.online.js";
 
 const opsAliases = (() => {
   const pairs = readdirSync(opsPath).map( s => {    // 'central.js', 'perf.js'
@@ -32,6 +33,8 @@ const opsAliases = (() => {
 
 const aliases = { ...opsAliases,
   ["/@adapters"]: adaptersPath,
+  ["/@env"]: firebaseOnlineJs,
+
   //["/@src"]: srcPath
 };
 
