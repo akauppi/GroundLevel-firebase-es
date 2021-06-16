@@ -59,6 +59,15 @@ steps:
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['run', 'build']
+  dir: packages/app
+
+# --- App-deploy-ops
+#
+# Build (but no deploy)
+#
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'build']
   dir: packages/app-deploy-ops
 
 # --- Timeout
@@ -66,4 +75,4 @@ steps:
 # Local:        ...
 # Cloud Build:  1:52 (without Cypress tests)
 #
-#timeout: 240s
+timeout: 240s

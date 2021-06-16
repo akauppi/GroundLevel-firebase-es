@@ -25,7 +25,7 @@ describe ('Can proxy application logs', () => {
 
     const { data } = await fnLog({ les });
     expect(data).toBe(true);
-  });
+  }, 4000 /*needed until Cloud Functions are woken up! (3000 wasn't enough)*/ );
 });
 
 // Copy-pasted from 'app-deploy-ops/adapters':

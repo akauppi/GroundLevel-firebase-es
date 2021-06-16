@@ -64,9 +64,9 @@
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "eslint-plugin-vue": "^7.9.0",
-    "prettier": "2.3.0",
-    "sass": "^1.32.11",
+    "eslint-plugin-vue": "^7.11.1",
+    "prettier": "2.3.1",
+    "sass": "^1.35.1",
     "vite": "^2.3.7",
     "vue-eslint-parser": "^7.6.0"
   },
