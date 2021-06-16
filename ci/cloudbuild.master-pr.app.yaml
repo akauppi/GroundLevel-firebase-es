@@ -37,21 +37,22 @@ steps:
 
 # --- App
 #
-# tbd. Cypress is not available on images based on Alpine.
-#     - track https://github.com/cypress-io/cypress/issues/419
+# tbd. Once a Cypress image is available, _use it also for the install step_. This way, we don't need to deal with
+#     the binaries cache.
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['install']
   dir: packages/app
-  env:
-  - 'CYPRESS_CACHE_FOLDER=/workspace/.tmp/Cypress'
+  env: ['CYPRESS_INSTALL_BINARY=0']
 #- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
 #  entrypoint: npm
-#  args: ['run ci:test']
+#  args: ['install']
 #  dir: packages/app
-#  env:
-#  - 'CYPRESS_CACHE_FOLDER=/workspace/.tmp/Cypress'
+#- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
+#  entrypoint: npm
+#  args: ['run', 'ci:test']
+#  dir: packages/app
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['run', 'lint']
@@ -67,12 +68,16 @@ steps:
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
+  args: ['install']
+  dir: packages/app-deploy-ops
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
   args: ['run', 'build']
   dir: packages/app-deploy-ops
 
 # --- Timeout
 #
 # Local:        ...
-# Cloud Build:  1:52 (without Cypress tests)
+# Cloud Build:  2:03 (without Cypress tests)
 #
 timeout: 240s

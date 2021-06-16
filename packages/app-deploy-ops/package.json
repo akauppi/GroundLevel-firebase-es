@@ -38,7 +38,6 @@
     "//_prepare_vite": "KIND=vite npm run --silent _prepare_kind",
     "-- ": "",
     "klean": "rm -rf roll/out/*",
-    "//test": "abc",
     "-- -": "",
     "postserve": "rm -f firebase.*.json",
     "postdeploy": "rm -f firebase.*.json",

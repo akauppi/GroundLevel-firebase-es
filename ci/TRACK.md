@@ -8,3 +8,11 @@ If we can have Electron run on Alpine, a Cypress CI image could be built on top 
 
 Otherwise, we need two different kinds of images (Debian for Cypress).
 
+- [Alpine Linux support](https://github.com/cypress-io/cypress/issues/419) (Cypress issues)
+
+This would be the REAL THING!!
+
+- 💥💥 [Run Cypress Headless Without Binary](https://github.com/cypress-io/cypress/issues/1232) 💥💥
+
+>...if we supported Chrome headless (which we will)
+

@@ -311,11 +311,11 @@ These two CI steps now allow seeing the 🟢🟠🔴 status of pull requests tha
 
 **Test it!**
 
-Make a Pull Request in GitHub
+Make a Pull Request in GitHub.
 
-You should see these:
+You should see these (under `Checks`):
 
-<font color=red>...tbd...</font>
+![](.images/github-pr-checks.png)
 
 
 <!-- #later (maybe move deployment stuff together???). tbd. check the details!!!

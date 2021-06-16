@@ -13,27 +13,7 @@ Restart Docker. Retry.
 
 After the restart, the cleanup logic seems to pass, reliably.
 
-<!-- this was needed, before:
-
-```
-$ docker ps -a
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                    PORTS               NAMES
-bcbc08b57442        busybox             "sh"                     4 hours ago         Exited (0) 4 hours ago                        cloudbuild_vol_59342577-7885-416e-b3aa-a310d84af208-helper
-...
-```
-
-Pick the container id with `cloudbuild_` in its name.
-
-Restart Docker.
-
-```
-$ docker container stop bcbc08b57442
-$ docker container rm bcbc08b57442
-```
--->
-
-
-## Error 1
+## `cloud-build-local` error 1
 
 ```
 $ cloud-build-local -dryrun=false --config=ci/cloudbuild.pr.yaml .
@@ -49,7 +29,4 @@ No solution to this.
 
 Docker Desktop doesn't allow using certain Docker version.
 
-For the moment, cannot use `cloud-build-local`.
-
-
-<font color=red>You can run Docker directly, instead of `cloud-build-local`. See `DEVS.md`. The difference is that with `cloud-build-local` (which we'd prefer to use) files are copied, whereas with the Docker command we bind the host folder.</font>
+For the moment, cannot use `cloud-build-local`. Use `gcloud build submit` (runs the builds in the cloud), instead.
