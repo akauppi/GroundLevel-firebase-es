@@ -16,3 +16,5 @@ This would be the REAL THING!!
 
 >...if we supported Chrome headless (which we will)
 
+- [Separate Electron, Cypress app code, and ffmpeg into individual downloads](https://github.com/cypress-io/cypress/issues/3899)
+

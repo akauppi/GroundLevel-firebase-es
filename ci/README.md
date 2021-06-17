@@ -273,6 +273,8 @@ It makes sense to keep the name of the CI entry and the respective `yaml` file t
 
 <p />
 
+>![](.images/ci-connect.png)
+>
 >*(\*): The `Connect New Repository` uses a popup to connect GitHub Cloud Build Application and the Cloud Build project, to access a certain repo. THIS DOES NOT WORK ON SAFARI (unless popups are enabled). Follow setup below or use eg. Chrome for connecting a repo.*
 >
 ><details><summary>Allow popups on Safari for `cloud.google.com`</summary>
