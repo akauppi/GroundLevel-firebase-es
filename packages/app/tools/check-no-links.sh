@@ -17,6 +17,6 @@ set -euf -o pipefail
 
 # Also 'file:' references show as links, so we need to grep them out.
 #
-if [[ ! -z $(npm list | grep -- "->" | grep -v @local/ | grep -v @firebase | grep -v eslint@ | greå -v eslint-plugin-node@ ) ]]; then
+if [[ ! -z $(npm list | grep -- "->" | grep -v @local/ | grep -v @firebase | grep -v eslint@ | grep -v eslint-plugin-node@ ) ]]; then
   exit 7
 fi

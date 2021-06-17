@@ -20,3 +20,6 @@
 
 # Generated files
 /vitebox/.env.dev*
+
+# Copied from '/branding'; remove this line to use your own
+/vitebox/public/favicon.png

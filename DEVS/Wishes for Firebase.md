@@ -351,7 +351,7 @@ Would you be able to add this to the emulator / `@firebase/rules-unit-testing` s
 This makes the billing attestable.
 
 
-<!-- seems done in 8.8.1
+<!-- seems done in 8.8.1; confirmed: 9.12.1
 ## Cloud Functions emulator: could watch for changes
 
 Firebase emulator (firebase-tools 8.6.0) does not pick up changes to the functions sources.

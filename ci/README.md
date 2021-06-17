@@ -273,6 +273,8 @@ It makes sense to keep the name of the CI entry and the respective `yaml` file t
 
 <p />
 
+>![](.images/ci-connect.png)
+>
 >*(\*): The `Connect New Repository` uses a popup to connect GitHub Cloud Build Application and the Cloud Build project, to access a certain repo. THIS DOES NOT WORK ON SAFARI (unless popups are enabled). Follow setup below or use eg. Chrome for connecting a repo.*
 >
 ><details><summary>Allow popups on Safari for `cloud.google.com`</summary>
@@ -311,11 +313,11 @@ These two CI steps now allow seeing the 🟢🟠🔴 status of pull requests tha
 
 **Test it!**
 
-Make a Pull Request in GitHub
+Make a Pull Request in GitHub.
 
-You should see these:
+You should see these (under `Checks`):
 
-<font color=red>...tbd...</font>
+![](.images/github-pr-checks.png)
 
 
 <!-- #later (maybe move deployment stuff together???). tbd. check the details!!!

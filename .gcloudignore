@@ -16,8 +16,9 @@
 
 # ^-- Note: '#!include' is a command; not a comment!
 
-# No need for submodules
 /.gitmodules
+/ci/
+/firebase-ci-builder.sub/
 
 # Global '.gitignore' (of the author); not observed by Cloud Build defaults
 #
@@ -45,18 +46,24 @@ ui-debug.log
 .lock
 vitebox/dist/
 .screenshots/
-out/
+roll/out/*
+vite/out/*
 firebase.*.json
 stats.html
 *.~
 
-# Builds itself
-/builds/
-/ci/
+# Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
+# the folder in the root level (if CI run is involved).
+
+# Branding
+#
+# The '/branding/favicon.png' is needed, and since '.gcloudignore' doesn't seem to support exclusion by '!', we
+# use the naming of other files in there.
+#
+/branding/icon_*
 
 # Documentation-like folders (irrelevant for build)
 #
-/branding/
 /DEVS/
 /**/.images/
 *.md
@@ -67,6 +74,3 @@ stats.html
 
 # Possible left-overs
 *.tgz
-
-# Cruft
-/_*/

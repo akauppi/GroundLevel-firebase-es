@@ -32,7 +32,7 @@ describe("userInfo shadowing", () => {
     await collection("userInfo").doc("abc").set(william);
 
     await expect( eventually("projects/1/userInfo/abc") ).resolves.toContainObject(william);
-  }, 4000 );    // 300 ms
+  }, 6000 /*needed until Cloud Functions are woken up! (4000 wasn't enough)*/ );    // 300 ms
 
   test ('Central user information is not distributed to a project where the user is not a member', async () => {
 
