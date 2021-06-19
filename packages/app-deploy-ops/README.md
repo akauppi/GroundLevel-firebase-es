@@ -6,7 +6,8 @@ Adds:
 
 - `@ops/central` implementation that connects the app's logging calls to a cloud service
 - crash reporting
-- Firebase production initialization (including baking in the access values)
+- Firebase production initialization
+  - bakes in Firebase access values
 
 We get the application logic as a module dependency, and don't expect anything from it (apart from it needing Firebase initialized and an implementation for `@ops/central`). It can use any web framework, and any libraries.
 
@@ -24,11 +25,13 @@ Available integrations:
 
 You can tie logging to more than one logging adapter at any one time. This may be useful if evaluating vendors or transitioning between them.
 
-### Use of Firebase CLI
+<!-- DELME?
+### Relation to deployment
 
 For this sub-package, you need to log in to a Firebase project (instructions below).
 
 This project can be a staging project - you should only deal with the production instance via CI/CD. This allows you eg. to develop the operational wrapping, but often even being in this sub-package is not necessary: CI/CD takes your backend and app, and changes here are presumed to be rather rare.
+-->
 
 
 ## Requirements
@@ -44,6 +47,35 @@ $ (cd ../app && npm install && npm run build)
 **!!** We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy-ops`. If you change app sources, also rebuild it.
 
 
+### Provide `.env.js`
+
+The access values (Firebase configuration) are *baked into the front-end code* and therefore need to be known for the *build* step, for two reasons:
+
+- removes one critical round-path and makes the app score better on LightHouse
+- allows deployment to hosting providers other than Firebase (though this is likely not necessary)
+
+Provide the target deployment's access values in `.env.{default|...}.js` in this form:
+
+```
+const config = {
+  "projectId": "testing-123",
+  "appId": "...",
+  "locationId": "...",
+  "apiKey": "...",
+  "authDomain": "testing-123.firebaseapp.com",
+};
+export default config;
+```
+
+To work with multiple targets, have multiple such files (`.env.staging.js`, `.env.prod.js`) and set the `ENV` env.var. to define the target.
+
+>*Note: This convention is still under trial. `#feedback` is appreciated!*
+
+You may consider adding the configurations you use to version control (they are not secrets).
+
+<font color=red>*As you may sense, this part of the repo is not finished, yet. We need a smoother workflow for testing and deploying the front-end. Will be back, after CI/CD covers also deployment...*</font>
+
+
 ## Getting started
 
 Install dependencies:
@@ -52,99 +84,13 @@ Install dependencies:
 $ npm install
 ```
 
-Log into a Firebase (staging) project.
-
->This is needed even for building, since (for optimization) we bake the Firebase access values right into the artefact.
-
-```
-$ npx firebase login
-...
-$ npx firebase use --add
-```
-
-Pick a project you use for staging.
-
 Build for deployment:
 
 ```
-$ npm run build
+$ ENV=[production|staging|...] npm run build
 ...
 created roll/out in 8.1s
 ```
-
-<!-- skip (maybe move to later?)
-### Analysing the build
-
-After the command you have a ready-to-be-deployed web app under `roll/out`.
-
-```
-roll/out
-├── adapters-f273c2ba.js
-├── adapters-f273c2ba.js.map
-├── app
-│   ├── aside-keys-3fd8741c.js
-│   ├── aside-keys-3fd8741c.js.map
-│   ├── vue-01885567.js
-│   ├── vue-01885567.js.map
-│   ├── vue-router-5519ae70.js
-│   └── vue-router-5519ae70.js.map
-├── app.es-ed65462e.js
-├── app.es-ed65462e.js.map
-├── fatal.css
-├── favicon.png -> ../../node_modules/@local/app/vitebox/public/favicon.png
-├── firebase-5dc6e54f.js
-├── firebase-5dc6e54f.js.map
-├── firebase-auth-d6ea998a.js
-├── firebase-auth-d6ea998a.js.map
-├── firebase-firestore-90758cb6.js
-├── firebase-firestore-90758cb6.js.map
-├── firebase-performance-ce7d4c56.js
-├── firebase-performance-ce7d4c56.js.map
-├── index.html
-├── main-3feb35cf.js
-├── main-3feb35cf.js.map
-├── ops-ea693b58.js
-├── ops-ea693b58.js.map
-├── style.css -> ../../node_modules/@local/app/vitebox/dist/style.css
-├── tslib-9956b3d6.js
-├── tslib-9956b3d6.js.map
-└── worker
-    ├── proxy.worker-6f726de1.iife.js
-    ├── proxy.worker-6f726de1.iife.js.map
-    ├── proxy.worker-7e0f3ce5.js
-    └── proxy.worker-7e0f3ce5.js.map
-```
-
-The exact details may vary. This partitioning of JavaScript to ES modules is called *chunking*. You can chunk in many ways. It's controlled in the file `manualChunks.js`.
-
-Chunks are loaded in by `roll/out/index.html`:
-
-```
-    <link rel="modulepreload" href="main-3feb35cf.js">
-    <link rel="prefetch" as="script" href="adapters-f273c2ba.js">
-    <link rel="modulepreload" href="firebase-5dc6e54f.js">
-    <link rel="prefetch" as="script" href="ops-ea693b58.js">
-    <link rel="modulepreload" href="firebase-performance-ce7d4c56.js">
-    <link rel="prefetch" as="script" href="app.es-ed65462e.js">
-    <link rel="modulepreload" href="app/vue-01885567.js">
-    <link rel="modulepreload" href="firebase-auth-d6ea998a.js">
-    <link rel="modulepreload" href="firebase-firestore-90758cb6.js">
-    <link rel="modulepreload" href="app/aside-keys-3fd8741c.js">
-    <link rel="modulepreload" href="app/vue-router-5519ae70.js">
-    <link rel="modulepreload" href="tslib-9956b3d6.js">
-```
-
-Notice how some of the files are `modulepreload`ed whereas others are just `prefetch`ed.
-
-When the browser processes `index.html`, it can start *all* of these fetches at once. If the server is HTTP/2 capable (Firebase hosting is), you'll get *one delivery* for all of them.
-
-These should optimize your web app's loading time. It's always worth to measure those, to be sure.
-
-<_!-- tbd. make a reference to "/ops/" (or something else?) once we have sections on performance monitoring.
---_>
-
--->
-
 
 ### Try it out
 
@@ -158,16 +104,7 @@ i  hosting: Serving hosting files from: roll/out
 
 Visit [http://localhost:3012](http://localhost:3012) and you should see a UI.
 
->Note: The UI uses a backend deployed to the cloud.
->
->If you haven't deployed the back end, yet, head to `../backend` sister package and (remember you are logged in to the Firebase project):
->
->```
->$ npm run ci:deploy
->```
-
-*<font color=red>tbd. Doesn't work like that - update the instructions (maybe deploy from here?)</font>
-*
+>Note: The UI uses a backend deployed to the cloud. If you haven't done that yet, return to the root's `README` and the CI/CD documentation, to see how you want to place the back-end online.
 
 ### Watch mode
 
@@ -198,6 +135,19 @@ We have:
 
 ## Deploying
 
+<font color=red>*Deployment is in a bit of flux, right now. We're moving towards CI/CD guidance and away from needing to be logged into the Firebase CLI tool (or even have it!).*
+
+*You can use the below documentation, but need to first:*
+
+```
+$ npm install -g firebase-tools
+$ firebase auth login
+$ firebase use --add
+```
+
+*Hope that helps, for now.*
+</font>
+
 This shows how one can manually deploy the site to cloud. Such commands will be called by CI/CD, when one eg. merges new stuff to `master` in version control.
 
 ```
@@ -224,7 +174,6 @@ Hosting URL: https://groundlevel-160221.web.app
 You can now try the web app at the URL shown on the console:
 
 [https://&lt;<i>your project id</i>&gt;.web.app](https://YOUR-PROJECT-ID.web.app)
-
 
 ## Logging
 
@@ -266,9 +215,10 @@ Getting your application deployed is simply the beginning of your journey.
 The author hopes that this repo helped you to get *there* fast. 😋 
 But now what?
 
-Have a look at the [`ops`](../../ops) folder in this repo. It has documentation about how one can build operational prowness on top of a running product.
+Have a look at the [ops](../../ops) folder. It has documentation about how one can build operational prowness on top of a running product.
+
+<!-- tbd. ops is unfinished, but... didn't find better wording. :S -->
 
 Then... build features... test... deploy... monitor... 🔁
 
 Be your bugs be simple 🐞 and users friendly.
-

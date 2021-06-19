@@ -11,11 +11,13 @@ import {fileURLToPath} from 'url'
 import {readdirSync} from 'fs'
 import { resolve as pathResolve } from 'path'
 
+const env = process.env["ENV"];
+
 const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
 const opsPath = srcPath + "/ops";
 const adaptersPath = myPath + "/../adapters";
-const envPath = myPath + "/../.env.js";
+const envPath = myPath + `/../.env.${env}.js`;
 
 const opsAliases = (() => {
   const pairs = readdirSync(opsPath).map( s => {    // 'central.js', 'perf.js'

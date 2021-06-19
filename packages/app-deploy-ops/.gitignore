@@ -1,5 +1,3 @@
-/.env.js
-
 # output folders
 /vite/out/
 /roll/out/
@@ -16,5 +14,6 @@
 # temp files
 /firebase-debug.log
 
-# remove this line (and edit 'package.json') to have the access values in version control
-/.env.js
+# Remove of comment out, to add the entries to version control
+/.env.*.js
+
