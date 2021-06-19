@@ -1,5 +1,28 @@
 # Approach
 
+## Baking in the Firebase access values - why?
+
+Normally, Firebase hosting provides the access values at `/__/firebase/init.js[on]`.
+
+This is true also for our project, but it takes one extra network round trip to fetch those, and we prefer to avoid it. Instead:
+
+- you log into the Firebase project
+- build scripts read the Firebase access values (via `npx firebase apps:sdkconfig`), and inject them into the build
+
+Everyone's happy? 😊
+
+### Reasoning
+
+In the design of this repo, we have tried to avoid the need to "log in" to Firebase account (or to use the Firebase CLI at all, for that matter).
+
+Here is the exception. Even now:
+
+- you should use a staging account, not a production one. Leave that to CI/CD.
+- you only need to do this occasionally, if wanting to eg. test the application wrapping
+
+Most of your work is done in the `app` subpackage, and you don't need to be logged in.
+
+
 ## Pulling in App via npm
 
 This is pretty awesome!
@@ -90,3 +113,5 @@ This is not ideal. It means we need to cater for offline mode, transmission fail
 - [Collecting browser console logs in Stackdriver](https://medium.com/google-cloud/collecting-browser-console-logs-in-stackdriver-fa388a90d32b) (blog, Dec 2019)
 
    *Stackdriver was the earlier name for Cloud Logging*
+
+

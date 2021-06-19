@@ -16,5 +16,5 @@
 # temp files
 /firebase-debug.log
 
-# remove this line if you wish to have the setting in version control
-/.firebase.online.js
+# remove this line (and edit 'package.json') to have the access values in version control
+/.env.js

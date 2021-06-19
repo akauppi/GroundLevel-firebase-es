@@ -2,6 +2,8 @@
   "name": "@local/root",
   "private": true,
   "scripts": {
+    "createStagingJs": "(cd packages/backend && sh/create-staging.sh) > firebase.staging.js",
+    "- ": "",
     "no": "npm run -s _no0 && npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no0": "npm --prefix tools outdated",
     "_no1": "npm --prefix packages/app outdated",
@@ -18,7 +20,7 @@
   "devDependencies": {
     "eslint": "^7.28.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "9.0.0-beta.2"
+    "firebase": "^9.0.0-beta.5"
   },
   "//": {
     "": [

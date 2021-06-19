@@ -6,23 +6,43 @@ Adds:
 
 - `@ops/central` implementation that connects the app's logging calls to a cloud service
 - crash reporting
-- Firebase production initialization
+- Firebase production initialization (including baking in the access values)
 
 We get the application logic as a module dependency, and don't expect anything from it (apart from it needing Firebase initialized and an implementation for `@ops/central`). It can use any web framework, and any libraries.
 
+### Adapters
+
 Available integrations:
 
-||||
+||adapters|comments|
 |---|---|---|
-|Logging|[Cloud Logging](https://cloud.google.com/logging)|<font color=red>Status: under work</font>|
-|Crash reporting|Writes to the logs|
+|Logging|[Cloud Logging](https://cloud.google.com/logging)|
+|Crash reporting|tbd.|
+|Performance monitoring|tbd.|
+
+><font color=red>WARN: Adapters are still work-in-progress.</font>
 
 You can tie logging to more than one logging adapter at any one time. This may be useful if evaluating vendors or transitioning between them.
+
+### Use of Firebase CLI
+
+For this sub-package, you need to log in to a Firebase project (instructions below).
+
+This project can be a staging project - you should only deal with the production instance via CI/CD. This allows you eg. to develop the operational wrapping, but often even being in this sub-package is not necessary: CI/CD takes your backend and app, and changes here are presumed to be rather rare.
 
 
 ## Requirements
 
 - npm
+
+### Have the app built
+
+```
+$ (cd ../app && npm install && npm run build)
+```
+
+**!!** We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy-ops`. If you change app sources, also rebuild it.
+
 
 ## Getting started
 
@@ -32,11 +52,17 @@ Install dependencies:
 $ npm install
 ```
 
-Prepare and build `../app`:
+Log into a Firebase (staging) project.
+
+>This is needed even for building, since (for optimization) we bake the Firebase access values right into the artefact.
 
 ```
-$ (cd ../app && npm install && npm run build)
+$ npx firebase login
+...
+$ npx firebase use --add
 ```
+
+Pick a project you use for staging.
 
 Build for deployment:
 
@@ -46,6 +72,7 @@ $ npm run build
 created roll/out in 8.1s
 ```
 
+<!-- skip (maybe move to later?)
 ### Analysing the build
 
 After the command you have a ready-to-be-deployed web app under `roll/out`.
@@ -113,7 +140,9 @@ When the browser processes `index.html`, it can start *all* of these fetches at 
 
 These should optimize your web app's loading time. It's always worth to measure those, to be sure.
 
-<!-- tbd. make a reference to "/ops/" (or something else?) once we have sections on performance monitoring.
+<_!-- tbd. make a reference to "/ops/" (or something else?) once we have sections on performance monitoring.
+--_>
+
 -->
 
 
@@ -131,8 +160,14 @@ Visit [http://localhost:3012](http://localhost:3012) and you should see a UI.
 
 >Note: The UI uses a backend deployed to the cloud.
 >
->If you haven't deployed the back end, yet, head to `../backend` sister package and follow its instructions.
+>If you haven't deployed the back end, yet, head to `../backend` sister package and (remember you are logged in to the Firebase project):
+>
+>```
+>$ npm run ci:deploy
+>```
 
+*<font color=red>tbd. Doesn't work like that - update the instructions (maybe deploy from here?)</font>
+*
 
 ### Watch mode
 

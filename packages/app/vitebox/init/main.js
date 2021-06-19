@@ -72,10 +72,10 @@ async function initFirebaseLocal() {   // () => Promise of ()
 }
 
 /*
-* Running against an online project (staging or production); access values from '.firebase.online.js'.
+* Running against an online project; access values from 'firebase.staging.js'.
 */
 async function initFirebaseOnline() {
-  const { apiKey, appId, authDomain, projectId } = await import('../../.firebase.online.js').then( mod => mod.default );
+  const { apiKey, appId, authDomain, projectId } = await import('../../.firebase.staging.js').then( mod => mod.default );
     //
     // appId needed for Firebase Performance Monitoring (only)
 

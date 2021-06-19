@@ -40,6 +40,8 @@ steps:
 # tbd. Once a Cypress image is available, _use it also for the install step_. This way, we don't need to deal with
 #     the binaries cache.
 #
+# tbd. Eventually the '--headless' wouldn't be needed (Cypress is trying to make it the default for 'cypress run').
+#
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['install']
@@ -53,6 +55,7 @@ steps:
 #  entrypoint: npm
 #  args: ['run', 'ci:test']
 #  dir: packages/app
+#  env: [ 'CYPRESS_RUN_FLAGS="--browser chrome --headless"' ]
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['run', 'lint']
