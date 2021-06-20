@@ -65,19 +65,6 @@ steps:
   args: ['run', 'build']
   dir: packages/app
 
-# --- App-deploy-ops
-#
-# Build (but no deploy)
-#
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['install']
-  dir: packages/app-deploy-ops
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'build']
-  dir: packages/app-deploy-ops
-
 # --- Timeout
 #
 # Local:        ...
