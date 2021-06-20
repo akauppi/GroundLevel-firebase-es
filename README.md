@@ -253,6 +253,16 @@ There are two places in the development that require an online Firebase backend.
 
 To use these commands, a `firebase.staging.js` file needs to be created in the repo's root.
 
+<font color=orange>
+>*FLUX WARNING: 🤭🪣🧼*
+>
+>*'app-deploy-ops' doesn't use the 'firebase.staging.js' but has its own system.*
+>
+>*We should move towards a system where:*
+>
+>- *initial deployments (of also the front end) happen via CI; one can manually force such runs*
+>- *it's enough for both of the cases to just tell the project id; they'll then sniff the access values from the publicly available URL (since front-end is deployed)*
+</font>
 
 #### Alternative A: Create by Firebase CLI
 
