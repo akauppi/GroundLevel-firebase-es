@@ -227,34 +227,11 @@ Use this when:
 - you have a Firebase account
 - you want to sign in as a real user
 
-#### Security note
+#### Pre-condition: staging back-end is deployed
 
-Firebase web apps use certain access keys to identify themselves to the backend. Firebase hosting provides them at `/__/firebase/init.js[on]` but since we use Vite, those are placed at build time to `vitebox/.env.development`.
+The back-end `dev:online` works against is identified by the `../../firebase.staging.js` configuration.
 
-```
-# Access values for the Firebase project.
-# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev:online'.
-#
-VITE_API_KEY=AIza...-MIo
-VITE_APP_ID=1:337...:web:277...be8
-VITE_AUTH_DOMAIN=groundlevel-160221.firebaseapp.com
-VITE_PROJECT_ID=groundlevel-160221
-```
-
-Those values (API key and App id) are not exactly secret. This repo has been created in a way that you don't need to store them in the version control, but they are visible for anyone having access to your web app.
-
->Then again, you *might* want to store them in the version control. There's no harm in doing so - it cuts away one step that your developers don't need to make manually, and ensures they all work on the same cloud instance.
-
-The guidance on how to deal with these values varies a bit between Firebase and Google Identity Platform (superset of Firebase Auth):
-
-- [Learn about using and managing API keys for Firebase](https://firebase.google.com/docs/projects/api-keys) (Firebase docs)
-- Google Identity Platform: [Using API keys](https://cloud.google.com/docs/authentication/api-keys) (Google Cloud docs)
-
-   The author restricted their API key by:
-   1. Google Cloud console > `APIs & Services` > `Credentials` > `API Keys` > `Browser key (auto created by Firebase)` (click)
-   3. `API Restrictions` > `Restrict key` > `[x] Identity Toolkit API`
-
-   >![](.images/gip-api-restriction.png)
+If the file is not there, check the root `README` for instructions on how to place it (and how to manually deploy the backend).
 
 #### Launch! 🚀
 

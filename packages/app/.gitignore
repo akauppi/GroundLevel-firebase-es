@@ -12,8 +12,8 @@
 /firestore-debug.log
 /ui-debug.log
 
-# Firebase online access values (remove this, to have them in the version control)
-/.firebase.online.js
+# Firebase online access values (a link to repo root)
+/.firebase.staging.js
 
 # Cypress
 /.screenshots

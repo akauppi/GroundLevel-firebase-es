@@ -17,4 +17,6 @@ This would be the REAL THING!!
 >...if we supported Chrome headless (which we will)
 
 - [Separate Electron, Cypress app code, and ffmpeg into individual downloads](https://github.com/cypress-io/cypress/issues/3899)
+- [Running cypress in headless mode should not use xvfb](https://github.com/cypress-io/cypress/issues/16505)
 
+*Sum-up: Forget about Alpine - too hard. Focus on tracking where work on headless-friendliness goes. Then .. at some point (2022/23?) introduce a Docker image for the UI side testing. 👏👏*

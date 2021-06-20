@@ -225,31 +225,137 @@ There are no tests here.
 
 Next, in order to deploy the app (backend and front-end) we need a Firebase project.
 
-With the project in place, we *could* proceed with a manual deployment of the backend and front-end, but that involves tying your local developer terminal with credentials that allow full control of the Firebase project.
+## Deployment to staging
 
-This is seen as a potential security threat, as well as unnecessary, by the author.
+><img src=".images/staging.svg" width=500 />
 
-Instead, we set up the whole CI/CD pipeline already now, and let it do the deployments for you.
+For development, it is good to have a project online where you can see your changes in real environment. These are called "staging" projects and we'll set up one now, for you / your team.
+
+>Note: You can also set up just one project, but in a realistic scenario you want to restrict access to users' data and therefore shift production projects away from development, eg. so that deployment to them happens only via CI/CD.
+>
+>Some developers may be fond of "dev" environments. With Firebase Emulators doing a good job for development, the need for such is reduced, but if you need one, it's just setting up another staging environment (for the person or team needing it). That is, you can have any number of staging environments you want.
 
 
-### Create a Firebase project
+### 1. Create a Firebase project
 
-Follow the instructions in the wiki > [0.1 Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN%200.1-firebase) to create a project.
+Follow the instructions in [0.1 Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (Wiki).
 
 >You *will* need a credit card for creating the "Blaze" plan. If you don't want to do that yet, choose the free plan and continue as far as you can. 👍
 
+### 2. Create a `firebase.staging.js` file
 
-### Setting up CI/CD
+There are two places in the development that require an online Firebase backend.
 
-See the [ci/README](ci/README.md) for instructions on how to set up the CI/CD pipeline.
+||command|comments|
+|---|---|---|
+|`app`|`npm run dev:online`|Development against a cloud back-end|
+|`app-deploy-ops`|`npm run serve`|Checking how the deployment candidate works, before deploying it|
+
+To use these commands, a `firebase.staging.js` file needs to be created in the repo's root.
+
+<font color=orange>
+>*FLUX WARNING: 🤭🪣🧼*
+>
+>*'app-deploy-ops' doesn't use the 'firebase.staging.js' but has its own system.*
+>
+>*We should move towards a system where:*
+>
+>- *initial deployments (of also the front end) happen via CI; one can manually force such runs*
+>- *it's enough for both of the cases to just tell the project id; they'll then sniff the access values from the publicly available URL (since front-end is deployed)*
+</font>
+
+#### Alternative A: Create by Firebase CLI
+
+```
+$ (cd packages/backend && npx firebase-tools use --add)
+... select the appropriate project ...
+```
+
+>Note: The `npx firebase-tools use --add` "must be run from a Firebase project directory". We have two such: `packages/backend` and `packages/app-deploy-ops`.
+>These two are *not* connected which means you need to separately select the project in both of them. This is due to the Firebase toolchain that doesn't really know the concept of a monorepo. For now, it's enough we've set the project in the `packages/backend` folder.
+
+```
+$ npm run createStagingJs
+```
+
+That creates the file.
+
+
+#### Alternative B: Copy-paste from online
+
+You can also just create the file by hand.
+
+- Visit Firebase Console > (project) > `⚙️` `Project settings` > `Your apps` > `SDK setup and configuration` > `◉ Config`
+
+   ![](.images/firebase-console-app-values.png)
+
+With data from there, create a `firebase.staging.js` file of this kind:
+
+```
+const config = {
+  "projectId": "test-staging-15",
+  "appId": "...",
+  "locationId": "...",
+  "apiKey": "...",
+  "authDomain": "test-staging-15.firebaseapp.com",
+};
+export default config;
+```
+
+This file is now used by both `packages/app` and `packages/app-deploy-ops`, to know where to find a backend in the cloud. Next, let's deploy one.
+
+
+### 3. Deploy the backend
+
+```
+$ cd packages/backend
+
+$ npx firebase-tools use --add    # ..unless you already did this
+
+$ npx firebase-tools deploy --only functions,firestore
+```
+
+That should deploy the Firestore Security Rules, index settings and Cloud Functions.
+
+Let's try it!
+
+```
+$ cd ../app
+
+$ npm run dev:online
+...
+```
+
+This command should now work, and at [localhost:3001](http://localhost:3001) you have an app with a cloud-backed back-end.
+
+**This may be your first deployment**. Let's celebrate for a while!! 🎉🎉🎪🤹‍♀️🎺
+
+
+### 4. Sharing the staging (optional)
+
+Now that the back-end is deployed, you can easily share it with the team by simply adding `firebase.staging.js` to the version control.
+
+- edit `.gitignore` and remove (or comment out) the line excluding `firebase.staging.js`
+- add `firebase.staging.js` to the git repo
+- edit `package.json`; remove or comment out the `createStagingJs` target so the file won't get accidentially overridden
+- remove `packages/backend/sh/create-staging.sh` since it's no longer required
+
+This is useful if you want the whole team to always share the same staging environment.
+
+>Note: The values are not really secrets. Anyone having access to your web app (before login) is able to figure them out.
+
+
+
+## Setting up CI/CD
+
+Production deployments are intended to be done using CI/CD. 
+
+See [ci/README](ci/README.md) for instructions on how to set up a CI/CD pipeline.
 
 This expects you to have a GitHub fork of the repo, and to want to use Cloud Build for running the CI/CD.
 
 Also other vendors provide cloud CI/CD. GitHub has one, and setting it up is simpler than the dance needed to get two cloud services to collaborate. Using Cloud Build was selected because of the Firebase Google background, and because it allows Docker images to be used as build steps.
 
-<!-- tbd....
-If you have problems, see [Manual deployment](Manual%20deployment.md).
--->
 
 ### Trying your deployment
 
