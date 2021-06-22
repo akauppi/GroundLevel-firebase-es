@@ -96,7 +96,6 @@ steps:
 
 # --- Timeout
 #
-# Local:        ...
-# Cloud Build:  5:24
+# Cloud Build:  5:34
 #
 timeout: 600s
