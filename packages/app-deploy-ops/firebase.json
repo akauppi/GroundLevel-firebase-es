@@ -13,6 +13,15 @@
         "destination": "/new-sample",
         "type": 301
       }
+    ],
+    "headers": [
+      {
+        "source" : "**/*.@(js|map)",
+        "headers" : [ { "key" : "Cache-Control", "value" : "max-age=604800" } ]
+      }, {
+        "source" : "**/*.@(jpg|jpeg|gif|png)",
+        "headers" : [ { "key" : "Cache-Control", "value" : "max-age=604800" } ]
+      }
     ]
   },
 
@@ -33,6 +42,16 @@
     "hosting.redirects": [
       "If you change the app's routing, consider adding a redirect so that users' existing bookmarks and what-not",
       "can remain functional, despite the change (if it's just a rework)."
+    ],
+    "hosting.headers": [
+      "- Google recommends \"one week and preferably up to one year for static assets\" cache times.",
+      "- Firebase Hosting defaults to 1h.",
+      "- LightHouse mentions about the 1h and suggests to raise it.",
+      "",
+      "Note: Keep 'index.html' at the default (1h). This is likely good for the CDN (so not every fetch leads all the",
+      "     way to the Firebase Hosting).",
+      "",
+      "See -> https://stackoverflow.com/questions/40375694/how-to-leverage-browser-caching-in-firebase-hosting"
     ]
   }
 }

@@ -12,13 +12,12 @@
     "-- ": "",
     "preinstall": "sh/npm-version-check.sh && npm run -s _preinstall1",
     "_preinstall1": "cp branding/favicon.png packages/app/vitebox/public/",
-    "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2 && npm run -s _postinstall3",
+    "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2",
     "_postinstall1": "npm --prefix tools install",
-    "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh",
-    "_postinstall3": "test -z \"$BUILD_ID\" || ./sh/hack.sh"
+    "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
   },
   "devDependencies": {
-    "eslint": "^7.28.0",
+    "eslint": "^7.29.0",
     "eslint-plugin-node": "^11.1.0",
     "firebase": "^9.0.0-beta.5"
   },
@@ -31,7 +30,7 @@
       "submodules (so if you use a package in two subpackages, it does not mean you must declare it here)."
     ],
     "scripts": {
-      "$BUILD_ID": "Used as an indication of Cloud Build."
+      "$BUILD_ID": "Can be used as an indication of Cloud Build."
     }
   }
 }

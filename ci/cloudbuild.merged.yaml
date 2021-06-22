@@ -2,12 +2,15 @@
 # ci/cloudbuild.merged.yaml
 #
 # Triggers:
-#   - new stuff is merged either to 'master' or 'staging' branch
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**',
+#     'packages/app/**', 'packages/app-deploy-ops/**', root 'package.json' or 'tools'
+#
+# GCP Project:
+#   Intended to be run in the *same* GCP project that carries the Firebase deployment.
 #
 # Responsibility:
-#   - run tests (once more..) and
-#   - deploy the backend if any backend files changed
-#   - package and deploy the front end if any 'app' or 'app-deploy-ops' files changed
+#   - test and deploy backend
+#   - (if that succeeded) test, build and deploy front-end
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -17,31 +20,27 @@
 #     HOME=/builder/home
 #
 # Note:
-#   This approach should already support multiple stages (production; staging), in that those likely are different
-#   Firebase projects, and as such carry their own CI setups. They'll track the same GitHub, but different branches.
+#   This approach causes unnecessary deployments (we don't have a way to tell, within the script, whether the changes
+#   were on the backend or front-end side), but it does keep the order of deployments.
 #
-
+#   Doing two scripts in parallel could lead to a situation where the front-end is deployed prior to its (with new
+#   features) back-end being available.
+#
+#   See 'ci/APPROACH.md' for a deeper discussion...
+#
 substitutions:
   _BUILDER_TAG: 9.12.1-node16-npm7
   #_BUILDER_IMG: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-  _CYPRESS_TAG: 9.12.1-7.4.0-14-7
-  #_CYPRESS_IMG: gcr.io/${PROJECT_ID}/firebase-cypress-node-npm:${_CYPRESS_TAG}
 
 steps:
-# DEBUG
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-#  entrypoint: bash
-#  args: ['-c', 'echo', '1: ${BRANCH_NAME} 2: ${$_HEAD_BRANCH} 3: ${$_BASE_BRANCH}']
-
 # Root install
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['install']
+  entrypoint: bash
+  args: ['-c', 'apk --no-cache add patch && npm install']
 
 # Backend
 #
-# tbd. Can we check If backend files are unchanged, and skip this? Alternatively, two 'merged' jobs but the backend
-#     one should be run first. #ask
+# (keep similar to 'cloudbuild.master-pr.backend.yaml')
 #
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
@@ -50,41 +49,36 @@ steps:
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['run', 'ci:test']
-  dir: packages/backend
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'lint']
   dir: packages/backend
 # DEPLOY
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'deploy']
+  entrypoint: firebase
+  args: ['use', '$PROJECT_ID']
   dir: packages/backend
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'ci:deploy']
+  dir: packages/backend
+
+#?
+#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+#  entrypoint: firebase
+#  args: ['deploy', '--project', '$PROJECT_ID', '--only', 'functions,firestore']
+#  dir: packages/backend
 
 # App
 #
-# tbd. Cypress image needed - see #39
+# (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
 #
-# tbd. Is it possible to skip, if neither 'package/app' nor 'package/app-deploy-ops' (nor 'tools', nor 'package.json') files changed.
-#
-# Note: By using the Cypress image also in 'npm install', we don't need to specifically disable loading the Cypress binary.
-#
-- name: gcr.io/$PROJECT_ID/firebase-cypress-node-npm:${_CYPRESS_TAG}
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['install']
   dir: packages/app
-- name: gcr.io/$PROJECT_ID/firebase-cypress-node-npm:${_CYPRESS_TAG}
-  entrypoint: npm
-  args: ['run', 'ci:test']
-  dir: packages/app
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'lint']
-  dir: packages/app
+  env: ['CYPRESS_INSTALL_BINARY=0']
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
   args: ['run', 'build']
-  dir: packages/app-deploy-ops
+  dir: packages/app
 
 # App-deploy-ops
 #
@@ -93,12 +87,17 @@ steps:
   args: ['install']
   dir: packages/app-deploy-ops
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'build']
+  entrypoint: firebase
+  args: ['use', '$PROJECT_ID']
   dir: packages/app-deploy-ops
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run', 'deploy']
+  args: ['run', 'build']
+  dir: packages/app-deploy-ops
+# DEPLOY
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'ci:deploy']
   dir: packages/app-deploy-ops
 
 # --- Timeout
@@ -106,4 +105,4 @@ steps:
 # Local:        ...
 # Cloud Build:  ...
 #
-timeout: 240s
+#timeout: 600s

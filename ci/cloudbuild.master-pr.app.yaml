@@ -4,6 +4,9 @@
 # Trigger:
 #   - PR is made or changed; changes affect 'packages/app' or 'packages/app-deploy-ops'
 #
+# Cloud Build project:
+#   - Common CI builder (not project specific; no deploys!)
+#
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #

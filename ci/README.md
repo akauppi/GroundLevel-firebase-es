@@ -177,8 +177,7 @@ You can either:
 
 The difference is marked in the table below, showing the details of setting up Cloud Build tasks. Execute the setup for each of these GCP projects.
 
-
-### Enable `Cloud Build API` 
+### Enable APIs
 
 - [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
 - `+ Enable APIs and Services`
@@ -189,6 +188,14 @@ The difference is marked in the table below, showing the details of setting up C
 
 *Without this, you run into problems. Google's instructions did not mention this step, for some reason. (May 2021)*
 
+Also check that the following are enabled:
+
+  - Firebase Management API
+  - Firebase Hosting API
+  - Cloud Resource Manager API
+
+<!-- from: https://cloud.google.com/build/docs/deploying-builds/deploy-firebase#before_you_begin
+-->
 
 ### Steps for the deploying project
 
@@ -367,10 +374,14 @@ $ cloud-build-local  --config=cloudbuild.master-pr.backend.yaml --dryrun=false .
 This works (runs the build in the cloud; requires you to have logged into the GCP project):
 
 ```
-$ gcloud builds submit --config=cloudbuild.master-pr.backend.yaml ..
+$ gcloud builds submit --config=cloudbuild.master-pr.{app|backend}.yaml ..
 ```
 
-This command packs the source files, runs the CI in the cloud. It saves you from `git commit` and awkward PRs just for testing.
+```
+$ gcloud builds submit --config=cloudbuild.merged.yaml ..
+```
+
+These commands pack the source files, and run the CI in the cloud. They save you from `git commit` and awkward PRs just for testing. :)
 
 ### See what is going out
 
@@ -381,6 +392,7 @@ $ gcloud meta list-files-for-upload ..
 ```
 
 This set of files is controlled by `.gcloudignore` in the project root.
+
 
 ## Maintenance: clean up the tarballs
 
