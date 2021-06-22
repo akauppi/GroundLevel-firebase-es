@@ -40,11 +40,12 @@
     " -- ": "",
     "lint": "eslint .",
     " - -": "",
-    "ci:deploy": "npm run -s _prepFunctions && firebase deploy --only functions,firestore",
-    "_prepFunctions": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
+    "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
+    "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
     " - --": "",
-    "prestart": "npm --prefix functions install",
-    "preci:start": "npm run -s prestart"
+    "prestart": "npm run -s _prepFunctions",
+    "preci:start": "npm run -s _prepFunctions",
+    "_prepFunctions": "npm --prefix functions install"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",

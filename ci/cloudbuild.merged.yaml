@@ -60,12 +60,6 @@ steps:
   args: ['run', 'ci:deploy']
   dir: packages/backend
 
-#?
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-#  entrypoint: firebase
-#  args: ['deploy', '--project', '$PROJECT_ID', '--only', 'functions,firestore']
-#  dir: packages/backend
-
 # App
 #
 # (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
@@ -92,7 +86,7 @@ steps:
   dir: packages/app-deploy-ops
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
   entrypoint: npm
-  args: ['run', 'build']
+  args: ['run', 'ci:build']
   dir: packages/app-deploy-ops
 # DEPLOY
 - name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
@@ -103,6 +97,6 @@ steps:
 # --- Timeout
 #
 # Local:        ...
-# Cloud Build:  ...
+# Cloud Build:  5:24
 #
-#timeout: 600s
+timeout: 600s
