@@ -40,7 +40,8 @@
     " -- ": "",
     "lint": "eslint .",
     " - -": "",
-    "ci:deploy": "firebase deploy --only functions,firestore",
+    "ci:deploy": "npm run -s _prepFunctions && firebase deploy --only functions,firestore",
+    "_prepFunctions": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
     " - --": "",
     "prestart": "npm --prefix functions install",
     "preci:start": "npm run -s prestart"

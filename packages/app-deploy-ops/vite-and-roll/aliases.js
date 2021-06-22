@@ -17,7 +17,7 @@ const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
 const opsPath = srcPath + "/ops";
 const adaptersPath = myPath + "/../adapters";
-const envPath = myPath + `/../.env.${env}.js`;
+const envPath = myPath + `/../.env.${env ?? 'ci'}.js`;
 
 const opsAliases = (() => {
   const pairs = readdirSync(opsPath).map( s => {    // 'central.js', 'perf.js'

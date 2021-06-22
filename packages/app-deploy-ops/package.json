@@ -13,7 +13,7 @@
     "build": "npm run --silent build:roll",
     "serve": "npm run --silent serve:roll",
     "watch": "npm run --silent watch:roll",
-    "deploy": "npm run --silent deploy:roll",
+    "klean": "rm -rf roll/out/*",
     "  -": "",
     "watch:roll": "concurrently -k -n roll,host \"npm run --silent _watchRoll\" \"npm run --silent serve:roll\"",
     "_watchRoll": "npm run --silent _prepRoll && rollup -c roll/rollup.config.js -w",
@@ -25,10 +25,11 @@
     "_prepRollOut2": "(cd roll/out && ln -fs ../../node_modules/@local/app/vitebox/dist/*.css .)",
     "  - --": "",
     "serve:roll": "firebase serve --config firebase.roll.json --only hosting --host 0.0.0.0 --port 3012",
-    "deploy:roll": "firebase deploy --config firebase.roll.json --only hosting",
     "  - -- ": "",
+    "ci:deploy": "npm run -s _ci:deploy:roll",
+    "_ci:deploy:roll": "npm run -s _prepare_roll && firebase deploy --config firebase.roll.json --only hosting",
+    "- -": "",
     "preserve:roll": "(PORT=3012 npm run --silent _checkPortIsFree) && npm run --silent _prepare_roll",
-    "predeploy:roll": "npm run --silent _prepare_roll",
     "_prepare_roll": "KIND=roll npm run -s _prepare_kind",
     " - - --": "",
     "//build:vite": "vite build -c vite/vite.config.js",
@@ -39,15 +40,13 @@
     "//predeploy:vite": "npm run --silent _prepare_vite",
     "//_prepare_vite": "KIND=vite npm run -s _prepare_kind",
     "-- ": "",
-    "klean": "rm -rf roll/out/*",
-    "-- -": "",
+    "prebuild": "[[ -z \"$BUILD_ID\" ]] || node tools/gen-ci-env.js > .env.ci.js",
     "postserve": "rm -f firebase.*.json",
-    "postdeploy": "rm -f firebase.*.json",
     "--": "",
     "_prepare_kind": "cat firebase.json | sed \"s/\\$SERVE_PATH/$KIND\\/out/\" > firebase.$KIND.json",
     "-- - ": "",
-    "_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; exit 6)",
-    "_checkEnv": "[[ -f ./.env.${ENV-default}.js ]] || ( >&2 echo \"ERROR: '.env.${ENV-default}.js' is missing; see 'README.md' on how to create one.\n\"; exit 9)"
+    "_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; false)",
+    "_checkEnv": "[[ -f ./.env.${ENV-ci}.js ]] || ( >&2 echo \"ERROR: '.env.${ENV-ci}.js' is missing; see 'README.md' on how to create one.\n\"; false)"
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
@@ -65,7 +64,7 @@
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
     "first-input-delay": "^0.1.3",
-    "rollup": "^2.52.1",
+    "rollup": "^2.52.2",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-visualizer": "^5.5.0"
@@ -76,7 +75,7 @@
   "//comments": {
     "scripts": {
       "prebuild": [
-        "May be used to build '../app' but this slows down integration development so might not be the best way. tbd."
+        "'$BUILD_ID' used to detect CI runs. Creates the env file for them."
       ],
       "postbuild:roll": [
         "We _could_ use a Rollup plugin for copying (and watching) public files, but now, since only one CSS file,",
