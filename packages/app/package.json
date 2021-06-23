@@ -52,14 +52,14 @@
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
-    "vue": "^3.1.1",
-    "vue-router": "^4.0.8"
+    "vue": "^3.1.2",
+    "vue-router": "^4.0.10"
   },
   "devDependencies": {
     "@local/firebase-prime": "file:../../tools/firebase-prime",
     "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.2.2",
-    "@vue/compiler-sfc": "^3.0.11",
+    "@vue/compiler-sfc": "latest",
     "concurrently": "^6.2.0",
     "cypress": "^7.5.0",
     "eslint": "file:../../node_modules/eslint",
@@ -68,7 +68,7 @@
     "eslint-plugin-vue": "^7.11.1",
     "prettier": "2.3.1",
     "sass": "^1.35.1",
-    "vite": "^2.3.7",
+    "vite": "^2.3.8",
     "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {
