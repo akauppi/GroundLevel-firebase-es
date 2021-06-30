@@ -6,20 +6,18 @@
 */
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { collection, eventually /*, preheat_EXP*/ } from 'firebase-jest-testing/firestoreAdmin'
+import { collection, doc, preheat_EXP } from 'firebase-jest-testing/firestoreAdmin'
 
 import './matchers/toContainObject'
 
 describe("userInfo shadowing", () => {
 
-  /* tbd. enable once 0.0.3-beta.4 is published
   // Have this, to move ~320ms of test execution time away from the reports (shows recurring timing). To show first
   // (worst) timing, don't do this.
   //
   beforeAll( () => {
     preheat_EXP("projects/1/userInfo");
   })
-  */
 
   test('Central user information is distributed to a project where the user is a member', async () => {
     const william = {
@@ -31,7 +29,7 @@ describe("userInfo shadowing", () => {
     //
     await collection("userInfo").doc("abc").set(william);
 
-    await expect( eventually("projects/1/userInfo/abc") ).resolves.toContainObject(william);
+    await expect( watchOne("projects/1/userInfo/abc") ).resolves.toContainObject(william);
   }, 6000 /*needed until Cloud Functions are woken up! (4000 wasn't enough)*/ );    // 300 ms
 
   test ('Central user information is not distributed to a project where the user is not a member', async () => {
@@ -40,10 +38,31 @@ describe("userInfo shadowing", () => {
     //
     await collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" });
 
-    await expect( eventually("projects/1/userInfo/xyz", o => !!o, 800 /*ms*/) ).resolves.toBeUndefined();
+    await sleepMs(300);   // give time
+    //await expect( doc("projects/1/userInfo/xyz").get().then( ss => ss.exists ) ).resolves.toBe(false);
 
-    // ideally:
-    //await expect(prom).not.toComplete;    // ..but with cancelling such a promise
+    await expect( doc("projects/1/userInfo/xyz").get() ).resolves.toContainObject( { exists: false } );
 
   }, 9999 /*ms*/ );
+
+  // ideally:
+  //await expect(prom).not.toComplete;    // ..but with cancelling such a promise
+
 });
+
+/*
+* Wait for 'docPath' to get set.
+*/
+function watchOne(docPath) {    // (string) => Promise of {...Firestore document }
+  return new Promise( (resolve) => {
+
+    const unsub = doc(docPath).onSnapshot( ss => {
+      if (!ss.exists) return;
+      const o = ss.data();
+      resolve(o);
+      unsub();
+    });
+  });
+}
+
+const sleepMs = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });

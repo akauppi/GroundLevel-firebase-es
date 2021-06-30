@@ -13,7 +13,7 @@ const opts = {
   // Jest 27.0.{1..4} resolver (aka browserify resolver) is not up to this, yet (Jun 2021).
   //
   // Comment out, to test whether Jest needs it.
-  // See -> https://github.com/akauppi/firebase-jest-testing/blob/master/TRACK.md#jest-cannot-handle-package-exports-%EF%B8%8F%EF%B8%8F%EF%B8%8F
+  // See -> https://github.com/akauppi/firebase-jest-testing/blob/master/TRACK.md#jest-cannot-handle-package-exports-%EF%B8%8F
   //
   resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
 };

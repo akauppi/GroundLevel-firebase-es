@@ -8,13 +8,20 @@
   },
   "emulators": {
     "firestore": {
-      "port": 6767
+      "port": 6767,
+      "host": "0.0.0.0"
     },
     "functions": {
-      "port": 5002
+      "port": 5002,
+      "host": "0.0.0.0"
     },
     "auth": {
-      "port": 9100
+      "port": 9100,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "port": 4000,
+      "host": "0.0.0.0"
     }
   }
 }

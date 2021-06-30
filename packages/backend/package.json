@@ -11,21 +11,21 @@
     "functions/*.js"
   ],
   "engines": {
-    "node": ">=13.2",
+    "node": "14 || ^16",
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run -s _ci_seq ; else npm run -s _test_1 ; fi",
-    "_test_1": "concurrently --kill-others --success=first -n emul,test \"npm run -s start\" \"wait-for 4000 && npm test\"",
+    "test": "if port-is-taken --silent 4000 ; then npm run _ci_seq; else npm run -s _test_1 ; fi",
+    "_test_1": "concurrently --kill-others --success=first --prefix none \"npm run start\" \"wait-for 4000 && npm test\"",
     "  - ": "",
     "ci:test": "npm run -s ci:seq",
-    "ci:seq": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
     "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
-    "//ci:par": "concurrently --kill-others -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_par\"",
+    "//ci:par": "concurrently --kill-others --success=first -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_par\"",
     "//_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
-    "ci:start": "npx firebase emulators:start --project=fns-test --only functions,firestore",
     "  -": "",
-    "start": "docker-run \"firebase emulators:start --project=fns-test --only functions,firestore\"",
+    "start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI\"",
+    "ci:start": "firebase emulators:start --project=demo-2",
     "  -  ": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
@@ -51,8 +51,8 @@
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.3-beta.3",
-    "jest": "^27.0.4"
+    "firebase-jest-testing": "^0.0.3-beta.4b",
+    "jest": "^27.0.5"
   },
   "//comments": {
     "engines.node": [
@@ -66,20 +66,9 @@
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
     "scripts": {
-      "//preinstall": [
-        "There does not seem to exist a need for '(cd functions && npm install)', now that we depend on 'file:functions'",
-        "Keep an eye on it. If needed, a 'preinstall' script can be used to create 'functions/node_modules'."
-      ],
-      "start": [
-        "The parameters are selected so that this can be used also for front end testing:",
-        "- '--project=app' shows the app's data in Emulator UI",
-        "- '--only auth,...' starts also the auth emulator",
-        "",
-        "These *would not be needed* for testing the back-end itself, but help in that we don't end up launching",
-        "two kinds of emulation back-ends - just the same that can be used both for backend and front end development.",
-        "",
-        "If you need to see eg. Firestore data after Cloud Functions tests have run (if developing the tests), simply",
-        "temporarily change the project to 'fns-test'."
+      "ci:start": [
+        "DO NOT use '|' in the CI side. The combination of Alpine Linux, 'concurrently' and piping creates a problem,",
+        "where the killing of the emulators hits a wrong process id, and CI run never finishes. See TRACK.md"
       ]
     }
   }

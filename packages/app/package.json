@@ -11,6 +11,10 @@
   "exports": {
     ".": "./vitebox/dist/app.es.js"
   },
+  "bin": {
+    "check-no-links": "./tools/check-no-links.sh",
+    "gen-vite-env-local": "./tools/gen-vite-env-local.js"
+  },
   "engines": {
     "node": ">=14.3 || ^16"
   },
@@ -18,16 +22,16 @@
   "scripts": {
     "dev": "npm run dev:local",
     "__": "",
-    "test": "if port-is-taken --silent 3000 ; then cypress run ; else npm run -s _test_1 ; fi",
-    "_test_1": "concurrently --kill-others --success=first -n dev,cy \"npm run -s dev:local\" \"wait-for 3000 && npm run -s test\"",
+    "test": "if port-is-taken --silent 3000 ; then cypress run ; else npm run _test_1 ; fi",
+    "_test_1": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-for 3000 && npm run -s test\"",
     "  -": "",
     "ci:test": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run ${CYPRESS_RUN_FLAGS}\"",
     "ci:dev": "concurrently --kill-others-on-fail -n emul,init \"npm run --silent _ci_dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
-    "_ci_dev_local_emul": "cd ../backend && firebase emulators:start --project=app --only auth,functions,firestore",
+    "_ci_dev_local_emul": "firebase emulators:start --project=demo-abc",
     "  - -": "",
-    "dev:local": "concurrently --kill-others-on-fail -n emul,init \"npm run --silent _dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
-    "_dev_local_emul": "npm run -s _checkPort4000 && (cd ../backend && docker-run \"firebase emulators:start --project=app --only auth,functions,firestore\")",
-    "_dev_local_init": "wait-for 4000 && firebase-prime --project=app local/docs.js local/users.js | grep -v -E 'WARNING.+Do not use with production credentials'",
+    "dev:local": "concurrently --kill-others-on-fail -n emul,init \"npm run _dev_local_emul\" \"npm run _dev_local_init && npm run _dev_local_vite\"",
+    "_dev_local_emul": "npm run -s _checkPort4000 && $(docker-run-cmd) firebase emulators:start --project=demo-abc | grep -v -E \"Detected demo project ID|You are not currently authenticated|You are not signed in\"",
+    "_dev_local_init": "wait-for 4000 && firebase-prime --project=demo-abc local/docs.js local/users.js",
     "_dev_local_vite": "vite --port 3000 --mode dev_local",
     "  --": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run --silent _dev_online_vite\"",
@@ -41,10 +45,12 @@
     "predev:online": "port-is-free 3001 && npm run -s _preDevOnline1",
     "_preDevOnline1": "npm run -s _checkStaging && ln -sf ../../firebase.staging.js ./.firebase.staging.js",
     "  - ": "",
-    "_checkNoLinks": "tools/check-no-links.sh || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; exit 8)",
+    "_checkNoLinks": "check-no-links || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; exit 8)",
     "_checkStaging": "[[ -f ../../firebase.staging.js ]] || ( >&2 echo \"ERROR: '../../firebase.staging.js' is missing; see 'README.md' on how to create one.\n\"; exit 7)",
     "_checkPort4000": "port-is-free --silent 4000 || ( >&2 echo \"ERROR: Port 4000 is taken. You might have left the backend server running (hint: use this for both).\n\"; exit 8)",
-    "_genEnvLocal": "node --harmony-top-level-await --experimental-json-modules tools/gen-vite-env-local.js ../backend/firebase.json > vitebox/.env.dev_local"
+    "_genEnvLocal": "gen-vite-env-local --project=demo-abc > vitebox/.env.dev_local",
+    "  - - ": "",
+    "postinstall": "npm --prefix tools/firebase-prime install"
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
@@ -52,27 +58,28 @@
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
-    "vue": "^3.1.1",
-    "vue-router": "^4.0.8"
+    "vue": "^3.1.2",
+    "vue-router": "^4.0.10"
   },
   "devDependencies": {
-    "@local/firebase-prime": "file:../../tools/firebase-prime",
+    "@local/backend": "file:../backend",
+    "@local/firebase-prime": "file:tools/firebase-prime",
+    "@local/self": "file:.",
     "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.2.2",
-    "@vue/compiler-sfc": "^3.0.11",
+    "@vue/compiler-sfc": "latest",
     "concurrently": "^6.2.0",
     "cypress": "^7.5.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "eslint-plugin-vue": "^7.11.1",
-    "prettier": "2.3.1",
+    "eslint-plugin-vue": "^7.12.1",
+    "prettier": "2.3.2",
     "sass": "^1.35.1",
-    "vite": "^2.3.7",
+    "vite": "^2.3.8",
     "vue-eslint-parser": "^7.6.0"
   },
   "//comments": {
-    "scripts": {},
     "devDependencies": {
       "prettier": [
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
@@ -87,9 +94,14 @@
       ]
     },
     "engines": [
-      "'>=14.3' for '—-harmony-top-level-await' (flag not needed in 16)",
-      "'>=13.2' for ES module support",
-      "'--experimental-json-modules' seems to be available for Node 12"
-    ]
+      "'>=14.3' for '—-harmony-top-level-await' (we don't use it)",
+      "'>=13.2' for ES module support"
+    ],
+    "scripts": {
+      "| grep -v": [
+        "Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.",
+        "A single 'grep -v -E' (needs -E) with '|' is fine."
+      ]
+    }
   }
 }

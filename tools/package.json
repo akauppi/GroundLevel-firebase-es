@@ -4,13 +4,10 @@
   "type": "module",
   "bin": {
     "abc": "./abc.sh",
-    "docker-run": "./docker-run.js",
+    "docker-run-cmd": "./docker-run-cmd.js",
     "port-is-free": "./port-is.sh",
     "port-is-taken": "./port-is.sh",
     "wait-for": "./wait-for.js"
-  },
-  "scripts": {
-    "postinstall": "npm --prefix firebase-prime install"
   },
   "dependencies": {
     "node-fetch": "3.0.0-beta.9"
