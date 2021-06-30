@@ -25,7 +25,7 @@ Responsible for:
 developed with:
 - macOS 11.4
 - node 16.2
-- npm 7.13
+- npm 7.19
 
 - Docker Desktop 3.3.4 with: 1 CPU core, 1.5 GB RAM
 -->

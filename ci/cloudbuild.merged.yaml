@@ -28,9 +28,6 @@
 #
 #   See 'ci/APPROACH.md' for a deeper discussion...
 #
-substitutions:
-  _BUILDER_TAG: 9.12.1-node16-npm7
-  #_BUILDER_IMG: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
 
 steps:
 # Root install
@@ -99,3 +96,7 @@ steps:
 # Cloud Build:  5:34
 #
 timeout: 600s
+
+substitutions:
+  _BUILDER_TAG: 9.12.1-node16-npm7
+  #_BUILDER_IMG: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}

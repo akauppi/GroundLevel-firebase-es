@@ -63,7 +63,7 @@ Development is done with:
 
 - macOS 11.4
 - node 16.2
-- npm 7.13
+- npm 7.19
 -->
 
 ## Getting started
@@ -152,10 +152,7 @@ $ npm run dev
 [emul] 
 ```
 
-We launch Docker for running the Firebase Emulators. This happens within the `packages/backend` folder, and uses its `firebase.json`. However, some parameters are more suitable for app development:
-
-- `--project=app`: this means you can observe (or modify) the data in the Emulator UI
-- `auth`: auth emulator is launched; we need it
+We launch Docker for running the Firebase Emulators.
 
 ```
 ...

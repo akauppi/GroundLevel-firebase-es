@@ -47,4 +47,37 @@ Only the project mentioned in the launch command gets Cloud Functions applied. T
 
 One can use eg. Firestore with any number of projects, on the same emulator instance but Cloud Functions background logic is only connected to the project named at the launch command.
 
->This behaviour isn't documented by Firebase. In fact, the author remembers seeing somewhere that the `--project` flag would "only affect hosting", but this is unconfirmed, without a source link. It does clearly affect Cloud Functions, as well.
+>This behaviour isn't documented by Firebase. In fact, the author remembers seeing somewhere that the `--project` flag would "only affect hosting", but this is unconfirmed, without a source link.
+
+
+## Clean up disk space from Cypress
+
+Cypress cache gathers easily some weight.
+
+```
+du -d 1 -h /Users/x/Library/Caches/Cypress/
+783M	/Users/x/Library/Caches/Cypress//7.1.0
+750M	/Users/x/Library/Caches/Cypress//7.5.0
+777M	/Users/x/Library/Caches/Cypress//7.2.0
+  0B	/Users/x/Library/Caches/Cypress//cy
+761M	/Users/x/Library/Caches/Cypress//7.6.0
+3,0G	/Users/x/Library/Caches/Cypress/
+```
+
+When new versions come available, they pile up here.
+
+To reclaim disk space, just remove the unneeded folders.
+
+>Note: Moving to trash bin does not clear the space. `rm -rf` does. ;)
+
+You can also use:
+
+```
+$ npx cypress cache prune
+
+Deleted all binary caches except for the 7.6.0 binary cache.
+```
+
+**More depth:**
+
+- [Cleaning Up Space on Development Machine](https://glebbahmutov.com/blog/cleaning-up-space/#cleaning-old-cypress-binaries) (blog, Apr 2020)

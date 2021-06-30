@@ -15,10 +15,6 @@
 #     HOME=/builder/home
 #
 
-substitutions:
-  _BUILDER_TAG: 9.12.1-node16-npm7
-  #_CYPRESS_IMAGE: cypress/included:7.4.0
-
 steps:
 # Root install
 #
@@ -74,3 +70,7 @@ steps:
 # Cloud Build:  2:03 (without Cypress tests)
 #
 timeout: 240s
+
+substitutions:
+  _BUILDER_TAG: 9.12.1-node16-npm7
+  #_CYPRESS_IMAGE: cypress/included:7.4.0

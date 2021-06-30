@@ -15,9 +15,6 @@
 #     HOME=/builder/home
 #
 
-substitutions:
-  _BUILDER_TAG: 9.12.1-node16-npm7
-
 steps:
 # Root install
 #
@@ -48,3 +45,6 @@ steps:
 # Cloud Build:  1:51, 1:41
 #
 timeout: 240s
+
+substitutions:
+  _BUILDER_TAG: 9.12.1-node16-npm7
