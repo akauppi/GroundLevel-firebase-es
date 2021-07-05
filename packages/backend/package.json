@@ -25,6 +25,7 @@
     "//_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
     "  -": "",
     "start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI\"",
+    "//start-pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-2",
     "ci:start": "firebase emulators:start --project=demo-2",
     "  -  ": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
@@ -52,7 +53,7 @@
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.3-beta.4b",
-    "jest": "^27.0.5"
+    "jest": "^27.0.6"
   },
   "//comments": {
     "engines.node": [

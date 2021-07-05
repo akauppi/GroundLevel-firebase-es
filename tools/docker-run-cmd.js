@@ -52,6 +52,10 @@ switch(lastPart) {
     fail(`Unexpected current folder: ${lastPart}`)
 }
 
+// Note:
+//    Keep '--sig-proxy=true' (though it is the default); it helps Firebase CLI release the ports. '=false' would lead
+//    to dangling ports and needing to restart Docker.
+//
 const cmd = [
   'docker run --rm --sig-proxy=true',
   `-v ${vOpts}`,

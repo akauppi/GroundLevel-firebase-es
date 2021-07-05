@@ -10,8 +10,9 @@
     "index.js"
   ],
   "dependencies": {
-    "@google-cloud/logging": "^9.2.3",
-    "firebase-admin": "^9.9.0",
+    "@google-cloud/functions-framework": "^1.9.0",
+    "@google-cloud/logging": "^9.5.2",
+    "firebase-admin": "^9.10.0",
     "firebase-functions": "^3.14.1"
   },
   "//": {
@@ -26,6 +27,11 @@
     "engines.node": [
       "During deployment, the scripts turn this into \"14\", which is acceptable to Firebase CLI (9.4.0).",
       "tbd. Make an issue."
-    ]
+    ],
+    "scripts": {
+      "@google-cloud/functions-framework": [
+        "Included, since a post by Firebase suggests that (explicitly defining the version), moving to ES modules implementation (past 3.14.1)."
+      ]
+    }
   }
 }

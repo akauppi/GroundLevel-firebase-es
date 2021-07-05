@@ -9,9 +9,16 @@
 
 <br />
 
-**A modern (ES modules based) Web App template**
+**A modern (ES modules based and "Serverless") Web App template**
 
-- great tools selected for you: [Vue.js 3](https://v3.vuejs.org), [Vite](https://github.com/vitejs/vite), [Firebase](https://firebase.google.com), [Jest](https://jestjs.io), [Cypress](https://www.cypress.io), web components [with Svelte 3](https://dev.to/silvio/how-to-create-a-web-components-in-svelte-2g4j), [Cloud Build](https://cloud.google.com/build), [Cloud Logging](https://cloud.google.com/logging/)
+- great tools selected for you: 
+  - [Vue.js 3](https://v3.vuejs.org)
+  - [Vite](https://github.com/vitejs/vite)
+  - [Firebase](https://firebase.google.com)
+  - [Jest](https://jestjs.io)
+  - [Cypress](https://www.cypress.io)
+  - [Cloud Build](https://cloud.google.com/build)
+  - [Cloud Logging](https://cloud.google.com/logging/)
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 - covers all the way to deployment (CI/CD) and operations
 
@@ -19,7 +26,7 @@
 
 This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making web applications in the 2020's can be, when modern tools and techniques are used.
 
-The repo showcases a full, social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. You can also see it as course material for modern web development (see [Training](TRAINING.md) for courses).
+The repo showcases a full social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. You can also see it as course material for modern web development (see [Training](TRAINING.md) for courses).
 
 ## Pre-requisites and tools
 
@@ -32,17 +39,21 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
    - Docker
 
-  Docker is used for launching the Firebase Emulators, which are used both in development, testing and CI. Alternatively, one can install the `firebase-tools` CLI on one's machine.
+  Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container - or in the Cloud Build CI/CD workload. This should be a degree safer than storing the Firebase credentials on one's development machine.
   
-  For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS image.
+  For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS image. WSL2 also happens to be a requirement for Docker Desktop.
 
-  ><details><summary>**Important note for Windows users..**</summary>
+<!-- not jinxing; write something once we do..  
+  Once [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) (blog, Apr 2021) is publicly available, we'll use it in the front end testing (Cypress).
+-->
+
+   <details style="margin-left: 2em"><summary>**Important note on file systems (Windows 10 + WSL2)**</summary>
   The folder you clone the repo to *must reside within the WSL2 file system*. Docker performance is dismal if you link to (or directly use) `/mnt/c/` or the like. Don't. Instead create the folder within WSL2 and have the IDE tools reach it, remotely.
-  </details>
+   </details>
   
 - **A capable IDE**
 
-  An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are two suggestions:
+  An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are some suggestions:
   
   - [Visual Studio Code](https://code.visualstudio.com) - free
   - [WebStorm](https://www.jetbrains.com/webstorm/) - free 30 days trial, then € 59 / 47 / 35 /year
@@ -52,26 +63,28 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   - JavaScript
   - CSS
 
-  We use the ECMAScript 6 (up to ES2018) features in the code, where-ever possible. Meaning no `var`, no `this` 😡, yes Promises and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
+  We use the ECMAScript features (up to ES2018) in the code, where-ever possible. Meaning no `var`, no `this` (ever!), yes Promises and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
 
   >Hint: [MDN resources](https://developer.mozilla.org) are a great place to learn the basics, and advanced material alike. Eg. [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) You might even have it in your native language! Check the ![Change language](.images/mdn-change-language.png) button.
 
 - A **credit card** to deploy Cloud Functions
 
-  While most Firebase features are available in the free (and default) "Spark" plan, Cloud Functions require the "Blaze" plan since summer 2020.
+  While most Firebase features are available in the free "Spark" plan, Cloud Functions require the "Blaze" plan since summer 2020.
   
   This might not be that bad.
   
   - you can still play with the emulators completely without a Firebase account
   - if your application doesn't need Cloud Functions, remove them and deploy
-  - even if you use Cloud Functions, chances are *there aren't actual costs* since the Firebase free tiers apply to the "Blaze" plan as well.
+  - even if you use Cloud Functions, chances are *there aren't actual costs* since the Firebase free tiers are rather generous and apply to the "Blaze" plan as well.
+
+Apropos, Firebase. What is it??
 
 
 ## Firebase
 
 <a href="https://firebase.google.com"><img src="https://firebase.google.com/downloads/brand-guidelines/SVG/logo-logomark.svg" align="left" style="padding: 1em" /></a>
 
-This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, database, background functions, performance monitoring.
+This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, database, background functions. <!--, performance monitoring. tbd. -->
 
 Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
 
@@ -88,27 +101,21 @@ There are similar offerings from other companies, but they are a year or two beh
 >Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun (Youtube, especially!). It's recommended to check those out in parallel with this repo.
 
 
-## Google Cloud
+### Google Cloud
 
-Firebase and Google Cloud have a relation. Firebase runs on top of Google Cloud (and is owned by Google). They have separate dashboards, but some Firebase tasks require one to visit the Google Cloud tools side.
+Firebase and Google Cloud Platform (GCP) have a relation. Firebase runs on top of GCP (and is owned by Google). They have separate dashboards, but some Firebase tasks require one to visit the GCP Console. When you create a Firebase project, a GCP project of the same name is also created (and is where your code really runs!).
 
 We stay at the Firebase side of things most of the time, exceptions being CI/CD (Cloud Build) and central logging (Cloud Logging).
 
-You'll be instructed about Google Cloud where necessary, and both of the above mentioned services can be replaced by others, of your choice (but you'll need to make the necessary changes).
+You'll be instructed about GCP where necessary. 
 
-## Requirements
-
-We aim to support development on:
-
-- Latest macOS version
-- Windows 10: Ubuntu under WSL2
-- Any Linux
+>Both of the above mentioned services can be replaced, of course, if you already are familiar with certain CI/CD and have certain operational monitoring in place. But these make good defaults.
 
 ## Folder structure
 
 ```
-├── DEVS     # notes about developing the repo (optional)
 ├── ci       # all CI/CD setup
+├── DEVS     # notes about developing the repo (optional)
 ├── firebase-ci-builder.sub   # sub-repo for the Docker image
 ├── hack     # needed until Firebase fixes one thing
 ├── packages
@@ -118,7 +125,7 @@ We aim to support development on:
 └── tools    # common scripts to the `packages`
 ```
 
-The three `packages` each contain their own documentation.
+The three `packages` and `ci` each contain their own documentation.
 
 
 ## Getting started
@@ -127,7 +134,7 @@ The three `packages` each contain their own documentation.
 $ npm install
 ```
 
-This installs some common packages, such as Firebase JS SDK. Subpackages use them from the root, and this is where you update their versions.
+This installs some common packages, Firebase JS SDK being the most important. Subpackages use them from the root, and this is where you update their versions.
 
 ```
 $ git submodule update
@@ -143,28 +150,28 @@ We use a Docker image for running Firebase Emulators. Before advancing, let's bu
 ```
 $ (cd firebase-ci-builder.sub && ./build)
 ...
- => => naming to docker.io/library/firebase-ci-builder:9.11.0-node16-npm7                                                                                                                                                                              0.0s 
+ => => naming to docker.io/library/firebase-ci-builder:9.12.1-node16-npm7 
 ```
+
+>Did you use the parantheses? Without them, you'll end up in the `firebase-ci-builder.sub` folder.
 
 You don't need to push this image anywhere - it's enough that it resides on your development machine. This image is launched by the sub-packages whenever Firebase Emulators are required.
 
 >You can test it:
 >
 >```
->$ docker run -it firebase-ci-builder:9.11.0-node16-npm7 firebase --version
-9.11.0
+>$ docker run -it --rm firebase-ci-builder:9.12.1-node16-npm7 firebase --version
+9.12.1
 >```
 
-<!-- hidden
-Alternatively, you can use a native `firebase-tools` installation. See [Docker vs. native `firebase-tools`](Docker%20vs.%20native%20firebase-tools.md).
--->
+If you insist, you can use a native `firebase-tools` installation. Just edit the `package.json` files.
 
 ## Speed run 
 
 If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
 through the three sub-packages, set up a Firebase project (and account), CI/CD to Cloud Build and end up having a clone of the sample application installed *on your Firebase account*, in the cloud.
 
-Alternatively, you can study each of the individual sub-packages' `README`s (plus `ci`) and come back here later..
+Alternatively, you can study each of the individual sub-packages' `README`s (and `ci`'s) and come back here later..
 
 
 ### Backend
@@ -179,17 +186,17 @@ $ npm test
 
 The tests should pass, running against the Docker image you built.
 
->**Windows users:**
+><details><summary>Note to Windows users:</summary>
 >
 >![](.images/defender-docker.png)
->
+>   
 >If you get this warning about Docker Desktop, at least
->
+>   
 >- **uncheck the "public networks" checkbox**. It's not needed.
->
+>   
 >It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least **do not press OK** without removing that one checkbox.
+></details>
 
-Let's proceed to the front end.
 
 ### App
 
@@ -199,15 +206,14 @@ $ npm install
 ...
 $ npm run build
 ...
-$ npm test
-...
 ```
-
-These tests are done using [Cypress](https://www.cypress.io). They work against the backend we left running - if you didn't, they'll launch the back-end automatically, but that is a bit slower.
 
 The output of this stage (in `vitebox/dist/`) *is* the web app. All the looks, styling and front end features are done here.
 
 What's missing is the operational readiness that adds performance monitoring, central logging and crash detection to the app.
+
+>Note: The front end has tests, but we skip them for now. See `packages/app/README.md` for more details.
+
 
 ### App-deploy-ops
 
@@ -223,173 +229,126 @@ $ npm run build
 
 There are no tests here.
 
-Next, in order to deploy the app (backend and front-end) we need a Firebase project.
+---
+
+Next, we'll do a manual deployment of the backend, and pick up a `firebase.staging.js` file in the project's root while doing so. This file opens some development commands for front-end development, where you can work against the deployed back-end.
+
+If you don't want to create a Firebase project at this stage, just skip it. You can return to this any time, later.
+
 
 ## Deployment to staging
 
 ><img src=".images/staging.svg" width=500 />
 
-For development, it is good to have a project online where you can see your changes in real environment. These are called "staging" projects and we'll set up one now, for you / your team.
+For development, it is good to have a project online where you can see your changes in a real environment. These are called "staging" projects and we'll set up one now, for you / your team.
 
->Note: You can also set up just one project, but in a realistic scenario you want to restrict access to users' data and therefore shift production projects away from development, eg. so that deployment to them happens only via CI/CD.
->
->Some developers may be fond of "dev" environments. With Firebase Emulators doing a good job for development, the need for such is reduced, but if you need one, it's just setting up another staging environment (for the person or team needing it). That is, you can have any number of staging environments you want.
+>Note: Some developers may be fond of "dev" environments. With Firebase Emulators doing a good job for development, the need for such is reduced, but if you need one, it's just setting up another staging environment (for the person or team needing it). That is, you can have any number of staging environments you want.
+
+After initial setup, you'll have CI/CD doing deployments for you. That is the safest option and we'll come to it, soon. 
+
+We'll do one initial deployment using a script prepared for this. It uses a temporary Docker container to sign you into Firebase, lets you select the right project, picks the access values and deploys the backend.
 
 
-### 1. Create a Firebase project
+### Create the Firebase project
 
 Follow the instructions in [0.1 Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (Wiki).
 
->You *will* need a credit card for creating the "Blaze" plan. If you don't want to do that yet, choose the free plan and continue as far as you can. 👍
+>You *will* need a credit card for creating the "Blaze" plan (and to deploy the default back-end).
 
-### 2. Create a `firebase.staging.js` file
+### Create `firebase.staging.js` and deploy
 
-There are two places in the development that require an online Firebase backend.
-
-||command|comments|
-|---|---|---|
-|`app`|`npm run dev:online`|Development against a cloud back-end|
-|`app-deploy-ops`|`npm run serve`|Checking how the deployment candidate works, before deploying it|
-
-To use these commands, a `firebase.staging.js` file needs to be created in the repo's root.
-
-<font color=orange>
->*FLUX WARNING: 🤭🪣🧼*
->
->*'app-deploy-ops' doesn't use the 'firebase.staging.js' but has its own system.*
->
->*We should move towards a system where:*
->
->- *initial deployments (of also the front end) happen via CI; one can manually force such runs*
->- *it's enough for both of the cases to just tell the project id; they'll then sniff the access values from the publicly available URL (since front-end is deployed)*
-</font>
-
-#### Alternative A: Create by Firebase CLI
+Start the script:
 
 ```
-$ (cd packages/backend && npx firebase-tools use --add)
-... select the appropriate project ...
+$ cd ..    # project root
+$ npm run initStagingAndDeploy
 ```
 
->Note: The `npx firebase-tools use --add` "must be run from a Firebase project directory". We have two such: `packages/backend` and `packages/app-deploy-ops`.
->These two are *not* connected which means you need to separately select the project in both of them. This is due to the Firebase toolchain that doesn't really know the concept of a monorepo. For now, it's enough we've set the project in the `packages/backend` folder.
+This starts a temporary Docker container and asks you to log into the Firebase project.
 
-```
-$ npm run createStagingJs
-```
+![](.images/create-staging.png)
 
-That creates the file.
+Press `n`.
 
+![](.images/create-staging-auth.png)
 
-#### Alternative B: Copy-paste from online
+Copy-paste the URL and open it in a browser.
 
-You can also just create the file by hand.
+![](.images/create-staging-add-project.png)
 
-- Visit Firebase Console > (project) > `⚙️` `Project settings` > `Your apps` > `SDK setup and configuration` > `◉ Config`
+Select the Firebase project you want to use for staging.
 
-   ![](.images/firebase-console-app-values.png)
+>Firebase CLI asks an alias for the project. Give it *anything* (e.g. `abc`). This info will be forgotten once we exit Docker.
 
-With data from there, create a `firebase.staging.js` file of this kind:
+![](.images/staging-access-values.png)
 
-```
-const config = {
-  "projectId": "test-staging-15",
-  "appId": "...",
-  "locationId": "...",
-  "apiKey": "...",
-  "authDomain": "test-staging-15.firebaseapp.com",
-};
-export default config;
-```
+The script picks downloads access values for the project and prepares `firebase.staging.js` for the front-end development.
 
-This file is now used by both `packages/app` and `packages/app-deploy-ops`, to know where to find a backend in the cloud. Next, let's deploy one.
+![](.images/staging-deploy.png)
+
+This last bit deploys the backend project.
 
 
-### 3. Deploy the backend
+### Sharing the staging (optional)
 
-```
-$ cd packages/backend
-
-$ npx firebase-tools use --add    # ..unless you already did this
-
-$ npx firebase-tools deploy --only functions,firestore
-```
-
-That should deploy the Firestore Security Rules, index settings and Cloud Functions.
-
-Let's try it!
-
-```
-$ cd ../app
-
-$ npm run dev:online
-...
-```
-
-This command should now work, and at [localhost:3001](http://localhost:3001) you have an app with a cloud-backed back-end.
-
-**This may be your first deployment**. Let's celebrate for a while!! 🎉🎉🎪🤹‍♀️🎺
-
-
-### 4. Sharing the staging (optional)
-
-Now that the back-end is deployed, you can easily share it with the team by simply adding `firebase.staging.js` to the version control.
+Now that the back-end is deployed, you can share it with the team by simply adding `firebase.staging.js` to the version control. This means your team members don't need to take the above steps, when they clone the project.
 
 - edit `.gitignore` and remove (or comment out) the line excluding `firebase.staging.js`
 - add `firebase.staging.js` to the git repo
-- edit `package.json`; remove or comment out the `createStagingJs` target so the file won't get accidentially overridden
-- remove `packages/backend/sh/create-staging.sh` since it's no longer required
+- remove `init-staging/` since it's no longer required
 
 This is useful if you want the whole team to always share the same staging environment.
 
 >Note: The values are not really secrets. Anyone having access to your web app (before login) is able to figure them out.
 
+---
+
+**This may be your first deployment!**. Let's celebrate for a while!! 🎉🎉🎪🤹‍♀️🎺
+
+The back-end is now deployed. Next, we set up Cloud Build to do deployments automatically.
+
 
 
 ## Setting up CI/CD
 
-Production deployments are intended to be done using CI/CD. 
+Production deployments are intended to be done using CI/CD.
 
 See [ci/README](ci/README.md) for instructions on how to set up a CI/CD pipeline.
 
 This expects you to have a GitHub fork of the repo, and to want to use Cloud Build for running the CI/CD.
 
-Also other vendors provide cloud CI/CD. GitHub has one, and setting it up is simpler than the dance needed to get two cloud services to collaborate. Using Cloud Build was selected because of the Firebase Google background, and because it allows Docker images to be used as build steps.
+>Also other vendors provide cloud CI/CD. GitHub has one, and setting it up should be simpler than the dance needed to get two cloud services to collaborate. Cloud Build was selected because of the Firebase Google background, and because it allows Docker images to be used as build steps.
 
 
 ### Trying your deployment
 
 Once you have the CI/CD deployment running, visit the application's web site:
 
-e.g. [https://groundlevel-160221.web.app](https://groundlevel-160221.web.app)
+e.g. [https://&lt;your-project&gt;.web.app](https://your-project.web.app)
 
 
 ## Where to go next?
 
-You have some options. 
+You now have an application running in the cloud!!!
 
-If you pick one, come back for the rest later. It doesn't really matter, in which order you cover these, but it would be useful to cover them all.
+Make changes to it, push those changes as a PR and see GitHub and Cloud Build approve or reject your changes.
 
-- Backend development ([`packages/backend`](packages/backend/README.md))
+If you merge them to `master`, they'll show up in the deployed project. Great!
 
-  All the cloud services that your front end relies on: database, server-side functions, data models and access rights of the stored data.
+What remains is:
 
-- Front-end development ([`packages/app`](packages/app/README.md))
+- Getting an audience!  How to publicize your application; how to get users to it.
+- Creating the app 😐
 
-  Developing the front end. You can do this without a Firebase project.
-  
-- Front-end ops ([`packages/app-deploy-ops`](packages/app-deploy-ops/README.md))
+Check these subfolders:
 
-  Adding operational robustness to the app's front end.
+- 🖌📐 Backend: [`packages/backend`](packages/backend/README.md)
+- 💅 Front-end: [`packages/app`](packages/app/README.md)
+- 🦾 Front-end operational readiness: [`packages/app-deploy-ops`](packages/app-deploy-ops/README.md)
+- 🌀 CI/CD ([`ci/`](ci/README.md))
 
-- CI/CD ([`ci/`](ci/README.md))
-
-  Making sure PRs don't break the code; deploying code that gets merged to `master`.
-
-<!-- disabled
-- Operations ([`ops/`](ops/README.md))
-
-  Advice on what to do once the app is out.
+<!-- #later
+- 📈 Operational monitoring and improvements ([`ops/`](ops/README.md)) (⚠️ work-in-progress)
 -->
 
 ## Making it yours!
@@ -441,7 +400,32 @@ copies or substantial portions of the Software.
 ie. do not remove the license. You may, of course, become active in further developing the app template and we'd like to hear if you use it.
 
 
-# Credits
+## Plans 🪐🧳
+
+What the repo *mostly* needs is people to use it. To test its usefulness. To bend it.
+
+You can help by using the repo, giving feedback, and telling others about it!
+
+---
+
+Since the Issues will be unnecessarily flooded at some point, here are two major tasks that the author would like to finish:
+
+- [ ] using git subpackages to *detach the app from the template*
+
+   This would allow you to keep pulling updates of the template, yet not be bothered that your application code is affected by them, in any way.
+   
+   In short, `packages/backend` and `packages/app` would be replaced by subpackages that you provide.
+   
+   We're trying this out, once interested parties volunteer. :)
+
+- [ ] `ops/**`
+
+   The `app-deploy-ops` part is still not finished. Once it is, information about what to consider in operations will be added in `ops/` (a documentation folder).
+
+---
+
+
+## Credits
 
 Thanks to Jaakko Roppola for wonderful icon art!! 🙌
 
@@ -450,7 +434,7 @@ Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://gith
 Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 
 
-# Contribution
+## Contribution
 
 As always, contributions and discussions are welcome.
 
@@ -462,7 +446,7 @@ As always, contributions and discussions are welcome.
 Have Fun, and spread the word!!
 
 
-# References
+## References
 
 ### Serving ES6 modules, HTTP/2 etc.
 

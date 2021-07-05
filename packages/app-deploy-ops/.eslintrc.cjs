@@ -60,6 +60,9 @@ module.exports = {
       globals: {},
       parserOptions: {
         sourceType: "module"
+      },
+      rules: {
+        "no-process-exit": [off]
       }
     },
 
