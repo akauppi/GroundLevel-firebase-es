@@ -1,8 +1,9 @@
 {
   "name": "@local/root",
   "private": true,
+  "type": "module",
   "scripts": {
-    "createStagingJs": "(cd packages/backend && sh/create-staging.sh) > firebase.staging.js",
+    "initStagingAndDeploy": "init-staging/launch.sh",
     "- ": "",
     "no": "npm run -s _no0 && npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
     "_no0": "npm --prefix tools outdated",
@@ -17,7 +18,7 @@
     "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
   },
   "devDependencies": {
-    "eslint": "^7.29.0",
+    "eslint": "^7.30.0",
     "eslint-plugin-node": "^11.1.0",
     "firebase": "^9.0.0-beta.5"
   },

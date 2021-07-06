@@ -26,7 +26,7 @@
     "  - --": "",
     "serve:roll": "firebase serve --config firebase.roll.json --only hosting --host 0.0.0.0 --port 3012",
     "  - -- ": "",
-    "ci:build": "node tools/gen-ci-env.js > .env.ci.js && npm run -s build",
+    "ci:build": "tools/gen-ci-env.js > .env.ci.js && npm run -s build",
     "ci:deploy": "npm run -s _ci:deploy:roll",
     "_ci:deploy:roll": "npm run -s _prepare_roll && firebase deploy --config firebase.roll.json --only hosting",
     "- -": "",
@@ -64,7 +64,7 @@
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
     "first-input-delay": "^0.1.3",
-    "rollup": "^2.52.2",
+    "rollup": "^2.52.4",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-visualizer": "^5.5.0"
@@ -91,7 +91,7 @@
       ]
     },
     "engines.node": [
-      "'>=14.3' for '—harmony-top-level-await' (flag not needed in 16)",
+      "'>=14.3' for '—harmony-top-level-await' (not used)",
       "'>=13.2' for ES module support"
     ]
   }

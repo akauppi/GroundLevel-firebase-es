@@ -37,7 +37,7 @@ $ sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-
 That's all. You'll be using the Cypress version installed via `npm`. Launch it with `npx cypress open` after the install.
 </details>
 
-<details><summary>**Windows 10 + WSL2 - without WSLg**</summary>
+<details><summary>**Windows 10 + WSL2**</summary>
 
 Windows and WSL2 duo is not a supported Cypress platform. This means you will need to do a little bit more than the other OSes. In short, you'll use *one* Cypress via `npm`, within WSL2, for "headless" testing (`npm test`).
 
@@ -54,9 +54,11 @@ For test based development, we recommend installing *another* instance, this tim
 Try launching the `Cypress.exe` app.
 </details>
 
->*Within H2 of 2021, Microsoft is bringing the [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) to Windows 10. This allows us to launch the Linux-side Cypress GUI, and use it from Windows.*
->   
->*tbd. Update these notes once we have access to WSLg.*
+>*Within Q3 of 2021, Microsoft is bringing the [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) to Windows 10. This will allow us to launch the Linux-side Cypress GUI, and use it from Windows. 🎉🎉🥁*
+
+<!--
+tbd. Update these notes once we have access to WSLg.
+-->
 
 <!--
 Development is done with: 
@@ -113,11 +115,18 @@ Differences of these modes:
 ||Back-end|Data|Users|Authentication|Central logging|
 |---|---|---|---|---|---|
 |`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|browser console|
-|`online`|in the cloud|in the cloud; changes are persistent|←|←|command line(*)|
+|`online`|in the cloud|in the cloud; changes are persistent|←|←|command line|
 
 >**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase projects so their data and users won't overlap.
 
-*<small>(\*) While online mode is cloud-aware, this sub-package is not operations aware. Thus, we likely won't pass the central logs to the cloud, but keep them to ourselves.</small>*
+<!-- Note on "online" mode's central logging:
+
+This sub-package is not operations aware, and thus we'll likely not roll the central logs onto the cloud in the way `app-deploy-ops` does.
+
+We *could* log to the Firebase staging project's Cloud Functions log, rather easily. Is there a benefit in doing so, vs. the local command line?
+
+This is something of a hazy area - give feedback if you have practical suggestions.
+-->
 
 
 ### `dev:local`
@@ -220,15 +229,12 @@ With "online" development, you run against the Firebase back-end services, but s
 Use this when:
 
 - the back-end is stable, and you are working on UI features
+- the back-end is deployed
 - you don't mind actually changing data
 - you have a Firebase account
 - you want to sign in as a real user
 
-#### Pre-condition: staging back-end is deployed
-
-The back-end `dev:online` works against is identified by the `../../firebase.staging.js` configuration.
-
-If the file is not there, check the root `README` for instructions on how to place it (and how to manually deploy the backend).
+The mode needs `firebase.staging.js` (in the project's root), to find the staging project. Instructions for creating it are in the root `README`.
 
 #### Launch! 🚀
 
@@ -288,18 +294,10 @@ $ npm test
 
 `npm test` launches the same local server as `npm run dev`, and runs Cypress tests on it.
 
-<!-- Editor's note:
-Intentionally not stating, what happens if `npm run dev` is already running. We might use it (as of today, 11-Jun-21) - or require one to shut it down. #open
--->
-
 
 ### Test based development
 
 The other way is to keep `npm run dev` running, and edit both one's code and tests (and Security Rules) while keeping an eye on the test results.
-
-<!-- internal note
-Haven't checked if Firebase Emulators pick up Security Rule changes, when run under Docker. (natively, they do so)
--->
 
 Have `npm run dev` running in the background. 
 

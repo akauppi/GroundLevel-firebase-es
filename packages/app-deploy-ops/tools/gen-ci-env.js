@@ -1,11 +1,12 @@
+#!/usr/bin/env node
 /*
 * tools/gen-ci-env.js
 *
-* Prepares an env file, based on the active Firebase project.
+* Outputs an env file to stdout, based on the active Firebase project.
 *
 * Usage:
 *   <<
-*     node --harmony-top-level-await tools/gen-ci-env.js
+*     $ tools/gen-ci-env.js > .env.ci.js
 *   <<
 *
 * Context:
@@ -18,7 +19,7 @@ import { execSync } from 'child_process'
 const output = execSync("firebase apps:sdkconfig", { encoding: 'utf8' } );
 
 /*
-* Output:
+* output:
 * <<
 *   // Copy and paste this into your JavaScript code to initialize the Firebase SDK.
 *   // You will also need to load the Firebase SDK.
