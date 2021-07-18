@@ -24,7 +24,7 @@
     "//ci:par": "concurrently --kill-others --success=first -n emul,test \"npm run -s ci:start\" \"wait-for 4000 && npm run -s _ci_par\"",
     "//_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
     "  -": "",
-    "start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI\"",
+    "start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated\"",
     "//start-pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-2",
     "ci:start": "firebase emulators:start --project=demo-2",
     "  -  ": "",
@@ -52,7 +52,7 @@
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.3-beta.4b",
+    "firebase-jest-testing": "^0.0.4-alpha.2",
     "jest": "^27.0.6"
   },
   "//comments": {

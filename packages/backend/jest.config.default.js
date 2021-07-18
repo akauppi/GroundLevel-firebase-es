@@ -9,6 +9,9 @@ const opts = {
   // Default is 5000. None of our tests take that long; fail fast.
   testTimeout: 2000,
 
+  // need to explicitly import 'test' etc.
+  injectGlobals: false,
+
   // Without this, the 'firebase-jest-testing' modules don't load, due to being declared using 'exports'.
   // Jest 27.0.{1..4} resolver (aka browserify resolver) is not up to this, yet (Jun 2021).
   //

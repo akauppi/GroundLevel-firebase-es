@@ -11,8 +11,8 @@
   ],
   "dependencies": {
     "@google-cloud/functions-framework": "^1.9.0",
-    "@google-cloud/logging": "^9.5.2",
-    "firebase-admin": "^9.10.0",
+    "@google-cloud/logging": "^9.5.4",
+    "firebase-admin": "^9.11.0",
     "firebase-functions": "^3.14.1"
   },
   "//": {

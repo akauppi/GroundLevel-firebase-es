@@ -8,6 +8,7 @@ import { test, expect, describe, beforeAll } from '@jest/globals'
 
 import { collection, doc, preheat_EXP } from 'firebase-jest-testing/firestoreAdmin'
 
+import './matchers/timesOut'
 import './matchers/toContainObject'
 
 describe("userInfo shadowing", () => {
@@ -29,7 +30,7 @@ describe("userInfo shadowing", () => {
     //
     await collection("userInfo").doc("abc").set(william);
 
-    await expect( watchOne("projects/1/userInfo/abc") ).resolves.toContainObject(william);
+    await expect( docListener("projects/1/userInfo/abc") ).resolves.toContainObject(william);
   }, 6000 /*needed until Cloud Functions are woken up! (4000 wasn't enough)*/ );    // 300 ms
 
   test ('Central user information is not distributed to a project where the user is not a member', async () => {
@@ -38,31 +39,24 @@ describe("userInfo shadowing", () => {
     //
     await collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" });
 
-    await sleepMs(300);   // give time
-    //await expect( doc("projects/1/userInfo/xyz").get().then( ss => ss.exists ) ).resolves.toBe(false);
+    await expect( docListener("projects/1/userInfo/xyz" )).timesOut(300);
 
-    await expect( doc("projects/1/userInfo/xyz").get() ).resolves.toContainObject( { exists: false } );
+    // ideally: await expect(prom).not.toComplete;
 
   }, 9999 /*ms*/ );
-
-  // ideally:
-  //await expect(prom).not.toComplete;    // ..but with cancelling such a promise
-
 });
 
 /*
 * Wait for 'docPath' to get set.
 */
-function watchOne(docPath) {    // (string) => Promise of {...Firestore document }
+function docListener(docPath) {    // (string) => Promise of {...Firestore document }
   return new Promise( (resolve) => {
 
     const unsub = doc(docPath).onSnapshot( ss => {
       if (!ss.exists) return;
       const o = ss.data();
       resolve(o);
-      unsub();
+      /*await*/ unsub();
     });
   });
 }
-
-const sleepMs = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });

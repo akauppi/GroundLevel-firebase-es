@@ -7,9 +7,10 @@
 *
 * ES modules support:
 *   - [x] Cloud Functions supports node.js 14
-*   - [ ] Firebase Emulator allows Cloud Functions to be expressed as ECMAScript modules (not yet)
-*   - [ ] 'firebase-functions' is available as ESM exports (not; there's an issue about it though)
-*   - [ ] 'firebase-admin' is available as ESM exports (work in progress; alpha)
+*   - [x] Firebase Emulator allows Cloud Functions to be expressed as ECMAScript modules
+*   - [~] 'firebase-functions' is available as ESM exports
+*         - explicitly importing '@google-cloud/functions-framework' 1.9.0 makes it so
+*   - [x] 'firebase-admin' is available as ESM exports
 *
 * References:
 *   - Call functions from your app (Firebase docs)

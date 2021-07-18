@@ -17,7 +17,7 @@
 */
 import { readFileSync } from 'fs'
 
-const IMAGE = "firebase-ci-builder:9.12.1-node16-npm7"
+const IMAGE = "firebase-ci-builder:9.16.0-node16-npm7"
 
 // Read 'firebase.json' from current work directory
 //

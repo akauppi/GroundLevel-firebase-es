@@ -12,7 +12,7 @@ set -euf -o pipefail
 #   - docker
 #
 FIREBASE_STAGING_JS="firebase.staging.js"
-IMAGE="firebase-ci-builder:9.12.1-node16-npm7"
+IMAGE="firebase-ci-builder:9.16.0-node16-npm7"
 
 # Safety
 #
