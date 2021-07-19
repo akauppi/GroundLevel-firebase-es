@@ -1,5 +1,5 @@
 /*
-* functions/src/cloudLoggingProxy.js
+* functions/cloudLoggingProxy.js
 *
 * Proxy for passing log entries to Cloud Logging. Back-end for the 'app-deploy-ops' proxy logging adapter.
 *
@@ -10,10 +10,9 @@
 * Note:
 *   We shouldn't need to do any Cloud Functions specific imports here; adaption done elsewhere.
 */
-const { EMULATION, logger, fail, failInvalidArgument } = require('./common.js');
+import { Logging } from '@google-cloud/logging'
 
-const { Logging } = require('@google-cloud/logging');
-// const Logging = import('@google-cloud/logging');
+import { EMULATION, logger, failInvalidArgument } from './common.js'
 
 function failWhileLoading(msg) {
   throw new Error(msg);
@@ -123,4 +122,8 @@ const cloudLoggingProxy_v0_PROD = (!EMULATION) && (_ => {
   }
 })();
 
-exports.cloudLoggingProxy_v0 = cloudLoggingProxy_v0_PROD || cloudLoggingProxy_v0_EMUL;
+const cloudLoggingProxy_v0 = cloudLoggingProxy_v0_PROD || cloudLoggingProxy_v0_EMUL;
+
+export {
+  cloudLoggingProxy_v0
+}

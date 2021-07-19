@@ -31,7 +31,7 @@ describe("userInfo shadowing", () => {
     await collection("userInfo").doc("abc").set(william);
 
     await expect( docListener("projects/1/userInfo/abc") ).resolves.toContainObject(william);
-  }, 6000 /*needed until Cloud Functions are woken up! (4000 wasn't enough)*/ );    // 300 ms
+  } );    // 340, 388, 406 ms
 
   test ('Central user information is not distributed to a project where the user is not a member', async () => {
 
@@ -39,7 +39,7 @@ describe("userInfo shadowing", () => {
     //
     await collection("userInfo").doc("xyz").set({ displayName: "blah", photoURL: "https://no-such.png" });
 
-    await expect( docListener("projects/1/userInfo/xyz" )).timesOut(300);
+    await expect( docListener("projects/1/userInfo/xyz" )).timesOut(400);
 
     // ideally: await expect(prom).not.toComplete;
 

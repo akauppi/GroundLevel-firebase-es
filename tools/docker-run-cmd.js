@@ -56,8 +56,11 @@ switch(lastPart) {
 //    Keep '--sig-proxy=true' (though it is the default); it helps Firebase CLI release the ports. '=false' would lead
 //    to dangling ports and needing to restart Docker.
 //
+//    ^-- really? See [1] which happens also with '--sig-proxy=true'.
+//    [1]: https://github.com/akauppi/GroundLevel-firebase-es/issues/67
+//
 const cmd = [
-  'docker run --rm --sig-proxy=true',
+  'docker run --rm',
   `-v ${vOpts}`,
   `-w ${wOpts}`,
   ...ports.flatMap(p => ['-p', `${p}:${p}`] ),

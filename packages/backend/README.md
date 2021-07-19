@@ -17,7 +17,7 @@ Responsible for:
 - Node 14 or 16
 - `npm` >= 7.7.0
 
-   `npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
+   >`npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
 
 - Docker Desktop
 
@@ -83,11 +83,3 @@ $ npm run ci:start  # instead of 'npm start'
 
 Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
 
-
-## Role of `npm run start`
-
-If you leave the `npm run start` running, it will be picked up by front-end development and testing (`packages/app`), as well.
-
-If you don't, those tests will automatically restart the emulators.
-
-It is up to you, which way of working you prefer, but now you know that the same instance is usable for both backend and front-end development.

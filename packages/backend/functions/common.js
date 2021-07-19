@@ -1,8 +1,7 @@
 /*
 * Common config stuff for actual routines.
 */
-const functions = require('firebase-functions');
-//import * as functions from 'firebase-functions';
+import functions from 'firebase-functions';
 const logger = functions.logger;    // for backend logging
 
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
@@ -17,13 +16,9 @@ function failInvalidArgument(msg) {
   throw new HttpsError('invalid-argument',msg);
 }
 
-exports.logger = logger;
-exports.EMULATION = EMULATION;
-exports.HttpsError = HttpsError;
-exports.failInvalidArgument = failInvalidArgument;
-
-/*export default {
+export {
   logger,
   EMULATION,
-  HttpsError
-}*/
+  HttpsError,
+  failInvalidArgument
+}

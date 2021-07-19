@@ -5,25 +5,20 @@
 *
 * This level handles the Functions API nuances; individual functions are in their own files.
 *
-* ES modules support:
-*   - [x] Cloud Functions supports node.js 14
-*   - [x] Firebase Emulator allows Cloud Functions to be expressed as ECMAScript modules
-*   - [~] 'firebase-functions' is available as ESM exports
-*         - explicitly importing '@google-cloud/functions-framework' 1.9.0 makes it so
-*   - [x] 'firebase-admin' is available as ESM exports
-*
 * References:
 *   - Call functions from your app (Firebase docs)
 *     -> https://firebase.google.com/docs/functions/callable
 *   - Add the Firebase Admin SDK to your server (Firebase docs)
 *     -> https://firebase.google.com/docs/admin/setup
 */
-const admin = require('firebase-admin');
-//import * as admin from 'firebase-admin';
+//const admin = require('firebase-admin');
+import admin from 'firebase-admin'
 
-const functions = require('firebase-functions');
-//import * as functions from 'firebase-functions';
+//const functions = require('firebase-functions');
+import functions from 'firebase-functions'
 const logger = functions.logger;
+
+import { cloudLoggingProxy_v0 as clp } from './cloudLoggingProxy.js'
 
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 
@@ -35,15 +30,14 @@ admin.initializeApp();
 const region = EMULATION ? null : functions.config().regions[0];
 const regionalFunctions = region ? functions.region(region) : functions;
 
-const { cloudLoggingProxy_v0 } = require('./cloudLoggingProxy.js');
-
-exports.cloudLoggingProxy_v0 = regionalFunctions.https
+//exports.cloudLoggingProxy_v0 = regionalFunctions.https
+export const cloudLoggingProxy_v0 = regionalFunctions.https
   .onCall(({ les, ignore }, context) => {
     const uid = context.auth?.uid;
 
     logger.debug("Logging request from:", uid || "(unknown user)");
 
-    return cloudLoggingProxy_v0(les, { ignore, uid });
+    return clp(les, { ignore, uid });
   });
 
 
@@ -54,7 +48,8 @@ exports.cloudLoggingProxy_v0 = regionalFunctions.https
 //
 // tbd. Needs #rework
 //
-exports.userInfoShadow_2 = regionalFunctions.firestore
+//exports.userInfoShadow_2 = regionalFunctions.firestore
+export const userInfoShadow_2 = regionalFunctions.firestore
   .document('/userInfo/{uid}')
   .onWrite( async (change, context) => {
     const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]

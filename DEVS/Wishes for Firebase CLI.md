@@ -432,3 +432,42 @@ While it makes sense in the cloud that Cloud Functions need to be warmed up, the
 
 - [ ] Report to Firebase `#contribute`
 
+
+## Emulators should be able to work with Docker `--network none` (fully offline)
+
+If I add `--network none` to the Docker command, this happens:
+
+```
+$ npm run start
+
+> prestart
+> npm run -s _prepFunctions
+
+
+> start
+> $(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"
+
+Launching Docker... 🐳
+i  emulators: Starting emulators: auth, functions, firestore
+⚠  Your requested "node" version "14 || ^16" doesn't match your global version "16"
+i  firestore: Firestore Emulator logging to firestore-debug.log
+i  ui: Emulator UI logging to ui-debug.log
+i  functions: Watching "/work/functions" for Cloud Functions...
+⚠  Error adding trigger: FirebaseError: HTTP Error: 503, io exception
+i  emulators: Shutting down emulators.
+i  ui: Stopping Emulator UI
+⚠  Emulator UI has exited upon receiving signal: SIGINT
+i  functions: Stopping Functions Emulator
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: HTTP Error: 503, io exception
+```
+
+Not sure that it's Firebase. Would need to do more research.
+
+But if proven to be not our cloud functions, but Firebase emulators themselves:
+
+- [ ] Report to `firebase-tools` issues
