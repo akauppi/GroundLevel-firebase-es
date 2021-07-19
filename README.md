@@ -238,7 +238,7 @@ If you don't want to create a Firebase project at this stage, just skip it. You 
 
 ## Deployment to staging
 
-><img src=".images/staging.svg" width=500 />
+><img src=".images/staging.svg" width=500 style="background-color:white" />
 
 For development, it is good to have a project online where you can see your changes in a real environment. These are called "staging" projects and we'll set up one now, for you / your team.
 

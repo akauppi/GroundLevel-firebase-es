@@ -5,7 +5,7 @@
 /.firebase/
 
 # temporary configs ({roll|vite})
-/firebase.*.json
+#/firebase.*.json
 
 # visualizer output
 /roll/stats.html
@@ -16,4 +16,4 @@
 
 # Remove of comment out, to add the entries to version control
 /.env.*.js
-
+!/.env.staging.js

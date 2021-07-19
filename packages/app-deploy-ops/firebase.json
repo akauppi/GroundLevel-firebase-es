@@ -1,9 +1,9 @@
 {
   "hosting": {
-    "public": "$SERVE_PATH",
+    "public": "roll/out",
     "rewrites": [
       {
-        "source": "!**/*.@(css|js|map)",
+        "source": "!**.@(css|js|map)",
         "destination": "/index.html"
       }
     ],
@@ -24,10 +24,20 @@
       }
     ]
   },
+  "emulators": {
+    "hosting": {
+      "port": 3012,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": false
+    }
+  },
 
   "//": {
     "hosting.public": [
-      "Must match 'outDir' in 'vite.config.js'"
+      "Must match the output dir (Rollup: ...; Vite: in 'vite.config.js')",
+      "tbd. This field will change when we try Vite build"
     ],
     "hosting.rewrites": [
       "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing sourcemaps, scripts etc. should show as 404.",

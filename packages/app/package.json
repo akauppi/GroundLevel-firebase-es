@@ -31,7 +31,7 @@
     "  - -": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,init \"npm run _dev_local_emul\" \"npm run _dev_local_init && npm run _dev_local_vite\"",
     "_dev_local_emul": "npm run -s _checkPort4000 && $(docker-run-cmd) firebase emulators:start --project=demo-abc | grep -v -E \"Detected demo project ID|You are not currently authenticated|You are not signed in\"",
-    "_dev_local_init": "wait-for 4000 && firebase-prime --project=demo-abc local/docs.js local/users.js",
+    "_dev_local_init": "wait-for 4000 && firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E \"Do not use with production credentials\"",
     "_dev_local_vite": "vite --port 3000 --mode dev_local",
     "  --": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run --silent _dev_online_vite\"",
@@ -77,7 +77,7 @@
     "prettier": "2.3.2",
     "sass": "^1.35.1",
     "vite": "^2.3.8",
-    "vue-eslint-parser": "^7.6.0"
+    "vue-eslint-parser": "^7.9.0"
   },
   "//comments": {
     "devDependencies": {

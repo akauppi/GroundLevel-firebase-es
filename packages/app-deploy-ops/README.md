@@ -1,4 +1,4 @@
-# app-deploy-ops
+# app-deploy
 
 Takes the app developed in `../app` sister package and prepares it for operations.
 
@@ -17,13 +17,15 @@ Available integrations:
 
 ||adapters|comments|
 |---|---|---|
+|Performance monitoring|tbd.|
 |Logging|[Cloud Logging](https://cloud.google.com/logging)|
 |Crash reporting|tbd.|
-|Performance monitoring|tbd.|
 
 ><font color=red>WARN: Adapters are still work-in-progress.</font>
 
-You can tie logging to more than one logging adapter at any one time. This may be useful if evaluating vendors or transitioning between them.
+<p />
+
+>Note: You can use more than one adapter of a specific kind at any one time. This may be useful if evaluating vendors or transitioning between them.
 
 <!-- DELME?
 ### Relation to deployment
@@ -44,14 +46,35 @@ This project can be a staging project - you should only deal with the production
 $ (cd ../app && npm install && npm run build)
 ```
 
-**!!** We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy-ops`. If you change app sources, also rebuild it.
+>⚠️ We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy`. If you change app sources, also rebuild it.
 
+### Have staging prepared
 
-### Provide `.env.js`
+See [Deployment to staging](../../README.md#deployment-to-staging) in the main `README.md`.
 
-The access values (Firebase configuration) are *baked into the front-end code* and therefore need to be known for the *build* step, for two reasons:
+<!-- Editor's note:
+The link above should work in GitHub; it doesn't work with the MacDown editor
+-->
 
-- removes one critical round-path and makes the app score better on LightHouse
+This means there's a `../../firebase.staging.js` file that contains the means to reach the backend:
+
+```
+const config = {
+  "projectId": "testing-123",
+  "appId": "...",
+  "locationId": "...",
+  "apiKey": "...",
+  "authDomain": "testing-123.firebaseapp.com",
+};
+export default config;
+```
+
+<!-- remove???
+### Provide `.env.{staging|...}.js`
+
+The access values (Firebase configuration) get *baked into the front-end code* and therefore need to be known for the build step, for two reasons:
+
+- removes one critical request on first load (makes the app score better on LightHouse)
 - allows deployment to hosting providers other than Firebase (though this is likely not necessary)
 
 Provide the target deployment's access values in `.env.{default|...}.js` in this form:
@@ -69,12 +92,8 @@ export default config;
 
 To work with multiple targets, have multiple such files (`.env.staging.js`, `.env.prod.js`) and set the `ENV` env.var. to define the target.
 
->*Note: This convention is still under trial. `#feedback` is appreciated!*
-
 You may consider adding the configurations you use to version control (they are not secrets).
-
-<font color=red>*As you may sense, this part of the repo is not finished, yet. We need a smoother workflow for testing and deploying the front-end. Will be back, after CI/CD covers also deployment...*</font>
-
+-->
 
 ## Getting started
 
@@ -103,34 +122,6 @@ i  hosting: Serving hosting files from: roll/out
 ```
 
 Visit [http://localhost:3012](http://localhost:3012) and you should see a UI.
-
->Note: The UI uses a backend deployed to the cloud. If you haven't done that yet, return to the root's `README` and the CI/CD documentation, to see how you want to place the back-end online.
-
-### Watch mode
-
-If you develop the integration part (code in `src/`), it may be useful to have the code automatically repackaged after changes.
-
-```
-$ npm run watch:roll
-```
-
->Note: This might not have Hot Module Reload (as `app` development has). Just press Refresh on the browser.
-
-<!-- hint: contributions on setting up HMR for Rollup are welcome :)
--->
-
-### Stats
-
-It's good to keep an eye on the packaging sizes.
-
-There are many Rollup packages for this, and the choices done in this repo may *not* be the best.
-
-We have:
-
-- `rollup-plugin-analyzer` showing the output sizes on every build
-- `rollup-plugin-visualizer` creates `roll/stats.html` showing the same info in a graphical manner
-
->💡: Please suggest your favourite plugins to the author; we can also think of stripping these completely away - it's a very personal thing and maybe best left for tools that visualize a directory already created (not needing to be part of the build setup).
 
 
 ## Deploying
@@ -206,6 +197,37 @@ You can create adapters yourself, and even publish and share them with others as
 >The [Cloud Logging](https://cloud.google.com/logging) adapter is intended to be the initial one, but it's **work in progress** since Cloud Logging does not provide a browser facing logging client.
 >
 >Another nice one could be [Datadog](https://www.datadoghq.com). 
+
+
+## Development (optional)
+
+This section is about 
+
+### Watch mode
+
+If you develop the integration part (code in `src/`), it may be useful to have the code automatically repackaged after changes.
+
+```
+$ npm run watch:roll
+```
+
+>Note: This might not have Hot Module Reload (as `app` development has). Just press Refresh on the browser.
+
+<!-- hint: contributions on setting up HMR for Rollup are welcome :)
+-->
+
+### Stats
+
+It's good to keep an eye on the packaging sizes.
+
+There are many Rollup packages for this, and the choices done in this repo may *not* be the best.
+
+We have:
+
+- `rollup-plugin-analyzer` showing the output sizes on every build
+- `rollup-plugin-visualizer` creates `roll/stats.html` showing the same info in a graphical manner
+
+>💡: Please suggest your favourite plugins to the author; we can also think of stripping these completely away - it's a very personal thing and maybe best left for tools that visualize a directory already created (not needing to be part of the build setup).
 
 
 ## Final yards
