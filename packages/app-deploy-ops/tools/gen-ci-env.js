@@ -1,7 +1,6 @@
 #!/usr/bin/env node
+
 /*
-* tools/gen-ci-env.js
-*
 * Outputs an env file to stdout, based on the active Firebase project.
 *
 * Usage:

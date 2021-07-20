@@ -80,15 +80,31 @@ switch(lastPart) {
     fail(`Unexpected current folder: ${lastPart}`)
 }
 
-// Note:
-//    Keep '--sig-proxy=true' (though it is the default); it helps Firebase CLI release the ports. '=false' would lead
-//    to dangling ports and needing to restart Docker.
+// Docker parameters:
 //
-//    ^-- really? See [1] which happens also with '--sig-proxy=true'.
-//    [1]: https://github.com/akauppi/GroundLevel-firebase-es/issues/67
+// '-it':
+//    Allows Ctrl-C termination to reach Firebase Emulators. This, in turn, allows them to gracefully shut down.
+//    Without this, we get "broken pipe" error on the terminal (if the Docker output is piped), and Docker may need
+//    restarts, at times. IMPORTANT!
+//
+// '--log-driver local':
+//    Inspired by this SO answer [1] ..and Docker docs [2] state:
+//      >>
+//        For other situations, the “local” logging driver is recommended
+//      <<
+//
+//    Setting to "none" takes away logs from Docker Desktop (those may be handy), but "local" is great!!!
+//
+// '-a stdout -a stderr':
+//    Based on [1]. Makes piping Docker output way more tolerant to Ctrl-C.
+//
+// [1]: https://stackoverflow.com/a/50161815/14455
+// [2]: https://docs.docker.com/config/containers/logging/configure/
 //
 const cmd = [
-  'docker run --rm',
+  'docker run -it --rm',
+  '--log-driver local',
+  '-a stdout -a stderr',
   `-v ${vOpts}`,
   `-w ${wOpts}`,
   ...ports.flatMap(p => ['-p', `${p}:${p}`] ),

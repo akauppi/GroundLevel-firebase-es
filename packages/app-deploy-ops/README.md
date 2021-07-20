@@ -126,9 +126,61 @@ Visit [http://localhost:3012](http://localhost:3012) and you should see a UI.
 
 ## Deploying
 
-<font color=red>*Deployment is in a bit of flux, right now. We're moving towards CI/CD guidance and away from needing to be logged into the Firebase CLI tool (or even have it!).*
+Deploying is intended to be done via CI/CD.
 
-*You can use the below documentation, but need to first:*
+### Manual deploying (just in case..)
+
+```
+$ docker run -it --rm -v $(pwd):/work -w /work -p 9005:9005 firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
+```
+
+Within Docker:
+
+```
+# firebase login
+...
+Visit this URL on this device to log in:
+https://accounts.google.com/o/oauth2/auth?client_id=563584335869-...9005
+```
+
+Copy-paste the URL to a browser, visit it and sign in.
+
+![](.images/firebase-login-wohoo.png)
+
+Close the browser and return to the Docker.
+
+```
+# firebase use --add
+```
+
+Select the right project, give a fake alias (eg. `abc`), and you're in. 
+
+>This is the state that CI/CD would normally operate in. You can now run commands intended for CI.
+
+```
+# npm run ci:build
+...
+worker in 370ms
+...
+@firebase/app (imported by src/main.js, adapters/cloudLogging/proxy.js)
+@local/app (imported by src/main.js)
+created roll/out in 575ms
+```
+
+>The CI build picks the activation values from the active project. It does not need a `../../firebase.{env}.js`.
+
+If all went well, proceed with deployment:
+
+```
+# npm run ci:deploy
+...
+```
+
+
+
+
+
+
 
 ```
 $ npm install -g firebase-tools
