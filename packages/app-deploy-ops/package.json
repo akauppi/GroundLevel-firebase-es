@@ -19,7 +19,7 @@
     "  - -": "",
     "_prepRoll": "npm run -s _checkEnv && npm run -s _prepRollOut",
     "_prepRollOut": "find roll/out -mindepth 1 ! -name \".gitkeep\" -delete && npm run -s _prepRollOut2",
-    "_prepRollOut2": "cp node_modules/@local/app/vitebox/dist/*.css roll/out/",
+    "_prepRollOut2": "cp node_modules/@local/app/dist/favicon.* node_modules/@local/app/dist/*.css roll/out/",
     "  - --": "",
     "serve": "$(docker-run-cmd) firebase emulators:start --project=demo-9 | grep -v -E \"You are not currently authenticated|Detected demo project ID|The Emulator UI requires a project ID to start\"",
     "//serve:pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-9",

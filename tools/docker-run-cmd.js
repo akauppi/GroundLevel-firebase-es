@@ -59,15 +59,19 @@ const ports = portsFromFirebaseJson(
   lastPart !== 'app-deploy-ops' ? ["firestore","functions","auth","ui"] : ["hosting"]
 );  // Array of int
 
+let itFriendly = true;
+
 switch(lastPart) {
   case 'backend':
     vOpts = `${pwd}:/work`;
     wOpts = '/work';
+    itFriendly = false;
     break;
 
   case 'app':
     vOpts = `${pwd}/..:/work`;
     wOpts = '/work/app';
+    itFriendly = false;
     break;
 
   //case 'app-ops':
@@ -87,6 +91,12 @@ switch(lastPart) {
 //    Without this, we get "broken pipe" error on the terminal (if the Docker output is piped), and Docker may need
 //    restarts, at times. IMPORTANT!
 //
+//    Note:
+//      '-it' cannot be used if launched via 'concurrently' (app, backup)
+//        <<
+//          the input device is not a TTY
+//        <<
+//
 // '--log-driver local':
 //    Inspired by this SO answer [1] ..and Docker docs [2] state:
 //      >>
@@ -102,7 +112,7 @@ switch(lastPart) {
 // [2]: https://docs.docker.com/config/containers/logging/configure/
 //
 const cmd = [
-  'docker run -it --rm',
+  `docker run ${ itFriendly ? '-it':'-i' } --rm`,
   '--log-driver local',
   '-a stdout -a stderr',
   `-v ${vOpts}`,

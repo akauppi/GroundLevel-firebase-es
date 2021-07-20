@@ -72,12 +72,15 @@ async function initFirebaseLocal() {   // () => Promise of ()
 }
 
 /*
-* Running against an online project; access values from 'firebase.staging.js'.
+* Running against an online project
 */
 async function initFirebaseOnline() {
-  const { apiKey, appId, authDomain, projectId } = await import('../../.firebase.staging.js').then( mod => mod.default );
-    //
-    // appId needed for Firebase Performance Monitoring (only)
+  const [apiKey, appId, authDomain, projectId] = [
+    import.meta.env.VITE_API_KEY,
+    import.meta.env.VITE_APP_ID,      // needed only for Firebase Performance Monitoring
+    import.meta.env.VITE_AUTH_DOMAIN,
+    import.meta.env.VITE_PROJECT_ID
+  ];
 
   assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 

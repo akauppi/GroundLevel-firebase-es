@@ -35,6 +35,9 @@ Like here: [Enable Top Level Await](https://github.com/eslint/eslint/issues/1317
 In "stage 3" (26 Oct 2020; Jan 2021).
 
 
+<!--
+| This one is for Rollup. We now use Vite for this level.
+
 ## Rollup-plugin-vue for Vue.js 3 (beta) needs an extra plugin for CSS/Sass
 
 [https://github.com/vuejs/rollup-plugin-vue/issues/364](https://github.com/vuejs/rollup-plugin-vue/issues/364)
@@ -43,10 +46,21 @@ Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
 
 If they react on the issue, we can remove the extra plugin.
 
-<!--
+<_!--
 This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs/rollup-plugin-vue/issues/364) and thus with us not needing to load a plugin.
 
 - [https://github.com/Norserium/vue-advanced-cropper/issues/72](https://github.com/Norserium/vue-advanced-cropper/issues/72)
 -->
 
 
+## Vite and `lang="scss"`
+
+If you use `lang="scss"` in the `style` sections, this occurs:
+
+```
+$ npm run build
+...
+[vite:css] Preprocessor dependency "sass" not found. Did you install it?
+```
+
+- [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?

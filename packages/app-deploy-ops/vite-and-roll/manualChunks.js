@@ -62,15 +62,15 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
 
   // App and its libraries (keep the chunking)
   //
-  // /Users/.../app/vitebox/dist/app.es.js
-  // /Users/.../app/vitebox/dist/vue.js
-  // /Users/.../app/vitebox/dist/aside-keys.js
-  // /Users/.../app/vitebox/dist/vue-router.js
-  // /Users/.../app/vitebox/dist/firebase.js
-  // /Users/.../app/vitebox/dist/firebase-auth.js
-  // /Users/.../app/vitebox/dist/firebase-firestore.js
-  // /Users/.../app/vitebox/dist/firebase-performance.js
-  // /Users/.../app/vitebox/dist/tslib.js
+  // /Users/.../app/dist/app.es.js
+  // /Users/.../app/dist/vue.js
+  // /Users/.../app/dist/aside-keys.js
+  // /Users/.../app/dist/vue-router.js
+  // /Users/.../app/dist/firebase.js
+  // /Users/.../app/dist/firebase-auth.js
+  // /Users/.../app/dist/firebase-firestore.js
+  // /Users/.../app/dist/firebase-performance.js
+  // /Users/.../app/dist/tslib.js
   //
   [/(?<!node_modules.*)\/app\/.+\/(.+?)\.js$/, 'app'],      // note: 'node_modules' _not_ allowed to precede (negative look-behind)
 

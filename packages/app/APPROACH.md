@@ -115,3 +115,13 @@ The ability to have multiple test folders within `cypress` is intentional. This 
 - `anonymous`: testing what a guest sees and anonymous login
 - `joe`: testing the UI from Joe D.'s point of view
 
+
+## Role of `vitebox`
+
+The main role of this folder is to hide `index.html` from the main level.
+
+We only need `index.html` in this development level; it doesn't deserve to be in a central position. Vite gives no configuration entry for hiding it.
+
+This gave a good excuse to place anything involving only this level (not production build) to such a folder.
+
+Production build does not need anything from `vitebox`, so when you do `npm run build`, this configuration does not involve it (but runs the build in the main folder).
