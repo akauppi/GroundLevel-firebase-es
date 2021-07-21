@@ -3,20 +3,31 @@
 
 ## Testing Security Rules
 
-The `firebase-jest-testing` library allows us to run the tests as-if they wouldn't change the database, when access is allowed. Since we only test **whether we have access** to certain fields, there is no benefit in being able to change the data.
-
->NOTE: If this approach feels welcome to you, [PLEASE LOBBY](https://github.com/firebase/firebase-js-sdk/issues/2895) to the Firebase architects to make Firestore emulator provide read-only access.
+The `firebase-jest-testing` library allows us to run the tests as-if they wouldn't change the database, when access is allowed.
 
 
-## Using the same back-end emulator also for the front end
+## Waking up Cloud Functions
 
-Ideally, the backend is not aware of the front-end, at all.
+The Firebase Emulators (`firebase-tools` 9.16.0) leave Cloud Functions "resting" after launch.
 
-The `npm run start` line in the `package.json` is an exception. It launches the emulators in a way that is suitable also for front-end development.
+This is tedious, and causes initial tests easily to time out. We've counteracted this with:
 
-This allows us to:
+- as part of the functions themselves, if emulation is detected, the functions are triggered so that they wake up.
 
-- only use one kind of emulator configuration; not two
 
-The front-end package sniffs, whether the Firebase Emulators are already running (port 4000 responds), and uses the existing instance if there is one.
+This wake-up happens *after* Emulators have opened port 4000 for shop, so tests don't have an easy mechanism to know when Cloud Functions really have woken up.
+
+This is not a problem with manual use (starting `npm run start` in one terminal; moving to another; executing tests with `npm run test:fns:...`), but it does bother `npm test`. We'd need to place something like `sleep 7` (seconds) in the command to have `npm test` launch safely - and any such constant delays are normally a no-no. Changed `npm test` so that it -- for now -- requires Firebase Emulators already to have been started, in the background.
+
+### Deeper analysis
+
+Why do Cloud Functions take up to 5..6 s to wake up, if executed under Docker?
+
+Are Firebase aware of this - something like 100's ms wake-up time would not cause these problems, but multiple seconds do.
+
+### Implications to CI
+
+Left CI out of this. It runs in its own environment (not under Docker) and performance is better.
+
+It matters slightly if the timings are off, but as long as the tests pass within timeout limits, CI does its job.
 

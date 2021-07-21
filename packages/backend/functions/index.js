@@ -137,5 +137,8 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
 // Cloud Functions remain sleeping, but we can wake them up right here, right now. O :)
 //
 if (EMULATION && process.env["FUNCTION_TARGET"] === undefined) {    // avoid loading warm-up twice
-  import('../functions-warm-up/index.js').then( mod => mod.call() );
+
+  if (process.env['HOME'] !== '/builder/home') {    // don't warm up CI runs
+    import('../functions-warm-up/index.js').then( mod => mod.call() );
+  }
 }
