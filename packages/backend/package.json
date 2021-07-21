@@ -11,12 +11,14 @@
     "functions/*.js"
   ],
   "engines": {
-    "node": "14 || ^16",
+    "node": "14 || >=16.0.0",
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run _ci_seq; else npm run -s _test_1 ; fi",
-    "_test_1": "concurrently --kill-others --success=first --prefix none \"npm run start\" \"wait-for 4000 && npm test\"",
+    "test": "npm run -s _checkStarted && npm run _ci_seq",
+
+    "//test": "if port-is-taken --silent 4000 ; then npm run _ci_seq; else npm run -s _test_1 ; fi",
+    "//_test_1": "concurrently --kill-others --success=first --prefix none \"npm run start\" \"wait-for 4000 && npm test\"",
     "  - ": "",
     "ci:test": "npm run -s ci:seq",
     "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
@@ -26,6 +28,7 @@
     "  -": "",
     "start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated\"",
     "//start:pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-2",
+    "  -  -": "",
     "ci:start": "firebase emulators:start --project=demo-2",
     "  -  ": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
@@ -46,7 +49,9 @@
     " - --": "",
     "prestart": "npm run -s _prepFunctions",
     "preci:start": "npm run -s _prepFunctions",
-    "_prepFunctions": "npm --prefix functions install"
+    "_prepFunctions": "npm --prefix functions install",
+    " - - -": "",
+    "_checkStarted": "port-is-taken --silent 4000 || ( >&2 echo \"** ROAD BLOCK **: Please 'npm run start' in a separate terminal and rerun 'npm test'.\n\"; false)"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
