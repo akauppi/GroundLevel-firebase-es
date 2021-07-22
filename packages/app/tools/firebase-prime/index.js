@@ -6,8 +6,8 @@
 import program from 'commander'
 
 import { initializeApp, deleteApp } from '@firebase/app'
-import { getAuth, initializeAuth, useAuthEmulator } from '@firebase/auth'
-import { getFirestore, useFirestoreEmulator } from '@firebase/firestore'
+import { getAuth, initializeAuth, connectAuthEmulator } from '@firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
 
 import { createUsers } from './createUsers.js'
 import { primeData } from './primeData/index.js'
@@ -62,8 +62,8 @@ async function main(docsFn, usersFn) {
 
   // Handle the emulation-awareness-lifting here
   //
-  useAuthEmulator(auth, `http://localhost:${authPort}`);
-  useFirestoreEmulator(db, 'localhost', firestorePort);
+  connectAuthEmulator(auth, `http://localhost:${authPort}`);
+  connectFirestoreEmulator(db, 'localhost', firestorePort);
 
   await Promise.all([
     wipe(projectId).then( _ => primeData(projectId, docs) ),

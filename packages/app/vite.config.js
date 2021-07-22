@@ -139,7 +139,9 @@ export default {
     // With 9.0.0-beta.1, '@firebase/...' packaging varies from subpackage to subpackage, but they all now carry "module"
     // which is enough (and part of Vite default 'resolve.mainFields' list).
     //
-    mainFields: ["module"]    // KEEP for a while
+    // With 9.0.0-beta.7, auth started working when this setting was disabled.
+    //
+    //mainFields: ["module"]    // KEEP for a while
   },
 
   // Means to pass build time values to the browser (in addition to '.env' files).
@@ -169,7 +171,7 @@ export default {
 
     rollupOptions: {
       external: [
-        /^@?firebase\//,    // don't try packing these - 'app-deploy-ops' will provide them (of the same version)
+        /^@?firebase\//,    // don't try packing these - 'app-deploy-ops' provides them (of the same version)
         //"/favicon.png"
         ...(DEV ? [] : ['@ops/central', '@ops/perf'])
       ],

@@ -5,12 +5,6 @@
   "scripts": {
     "initStagingAndDeploy": "init-staging/launch.sh",
     "- ": "",
-    "no": "npm run -s _no0 && npm run -s _no1 && npm run -s _no2 && npm run -s _no3",
-    "_no0": "npm --prefix tools outdated",
-    "_no1": "npm --prefix packages/app outdated",
-    "_no2": "npm --prefix packages/app-deploy-ops outdated",
-    "_no3": "npm --prefix packages/backend outdated && npm --prefix packages/backend/functions outdated",
-    "-- ": "",
     "preinstall": "sh/npm-version-check.sh",
     "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2",
     "_postinstall1": "npm --prefix tools install",
@@ -19,7 +13,7 @@
   "devDependencies": {
     "eslint": "^7.30.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.0.0-beta.6"
+    "firebase": "^9.0.0-beta.7"
   },
   "//": {
     "": [

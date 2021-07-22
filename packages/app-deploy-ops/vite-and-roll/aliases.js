@@ -8,16 +8,22 @@
 */
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
-import {readdirSync} from 'fs'
+import {readdirSync, existsSync} from 'fs'
 import { resolve as pathResolve } from 'path'
 
-const env = process.env["ENV"];
+const env = process.env["ENV"] || "staging";
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
 const opsPath = srcPath + "/ops";
 const adaptersPath = myPath + "/../adapters";
-const envPath = myPath + `/../.env.${env ?? 'ci'}.js`;
+const envPath = myPath + `/../../../firebase.${env}.js`;
+
+if (!existsSync(envPath)) {
+  fail(`No '${envPath}' found. Please create one or change the staging name by 'ENV=...'.`);
+}
+
+function fail(msg) { throw new Error(msg) }
 
 const opsAliases = (() => {
   const pairs = readdirSync(opsPath).map( s => {    // 'central.js', 'perf.js'
