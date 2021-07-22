@@ -28,10 +28,18 @@
 #
 #   See 'ci/APPROACH.md' for a deeper discussion...
 #
+# References:
+#   - Cloud Build > Substituting variable values
+#     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
 
 steps:
+# Flight check: not to be run from the 'ci-builder'
+- name: $_1
+  entrypoint: bash
+  args: ['-c', '[[ $PROJECT_ID != ci-builder ]]']
+
 # Root install
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: bash
   args: ['-c', 'apk --no-cache add patch && npm install']
 
@@ -39,20 +47,20 @@ steps:
 #
 # (keep similar to 'cloudbuild.master-pr.backend.yaml')
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
+  entrypoint: firebase
+  args: ['use', '$PROJECT_ID']
+  dir: packages/backend
+- name: $_1
   entrypoint: npm
   args: ['install']
   dir: packages/backend
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['run', 'ci:test']
   dir: packages/backend
 # DEPLOY
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: firebase
-  args: ['use', '$PROJECT_ID']
-  dir: packages/backend
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['run', 'ci:deploy']
   dir: packages/backend
@@ -61,32 +69,32 @@ steps:
 #
 # (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['install']
   dir: packages/app
   env: ['CYPRESS_INSTALL_BINARY=0']
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
 
 # App-deploy-ops
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['install']
   dir: packages/app-deploy-ops
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: firebase
   args: ['use', '$PROJECT_ID']
   dir: packages/app-deploy-ops
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['run', 'ci:build']
   dir: packages/app-deploy-ops
 # DEPLOY
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['run', 'ci:deploy']
   dir: packages/app-deploy-ops
@@ -97,6 +105,8 @@ steps:
 #
 timeout: 600s
 
+# Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
+#
 substitutions:
-  _BUILDER_TAG: 9.16.0-node16-npm7
-  #_BUILDER_TAG: 9.12.1-node16-npm7
+  #_BUILDER_TAG: 9.16.0-node16-npm7
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7

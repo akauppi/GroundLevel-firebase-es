@@ -6,18 +6,16 @@
 */
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { collection, doc, preheat_EXP } from 'firebase-jest-testing/firestoreAdmin'
+import { collection, doc } from 'firebase-jest-testing/firestoreAdmin'
 
 import './matchers/timesOut'
 import './matchers/toContainObject'
 
 describe("userInfo shadowing", () => {
 
-  // Have this, to move ~320ms of test execution time away from the reports (shows recurring timing). To show first
-  // (worst) timing, don't do this.
-  //
-  beforeAll( () => {
-    preheat_EXP("projects/1/userInfo");
+  beforeAll( async () => {
+    // Pre-heat also the client (cuts ~320ms off listening times for the stated collection). To show worst case times, skip it.
+    preHeat("projects/1/userInfo");
   })
 
   test('Central user information is distributed to a project where the user is a member', async () => {
@@ -59,4 +57,9 @@ function docListener(docPath) {    // (string) => Promise of {...Firestore docum
       /*await*/ unsub();
     });
   });
+}
+
+function preHeat(docPath) {    // (string) => ()
+  const unsub = doc(`${docPath}/...`).onSnapshot( ss => {} );
+  unsub();
 }

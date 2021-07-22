@@ -17,8 +17,6 @@ import { performance } from 'perf_hooks'
 
 import { httpsCallable } from './httpsCallable.js'
 
-//console.log("!!! ---- LOADED --- !!!")
-
 import admin from 'firebase-admin'    // version in 'functions/package.json'
 
 admin.initializeApp();
@@ -51,10 +49,11 @@ async function warmUpUserInfo() {
   // Listen to the change - just to get a timing of the wake-up.
   //
   const x = await docListener("projects/1/userInfo/def");
-  //console.log("RECEIVED:", x);    // {}
 
   console.info(`Woke up Cloud Function watching Firestore - took ${ Math.round(performance.now() - t0) }ms`);
     // 3919, 4717ms
+
+  await ackWarmedUp("1");
 }
 
 function docListener(docPath) {    // (string) => Promise of {...Firestore document }
@@ -81,15 +80,40 @@ async function warmUpLogging() {
 
   console.info(`Woke up Cloud Function 'cloudLoggingProxy_v0' - took ${ Math.round(performance.now() - t0) }ms`);
     // 2008, 3297, 3635, 3965, 5939 ms
+
+  await ackWarmedUp("2");
 }
 
-function call() {   // (App) => ()   ; with free-running tail
-  /*await*/ Promise.all([
-    warmUpUserInfo(),
-    warmUpLogging()
-  ]);
+//--- Ack
+//
+// Synchronization mechanism between us and the Jest tests.
+//
+// This is needed by 'npm test' not to jump ship before the warm-ups have happened. The tests needing Cloud Functions
+// to be initialized are added with code checking the second project's Firestore.
+//
+// Note: Cannot use default project because tests wipe that database, at launch.
+//
+// Note: None of this (well, none of the whole 'functions-warm-up') is needed if the Firebase Emulators:
+//      - started the functions warmed up (no lazy loading in emulators)
+//      - ..or took only 100's ms to warm up, instead of seconds
+//
+const projectId2 = 'warmed-up'
+
+const app2 = admin.initializeApp({
+  projectId: projectId2
+}, "carrot");
+const dbAdmin2 = admin.firestore(app2);
+
+async function ackWarmedUp(key) {   // (string) => Promise of ()
+
+  await dbAdmin2.doc('warmed-up/_').set({ [key]: true }, { merge: true })
 }
 
-export {
-  call
-}
+// Initialize by the module simply being imported
+//
+// Free-running tail.
+//
+/*await*/ Promise.all([
+  warmUpUserInfo(),
+  warmUpLogging()
+])

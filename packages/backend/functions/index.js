@@ -139,6 +139,6 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
 if (EMULATION && process.env["FUNCTION_TARGET"] === undefined) {    // avoid loading warm-up twice
 
   if (process.env['HOME'] !== '/builder/home') {    // don't warm up CI runs
-    import('../functions-warm-up/index.js').then( mod => mod.call() );
+    import('../functions-warm-up/index.js');
   }
 }

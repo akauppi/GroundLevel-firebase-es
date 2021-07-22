@@ -1,7 +1,7 @@
 /*
 * test-fns/logging.test.js
 */
-import { test, expect, describe, beforeAll } from '@jest/globals'
+import { test, expect, describe } from '@jest/globals'
 
 import { httpsCallable } from 'firebase-jest-testing/firebaseClientLike'
 

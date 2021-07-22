@@ -57,8 +57,6 @@ $ npm test
 
 The tests should pass, or be skipped.
 
->If you have timeout problems, just run `npm test` again. We have problems with Firebase Emulators taking awefully long to launch Cloud Functions, under Docker. See `APPROACH.md`.
-
 ## Development workflow
 
 <!-- was

@@ -15,10 +15,8 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "npm run -s _checkStarted && npm run _ci_seq",
-
-    "//test": "if port-is-taken --silent 4000 ; then npm run _ci_seq; else npm run -s _test_1 ; fi",
-    "//_test_1": "concurrently --kill-others --success=first --prefix none \"npm run start\" \"wait-for 4000 && npm test\"",
+    "test": "if port-is-taken --silent 4000 ; then npm run _ci_seq; else npm run -s _test_1 ; fi",
+    "_test_1": "concurrently --kill-others --success=first --prefix none \"npm run start\" \"wait-for 4000 && node hack/ack-await.js && npm test\"",
     "  - ": "",
     "ci:test": "npm run -s ci:seq",
     "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
@@ -49,14 +47,13 @@
     " - --": "",
     "prestart": "npm run -s _prepFunctions",
     "preci:start": "npm run -s _prepFunctions",
-    "_prepFunctions": "npm --prefix functions install",
-    " - - -": "",
-    "_checkStarted": "port-is-taken --silent 4000 || ( >&2 echo \"** ROAD BLOCK **: Please 'npm run start' in a separate terminal and rerun 'npm test'.\n\"; false)"
+    "_prepFunctions": "npm --prefix functions install"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.0",
     "eslint-plugin-node": "^11.1.0",
+    "firebase-admin": "^9.100.0-alpha.1",
     "firebase-jest-testing": "^0.0.4-alpha.2",
     "jest": "^27.0.6"
   },
@@ -75,6 +72,9 @@
       "ci:start": [
         "DO NOT use '|' in the CI side. The combination of Alpine Linux, 'concurrently' and piping creates a problem,",
         "where the killing of the emulators hits a wrong process id, and CI run never finishes. See TRACK.md"
+      ],
+      "firebase-admin": [
+        "Needed _solely_ for the implementation of the 'warm up' ack model, via a 2nd project in Firestore."
       ]
     }
   }

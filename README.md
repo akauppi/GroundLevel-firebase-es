@@ -182,8 +182,6 @@ $ npm test
 ...
 ```
 
-><font color=red>❌ Straight-up `npm test` is currently out-of-order. To run it, launch `npm run start` in a separate terminal and then `npm test`. Hope to get it run like above, soon. <!-- Jul 2021 --></font>
-
 The tests should pass, running against the Docker image you built.
 
 ><details><summary>Note to Windows users:</summary>
