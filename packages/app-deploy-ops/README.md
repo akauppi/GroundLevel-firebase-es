@@ -109,7 +109,7 @@ We'll cover that in `../../ci` but for now, you can do one deployment manually.
 ### Manual deploying (just in case..)
 
 ```
-$ docker run -it --rm -v $(pwd):/work -w /work -p 9005:9005 firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
+$ docker run -it --rm -v $(pwd)/..:/work -w /work -p 9005:9005 firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
 ```
 
 Within Docker:
@@ -126,6 +126,10 @@ Copy-paste the URL to a browser, visit it and sign in.
 ![](.images/firebase-login-wohoo.png)
 
 Close the browser and return to the Docker.
+
+```
+# cd app-deploy-ops
+```
 
 ```
 # firebase use --add
@@ -169,10 +173,6 @@ Project Console: https://console.firebase.google.com/project/groundlevel-160221/
 Hosting URL: https://groundlevel-160221.web.app
 ```
 </details>
-
-<!--
-tbd. Above doesn't work: '../app' is not available for the Docker.
--->
 
 You can now try the web app at the URL shown on the console:
 

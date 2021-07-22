@@ -39,7 +39,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
    - Docker
 
-  Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container - or in the Cloud Build CI/CD workload. This should be a degree safer than storing the Firebase credentials on one's development machine.
+  Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container. This should be a degree safer than storing the Firebase credentials on one's development machine.
   
   For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS image. WSL2 also happens to be a requirement for Docker Desktop.
 
@@ -150,28 +150,26 @@ We use a Docker image for running Firebase Emulators. Before advancing, let's bu
 ```
 $ (cd firebase-ci-builder.sub && ./build)
 ...
- => => naming to docker.io/library/firebase-ci-builder:9.12.1-node16-npm7 
+ => => naming to docker.io/library/firebase-ci-builder:9.16.0-node16-npm7 
 ```
 
->Did you use the parantheses? Without them, you'll end up in the `firebase-ci-builder.sub` folder.
+>Did you use the parantheses? Without them, you'll end up in the `firebase-ci-builder.sub` folder. Use `cd ..` to climb back.
 
 You don't need to push this image anywhere - it's enough that it resides on your development machine. This image is launched by the sub-packages whenever Firebase Emulators are required.
 
 >You can test it:
 >
 >```
->$ docker run -it --rm firebase-ci-builder:9.12.1-node16-npm7 firebase --version
-9.12.1
+>$ docker run -it --rm firebase-ci-builder:9.16.0-node16-npm7 firebase --version
+9.16.0
 >```
-
-If you insist, you can use a native `firebase-tools` installation. Just edit the `package.json` files.
 
 ## Speed run 
 
 If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
-through the three sub-packages, set up a Firebase project (and account), CI/CD to Cloud Build and end up having a clone of the sample application installed *on your Firebase account*, in the cloud.
+through the three sub-packages, set up a Firebase project (and account), CI/CD to Cloud Build and land on a discussion about operating your newly dispatched web app.
 
-Alternatively, you can study each of the individual sub-packages' `README`s (and `ci`'s) and come back here later..
+Alternatively, you can study each of the individual sub-packages' `README`s (and `ci` and `ops`) and come back here later..
 
 
 ### Backend
@@ -183,6 +181,8 @@ $ npm install
 $ npm test
 ...
 ```
+
+><font color=red>❌ Straight-up `npm test` is currently out-of-order. To run it, launch `npm run start` in a separate terminal and then `npm test`. Hope to get it run like above, soon. <!-- Jul 2021 --></font>
 
 The tests should pass, running against the Docker image you built.
 
@@ -208,7 +208,7 @@ $ npm run build
 ...
 ```
 
-The output of this stage (in `vitebox/dist/`) *is* the web app. All the looks, styling and front end features are done here.
+The output of this stage (in `dist/`) *is* the web app. All the looks, styling and front end features are done here.
 
 What's missing is the operational readiness that adds performance monitoring, central logging and crash detection to the app.
 
@@ -218,6 +218,12 @@ What's missing is the operational readiness that adds performance monitoring, ce
 ### App-deploy-ops
 
 This sub-package wraps the output of the "app" build to be ready for deployment.
+
+Before you can build the production-ready front end, the backend code needs to be deployed to a "staging" Firebase project. Follow [these instructions](Deployment%20to%20staging.md) for doing it.
+
+This creates a `firebase.staging.js` file in the repo's root, containing the access values for reaching a Firebase instance deployed online.
+
+>You can use multiple "staging" projects, if you like. Just define an environment variable `ENV` with the name of the environment. This can be useful for eg. a beta testers project (`"testers"`), an internal team sandbox (`"team"`) etc.
 
 ```
 $ cd ../app-deploy-ops
@@ -229,84 +235,7 @@ $ npm run build
 
 There are no tests here.
 
----
-
-Next, we'll do a manual deployment of the backend, and pick up a `firebase.staging.js` file in the project's root while doing so. This file opens some development commands for front-end development, where you can work against the deployed back-end.
-
-If you don't want to create a Firebase project at this stage, just skip it. You can return to this any time, later.
-
-
-## Deployment to staging
-
-><img src=".images/staging.svg" width=500 style="background-color:white" />
-
-For development, it is good to have a project online where you can see your changes in a real environment. These are called "staging" projects and we'll set up one now, for you / your team.
-
->Note: Some developers may be fond of "dev" environments. With Firebase Emulators doing a good job for development, the need for such is reduced, but if you need one, it's just setting up another staging environment (for the person or team needing it). That is, you can have any number of staging environments you want.
-
-After initial setup, you'll have CI/CD doing deployments for you. That is the safest option and we'll come to it, soon. 
-
-We'll do one initial deployment using a script prepared for this. It uses a temporary Docker container to sign you into Firebase, lets you select the right project, picks the access values and deploys the backend.
-
-
-### Create the Firebase project
-
-Follow the instructions in [0.1 Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (Wiki).
-
->You *will* need a credit card for creating the "Blaze" plan (and to deploy the default back-end).
-
-### Create `firebase.staging.js` and deploy
-
-Start the script:
-
-```
-$ cd ..    # project root
-$ npm run initStagingAndDeploy
-```
-
-This starts a temporary Docker container and asks you to log into the Firebase project.
-
-![](.images/create-staging.png)
-
-Press `n`.
-
-![](.images/create-staging-auth.png)
-
-Copy-paste the URL and open it in a browser.
-
-![](.images/create-staging-add-project.png)
-
-Select the Firebase project you want to use for staging.
-
->Firebase CLI asks an alias for the project. Give it *anything* (e.g. `abc`). This info will be forgotten once we exit Docker.
-
-![](.images/staging-access-values.png)
-
-The script picks downloads access values for the project and prepares `firebase.staging.js` for the front-end development.
-
-![](.images/staging-deploy.png)
-
-This last bit deploys the backend project.
-
-
-### Sharing the staging (optional)
-
-Now that the back-end is deployed, you can share it with the team by simply adding `firebase.staging.js` to the version control. This means your team members don't need to take the above steps, when they clone the project.
-
-- edit `.gitignore` and remove (or comment out) the line excluding `firebase.staging.js`
-- add `firebase.staging.js` to the git repo
-- remove `init-staging/` since it's no longer required
-
-This is useful if you want the whole team to always share the same staging environment.
-
->Note: The values are not really secrets. Anyone having access to your web app (before login) is able to figure them out.
-
----
-
-**This may be your first deployment!**. Let's celebrate for a while!! 🎉🎉🎪🤹‍♀️🎺
-
-The back-end is now deployed. Next, we set up Cloud Build to do deployments automatically.
-
+The folder's `README` contains information on how to do a manual deployment to the staging project. However, we proceed with the real thing - setting up CI/CD that deploys ready code, on your behalf!
 
 
 ## Setting up CI/CD
@@ -349,6 +278,7 @@ Check these subfolders:
 
 <!-- #later
 - 📈 Operational monitoring and improvements ([`ops/`](ops/README.md)) (⚠️ work-in-progress)
+- Growing with your user base ([`grow/`](grow/README.md)) (just-an-idea)
 -->
 
 ## Making it yours!
@@ -400,6 +330,7 @@ copies or substantial portions of the Software.
 ie. do not remove the license. You may, of course, become active in further developing the app template and we'd like to hear if you use it.
 
 
+<!-- hide/remove? (looks more pro without it)
 ## Plans 🪐🧳
 
 What the repo *mostly* needs is people to use it. To test its usefulness. To bend it.
@@ -420,18 +351,20 @@ Since the Issues will be unnecessarily flooded at some point, here are two major
 
 - [ ] `ops/**`
 
-   The `app-deploy-ops` part is still not finished. Once it is, information about what to consider in operations will be added in `ops/` (a documentation folder).
+   Once the `app-deploy-ops` part is finished, information about what to consider in operations will be added in `ops/` (a documentation folder).
 
 ---
-
+-->
 
 ## Credits
 
-Thanks to Jaakko Roppola for wonderful icon art!! 🙌
+Thanks to:
 
-Thanks to Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it, then changed a few things.
+- Jaakko Roppola for wonderful icon art!! 🙌
 
-Thanks to Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
+- Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it (in 2019), then changed a few things.
+
+- Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 
 
 ## Contribution

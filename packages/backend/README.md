@@ -83,5 +83,5 @@ This is useful when working on a certain test. Look in `package.json` for all su
 
 Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
 
-However, to get a staging instance up and running for the benefit of the front end sub-packages (they need it), follow the instructions in the root `README`: [Deployment to staging](../../README.md#deployment-to-staging)
+To deploy manually, follow the instructions in `../../`[Deployment to staging](../../Deployment%20to%20staging..md).
 

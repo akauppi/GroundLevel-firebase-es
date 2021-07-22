@@ -13,7 +13,3 @@
 
 # temp files
 /firebase-debug.log
-
-# Remove of comment out, to add the entries to version control
-/.env.*.js
-!/.env.staging.js
