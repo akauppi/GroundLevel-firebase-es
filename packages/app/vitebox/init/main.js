@@ -7,9 +7,9 @@
 import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
-import { getAuth, useAuthEmulator } from '@firebase/auth'
-import { getFirestore, useFirestoreEmulator } from '@firebase/firestore'
-import { getFunctions, useFunctionsEmulator } from '@firebase/functions'
+import { getAuth, connectAuthEmulator } from '@firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
+import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
@@ -57,9 +57,9 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
   const auth = getAuth();
 
-  useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
-  useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
-  useAuthEmulator(auth, AUTH_URL);
+  connectFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
+  connectFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
+  connectAuthEmulator(auth, AUTH_URL);
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
@@ -72,12 +72,15 @@ async function initFirebaseLocal() {   // () => Promise of ()
 }
 
 /*
-* Running against an online project; access values from 'firebase.staging.js'.
+* Running against an online project
 */
 async function initFirebaseOnline() {
-  const { apiKey, appId, authDomain, projectId } = await import('../../.firebase.staging.js').then( mod => mod.default );
-    //
-    // appId needed for Firebase Performance Monitoring (only)
+  const [apiKey, appId, authDomain, projectId] = [
+    import.meta.env.VITE_API_KEY,
+    import.meta.env.VITE_APP_ID,      // needed only for Firebase Performance Monitoring
+    import.meta.env.VITE_AUTH_DOMAIN,
+    import.meta.env.VITE_PROJECT_ID
+  ];
 
   assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 

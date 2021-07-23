@@ -9,6 +9,8 @@ const fail = (msg) => { throw new Error(msg) }
 
 describe ('Can proxy application logs', () => {
 
+  const fnLog = httpsCallable("cloudLoggingProxy_v0");
+
   test('good log entries', async () => {
     const msgs = [
       { level:'info', msg:'Jack says hi!' },
@@ -21,11 +23,9 @@ describe ('Can proxy application logs', () => {
       return createLogEntry(level, msg, []);
     });
 
-    const fnLog = httpsCallable("cloudLoggingProxy_v0");
-
     const { data } = await fnLog({ les });
     expect(data).toBe(true);
-  }, 4000 /*needed until Cloud Functions are woken up! (3000 wasn't enough)*/ );
+  } );
 });
 
 // Copy-pasted from 'app-deploy-ops/adapters':

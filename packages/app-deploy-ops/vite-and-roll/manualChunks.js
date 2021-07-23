@@ -42,11 +42,9 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //  /Users/.../app-deploy-ops/src/catch.js
   //  /Users/.../app-deploy-ops/index.html                        <-- only in the Vite build
   //  /Users/.../app-deploy-ops/index.html?html-proxy&index=0.js  <-- -''-
-  //  /Users/.../app-deploy-ops/.env.[...].js
   //
   /\/app-deploy-ops\/src\/(?!ops\/)/,   // to main chunk
   /\/app-deploy-ops\/index\.html/,
-  /\/app-deploy-ops\/\.env\..+\.js$/,
 
   //  /Users/.../app-deploy-ops/src/ops/central.js
   //  /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
@@ -54,23 +52,23 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   /\/app-deploy-ops\/src\/(ops)\//,
   [/\/app-deploy-ops\/adapters/, undefined, 'ops'],
 
-  //  /Users/.../app-deploy-ops/.env.js
-  /\/app-deploy-ops\/\.env\.js/,    // to main chunk
+  //  /Users/.../firebase.{staging|...}.js    // the Firebase access values
+  /\/firebase\.[^.]+\.js$/,
 
   // vite/preload-helper
   /^(vite)\//,      // Vite runtime (small, ~600b)
 
   // App and its libraries (keep the chunking)
   //
-  // /Users/.../app/vitebox/dist/app.es.js
-  // /Users/.../app/vitebox/dist/vue.js
-  // /Users/.../app/vitebox/dist/aside-keys.js
-  // /Users/.../app/vitebox/dist/vue-router.js
-  // /Users/.../app/vitebox/dist/firebase.js
-  // /Users/.../app/vitebox/dist/firebase-auth.js
-  // /Users/.../app/vitebox/dist/firebase-firestore.js
-  // /Users/.../app/vitebox/dist/firebase-performance.js
-  // /Users/.../app/vitebox/dist/tslib.js
+  // /Users/.../app/dist/app.es.js
+  // /Users/.../app/dist/vue.js
+  // /Users/.../app/dist/aside-keys.js
+  // /Users/.../app/dist/vue-router.js
+  // /Users/.../app/dist/firebase.js
+  // /Users/.../app/dist/firebase-auth.js
+  // /Users/.../app/dist/firebase-firestore.js
+  // /Users/.../app/dist/firebase-performance.js
+  // /Users/.../app/dist/tslib.js
   //
   [/(?<!node_modules.*)\/app\/.+\/(.+?)\.js$/, 'app'],      // note: 'node_modules' _not_ allowed to precede (negative look-behind)
 

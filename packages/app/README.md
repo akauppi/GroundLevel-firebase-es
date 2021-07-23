@@ -331,8 +331,24 @@ The Cypress approach changes the way we do software. The more time you spend wit
 Some Cypress features like "stubs" and "proxies" are not need, at all. Those are intended for building scaffolding when running things locally, but we have the whole Firebase emulators so we can work against the Real Thing.
 
 
-## What next?
+## Production build
 
-The output of this subpackage is a production-ready build that passes tests.
+```
+$ npm run build
+...
+vite v2.3.8 building for production...
+✓ 55 modules transformed.
+dist/aside-keys.js   17.91kb / brotli: 5.64kb
+dist/aside-keys.js.map 28.60kb
+dist/style.css       5.26kb / brotli: 1.43kb
+dist/app.es.js       33.24kb / brotli: 8.14kb
+dist/app.es.js.map   65.48kb
+dist/vue-router.js   52.54kb / brotli: 11.63kb
+dist/vue-router.js.map 172.74kb
+dist/vue.js          132.61kb / brotli: 26.22kb
+dist/vue.js.map      512.57kb
+```
 
-You can now move to `../app-deploy-ops` which takes such a build and wraps a cloak of operational awareness around it.
+This builds your front end application in `dist/` folder. It contains all the logic and the styles that your application has, but it lacks the operational awareness that makes it fully ready for production.
+
+We'll add that layer around it in the final sub-package, `../app-deploy-ops`.

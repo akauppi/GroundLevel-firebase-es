@@ -1,0 +1,79 @@
+#
+# ci/cloudbuild.merged.app.yaml
+#
+# Triggers:
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/app/**', 'packages/app-deploy-ops/**',
+#     root 'package.json' or 'tools'
+#
+# GCP Project:
+#   Same GCP project that carries the Firebase deployment.
+#
+# Responsibility:
+#   - build (maybe test, later) and deploy front-end
+#
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
+#
+#   - env.variables (just some):
+#     PWD=/workspace
+#     HOME=/builder/home
+#
+# References:
+#   - Cloud Build > Substituting variable values
+#     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
+
+steps:
+# Flight check: not to be run from the 'ci-builder'
+- name: $_1
+  entrypoint: bash
+  args: ['-c', '[[ $PROJECT_ID != ci-builder ]]']
+
+# Root install
+- name: $_1
+  entrypoint: bash
+  args: ['-c', 'apk --no-cache add patch && npm install']
+
+# Backend
+# (once/if we run Cypress tests, also backend needs 'npm install'; but we won't deploy it here, which takes "forever")
+
+# App (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
+- name: $_1
+  entrypoint: npm
+  args: ['install']
+  dir: packages/app
+  env: ['CYPRESS_INSTALL_BINARY=0']
+- name: $_1
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app
+
+# App-deploy-ops
+- name: $_1
+  entrypoint: npm
+  args: ['install']
+  dir: packages/app-deploy-ops
+- name: $_1
+  entrypoint: firebase
+  args: ['use', '$PROJECT_ID']
+  dir: packages/app-deploy-ops
+- name: $_1
+  entrypoint: npm
+  args: ['run', 'ci:build']
+  dir: packages/app-deploy-ops
+# DEPLOY
+- name: $_1
+  entrypoint: npm
+  args: ['run', 'ci:deploy']
+  dir: packages/app-deploy-ops
+
+# --- Timeout
+#
+# Cloud Build:  2:03
+#
+timeout: 240s
+
+# Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
+#
+substitutions:
+  #_BUILDER_TAG: 9.16.0-node16-npm7
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7

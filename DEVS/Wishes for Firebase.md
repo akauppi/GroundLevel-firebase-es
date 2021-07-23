@@ -462,6 +462,8 @@ useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
 useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
 ```
 
+>Changed to `connectAuthEmulator` but while Firebase could have made this consistency change simultaneously, they didn't.
+
 Mentioned in [#4781](https://github.com/firebase/firebase-js-sdk/issues/4781).
 
 ## FR: Ability to cloak as admin, with Firestore emulator (documenting this)

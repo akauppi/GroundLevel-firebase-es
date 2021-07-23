@@ -11,16 +11,39 @@
 *   - Add the Firebase Admin SDK to your server (Firebase docs)
 *     -> https://firebase.google.com/docs/admin/setup
 */
-//const admin = require('firebase-admin');
 import admin from 'firebase-admin'
 
-//const functions = require('firebase-functions');
 import functions from 'firebase-functions'
 const logger = functions.logger;
 
 import { cloudLoggingProxy_v0 as clp } from './cloudLoggingProxy.js'
 
+// Some env.vars:
+//
+//  FIREBASE_EMULATORS_PATH: '/root/.cache/firebase/emulators'
+//  IS_FIREBASE_CLI: 'true'
+//  GCLOUD_PROJECT: 'demo-2'
+//  FUNCTIONS_EMULATOR: 'true'
+//  FIRESTORE_EMULATOR_HOST: '0.0.0.0:6767'
+//
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
+
+//---
+// tbd. Why does this code get loaded TWICE?
+//
+// On the second time, with below env.vars added. It looks like reading the function, but why wasn't it done on the
+// first round???
+//
+//  <<
+//    FUNCTION_TARGET: 'cloudLoggingProxy_v0',
+//    FUNCTION_SIGNATURE_TYPE: 'http',
+//    K_SERVICE: 'cloudLoggingProxy_v0',
+//    K_REVISION: '1',
+//    PORT: '80',
+//  <<
+//
+//  Asked here: https://github.com/firebase/firebase-admin-node/discussions/1390
+//---
 
 admin.initializeApp();
 
@@ -30,7 +53,6 @@ admin.initializeApp();
 const region = EMULATION ? null : functions.config().regions[0];
 const regionalFunctions = region ? functions.region(region) : functions;
 
-//exports.cloudLoggingProxy_v0 = regionalFunctions.https
 export const cloudLoggingProxy_v0 = regionalFunctions.https
   .onCall(({ les, ignore }, context) => {
     const uid = context.auth?.uid;
@@ -48,7 +70,6 @@ export const cloudLoggingProxy_v0 = regionalFunctions.https
 //
 // tbd. Needs #rework
 //
-//exports.userInfoShadow_2 = regionalFunctions.firestore
 export const userInfoShadow_2 = regionalFunctions.firestore
   .document('/userInfo/{uid}')
   .onWrite( async (change, context) => {
@@ -111,3 +132,13 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
   })
 */
 
+// Wake up!!!!!!!! 😇⏰⏰⏰
+//
+// Cloud Functions remain sleeping, but we can wake them up right here, right now. O :)
+//
+if (EMULATION && process.env["FUNCTION_TARGET"] === undefined) {    // avoid loading warm-up twice
+
+  if (process.env['HOME'] !== '/builder/home') {    // don't warm up CI runs
+    import('../functions-warm-up/index.js');
+  }
+}

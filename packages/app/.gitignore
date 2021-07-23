@@ -1,6 +1,6 @@
 # 'node_modules' ignored by the main project
 
-/vitebox/dist/
+/dist/
 
 # Firebase hosting caches
 /.firebase/
@@ -12,14 +12,9 @@
 /firestore-debug.log
 /ui-debug.log
 
-# Firebase online access values (a link to repo root)
-/.firebase.staging.js
-
 # Cypress
 /.screenshots
 
 # Generated files
 /vitebox/.env.dev*
 
-# Copied from '/branding'; remove this line to use your own
-/vitebox/public/favicon.png

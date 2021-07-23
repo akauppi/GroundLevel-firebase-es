@@ -16,10 +16,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
 import { aliases } from '../vite-and-roll/aliases.js'
+import { /*dedupe*/ } from '../vite-and-roll/rollupConfig'
 
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
-import { readdirSync } from 'fs'
 
 import workerConfigGen, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
 
@@ -31,14 +31,6 @@ const targetHtml = myPath + '/out/index.html';
 const watch = process.env.ROLLUP_WATCH;
 
 /*
-* List the '@firebase/auth', '@firebase/app', ... subpackages, so that access to *any* of those is deduplicated
-* (cannot give a regex to dedupe).
-*/
-const allFirebaseSubpackages = [
-  ...readdirSync("./node_modules/@firebase").map( x => `@firebase/${x}` )
-];
-
-/*
 * Note: The order of the plugins does sometimes matter.
 */
 const plugins = [
@@ -47,11 +39,11 @@ const plugins = [
   }),
 
   resolve({
-    mainFields: ["module"],  // insist on importing ES6 only (tbd. remove at some point; Rollup defaults work with Firebase, since 9.0.0-beta.1?)
+    //mainFields: ["module"],  // insist on importing ES6 only (tbd. remove at some point; Rollup defaults work with Firebase, since 9.0.0-beta.1?)
     modulesOnly: true,       // "inspect resolved files to assert that they are ES2015 modules"
 
-    dedupe: allFirebaseSubpackages    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
-                                      // tbd. is there a way to dedupe *any* Rollup packages?
+    // NEWS: Seems to work now, without (Firebase 9.0.0-beta.7)
+    //dedupe    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
   }),
 
   // Inject build-time knowledge to the sources, at some places.
@@ -74,19 +66,19 @@ const plugins = [
       }*/
     },
 
-    // Mitigate warning (@rollup/plugin-replace 2.4.2):
+    // Mitigate warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
     //  <<
     //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
     //  <<
-    preventAssignment: true   // likely not needed with plugin 2.5.x
+    preventAssignment: true   // likely not needed with plugin v.??? (surprised that 3.0.0 still needs it)
   }),
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
-  //TEMP disabled: !watch && terser(),
+  !watch && terser(),
 
   tunnelPlugin(templateHtml, targetHtml),
 
-  // '@atomico' reporter shows yellow at 90% of the threshold; red for exceeding. Unfortunatly, the threshold applies
+  // '@atomico' reporter shows yellow at 90% of the threshold; red for exceeding. Unfortunately, the threshold applies
   // both to total and chunk sizing, which isn't really meaningful.
   //
   // "Good enough for now". You can replace this reporter.

@@ -4,8 +4,8 @@
 
 /.firebase/
 
-# temporary configs ({roll|vite})
-/firebase.*.json
+# temporary configs (especially CI)
+/firebase.*.js
 
 # visualizer output
 /roll/stats.html
@@ -13,7 +13,3 @@
 
 # temp files
 /firebase-debug.log
-
-# Remove of comment out, to add the entries to version control
-/.env.*.js
-

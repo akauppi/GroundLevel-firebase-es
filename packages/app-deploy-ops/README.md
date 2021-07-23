@@ -1,4 +1,4 @@
-# app-deploy-ops
+# app-deploy
 
 Takes the app developed in `../app` sister package and prepares it for operations.
 
@@ -17,13 +17,15 @@ Available integrations:
 
 ||adapters|comments|
 |---|---|---|
+|Performance monitoring|tbd.|
 |Logging|[Cloud Logging](https://cloud.google.com/logging)|
 |Crash reporting|tbd.|
-|Performance monitoring|tbd.|
 
 ><font color=red>WARN: Adapters are still work-in-progress.</font>
 
-You can tie logging to more than one logging adapter at any one time. This may be useful if evaluating vendors or transitioning between them.
+<p />
+
+>Note: You can use more than one adapter of a specific kind at any one time. This may be useful if evaluating vendors or transitioning between them.
 
 <!-- DELME?
 ### Relation to deployment
@@ -44,17 +46,17 @@ This project can be a staging project - you should only deal with the production
 $ (cd ../app && npm install && npm run build)
 ```
 
-**!!** We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy-ops`. If you change app sources, also rebuild it.
+>⚠️ We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy`. If you change app sources, also rebuild it.
 
+### Have staging prepared
 
-### Provide `.env.js`
+See [Deployment to staging](../../README.md#deployment-to-staging) in the main `README.md`.
 
-The access values (Firebase configuration) are *baked into the front-end code* and therefore need to be known for the *build* step, for two reasons:
+<!-- Editor's note:
+The link above should work in GitHub; it doesn't work with the MacDown editor
+-->
 
-- removes one critical round-path and makes the app score better on LightHouse
-- allows deployment to hosting providers other than Firebase (though this is likely not necessary)
-
-Provide the target deployment's access values in `.env.{default|...}.js` in this form:
+This means there's a `../../firebase.staging.js` file that contains the means to reach the backend:
 
 ```
 const config = {
@@ -66,15 +68,6 @@ const config = {
 };
 export default config;
 ```
-
-To work with multiple targets, have multiple such files (`.env.staging.js`, `.env.prod.js`) and set the `ENV` env.var. to define the target.
-
->*Note: This convention is still under trial. `#feedback` is appreciated!*
-
-You may consider adding the configurations you use to version control (they are not secrets).
-
-<font color=red>*As you may sense, this part of the repo is not finished, yet. We need a smoother workflow for testing and deploying the front-end. Will be back, after CI/CD covers also deployment...*</font>
-
 
 ## Getting started
 
@@ -104,56 +97,65 @@ i  hosting: Serving hosting files from: roll/out
 
 Visit [http://localhost:3012](http://localhost:3012) and you should see a UI.
 
->Note: The UI uses a backend deployed to the cloud. If you haven't done that yet, return to the root's `README` and the CI/CD documentation, to see how you want to place the back-end online.
-
-### Watch mode
-
-If you develop the integration part (code in `src/`), it may be useful to have the code automatically repackaged after changes.
-
-```
-$ npm run watch:roll
-```
-
->Note: This might not have Hot Module Reload (as `app` development has). Just press Refresh on the browser.
-
-<!-- hint: contributions on setting up HMR for Rollup are welcome :)
--->
-
-### Stats
-
-It's good to keep an eye on the packaging sizes.
-
-There are many Rollup packages for this, and the choices done in this repo may *not* be the best.
-
-We have:
-
-- `rollup-plugin-analyzer` showing the output sizes on every build
-- `rollup-plugin-visualizer` creates `roll/stats.html` showing the same info in a graphical manner
-
->💡: Please suggest your favourite plugins to the author; we can also think of stripping these completely away - it's a very personal thing and maybe best left for tools that visualize a directory already created (not needing to be part of the build setup).
-
 
 ## Deploying
 
-<font color=red>*Deployment is in a bit of flux, right now. We're moving towards CI/CD guidance and away from needing to be logged into the Firebase CLI tool (or even have it!).*
+Deploying is intended to be done via CI/CD.
 
-*You can use the below documentation, but need to first:*
+We'll cover that in `../../ci` but for now, you can do one deployment manually.
 
-```
-$ npm install -g firebase-tools
-$ firebase auth login
-$ firebase use --add
-```
+<details style="border: 1px solid lightblue; padding: 0.5em;"><summary>Manual deploying...</summary>
 
-*Hope that helps, for now.*
-</font>
-
-This shows how one can manually deploy the site to cloud. Such commands will be called by CI/CD, when one eg. merges new stuff to `master` in version control.
+### Manual deploying (just in case..)
 
 ```
-$ npm run deploy
+$ docker run -it --rm -v $(pwd)/..:/work -w /work -p 9005:9005 firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
+```
+
+Within Docker:
+
+```
+# firebase login
 ...
+Visit this URL on this device to log in:
+https://accounts.google.com/o/oauth2/auth?client_id=563584335869-...9005
+```
 
+Copy-paste the URL to a browser, visit it and sign in.
+
+![](.images/firebase-login-wohoo.png)
+
+Close the browser and return to the Docker.
+
+```
+# cd app-deploy-ops
+```
+
+```
+# firebase use --add
+```
+
+Select the right project, give a fake alias (eg. `abc`), and you're in. 
+
+>This is the state that CI/CD would normally operate in. You can now run commands intended for CI.
+
+```
+# npm run ci:build
+...
+worker in 370ms
+...
+@firebase/app (imported by src/main.js, adapters/cloudLogging/proxy.js)
+@local/app (imported by src/main.js)
+created roll/out in 575ms
+```
+
+>The CI build picks the activation values from the active project. It does not need a `../../firebase.{env}.js`.
+
+If all went well, proceed with deployment:
+
+```
+# npm run ci:deploy
+...
 === Deploying to 'groundlevel-160221'...
 
 i  deploying hosting
@@ -170,10 +172,60 @@ i  hosting[groundlevel-160221]: releasing new version...
 Project Console: https://console.firebase.google.com/project/groundlevel-160221/overview
 Hosting URL: https://groundlevel-160221.web.app
 ```
+</details>
 
 You can now try the web app at the URL shown on the console:
 
 [https://&lt;<i>your project id</i>&gt;.web.app](https://YOUR-PROJECT-ID.web.app)
+
+The rest of this `README` discusses development of the `app-ops` operational layer. If you are not interested, you can skip it (proceed to `../../ops` and `../../ci`, in that case).
+
+---
+
+If you continue, we have a look at the adapter system and how you can develop them.
+
+There are adapters for:
+
+- performance monitoring
+- central logging
+- crash analytics
+
+Let's first look at development commands in general, then peek at each of the adapter types, in particular.
+
+## Development
+
+### Watch mode
+
+If you develop the integration part (code in `src/`), it may be useful to have the code automatically repackaged after changes.
+
+```
+$ npm run watch:roll
+```
+
+>Note: This might not have Hot Module Reload (as `app` development has). Just press Refresh on the browser.
+
+<!-- contributions on setting up HMR for Rollup are welcome :) #help
+-->
+
+### Stats
+
+It's good to keep an eye on the packaging sizes.
+
+There are many Rollup packages for this, and the choices done in this repo may not be the best.
+
+We have:
+
+- `rollup-plugin-analyzer` showing the output sizes on every build
+- `rollup-plugin-visualizer` creates `roll/stats.html` showing the same info in a graphical manner
+
+>💡: Please suggest your favourite plugins to the author; we can also think of stripping these completely away - it's a very personal thing and maybe best left for tools that visualize a directory already created (not needing to be part of the build setup).
+
+
+<!--
+## Performance monitoring
+
+...tbd.
+-->
 
 ## Logging
 
@@ -207,18 +259,35 @@ You can create adapters yourself, and even publish and share them with others as
 >
 >Another nice one could be [Datadog](https://www.datadoghq.com). 
 
+<!--
+## Crash analytics
 
-## Final yards
+...tbd.
+-->
 
-Getting your application deployed is simply the beginning of your journey.
+## Final yards 🏃‍♂️🏃‍♀️
 
-The author hopes that this repo helped you to get *there* fast. 😋 
+We've now covered *building* the backend, the front end and preparing the front end for deployment.
+
+Next, you can check these two sub-folders in either order:
+
+- [CI/CD](../../ci/README.md)
+
+   Shows setting up a CI/CD pipeline, using [Cloud Build](https://cloud.google.com/build), for continuous testing and deployment.
+
+- [Operations](../../ops/README.md)
+
+   Discussion about the operational aspects of running an application. The contents are firmly connected to what's in this sub-package but more general and discussive in nature (thus they aren't here).
+
+
+Getting your application deployed is simply the beginning of your journey. The author hopes that this repo helped you to get *there* fast. 😋 
+
+<!--
 But now what?
 
 Have a look at the [ops](../../ops) folder. It has documentation about how one can build operational prowness on top of a running product.
 
-<!-- tbd. ops is unfinished, but... didn't find better wording. :S -->
-
 Then... build features... test... deploy... monitor... 🔁
+-->
 
-Be your bugs be simple 🐞 and users friendly.
+Be your bugs simple 🐞 and users friendly.

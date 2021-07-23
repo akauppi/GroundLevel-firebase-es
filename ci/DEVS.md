@@ -24,30 +24,18 @@ The `*_cloudbuild` bucket has a `source/` folder with `.tgz` packages.
 >(Please suggest the steps for adding the lifecycle, eg. retain for 30 days only. `#help`)
 
 
-<!-- hidden; not really a problem?
-## Build logs
-
-`gcloud builds submit --help` states that build logs should be stored (by default) in a bucket:
-
-```
-gs://[PROJECT_NUMBER].cloudbuild-logs.googleusercontent.com/
-```
-
->*tbd. Where can I see Cloud Build logs?*
--->
-
 ## Troubleshoot locally
 
 To launch a Docker container, similar to what `gcloud builds submit` does:
 
 ```
-$ docker run -it --volume `pwd`/..:/workspace gcr.io/groundlevel-160221/firebase-ci-builder:9.11.0-node16-npm7 /bin/bash
+$ docker run -it --volume `pwd`/..:/workspace gcr.io/groundlevel-160221/firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
 bash-5.0#
 ```
 
 You can now execute the build steps and debug, if something doesn't work right. Faster than changing `cloudbuild.yaml`.
 
->Note DIFFERENCES: Whereas Cloud Build copies files and **excludes** certain ones, here you see a mapping of the actual disk contents on your host. If you remove something, it's removed in the host.
+>Note DIFFERENCES: Whereas Cloud Build copies files and **excludes** certain ones, here you see a mapping of the actual disk contents of your entire repo. If you remove something, it's removed in the host.
 
 
 ## Viewing builds
@@ -55,18 +43,16 @@ You can now execute the build steps and debug, if something doesn't work right. 
 See -> [Viewing build results](https://cloud.google.com/build/docs/view-build-results) (Cloud Build docs)
 
 
-## Kaniko caching
+## Build default timeout
 
-Not for us. It seems a technology worth if one builds Docker containers (this is *not* clearly stated in its documentation, but implied).
+Timeout for the builds seems to be 10min (600s), which is rather long. The author has taken a habit of providing an explicit timeout for each CI job, just in case.
 
-
-## Misc notes
-
-- Timeout for the builds seems to be 10min (600s); seen in `gcloud builds describe <id>`.
+<!-- whisper
+seen in `gcloud builds describe <id>`
+-->
 
 
 ## References
 
 - `gcloud topic gcloudignore`
 - `gcloud builds submit --help`
-

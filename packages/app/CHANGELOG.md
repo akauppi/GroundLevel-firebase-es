@@ -4,6 +4,10 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
+## 20-Jul-2021
+
+- **CHANGE:** Separated `vitebox` so it's clearly only for development; production builds work in the main folder.
+
 ## 29-Apr-2021
 
 - **CHANGE:** enabling the social sign-in also in local mode (but still recommending to use `?user=dev`)

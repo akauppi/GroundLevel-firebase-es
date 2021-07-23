@@ -24,27 +24,32 @@ Responsible for:
 <!-- 
 developed with:
 - macOS 11.4
-- node 16.2
+- node 16.5
 - npm 7.19
 
-- Docker Desktop 3.3.4 with: 1 CPU core, 1.5 GB RAM
+- Docker Desktop 3.5.2 with: 1 CPU core, 1.5 GB RAM
 -->
-
-### Docker settings
-
-Using Docker makes launching Firebase Emulators a little bit (5..7 s) slower than if they were run natively. However, you don't need to restart the emulators that often, so this is deemed as tolerable.
-
-<!-- 13..16 vs. 8..9 s (on macOS) 
--->
-
->If you experience time-outs with the tests, see [DEVS/Docker Performance.md](../../DEVS/Docker%20Performance.md).
-
 
 ## Getting started
 
 ```
 $ npm install
 ```
+
+<!-- Editor's note
+Ideally, we just instruct people to `npm test` and it automatically launches Firebase Emulators (and shuts them down.
+
+It used to be like this. However, timeouts and Docker jams caused to (hopefully, temporarily) go to this "keep emulators running all the time" approach.
+-->
+
+For the time you are working with `backup`, start Firebase Emulators in another terminal and keep them running:
+
+```
+$ npm run start
+...
+```
+
+In the first terminal:
 
 ```
 $ npm test
@@ -54,6 +59,7 @@ The tests should pass, or be skipped.
 
 ## Development workflow
 
+<!-- was
 ```
 $ npm start
 ```
@@ -61,25 +67,19 @@ $ npm start
 This launches the Firebase emulator in one terminal, and automatically picks up changes to the sources.
 
 You can then run individual tests against it (see `package.json` for the precise name of commands).
+-->
 
-e.g. 
+In addition to running all the tests at once, you can run individual tests like this:
 
 ```
 $ npm run test:fns:userInfo
 ```
 
-## Alternative: use native `firebase-tools`
-
-The above instructions require you to have Docker running.
-
-If you rather develop with Firebase CLI (globally installed), use these commands:
-
-```
-$ npm run ci:test   # instead of 'npm test'
-$ npm run ci:start  # instead of 'npm start'
-```
+This is useful when working on a certain test. Look in `package.json` for all such commands.
 
 ## Deploying
 
 Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
+
+To deploy manually, follow the instructions in `../../`[Deployment to staging](../../Deployment%20to%20staging..md).
 

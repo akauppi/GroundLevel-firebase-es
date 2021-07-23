@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "$SERVE_PATH",
+    "public": "roll/out",
     "rewrites": [
       {
         "source": "!**/*.@(css|js|map)",
@@ -24,20 +24,31 @@
       }
     ]
   },
+  "emulators": {
+    "hosting": {
+      "port": 3012,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": false
+    }
+  },
 
   "//": {
     "hosting.public": [
-      "Must match 'outDir' in 'vite.config.js'"
+      "Must match the output dir (Rollup: ...; Vite: in 'vite.config.js')",
+      "tbd. This field will change when we try Vite build"
     ],
     "hosting.rewrites": [
       "Non-existing '.html' and postfix-less fetches should lead to SPA index. Missing sourcemaps, scripts etc. should show as 404.",
       "",
       "Test this (manually) by:",
-      "  /common.css -> 200",
-      "  /nosuch.js -> 404",
-      "  /some -> 200 (index.html)",
-      "  /some.html -> 200",
-      "  /main-{hash}.js.map (that exists) -> 200"
+      "  /style.css   -> 200; Content-type: text/css",
+      "  /nosuch.js   -> 404",
+      "  /some        -> 200 (index.html)",
+      "  /some.html   -> 200 (index.html)",
+      "  /main-{hash}.js (that exists) -> 200; Content-type: application/javascript",
+      "  /main-{hash}.js.map (that exists) -> 200; Content-type: application/json"
     ],
     "hosting.redirects": [
       "If you change the app's routing, consider adding a redirect so that users' existing bookmarks and what-not",

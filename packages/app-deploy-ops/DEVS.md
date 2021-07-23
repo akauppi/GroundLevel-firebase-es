@@ -2,12 +2,39 @@
 
 ## Rollup vs. Vite
 
-We'd like to be able to build with two options: plain Rollup and Vite (that uses Rollup underneath).
+It seems Rollup is winning the "fight" of production building, but we're keeping Vite as an option (though not actively maintained), like a spare tire (though without air!!).
 
-Unfortunately the Vite build is currently [not working](https://github.com/akauppi/GroundLevel-firebase-es/issues/35) 
+**Rollup**
 
->Edit: We got to Vite vs. Rollup size comparisons. Vite 488kB vs. Rollup 496kB (these likely are from different code bases, but there is no big sway one way or the other).
->
+- provides more control
+- demands more detailed configuration
+
+**Vite**
+
+- we use it in the app build
+- it can do production builds, but with out workers and what-not, setting such up is challenging
+
+**Ideally**, it would be awesome to be able to build the production front-end with either one, leaving the choice to the project owner. They can then place the output they prefer in the `firebase.json` `hosting.public` and roll on!!
+
+**Current state:**
+
+Vite build is kept in a semi-crippled form. Not intentionally, just lack of resources.
+
+- `npm run //build:vite`, to show it's not actively maintained
+- common things placed in `vite-or-roll` (Vite uses Rollup underneath)
+- likely not worth replicating worker builds with Vite - like: ever..?
+
+<!-- Editor's note: "Never say never"
+-->
+
+**Size comparison (aged)**
+
+In Mar 2021, we got to Vite vs. Rollup size comparisons (these likely are from different code bases, but there is no big sway one way or the other).
+
+Vite 488kB vs. Rollup 496kB
+
+>Those numbers are likely before Brotli compression. In Jul 2021, Rollup build (with Brotli) is 119.48KB. Vite is unknown.
+
 >One day, let's decide to have them both up - or toss one permanently aside?
 
 

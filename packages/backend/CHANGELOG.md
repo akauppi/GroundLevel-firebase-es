@@ -1,5 +1,10 @@
 # Changelog
 
+## 21-Jul-21
+
+- Wake-up of Cloud Functions, to have consistent test execution times. 
+   - `npm test` now requires Emulators to be started, first.
+
 ## 4-Jun-21
 
 - Testing using Docker.

@@ -4,23 +4,27 @@ All command line commands are expected to be run in the `ci` folder.
 
 ## Aim 🎯
 
-For a PR to `master`:
+### For a PR targeting `master`
 
-1. If files in `backend` (or root `package.json`, or `tools`) changed:
-  - test `backend`
-2. If files in `app` changed:
-  - test `app`
+|Files changed in...|then...|
+|---|---|
+|`backend` (or root `package.json`, or `tools`)|test `backend`|
+|`app`(or root `package.json`, or `tools`)|test `app`|
 
-For changes already merged to `master`:
+>Note: testing front-end requires Cypress, which is currently not easily packaged for Cloud Build use.
 
-1. If files in `backend` (or root `package.json`, or `tools`) changed:
-  - deploy `backend`
-2. If files in `app` or `app-deploy-ops` changed:
-  - build `app`
-  - build `app-deploy-ops`
-  - deploy `app-deploy-ops`
+<!-- Author's note:
+Cypress 8.0.0 with `headless` looks like a step forward. Let's see.
+-->
 
->Note: With Cloud Build integrated with GitHub, one cannot restrict merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.
+### For changes already merged to `master`
+
+|Files changed in...|then...|
+|---|---|
+|`backend` (or root `package.json`, or `tools`)|test and deploy `backend`|
+|`app` or `app-deploy-ops` (or root `package.json`, or `tools`)|test and build `app`<br />build and deploy `app-deploy-ops`|
+
+With Cloud Build integrated with GitHub, one **cannot** restrict merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.
 
 <!-- author's note:
 
@@ -29,6 +33,48 @@ We'd like to:
 - have two people approve PRs
   - [ ] check what options GitHub itself provides
 -->
+
+### Suggested GCP projects layout
+
+The model recommended by the author is such:
+
+```
+         xxxxxx                     ┌─────────────────────┐      ┌────────────────────────┐
+    x   x     xxxx         deploy   │                     │      │                        │
+  xxxxxxx         xxxxxx  ┌─────────┤   Application       │      │   CI/CD project        │
+ xx    xx         x     x │         │   projects          │      │                        │   PR changed    GitHub repos
+x       x                xxx        │                     ├───┬──┤   - builder images     ◄────────────────
+xx                         x        │   - deploy CI task  │   │  │   - PR CI tasks        │
+ xx                     xxx         │                     │   │  │     "does it pass?"    ├───────────────►
+  xxxxxxxxxxxxxxxxxxxxxxx           │                     │   │  │                        │   pass/fail
+                                    └─────────────────────┘   │  └────────────────────────┘
+                                    ┌─────────────────────┐   │
+                                    │                     │   │              merged
+                                    │   ...               │   │   ◄────────────────────────────────────────
+                                    │                     ├───┤  
+                                    └─────────────────────┘   │
+                                    ┌─────────────────────┐   │
+                                    │                     │   │
+                                    │   ...               │   │
+                                    │                     ├───┘
+                                    └─────────────────────┘
+```
+<!-- drawing with Asciiflow -->
+
+There is a single, CI/CD centric GCP project (e.g. `ci-builder`). It...
+
+- runs any "does this pass the tests?" CI tests (that don't need access rights to deploy)
+- holds the custom Docker images used in the organization 
+  - grants the other projects access to its Container Registry
+
+In addition, each GCP project (responsible for a certain product's certain tier, e.g. `abc-staging`) has a CI/CD aspect:
+
+- runs deployments, if a certain branch changes.
+
+This organization seems light enough, yet flexible, to recommend. In the following text we expect you have it in place.
+
+>One benefit of the above model is that *deployment keys* don't need to be shared. Each project is in charge of deploying itself.
+
 
 ## Requirements
 
@@ -48,8 +94,8 @@ We'd like to:
    Update by: `gcloud components update`
 	</details>
 
-   <details><summary>Installation on Windows 10 + WSL2</summary>
-   tbd.. `#contribute`
+   <details><summary>Installation on Windows 10 + WSL2 `#contribute`</summary>
+   tbd..
    </details>
 
 - Docker
@@ -57,59 +103,13 @@ We'd like to:
    Needed for building the builders.
 
 
-### Set up a GCP project for CI/CD jobs
+### Create a "CI Builder" GCP project
 
-The model recommended by the author is such:
+Create a GCP project for the CI builder role, and make it the active project for `gcloud`. 
 
-```
-         xxxxxx                     ┌─────────────────────┐      ┌────────────────────────┐
-    x   x     xxxx         deploy   │                     │      │                        │
-  xxxxxxx         xxxxxx  ┌─────────┤   Application       │      │   CI/CD project        │
- xx    xx         x     x │         │   projects          │      │                        │   PR changed    GitHub repos
-x       x                xxx        │                     ├───┬──┤   - builder images     ◄────────────────     - PRs
-xx                         x        │   - deploy CI task  │   │  │   - PR CI tasks        │
- xx                     xxx         │                     │   │  │     "does it pass?"    ├───────────────►
-  xxxxxxxxxxxxxxxxxxxxxxx           │                     │   │  │                        │   pass/fail
-                                    └─────────────────────┘   │  └────────────────────────┘
-                                                              │
-                                    ┌─────────────────────┐   │
-                                    │                     │   │              branch changed
-                                    │   ...               │   │   ◄────────────────────────────────────────
-                                    │                     ├───┤  
-                                    └─────────────────────┘   │
-                                                              │
-                                    ┌─────────────────────┐   │
-                                    │                     │   │
-                                    │   ...               │   │
-                                    │                     ├───┘
-                                    └─────────────────────┘
-```
-<!-- drawing with Asciiflow -->
-
-There is a single, CI/CD centric GCP project (e.g. `ci-builder`).
-
-It...
-
-- runs any "does this pass the tests?" CI tests (that don't need access rights to deploy)
-- holds the custom Docker images used in the organization 
-  - grants the other projects (below) access to its Container Registry
-
-In addition, each GCP project (responsible for a certain product's certain tier, e.g. `swapper-staging`) has a CI/CD aspect:
-
-- runs deployments, if the suitable branch changes.
-
-This organization seems light enough, yet flexible, to recommend. In the following text we expect you have it in place.
-
->One benefit of the above model is that *deployment keys* don't need to be shared much (well, at all).
-
-<!-- tbd. Separate (and link to):
-Guidance on setting up the GCP projects.
+<!-- tbd. more details
+- enabling Container Registry etc. (a link to the Wiki?)
 -->
-
-
-### Log in to the GCP project
-
-To use `gcloud builds submit`, for example, you need to be logged in to the CI project. This can be either the central `ci-builder` or a product specific project - your call.
 
 ```
 $ gcloud auth login
@@ -122,60 +122,72 @@ $ gcloud projects list
 Pick the right one, then:
 
 ```
-$ gcloud config set project my-project-id
+$ gcloud config set project <your-ci-builder-project>
 ```
 
-<!-- whisper
-Observe your current project by:
+>Query the current active project by:
+>
+>```
+>$ gcloud config get-value project
+>```
 
-```
-$ gcloud config get-value project
-Your active configuration is: [...]
-ci-builder-21
-```
--->
+### Deployment GCP project(s)
 
-### Build the Builders
+These are already created, by Firebase.
+
+When you create a Firebase project, a GCP project of the same name gets created as well. We use those projects for automating deployments, using Cloug Build.
+
+
+### Push the builder images
 
 The CI scripts require `ci-builder` Container Registry to have the following builder images:
 
-- `firebase-emulators:9.12.1-node16-npm7`
-- `firebase-emulators-cypress:9.12.1-7.5.0-node14-npm7`
+- `firebase-emulators:9.16.0-node16-npm7`
+- <font color=lightgray>`firebase-emulators-cypress:9.12.1-7.5.0-node14-npm7` (not ready yet)</font>
 
 <details><summary>Instruction for building and pushing them..</summary>
 
-```
-$ cd firebase-emulators.sub
-$ ./build
-$ ./push-to-gcr
-  # agree with the prompt...
-```
+1. Log into your "CI builder" GCloud project (see steps above).
+2. Build and push the images
 
-```
-$ cd ../firebase-emulators-cypress.sub  # tbd.
-```
-<!-- tbd. check the instructions; THIS IS REALLY LEFT UNDONE!! -->
+   ```
+   $ pushd ../firebase-ci-builder.sub
+   $ ./build
+   $ ./push-to-gcr
+   ...
+   $ popd
+   ```
+
+   ```
+   $ pushd firebase-ci-builder-cypress.sub   # TENTATIVE
+   $ ./build
+   $ ./push-to-gcr
+   ...
+   $ popd
+   ```
 </details>
 
+<!-- tbd. update once/if we have a Cypress Alpine image 🏞
+-->
 
-## GitHub Marketplace: enable Cloud Build application
+Now we have the necessary Docker images in the Container Registry of the `ci-builder` GCP project. 
 
-- [Google Cloud Build](https://github.com/marketplace/google-cloud-build) (GitHub Marketplace) application > `Enable`
-- Add your GitHub repo to the Cloud Build app (covers all GCP projects where Cloud Build is enabled)
+Next, let's introduce GitHub and Cloud Build to each other.
 
-You need this, in order to create Cloud Build triggers on GitHub PRs.
 
->Note: The UI uses the term "purchase", but installing the application is completely free (Jun 2021). The costs - if any - are based on your agreements with GitHub and Cloud Build.
+### Update the reference to `ci-builder` GCP project
+
+The `cloudbuild.merged.yaml` script has these lines at its end:
+
+```
+substitutions:
+  _BUILDER_IMAGE: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
+```
+
+This tells the deployment project, where it can fetch its builder images. My `ci-builder` project doesn't provide public pull access, so replace `ci-builder` with the GCP project where you just pushed the builder images.
 
 
 ## Cloud Build setup
-
-You can either:
-
-- use one GCP project for both deployment and CI tests
-- use two GCP projects: one for CI tests, another one (or multiple) for deployments
-
-The difference is marked in the table below, showing the details of setting up Cloud Build tasks. Execute the setup for each of these GCP projects.
 
 ### Enable APIs
 
@@ -199,7 +211,7 @@ Also check that the following are enabled:
 
 ### Steps for the deploying project
 
-For the GCP project that handles deployment (author recommends the deployment project itself), in addition to the above, do these steps:
+For the GCP project that handles deployment (the one matching a Firebase project's name), in addition to the above, do these steps:
 
 <details><summary>Grant Firebase IAM roles to the Cloud Build service account</summary>
 
@@ -208,6 +220,7 @@ For the GCP project that handles deployment (author recommends the deployment pr
 
 >![](.images/firebase-admin-enabled.png)
 
+<!-- YEEAAH... 
 There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
 
 - Get the number from the "Service account email" (above screenshot).
@@ -221,11 +234,7 @@ There was one more role needed, not covered in the normal documentation. Deployi
    ...
    ```
 
->Note:
->
->You may consider doing this on a *separate local account* to not need to log in as the production account, ever. Think of it as admin-level stuff.
->
->Q: Is there a way to do this on the Google Cloud Console? We'd rather give those instructions. `#help`
+>tbd. If re-enabling this section, give the instructions using Cloud Shell (not needing to log into staging/production accounts ever, from one's development machine..) #help
 
 ```
 $ gcloud auth logout
@@ -233,7 +242,7 @@ $ gcloud auth logout
 
 >Note: Would changing the `Service Account User` in the screenshot have done the same? Likely. (tbd. test) 
 
-<!-- whisper
+<!_-- whisper
 Interestingly, the GUI does not change the state of `Service Account User` to `ENABLED` - maybe it contains more roles than the one we changed at the command line?
 -->
 </details>
@@ -248,6 +257,40 @@ Interestingly, the GUI does not change the state of `Service Account User` to `E
 
 >![](.images/add-api-keys-admin.png)
 </details>
+
+<details><summary>Enable access to CI Builder Container Registry</summary>
+
+1. You'll need the Cloud Build service account (and email adress) of the *deploying project*.
+
+   - Google Cloud console > project *deploying* > Cloud Build > `Settings`
+   - pick up the **Service account email:** `337...369@cloudbuild.gserviceaccount.com` value
+
+From the [official guide](https://cloud.google.com/container-registry/docs/access-control#granting_users_and_other_projects_access_to_a_registry) (Container Registry docs):
+
+> You control access to Container Registry hosts with Cloud Storage permissions.
+
+We need to grant the `Storage Object Viewer` role to the needing service account.
+
+&nbsp;2. 
+
+   - (change to `ci-builder` project) > Cloud Storage > `artifacts.ci-builder.appspot.com`
+   - `Permissions` > `+👤 Add` > *provide the service account*
+      - Role: `Cloud Storage` > `Storage Object Viewer`
+
+   >![](.images/cloud-storage-add-member.png)
+
+Your deployment project Cloud Build runs should now be able to pull the builder images.
+</details>
+
+
+## Enable GitHub / Cloud Build integration
+
+- GitHub Marketplace > Apps > [Google Cloud Build](https://github.com/marketplace/google-cloud-build) > `Enable`
+- Add your GitHub repo to the Cloud Build app (covers all GCP projects where Cloud Build is enabled)
+
+You need this, in order to create Cloud Build triggers on GitHub PRs.
+
+>Note: The UI uses the term "purchase", but installing the application is completely free (Jun 2021). The costs - if any - are based on your agreements with GitHub and Cloud Build.
 
 
 ## Create the triggers
@@ -354,6 +397,7 @@ The same CI step takes care of deploying both backend and app.
 >*tbd. We might revisit this later, but it's important that if both change, backend is updated first.*
 -->
 
+<!-- hidden; `cloud-build-local` doesn't get love
 ## Run CI jobs manually (`cloud-build-local`; doesn't work)
 
 You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
@@ -368,10 +412,11 @@ $ cloud-build-local  --config=cloudbuild.master-pr.backend.yaml --dryrun=false .
 `cloud-build-local` seems to be pretty abandoned by Google, so the author looked further... 
 
 >`#help`: Anyone know how to fix this?
+-->
 
-## Run CI jobs manually II (`gcloud builds submit`)
+## Run CI jobs manually (`gcloud builds submit`)
 
-This works (runs the build in the cloud; requires you to have logged into the GCP project):
+The below commands pack your sources, send them to Cloud Build and let you see the build logs, in real time.
 
 ```
 $ gcloud builds submit --config=cloudbuild.master-pr.{app|backend}.yaml ..
@@ -381,7 +426,10 @@ $ gcloud builds submit --config=cloudbuild.master-pr.{app|backend}.yaml ..
 $ gcloud builds submit --config=cloudbuild.merged.yaml ..
 ```
 
-These commands pack the source files, and run the CI in the cloud. They save you from `git commit` and awkward PRs just for testing. :)
+When using these, make sure you are logged into the correct GCloud project.
+
+The author finds the `gcloud builds` workflow great for developing one's CI scripts, since you don't need to commit the changes to version control! 🙂
+
 
 ### See what is going out
 
@@ -394,12 +442,13 @@ $ gcloud meta list-files-for-upload ..
 This set of files is controlled by `.gcloudignore` in the project root.
 
 
+<!-- #later; not a big thing (see DEVS.md)
 ## Maintenance: clean up the tarballs
 
 *tbd. Where are they; what do we need to do?*
 
 `#contribute` by suggesting text, maybe?? ;M
-
+-->
 
 ## References
 
@@ -408,4 +457,3 @@ This set of files is controlled by `.gcloudignore` in the project root.
 - [Deploying to Firebase](https://cloud.google.com/build/docs/deploying-builds/deploy-firebase) (Cloud Build docs)
 - [Building and debugging locally](https://cloud.google.com/build/docs/build-debug-locally) (Cloud Build docs)
 - `gcloud builds submit --help`
-

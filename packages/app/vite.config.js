@@ -1,4 +1,9 @@
+//
 // vite.config.js
+//
+// Two modes:
+//  - for 'npm run dev:...', compile on-the-fly and use files from 'vitebox'
+//  - for 'npm run build', stay in the main folder
 //
 import path, { dirname, join as pJoin } from 'path'
 import { readdirSync, statSync } from 'fs'
@@ -8,9 +13,11 @@ import vue from '@vitejs/plugin-vue'
 
 const myPath = dirname(fileURLToPath(import.meta.url))
 const srcPath = pJoin(myPath, 'src');
-const opsPath = pJoin(myPath, 'vitebox/ops');
 
-const DEV_BUILD = false;  // !! process.env.VUE_DEV;    // #cleanup
+const DEV = process.env["NODE_ENV"] !== "production";
+  //
+  // true:  hosting, on-the-fly 🪰
+  // false: building for shipment; 'dist/'; no 'vitebox' files are needed!! 🚢
 
 /*
 * For an absolute path 'p', provide the immediate subdirectories within it.
@@ -44,9 +51,11 @@ const forcedVueComponents = new Set([
 ]);
 
 /*
-* Each file in 'opsPath' gets its own alias (eg. '@ops/central' -> '<root>/vitebox/ops/central.js')
+* Map '@ops/goo' to 'vitebox/ops/goo.js' (for 'npm run dev:...' only!)
 */
-const opsAliases = (() => {
+const opsAliases_DEV = DEV && (() => {
+  const opsPath = pJoin(myPath, 'vitebox/ops');
+
   const pairs = readdirSync(opsPath).map( s => {    // e.g. 'central.js'
     const [_,c1] = s.match(/(.+)\.js$/) || [];    // pick
     if (c1) {
@@ -109,23 +118,17 @@ const chunkTo = [     // Array of Regex
 ];
 
 export default {
-  root: 'vitebox',
+  ...(DEV ? {    // 'npm run dev:...'
+    root: 'vitebox',
+    publicDir: '../public'    // relative to 'vitebox'
+  } : {
+    // regular root
+  }),
 
   resolve: {
     alias: { ...subAliases,
       '/@': srcPath,
-      ...opsAliases,
-      ...(DEV_BUILD ? {
-        // KEEP for a while
-        //
-        // Developer versions of Vue.js 3 (and Vue Router) *may* be needed for the Developer Tools to work right.
-        // Or not. Keep until we have practical experience.
-        //  ---
-        // Use development versions so that Vue Developer tools would pick them up. EXPERIMENTAL
-        //
-        //'vue': 'vue/dist/vue.esm-browser.js',
-        //'vue-router': 'vue-router/dist/vue-router.esm-browser.js'
-      } : {})
+      ...(opsAliases_DEV || {}),
     },
 
     // Let's stick to *only* 'module' for a while; this can be completely removed once we know things are stable.
@@ -136,7 +139,9 @@ export default {
     // With 9.0.0-beta.1, '@firebase/...' packaging varies from subpackage to subpackage, but they all now carry "module"
     // which is enough (and part of Vite default 'resolve.mainFields' list).
     //
-    mainFields: ["module"]    // KEEP for a while
+    // With 9.0.0-beta.7, auth started working when this setting was disabled.
+    //
+    //mainFields: ["module"]    // KEEP for a while
   },
 
   // Means to pass build time values to the browser (in addition to '.env' files).
@@ -149,6 +154,10 @@ export default {
   },
 
   build: {
+    ...(!DEV ? {
+      //outDir: "dist"    // also the default (relative to 'app' folder)
+    }:{}),
+
     minify: false,
     sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
     target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
@@ -162,9 +171,9 @@ export default {
 
     rollupOptions: {
       external: [
-        /^@?firebase\//,    // don't try packing these - we've made them 'peerDependency'
+        /^@?firebase\//,    // don't try packing these - 'app-deploy-ops' provides them (of the same version)
         //"/favicon.png"
-        ...Object.keys(opsAliases)    // "@ops/central" et.al.
+        ...(DEV ? [] : ['@ops/central', '@ops/perf'])
       ],
       output: { manualChunks }
     },
@@ -189,8 +198,10 @@ export default {
   //    -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md#231-2021-05-12
   //
   server: {
-    fsServe: {
+    fs: {
       strict: true    // restrict access to the work directory
-    }
+    },
+    // Allows viewing from other devices, eg. a tablet.
+    host: true
   }
 }
