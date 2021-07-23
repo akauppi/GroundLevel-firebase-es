@@ -1,16 +1,15 @@
 #
-# ci/cloudbuild.merged.yaml
+# ci/cloudbuild.merged.app.yaml
 #
 # Triggers:
-#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**',
-#     'packages/app/**', 'packages/app-deploy-ops/**', root 'package.json' or 'tools'
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/app/**', 'packages/app-deploy-ops/**',
+#     root 'package.json' or 'tools'
 #
 # GCP Project:
-#   Intended to be run in the *same* GCP project that carries the Firebase deployment.
+#   Same GCP project that carries the Firebase deployment.
 #
 # Responsibility:
-#   - test and deploy backend
-#   - (if that succeeded) test, build and deploy front-end
+#   - build (maybe test, later) and deploy front-end
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -18,15 +17,6 @@
 #   - env.variables (just some):
 #     PWD=/workspace
 #     HOME=/builder/home
-#
-# Note:
-#   This approach causes unnecessary deployments (we don't have a way to tell, within the script, whether the changes
-#   were on the backend or front-end side), but it does keep the order of deployments.
-#
-#   Doing two scripts in parallel could lead to a situation where the front-end is deployed prior to its (with new
-#   features) back-end being available.
-#
-#   See 'ci/APPROACH.md' for a deeper discussion...
 #
 # References:
 #   - Cloud Build > Substituting variable values
@@ -44,31 +34,9 @@ steps:
   args: ['-c', 'apk --no-cache add patch && npm install']
 
 # Backend
-#
-# (keep similar to 'cloudbuild.master-pr.backend.yaml')
-#
-- name: $_1
-  entrypoint: firebase
-  args: ['use', '$PROJECT_ID']
-  dir: packages/backend
-- name: $_1
-  entrypoint: npm
-  args: ['install']
-  dir: packages/backend
-- name: $_1
-  entrypoint: npm
-  args: ['run', 'ci:test']
-  dir: packages/backend
-# DEPLOY
-- name: $_1
-  entrypoint: npm
-  args: ['run', 'ci:deploy']
-  dir: packages/backend
+# (once/if we run Cypress tests, also backend needs 'npm install'; but we won't deploy it here, which takes "forever")
 
-# App
-#
-# (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
-#
+# App (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
 - name: $_1
   entrypoint: npm
   args: ['install']
@@ -80,7 +48,6 @@ steps:
   dir: packages/app
 
 # App-deploy-ops
-#
 - name: $_1
   entrypoint: npm
   args: ['install']
@@ -101,9 +68,9 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build:  5:34
+# Cloud Build:  2:03
 #
-timeout: 600s
+timeout: 240s
 
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
