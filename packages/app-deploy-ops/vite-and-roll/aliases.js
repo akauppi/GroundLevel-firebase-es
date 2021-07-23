@@ -11,7 +11,7 @@ import {fileURLToPath} from 'url'
 import {readdirSync, existsSync, writeFileSync} from 'fs'
 import { resolve as pathResolve } from 'path'
 
-import { pickConfig } from './pick-config'
+import { pickConfig } from './pick-config.js'   // note: without extension good for Rollup; Vite needs '.js'
 
 const env = process.env["ENV"] || "staging";
 

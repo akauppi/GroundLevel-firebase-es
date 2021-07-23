@@ -25,7 +25,6 @@
     "//serve:pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-9",
     "  - -- ": "",
     "ci:build": "ENV=ci npm run build",
-    "//ci:build": "tools/gen-ci-env.js > ../../firebase.tmp.js && ENV=tmp npm run build",
     "ci:deploy": "firebase deploy --only hosting",
     "- -": "",
     "//build:vite": "vite build -c vite/vite.config.js",
@@ -53,10 +52,10 @@
     "rollup": "^2.53.2",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-visualizer": "^5.5.2"
+    "rollup-plugin-visualizer": "^5.5.2",
+    "vite": "^2.4.3"
   },
   "//devDependencies": {
-    "vite": "^2.1.5"
   },
   "//comments": {
     "scripts": {
