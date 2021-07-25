@@ -177,14 +177,14 @@ Next, let's introduce GitHub and Cloud Build to each other.
 
 ### Update the reference to `ci-builder` GCP project
 
-The `cloudbuild.merged.yaml` script has these lines at its end:
+The `cloudbuild.merged.{app|backend}.yaml` scripts have these lines at the end:
 
 ```
 substitutions:
   _BUILDER_IMAGE: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
 ```
 
-This tells the deployment project, where it can fetch its builder images. My `ci-builder` project doesn't provide public pull access, so replace `ci-builder` with the GCP project where you just pushed the builder images.
+This tells the deployment project, where it can fetch its builder images. My `ci-builder` project doesn't provide public pull access, so replace `/ci-builder/` with the GCP project where you just pushed the builder images.
 
 
 ## Cloud Build setup
@@ -370,32 +370,50 @@ You should see these (under `Checks`):
 ![](.images/github-pr-checks.png)
 
 
-<!-- #later (maybe move deployment stuff together???). tbd. check the details!!!
-
 ### Deploy
 
-You may have 1..n deployment projects (eg. production and staging).
+You may have 1..n deployment projects (eg. production and staging). Each such would listen to a different branch of the GitHub repo.
 
-Each such would listen to a different branch of the GitHub repo.
+Create these triggers in the project that gets deployed, itself. This way, you don't need to spread deployment rights.
 
-Create these triggers in the project that gets deployed, itself. This way, you don't need to spread deployment rights. (blah-blah)
-
-||**`master-merged`**|
+||**`merged-backend`**|
 |---|---|
-|Description|Merge to `master`|
+|Description|Merge to `master` (affects backend)|
 |Event|(●) Push to a branch|
 |**Source**|
 |Base branch|`^master$`|
-|Included files filter (glob)|*empty*|
+|Included files filter (glob)|`backend/**`, `*.*`, `tools/**`|
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
-|Location|(●) Repository: `ci/cloudbuild.merged.yaml`|
+|Location|(●) Repository: `ci/cloudbuild.merged.backend.yaml`|
 
-The same CI step takes care of deploying both backend and app. 
+This takes care of deploying the backend.
 
->*tbd. We might revisit this later, but it's important that if both change, backend is updated first.*
--->
+For the front-end, create a similar trigger (you can use `duplicate` in the triggers list as a start):
+
+||**`merged-app`**|
+|---|---|
+|Description|Merge to `master` (affects app)|
+|Event|(●) Push to a branch|
+|**Source**|
+|Base branch|`^master$`|
+|Included files filter (glob)|`app/**`, `app-deploy-ops/**`, `*.*`, `tools/**`|
+|Ignored files filter (glob)|`*.md`, `.images/*`|
+|**Configuration**|
+|Type|(●) Cloud Build configuration file (yaml or json)|
+|Location|(●) Repository: `ci/cloudbuild.merged.app.yaml`|
+
+With these two jobs in place, your deployments will track the contents of the `master` branch.
+
+To make multiple deployments, just dedicate a certain branch to the deployment, create a Firebase project for it and add these steps.
+
+>**Note**: What if...
+>
+>my front-end and back-end deployments need to be aligned?
+>
+>The author is thinking of adding a version number to the back-end that the front-end deployment script can detect, and refuse to deploy if the version is not what is requested. If your front-end deployment fails for this reason, just manually restart it. *This is not implemented, yet.*
+
 
 <!-- hidden; `cloud-build-local` doesn't get love
 ## Run CI jobs manually (`cloud-build-local`; doesn't work)
