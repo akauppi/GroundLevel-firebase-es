@@ -36,7 +36,6 @@
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
-    "@firebase/performance": "file:../../node_modules/@firebase/performance",
     "@local/app": "file:../app"
   },
   "devDependencies": {
@@ -54,8 +53,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-visualizer": "^5.5.2",
     "vite": "^2.4.3"
-  },
-  "//devDependencies": {
   },
   "//comments": {
     "scripts": {

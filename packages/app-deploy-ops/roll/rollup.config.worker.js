@@ -59,7 +59,7 @@ const pluginsWorkerGen = (esm) => [
 * [1]: https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 */
 function configWorkerGen(esm) { return {   // (boolean) => object
-  input: './adapters/cloudLogging/proxy.worker.js',
+  input: './src/ops-adapters/cloudLogging/proxy.worker.js',
   output: {
     dir: myPath + '/out/worker',   // under which 'proxy.worker-{hash}.js' (including imports, tree-shaken-not-stirred)
     format: esm ? 'es':'iife',

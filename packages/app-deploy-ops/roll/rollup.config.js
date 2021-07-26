@@ -52,7 +52,7 @@ const plugins = [
   //    unchanged!
   //
   replace({
-    include: ['adapters/cloudLogging/proxy.js'],
+    include: ['src/ops-adapters/cloudLogging/proxy.js'],
     values: {
       'process.env.PROXY_WORKER_HASH': () => {    // () => string
         const arr = loggingAdapterProxyHashes;

@@ -1,5 +1,5 @@
 /*
-* src/ops/central.js
+* src/ops-implement/central.js
 *
 * Central logging. Imported by either:
 *   - application code (uses 'central')

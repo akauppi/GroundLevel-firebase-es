@@ -75,7 +75,6 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   // Firebase for both app and ops (+ tslib, idb)
   //
   // /Users/.../node_modules/@firebase/app/dist/index.esm2017.js
-  // /Users/.../node_modules/@firebase/performance/dist/index.esm2017.js
   // /Users/.../node_modules/@firebase/util/dist/index.esm2017.js
   // /Users/.../node_modules/@firebase/logger/dist/index.esm2017.js
   // /Users/.../node_modules/@firebase/component/dist/index.esm2017.js
@@ -90,12 +89,11 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //
   /\/node_modules\/@?(firebase\/auth)\//,
   /\/node_modules\/@?(firebase\/firestore)\//,
-  /\/node_modules\/@?(firebase\/performance)\//,
     //
   /\/node_modules\/@?(firebase)\//,   // catch all of Firebase (keep AFTER the specific matches)
 
-  /\/node_modules\/(tslib)\//,
-  [/\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
+  /\/node_modules\/(tslib)\//   //,
+  //[/\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
 ];
 
 export {

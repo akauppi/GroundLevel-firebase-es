@@ -30,8 +30,8 @@ steps:
 
 # Root install
 - name: $_1
-  entrypoint: bash
-  args: ['-c', 'apk --no-cache add patch && npm install']
+  entrypoint: npm
+  args: ['install']
 
 # Tests (keep similar to 'cloudbuild.master-pr.backend.yaml')
 - name: $_1

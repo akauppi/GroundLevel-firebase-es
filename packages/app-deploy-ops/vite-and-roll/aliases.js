@@ -17,8 +17,8 @@ const env = process.env["ENV"] || "staging";
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
-const opsPath = srcPath + "/ops";
-const adaptersPath = myPath + "/../adapters";
+const opsPath = srcPath + "/ops-implement";
+const adaptersPath = srcPath + "/ops-adapters";
 let envPath = myPath + `/../../../firebase.${env}.js`;    // default: development
 
 // Development:

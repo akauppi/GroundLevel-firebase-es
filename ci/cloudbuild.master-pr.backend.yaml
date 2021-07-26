@@ -18,11 +18,9 @@
 steps:
 # Root install
 #
-# Note: 'patch' is added and used within the same CI step, since changes outside of '/workspace' don't carry from step to step.
-#
 - name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: bash
-  args: ['-c', 'apk --no-cache add patch && npm install']
+  entrypoint: npm
+  args: ['install']
 
 # Backend
 #

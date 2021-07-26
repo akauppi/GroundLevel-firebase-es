@@ -30,8 +30,8 @@ steps:
 
 # Root install
 - name: $_1
-  entrypoint: bash
-  args: ['-c', 'apk --no-cache add patch && npm install']
+  entrypoint: npm
+  args: ['install']
 
 # Backend
 # (once/if we run Cypress tests, also backend needs 'npm install'; but we won't deploy it here, which takes "forever")
