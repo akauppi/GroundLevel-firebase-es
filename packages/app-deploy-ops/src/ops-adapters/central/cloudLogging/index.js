@@ -16,10 +16,8 @@
 */
 import { getApp } from '@firebase/app'
 
-const esmHash = process.env.PROXY_WORKER_HASH;    // injected by Rollup build
-//const iifeHash = process.env.PROXY_WORKER_HASH_IIFE;    // not needed
-
-debugger; // esmHash
+const esmHash = import.meta.env.PROXY_WORKER_HASH;    // injected by Rollup build
+//const iifeHash = import.meta.env.PROXY_WORKER_HASH_IIFE;    // not needed
 
 function fail(msg) { throw new Error(msg); }
 function assert(cond,msg) { if (!cond) fail(msg || "(assert failed)"); }

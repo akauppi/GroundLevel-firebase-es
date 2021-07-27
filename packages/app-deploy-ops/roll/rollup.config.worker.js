@@ -10,8 +10,6 @@ import { terser } from 'rollup-plugin-terser'
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
 
-function fail(msg) { throw new Error(msg); }
-
 const myPath = dirname(fileURLToPath(import.meta.url));
 
 const watch = process.env.ROLLUP_WATCH;
@@ -39,7 +37,7 @@ const catchHashPlugin = (esm) => ({
 
 const pluginsWorkerGen = (esm) => [
   resolve({
-    mainFields: ["esm2017", "module"],
+    //mainFields: ["esm2017", "module"],    // <-- no longer needed, right? (Firebase relic) #cleanup
     modulesOnly: true       // "inspect resolved files to assert that they are ES2015 modules"
   }),
   !watch && terser(),

@@ -78,6 +78,7 @@ switch(lastPart) {
   case 'app-deploy-ops':    // for now
     vOpts = `${pwd}:/work`;
     wOpts = '/work';
+    itFriendly = false;   // also 'npm run watch' needs it (same as above, for 'app') 🙁🙁
     break;
 
   default:

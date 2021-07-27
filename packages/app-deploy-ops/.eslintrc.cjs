@@ -75,14 +75,6 @@ module.exports = {
       globals: {
         module: true
       }
-    },
-
-    // files with 'process.env.' injection
-    {
-      files: ["adapters/**/*.js"],
-      globals: {
-        process: true
-      }
     }
   ]
 };

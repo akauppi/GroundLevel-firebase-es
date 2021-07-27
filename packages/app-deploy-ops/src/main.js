@@ -13,8 +13,6 @@ import { default as config } from '/@env'
 
 const t0 = performance.now();   // start ⏱
 
-debugger;
-
 // Others can use 'getApp()' to get a handle
 //
 // Note: 'locationId' is not needed (or recognized!) by Firebase itself, but is anyways passed to 'httpsCallables'

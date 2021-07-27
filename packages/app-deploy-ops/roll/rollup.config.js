@@ -59,20 +59,22 @@ const envPairs = (_ => {
     });
 
   return pairs;
-})();
+})();   // Array of [string, string]
 
-const proxyPairs = [
+const proxyHashPairs = [
   ["PROXY_WORKER_HASH", () => {
     const arr = loggingAdapterProxyHashes;
-    (arr && arr[0]) || fail("Worker hash (ESM) not available, yet!");
-    return JSON.stringify(arr);
+    const tmp = (arr && arr[0]) || fail("Worker hash (ESM) not available, yet!");
+    return JSON.stringify(tmp);
   }],
   /*["PROXY_WORKER_HASH_IIFE", (() => {
     const arr= loggingAdapterProxyHashes;
-    assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
-    return JSON.stringify(arr);
+    const tmp= (arr && arr[1]) || fail("Worker hash (IIFE) not available, yet!");
+    return JSON.stringify(tmp);
   })()]*/
-];
+];   // Array of [string, () => quoted string]]
+
+function fail(msg) { throw new Error(msg) }
 
 /*
 * Note: The order of the plugins does sometimes matter.
@@ -92,20 +94,35 @@ const plugins = [
 
   // Inject build-time knowledge to the sources, at some places.
   //
-  // NOTE: The replaced strings _must_ begin with 'process.env.' (or '__...'); otherwise the plugin quietly leaves them
-  //    unchanged!
+  // Using two 'replace()' calls: adapters are not found by the default "include all files", it seems.
   //
-  replace({
-    include: ['src/ops-adapters/central/cloudLogging/proxy.js'],
-    values: Object.fromEntries( [...envPairs, ...proxyPairs].map( ([k,v]) =>
-      [`import.meta.${k}`, v]
+  // Using 'JSON.stringify' for the values feels safer than just `'${v}'` - though we know the contents to be replaced
+  //
+  // "Prevents replacing strings where they are followed by a single equals sign."
+  //
+  // We want this, but it also mitigates a warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
+  //  <<
+  //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
+  //  <<
+  //
+  // NOTE:
+  //    FOR SOME REASON, the 'include' parameters work with relative paths, WITHOUT './' in the beginning, relative to
+  //    the current folder (not 'roll', where this script is). Don't use 'myPath + ...', don't try to be clever.
+  //
+  replace({   // targeted injection to:
+    include: 'src/ops-adapters/central/cloudLogging/index.js',
+    values: Object.fromEntries( proxyHashPairs.map( ([k,f]) =>
+      [`import.meta.env.${k}`, f]   // generator: () => string
     )),
+    preventAssignment: true
+  }),
 
-    // Mitigate warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
-    //  <<
-    //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
-    //  <<
-    preventAssignment: true   // likely not needed with plugin v.??? (surprised that 3.0.0 still needs it)
+  replace({   // general replacements (all files)
+    include: 'src/**/*.js',
+    values: Object.fromEntries( envPairs.map( ([k,v]) =>
+      [`import.meta.env.${k}`, JSON.stringify(v)]
+    )),
+    preventAssignment: true
   }),
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
@@ -146,10 +163,8 @@ export default [
       sourcemap: true     // have source map even for production
     },
 
-    plugins: plugins,
+    plugins,
 
     preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
   }
 ];
-
-function fail(msg) { throw new Error(msg) }
