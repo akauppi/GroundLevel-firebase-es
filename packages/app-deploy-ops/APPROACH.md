@@ -105,3 +105,13 @@ This is not ideal. It means we need to cater for offline mode, transmission fail
 - [Collecting browser console logs in Stackdriver](https://medium.com/google-cloud/collecting-browser-console-logs-in-stackdriver-fa388a90d32b) (blog, Dec 2019)
 
    *Stackdriver is the earlier name for Cloud Logging*
+
+
+## Own replace over `dotenv`
+
+We read API keys from `.env` file but don't use the `dotenv` node module for doing so.
+
+This is mostly just to reduce the number of dependencies; it's not hard to pass the values to `import.meta.{key}`.
+
+Our mental model is that of Vite (which does use `dotenv` underneath).
+

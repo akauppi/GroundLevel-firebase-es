@@ -1,5 +1,5 @@
 /*
-* adapters/cloudLogging/proxy.js
+* adapters/central/cloudLogging/index.js
 *
 * MAIN THREAD side of the logging proxy.
 *
@@ -19,6 +19,8 @@ import { getApp } from '@firebase/app'
 const esmHash = process.env.PROXY_WORKER_HASH;    // injected by Rollup build
 //const iifeHash = process.env.PROXY_WORKER_HASH_IIFE;    // not needed
 
+debugger; // esmHash
+
 function fail(msg) { throw new Error(msg); }
 function assert(cond,msg) { if (!cond) fail(msg || "(assert failed)"); }
 
@@ -36,8 +38,8 @@ const ignore = location.hostname === "localhost" || location.hostname === "127.0
 // The reason likely is that the worker is a single chunk, not using 'import' or 'export' (and the browsers ignore
 // the '{ type: "module" }' though they technically should reject it).
 //
-const PROXY_WORKER_PATH = `/worker/proxy.worker-${esmHash}.js`;
-//const PROXY_WORKER_IIFE_PATH = `/worker/proxy.worker-${iifeHash}.iife.js`;
+const PROXY_WORKER_PATH = `/worker/abc-${esmHash}.js`;
+//const PROXY_WORKER_IIFE_PATH = `/worker/abc-${iifeHash}.iife.js`;
 
 let myWorker;
 

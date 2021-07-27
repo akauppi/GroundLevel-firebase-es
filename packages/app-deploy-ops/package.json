@@ -12,7 +12,7 @@
     "lint": "eslint src",
     "build": "npm run -s build:roll",
     "  -": "",
-    "watch": "concurrently -k -n roll,host \"npm run --silent _watchRoll\" \"npm run -s serve\"",
+    "watch": "concurrently --kill-others-on-fail -n roll,host \"npm run -s _watchRoll\" \"npm run serve\"",
     "_watchRoll": "npm run -s _prepRoll && rollup -c roll/rollup.config.js -w",
     "  - ": "",
     "build:roll": "npm run -s _prepRoll && rollup -c roll/rollup.config.js",
@@ -22,13 +22,14 @@
     "_prepRoll2": "cp node_modules/@local/app/dist/favicon.* node_modules/@local/app/dist/*.css roll/out/",
     "  - --": "",
     "serve": "$(docker-run-cmd) firebase emulators:start --project=demo-9 | grep -v -E \"You are not currently authenticated|Detected demo project ID|The Emulator UI requires a project ID to start\"",
-    "//serve:pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-9",
     "  - -- ": "",
     "ci:build": "ENV=ci npm run build",
     "ci:deploy": "firebase deploy --only hosting",
     "- -": "",
     "//build:vite": "vite build -c vite/vite.config.js",
     "-- ": "",
+    "prebuild": "npm run -s _checkEnv",
+    "_checkEnv": "[[ -f .env.${ENV-staging} ]] || ( >&2 echo \"ERROR: Please create config file '.env.${ENV-staging}' - see README.\n\"; false)",
     "//_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; false)",
     "-- - -": "",
     "klean": "rm -rf roll/out/*"
@@ -36,7 +37,8 @@
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
-    "@local/app": "file:../app"
+    "@local/app": "file:../app",
+    "raygun4js": "^2.22.3"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
@@ -56,9 +58,6 @@
   },
   "//comments": {
     "scripts": {
-      "prebuild": [
-        "'$BUILD_ID' used to detect CI runs. Creates the env file for them."
-      ],
       "postbuild:roll": [
         "We _could_ use a Rollup plugin for copying (and watching) public files, but now, since only one CSS file,",
         "mere copy at each build is enough. (public/*.css)"

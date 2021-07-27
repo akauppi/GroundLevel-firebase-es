@@ -19,7 +19,7 @@
 *     - '.../mod-#.js"  // '#' by the hash for 'mod'
 *     - ${INCLUDE filepath}  // replace by the contents of such file
 */
-import { strict as assert } from 'assert'
+//import { strict as assert } from 'assert'
 import { readFileSync, writeFileSync } from 'fs'
 
 /*

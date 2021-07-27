@@ -1,7 +1,7 @@
 /*
-* adapters/cloudLogging/proxy.worker.js
+* adapters/central/cloudLogging/worker.js
 *
-* WEB WORKER side for 'proxy.js'.
+* WEB WORKER side for the adapter.
 *
 * Note: Since this is created as a Web Worker, it *does not* have access to the main application's runtime.
 *   Try to keep it as self-contained as possible. Dependencies likely get built separately from the main app (including

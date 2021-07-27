@@ -25,7 +25,6 @@
     "//_ci_par": "concurrently -n test-fns,test-rules \"npm run test:fns:all\" \"npm run test:rules:all\"",
     "  -": "",
     "start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated\"",
-    "//start:pipeless": "$(docker-run-cmd) firebase emulators:start --project=demo-2",
     "  -  -": "",
     "ci:start": "firebase emulators:start --project=demo-2",
     "  -  ": "",

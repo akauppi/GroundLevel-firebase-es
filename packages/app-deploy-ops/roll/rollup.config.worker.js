@@ -27,7 +27,7 @@ const catchHashPlugin = (esm) => ({
     Object.keys(bundle).forEach( fileName => {
       // filename: "proxy.worker-520aaa52[.iife].js"
       //
-      const [_,c1] = fileName.match(/^proxy.worker-([a-f0-9]+)(?:\.iife)?\.js$/) || [];
+      const [_,c1] = fileName.match(/^worker-([a-f0-9]+)(?:\.iife)?\.js$/) || [];
       if (c1) {
         loggingAdapterProxyHashes[esm?0:1] = c1;
         return;
@@ -59,7 +59,7 @@ const pluginsWorkerGen = (esm) => [
 * [1]: https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 */
 function configWorkerGen(esm) { return {   // (boolean) => object
-  input: './src/ops-adapters/cloudLogging/proxy.worker.js',
+  input: './src/ops-adapters/central/cloudLogging/worker.js',
   output: {
     dir: myPath + '/out/worker',   // under which 'proxy.worker-{hash}.js' (including imports, tree-shaken-not-stirred)
     format: esm ? 'es':'iife',

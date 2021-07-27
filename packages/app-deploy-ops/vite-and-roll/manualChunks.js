@@ -43,14 +43,13 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //  /Users/.../app-deploy-ops/index.html                        <-- only in the Vite build
   //  /Users/.../app-deploy-ops/index.html?html-proxy&index=0.js  <-- -''-
   //
-  /\/app-deploy-ops\/src\/(?!ops\/)/,   // to main chunk
+  /\/app-deploy-ops\/src\/(?!ops\/)/,   // to main chunk; '(?!' is negative look-ahead
   /\/app-deploy-ops\/index\.html/,
 
-  //  /Users/.../app-deploy-ops/src/ops/central.js
-  //  /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
+  //  /Users/.../app-deploy-ops/src/ops-implement/central.js
+  //  /Users/.../app-deploy-ops/src/ops-adapters/central/cloudLogging/index.js
   //
-  /\/app-deploy-ops\/src\/(ops)\//,
-  [/\/app-deploy-ops\/adapters/, undefined, 'ops'],
+  /\/app-deploy-ops\/src\/(ops).+\//,
 
   //  /Users/.../firebase.{staging|...}.js    // the Firebase access values
   /\/firebase\.[^.]+\.js$/,
@@ -92,8 +91,14 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
     //
   /\/node_modules\/@?(firebase)\//,   // catch all of Firebase (keep AFTER the specific matches)
 
-  /\/node_modules\/(tslib)\//   //,
+  /\/node_modules\/(tslib)\//,
   //[/\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
+
+  // Adapter dependencies
+  //
+  //  /Users/.../node_modules/raygun4js/dist/raygun.umd.js
+  //
+  /\/node_modules\/(raygun4js)\//
 ];
 
 export {

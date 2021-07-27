@@ -4,11 +4,9 @@
 * Used by:
 *   $ npm run build:rollup
 */
-import { strict as assert } from 'assert'
-
 import sizes from '@atomico/rollup-plugin-sizes'
 import alias from '@rollup/plugin-alias'
-import resolve from '@rollup/plugin-node-resolve'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -16,10 +14,10 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
 import { aliases } from '../vite-and-roll/aliases.js'
-import { /*dedupe*/ } from '../vite-and-roll/rollupConfig'
 
-import {dirname} from 'path'
-import {fileURLToPath} from 'url'
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import { readFileSync, existsSync } from 'fs'
 
 import workerConfigGen, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
 
@@ -30,6 +28,52 @@ const targetHtml = myPath + '/out/index.html';
 
 const watch = process.env.ROLLUP_WATCH;
 
+// Read '.env.{ENV-staging}'
+//
+const envPairs = (_ => {
+  const baseName = `.env.${ process.env["ENV"] || 'staging' }`;
+  const envPath = myPath + `/../${ baseName }`;
+
+  if (!existsSync(envPath)) {   // 'package.json' should have checked this
+    fail(`No '${baseName}' file found` );
+  }
+
+  const ReComment = /^#/;
+  const ReKV = /^(.+?)=(.+)$/;     // no end-of-line comments
+
+  const raw = readFileSync(envPath, 'utf-8');
+    //
+    //  <<
+    //    # comments
+    //    k=v
+    //    ...
+    //  <<
+
+  const lines = raw.split('\n');
+
+  const pairs = lines
+    .filter( line => ! (ReComment.test(line) || line.trim() === '') )
+    .map( line => {
+      const [_,c1,c2] = ReKV.exec(line) || fail(`Syntax error in '${baseName}' (expecting 'key=value'): ${line}`);
+      return [c1,c2];
+    });
+
+  return pairs;
+})();
+
+const proxyPairs = [
+  ["PROXY_WORKER_HASH", () => {
+    const arr = loggingAdapterProxyHashes;
+    (arr && arr[0]) || fail("Worker hash (ESM) not available, yet!");
+    return JSON.stringify(arr);
+  }],
+  /*["PROXY_WORKER_HASH_IIFE", (() => {
+    const arr= loggingAdapterProxyHashes;
+    assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
+    return JSON.stringify(arr);
+  })()]*/
+];
+
 /*
 * Note: The order of the plugins does sometimes matter.
 */
@@ -38,12 +82,12 @@ const plugins = [
     entries: Object.entries(aliases).map( ([k,v]) => ({ find: k, replacement: v }) )   // plugin's syntax
   }),
 
-  resolve({
+  nodeResolve({
     //mainFields: ["module"],  // insist on importing ES6 only (tbd. remove at some point; Rollup defaults work with Firebase, since 9.0.0-beta.1?)
-    modulesOnly: true,       // "inspect resolved files to assert that they are ES2015 modules"
 
-    // NEWS: Seems to work now, without (Firebase 9.0.0-beta.7)
-    //dedupe    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
+    modulesOnly: false,       // "inspect resolved files to assert that they are ES2015 modules"
+      //
+      // 'false' because of 'raygun4j' (2.22.3); UMD packaging only
   }),
 
   // Inject build-time knowledge to the sources, at some places.
@@ -52,19 +96,10 @@ const plugins = [
   //    unchanged!
   //
   replace({
-    include: ['src/ops-adapters/cloudLogging/proxy.js'],
-    values: {
-      'process.env.PROXY_WORKER_HASH': () => {    // () => string
-        const arr = loggingAdapterProxyHashes;
-        assert(arr && arr[0], "Worker hash (ESM) not available, yet!");
-        return JSON.stringify(arr);
-      },
-      /*'process.env.PROXY_WORKER_HASH_IIFE': () => {    // () => string
-        const arr= loggingAdapterProxyHashes;
-        assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
-        return JSON.stringify(arr);
-      }*/
-    },
+    include: ['src/ops-adapters/central/cloudLogging/proxy.js'],
+    values: Object.fromEntries( [...envPairs, ...proxyPairs].map( ([k,v]) =>
+      [`import.meta.${k}`, v]
+    )),
 
     // Mitigate warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
     //  <<
@@ -116,3 +151,5 @@ export default [
     preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
   }
 ];
+
+function fail(msg) { throw new Error(msg) }

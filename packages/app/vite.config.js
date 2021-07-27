@@ -144,7 +144,7 @@ export default {
     //mainFields: ["module"]    // KEEP for a while
   },
 
-  // Means to pass build time values to the browser (in addition to '.env' files).
+  // Means to pass build time values to the browser
   //
   // Note: IF using in production, one needs to provide eg. the quotes, since it's a literal replace. This makes sense
   //    for using the mechanism as a macro (to inject code). Not so nice for strings.
