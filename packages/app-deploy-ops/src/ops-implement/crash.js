@@ -1,14 +1,10 @@
 /*
 * src/ops-implement/crash.js
 *
-* Enable crash reporting
+* Enable crash reporting in the adapters.
 */
 import { init } from '/@adapters/raygun/index'
 
 const RAYGUN_API_KEY = import.meta.env.RAYGUN_API_KEY;
+init(RAYGUN_API_KEY, { enableCrashReporting: true });
 
-init(RAYGUN_API_KEY);
-
-// tbd. enable Raygun crash reporting from teh adapter (give API KEY as a parameter)
-
-export {}
