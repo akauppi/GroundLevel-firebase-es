@@ -1,5 +1,5 @@
 /*
-* Rollup config
+* Rollup config for the main build
 *
 * Used by:
 *   $ npm run build:rollup
@@ -17,9 +17,8 @@ import { aliases } from '../vite-and-roll/aliases.js'
 
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { readFileSync, existsSync } from 'fs'
 
-import workerConfigGen, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
+import { proxyPairs, mainPairs } from './injectPairs'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 
@@ -28,98 +27,53 @@ const targetHtml = myPath + '/out/index.html';
 
 const watch = process.env.ROLLUP_WATCH;
 
-// Read '.env.{ENV-staging}'
-//
-const envPairs = (_ => {
-  const baseName = `.env.${ process.env["ENV"] || 'staging' }`;
-  const envPath = myPath + `/../${ baseName }`;
-
-  if (!existsSync(envPath)) {   // 'package.json' should have checked this
-    fail(`No '${baseName}' file found` );
-  }
-
-  const ReComment = /^#/;
-  const ReKV = /^(.+?)=(.+)$/;     // no end-of-line comments
-
-  const raw = readFileSync(envPath, 'utf-8');
-    //
-    //  <<
-    //    # comments
-    //    k=v
-    //    ...
-    //  <<
-
-  const lines = raw.split('\n');
-
-  const pairs = lines
-    .filter( line => ! (ReComment.test(line) || line.trim() === '') )
-    .map( line => {
-      const [_,c1,c2] = ReKV.exec(line) || fail(`Syntax error in '${baseName}' (expecting 'key=value'): ${line}`);
-      return [c1,c2];
-    });
-
-  return pairs;
-})();   // Array of [string, string]
-
-const proxyHashPairs = [
-  ["PROXY_WORKER_HASH", () => {
-    const arr = loggingAdapterProxyHashes;
-    const tmp = (arr && arr[0]) || fail("Worker hash (ESM) not available, yet!");
-    return JSON.stringify(tmp);
-  }],
-  /*["PROXY_WORKER_HASH_IIFE", (() => {
-    const arr= loggingAdapterProxyHashes;
-    const tmp= (arr && arr[1]) || fail("Worker hash (IIFE) not available, yet!");
-    return JSON.stringify(tmp);
-  })()]*/
-];   // Array of [string, () => quoted string]]
-
-function fail(msg) { throw new Error(msg) }
+//function fail(msg) { throw new Error(msg) }
 
 /*
 * Note: The order of the plugins does sometimes matter.
 */
 const plugins = [
   alias({
-    entries: Object.entries(aliases).map( ([k,v]) => ({ find: k, replacement: v }) )   // plugin's syntax
+    entries: {
+      ...aliases
+    }
   }),
 
   nodeResolve({
-    //mainFields: ["module"],  // insist on importing ES6 only (tbd. remove at some point; Rollup defaults work with Firebase, since 9.0.0-beta.1?)
+    //mainFields: ["module"],   // Can be used to steer, which fields Rollup picks (default: ['module', 'main']) for modules not using 'exports'.
 
     modulesOnly: false,       // "inspect resolved files to assert that they are ES2015 modules"
       //
       // 'false' because of 'raygun4j' (2.22.3); UMD packaging only
   }),
 
-  // Inject build-time knowledge to the sources, at some places.
-  //
-  // Using two 'replace()' calls: adapters are not found by the default "include all files", it seems.
+  // Inject build-time knowledge to the sources.
   //
   // Using 'JSON.stringify' for the values feels safer than just `'${v}'` - though we know the contents to be replaced
   //
-  // "Prevents replacing strings where they are followed by a single equals sign."
-  //
-  // We want this, but it also mitigates a warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
-  //  <<
-  //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
-  //  <<
+  // 'preventAssignment: true':
+  //    "Prevents replacing strings where they are followed by a single equals sign."
+  //    We want this, but it also mitigates a warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
+  //      <<
+  //        'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
+  //      <<
   //
   // NOTE:
-  //    FOR SOME REASON, the 'include' parameters work with relative paths, WITHOUT './' in the beginning, relative to
-  //    the current folder (not 'roll', where this script is). Don't use 'myPath + ...', don't try to be clever.
+  //    The 'include' parameter is very PICKY to get 'src/...' instead of './src' or 'myPath + ...' (and DOES NOT COMPLAIN
+  //    if you provide paths it won't cope with!!). Don't be clever.
   //
   replace({   // targeted injection to:
-    include: 'src/ops-adapters/central/cloudLogging/index.js',
-    values: Object.fromEntries( proxyHashPairs.map( ([k,f]) =>
-      [`import.meta.env.${k}`, f]   // generator: () => string
+    include: 'src/ops-adapters/cloudLogging/index.js',
+    values: Object.fromEntries( proxyPairs.map( ([k,v]) =>
+      [`import.meta.env.${k}`, JSON.stringify(v)]
     )),
     preventAssignment: true
   }),
 
-  replace({   // general replacements (all files)
+  replace({   // general (all files; not adapters)
     include: 'src/**/*.js',
-    values: Object.fromEntries( envPairs.map( ([k,v]) =>
+    exclude: 'src/ops-adapters/**',
+    values: Object.fromEntries( mainPairs.map( ([k,v]) =>
       [`import.meta.env.${k}`, JSON.stringify(v)]
     )),
     preventAssignment: true
@@ -148,23 +102,16 @@ const plugins = [
   })
 ];
 
-export default [
-  // Worker config(s) need(s) to be first; the main config needs hashes from it.
-  workerConfigGen(true),
-  //workerConfigGen(false),   // DISABLED: also Safari (14.0.3) and Firefox (88) seem fine with ESM code (kept for maybe needing to support older versions)
-  {
-    input: './src/main.js',
-    output: {
-      dir: myPath + '/out',
-      format: 'es',   // "required"
-      entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
+export default {
+  input: './src/main.js',
+  output: {
+    dir: myPath + '/out',
+    format: 'es',   // "required"
+    entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
-      manualChunks,
-      sourcemap: true     // have source map even for production
-    },
-
-    plugins,
-
-    preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
-  }
-];
+    manualChunks,
+    sourcemap: true     // have source map even for production
+  },
+  plugins,
+  preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
+}

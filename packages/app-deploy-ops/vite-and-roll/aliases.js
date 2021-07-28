@@ -66,10 +66,6 @@ const aliases = { ...opsAliases,
   ["/@adapters"]: adaptersPath,
   ["/@env"]: envPath,
 
-  // raygun4js (2.22.3) defaults ('main' field) to a UMD packaging. Use this to steer to another flavour.
-  //
-  ["raygun4js"]: 'raygun4js/dist/raygun.vanilla.js'
-
   //["/@src"]: srcPath
 };
 

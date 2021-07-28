@@ -47,7 +47,7 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   /\/app-deploy-ops\/index\.html/,
 
   //  /Users/.../app-deploy-ops/src/ops-implement/central.js
-  //  /Users/.../app-deploy-ops/src/ops-adapters/central/cloudLogging/index.js
+  //  /Users/.../app-deploy-ops/src/ops-adapters/cloudLogging/index.js
   //
   /\/app-deploy-ops\/src\/(ops).+\//,
 

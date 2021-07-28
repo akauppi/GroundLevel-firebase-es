@@ -1,5 +1,5 @@
 /*
-* adapters/central/cloudLogging/worker.js
+* ops-adapters/cloudLogging/worker.js
 *
 * WEB WORKER side for the adapter.
 *

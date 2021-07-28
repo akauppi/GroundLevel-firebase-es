@@ -73,15 +73,17 @@
 
     <!--
     - Raygun recommended snippet, from: https://www.npmjs.com/package/raygun4js
-    -->
-    <!--ROLL
+    --_>
+    <_!--ROLL
     <script>
       ${INCLUDE node_modules/raygun4js/dist/snippet/minified.js}
     </script>
-    -->
+    --_>
+    <!_--UNROLL --_>
     <script type="text/javascript">
       !function(c,n,r,u,e,o,a){c.RaygunObject=u,c[u]=c[u]||function(){(c[u].o=c[u].o||[]).push(arguments)},e=n.createElement(r),o=n.getElementsByTagName(r)[0],e.async=1,e.src="//cdn.raygun.io/raygun4js/raygun.min.js",c.__raygunNoConflict=!1,o.parentNode.insertBefore(e,o),a=c.onerror,c.onerror=function(n,r,e,o,t){a&&a(n,r,e,o,t),t=t||new Error(n),c[u].q=c[u].q||[],c[u].q.push({e:t})}}(window,document,"script","rg4js");
     </script>
+    -->
 
     <!--ROLL
     <script type="module" src="/main-#.js"></script>

@@ -15,7 +15,7 @@
 import { centralIsAvailable } from '../catch'
 
 // Cloud Logging, via proxy
-import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/central/cloudLogging/index.js';
+import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/index'
 
 cloudLoggingInit( {
   maxBatchDelayMs: 5000,
