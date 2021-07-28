@@ -5,6 +5,7 @@
 * - real user monitoring
 * - crash reporting
 */
+import { subscribe } from '@ops/userChange'
 
 // raygun4js (2.22.3) defaults ('main' field) to UMD packaging.
 //
@@ -59,23 +60,40 @@ function init(apiKey, opts) {   // (string, { enableCrashReporting: boolean|unde
   // -''-
   //??? rg('enablePulse', true); // Enables Real User Monitoring
 
-  initialized = true;
-}
+  // Let us - and Raygun - know when user changes.
+  //
+  subscribe( user => {
 
-/*
-* Called if the Firebase user changes.
-*
-* Note: Caller may filter some information out, and e.g. only provide verified email addresses.
-*/
-function userChanged({ displayName, email, isAnonymous, uid }) {
+    if (user) {
+      const { uid, email, isAnonymous, displayName } = user;
 
-  rg.setUser({
-    identifier: uid,    // Firebase user id -- RayGun: "email address or unique id"
-    isAnonymous,
-    email,
-    //firstName,
-    fullName: displayName
+      // With out adventurous linking to Raygun, got to give the parameters in a certain order (no object).
+      //
+      rg.setUser(
+        email || uid,   // identifier; RayGun: "email address or unique id"
+        isAnonymous,
+        email,
+        displayName,    // fullName
+        null,           // firstName (tbd. try 'null')?
+        uid             // uuid
+      );
+      /***
+      rg.setUser({
+        identifier: uid,    // Firebase user id -- RayGun: "email address or unique id"
+        isAnonymous,
+        email,
+        //firstName,
+        fullName: displayName
+      });
+      ***/
+    } else {
+      rg.setUser(null);   // tbd. how to signal "no current user"?
+    }
+
+    console.log("Sent Raygun about user: ", user);  // DEBUG
   });
+
+  initialized = true;
 }
 
 function checkOpts(o,valid) {   // (object, Array of string) => ()    ; or throws if unknown keys
@@ -90,7 +108,5 @@ function fail(msg) { throw new Error(msg) }
 export {
   init,
   reportTrack_v0,
-  counterInc_v0,
-    //
-  userChanged
+  counterInc_v0
 }

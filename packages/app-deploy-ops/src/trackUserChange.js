@@ -9,8 +9,6 @@
 import { onAuthStateChanged, getAuth } from '@firebase/auth'
 const auth = getAuth();
 
-import { userChanged } from '/@adapters/raygun/index'
-
 //  {
 //    displayName: "Joe Dalton"
 //    email: "joe@dalton.com[ic]"
@@ -22,15 +20,22 @@ import { userChanged } from '/@adapters/raygun/index'
 //    providerId: "firebase"
 //    uid: <string>
 //  }
-//
-onAuthStateChanged( auth,user => {
 
-  const conv = ({ displayName, email, emailVerified, isAnonymous, uid }) => ({
-    uid,
-    displayName,
-    email: emailVerified ? email : undefined,   // don't provide the email if we cannot trust it
-    isAnonymous
+function init(callback) {   // (({ ...user-object }|null) => ()) => ()
+  onAuthStateChanged( auth,user => {
+
+    const conv = ({ displayName, email, emailVerified, isAnonymous, uid }) => ({
+      uid,
+      displayName,
+      email: emailVerified ? email : undefined,   // don't provide the email if we cannot trust it
+      isAnonymous
+    });
+
+    const v = user ? conv(user) : null;
+    callback(v);
   });
+}
 
-  userChanged(user ? conv(user) : {});
-});
+export {
+  init
+}

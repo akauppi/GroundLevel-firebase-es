@@ -14,6 +14,7 @@ import '@ops/crash'
 import '@ops/perf'
 
 import './catch-ui-move-me-away'
+import { tickle } from '@ops/userChange'
 
 const t0 = performance.now();   // start ⏱
 
@@ -33,10 +34,7 @@ console.debug("Firebase ready (launching app):", Math.round(performance.now() - 
 
   // Report the user to interested adapters
   //
-
+  const init = await import('./trackUserChange.js').then( mod => mod.init );
+  init(tickle);
 
 })();   // free-running tail
-
-
-import { onAuthStateChanged, getAuth } from '@firebase/auth'
-const auth = getAuth();
