@@ -8,45 +8,14 @@
 */
 import {dirname} from 'path'
 import {fileURLToPath} from 'url'
-import {readdirSync, existsSync, writeFileSync} from 'fs'
+import {readdirSync} from 'fs'
 import { resolve as pathResolve } from 'path'
-
-import { pickConfig } from './pick-config.js'   // note: without extension good for Rollup; Vite needs '.js'
-
-const env = process.env["ENV"] || "staging";
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 const srcPath = myPath + "/../src";
 const opsPath = srcPath + "/ops-implement";
 const adaptersPath = srcPath + "/ops-adapters";
-let envPath = myPath + `/../../../firebase.${env}.js`;    // default: development
-
-// Development:
-//  - use staging access values, from '../../../firebase.${ENV-staging}.js'
-// CI build:
-//  - use Firebase active project's values
-//
-if (env === 'ci') {
-  const tmpFile = '.tmp.js';
-  const o = pickConfig();
-
-  // Follow the syntax of the '../../../firebase.*.js' file(s)
-  //
-  const bulk = `
-// TEMPORARY FILE created by CI build
-//
-const config = ${ JSON.stringify(o) };
-export default config`
-
-  // Write it to a temporary file and then direct imports to such file.
-  //
-  writeFileSync(tmpFile, bulk);
-  envPath = `./${tmpFile}`;
-
-} else {
-  existsSync(envPath) ||
-    fail(`No '${envPath}' found. Please create one or change the staging name by 'ENV=...'.`);
-}
+const envPath = myPath + `/../../../firebase.${ process.env["ENV"] || 'staging' }.js`;
 
 const opsAliases = (() => {
   const pairs = readdirSync(opsPath).map( s => {    // 'central.js', 'perf.js'
@@ -68,8 +37,6 @@ const aliases = { ...opsAliases,
 
   //["/@src"]: srcPath
 };
-
-function fail(msg) { throw new Error(msg) }
 
 export {
   aliases

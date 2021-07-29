@@ -61,14 +61,27 @@ steps:
   args: ['run', 'build']
   dir: packages/app
 
+# --- App-deploy-ops
+#
+# Test we can build it. Can fake the access values, because this code's not going to be run.
+#
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['install']
+  dir: packages/app-deploy-ops
+- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'ci:build']
+  dir: packages/app-deploy-ops
+  env: ['RAYGUN_API_KEY=abc', 'CI_JUST_BUILD=1']
+
 # --- Timeout
 #
 # Local:        ...
-# Cloud Build:  2:03 (without Cypress tests)
+# Cloud Build:  2:16 (without Cypress tests)
 #
 timeout: 240s
 
 substitutions:
   _BUILDER_TAG: 9.16.0-node16-npm7
-  #_BUILDER_TAG: 9.12.1-node16-npm7
   #_CYPRESS_IMAGE: cypress/included:7.4.0

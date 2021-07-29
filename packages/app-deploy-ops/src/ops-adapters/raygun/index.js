@@ -20,6 +20,7 @@ function counterInc_v0() {    // (string, num) => ()
 }
 
 let initialized = false;
+let crashReportingEnabled = false;
 
 /*
 * Initialize with an API KEY provided by the caller.
@@ -32,30 +33,33 @@ function init(apiKey, opts) {   // (string, { enableCrashReporting: boolean|unde
   const { enableCrashReporting } = opts;
   checkOpts(opts, ['enableCrashReporting']);
 
-  if (enableCrashReporting) {
-    console.warn("Not sure whether RayGun crash reporting is enabled..");     // tbd.
+  if (!initialized) {
+    initialized = true;
+
+    //rg4js('apiKey', 'paste_your_api_key_here');
+    const tmp = {
+      debugMode: true,
+
+      disablePulse: false,    // needed for enabling it???
+      //trackCoreWebVitals: true,   // default: true
+
+      // Suppress Raygun (2.22.3) debug mode from giving:
+      //  <<
+      //    Cannot read property '_captureMissingRequests' of undefined
+      //  <<
+      captureMissingRequests: false   // default: false
+    };
+    rg.init(apiKey, tmp);
+  }
+
+  if (enableCrashReporting && !crashReportingEnabled) {
+    crashReportingEnabled = true;
+
+    //rg4js('enableCrashReporting', true);
+    rg.attach();
   }
 
   if (initialized) return;    // already initialized
-
-  const tmp = {
-    //from:     // "localhost" or net
-
-    debugMode: true,
-
-    disablePulse: false,    // needed for enabling it???
-    //trackCoreWebVitals: true,   // default: true
-
-    // Suppressse Raygun (2.22.3) debug mode from giving:
-    //  <<
-    //    Cannot read property '_captureMissingRequests' of undefined
-    //  <<
-    captureMissingRequests: false   // default: false
-  };
-  rg.init(apiKey, tmp);
-
-  // tbd. eventually place this in a crash reporting interface
-  //??? rg('enableCrashReporting', true);
 
   // -''-
   //??? rg('enablePulse', true); // Enables Real User Monitoring
@@ -90,10 +94,8 @@ function init(apiKey, opts) {   // (string, { enableCrashReporting: boolean|unde
       rg.setUser(null);   // tbd. how to signal "no current user"?
     }
 
-    console.log("Sent Raygun about user: ", user);  // DEBUG
+    //console.log("Sent Raygun about user: ", user);  // DEBUG
   });
-
-  initialized = true;
 }
 
 function checkOpts(o,valid) {   // (object, Array of string) => ()    ; or throws if unknown keys
