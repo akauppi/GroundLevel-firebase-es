@@ -441,7 +441,7 @@ $ gcloud builds submit --config=cloudbuild.master-pr.{app|backend}.yaml ..
 ```
 
 ```
-$ gcloud builds submit --config=cloudbuild.merged.yaml ..
+$ gcloud builds submit --config=cloudbuild.merged.{app|backend}.yaml ..
 ```
 
 When using these, make sure you are logged into the correct GCloud project.
