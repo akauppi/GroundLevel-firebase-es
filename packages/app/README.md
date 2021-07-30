@@ -5,6 +5,11 @@ Web application sample project.
 ## Requirements
 
 - `npm` >= 7.7.0
+- Docker & Docker Compose[^1]
+
+   >For Mac and Windows, Docker Compose comes as part of Docker Desktop. For Linux, see [Install Compose on Linux systems](https://docs.docker.com/compose/install/#install-compose-on-linux-systems).
+
+[^1]: Development is done with Docker for Mac, "Docker Compose v2" enabled (experimental feature). The instructions should work with either Docker Compose v1 or v2.
 
 ### Cypress setup
 

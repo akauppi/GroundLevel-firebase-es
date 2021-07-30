@@ -1,0 +1,25 @@
+{
+  "name": "firebase-prime",
+  "description": "[CLI] Priming an emulated Firestore instance with users and data, from ESM files.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "16"
+  },
+  "files": [
+    "src/**"
+  ],
+  "bin": {
+    "firebase-prime": "src/index.js"
+  },
+  "dependencies": {
+    "commander": "^8.1.0",
+    "firebase": "^9.0.0-beta.7"
+  },
+  "//": {
+    "usage": [
+      "'firebase-prime --project=xyz docs.js users.js"
+    ]
+  }
+}

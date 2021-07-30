@@ -3,7 +3,8 @@
 /*
 * Command line entry point.
 */
-import program from 'commander'
+//import { program } from 'commander'
+import { program } from 'commander/esm.mjs'   // for now (8.1)
 
 import { initializeApp, deleteApp } from '@firebase/app'
 import { getAuth, initializeAuth, connectAuthEmulator } from '@firebase/auth'

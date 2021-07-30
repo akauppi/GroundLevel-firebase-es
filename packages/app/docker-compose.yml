@@ -1,0 +1,82 @@
+#
+# Docker compose of:
+#   - firebase-ci-builder   brings Firebase Emulators
+#   - cypress/included      brings Cypress front-end testing
+#
+# With the two together, we should be able to run front-end testing, against an emulated back-end, in CI.
+#
+# Intentions:
+#   Within a Docker universe,
+#     - launch Firebase Emulators using 'firebase.json' (UI could be disabled);
+#       - exposing ports 6767 (Firestore) and 5002 (Cloud Functions)
+#
+#     - run an npm testing command ('wait-for 3000 && npm run -s test'), with a Cypress image
+#       - the front end is hosted by Vite (already installed in the file system)
+#
+#   The output of the Cypress testing needs to be visible in the console.
+#   The running must stop when Cypress tests have passed; and the return code (success/fail) also reflected in the
+#   host side.
+#
+#   Sharing:
+#     - Firebase Emulators need access to both '../backend' and this folder
+#     - Cypress (and Vite) only need access to this folder
+#
+# Docker Compose (v3) note:
+#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+# References:
+#   Overview of Docker Compose (Docker docs)
+#     -> https://docs.docker.com/compose/
+#   Compose file version 3 reference
+#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+version: '3.0'
+
+services:
+  abc:
+    profiles: ['_demo']
+    image: debian:latest
+    #entrypoint: /bin/bash
+    #command: 'echo -e "A\\nB\\nC" | grep -v -E B'
+    #
+    command: echo -e a | grep -v a      # a
+    #command: 'echo -e a | grep x'      # a
+    #
+    #command: bash -c 'echo -e a | grep -v a'   # (empty) 👍
+    #command: bash -c 'echo -e a | grep a'   # a 👍
+    #command: bash -c 'echo -e a && false'   # (exits with code 1) 👍
+
+  # Launch Firebase Emulators, with certain warning and info messages suppressed.
+  emul:
+    image: firebase-ci-builder:9.16.0-node16-npm7
+    ports:
+      - "6767:6767"
+      - "5002:5002"
+      - "4000:4000"
+    volumes:
+      - ..:/up
+    working_dir: /up/app
+    command: bash -c 'firebase emulators:start --project=demo-abc | grep -v -E "Detected demo project ID|You are not currently authenticated|You are not signed in"'
+    #command: bash -c 'firebase emulators:start --project=demo-abc'
+
+  # Vite provides the front-end hosting, with on-the-fly ESM orchestration and Hot Module Reload. 🪄
+  #
+  vite:
+    build: ../../firebase-ci-builder.user/
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/work
+    working_dir: /work
+    depends_on: ['emul']
+    #command: bash -c 'wait-for-it emul:4000 && false'
+    command: bash -c 'wait-for-it emul:4000 && (firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials") && vite --port 3000 --mode dev_local'
+  #
+  # Cypress is run as a separate 'run' command, on top of the default services.
+  #
+  cypress:
+    image: cypress/included:8.0.0
+    volumes:
+      - .:/work
+    depends_on: ['vite','emul']
+    profiles: ['cypress']

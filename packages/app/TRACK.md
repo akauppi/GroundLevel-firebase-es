@@ -64,3 +64,12 @@ $ npm run build
 ```
 
 - [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
+
+
+## Use of pipe or `&&` in Docker Compose commands
+
+- [Answer to "docker-compose use pipe in command
+"](https://stackoverflow.com/a/68590318/14455)
+
+   Is there a more robust method? (apart from making each command a script?)
+   

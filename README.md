@@ -19,6 +19,7 @@
   - [Cypress](https://www.cypress.io)
   - [Cloud Build](https://cloud.google.com/build)
   - [Cloud Logging](https://cloud.google.com/logging/)
+  - [Raygun](https://raygun.com)
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 - covers all the way to deployment (CI/CD) and operations
 
@@ -136,16 +137,18 @@ $ npm install
 
 This installs some common packages, Firebase JS SDK being the most important. Subpackages use them from the root, and this is where you update their versions.
 
+### Build the Docker image
+
+We use a Docker image for running Firebase Emulators. Before advancing, let's build that image.
+
 ```
+$ git submodule init
 $ git submodule update
 ```
 
 This updates the contents of `firebase-ci-builder.sub` submodule.
 
-
-### Build the Docker image
-
-We use a Docker image for running Firebase Emulators. Before advancing, let's build that image:
+Build:
 
 ```
 $ (cd firebase-ci-builder.sub && ./build)
@@ -153,9 +156,9 @@ $ (cd firebase-ci-builder.sub && ./build)
  => => naming to docker.io/library/firebase-ci-builder:9.16.0-node16-npm7 
 ```
 
->Did you use the parantheses? Without them, you'll end up in the `firebase-ci-builder.sub` folder. Use `cd ..` to climb back.
+>*Note:* Did you use the parantheses in the command above? Without them, you'll end up in the `firebase-ci-builder.sub` folder. `cd ..` to climb back.
 
-You don't need to push this image anywhere - it's enough that it resides on your development machine. This image is launched by the sub-packages whenever Firebase Emulators are required.
+You don't need to push this image anywhere - it's enough that it resides on your development machine. The image is launched by the sub-packages whenever Firebase Emulators are required.
 
 >You can test it:
 >
