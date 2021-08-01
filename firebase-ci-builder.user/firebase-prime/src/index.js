@@ -13,7 +13,7 @@ import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
 import { createUsers } from './createUsers.js'
 import { primeData } from './primeData/index.js'
 import { wipe } from './primeData/wipe.js'
-import { firestorePort, authPort } from './config.js'
+import { firestorePort, authPort, host } from './config.js'
 
 /* Firebase 9.0.0.beta-{1..5} 'getAuth' seems broken. Gives us this ('initializeAuth' works):    #unreported
 *
@@ -63,8 +63,8 @@ async function main(docsFn, usersFn) {
 
   // Handle the emulation-awareness-lifting here
   //
-  connectAuthEmulator(auth, `http://localhost:${authPort}`);
-  connectFirestoreEmulator(db, 'localhost', firestorePort);
+  connectAuthEmulator(auth, `http://${host}:${authPort}`);
+  connectFirestoreEmulator(db, host, firestorePort);
 
   await Promise.all([
     wipe(projectId).then( _ => primeData(projectId, docs) ),

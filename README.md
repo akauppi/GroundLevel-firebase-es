@@ -38,7 +38,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `node` v. 14.3+ or 16.x
    - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
-   - Docker
+   - Docker Desktop (or Docker + Docker Compose for Linux)
 
   Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container. This should be a degree safer than storing the Firebase credentials on one's development machine.
   
@@ -52,6 +52,17 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   The folder you clone the repo to *must reside within the WSL2 file system*. Docker performance is dismal if you link to (or directly use) `/mnt/c/` or the like. Don't. Instead create the folder within WSL2 and have the IDE tools reach it, remotely.
    </details>
   
+   <details style="margin-left: 2em"><summary>**Installation of Docker Compose on Linux**</summary>
+   There is no Docker Desktop for Linux. To install:
+   
+   - See [Install Docker Compose](https://docs.docker.com/compose/install/#install-compose-on-linux-systems) > `Install Compose` > `Linux`
+
+   Note: Docker Compose is intended to be included also in normal Docker for Linux, by the end of 2021.
+   </details>
+   
+   <!-- tbd. Check situation of Docker Compose support on Linux, towards end of 2021. Revise the instructions when basic `docker` contains `docker compose` support.
+   -->
+   
 - **A capable IDE**
 
   An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are some suggestions:

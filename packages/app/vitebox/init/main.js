@@ -13,7 +13,7 @@ import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-async function initFirebaseLocal() {   // () => Promise of ()
+async function initFirebaseLocal(host) {   // (string) => Promise of ()
   assert(LOCAL);
 
   console.info("Initializing for LOCAL EMULATION");
@@ -44,7 +44,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6767
   const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
-  const AUTH_URL = `http://localhost:${authPort}`;          // "http://localhost:9100"
+  const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9100"
 
   const firestore = getFirestore();
 
@@ -57,8 +57,8 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
   const auth = getAuth();
 
-  connectFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
-  connectFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
+  connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
+  connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
   connectAuthEmulator(auth, AUTH_URL);
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
@@ -89,7 +89,7 @@ async function initFirebaseOnline() {
 
 /*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
   if (LOCAL) {
-    await initFirebaseLocal();
+    await initFirebaseLocal('localhost');
   } else {
     await initFirebaseOnline();
   }
@@ -97,3 +97,5 @@ async function initFirebaseOnline() {
   const { initializedProm } = await import('/@/app.js');
   return initializedProm;
 })();
+
+function fail(msg) { throw new Error(msg) }

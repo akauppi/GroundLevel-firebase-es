@@ -23,7 +23,10 @@ const [firestorePort, authPort] = (_ => {
   }
 })();
 
+const host = "emul";
+
 export {
   firestorePort,
-  authPort
+  authPort,
+  host
 }
