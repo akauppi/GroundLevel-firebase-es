@@ -66,10 +66,25 @@ $ npm run build
 - [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
 
 
+<!-- not important?
 ## Use of pipe or `&&` in Docker Compose commands
 
 - [Answer to "docker-compose use pipe in command
 "](https://stackoverflow.com/a/68590318/14455)
 
    Is there a more robust method? (apart from making each command a script?)
-   
+-->
+
+
+## Vite and HMR, under Docker
+
+Wasn't able to get it working. Tried:
+
+- changing the volume to `type: bind`
+- mounting `node_modules` separately, as described [here](https://github.com/vitejs/vite/issues/3161)
+
+Neither worked. 
+
+Track: 
+
+- [Vite and Docker](https://github.com/vitejs/vite/issues/4116)

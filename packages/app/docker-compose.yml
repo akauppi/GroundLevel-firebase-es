@@ -58,26 +58,50 @@ services:
       - ..:/up
     working_dir: /up/app
     command: bash -o pipefail -c
-      'firebase emulators:start --project=demo-abc
-      | grep -v -E "Detected demo project ID|You are not currently authenticated|You are not signed in"'
+      'echo "Launching Docker... 🐳" &&
+      firebase emulators:start --project=demo-abc
+        | grep -v -E "Detected demo project ID|You are not currently authenticated|You are not signed in"'
 
   # Vite provides the front-end hosting, with on-the-fly ESM discovery and Hot Module Reload. 🪄
   #
   # Implementation comments:
   #   - project root needs to be shared, so that '@firebase/...' can be imported
-  #   - 'npm rebuild esbuild' is needed for Vite, see -> https://github.com/vitejs/vite/issues/2671
-  vite:
+  #   - 'npm rebuild esbuild' or 'node node_modules/esbuild/install.js' is needed, see -> https://github.com/vitejs/vite/issues/2671
+  #   - timeout of 15s (for emulators to start up) has been known to be met
+  #
+# DISABLED because HMR didn't work.
+#
+#  vite:
+#    build: ../../firebase-ci-builder.user/
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ../..:/proj
+#    working_dir: /proj/packages/app
+#    command: bash -o pipefail -c
+#      'node node_modules/esbuild/install.js &&
+#      wait-for-it emul:4000 --timeout=20 &&
+#      (firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
+#      npx vite --port 3000 --mode dev_local'
+#    #environment:
+#    #  - "FIREBASE_HOST=emul"
+#    depends_on: ['emul']
+
+  # Initialize Firebase contents
+  #
+  # Used if Vite is run on host side
+  #
+  # Implementation comments:
+  #   - timeout of 15s (for emulators to start up) has been known to be met
+  #
+  init:
     build: ../../firebase-ci-builder.user/
-    ports:
-      - "3000:3000"
     volumes:
-      - ../..:/upup
-    working_dir: /upup/packages/app
+      - ../..:/proj
+    working_dir: /proj/packages/app
     command: bash -o pipefail -c
-      'npm rebuild esbuild &&
-      wait-for-it emul:4000 &&
-      (firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
-      npx vite --port 3000 --mode dev_local'
+      'wait-for-it emul:4000 --timeout=20 &&
+      (firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials")'
     depends_on: ['emul']
 
   # Cypress is run as a separate 'run' command, on top of the default services.
