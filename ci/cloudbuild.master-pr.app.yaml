@@ -7,6 +7,11 @@
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
 #
+# Uses images:
+#   - node:16
+#   - firebase-ci-builder:${_BUILDER_TAG}   (pushed to Container Registry)
+#   - docker
+#
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
@@ -18,7 +23,7 @@
 steps:
 # Root install
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
 
@@ -26,37 +31,35 @@ steps:
 #
 # Do not care to test it - separate PR task does it.
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
   dir: packages/backend
 
 # --- App
 #
-# tbd. Once a Cypress image is available, _use it also for the install step_. This way, we don't need to deal with
-#     the binaries cache.
-#
-# tbd. Eventually the '--headless' wouldn't be needed (Cypress is trying to make it the default for 'cypress run').
-#
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
   dir: packages/app
   env: ['CYPRESS_INSTALL_BINARY=0']
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
-#  entrypoint: npm
-#  args: ['install']
-#  dir: packages/app
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
-#  entrypoint: npm
-#  args: ['run', 'ci:test']
-#  dir: packages/app
-#  env: [ 'CYPRESS_RUN_FLAGS="--browser chrome --headless"' ]
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+
+# Q: Is this able to pull the 'firebase-ci-builder' image from the Container Registry, as referenced in the 'docker-compose.yml'?
+#
+- name: gcr.io/cloud-builders/docker
+  entrypoint: docker
+  args: ['compose', 'run', 'cypress']
+    # same as 'npm run ci:test' would do
+  dir: packages/app
+
+#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
@@ -69,6 +72,5 @@ steps:
 timeout: 240s
 
 substitutions:
-  _BUILDER_TAG: 9.16.0-node16-npm7
+  #_BUILDER_TAG: 9.16.0-node16-npm7
   #_BUILDER_TAG: 9.12.1-node16-npm7
-  #_CYPRESS_IMAGE: cypress/included:7.4.0

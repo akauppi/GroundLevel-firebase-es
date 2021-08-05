@@ -6,6 +6,7 @@
 #   - bash, curl
 #   - 'wait-for-it'       // from: https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
 #     The de-facto shell script standard for waiting a port, available eg. in Debian/Ubuntu by `apt-get install`.
+#   - 'firebase-prime' command line for priming Firestore docs and users
 #
 # Context:
 #   - user 'user' created

@@ -80,10 +80,8 @@ services:
     command: bash -o pipefail -c
       'node node_modules/esbuild/install.js &&
       wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
+      (firebase-prime --host=emul --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
       npx vite --port 3000 --mode dev_local'
-    #environment:
-    #  - "FIREBASE_HOST=emul"
     depends_on: ['emul']
 
   # Initialize Firebase contents if Vite is run on host side

@@ -494,6 +494,23 @@ Firebase 9.0.0-beta.{1..3} API is inconsistent.
 const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
 ```
 
+*This has been raised as some issue. Add the link here if tracking it.*
+
+## Data URL's not supported for auth photo URL
+
+Unfortunately, Firebase auth dislikes data URLs. Using one:
+
+```
+FirebaseAuthError: The photoURL field must be a valid URL.
+```
+
+**To reproduce:**
+
+- Change the `dev.photoURL` in `packages/app/local/users.js` to a data URL (starting `data:...`).
+
+- `npm run dev` and open in browser.
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

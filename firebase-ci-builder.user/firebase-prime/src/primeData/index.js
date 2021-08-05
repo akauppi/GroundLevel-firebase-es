@@ -8,8 +8,9 @@
 *     -> https://firebase.google.com/docs/firestore/reference/rest/v1/Write
 */
 import { commit_v1, mapValue } from './commit-set.js'
+import { projectId } from '../config.js'
 
-async function primeData(projectId, data) {    // (string, { <docKey>: object }) => Promise of ()
+async function primeData(data) {    // ({ <docKey>: object }) => Promise of ()
 
   // Note: Though the field says 'update' it really is a set (without 'updateMask')
   //

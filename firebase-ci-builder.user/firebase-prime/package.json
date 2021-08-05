@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "commander": "^8.1.0",
-    "firebase": "^9.0.0-beta.7"
+    "firebase-admin": "^9.100.0-alpha.1"
   },
   "//": {
     "usage": [
-      "'firebase-prime --project=xyz docs.js users.js"
+      "'firebase-prime [--host=abc] --project=xyz docs.js users.js"
     ]
   }
 }

@@ -471,3 +471,25 @@ Not sure that it's Firebase. Would need to do more research.
 But if proven to be not our cloud functions, but Firebase emulators themselves:
 
 - [ ] Report to `firebase-tools` issues
+
+---
+
+On Docker Compose, with `dns: 0.0.0.0` on the Firebase Emulators service, we see:
+
+```
+emul_1  | Error: Failed to make request to https://firebase-public.firebaseio.com/cli.json
+```
+
+- [ ] What is `firebaseio.com`? Why is it called to?
+
+What do we *users* expect Firebase Emulators to do? 
+
+A nice step would be to:
+
+- **openly document** where it's calling, and why
+- allow a CLI option to run completely offline
+
+Current behaviour (9.16.0): if no DNS, no running of emulators, either. 
+
+>`emul_1 exited with code 1`
+

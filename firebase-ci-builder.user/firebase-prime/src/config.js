@@ -1,9 +1,11 @@
 /*
 * config.js
 *
-* Provide configuration info, based on 'firebase.json' (in the current folder).
+* Provide configuration info, based on 'firebase.json' (in the current folder) and CLI parameters.
 */
 import { existsSync, readFileSync } from 'fs'
+
+const { projectId, host } = global.chewedOpts;  // from 'index.js'
 
 const firebaseJson = "./firebase.json";
 
@@ -23,10 +25,16 @@ const [firestorePort, authPort] = (_ => {
   }
 })();
 
-const host = "emul";
+function fail(msg) {
+  console.error(msg);
+  process.exit(2);
+}
+
+function failInternal(msg) { throw new Error( `INTERNAL: ${msg}` ) }
 
 export {
   firestorePort,
   authPort,
-  host
+  host,
+  projectId
 }
