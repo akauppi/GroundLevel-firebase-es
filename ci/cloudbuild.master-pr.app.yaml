@@ -9,7 +9,7 @@
 #
 # Uses images:
 #   - node:16
-#   - firebase-ci-builder:${_BUILDER_TAG}   (pushed to Container Registry)
+#   - firebase-ci-builder   (pushed to Container Registry; used via Docker Compose)
 #   - docker
 #
 # Runtime environment:
@@ -38,27 +38,32 @@ steps:
 
 # --- App
 #
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
 - name: node:16
   entrypoint: npm
   args: ['install']
   dir: packages/app
   env: ['CYPRESS_INSTALL_BINARY=0']
 
-# Q: Is this able to pull the 'firebase-ci-builder' image from the Container Registry, as referenced in the 'docker-compose.yml'?
+# On 6-Aug-2021, 'gcr.io/cloud-builders/docker':
 #
-- name: gcr.io/cloud-builders/docker
-  entrypoint: docker
-  args: ['compose', 'run', 'cypress']
-    # same as 'npm run ci:test' would do
-  dir: packages/app
+#   - is version 19.03.8
+#   - does not have 'docker compose' or 'docker-compose'
+#
+#   <<
+#     # docker compose up
+#     docker: 'compose' is not a docker command.
+#   <<
+#
+#- name: gcr.io/cloud-builders/docker
+#  entrypoint: docker
+#  args: ['compose', 'run', 'cypress']
+#    # same as 'npm run ci:test' would do
+#  dir: packages/app
 
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
 - name: node:16
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
 - name: node:16
   entrypoint: npm
   args: ['run', 'build']

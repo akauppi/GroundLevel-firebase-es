@@ -1,28 +1,24 @@
 #
+# docker-compose.yml
+#
+# For development (via 'npm' scripts) and as a basis for CI.
+#
 # Docker compose of:
 #   - firebase-ci-builder   brings Firebase Emulators
-#   - cypress/included      brings Cypress front-end testing
-#
-# With the two together, we should be able to run front-end testing, against an emulated back-end, in CI.
+#   - data and user priming
+#   - Vite                  front end Hot-Module Reloading; hosting
 #
 # Intentions:
 #   Within a Docker universe,
 #     - launch Firebase Emulators using 'firebase.json' (UI could be disabled);
-#       - exposing ports 6767 (Firestore) and 5002 (Cloud Functions)
-#
-#     - run an npm testing command ('wait-for 3000 && npm run -s test'), with a Cypress image
-#       - the front end is hosted by Vite (already installed in the file system)
-#
-#   The output of the Cypress testing needs to be visible in the console.
-#   The running must stop when Cypress tests have passed; and the return code (success/fail) also reflected in the
-#   host side.
-#
-#   Sharing:
-#     - Firebase Emulators need access to both '../backend' and this folder
-#     - Cypress (and Vite) only need access to this folder
+#       - exposing ports for Firestore and Firebase Auth (Cloud Functions emulated but not used from the front end)
+#     - launch Vite, hosting the front-end at localhost:3000.
+#     - Cypress use is locally (not within Docker) for development.
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+#   (Docker will be adding instructions in their 'command' documentation.)
 #
 # References:
 #   Overview of Docker Compose (Docker docs)
@@ -33,19 +29,6 @@
 version: '3.4'
 
 services:
-#  abc:
-#    profiles: ['_demo']
-#    image: debian:latest
-#    #entrypoint: /bin/bash
-#    #command: 'echo -e "A\\nB\\nC" | grep -v -E B'
-#    #
-#    command: echo a | grep -v a      # a
-#    #command: 'echo a | grep x'      # a
-#    #
-#    #command: bash -c 'echo a | grep -v a'   # (empty) 👍
-#    #command: bash -c 'echo a | grep a'   # a 👍
-#    #command: bash -c 'echo a && false'   # (exits with code 1) 👍
-
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
   emul:
@@ -60,18 +43,24 @@ services:
     working_dir: /up/app
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
-      firebase emulators:start --project=demo-abc
+      firebase emulators:start --project=${PROJECT_ID:-demo-abc}
         | grep -v -E "Detected demo project ID|You are not currently authenticated|You are not signed in"'
 
-  # Vite provides the front-end hosting, with on-the-fly ESM discovery and Hot Module Reload. 🪄
+  # Vite provides the front-end hosting, with on-the-fly ES module resolving and Hot Module Reload. 🪄
   #
   # Implementation comments:
   #   - project root needs to be shared, so that '@firebase/...' can be imported
-  #   - 'npm rebuild esbuild' or 'node node_modules/esbuild/install.js' is needed, see -> https://github.com/vitejs/vite/issues/2671
-  #   - unfortunately, timeout of 15s (for emulators to start up) has been known to be met (Firebase Emulators wake up slow)
+  #   - 'npm rebuild esbuild' or 'node node_modules/esbuild/install.js' is needed, since the npm dependencies ('esbuild')
+  #     are installed in the host (could be macOS); to turn the binaries to Alpine Linux compatible ones. [1] IF YOU USE
+  #     'vite' stand-alone (on Mac), need to run the same command, there as well (but we don't plan to; placing all bets
+  #     on black).
+  #   - timeout of 15s (for emulators to start up) has been known to be met (Firebase Emulators take some time to wake up),
+  #     so adding some.
+  #
+  #   [1]: "Vite + Esbuild Docker issue" (Vite GitHub Issues) -> https://github.com/vitejs/vite/issues/2671
   #
   vite:
-    build: ../../firebase-ci-builder.user/
+    build: ../../firebase-dc-tools/
     ports:
       - "3000:3000"
     volumes:
@@ -80,40 +69,21 @@ services:
     command: bash -o pipefail -c
       'node node_modules/esbuild/install.js &&
       wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --host=emul --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
+      (firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
       npx vite --port 3000 --mode dev_local'
     depends_on: ['emul']
 
   # Initialize Firebase contents if Vite is run on host side
   #
-  # Implementation comments:
-  #   - timeout of 15s (for emulators to start up) has been known to be met
+  # TEMPORARY - REMOVE ONCE HOT MODULE RELOAD WORKS IN DOCKER COMPOSE, and we can only use Vite that way!
   #
-  init:
-    build: ../../firebase-ci-builder.user/
+  init-hmr-work-around:
+    build: ../../firebase-dc-tools/
     volumes:
       - ../..:/proj
     working_dir: /proj/packages/app
     command: bash -o pipefail -c
       'wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E "Do not use with production credentials")'
+      (firebase-prime --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials")'
     depends_on: ['emul']
     profiles: ['manual']
-
-  # Cypress is run as a separate 'run' command, on top of the default services.
-  #
-  # Note:
-  #   - 'cypress/included:8.0.0' has Node 14.16.0 (not Node 16); by 'docker image inspect {image-name}'
-  #
-  cypress:
-    image: cypress/included:${CYPRESS_VERSION-latest}
-    volumes:
-      - ../..:/proj
-    working_dir: /proj/packages/app
-    # default entrypoint is: ['cypress', 'run']
-    entrypoint: /bin/bash
-    command: -o pipefail -c '
-      cat cypress.json | sed s/localhost:3000/vite:3000/ > node_modules/.cypress.tmp.json &&
-      cypress run --config-file node_modules/.cypress.tmp.json'
-    depends_on: ['vite']
-    profiles: ['cypress']

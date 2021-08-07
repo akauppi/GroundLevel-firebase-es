@@ -4,7 +4,7 @@
 import { initializeApp } from 'firebase-admin/app'    // for "modular API" (in alpha)
 import { getAuth } from 'firebase-admin/auth'
 
-import { createUsers } from './createUsers.js'
+import { createUsers } from './createUsers/index.js'
 import { primeData } from './primeData/index.js'
 import { wipe } from './primeData/wipe.js'
 import { host, authPort, projectId } from './config.js'

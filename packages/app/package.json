@@ -28,15 +28,15 @@
     "-- -": "",
     "dev:local": "concurrently --kill-others-on-fail -n emul,vite \"npm run -s _dev_local_emul\" \"npm run -s _dev_local_vite\"",
     "_dev_local_emul": "docker compose up emul",
-    "_dev_local_vite": "node node_modules/esbuild/install.js && docker compose run init && vite --port 3000 --mode dev_local",
+    "_dev_local_vite": "node node_modules/esbuild/install.js && docker compose run init-hmr-work-around && vite --port 3000 --mode dev_local",
     "-- - ": "",
-    "dev:local2": "docker compose up vite --abort-on-container-exit",
+    "dev:local:all-dc": "docker compose up vite --abort-on-container-exit",
     "--  -": "",
     "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run -s _dev_online_log\" \"npm run -s _dev_online_vite\"",
     "_dev_online_log": "PORT=5050 node tools/printout.js",
     "_dev_online_vite": "wait-for 5050 && vite --port 3001",
     "-- --": "",
-    "ci:test": "CYPRESS_VERSION=8.1.0 docker compose run cypress",
+    "//ci:test_": "CYPRESS_VERSION=8.1.0 docker-compose run cypress",
     "--   -": "",
     "//ci:test": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run ${CYPRESS_RUN_FLAGS}\"",
     "//ci:dev": "concurrently --kill-others-on-fail -n emul,init \"npm run -s _ci_dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
@@ -82,6 +82,9 @@
     "vite": "^2.4.3",
     "vue-eslint-parser": "^7.9.0"
   },
+  "//devDependencies": {
+    "//@xxx/firebase-prime": "file:../../firebase-ci-builder.user/firebase-prime"
+  },
   "//comments": {
     "devDependencies": {
       "prettier": [
@@ -107,6 +110,10 @@
       "| grep -v": [
         "Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.",
         "A single 'grep -v -E' (needs -E) with '|' is fine."
+      ],
+      "ci:test": [
+        "CI calls directly 'docker compose' since it's using a docker image that doesn't have 'npm'. We reflect the",
+        "command here, mostly for just documenting the use."
       ]
     }
   }
