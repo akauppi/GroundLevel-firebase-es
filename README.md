@@ -257,11 +257,13 @@ This creates a `firebase.staging.js` file in the repo's root, containing the acc
 $ cd ../app-deploy-ops
 $ npm install
 ...
-$ npm run build
+$ RAYGUN_API_KEY=abc npm run build
 ...
 ```
 
 There are no tests here.
+
+>The `abc` for a Raygun API key is obviously bogus. If you choose to use Raygun for operational monitoring (the default adapter), fill in your own API key there (and in CI scripts).
 
 The folder's `README` contains information on how to do a manual deployment to the staging project. However, we proceed with the real thing - setting up CI/CD that deploys ready code, on your behalf!
 

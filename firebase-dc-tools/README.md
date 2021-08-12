@@ -4,7 +4,7 @@ Docker image for using the `firebase-ci-builder`.
 
 Also provides:
 
-- `wait-for` CLI
+- `wait-for-it` CLI
 - `firebase-prime` CLI
 
 Gets automatically pulled and built, by `docker compose`, in `packages/app` (maybe also in `packages/backend`).
