@@ -1,5 +1,9 @@
 # Changelog
 
+## 12-Aug-21
+
+- Using Docker Compose for handling concurrency in testing.
+
 ## 16-Jun-21
 
 - Going back to `firebase@9.0.0-beta.2`, to fix [#56](https://github.com/akauppi/GroundLevel-firebase-es/issues/56)

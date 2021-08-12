@@ -15,7 +15,8 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run _ci_seq; else docker compose run test ; fi",
+    "test": "if port-is-taken --silent 4000 ; then npm run _test1; else docker compose run test ; fi",
+    "_test1": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
     "start": "docker compose up --abort-on-container-exit",
     "//start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated\"",
@@ -34,16 +35,16 @@
     "lint": "eslint .",
     "  -   -": "",
     "ci:test": "npm run -s ci:seq",
-    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run ci:start\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run _ci_emul\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "_ci_emul": "npx firebase emulators:start --project=demo-2",
     "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
     "  - - -": "",
-    "ci:start": "firebase emulators:start --project=demo-2",
-    "  -  --": "",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
     "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
-    "  - ---": "",
+    "  -  --": "",
+    "pretest": "npm run -s _prepFunctions",
     "prestart": "npm run -s _prepFunctions",
-    "preci:start": "npm run -s _prepFunctions",
+    "preci:test": "npm run -s _prepFunctions",
     "_prepFunctions": "npm --prefix functions install"
   },
   "devDependencies": {
