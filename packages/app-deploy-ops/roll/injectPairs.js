@@ -5,14 +5,12 @@
 *
 * Note: We just collect the data here; how it's injected is up to the build.
 */
-import { existsSync, readFileSync, readdirSync } from 'fs'
+import { readdirSync } from 'fs'
 
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
-
-const stageName = process.env["ENV"] || 'staging';
 
 // Hashes for loading the proxy/proxies.
 //
@@ -47,28 +45,20 @@ const proxyPairs = (_ => {
   ];
 })();
 
-// Values from '.env.${ENV-staging}' (general)
+// Values from environment variables:
+//  - RAYGUN_API_KEY
 //
-const mainPairs = (_ => {
-  const fn = `.env.${stageName}`;
-  const envPath = myPath + `/../${fn}`;
+// These are expected to be provided by the CI script.
+//
+const envPairs = (_ => {
+  const a = ['RAYGUN_API_KEY'];
 
-  if (!existsSync(envPath)) {   // 'package.json' should have checked this
-    fail(`No '${fn}' file found` );
+  const pairs = a.map( k => [k, process.env[k]] );
+
+  const missing = pairs.flatMap(([k,v]) => !v ? [k] : []);
+  if (missing.length > 0) {
+    fail(`Not having values for env.var(s): ${ missing.join(',') }`)
   }
-
-  const ReComment = /^#/;
-  const ReKV = /^(.+?)=(.+)$/;     // no end-of-line comments
-
-  const raw = readFileSync(envPath, 'utf-8');
-  const lines = raw.split('\n');
-
-  const pairs = lines
-    .filter( line => ! (ReComment.test(line) || line.trim() === '') )
-    .map( line => {
-      const [_,c1,c2] = ReKV.exec(line) || fail(`Syntax error in '${fn}' (expecting 'key=value'): ${line}`);
-      return [c1,c2];
-    });
 
   return pairs;
 })();   // Array of [string, string]
@@ -77,5 +67,5 @@ function fail(msg) { throw new Error(msg) }
 
 export {
   proxyPairs,
-  mainPairs
+  envPairs
 }

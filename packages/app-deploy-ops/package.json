@@ -30,7 +30,7 @@
     "//build:vite": "vite build -c vite/vite.config.js",
     "-- ": "",
     "prebuild": "npm run -s _checkEnv",
-    "_checkEnv": "[[ -f .env.${ENV-staging} ]] || ( >&2 echo \"ERROR: Please create config file '.env.${ENV-staging}' - see README.\n\"; false)",
+    "_checkEnv": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: Please create config file '../../firebase.${ENV-staging}.js' - see README.\n\"; false)",
     "//_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; false)",
     "-- - -": "",
     "klean": "rm -rf roll/out/*"

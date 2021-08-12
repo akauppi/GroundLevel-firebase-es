@@ -7,7 +7,7 @@ Also provides:
 - `wait-for` CLI
 - `firebase-prime` CLI
 
-Gets automatically pulled and built, by `docker compose`, in `packages/app` (maybe later also in `packages/backend`).
+Gets automatically pulled and built, by `docker compose`, in `packages/app` (maybe also in `packages/backend`).
 
 >## Why is this here?
 > 

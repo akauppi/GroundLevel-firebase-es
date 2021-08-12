@@ -18,8 +18,6 @@
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
 #
-#   (Docker will be adding instructions in their 'command' documentation.)
-#
 # References:
 #   Overview of Docker Compose (Docker docs)
 #     -> https://docs.docker.com/compose/
@@ -59,8 +57,13 @@ services:
   #
   #   [1]: "Vite + Esbuild Docker issue" (Vite GitHub Issues) -> https://github.com/vitejs/vite/issues/2671
   #
+  # Note:
+  #   Docker Desktop for Windows (WSL2), docker 20.10.7, requires the 'user: "1000"' work-around, since this step
+  #   needs to write files on the shared volume.
+  #
   vite:
     build: ../../firebase-dc-tools/
+    user: '1000'    # WSL2 quick fix
     ports:
       - "3000:3000"
     volumes:
@@ -79,6 +82,7 @@ services:
   #
   init-hmr-work-around:
     build: ../../firebase-dc-tools/
+    user: '1000'    # WSL2 quick fix
     volumes:
       - ../..:/proj
     working_dir: /proj/packages/app
@@ -86,4 +90,26 @@ services:
       'wait-for-it emul:4000 --timeout=20 &&
       (firebase-prime --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials")'
     depends_on: ['emul']
+    profiles: ['manual']
+
+  # DEBUG
+  #
+  # On macOS:         user | files owned by: user, mygroup | can write a file (and it shows as the macOS user's file, under host)
+  # On Windows+WSL2:  user | -''-: node, node              | fails to write the file
+  #
+  # With 'user: root':
+  #   - allows the code to run on Windows+WSL2, but any output files are created as 'root' in WSL2.
+  #
+  # With 'user: 1000' (WSL2 host user):
+  #   - works on WSL2
+  #   - works on macOS (the output file is that of the host user)
+  #
+  debug:
+    build: ../../firebase-dc-tools/
+    user: '1000'    # WSL2 user
+    volumes:
+      - ../..:/proj
+    working_dir: /proj/packages/app
+    command: bash -o pipefail -c
+      'whoami && ls -al node_modules/esbuild && echo "some" > some.txt'
     profiles: ['manual']

@@ -1,5 +1,5 @@
 #
-# ci/cloudbuild.pr.app.yaml
+# ci/cloudbuild.master-pr.app.yaml
 #
 # Trigger:
 #   - PR is made or changed; changes affect 'packages/app' or 'packages/app-deploy-ops'
@@ -45,6 +45,7 @@ steps:
   env: ['CYPRESS_INSTALL_BINARY=0']
 
 # On 6-Aug-2021, 'gcr.io/cloud-builders/docker':
+#   https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/docker
 #
 #   - is version 19.03.8
 #   - does not have 'docker compose' or 'docker-compose'
@@ -54,28 +55,55 @@ steps:
 #     docker: 'compose' is not a docker command.
 #   <<
 #
+# See #76 for more information: https://github.com/akauppi/GroundLevel-firebase-es/issues/76
+#
 #- name: gcr.io/cloud-builders/docker
 #  entrypoint: docker
 #  args: ['compose', 'run', 'cypress']
 #    # same as 'npm run ci:test' would do
 #  dir: packages/app
 
+# Or:
+#- name: docker/compose
+#  entrypoint: docker-compose
+#  args: ['run', 'cypress']
+#    # same as what 'npm run ci:test' would do
+#  dir: packages/app
+
 - name: node:16
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
-- name: node:16
+- name: $_1
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
 
+# --- App-deploy-ops
+#
+# Try that the code builds with fake access values.
+#
+- name: node:16
+  entrypoint: npm
+  args: ['install']
+  dir: packages/app-deploy-ops
+- name: node:16
+  entrypoint: sh
+  args: ['-c', 'echo "export default { }" > ../../firebase.fake.js']
+  dir: packages/app-deploy-ops
+- name: $_1
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app-deploy-ops
+  env: ['ENV=fake', 'RAYGUN_API_KEY=x']
+
 # --- Timeout
 #
 # Local:        ...
-# Cloud Build:  2:03 (without Cypress tests)
+# Cloud Build:  2:33 (without Cypress tests)
 #
 timeout: 240s
 
 substitutions:
-  #_BUILDER_TAG: 9.16.0-node16-npm7
-  #_BUILDER_TAG: 9.12.1-node16-npm7
+  # Has Node 16 and bash
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7

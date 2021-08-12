@@ -5,7 +5,7 @@
 #   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/app/**', 'packages/app-deploy-ops/**',
 #     root 'package.json' or 'tools'
 #
-# GCP Project:
+# Cloud Build project:
 #   Same GCP project that carries the Firebase deployment.
 #
 # Responsibility:
@@ -26,17 +26,19 @@ steps:
 # Flight check: not to be run from the 'ci-builder'
 - name: $_1
   entrypoint: bash
-  args: ['-c', '[[ $PROJECT_ID != ci-builder ]]']
+  args: ['-c', '[[ $PROJECT_ID != ci-builder ]] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )']
 
 # Root install
 - name: $_1
   entrypoint: npm
   args: ['install']
 
-# Backend
-# (once/if we run Cypress tests, also backend needs 'npm install'; but we won't deploy it here, which takes "forever")
+# --- Backend
+#
+# Once/if we run Cypress tests, also backend needs 'npm install'.
 
-# App (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
+# --- App (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
+#
 - name: $_1
   entrypoint: npm
   args: ['install']
@@ -47,7 +49,8 @@ steps:
   args: ['run', 'build']
   dir: packages/app
 
-# App-deploy-ops
+# --- App-deploy-ops
+#
 - name: $_1
   entrypoint: npm
   args: ['install']

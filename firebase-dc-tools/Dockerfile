@@ -19,7 +19,6 @@
 FROM node:16-alpine
 
 ENV USER user
-ENV GROUP mygroup
 
 # Enable if npm needs updating. KEEP
 #RUN npm install -g npm
@@ -55,8 +54,7 @@ RUN cd /tmp/firebase-prime \
   && npm install -g \
   && firebase-prime --help
 
-RUN addgroup -S ${GROUP} && adduser --disabled-password \
-  --ingroup ${GROUP} \
+RUN adduser --disabled-password \
   ${USER}
 
 WORKDIR /home/${USER}
