@@ -1,5 +1,5 @@
 /*
-* src/ops/central.js
+* src/ops-implement/central.js
 *
 * Central logging. Imported by either:
 *   - application code (uses 'central')
@@ -15,7 +15,7 @@
 import { centralIsAvailable } from '../catch'
 
 // Cloud Logging, via proxy
-import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/proxy.js';
+import { init as cloudLoggingInit, loggerGen as cloudLoggingLoggerGen } from '/@adapters/cloudLogging/index'
 
 cloudLoggingInit( {
   maxBatchDelayMs: 5000,

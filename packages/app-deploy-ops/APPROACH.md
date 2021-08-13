@@ -105,3 +105,32 @@ This is not ideal. It means we need to cater for offline mode, transmission fail
 - [Collecting browser console logs in Stackdriver](https://medium.com/google-cloud/collecting-browser-console-logs-in-stackdriver-fa388a90d32b) (blog, Dec 2019)
 
    *Stackdriver is the earlier name for Cloud Logging*
+
+
+## `import.meta.env.{key}`
+
+There are some values that need injecting into the sources, at build times.
+
+- API keys in `.env.${ENV-staging}`
+- hash of the `roll/out/worker/*.js` file(s)
+
+This is done by `@rollup/plugin-replace` and `import.meta.env.{key}` keys. This approach was selected mainly for familiarity with how Vite does it (limited to `VITE_...` keys).
+
+The proxy workers' build was split apart from the main build (in the `package.json` level) so that the hashes can be sniffed, at the beginning of the main build. This simplifies the build files a bit, and doesn't seem to carry big negatives.
+
+**Alternatives considered:**
+
+```
+import SOME_API_KEY from `@injected`
+```
+
+This would work, but the syntax is specific to this repo and therefore would look alien to developers.
+
+A temporary file would be created, as part of the build, and the `@injected` module id mapped to it by aliasing.
+
+The author things this is *cooler* but less familiar. Maybe later - it would be a sturdier approach than `@rollup/plugin-replace`; it would catch naming misalignments in build stage.
+
+<!--
+Also `dotenv` was considered but turned away from. It's commonly used (Vite uses it), but doesn't present much added value to parsing the `.env` file ourselves.
+-->
+

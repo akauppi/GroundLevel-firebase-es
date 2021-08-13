@@ -65,19 +65,20 @@ switch(lastPart) {
   case 'backend':
     vOpts = `${pwd}:/work`;
     wOpts = '/work';
-    itFriendly = false;
     break;
 
   case 'app':
     vOpts = `${pwd}/..:/work`;
     wOpts = '/work/app';
-    itFriendly = false;
+    itFriendly = false;   // needed for 'npm run dev[:local]'. For some reason, the '--handle-input --default-input-target' aren't enough:
+                          // still says "the input device is not a TTY" if launched with '-t' :Y
     break;
 
   //case 'app-ops':
   case 'app-deploy-ops':    // for now
     vOpts = `${pwd}:/work`;
     wOpts = '/work';
+    itFriendly = false;   // also 'npm run watch' needs it (same as above, for 'app') 🙁🙁
     break;
 
   default:
@@ -86,13 +87,12 @@ switch(lastPart) {
 
 // Docker parameters:
 //
-// '-it':
+// '-t:
 //    Allows Ctrl-C termination to reach Firebase Emulators. This, in turn, allows them to gracefully shut down.
 //    Without this, we get "broken pipe" error on the terminal (if the Docker output is piped), and Docker may need
 //    restarts, at times. IMPORTANT!
 //
-//    Note:
-//      '-it' cannot be used if launched via 'concurrently' (app, backup)
+//    This needs '-a stdin'; otherwise:
 //        <<
 //          the input device is not a TTY
 //        <<
@@ -115,6 +115,7 @@ const cmd = [
   `docker run ${ itFriendly ? '-it':'-i' } --rm`,
   '--log-driver local',
   '-a stdout -a stderr',
+  '-a stdin',     // IMPORTANT: needed for Ctrl-C to work!
   `-v ${vOpts}`,
   `-w ${wOpts}`,
   ...ports.flatMap(p => ['-p', `${p}:${p}`] ),

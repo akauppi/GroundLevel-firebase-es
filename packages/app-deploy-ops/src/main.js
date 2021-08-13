@@ -27,7 +27,7 @@ initializeApp(config);
 //let stage = "???";
 
 /*await*/ (async _ => {
-  console.debug("Firebase ready (launching app):", performance.now() - t0);
+  console.debug("Firebase ready (launching app):", Math.round(performance.now() - t0) );    // tbd. #gunray
 
   await import('@local/app').then( mod => mod.initializedProm );
 
@@ -36,10 +36,10 @@ initializeApp(config);
   // Import 'ops/central' now that Firebase is initialized, and the app is on its way.
   //
   // Note: This matters for:
-  //    - allowing 'crash.js' to see 'fatal' early on (but thing are crooked already, if it has messages)
+  //    - allowing 'crash.js' to see 'fatal' early on (...unnecessary comment removed..)
   //    - seeing possible loading problems at launch, even if the app wouldn't use 'central' logging
   //
-  const { central } = await import('./ops/central');
+  const { central } = await import('./ops-implement/central');
   console.debug("Central initialized:", performance.now() - t0);    // 157
 
   window.central = central;   // TEMP; for use from console

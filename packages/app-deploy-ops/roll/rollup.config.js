@@ -1,14 +1,12 @@
 /*
-* Rollup config
+* Rollup config for the main build
 *
 * Used by:
 *   $ npm run build:rollup
 */
-import { strict as assert } from 'assert'
-
 import sizes from '@atomico/rollup-plugin-sizes'
 import alias from '@rollup/plugin-alias'
-import resolve from '@rollup/plugin-node-resolve'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -16,12 +14,11 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { tunnelPlugin } from './tools/tunnel-plugin.js'
 import { manualChunks } from '../vite-and-roll/manualChunks.js'
 import { aliases } from '../vite-and-roll/aliases.js'
-import { /*dedupe*/ } from '../vite-and-roll/rollupConfig'
 
-import {dirname} from 'path'
-import {fileURLToPath} from 'url'
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-import workerConfigGen, { loggingAdapterProxyHashes } from './rollup.config.worker.js'
+import { proxyPairs, envPairs } from './injectPairs'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 
@@ -30,47 +27,56 @@ const targetHtml = myPath + '/out/index.html';
 
 const watch = process.env.ROLLUP_WATCH;
 
+//function fail(msg) { throw new Error(msg) }
+
 /*
 * Note: The order of the plugins does sometimes matter.
 */
 const plugins = [
   alias({
-    entries: Object.entries(aliases).map( ([k,v]) => ({ find: k, replacement: v }) )   // plugin's syntax
+    entries: {
+      ...aliases
+    }
   }),
 
-  resolve({
-    //mainFields: ["module"],  // insist on importing ES6 only (tbd. remove at some point; Rollup defaults work with Firebase, since 9.0.0-beta.1?)
-    modulesOnly: true,       // "inspect resolved files to assert that they are ES2015 modules"
+  nodeResolve({
+    //mainFields: ["module"],   // Can be used to steer, which fields Rollup picks (default: ['module', 'main']) for modules not using 'exports'.
 
-    // NEWS: Seems to work now, without (Firebase 9.0.0-beta.7)
-    //dedupe    // this is IMPORTANT: without it, '@firebase/...' get packaged in all weird ways 🙈
+    modulesOnly: false,       // "inspect resolved files to assert that they are ES2015 modules"
+      //
+      // 'false' because of 'raygun4j' (2.22.3); UMD packaging only
   }),
 
-  // Inject build-time knowledge to the sources, at some places.
+  // Inject build-time knowledge to the sources.
   //
-  // NOTE: The replaced strings _must_ begin with 'process.env.' (or '__...'); otherwise the plugin quietly leaves them
-  //    unchanged!
+  // Using 'JSON.stringify' for the values feels safer than just `'${v}'` - though we know the contents to be replaced
   //
-  replace({
-    include: ['adapters/cloudLogging/proxy.js'],
-    values: {
-      'process.env.PROXY_WORKER_HASH': () => {    // () => string
-        const arr = loggingAdapterProxyHashes;
-        assert(arr && arr[0], "Worker hash (ESM) not available, yet!");
-        return JSON.stringify(arr);
-      },
-      /*'process.env.PROXY_WORKER_HASH_IIFE': () => {    // () => string
-        const arr= loggingAdapterProxyHashes;
-        assert(arr && arr[1], "Worker hash (IIFE) not available, yet!");
-        return JSON.stringify(arr);
-      }*/
-    },
+  // 'preventAssignment: true':
+  //    "Prevents replacing strings where they are followed by a single equals sign."
+  //    We want this, but it also mitigates a warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
+  //      <<
+  //        'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
+  //      <<
+  //
+  // NOTE:
+  //    The 'include' parameter is very PICKY to get 'src/...' instead of './src' or 'myPath + ...' (and DOES NOT COMPLAIN
+  //    if you provide paths it won't cope with!!). Don't be clever.
+  //
+  replace({   // targeted injection to:
+    include: 'src/ops-adapters/cloudLogging/index.js',
+    values: Object.fromEntries( proxyPairs.map( ([k,v]) =>
+      [`import.meta.env.${k}`, JSON.stringify(v)]
+    )),
+    preventAssignment: true
+  }),
 
-    // Mitigate warning (@rollup/plugin-replace 2.4.2, still in 3.0.0):
-    //  <<
-    //    'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
-    //  <<
-    preventAssignment: true   // likely not needed with plugin v.??? (surprised that 3.0.0 still needs it)
+  replace({   // general (all files; not adapters)
+    include: 'src/**/*.js',
+    exclude: 'src/ops-adapters/**',
+    values: Object.fromEntries( envPairs.map( ([k,v]) =>
+      [`import.meta.env.${k}`, JSON.stringify(v)]
+    )),
+    preventAssignment: true
   }),
 
   // enable for minified output (reduces the Brotli output sizes by ~x2: 193kB -> 104kB)
@@ -96,23 +102,16 @@ const plugins = [
   })
 ];
 
-export default [
-  // Worker config(s) need(s) to be first; the main config needs hashes from it.
-  workerConfigGen(true),
-  //workerConfigGen(false),   // DISABLED: also Safari (14.0.3) and Firefox (88) seem fine with ESM code (kept for maybe needing to support older versions)
-  {
-    input: './src/main.js',
-    output: {
-      dir: myPath + '/out',
-      format: 'es',   // "required"
-      entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
+export default {
+  input: './src/main.js',
+  output: {
+    dir: myPath + '/out',
+    format: 'es',   // "required"
+    entryFileNames: '[name]-[hash].js',   // .."chunks created from entry points"; default is: '[name].js'
 
-      manualChunks,
-      sourcemap: true     // have source map even for production
-    },
-
-    plugins: plugins,
-
-    preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
-  }
-];
+    manualChunks,
+    sourcemap: true     // have source map even for production
+  },
+  plugins,
+  preserveEntrySignatures: false,   // "recommended setting for web apps" (and mitigates a warning)
+}

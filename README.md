@@ -1,6 +1,15 @@
 # GroundLevel ♠️ Firebase ♠️ ES modules
 
+<!-- not active; we're going for Discourd, #later
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
+-->
+
+<!-- CI Cloud Build badges: tbd.
+- backend deployment of master
+- app deployment of master
+
+https://github.com/leg100/cloud-build-badge
+-->
 
 <!-- Using 'img' to be able to scale from Markdown.
 - Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
@@ -22,11 +31,15 @@
 - built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
 - covers all the way to deployment (CI/CD) and operations
 
+<!--
+  - [Raygun](https://raygun.com)
+-->
+
 <br clear=all />
 
 This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making web applications in the 2020's can be, when modern tools and techniques are used.
 
-The repo showcases a full social web app and has an emphasis on *operating* such an app. In this it deviates from most templates. You can also see it as course material for modern web development (see [Training](TRAINING.md) for courses).
+The repo <!--showcases a full social web app and--> has an emphasis on *operating* such an app. In this it deviates from most templates. You can also see it as course material for modern web development (see [Training](TRAINING.md) for courses).
 
 ## Pre-requisites and tools
 
@@ -37,13 +50,13 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `node` v. 14.3+ or 16.x
    - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
-   - Docker
+   - Docker Desktop [on Mac](https://docs.docker.com/docker-for-mac/install/) or [on Windows](https://docs.docker.com/docker-for-windows/install/) *(for Linux, be in touch!)*
 
-  Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container. This should be a degree safer than storing the Firebase credentials on one's development machine.
+  Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container, so you don't need to install it on your development machine. This should also be somewhat safer since the Firebase credentials are not stored locally on developers' computers.
   
   For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS image. WSL2 also happens to be a requirement for Docker Desktop.
 
-<!-- not jinxing; write something once we do..  
+<!-- tbd. write something once we do..  
   Once [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) (blog, Apr 2021) is publicly available, we'll use it in the front end testing (Cypress).
 -->
 
@@ -51,6 +64,17 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   The folder you clone the repo to *must reside within the WSL2 file system*. Docker performance is dismal if you link to (or directly use) `/mnt/c/` or the like. Don't. Instead create the folder within WSL2 and have the IDE tools reach it, remotely.
    </details>
   
+   <details style="margin-left: 2em"><summary>**Installation of Docker Compose on Linux**</summary>
+   There is no Docker Desktop for Linux. To install:
+   
+   - See [Install Docker Compose](https://docs.docker.com/compose/install/#install-compose-on-linux-systems) > `Install Compose` > `Linux`
+
+   Note: Docker Compose is intended to be included also in normal Docker for Linux, by the end of 2021.
+   </details>
+   
+   <!-- tbd. Check situation of Docker Compose support on Linux, towards end of 2021. Revise the instructions when basic `docker` contains `docker compose` support. NOTE: There's a Job ad for this.
+   -->
+   
 - **A capable IDE**
 
   An IDE (integrated debugger and editor) is where you spend most of your time. Pick a good one. Learn to use it well. Here are some suggestions:
@@ -69,7 +93,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
 - A **credit card** to deploy Cloud Functions
 
-  While most Firebase features are available in the free "Spark" plan, Cloud Functions require the "Blaze" plan since summer 2020.
+  While most Firebase features continue to be free under the "Spark" plan, Cloud Functions require the "Blaze" plan since summer 2020.
   
   This might not be that bad.
   
@@ -84,7 +108,7 @@ Apropos, Firebase. What is it??
 
 <a href="https://firebase.google.com"><img src="https://firebase.google.com/downloads/brand-guidelines/SVG/logo-logomark.svg" align="left" style="padding: 1em" /></a>
 
-This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, database, background functions. <!--, performance monitoring. tbd. -->
+This repo uses the [Firebase](https://firebase.google.com) serverless framework for a lot of things: authentication, database, background functions, hosting.
 
 Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a "back end" but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
 
@@ -96,16 +120,20 @@ There are similar offerings from other companies, but they are a year or two beh
 
 >*This field is changing, though. [AWS Amplify](https://aws.amazon.com/amplify/?nc=sn&loc=0) offers a similar, but less tightly knit solution, based on GraphQL. [Supabase](http://supabase.io/) directly claims to be a Firebase alternative, based on PostgreSQL and an open source approach.*
 
+<!-- whisper
+The author is open to trying the approach with non-Firebase products, but they need to provide a 100% offline emulator experience, which Firebase does.
+-->
+
 <p />
 
->Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun (Youtube, especially!). It's recommended to check those out in parallel with this repo.
+>Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun (Youtube ca. 2019-20, especially!). It's recommended to check those out in parallel with this repo.
 
 
-### Google Cloud
+### Google Cloud Platform
 
 Firebase and Google Cloud Platform (GCP) have a relation. Firebase runs on top of GCP (and is owned by Google). They have separate dashboards, but some Firebase tasks require one to visit the GCP Console. When you create a Firebase project, a GCP project of the same name is also created (and is where your code really runs!).
 
-We stay at the Firebase side of things most of the time, exceptions being CI/CD (Cloud Build) and central logging (Cloud Logging).
+We stay at the Firebase side of things most of the time, exceptions being CI/CD (Cloud Build) and central logging (Cloud Logging). 
 
 You'll be instructed about GCP where necessary. 
 
@@ -117,7 +145,6 @@ You'll be instructed about GCP where necessary.
 ├── ci       # all CI/CD setup
 ├── DEVS     # notes about developing the repo (optional)
 ├── firebase-ci-builder.sub   # sub-repo for the Docker image
-├── hack     # needed until Firebase fixes one thing
 ├── packages
 │   ├── app
 │   ├── app-deploy-ops
@@ -136,16 +163,18 @@ $ npm install
 
 This installs some common packages, Firebase JS SDK being the most important. Subpackages use them from the root, and this is where you update their versions.
 
+### Build the Docker image
+
+We use a Docker image for running Firebase Emulators. Before advancing, let's build that image.
+
 ```
+$ git submodule init
 $ git submodule update
 ```
 
 This updates the contents of `firebase-ci-builder.sub` submodule.
 
-
-### Build the Docker image
-
-We use a Docker image for running Firebase Emulators. Before advancing, let's build that image:
+Build:
 
 ```
 $ (cd firebase-ci-builder.sub && ./build)
@@ -153,9 +182,9 @@ $ (cd firebase-ci-builder.sub && ./build)
  => => naming to docker.io/library/firebase-ci-builder:9.16.0-node16-npm7 
 ```
 
->Did you use the parantheses? Without them, you'll end up in the `firebase-ci-builder.sub` folder. Use `cd ..` to climb back.
+>*Note:* Did you use the parantheses in the command above? Without them, you'll end up in the `firebase-ci-builder.sub` folder. `cd ..` to climb back.
 
-You don't need to push this image anywhere - it's enough that it resides on your development machine. This image is launched by the sub-packages whenever Firebase Emulators are required.
+You don't need to push this image anywhere - it's enough that it resides on your development machine. The image is launched by the sub-packages whenever Firebase Emulators are required.
 
 >You can test it:
 >
@@ -171,6 +200,7 @@ through the three sub-packages, set up a Firebase project (and account), CI/CD t
 
 Alternatively, you can study each of the individual sub-packages' `README`s (and `ci` and `ops`) and come back here later..
 
+><font color=orange>NOTE: `ops` folder is still [just in the plans](https://github.com/akauppi/GroundLevel-firebase-es/issues/59). It will document the operational side and give ideas.</font>
 
 ### Backend
 
@@ -227,11 +257,13 @@ This creates a `firebase.staging.js` file in the repo's root, containing the acc
 $ cd ../app-deploy-ops
 $ npm install
 ...
-$ npm run build
+$ RAYGUN_API_KEY=abc npm run build
 ...
 ```
 
 There are no tests here.
+
+>The `abc` for a Raygun API key is obviously bogus. If you choose to use Raygun for operational monitoring (the default adapter), fill in your own API key there (and in CI scripts).
 
 The folder's `README` contains information on how to do a manual deployment to the staging project. However, we proceed with the real thing - setting up CI/CD that deploys ready code, on your behalf!
 

@@ -43,14 +43,13 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //  /Users/.../app-deploy-ops/index.html                        <-- only in the Vite build
   //  /Users/.../app-deploy-ops/index.html?html-proxy&index=0.js  <-- -''-
   //
-  /\/app-deploy-ops\/src\/(?!ops\/)/,   // to main chunk
+  /\/app-deploy-ops\/src\/(?!ops\/)/,   // to main chunk; '(?!' is negative look-ahead
   /\/app-deploy-ops\/index\.html/,
 
-  //  /Users/.../app-deploy-ops/src/ops/central.js
-  //  /Users/.../app-deploy-ops/adapters/logging/googleCloudLogging.js
+  //  /Users/.../app-deploy-ops/src/ops-implement/central.js
+  //  /Users/.../app-deploy-ops/src/ops-adapters/cloudLogging/index.js
   //
-  /\/app-deploy-ops\/src\/(ops)\//,
-  [/\/app-deploy-ops\/adapters/, undefined, 'ops'],
+  /\/app-deploy-ops\/src\/(ops).+\//,
 
   //  /Users/.../firebase.{staging|...}.js    // the Firebase access values
   /\/firebase\.[^.]+\.js$/,
@@ -75,7 +74,6 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   // Firebase for both app and ops (+ tslib, idb)
   //
   // /Users/.../node_modules/@firebase/app/dist/index.esm2017.js
-  // /Users/.../node_modules/@firebase/performance/dist/index.esm2017.js
   // /Users/.../node_modules/@firebase/util/dist/index.esm2017.js
   // /Users/.../node_modules/@firebase/logger/dist/index.esm2017.js
   // /Users/.../node_modules/@firebase/component/dist/index.esm2017.js
@@ -90,12 +88,17 @@ const chunkTo = [     // Array of (Regex | [Regex, string, string?])
   //
   /\/node_modules\/@?(firebase\/auth)\//,
   /\/node_modules\/@?(firebase\/firestore)\//,
-  /\/node_modules\/@?(firebase\/performance)\//,
     //
   /\/node_modules\/@?(firebase)\//,   // catch all of Firebase (keep AFTER the specific matches)
 
   /\/node_modules\/(tslib)\//,
-  [/\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
+  //[/\/node_modules\/idb\//, undefined, 'firebase-performance']    // used by firebase-performance only (pack together)
+
+  // Adapter dependencies
+  //
+  //  /Users/.../node_modules/raygun4js/dist/raygun.umd.js
+  //
+  /\/node_modules\/(raygun4js)\//
 ];
 
 export {

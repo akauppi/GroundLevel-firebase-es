@@ -17,42 +17,44 @@
     "gen-vite-env-online": "./tools/gen-vite-env-online.js"
   },
   "engines": {
-    "node": ">=14.3 || ^16"
+    "node": ">=14.3 || >=16 <16.6 || >=16.6.1"
   },
   "--": "-- following stuff matters for development, only --",
   "scripts": {
     "dev": "npm run dev:local",
-    "__": "",
+    "-- ": "",
     "test": "if port-is-taken --silent 3000 ; then cypress run ; else npm run _test_1 ; fi",
     "_test_1": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-for 3000 && npm run -s test\"",
-    "  -": "",
-    "ci:test": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run ${CYPRESS_RUN_FLAGS}\"",
-    "ci:dev": "concurrently --kill-others-on-fail -n emul,init \"npm run --silent _ci_dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
-    "_ci_dev_local_emul": "firebase emulators:start --project=demo-abc",
-    "  - -": "",
-    "dev:local": "concurrently --kill-others-on-fail -n emul,init \"npm run _dev_local_emul\" \"npm run _dev_local_init && npm run _dev_local_vite\"",
-    "_dev_local_emul": "npm run -s _checkPort4000 && $(docker-run-cmd) firebase emulators:start --project=demo-abc | grep -v -E \"Detected demo project ID|You are not currently authenticated|You are not signed in\"",
-    "_dev_local_init": "wait-for 4000 && firebase-prime --project=demo-abc local/docs.js local/users.js | grep -v -E \"Do not use with production credentials\"",
-    "_dev_local_vite": "vite --port 3000 --mode dev_local",
-    "  --": "",
-    "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run --silent _dev_online_log\" \"npm run -s _dev_online_vite\"",
+    "-- -": "",
+    "dev:local": "concurrently --kill-others-on-fail -n emul,vite \"npm run -s _dev_local_emul\" \"npm run -s _dev_local_vite\"",
+    "_dev_local_emul": "docker compose up emul",
+    "_dev_local_vite": "node node_modules/esbuild/install.js && docker compose run init-hmr-work-around && vite --port 3000 --mode dev_local",
+    "--  -": "",
+    "dev:local:all-dc": "docker compose up vite --abort-on-container-exit",
+    "-- --": "",
+    "dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run -s _dev_online_log\" \"npm run -s _dev_online_vite\"",
     "_dev_online_log": "PORT=5050 node tools/printout.js",
     "_dev_online_vite": "wait-for 5050 && vite --port 3001",
-    "  ---": "",
+    "--   -": "",
     "lint": "eslint --ext .js,.vue src",
     "build": "vite build",
-    "prebuild": "npm run --silent _checkNoLinks",
-    "predev:local": "port-is-free 3000,5002 && npm run --silent _genEnvLocal",
+    "prebuild": "npm run -s _checkNoLinks && node node_modules/esbuild/install.js",
+    "predev:local": "port-is-free 3000 && npm run -s _genEnvLocal",
     "predev:online": "port-is-free 3001 && npm run -s _genEnvOnline",
-    "  - ": "",
+    "-- - -": "",
+    "//ci:test_": "CYPRESS_VERSION=8.1.0 docker-compose run cypress",
+    "--  --": "",
+    "//ci:test": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run ${CYPRESS_RUN_FLAGS}\"",
+    "//ci:dev": "concurrently --kill-others-on-fail -n emul,init \"npm run -s _ci_dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
+    "//_ci_dev_local_emul": "firebase emulators:start --project=demo-abc",
+    "-- ---": "",
     "_checkNoLinks": "check-no-links || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; false)",
     "//_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
     "_checkPort4000": "port-is-free --silent 4000 || ( >&2 echo \"ERROR: Port 4000 is taken. You might have left the backend server running (hint: use this for both).\n\"; false)",
     "_genEnvLocal": "gen-vite-env-local --project=demo-abc > vitebox/.env.dev_local",
     "_genEnvOnline": "gen-vite-env-online > vitebox/.env.development",
-    "  - - ": "",
-    "postbuild": "cp public/* dist/",
-    "postinstall": "npm --prefix tools/firebase-prime install"
+    "--    -": "",
+    "postbuild": "cp public/* dist/"
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
@@ -65,13 +67,12 @@
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
-    "@local/firebase-prime": "file:tools/firebase-prime",
     "@local/self": "file:.",
     "@local/tools": "file:../../tools",
     "@vitejs/plugin-vue": "^1.2.5",
     "@vue/compiler-sfc": "latest",
     "concurrently": "^6.2.0",
-    "cypress": "^8.0.0",
+    "cypress": "^8.1.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
@@ -80,6 +81,9 @@
     "sass": "^1.35.1",
     "vite": "^2.4.3",
     "vue-eslint-parser": "^7.9.0"
+  },
+  "//devDependencies": {
+    "//@xxx/firebase-prime": "file:../../firebase-ci-builder.user/firebase-prime"
   },
   "//comments": {
     "devDependencies": {
@@ -98,14 +102,20 @@
         "Instead, root defines the version and both us and 'app-ops-deploy' pull in the necessary '@firebase' modules, directly."
       ]
     },
-    "engines": [
+    "engines.node": [
       "'>=14.3' for '—-harmony-top-level-await' (we don't use it)",
-      "'>=13.2' for ES module support"
+      "'>=13.2' for ES module support",
+      "",
+      "Avoid 16.6.0 -> https://github.com/facebook/jest/issues/11708"
     ],
     "scripts": {
       "| grep -v": [
         "Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.",
         "A single 'grep -v -E' (needs -E) with '|' is fine."
+      ],
+      "ci:test": [
+        "CI calls directly 'docker compose' since it's using a docker image that doesn't have 'npm'. We reflect the",
+        "command here, mostly for just documenting the use."
       ]
     }
   }

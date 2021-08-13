@@ -81,3 +81,17 @@ Deleted all binary caches except for the 7.6.0 binary cache.
 **More depth:**
 
 - [Cleaning Up Space on Development Machine](https://glebbahmutov.com/blog/cleaning-up-space/#cleaning-old-cypress-binaries) (blog, Apr 2020)
+
+
+## Building the Docker image, after it's changed
+
+`docker compose` doesn't track changes to the Dockerfile defined with `build:`, by purpose.
+
+To reflect changes, use:
+
+```
+$ docker compose build
+```
+
+>If you change a service’s Dockerfile or the contents of its build directory, run docker-compose build to rebuild it. <sub>source: [Docker Compose CLI reference](https://docs.docker.com/compose/reference/build/)</sub>
+

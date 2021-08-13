@@ -26,12 +26,12 @@ steps:
 # Flight check: not to be run from the 'ci-builder'
 - name: $_1
   entrypoint: bash
-  args: ['-c', '[[ $PROJECT_ID != ci-builder ]]']
+  args: ['-c', '[[ $PROJECT_ID != ci-builder ]] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )']
 
 # Root install
 - name: $_1
-  entrypoint: bash
-  args: ['-c', 'apk --no-cache add patch && npm install']
+  entrypoint: npm
+  args: ['install']
 
 # Tests (keep similar to 'cloudbuild.master-pr.backend.yaml')
 - name: $_1

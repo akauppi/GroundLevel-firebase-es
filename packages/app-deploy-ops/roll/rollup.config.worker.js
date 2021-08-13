@@ -1,49 +1,33 @@
 /*
-* Rollup config for building web worker(s)
+* Rollup config for proxy worker
 *
-* Imported by the main rollup config.
+* This is a preceding build to the main build. They are separated so that the main build has the hash of our
+* output file, before the build (to be able to inject it to the code).
+*
+* Pros:
+*   - clear separation; cleaner config files
+*
+* Cons:
+*   - this build is left outside of 'npm run watch' (you have to manually recompile, if you change the worker code,
+*     which should be rare)
 */
 import sizes from '@atomico/rollup-plugin-sizes'
-import resolve from '@rollup/plugin-node-resolve'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import { terser } from 'rollup-plugin-terser'
 
-import {dirname} from 'path'
-import {fileURLToPath} from 'url'
-
-function fail(msg) { throw new Error(msg); }
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 
 const watch = process.env.ROLLUP_WATCH;
 
-const loggingAdapterProxyHashes = [];   // [ esm_hash, iife_hash ]
-
-const catchHashPlugin = (esm) => ({
-  name: 'my-plugin',
-
-  // Below, one can define hooks for various stages of the build.
-  //
-  generateBundle(_ /*options*/, bundle) {
-    Object.keys(bundle).forEach( fileName => {
-      // filename: "proxy.worker-520aaa52[.iife].js"
-      //
-      const [_,c1] = fileName.match(/^proxy.worker-([a-f0-9]+)(?:\.iife)?\.js$/) || [];
-      if (c1) {
-        loggingAdapterProxyHashes[esm?0:1] = c1;
-        return;
-      }
-      console.warn("Unexpected (worker) bundle generated:", fileName);
-    });
-  }
-});
-
-const pluginsWorkerGen = (esm) => [
-  resolve({
-    mainFields: ["esm2017", "module"],
+const plugins = [
+  nodeResolve({
+    //mainFields: ["esm2017", "module"],    // <-- no longer needed, right? (Firebase relic) #cleanup
     modulesOnly: true       // "inspect resolved files to assert that they are ES2015 modules"
   }),
   !watch && terser(),
-  catchHashPlugin(esm),
 
   !watch && sizes(),
 ];
@@ -58,8 +42,8 @@ const pluginsWorkerGen = (esm) => [
 *
 * [1]: https://developer.mozilla.org/en-US/docs/Web/API/Worker#browser_compatibility
 */
-function configWorkerGen(esm) { return {   // (boolean) => object
-  input: './adapters/cloudLogging/proxy.worker.js',
+const workerConfigGen = (esm) => ({   // (boolean) => object
+  input: './src/ops-adapters/cloudLogging/worker.js',
   output: {
     dir: myPath + '/out/worker',   // under which 'proxy.worker-{hash}.js' (including imports, tree-shaken-not-stirred)
     format: esm ? 'es':'iife',
@@ -67,8 +51,10 @@ function configWorkerGen(esm) { return {   // (boolean) => object
     sourcemap: true,   // have source map even for production
   },
 
-  plugins: pluginsWorkerGen(esm)
-};}
+  plugins
+});
 
-export default configWorkerGen;
-export { loggingAdapterProxyHashes }
+export default [
+  workerConfigGen(true),
+  //workerConfigGen(false),   // DISABLED: also Safari (14.0.3) and Firefox (88) seem fine with ESM code (kept for maybe needing to support older versions)
+];

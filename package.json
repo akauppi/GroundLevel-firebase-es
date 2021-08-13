@@ -6,14 +6,13 @@
     "initStagingAndDeploy": "init-staging/launch.sh",
     "- ": "",
     "preinstall": "sh/npm-version-check.sh",
-    "postinstall": "npm run -s _postinstall1 && npm run -s _postinstall2",
-    "_postinstall1": "npm --prefix tools install",
-    "_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
+    "postinstall": "npm run -s _postinstall1",
+    "_postinstall1": "npm --prefix tools install"
   },
   "devDependencies": {
     "eslint": "^7.31.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.0.0-beta.7"
+    "firebase": "^9.0.0-beta.8"
   },
   "//": {
     "": [
@@ -22,9 +21,6 @@
       "",
       "Some tools ('wait-on', 'concurrently') are not here. Those are seen as implementation details of the particular",
       "submodules (so if you use a package in two subpackages, it does not mean you must declare it here)."
-    ],
-    "scripts": {
-      "$BUILD_ID": "Can be used as an indication of Cloud Build."
-    }
+    ]
   }
 }

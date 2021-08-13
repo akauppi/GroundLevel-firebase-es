@@ -59,14 +59,13 @@ The link above should work in GitHub; it doesn't work with the MacDown editor
 This means there's a `../../firebase.staging.js` file that contains the means to reach the backend:
 
 ```
-const config = {
+export default {
   "projectId": "testing-123",
   "appId": "...",
   "locationId": "...",
   "apiKey": "...",
   "authDomain": "testing-123.firebaseapp.com",
-};
-export default config;
+}
 ```
 
 ## Getting started

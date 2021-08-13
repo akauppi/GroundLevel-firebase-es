@@ -15,15 +15,15 @@ import { pickConfig } from './pick-config.js'   // note: without extension good 
 
 const env = process.env["ENV"] || "staging";
 
-const myPath = dirname(fileURLToPath(import.meta.url));
-const srcPath = myPath + "/../src";
-const opsPath = srcPath + "/ops";
-const adaptersPath = myPath + "/../adapters";
-let envPath = myPath + `/../../../firebase.${env}.js`;    // default: development
+const path = dirname(fileURLToPath(import.meta.url)) + "/..";
+const srcPath = path + "/src";
+const opsPath = srcPath + "/ops-implement";
+const adaptersPath = srcPath + "/ops-adapters";
+let envPath = path + `/../../firebase.${env}.js`;    // default: development
 
 // Development:
 //  - use staging access values, from '../../../firebase.${ENV-staging}.js'
-// CI build:
+// CI build for deployment:
 //  - use Firebase active project's values
 //
 if (env === 'ci') {
@@ -35,13 +35,13 @@ if (env === 'ci') {
   const bulk = `
 // TEMPORARY FILE created by CI build
 //
-const config = ${ JSON.stringify(o) };
-export default config`
+const a = ${ JSON.stringify(o) };
+export default a`
 
   // Write it to a temporary file and then direct imports to such file.
   //
   writeFileSync(tmpFile, bulk);
-  envPath = `./${tmpFile}`;
+  envPath = tmpFile;
 
 } else {
   existsSync(envPath) ||
