@@ -24,7 +24,7 @@
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
-version: '3.4'
+version: '3.0'
 
 services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.

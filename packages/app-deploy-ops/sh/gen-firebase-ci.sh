@@ -1,9 +1,7 @@
 #!/bin/bash
 set -euf -o pipefail
 
-# Create '../../firebase.ci.js' contents, based on:
-#   - the active Firebase project (if there is one)
-#   - fake values (for CI "just build" run)
+# Create the contents of a '../../firebase.*.js' file, based on the active Firebase project.
 #
 # Context:
 #   Alpine Linux
@@ -12,40 +10,24 @@ set -euf -o pipefail
 #   - grep
 #
 
-# Determine, whether we're in an active Firebase project or not.
-#
-# 'firebase use | more' output:
-#   <<
-#
-#   Error: No active project
-#   <<
-#
-# It leave a ZERO RETURN CODE (firebase-tools 9.16.0), so we examine the output... :!
-#
-# tbd. LATER. FOR NOW, just set 'CI_JUST_BUILD' in the ci script...
-#
-if [[ ${CI_JUST_BUILD-} ]] ; then
-  CATCH=""
-else
-  CATCH=$(firebase apps:sdkconfig | grep -E '^\s+".+":\s.+,')
-    #
-    # <<
-    #   // Copy and paste this into your JavaScript code to initialize the Firebase SDK.
-    #   // You will also need to load the Firebase SDK.
-    #   // See https://firebase.google.com/docs/web/setup for more details.
-    #
-    #   firebase.initializeApp({
-    #     "projectId": "...",
-    #     "appId": "...",
-    #     "storageBucket": "...",
-    #     "locationId": "...",
-    #     "apiKey": "...",
-    #     "authDomain": "...",
-    #     "messagingSenderId": "...",
-    #     "measurementId": "..."
-    #   });
-    # <<
-fi
+CATCH=$(firebase apps:sdkconfig | grep -E '^\s+".+":\s.+,')
+  #
+  # <<
+  #   // Copy and paste this into your JavaScript code to initialize the Firebase SDK.
+  #   // You will also need to load the Firebase SDK.
+  #   // See https://firebase.google.com/docs/web/setup for more details.
+  #
+  #   firebase.initializeApp({
+  #     "projectId": "...",
+  #     "appId": "...",
+  #     "storageBucket": "...",
+  #     "locationId": "...",
+  #     "apiKey": "...",
+  #     "authDomain": "...",
+  #     "messagingSenderId": "...",
+  #     "measurementId": "..."
+  #   });
+  # <<
 
 # Required syntax for 'firebase.${ENV-staging}.js' files
 #

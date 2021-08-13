@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "initStagingAndDeploy": "init-staging/launch.sh",
-    "  -": "",
+    ”--”: "",
     "preinstall": "[[ $BUILDER_OUTPUT ]] || sh/npm-version-check.sh",
     "postinstall": "npm --prefix tools install",
     "//_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
