@@ -9,7 +9,7 @@ set -eu -o pipefail
 #   <<
 #
 
-PATHS=". tools packages/backend packages/backend/functions packages/app packages/app-deploy-ops"
+PATHS=". tools firebase-dc-tools/firebase-prime packages/backend packages/backend/functions packages/app packages/app-deploy-ops"
 
 for _PATH in $PATHS
 do

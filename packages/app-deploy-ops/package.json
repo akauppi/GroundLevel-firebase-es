@@ -28,9 +28,8 @@
     "- -": "",
     "//build:vite": "vite build -c vite/vite.config.js",
     "-- ": "",
-    "prebuild": "npm run -s _checkEnv && npm run -s _checkEnv2",
-    "_checkEnv": "[[ -f .env.${ENV-staging} ]] || ( >&2 echo \"ERROR: Please create config file '.env.${ENV-staging}' - see README.md.\n\"; false)",
-    "_checkEnv2": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: Missing '../../firebase.${ENV-staging}.js' - see README.md.\n\"; false)",
+    "prebuild": "npm run -s _checkEnv",
+    "_checkEnv": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: Please create config file '../../firebase.${ENV-staging}.js' - see README.\n\"; false)",
     "//_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; false)",
     "-- - -": "",
     "klean": "rm -rf roll/out/*"
@@ -40,7 +39,7 @@
     "@firebase/auth": "file:../../node_modules/@firebase/auth",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "@local/app": "file:../app",
-    "raygun4js": "^2.22.3"
+    "raygun4js": "^2.22.4"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
@@ -51,11 +50,12 @@
     "concurrently": "^6.2.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "first-input-delay": "^0.1.3",
     "rollup": "^2.54.0",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-visualizer": "^5.5.2",
+    "rollup-plugin-visualizer": "^5.5.2"
+  },
+  "//devDependencies": {
     "vite": "^2.4.3"
   },
   "//comments": {

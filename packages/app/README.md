@@ -5,6 +5,9 @@ Web application sample project.
 ## Requirements
 
 - `npm` >= 7.7.0
+- Docker Desktop
+
+   >For Mac and Windows, Docker Compose comes as part of Docker Desktop. For Linux, see [Install Compose on Linux systems](https://docs.docker.com/compose/install/#install-compose-on-linux-systems).
 
 ### Cypress setup
 
@@ -39,6 +42,8 @@ That's all. You'll be using the Cypress version installed via `npm`. Launch it w
 
 <details><summary>**Windows 10 + WSL2**</summary>
 
+>*Within 2021, Microsoft is bringing the [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) to Windows 10. This will allow us to launch the Linux-side Cypress GUI, and use it from Windows. 🎉🎉🥁*
+
 Windows and WSL2 duo is not a supported Cypress platform. This means you will need to do a little bit more than the other OSes. In short, you'll use *one* Cypress via `npm`, within WSL2, for "headless" testing (`npm test`).
 
 For test based development, we recommend installing *another* instance, this time on the Windows side.
@@ -54,18 +59,14 @@ For test based development, we recommend installing *another* instance, this tim
 Try launching the `Cypress.exe` app.
 </details>
 
->*Within Q3 of 2021, Microsoft is bringing the [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) to Windows 10. This will allow us to launch the Linux-side Cypress GUI, and use it from Windows. 🎉🎉🥁*
-
-<!--
-tbd. Update these notes once we have access to WSLg.
--->
 
 <!--
 Development is done with: 
 
-- macOS 11.4
-- node 16.2
+- macOS 11.5
+- node 16.5
 - npm 7.19
+- Docker Desktop 3.5.2
 -->
 
 ## Getting started
@@ -83,13 +84,11 @@ Launch the app:
 ```
 $ npm run dev
 ...
-[emul] Launching Docker... 🐳
-...
-[init]   vite v2.3.7 dev server running at:
-[init]
-[init]   > Local:    http://localhost:3000/
-[init]   > Network:
-[init]
+[vite_1]   vite v2.4.4 dev server running at:
+[vite_1]
+[vite_1]   > Local:    http://localhost:3000/
+[vite_1]   > Network:	 ...
+[vite_1]
 ...
 ```
 
@@ -101,7 +100,7 @@ Try it:
 
 [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 
-Try making some changes in the `src/**` files and see that they are reflected in the browser.
+Try making some changes in the `src/**` files (`src/pages/Home/index.vue` has the main page) and see that they are reflected in the browser.
 
 
 ## Two development workflows
@@ -352,3 +351,8 @@ dist/vue.js.map      512.57kb
 This builds your front end application in `dist/` folder. It contains all the logic and the styles that your application has, but it lacks the operational awareness that makes it fully ready for production.
 
 We'll add that layer around it in the final sub-package, `../app-deploy-ops`.
+
+
+## Maintenance
+
+Cypress binaries are gathered in [a cache directory](https://docs.cypress.io/guides/getting-started/installing-cypress#Binary-cache). You might want to clean the earlier ones away, at times, to save disk space.

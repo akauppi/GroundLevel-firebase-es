@@ -26,7 +26,7 @@ steps:
 # Flight check: not to be run from the 'ci-builder'
 - name: $_1
   entrypoint: bash
-  args: ['-c', '[[ $PROJECT_ID != ci-builder ]]']
+  args: ['-c', '[[ $PROJECT_ID != ci-builder ]] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )']
 
 # Root install
 - name: $_1

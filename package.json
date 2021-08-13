@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "initStagingAndDeploy": "init-staging/launch.sh",
-    "- ": "",
+    "  -": "",
     "preinstall": "[[ $BUILDER_OUTPUT ]] || sh/npm-version-check.sh",
     "postinstall": "npm --prefix tools install",
     "//_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
@@ -12,7 +12,7 @@
   "devDependencies": {
     "eslint": "^7.31.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.0.0-beta.7"
+    "firebase": "^9.0.0-beta.8"
   },
   "//": {
     "": [

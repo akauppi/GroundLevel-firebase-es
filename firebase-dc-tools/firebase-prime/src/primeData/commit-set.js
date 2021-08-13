@@ -14,7 +14,7 @@
 import { strict as assert } from 'assert'
 import fetch from 'node-fetch'
 
-import { firestorePort } from '../config.js'
+import { firestorePort, host } from '../config.js'
 
 /*
 * Carry out writes to Firestore.
@@ -25,7 +25,7 @@ import { firestorePort } from '../config.js'
 * the emulator's response).
 */
 async function commit_v1(projectId, token, writes) {   // (string, string, Array of Write) => Promise of true|string
-  const path_v1 = `http://localhost:${firestorePort}/v1/projects/${projectId}/databases/(default)/documents`;
+  const path_v1 = `http://${host}:${firestorePort}/v1/projects/${projectId}/databases/(default)/documents`;
 
   const [method, uri] = ['POST', `${path_v1}:commit`];
 

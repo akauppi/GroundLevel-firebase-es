@@ -45,3 +45,8 @@ VITE_PROJECT_ID=${projectId}
 `;
 
 process.stdout.write(out);
+
+function fail(msg) {
+  process.stderr.write(`ERROR: ${msg}\n\n`);
+  process.exit(2);
+}

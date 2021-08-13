@@ -8,15 +8,15 @@
 import { strict as assert } from 'assert'
 import fetch from 'node-fetch'
 
-import { firestorePort } from '../config.js'
+import { firestorePort, host, projectId } from '../config.js'
 
 /*
 * Based on 'rules-unit-testing' sources; re-implemented using 'fetch' API.
 */
-async function wipe(projectId) {   // (string) => Promise of ()
+async function wipe() {   // () => Promise of ()
   assert(projectId);
 
-  const uri = `http://localhost:${firestorePort}/emulator/v1/projects/${projectId}/databases/(default)/documents`;
+  const uri = `http://${host}:${firestorePort}/emulator/v1/projects/${projectId}/databases/(default)/documents`;
   const method = 'DELETE';
   const body = JSON.stringify({
     database: `projects/${projectId}/databases/(default)`

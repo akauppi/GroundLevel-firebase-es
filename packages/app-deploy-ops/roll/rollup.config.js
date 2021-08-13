@@ -18,7 +18,7 @@ import { aliases } from '../vite-and-roll/aliases.js'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
-import { proxyPairs, mainPairs } from './injectPairs'
+import { proxyPairs, envPairs } from './injectPairs'
 
 const myPath = dirname(fileURLToPath(import.meta.url));
 
@@ -73,7 +73,7 @@ const plugins = [
   replace({   // general (all files; not adapters)
     include: 'src/**/*.js',
     exclude: 'src/ops-adapters/**',
-    values: Object.fromEntries( mainPairs.map( ([k,v]) =>
+    values: Object.fromEntries( envPairs.map( ([k,v]) =>
       [`import.meta.env.${k}`, JSON.stringify(v)]
     )),
     preventAssignment: true

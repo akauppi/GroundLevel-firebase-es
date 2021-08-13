@@ -1,11 +1,16 @@
 #
-# ci/cloudbuild.pr.app.yaml
+# ci/cloudbuild.master-pr.app.yaml
 #
 # Trigger:
 #   - PR is made or changed; changes affect 'packages/app' or 'packages/app-deploy-ops'
 #
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
+#
+# Uses images:
+#   - node:16
+#   - firebase-ci-builder   (pushed to Container Registry; used via Docker Compose)
+#   - docker
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -18,7 +23,7 @@
 steps:
 # Root install
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
 
@@ -26,62 +31,78 @@ steps:
 #
 # Do not care to test it - separate PR task does it.
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
   dir: packages/backend
 
 # --- App
 #
-# tbd. Once a Cypress image is available, _use it also for the install step_. This way, we don't need to deal with
-#     the binaries cache.
-#
-# tbd. Eventually the '--headless' wouldn't be needed (Cypress is trying to make it the default for 'cypress run').
-#
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
   dir: packages/app
   env: ['CYPRESS_INSTALL_BINARY=0']
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
-#  entrypoint: npm
-#  args: ['install']
+
+# On 6-Aug-2021, 'gcr.io/cloud-builders/docker':
+#   https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/docker
+#
+#   - is version 19.03.8
+#   - does not have 'docker compose' or 'docker-compose'
+#
+#   <<
+#     # docker compose up
+#     docker: 'compose' is not a docker command.
+#   <<
+#
+# See #76 for more information: https://github.com/akauppi/GroundLevel-firebase-es/issues/76
+#
+#- name: gcr.io/cloud-builders/docker
+#  entrypoint: docker
+#  args: ['compose', 'run', 'cypress']
+#    # same as 'npm run ci:test' would do
 #  dir: packages/app
-#- name: gcr.io/$PROJECT_ID/firebase-ci-builder-cypress:${_CYPRESS_TAG}
-#  entrypoint: npm
-#  args: ['run', 'ci:test']
+
+# Or:
+#- name: docker/compose
+#  entrypoint: docker-compose
+#  args: ['run', 'cypress']
+#    # same as what 'npm run ci:test' would do
 #  dir: packages/app
-#  env: [ 'CYPRESS_RUN_FLAGS="--browser chrome --headless"' ]
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+
+- name: node:16
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: $_1
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
 
 # --- App-deploy-ops
 #
-# Test we can build it. Can fake the access values, because this code's not going to be run.
+# Try that the code builds with fake access values.
 #
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
+- name: node:16
   entrypoint: npm
   args: ['install']
   dir: packages/app-deploy-ops
-- name: gcr.io/$PROJECT_ID/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'ci:build']
+- name: node:16
+  entrypoint: sh
+  args: ['-c', 'echo "export default { }" > ../../firebase.fake.js']
   dir: packages/app-deploy-ops
-  env: ['RAYGUN_API_KEY=abc', 'CI_JUST_BUILD=1']
+- name: $_1
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app-deploy-ops
+  env: ['ENV=fake', 'RAYGUN_API_KEY=x']
 
 # --- Timeout
 #
-# Local:        ...
-# Cloud Build:  2:16 (without Cypress tests)
+# Cloud Build:  2:33 (without Cypress tests)
 #
 timeout: 240s
 
 substitutions:
-  _BUILDER_TAG: 9.16.0-node16-npm7
-  #_CYPRESS_IMAGE: cypress/included:7.4.0
+  # Has Node 16 and bash
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
