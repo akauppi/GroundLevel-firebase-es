@@ -12,8 +12,14 @@
 #   Within a Docker universe,
 #     - launch Firebase Emulators using 'firebase.json' (UI could be disabled);
 #       - exposing ports for Firestore and Firebase Auth (Cloud Functions emulated but not used from the front end)
-#     - launch Vite, hosting the front-end at localhost:3000.
+#     - launch Vite, hosting the front-end at localhost:3000
 #     - Cypress use is locally (not within Docker) for development.
+#
+# Docker Compose NOTES:
+#   - Docker Compose isolates different subpackages from each other by the '{folder}_{service}' naming; we can use
+#     the same 'emul' both here and in backend without them becoming entangled.
+#   - 'docker compose up' *will* keep the containers available, for a while, and reuse them. This means they might
+#     come with state - or without - and our scripts must be tolerant of that!!!
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
@@ -72,7 +78,7 @@ services:
     command: bash -o pipefail -c
       'node node_modules/esbuild/install.js &&
       wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
+      firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js &&
       npx vite --port 3000 --mode dev_local'
     depends_on: ['emul']
 
@@ -88,7 +94,7 @@ services:
     working_dir: /proj/packages/app
     command: bash -o pipefail -c
       'wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials")'
+      firebase-prime --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js'
     depends_on: ['emul']
     profiles: ['manual']
 

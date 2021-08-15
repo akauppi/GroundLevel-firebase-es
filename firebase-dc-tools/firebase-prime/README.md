@@ -1,10 +1,14 @@
 # firebase-prime
 
-Tools to prime a Firestore emulated instance with:
+Command line tool for priming a Firestore emulated instance with data and users. 
 
-- users
-- data
+Used via Docker Compose (which points to here).
 
-## References
 
-- [Best practice for distributing a nodejs command line application](https://stackoverflow.com/questions/39113257/best-practice-for-distributing-a-nodejs-command-line-application) (SO, 2016)
+## Trying it out (outside of Docker Compose)
+
+Have Firestore etc. emulated, and `firebase.json` in the current directory.
+
+
+
+

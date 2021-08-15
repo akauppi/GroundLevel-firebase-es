@@ -11,11 +11,11 @@
     "functions/*.js"
   ],
   "engines": {
-    "node": "14 || >=16 < 16.6 || >= 16.6.1",
+    "node": "14 || >= 16 < 16.6 || >= 16.6.1",
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run _test1; else docker compose run test ; fi",
+    "test": "if port-is-taken --silent 4000 ; then npm run _test1; else docker compose run --rm test ; fi",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
     "start": "docker compose up --abort-on-container-exit",

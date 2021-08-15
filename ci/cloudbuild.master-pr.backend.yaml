@@ -39,7 +39,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build:  1:51
+# Cloud Build:  1:51, 1:45
 #
 timeout: 240s
 

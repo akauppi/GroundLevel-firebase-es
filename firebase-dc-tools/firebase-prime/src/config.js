@@ -5,9 +5,14 @@
 */
 import { existsSync, readFileSync } from 'fs'
 
-const { projectId, host } = global.chewedOpts;  // from 'index.js'
+let projectId, host;
 
 const firebaseJson = "./firebase.json";
+
+function init(a, b) {   // (string, string) => ()
+  projectId = a;
+  host = b;
+}
 
 // Get the Firebase emulator ports from Firebase configuration file.
 //
@@ -30,11 +35,11 @@ function fail(msg) {
   process.exit(2);
 }
 
-function failInternal(msg) { throw new Error( `INTERNAL: ${msg}` ) }
-
 export {
   firestorePort,
   authPort,
   host,
-  projectId
+  projectId,
+    //
+  init    // called by 'index.js' to provide us parameters
 }

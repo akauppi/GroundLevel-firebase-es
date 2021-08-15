@@ -15,11 +15,13 @@ program
   .action(mainWrapper)
   .parse();
 
-async function mainWrapper(docsFn, usersFn) {
-  const projectId = program.opts().project || failInternal('--project not provided (Commander should give an error?)');
-  const host = program.opts().host || failInternal('no \'host\' value (Commander should have used the default)');
+import { init as initConfig } from './config.js'
 
-  global.chewedOpts = { projectId, host };
+async function mainWrapper(docsFn, usersFn) {
+  initConfig(
+    program.opts().project || failInternal('--project missing'),   // Commander should have required it
+    program.opts().host || failInternal('--host missing')               // Commander should have placed the default
+  );
 
   // Little trickery to import relative to current directory.
   //
@@ -29,7 +31,7 @@ async function mainWrapper(docsFn, usersFn) {
   if (!docs) fail(`Missing 'docs' export in: ${docsFn}`);
   if (!users) fail( `Missing 'users' export in: ${usersFn}`);
 
-  // Note: By importing 'main' itself dynamically, we allow 'config' to pass the projectId and host parameters.
+  // Note: By importing 'main' dynamically, we allow 'config' to have been initialized, first.
   //
   const { main } = await import('./main.js');
   return main(docs, users);
@@ -39,3 +41,5 @@ function fail(msg) {
   console.error(msg);
   process.exit(2);
 }
+
+function failInternal(msg) { throw new Error(msg) }

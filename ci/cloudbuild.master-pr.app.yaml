@@ -99,7 +99,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build:  2:33 (without Cypress tests)
+# Cloud Build:  2:33, 2:13 (without Cypress tests)
 #
 timeout: 240s
 

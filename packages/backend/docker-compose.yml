@@ -44,15 +44,17 @@ services:
 
   # Used for running 'npm test' when the emulators are not already running; launches them (and cleans away).
   #
+  # Note: 'npm test' may need some things from "upstairs". Try, if this works also with just sharing 'backend' folder. <-- tbd.
+  #
   test:
     build: ../../firebase-dc-tools/
     user: '1000'    # WSL2 quick fix
     volumes:
       - ../..:/proj
-    working_dir: /proj/packages/app
+    working_dir: /proj/packages/backend
     command: bash -o pipefail -c
       'wait-for-it emul:4000 --timeout=20 &&
-      node hack/ack-await.js &&
+      node hack/ack-await &&
       npm test'
     depends_on: ['emul']
     profiles: ['manual']

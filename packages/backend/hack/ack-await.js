@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
-* test-fns/ack-await.js
+* backend/hack/ack-await.js
 *
 * Listens to the "warmed up" acks from '../functions-warm-up/index.js'.
 *
