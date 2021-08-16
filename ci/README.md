@@ -2,7 +2,9 @@
 
 All command line commands are expected to be run in the `ci` folder.
 
-## Aim 🎯
+## Target 🎯
+
+Before dwelling into the details, it's good to see what we actually want the CI/CD pipeline to do for us.
 
 ### For a PR targeting `master`
 
@@ -78,29 +80,11 @@ This organization seems light enough, yet flexible, to recommend. In the followi
 
 ## Requirements
 
-- `gcloud`
+- `gcloud` CLI
 
-   <details><summary>Installation on macOS</summary>
-   Follow [Installing Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
-	
-	After unpacking, move the folder to a permament location (author uses `~/bin/google-cloud-sdk`). The installation is on that directory only, and uninstalling means removing the directory.
-
-   ```
-   $ gcloud --version
-	Google Cloud SDK 343.0.0
-	...
-   ```
-
-   Update by: `gcloud components update`
-	</details>
-
-   <details><summary>Installation on Windows 10 + WSL2 `#contribute`</summary>
-   tbd..
-   </details>
+   - Instructions for installing it are in the root `README`
 
 - Docker
-
-   Needed for building the builders.
 
 
 ### Create a "CI Builder" GCP project
@@ -138,17 +122,12 @@ These are already created, by Firebase.
 When you create a Firebase project, a GCP project of the same name gets created as well. We use those projects for automating deployments, using Cloug Build.
 
 
-### Push the builder images
+### Push the builder image
 
-The CI scripts require `ci-builder` Container Registry to have the following builder images:
-
-- `firebase-emulators:9.16.0-node16-npm7`
-- <font color=lightgray>`firebase-emulators-cypress:9.12.1-7.5.0-node14-npm7` (not ready yet)</font>
-
-<details><summary>Instruction for building and pushing them..</summary>
+The CI scripts require `ci-builder` Container Registry to have the `firebase-ci-builder:9.16.0-node16-npm7` image.
 
 1. Log into your "CI builder" GCloud project (see steps above).
-2. Build and push the images
+2. Build and push the image
 
    ```
    $ pushd ../firebase-ci-builder.sub
@@ -157,20 +136,6 @@ The CI scripts require `ci-builder` Container Registry to have the following bui
    ...
    $ popd
    ```
-
-   ```
-   $ pushd firebase-ci-builder-cypress.sub   # TENTATIVE
-   $ ./build
-   $ ./push-to-gcr
-   ...
-   $ popd
-   ```
-</details>
-
-<!-- tbd. update once/if we have a Cypress Alpine image 🏞
--->
-
-Now we have the necessary Docker images in the Container Registry of the `ci-builder` GCP project. 
 
 Next, let's introduce GitHub and Cloud Build to each other.
 

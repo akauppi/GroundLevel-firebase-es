@@ -1,0 +1,63 @@
+#
+# docker-compose.yml
+#
+# For:
+#   - manual deployment of backend and front-end
+#   - getting the access values to 'firebase.${ENV-staging}.js'
+#
+# Usage:
+#   <<
+#     $ CAPTURE_FILE=... docker compose run --service-ports all
+#   <<
+#
+# Docker Compose (v3) note:
+#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+# References:
+#   Overview of Docker Compose (Docker docs)
+#     -> https://docs.docker.com/compose/
+#   Compose file version 3 reference
+#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+version: '3.0'
+
+services:
+  debug:
+    build: ../firebase-ci-builder.sub/
+    volumes:
+      - ..:/proj
+    working_dir: /proj
+    command: bash -o pipefail -c
+      'echo "Launching Docker... 🐳" &&
+      npm --version &&
+      (cd packages/backend && npm install)
+      '
+    profiles: ['manual']
+    environment:
+    - NO_UPDATE_NOTIFIER=x
+
+  # Using 'image' (not 'build') because it allows us to explicitly control the version of Firebase CLI.
+  #
+  deploy:
+    #build: ../firebase-ci-builder.sub/
+    image: firebase-ci-builder:9.16.0-node16-npm7
+    ports:
+      - "9005:9005"
+    # 9005 is needed by the auth dance
+    volumes:
+      - ..:/proj
+    working_dir: /proj
+    command: bash -o pipefail -c
+      'echo "Launching Docker... 🐳" &&
+      firebase login
+        &&
+      (cd packages/backend && firebase use --add) &&
+      (cd packages/app-deploy-ops && firebase use $$(cd ../backend && firebase use)) &&
+      (cd packages/backend && firebase apps:sdkconfig) > ${CAPTURE_FILE}
+        &&
+      (cd packages/backend &&        npm install && npm run ci:deploy) &&
+      (cd packages/app &&            npm install && npm run build) &&
+      (cd packages/app-deploy-ops && npm install && npm run ci:deploy)
+      '
+    profiles: ['manual']
+    #environment: ['NO_UPDATE_NOTIFIER=x']    # (did not work; npm 7.19, 7.20.3)

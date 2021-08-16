@@ -11,6 +11,17 @@ Responsible for:
    - proxying to Cloud Logging (ops)
 - testing the back-end
 
+**Folder structure**
+
+```
+├── functions             # Cloud Functions definitions
+├── functions-warm-up     # code that makes sure Cloud Functions are awake
+├── sh                    # build tools
+├── test-fns              # tests for Cloud Functions
+└── test-rules            # tests for Firestore Security Rules
+```
+
+The root has various configuration files.
 
 ## Requirements
 
@@ -23,11 +34,11 @@ Responsible for:
 
 <!-- 
 developed with:
-- macOS 11.4
-- node 16.5
-- npm 7.19
+- macOS 11.5
+- node 16.6
+- npm 7.20
 
-- Docker Desktop 3.5.2 with: 1 CPU core, 1.5 GB RAM
+- Docker Desktop 3.6.0 with: 1 CPU core, 1.5 GB RAM
 -->
 
 ## Getting started
@@ -36,20 +47,7 @@ developed with:
 $ npm install
 ```
 
-<!-- Editor's note
-Ideally, we just instruct people to `npm test` and it automatically launches Firebase Emulators (and shuts them down.
-
-It used to be like this. However, timeouts and Docker jams caused to (hopefully, temporarily) go to this "keep emulators running all the time" approach.
--->
-
-For the time you are working with `backup`, start Firebase Emulators in another terminal and keep them running:
-
-```
-$ npm run start
-...
-```
-
-In the first terminal:
+Make sure Docker is running and:
 
 ```
 $ npm test
@@ -57,19 +55,26 @@ $ npm test
 
 The tests should pass, or be skipped.
 
+><details><summary>Note to Windows users:</summary>
+>
+>![](.images/defender-docker.png)
+>   
+>If you get this warning about Docker Desktop, at least
+>   
+>- **uncheck the "public networks" checkbox**. It's not needed.
+>   
+>It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least **do not press OK** without removing that one checkbox.
+></details>
+
 ## Development workflow
 
-<!-- was
 ```
 $ npm start
 ```
 
-This launches the Firebase emulator in one terminal, and automatically picks up changes to the sources.
+This launches the Firebase emulators in one terminal, and automatically picks up changes to the sources.
 
-You can then run individual tests against it (see `package.json` for the precise name of commands).
--->
-
-In addition to running all the tests at once, you can run individual tests like this:
+You can then run individual tests against it:
 
 ```
 $ npm run test:fns:userInfo
@@ -77,9 +82,10 @@ $ npm run test:fns:userInfo
 
 This is useful when working on a certain test. Look in `package.json` for all such commands.
 
+>Note: If you now run `npm test`, it will use the existing emulators instead of launching a new set.
+
+
 ## Deploying
 
-Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
-
-To deploy manually, follow the instructions in `../../`[Deployment to staging](../../Deployment%20to%20staging..md).
+Deploying is done via Continuous Integration. See `ci` at the repo root.
 

@@ -6,7 +6,7 @@
     "node": "14 || >= 16 < 16.6 || >= 16.6.1"
   },
   "scripts": {
-    "initStagingAndDeploy": "init-staging/launch.sh",
+    "first": "first/deploy.sh",
     "--": "",
     "preinstall": "[[ $BUILDER_OUTPUT ]] || sh/npm-version-check.sh",
     "postinstall": "npm --prefix tools install",

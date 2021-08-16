@@ -9,3 +9,6 @@
 
 # Remove this line if you wish to keep the access values in version control.
 /firebase.staging.js
+
+# Temporary files
+/.captured.sdkconfig

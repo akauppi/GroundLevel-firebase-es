@@ -13,29 +13,38 @@ https://github.com/leg100/cloud-build-badge
 
 <!-- Using 'img' to be able to scale from Markdown.
 - Unfortunately, not able to do proper left-alignment (try out what works in GitHub; only that really matters..)
--->
+-
 <img alt="Logo" src="branding/icon_512x512.png" width=300 align="left" style="margin: 40px">
-
-<br />
-
-**A modern (ES modules based and "Serverless") Web App template**
-
-- great tools selected for you: 
-  - [Vue.js 3](https://v3.vuejs.org)
-  - [Vite](https://github.com/vitejs/vite)
-  - [Firebase](https://firebase.google.com)
-  - [Jest](https://jestjs.io)
-  - [Cypress](https://www.cypress.io)
-  - [Cloud Build](https://cloud.google.com/build)
-  - [Cloud Logging](https://cloud.google.com/logging/)
-- built on 2020's technology (ES9, async/await), aiming to stay up to date and lean
-- covers all the way to deployment (CI/CD) and operations
-
-<!--
-  - [Raygun](https://raygun.com)
 -->
 
-<br clear=all />
+<table style="border: none;"><tr>
+  <td><img alt="Logo" src="branding/icon_512x512.png" width=300 style="padding-right: 4em">
+  </td>
+  <td>
+  <p>
+  	<b>A modern (ES modules based and "Serverless") Web App template</b>
+  </p>
+  <p>
+  Great tools selected for you:
+  
+    <a href="https://v3.vuejs.org">Vue.js 3</a>,
+    <a href="https://github.com/vitejs/vite">Vite</a>,
+    <a href="https://firebase.google.com">Firebase</a>,
+    <a href="https://jestjs.io">Jest</a>,
+    <a href="https://www.cypress.io">Cypress</a>,
+    <a href="https://cloud.google.com/build">Cloud Build</a>,
+    <a href="https://cloud.google.com/logging/">Cloud Logging</a>, ...
+<!--
+    <a href="https://raygun.com">Raygun</a>
+-->
+  </p>
+  <p>
+<font color=green>&check;</font> Built on 2020's technology (ES9, async/await), aiming to stay up to date and lean.<br />
+
+<font color=green>&check;</font> Covers all the way to deployment (CI/CD) and operations.
+</p>
+  </td>
+</tr></table>
 
 This repo is intended for professionals and beginners alike. Its main point is to showcase how easy, and effective, making web applications in the 2020's can be, when modern tools and techniques are used.
 
@@ -50,9 +59,9 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
    - `node` v. 14.3+ or 16.x
    - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
-   - Docker Desktop [on Mac](https://docs.docker.com/docker-for-mac/install/) or [on Windows](https://docs.docker.com/docker-for-windows/install/) *(for Linux, be in touch!)*
+   - Docker Desktop [on Mac](https://docs.docker.com/docker-for-mac/install/) or [on Windows](https://docs.docker.com/docker-for-windows/install/) 
 
-  Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container, so you don't need to install it on your development machine. This should also be somewhat safer since the Firebase credentials are not stored locally on developers' computers.
+      Docker is used for launching the Firebase Emulators, and building the CI/CD base image. The workflow we present always packs Firebase CLI inside a Docker container, so you don't need to install it on your development machine. This should also be somewhat safer since the Firebase credentials are not stored locally on developers' computers.
   
   For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with eg. Ubuntu LTS image. WSL2 also happens to be a requirement for Docker Desktop.
 
@@ -60,16 +69,16 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
   Once [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) (blog, Apr 2021) is publicly available, we'll use it in the front end testing (Cypress).
 -->
 
-   <details style="margin-left: 2em"><summary>**Important note on file systems (Windows 10 + WSL2)**</summary>
+   <details style="margin-left: 2em"><summary><b>Important note on file systems (Windows 10 + WSL2)</b></summary>
   The folder you clone the repo to *must reside within the WSL2 file system*. Docker performance is dismal if you link to (or directly use) `/mnt/c/` or the like. Don't. Instead create the folder within WSL2 and have the IDE tools reach it, remotely.
    </details>
   
-   <details style="margin-left: 2em"><summary>**Installation of Docker Compose on Linux**</summary>
-   There is no Docker Desktop for Linux. To install:
+   <details style="margin-left: 2em;"><summary><b>Linux</b></summary>
+   Unlike with Windows and Mac, Docker Compose v2 is currently (Aug 2021) not integrated with Docker for Linux (this will likely happen by the end of 2021). This is no reason to wait, but you'll need to figure things out on your own, and maybe change some build files.
    
-   - See [Install Docker Compose](https://docs.docker.com/compose/install/#install-compose-on-linux-systems) > `Install Compose` > `Linux`
-
-   Note: Docker Compose is intended to be included also in normal Docker for Linux, by the end of 2021.
+   There is a [JOB opening](https://github.com/akauppi/GroundLevel-firebase-es/blob/master/JOBS.md#native-linux-responsible) with this project for someone to see that things (continue to) work on Linux.
+    
+   See [Install Docker Compose](https://docs.docker.com/compose/install/#install-compose-on-linux-systems) > `Install Compose` > `Linux`
    </details>
    
    <!-- tbd. Check situation of Docker Compose support on Linux, towards end of 2021. Revise the instructions when basic `docker` contains `docker compose` support. NOTE: There's a Job ad for this.
@@ -139,17 +148,19 @@ You'll be instructed about GCP where necessary.
 
 >Both of the above mentioned services can be replaced, of course, if you already are familiar with certain CI/CD and have certain operational monitoring in place. But these make good defaults.
 
+
 ## Folder structure
 
 ```
-├── ci       # all CI/CD setup
-├── DEVS     # notes about developing the repo (optional)
-├── firebase-ci-builder.sub   # sub-repo for the Docker image
+├── ci                   # all CI/CD setup
+├── DEVS                 # notes about developing the repo (optional)
+├── firebase-ci-builder.sub # sub-repo for the Docker image
+├── first                # tools for manual deployment
 ├── packages
-│   ├── app
-│   ├── app-deploy-ops
-│   └── backend
-└── tools    # common scripts to the `packages`
+│   ├── app              # front-end logic and looks
+│   ├── app-deploy-ops   # front-end ops hardening
+│   └── backend          # Firestore Security Rules, Cloud Functions
+└── tools                # common scripts to the `packages`
 ```
 
 The three `packages` and `ci` each contain their own documentation.
@@ -163,18 +174,40 @@ $ npm install
 
 This installs some common packages, Firebase JS SDK being the most important. Subpackages use them from the root, and this is where you update their versions.
 
-### Build the Docker image
+Each of the subpackages has its own `npm install` that you'll run, for development. Follow the instructions in the particular `README`s.
 
-We use a Docker image for running Firebase Emulators. Before advancing, let's build that image.
+
+### Update the submodules
+
+We use a Docker image for running Firebase Emulators. The recipe for building this image comes from the [firebase-ci-builder](https://github.com/akauppi/firebase-ci-builder) repo and is linked here as a git submodule.
+
+>Git submodules are a repo-within-a-repo. Once you initialize the submodules and `cd` to `firebase-ci-builder.sub`, you are no longer changing the GroundLevel repo. 
+>
+>This is very handy, but it's good to know what's going around. 
+>
+>Note: Using `.sub` postfix for submodules is just the author's convention for making explicit, where the repos change.
+
+As a one-time thing, run these commands:
 
 ```
 $ git submodule init
 $ git submodule update
 ```
 
-This updates the contents of `firebase-ci-builder.sub` submodule.
+The `firebase-ci-builder.sub` folder is now populated. 
 
-Build:
+
+### Build the CI builder
+
+<details style="border: 2px solid lightblue; padding: 0.4em;"><summary>Note to Windows users:</summary>
+![](.images/defender-docker.png)
+   
+If you get this warning about Docker Desktop, at least
+   
+- **uncheck the "public networks" checkbox**. It's not needed.
+   
+It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least **do not press OK** without removing that one checkbox.
+</details>
 
 ```
 $ (cd firebase-ci-builder.sub && ./build)
@@ -190,87 +223,139 @@ You don't need to push this image anywhere - it's enough that it resides on your
 >
 >```
 >$ docker run -it --rm firebase-ci-builder:9.16.0-node16-npm7 firebase --version
-9.16.0
+>9.16.0
 >```
 
-## Speed run 
 
-If you continue here, we'll do a real speed run 🏃‍♀️🏃🏃‍♂️
-through the three sub-packages, set up a Firebase project (and account), CI/CD to Cloud Build and land on a discussion about operating your newly dispatched web app.
+### Tour of the subpackages 🚌
 
-Alternatively, you can study each of the individual sub-packages' `README`s (and `ci` and `ops`) and come back here later..
+The application is divided into three subpackages, each having their own `README` and `npm install`.
 
-><font color=orange>NOTE: `ops` folder is still [just in the plans](https://github.com/akauppi/GroundLevel-firebase-es/issues/59). It will document the operational side and give ideas.</font>
+We'll briefly mention them, as if shown from a bus window. To do the work, step out to each of the folders separately, study their contents and make changes.
 
-### Backend
+>*'subpackage'* is an `npm` term, whereas *'submodule'* was a git term. It means a folder with its own `package.json` so you need to separately run `npm install` within it.
+
+
+**`packages/backend`**
+
+This folder has the Firebase back-end features:
+
+- Firestore Security Rules describe your database's access rights
+- Cloud Functions provide back-end functionality
+
+The main purpose of the folder is to provide a means to test these things, before deployment to the cloud.
+
+**`packages/app`**
+
+This is where your web app lives.
+
+The logic, the looks, the authentication. Everything that gets shipped to your customers once they open the right URL.
+
+You can develop the code with Hot Module Reloading, thanks to Vite, seeing changes in a browser while you edit the underlying HTML, CSS or ECMAScript.
+
+Once you're pleased, test the creature using Cypress.
+
+This stage builds into a set of modules in `dist/` that are fed to the next stage. This approach is unconventional - the purpose is to separate application logic from operational details.
+
+**`packages/app-deploy-ops`**
+
+Takes the loaf in `app/dist` and covers it with operational awareness:
+
+- crash detection
+- central logging
+- performance monitoring
+
+These aspects are provided as adapters, meaning one can switch from one cloud vendor to another - or use both in parallel - without *any* changes to the underlying app logic.
+
+Once built here a second time, the front-end is ready for deployment - by the CI/CD.
+
+
+### Create a Firebase project
+
+This repo uses Firebase as your cloud presence. It:
+
+- hosts your database
+- runs server-side functions
+- hosts the client-side files
+- offers you a console to supervise the above
+
+Follow the instructions in [Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (Wiki) to create your Firebase account and a project.
+
+>You *will* need a credit card for creating the "Blaze" plan (which is needed for deploying the default back-end).
+
+
+
+## First deployment
+
+Have the Firebase project? Great! 🎉🎉
+
+You can now deploy the current contents of the repo manually, to be able to see the app online. It will take ~5 minutes.
+
+The recommended way of deployment is with a CI/CD pipeline, but setting such up takes longer. You can start with manual deployments and move to CI/CD when you feel ready for the deeper plunge. 💧🦦
+
+
+### Manual deployment
+
+Start the script:
 
 ```
-$ cd packages/backend
-$ npm install
-...
-$ npm test
-...
+$ npm run first
 ```
 
-The tests should pass, running against the Docker image you built.
+This starts a temporary Docker container and asks you to log into the Firebase project.
 
-><details><summary>Note to Windows users:</summary>
->
->![](.images/defender-docker.png)
->   
->If you get this warning about Docker Desktop, at least
->   
->- **uncheck the "public networks" checkbox**. It's not needed.
->   
->It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least **do not press OK** without removing that one checkbox.
-></details>
+![](.images/first-1.png)
+![](.images/first-2.png)
+
+Did you reach the end?
+
+>Note: Let us know if there were any problems (by filing a GitHub Issue). This stage just "need to get done", but it's not deserving too much of documentation space (thus the screen shots). Hope you made it!!!
+
+You can now visit the new web site!! 🎪🎺🪗🥁
 
 
-### App
+---
 
-```
-$ cd ../app
-$ npm install
-...
-$ npm run build
-...
-```
+### `firebase.staging.js`
 
-The output of this stage (in `dist/`) *is* the web app. All the looks, styling and front end features are done here.
-
-What's missing is the operational readiness that adds performance monitoring, central logging and crash detection to the app.
-
->Note: The front end has tests, but we skip them for now. See `packages/app/README.md` for more details.
-
-
-### App-deploy-ops
-
-This sub-package wraps the output of the "app" build to be ready for deployment.
-
-Before you can build the production-ready front end, the backend code needs to be deployed to a "staging" Firebase project. Follow [these instructions](Deployment%20to%20staging.md) for doing it.
-
-This creates a `firebase.staging.js` file in the repo's root, containing the access values for reaching a Firebase instance deployed online.
-
->You can use multiple "staging" projects, if you like. Just define an environment variable `ENV` with the name of the environment. This can be useful for eg. a beta testers project (`"testers"`), an internal team sandbox (`"team"`) etc.
+In addition to deploying your application, the `first` scripts also fetched its *access values* (author's term) to a local file. Let's see it.
 
 ```
-$ cd ../app-deploy-ops
-$ npm install
-...
-$ RAYGUN_API_KEY=abc npm run build
-...
+$ cat firebase.staging.js
+export default {
+  "projectId": ...,
+  "appId": ...,
+  "locationId": ...,
+  "apiKey": ...,
+  "authDomain": ...,
+}
 ```
 
-There are no tests here.
+These values are needed in a couple of places in the repo:
 
->The `abc` for a Raygun API key is obviously bogus. If you choose to use Raygun for operational monitoring (the default adapter), fill in your own API key there (and in CI scripts).
+|subpackage|command|purpose
+|---|---|---|
+|`app`|`npm run dev:online`|Developing against the online backend|
+|`app-deploy-ops`|`npm run build`|Building the front-end|
 
-The folder's `README` contains information on how to do a manual deployment to the staging project. However, we proceed with the real thing - setting up CI/CD that deploys ready code, on your behalf!
+Firebase hosting provides these values (except for `locationId`) in the `__/firebase/init.js[on]` URL, but in GroundLevel we prefer to bake them right into the front-end's code. This takes away one return trip, and makes the launch of the web app snappier.
+
+>The values are *not* secrets - anyone having access to your URL will be able to get them. Try with `https://<your-app>.web.app/__/firebase/init.json`.
+
+<!-- Editor's note:
+Is it good to mention multiple environments here, or should it wait? 
+-->
+
+You can have multiple deployment environments.
+
+Just prefix `ENV=abc` to any of the above `npm` commands and they'll use `firebase.${ENV}.js` access values.
+
+To create such a file, run `ENV=abc npm run first`, or simply fill in the file manually, based on the template you now have.
 
 
 ## Setting up CI/CD
 
-Production deployments are intended to be done using CI/CD.
+Eventually, we hope you'll like to move to automated deployment.
 
 See [ci/README](ci/README.md) for instructions on how to set up a CI/CD pipeline.
 
@@ -279,20 +364,7 @@ This expects you to have a GitHub fork of the repo, and to want to use Cloud Bui
 >Also other vendors provide cloud CI/CD. GitHub has one, and setting it up should be simpler than the dance needed to get two cloud services to collaborate. Cloud Build was selected because of the Firebase Google background, and because it allows Docker images to be used as build steps.
 
 
-### Trying your deployment
-
-Once you have the CI/CD deployment running, visit the application's web site:
-
-e.g. [https://&lt;your-project&gt;.web.app](https://your-project.web.app)
-
-
 ## Where to go next?
-
-You now have an application running in the cloud!!!
-
-Make changes to it, push those changes as a PR and see GitHub and Cloud Build approve or reject your changes.
-
-If you merge them to `master`, they'll show up in the deployed project. Great!
 
 What remains is:
 
@@ -311,9 +383,12 @@ Check these subfolders:
 - Growing with your user base ([`grow/`](grow/README.md)) (just-an-idea)
 -->
 
-## Making it yours!
+>We hope you are active also in the development - and giving feedback - of the GroundLevel repo. It doesn't serve its purpose unless it becomes the growing ground, a fertile soil, for many flowerful web apps! 
+>
+>🌷🌸🌼🌹🥀🌻🌾🌹🌺💐
 
-By now, you have deployed the sample app to your own Firebase project. It's now an independent *instance* of that application, unattached to the one run by the original authors.
+
+## Making it yours!
 
 Once you start making heavier modifications - that's why the repo exists, it's intended as a "ground level" of your spectacular app! - we hope that you remove the "GroundLevel" branding. Do so:
 
@@ -359,32 +434,6 @@ copies or substantial portions of the Software.
 
 ie. do not remove the license. You may, of course, become active in further developing the app template and we'd like to hear if you use it.
 
-
-<!-- hide/remove? (looks more pro without it)
-## Plans 🪐🧳
-
-What the repo *mostly* needs is people to use it. To test its usefulness. To bend it.
-
-You can help by using the repo, giving feedback, and telling others about it!
-
----
-
-Since the Issues will be unnecessarily flooded at some point, here are two major tasks that the author would like to finish:
-
-- [ ] using git subpackages to *detach the app from the template*
-
-   This would allow you to keep pulling updates of the template, yet not be bothered that your application code is affected by them, in any way.
-   
-   In short, `packages/backend` and `packages/app` would be replaced by subpackages that you provide.
-   
-   We're trying this out, once interested parties volunteer. :)
-
-- [ ] `ops/**`
-
-   Once the `app-deploy-ops` part is finished, information about what to consider in operations will be added in `ops/` (a documentation folder).
-
----
--->
 
 ## Credits
 
