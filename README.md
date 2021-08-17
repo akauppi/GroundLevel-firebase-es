@@ -311,7 +311,7 @@ Did you reach the end?
 
 >Note: Let us know if there were any problems (by filing a GitHub Issue). This stage just "need to get done", but it's not deserving too much of documentation space (thus the screen shots). Hope you made it!!!
 
-You can now visit the new web site!! 🎪🎺🪗🥁
+**This may be your first deployment!**. Let's celebrate for a while!! 🎉🎉🎪🤹‍♀️🎺
 
 
 ---
@@ -342,15 +342,7 @@ Firebase hosting provides these values (except for `locationId`) in the `__/fire
 
 >The values are *not* secrets - anyone having access to your URL will be able to get them. Try with `https://<your-app>.web.app/__/firebase/init.json`.
 
-<!-- Editor's note:
-Is it good to mention multiple environments here, or should it wait? 
--->
-
-You can have multiple deployment environments.
-
-Just prefix `ENV=abc` to any of the above `npm` commands and they'll use `firebase.${ENV}.js` access values.
-
-To create such a file, run `ENV=abc npm run first`, or simply fill in the file manually, based on the template you now have.
+You can have multiple deployment environments, and you can share the environments with your team. For more details on this, see [Staging](Staging.md).
 
 
 ## Setting up CI/CD
