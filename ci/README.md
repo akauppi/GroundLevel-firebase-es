@@ -82,7 +82,33 @@ This organization seems light enough, yet flexible, to recommend. In the followi
 
 - `gcloud` CLI
 
-   - Instructions for installing it are in the root `README`
+   <details><summary>*Installing `gcloud` on macOS...*</summary>
+      
+   1. Download the package from [official installation page](https://cloud.google.com/sdk/docs/install)
+   2. Extract in the downloads folder, but then..
+   3. Move `google-cloud-sdk` to a location where you'd like it to remain (e.g. `~/bin`).
+   
+      When you run the install script, the software is installed *in place*. You cannot move it around any more.
+      
+   4. From here, you can follow the official instructions:
+   
+      `./google-cloud-sdk/install.sh`
+   
+      `./google-cloud-sdk/bin/gcloud init`
+   
+   To update: `gcloud components update`
+   </details>
+
+   <details><summary>*Installing `gcloud` on Windows 10 + WSL2...*</summary>
+
+   ```
+   $ apt-get install google-cloud-sdk
+   ```
+   
+   >Note: This version may lack a bit behind, and doesn't have support for `gcloud components`, but should be enough.
+   
+   To update: `sudo apt-get upgrade google-cloud-sdk`
+	</details>      
 
 - Docker
 
