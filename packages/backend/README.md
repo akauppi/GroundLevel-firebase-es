@@ -55,16 +55,6 @@ $ npm test
 
 The tests should pass, or be skipped.
 
-><details><summary>Note to Windows users:</summary>
->
->![](.images/defender-docker.png)
->   
->If you get this warning about Docker Desktop, at least
->   
->- **uncheck the "public networks" checkbox**. It's not needed.
->   
->It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least **do not press OK** without removing that one checkbox.
-></details>
 
 ## Development workflow
 

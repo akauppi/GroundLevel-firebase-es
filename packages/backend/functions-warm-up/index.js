@@ -109,11 +109,13 @@ async function ackWarmedUp(key) {   // (string) => Promise of ()
   await dbAdmin2.doc('warmed-up/_').set({ [key]: true }, { merge: true })
 }
 
-// Initialize by the module simply being imported
+// Initialize. Allows the caller to print the error, if something goes haywire.
 //
-// Free-running tail.
-//
-/*await*/ Promise.all([
-  warmUpUserInfo(),
-  warmUpLogging()
-])
+async function init() {
+  return Promise.all([
+    warmUpUserInfo(),
+    warmUpLogging()
+  ]);
+}
+
+export { init }

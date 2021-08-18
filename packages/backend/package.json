@@ -15,10 +15,12 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run _test1; else docker compose run --rm test ; fi",
-    "_test1": "npm run test:fns:all && npm run test:rules:all",
+    "test": "if port-is-taken --silent 4000 ; then npm run _test_all; else docker compose run --rm test ; fi",
+    "//test:dc": "docker compose run --rm test",
+    "_test_all": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
-    "start": "docker compose up --abort-on-container-exit",
+    "start": "docker compose up",
+    "//start": "docker compose up --abort-on-container-exit",
     "  - -": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
@@ -33,8 +35,9 @@
     "  - --": "",
     "lint": "eslint .",
     "  -   -": "",
+    "//ci:test": "docker-compose run test",
     "ci:test": "npm run -s ci:seq",
-    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run _ci_emul\" \"wait-for 4000 && npm run -s _ci_seq\"",
+    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run _ci_emul\" \"wait-for 4000 && node hack/ack-await && npm run -s _ci_seq\"",
     "_ci_emul": "npx firebase emulators:start --project=demo-2",
     "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
     "  - - -": "",
@@ -51,8 +54,9 @@
     "concurrently": "^6.2.1",
     "eslint-plugin-node": "^11.1.0",
     "firebase-admin": "^9.100.0-alpha.1",
-    "firebase-jest-testing": "^0.0.4-alpha.2",
-    "jest": "^27.0.6"
+    "firebase-jest-testing": "^0.0.4-alpha.3",
+    "jest": "^27.0.6",
+    "node-fetch": "^3.0.0-beta.10"
   },
   "//comments": {
     "engines.node": [
@@ -70,6 +74,15 @@
     "devDependencies": {
       "firebase-admin": [
         "Needed _solely_ for the implementation of the 'warm up' ack model, via a 2nd project in Firestore."
+      ]
+    },
+    "scripts": {
+      "ci:test": [
+        "//ci:test shows the command Cloud Build *could* use, to run the tests in Docker.",
+        "It does not seem to work, however. Wait for Docker Compose v2 on Linux.",
+        "",
+        "ci:test is around to allow native execution (with npm and 'concurrently', without Docker Compose).",
+        "If we can use 'docker-compose', 'concurrently' can leave the stage."
       ]
     }
   }

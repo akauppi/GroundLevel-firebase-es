@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
-* backend/hack/ack-await.js
+* hack/ack-await.js
 *
 * Listens to the "warmed up" acks from '../functions-warm-up/index.js'.
 *
@@ -11,12 +11,15 @@
 import { readFileSync } from 'fs'
 import { performance } from 'perf_hooks'
 
-function fail(msg) { throw new Error(msg) }
-
 // These need to match with '../functions-warm-up/index.js'
 //
 const projectId = "warmed-up"
 const docPath = "warmed-up/_"   // { "1": true, "2": true }
+
+// Usage:
+//    $ [EMUL_HOST=emul] hack/ack-await.js
+//
+const host = process.env["EMUL_HOST"] || "localhost";
 
 const FIRESTORE_HOST = (_ => {
   const raw = readFileSync('./firebase.json');
@@ -25,7 +28,7 @@ const FIRESTORE_HOST = (_ => {
   const port = json.emulators?.firestore?.port ||
     fail( "Did not find 'emulators.firestore.port' in 'firebase.json'" );
 
-  return `localhost:${port}`;
+  return `${host}:${port}`;
 })();
 
 // Need to use actual Admin SDK because 'firebase-jest-testing' would only provide access to the project that priming
@@ -82,3 +85,5 @@ await Promise.all([
     console.log(`Got ACK that LOGGING is ready (waited ${ Math.round(performance.now() - t0) }ms)`);
   })
 ])
+
+function fail(msg) { throw new Error(msg) }

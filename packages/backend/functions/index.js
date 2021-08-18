@@ -138,7 +138,9 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
 //
 if (EMULATION && process.env["FUNCTION_TARGET"] === undefined) {    // avoid loading warm-up twice
 
-  if (process.env['HOME'] !== '/builder/home') {    // don't warm up CI runs
-    import('../functions-warm-up/index.js');
-  }
+  //if (process.env['HOME'] === '/builder/home') return;    // don't warm up CI runs    (tbd. are we fine with waking also in CI?)
+
+  import('../functions-warm-up/index.js').then( mod => mod.init ).then( async (init) => {
+    await init()
+  })
 }

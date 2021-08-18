@@ -23,6 +23,9 @@ ENV USER user
 # Enable if npm needs updating. KEEP
 #RUN npm install -g npm
 
+# Suppress npm update announcements
+RUN npm config set update-notifier false
+
 RUN apk --no-cache add bash curl
 
 # 'wait-for-it'
@@ -51,8 +54,8 @@ ADD firebase-prime /tmp/firebase-prime
 
 RUN cd /tmp/firebase-prime \
   && npm install \
-  && npm install -g \
-  && firebase-prime --help
+  && npm install -g
+  # && firebase-prime --help > /dev/null
 
 RUN adduser --disabled-password \
   ${USER}

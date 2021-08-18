@@ -2,36 +2,36 @@
 
 All command line commands are expected to be run in the `ci` folder.
 
-## Target 🎯
+## Aiming 🎯
 
-Before dwelling into the details, it's good to see what we actually want the CI/CD pipeline to do for us.
+Let's first set the target - what do we want the CI/CD pipeline to do for us?
 
 ### For a PR targeting `master`
 
 |Files changed in...|then...|
 |---|---|
-|`backend` (or root `package.json`, or `tools`)|test `backend`|
-|`app`(or root `package.json`, or `tools`)|test `app`|
+|`packages/backend` (or `/package.json`, or `/tools`)|test `packages/backend`|
+|`packages/app` (or `/package.json`, or `/tools`)|test `packages/app`|
 
->Note: testing front-end requires Cypress, which is currently not easily packaged for Cloud Build use.
+*We could also do something when `packages/app-deploy-ops` changes; at least see that it builds.*
 
-<!-- Author's note:
-Cypress 8.0.0 with `headless` looks like a step forward. Let's see.
+<!-- tbd.
+Testing with Cypress still WIP.
 -->
 
 ### For changes already merged to `master`
 
 |Files changed in...|then...|
 |---|---|
-|`backend` (or root `package.json`, or `tools`)|test and deploy `backend`|
-|`app` or `app-deploy-ops` (or root `package.json`, or `tools`)|test and build `app`<br />build and deploy `app-deploy-ops`|
+|`packages/backend` (or `/package.json`, or `/tools`)|test and deploy `packages/backend`|
+|`packages/app` or `packages/app-deploy-ops` (or `/package.json`, or `/tools`)|test and build `packages/app`<br />build and deploy `packages/app-deploy-ops`|
 
-With Cloud Build integrated with GitHub, one **cannot** restrict merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.
+**With Cloud Build integrated with GitHub, one *cannot restrict* merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.**
 
 <!-- author's note:
 
 We'd like to:
-- restrict merges to `master` altogether (#help: how is that possible?)
+- restrict merges to `master` altogether, if they would break the tests
 - have two people approve PRs
   - [ ] check what options GitHub itself provides
 -->
@@ -41,48 +41,67 @@ We'd like to:
 The model recommended by the author is such:
 
 ```
-         xxxxxx                     ┌─────────────────────┐      ┌────────────────────────┐
-    x   x     xxxx         deploy   │                     │      │                        │
-  xxxxxxx         xxxxxx  ┌─────────┤   Application       │      │   CI/CD project        │
- xx    xx         x     x │         │   projects          │      │                        │   PR changed    GitHub repos
-x       x                xxx        │                     ├───┬──┤   - builder images     ◄────────────────
-xx                         x        │   - deploy CI task  │   │  │   - PR CI tasks        │
- xx                     xxx         │                     │   │  │     "does it pass?"    ├───────────────►
-  xxxxxxxxxxxxxxxxxxxxxxx           │                     │   │  │                        │   pass/fail
-                                    └─────────────────────┘   │  └────────────────────────┘
-                                    ┌─────────────────────┐   │
-                                    │                     │   │              merged
-                                    │   ...               │   │   ◄────────────────────────────────────────
-                                    │                     ├───┤  
-                                    └─────────────────────┘   │
-                                    ┌─────────────────────┐   │
-                                    │                     │   │
-                                    │   ...               │   │
-                                    │                     ├───┘
-                                    └─────────────────────┘
+                                    ┌──────────────────────────┐               ┌──────────────────┐
+                                    │                      (1) │               │                  │
+                                    │   CI/CD project          │   PR changed  │  GitHub repo     │
+                                    │                          │◄──────────────┤                  │
+                                    │   - builder images       │               │                  │
+                                    │   - PR CI tasks          │               │                  │
+                                    │     "does it pass?"      │──────────────►│                  │
+                                    │                          │   pass/fail   │                  │
+                                    └────────────────────────┬─┘               └────────┬─────────┘
+                                                             │                          │   ▲
+         xxxxxx                     ┌─────────────────────┐  │ provide image            │   │
+    x   x     xxxx         deploy   │                 (2) │◄─┘                          │   │
+  xxxxxxx         xxxxxx  ┌─────────┤   Staging project   │  |         merge to master  │   │
+ xx    xx         x     x ▼         │                     │◄────────────────────────────┘   │
+x       x                xxx        │   - deploy CI task  │  |                              │
+xx                         x        │                     ├─────────────────────────────────┘
+ xx                     xxx         │                     │  |         pass/fail
+  xxxxxxxxxxxxxxxxxxxxxxx           └─────────────────────┘  |
+                          ▲                                  |
+                          |         .---------------------.  |
+                          |         |                     |<-'
+                          '---------|   2nd staging proj  |
+                                    |                     |
+                                    '---------------------'
 ```
 <!-- drawing with Asciiflow -->
 
-There is a single, CI/CD centric GCP project (e.g. `ci-builder`). It...
+#### CI/CD project (1)
 
-- runs any "does this pass the tests?" CI tests (that don't need access rights to deploy)
-- holds the custom Docker images used in the organization 
-  - grants the other projects access to its Container Registry
+This is a separately created GCP project (has no counterpart in Firebase) that:
 
-In addition, each GCP project (responsible for a certain product's certain tier, e.g. `abc-staging`) has a CI/CD aspect:
+- carries the builder Docker image(s)
+- runs any "does this pass the tests?" CI tests (that don't involve deployment)
 
-- runs deployments, if a certain branch changes.
+#### Staging project(s) (2)
 
-This organization seems light enough, yet flexible, to recommend. In the following text we expect you have it in place.
+These GCP projects are created automatically by creation of a *Firebase* project.
 
->One benefit of the above model is that *deployment keys* don't need to be shared. Each project is in charge of deploying itself.
+They are used (by Firebase) for the deployments themselves, and we piggy-back them to also help in CI/CD. They:
+
+- run deployments, if a certain branch changes
+
+#### Benefits
+
+The main benefit this layout provides is that "production keys" don't need to be shared - at all. The GCP projects **deploy onto themselves** (the arrows in the picture kind of lie..) and someone in the organization already has admin access to them.
+
+Deployment rights are moved from *production* to *version control* access control, since now anyone who can merge to `master` can also deploy (they become the same thing).
+
+The raison d’être of the dedicated CI/CD project is that it centrifies things. 
+
+- It's good to find all (non-deploying) CI/CD tasks in one place
+- Access to it can be provided to all developers (to set up new test runs, or modify existing ones)
+
+This layout seems light enough, yet flexible, to recommend. In the following text we expect you have it in place.
 
 
 ## Requirements
 
 - `gcloud` CLI
 
-   <details><summary>*Installing `gcloud` on macOS...*</summary>
+   <details><summary><b>Installing `gcloud` on macOS</b></summary>
       
    1. Download the package from [official installation page](https://cloud.google.com/sdk/docs/install)
    2. Extract in the downloads folder, but then..
@@ -98,8 +117,7 @@ This organization seems light enough, yet flexible, to recommend. In the followi
    
    To update: `gcloud components update`
    </details>
-
-   <details><summary>*Installing `gcloud` on Windows 10 + WSL2...*</summary>
+   <details><summary><b>Installing `gcloud` on Windows 10 + WSL2</b></summary>
 
    ```
    $ apt-get install google-cloud-sdk
@@ -132,7 +150,7 @@ $ gcloud projects list
 Pick the right one, then:
 
 ```
-$ gcloud config set project <your-ci-builder-project>
+$ gcloud config set project <project-id>
 ```
 
 >Query the current active project by:
@@ -141,11 +159,22 @@ $ gcloud config set project <your-ci-builder-project>
 >$ gcloud config get-value project
 >```
 
+<p />
+>Note: Unlike the Firebase CLI projects (which you may be familiar with from earlier life), `gcloud` project is system-wide. You can change terminals and folders; the same project is selected.
+
+>**Clean up (security advice)**
+>
+>You don't need `gcloud` after this stage, any more. It's healthy to log out of it.
+>
+>```
+>$ gcloud revoke <your-email>
+>```
+>
+>Now, any future access will need to go through the authentication you just did.
+
 ### Deployment GCP project(s)
 
 These are already created, by Firebase.
-
-When you create a Firebase project, a GCP project of the same name gets created as well. We use those projects for automating deployments, using Cloug Build.
 
 
 ### Push the builder image
@@ -163,19 +192,21 @@ The CI scripts require `ci-builder` Container Registry to have the `firebase-ci-
    $ popd
    ```
 
-Next, let's introduce GitHub and Cloud Build to each other.
 
+### Update the references to `ci-builder` GCP project
 
-### Update the reference to `ci-builder` GCP project
-
-The `cloudbuild.merged.{app|backend}.yaml` scripts have these lines at the end:
+The `cloudbuild.merged.*.yaml` scripts have these lines at the end:
 
 ```
 substitutions:
-  _BUILDER_IMAGE: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
 ```
 
-This tells the deployment project, where it can fetch its builder images. My `ci-builder` project doesn't provide public pull access, so replace `/ci-builder/` with the GCP project where you just pushed the builder images.
+This tells the deployment project, where it can fetch its builder images. The `ci-builder` project belongs to the author and doesn't provide public pull access, so replace it with the GCP project you use for the same purpose.
+
+---
+
+Next, let's introduce GitHub and Cloud Build to each other.
 
 
 ## Cloud Build setup

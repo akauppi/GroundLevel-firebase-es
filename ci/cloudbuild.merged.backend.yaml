@@ -20,8 +20,8 @@
 #
 # References:
 #   - Cloud Build > Substituting variable values
-#     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
-
+#     -> https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
+#
 steps:
 # Flight check: not to be run from the 'ci-builder'
 - name: $_1
