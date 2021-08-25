@@ -53,7 +53,6 @@
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.1",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-admin": "^9.100.0-alpha.1",
     "firebase-jest-testing": "^0.0.4-alpha.3",
     "jest": "^27.0.6",
     "node-fetch": "^3.0.0-beta.10"
@@ -71,11 +70,6 @@
       "",
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
-    "devDependencies": {
-      "firebase-admin": [
-        "Needed _solely_ for the implementation of the 'warm up' ack model, via a 2nd project in Firestore."
-      ]
-    },
     "scripts": {
       "ci:test": [
         "//ci:test shows the command Cloud Build *could* use, to run the tests in Docker.",

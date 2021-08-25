@@ -9,7 +9,7 @@ Ideally, we'd like to:
 - deploy the front-end *only after a related backend is deployed* (if both changed in the same merge)
 - avoid unnecessary deployments (if nothing changed)
 
-Cloud Build (Jun 2021) doesn't seem to be up to this...
+Cloud Build (Jun 2021) doesn't seem to be up to this.
 
 The problem is, we cannot know *within* the Cloud Build run, which files caused the change. If we did, this can be described as a single script, with optional steps (eg. deploy backend only if it changed; test and deploy front-end only if it did).
 

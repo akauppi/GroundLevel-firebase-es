@@ -1,4 +1,4 @@
-# Problems
+# Troubles hooting
 
 
 ## Cannot find `package.json` of the root

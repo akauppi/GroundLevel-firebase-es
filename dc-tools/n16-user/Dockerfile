@@ -1,12 +1,9 @@
 #
-# Using Firebase Emulators, from Docker Compose
-#
 # Provides:
 #   - node.js (16) and npm (>= 7.7)
 #   - bash, curl
 #   - 'wait-for-it'       // from: https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
 #     The de-facto shell script standard for waiting a port, available eg. in Debian/Ubuntu by `apt-get install`.
-#   - 'firebase-prime' command line for priming Firestore docs and users
 #
 # Context:
 #   - user 'user' created
@@ -19,12 +16,6 @@
 FROM node:16-alpine
 
 ENV USER user
-
-# Enable if npm needs updating. KEEP
-#RUN npm install -g npm
-
-# Suppress npm update announcements
-RUN npm config set update-notifier false
 
 RUN apk --no-cache add bash curl
 
@@ -46,17 +37,6 @@ ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.s
 RUN echo "b7a04f38de1e51e7455ecf63151c8c7e405bd2d45a2d4e16f6419db737a125d6  /usr/local/bin/wait-for-it" | sha256sum -c \
   && chmod +rx /usr/local/bin/wait-for-it
 
-# 'firebase-prime'
-#
-# Make it available via 'npm', globally, as a command line tool.
-#
-ADD firebase-prime /tmp/firebase-prime
-
-RUN cd /tmp/firebase-prime \
-  && npm install \
-  && npm install -g
-  # && firebase-prime --help > /dev/null
-
 RUN adduser --disabled-password \
   ${USER}
 
@@ -66,5 +46,19 @@ WORKDIR /home/${USER}
 USER ${USER}
    # $ whoami
    # user
+
+# Suppress npm update announcements
+#
+# Note: Run it as the user (running as root wouldn't change the user's settings).
+#
+# ..and YET it shows:
+#   <<
+#     #npm notice New minor version of npm available! 7.20.3 -> 7.21.0
+#     #npm notice Changelog: https://github.com/npm/cli/releases/tag/v7.21.0
+#     #npm notice Run npm install -g npm@7.21.0 to update!
+#     #npm notice
+#   <<
+#
+RUN npm config set update-notifier false
 
 # No default entry point

@@ -9,4 +9,6 @@ firestore-debug.log
 ui-debug.log
 
 # Temporary file
-/functions/package.json.~
+#/functions/package.json.~
+/functions/.ack.*
+

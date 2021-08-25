@@ -1,89 +1,52 @@
 #!/usr/bin/env node
 
 /*
-* hack/ack-await.js
+* hack/ack-await.js key [...]
 *
-* Listens to the "warmed up" acks from '../functions-warm-up/index.js'.
+* Context:
+*   - called as a command line tool, to wait for the turning up of a certain file.
 *
-* Acks are sent through Firestore (file system could be another mechanism, but would need cleanup, unlike Firestore),
-* but a second project id to avoid being cleaned up by the Jest setup.
+* Usage:
+*   <<
+*     $ hack/ack-await.js <key> [...more keys...]
+*   <<
 */
-import { readFileSync } from 'fs'
-import { performance } from 'perf_hooks'
+import { existsSync } from 'fs'
 
-// These need to match with '../functions-warm-up/index.js'
-//
-const projectId = "warmed-up"
-const docPath = "warmed-up/_"   // { "1": true, "2": true }
+const keys = process.argv.slice(2);
+if (keys.length === 0) {
+  const [_,c1] = process.argv[1].match( /(hack\/.+)/ ) || [];
 
-// Usage:
-//    $ [EMUL_HOST=emul] hack/ack-await.js
-//
-const host = process.env["EMUL_HOST"] || "localhost";
-
-const FIRESTORE_HOST = (_ => {
-  const raw = readFileSync('./firebase.json');
-  const json = JSON.parse(raw);
-
-  const port = json.emulators?.firestore?.port ||
-    fail( "Did not find 'emulators.firestore.port' in 'firebase.json'" );
-
-  return `${host}:${port}`;
-})();
-
-// Need to use actual Admin SDK because 'firebase-jest-testing' would only provide access to the project that priming
-// has named.
-//
-import { initializeApp } from 'firebase-admin/app'    // "modular API" (alpha)
-
-/*
-* Adapted from 'firebase-jest-testing'
-*/
-const dbAdminAlien = (_ => {
-  const adminApp = initializeApp({
-    projectId
-  }, `unlimited-${ Date.now() }`);   // unique name keeps away from other "apps" (configurations, really); btw. would be nice if Firebase APIs had nameless "apps" easier.
-
-  const db = adminApp.firestore();
-  db.settings({
-    host: FIRESTORE_HOST,
-    ssl: false
-  });
-
-  process.on( 'exit', async () => {   // clean up (might not be needed)
-    await adminApp.delete();
-  });
-
-  return db;
-})();
-
-async function waitForAck(key) {    // (string) => Promise of ()
-
-  return new Promise( (resolve) => {
-
-    const unsub = dbAdminAlien.doc(docPath).onSnapshot( ss => {
-      if (!ss.exists) return;
-      const o = ss.data();
-
-      if (o[key]) {
-        resolve(o);
-        /*await*/ unsub();
-      }
-    });
-  });
+  process.stderr.write(`Usage: ${ c1 } key [...]\n`);
+  process.exit(-1);
 }
 
-const t0 = performance.now();
-
-// Top-level await, to wait until both logging and userinfo are ready for tests.
+//--- Implementation ---
 //
-await Promise.all([
-  waitForAck("1").then( _ => {
-    console.log(`Got ACK that USERINFO-listening is ready (waited ${ Math.round(performance.now() - t0) }ms)`);
-  }),
-  waitForAck("2").then( _ => {
-    console.log(`Got ACK that LOGGING is ready (waited ${ Math.round(performance.now() - t0) }ms)`);
-  })
-])
+// Needs to precede the CLI part; otherwise "Cannot access [...] before initialization"
 
-function fail(msg) { throw new Error(msg) }
+const POLL_DELAY_MS = 100;
+
+async function waitUntil(f) {   // (() => Boolean) => Promise of ()
+  while( !f() ) {
+    await waitMs(POLL_DELAY_MS);
+  }
+}
+
+const waitMs = ms => new Promise( (resolve) => {
+  setTimeout(resolve, ms);
+});
+
+//--- CLI ---
+
+const proms = keys.map( async k => {
+  const fn = `./functions/.ack.${k}`;
+
+  console.debug(`Waiting for: ${fn}`);
+
+  await waitUntil(() => existsSync(fn));
+
+  console.debug(`Detected: ${fn}`);
+} );
+
+await Promise.all(proms);   // top-level-await (ignore the IDE highlighting; it's fine!)

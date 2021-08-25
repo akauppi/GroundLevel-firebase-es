@@ -42,21 +42,22 @@ services:
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
+      rm -f functions/.ack.* &&
       firebase emulators:start --project=${PROJECT_ID:-demo-2}
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
 
   test:
-    build: ../../firebase-dc-tools/
+    build: ../../dc-tools/n16-user/
     user: '1000'    # WSL2 quick fix
     volumes:
-      - ../..:/proj
-      #- .:/work
-    working_dir: /proj/packages/backend
-    #working_dir: /work
+      - .:/work
+    working_dir: /work
     command: bash -o pipefail -c
       'wait-for-it emul:4000 --timeout=20 &&
-      node hack/ack-await &&
-      npm run test:all'
+        node hack/ack-await 1 2 &&
+      npm run test:fns:all &&
+        npm run test:rules:all
+      '
     environment: ['EMUL_HOST=emul']
       #
     depends_on: ['emul']

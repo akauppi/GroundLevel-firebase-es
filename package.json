@@ -8,7 +8,7 @@
   "scripts": {
     "first": "first/deploy.sh",
     "--": "",
-    "preinstall": "[[ $BUILDER_OUTPUT ]] || sh/npm-version-check.sh",
+    "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh",
     "postinstall": "npm --prefix tools install",
     "//_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
   },
@@ -30,7 +30,10 @@
       "16.6.0 has an issue with Jest that's fixed in 16.6.1."
     ],
     "scripts": {
-      "$BUILDER_OUTPUT": "Indication of Cloud Build - defined both in automated and manually triggered builds."
+      "$BUILDER_OUTPUT": [
+        "Indication of Cloud Build - defined both in automated and manually triggered builds.",
+        "Avoid '[[' (bash) since 'node:16-alpine' image (CI) won't have it."
+      ]
     }
   }
 }
