@@ -48,7 +48,9 @@ steps:
   env: ['CYPRESS_INSTALL_BINARY=0']
 
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'cypress']
+  args: ['run', 'cypress',
+     '--build-arg', 'CYPRESS_TAG=8.3.99'
+  ]
   dir: packages/app
   env: [
     'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
@@ -87,7 +89,7 @@ steps:
 #
 # Cloud Build:  2:33, 2:13, 2:04 (without Cypress tests)
 #
-timeout: 240s
+timeout: 500s
 
 substitutions:
   # Has Node 16 and bash

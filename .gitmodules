@@ -1,3 +1,6 @@
 [submodule "firebase-ci-builder"]
 	path = firebase-ci-builder.sub
 	url = https://github.com/akauppi/firebase-ci-builder.git
+[submodule "dc-tools/cypress-run/wait-for-it.sub"]
+	path = dc-tools/cypress-run/wait-for-it.sub
+	url = https://github.com/vishnubob/wait-for-it.git

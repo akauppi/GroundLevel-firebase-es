@@ -129,22 +129,36 @@ services:
   #   [1]: "Feature request: Add the ability to configure the server wait behavior" (Cypress GitHub Issues)
   #         -> https://github.com/cypress-io/cypress/issues/8870
   #
+  # Note:
+  #   Enabling 'ELECTRON_RUN_AS_NODE=1' (experimental) gives:
+  #     <<
+  #       Found an error while validating the `browsers` list. Expected `version` to be a non-empty string. Instead the value was: `{"name":"electron","channel":"stable","family":"chromium","displayName":"Electron","version":"","path":"","info":"Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."}`
+  #     <<
+  #   i.e. cannot use it=?
+  #
   cypress:
     #image: cypress/included:8.3.0        # won't wait long enough (on the first launch)
-    build: ../../dc-tools/cypress-run/
+    build:
+      context: ../../dc-tools/cypress-run/
+      args:
+        - CYPRESS_TAG=8.3.0
     volumes:
       - ../..:/proj
     working_dir: /proj/packages/app
     command: bash -o pipefail -c
-      'wait-for-it vite:3000 --timeout=30 &&
-      cypress run --headless --browser chrome
+      'wait-for-it vite:3000 --timeout=60 &&
+      cypress run --headless
       '
         # wait for 'vite:3000': 19, 23 s (local DC)
+
+      # To test with Chrome (included):
+      #cypress run --headless --browser chrome
 
     # If having stuck tests, try this:
     #shm_size: 500MB
     environment:
       - CYPRESS_baseUrl=http://vite:3000    # CYPRESS_BASE_URL works as well
+      #- ELECTRON_RUN_AS_NODE=1             # EXPERIMENTAL (fails the run), https://docs.cypress.io/guides/continuous-integration/introduction#Running-headless-tests-without-Xvfb
       #- DEBUG=cypress:*
     depends_on: ['vite']
     profiles: ['manual']

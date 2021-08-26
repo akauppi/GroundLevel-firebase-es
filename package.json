@@ -9,8 +9,7 @@
     "first": "first/deploy.sh",
     "--": "",
     "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh",
-    "postinstall": "npm --prefix tools install",
-    "//_postinstall2": "grep -q \"//const ERROR_FACTORY\" node_modules/@firebase/performance/dist/index.esm2017.js || hack/patch.sh"
+    "postinstall": "npm --prefix tools install"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
