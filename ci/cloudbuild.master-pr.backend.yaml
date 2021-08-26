@@ -7,6 +7,11 @@
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
 #
+# Uses images:
+#   - node:16
+#   - firebase-ci-builder   (pushed to Container Registry)
+#   - docker/compose
+#
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
@@ -16,7 +21,7 @@
 #
 # Note:
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
-#   to regular users (that other images may have). This is normally not a concern.
+#   to regular users (of other images). This is normally not a concern.
 #
 
 steps:
@@ -35,19 +40,31 @@ steps:
 
 # Using native
 #
-#- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#  entrypoint: npm
-#  args: ['run', 'ci:test']
-#  dir: packages/backend
+# Collaborates with 'package.json' to run both the emulators and tests at the same time (DC is more modular, nicer,
+# but slower..)
+#
+- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+  entrypoint: npm
+  args: ['run', 'ci:test']
+  dir: packages/backend
 
 # Using DC
 #
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'test']
-  dir: packages/backend
-  env: [
-    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
-  ]
+# Too slow and unstable. At least:
+#   <<
+#     ✕ Central user information is distributed to a project where the user is a member (10004 ms)    <<-- exceeds any timeout
+#     ...
+#     Function 'http://emul:5002/demo-2/us-central1/cloudLoggingProxy_v0' not found (404): 'Function us-central1-cloudLoggingProxy_v0 does not exist, valid triggers are: '
+#   <<
+#
+# Have tried to get this to work, but since there's NO DIRECT BENEFIT over the native option, #later. Much later...!!
+#
+#/- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#/  args: ['run', 'test']
+#/  dir: packages/backend
+#/  env: [
+#/    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
+#/  ]
 
 - name: node:16
   entrypoint: npm
@@ -56,10 +73,10 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build:  1:51, 1:45
+# Cloud Build (native, no lint):  1:51, 1:45
 #
 timeout: 240s
 
 substitutions:
-  _BUILDER_TAG: 9.16.5-node16-npm7
-  _DOCKER_COMPOSE_TAG: 1.29.2
+  _BUILDER_TAG: 9.16.0-node16-npm7
+  #_DOCKER_COMPOSE_TAG: 1.29.2

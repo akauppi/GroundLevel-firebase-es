@@ -48,16 +48,17 @@ services:
 
   test:
     build: ../../dc-tools/n16-user/
-    user: '1000'    # WSL2 quick fix
+    user: '1000'    # WSL2 quick fix (..but messes the npm minor update notification banning!)
     volumes:
       - .:/work
     working_dir: /work
     command: bash -o pipefail -c
       'wait-for-it emul:4000 --timeout=20 &&
-        node hack/ack-await 1 2 &&
       npm run test:fns:all &&
         npm run test:rules:all
       '
+      #node hack/ack-await 1 2 &&   # <-- tbd. needs some debugging
+
     environment: ['EMUL_HOST=emul']
       #
     depends_on: ['emul']

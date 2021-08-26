@@ -71,7 +71,7 @@
     "@vitejs/plugin-vue": "^1.2.5",
     "@vue/compiler-sfc": "latest",
     "concurrently": "^6.2.1",
-    "cypress": "^8.1.0",
+    "cypress": "^8.3.0",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",

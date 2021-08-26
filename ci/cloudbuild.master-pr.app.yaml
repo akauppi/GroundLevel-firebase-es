@@ -10,7 +10,7 @@
 # Uses images:
 #   - node:16
 #   - firebase-ci-builder   (pushed to Container Registry; used via Docker Compose)
-#   - docker
+#   - docker/compose
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -19,6 +19,9 @@
 #     PWD=/workspace
 #     HOME=/builder/home
 #
+# Note:
+#   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
+#   to regular users (of other images). This is normally not a concern.
 
 steps:
 # Root install
@@ -44,40 +47,22 @@ steps:
   dir: packages/app
   env: ['CYPRESS_INSTALL_BINARY=0']
 
-# On 6-Aug-2021, 'gcr.io/cloud-builders/docker':
-#   https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/docker
-#
-#   - is version 19.03.8
-#   - does not have 'docker compose' or 'docker-compose'
-#
-#   <<
-#     # docker compose up
-#     docker: 'compose' is not a docker command.
-#   <<
-#
-# See #76 for more information: https://github.com/akauppi/GroundLevel-firebase-es/issues/76
-#
-#- name: gcr.io/cloud-builders/docker
-#  entrypoint: docker
-#  args: ['compose', 'run', 'cypress']
-#    # same as 'npm run ci:test' would do
-#  dir: packages/app
-
-# Or:
-#- name: docker/compose
-#  entrypoint: docker-compose
-#  args: ['run', 'cypress']
-#    # same as what 'npm run ci:test' would do
-#  dir: packages/app
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['run', 'cypress']
+  dir: packages/app
+  env: [
+    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
+  ]
 
 - name: node:16
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
-- name: $_1
+- name: node:16
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
+    # tbd. use 'n16-user' if needs bash
 
 # --- App-deploy-ops
 #
@@ -91,11 +76,12 @@ steps:
   entrypoint: sh
   args: ['-c', 'echo "export default { }" > ../../firebase.fake.js']
   dir: packages/app-deploy-ops
-- name: $_1
-  entrypoint: npm
-  args: ['run', 'build']
-  dir: packages/app-deploy-ops
-  env: ['ENV=fake', 'RAYGUN_API_KEY=x']
+#- name: node:16
+#  # likely with n16-user???
+#  entrypoint: npm
+#  args: ['run', 'build']
+#  dir: packages/app-deploy-ops
+#  env: ['ENV=fake', 'RAYGUN_API_KEY=x']
 
 # --- Timeout
 #
@@ -105,4 +91,9 @@ timeout: 240s
 
 substitutions:
   # Has Node 16 and bash
-  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
+  #_1: gcr.io/${PROJECT_ID}/firebase-ci-builder:9.16.0-node16-npm7
+  #
+  _BUILDER_TAG: 9.16.0-node16-npm7
+  #
+  _DOCKER_COMPOSE_TAG: 1.29.2
+    # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated

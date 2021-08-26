@@ -10,7 +10,14 @@
 * Note:
 *   We cannot 'import' any of the application sources, since they use '/@xxx' path mapping. (This should be fine.)
 */
-import { signInWithCustomToken, updateProfile } from '@firebase/auth'
+import {
+  connectAuthEmulator,
+  debugErrorMap,
+  initializeAuth,
+  signInWithCustomToken,
+  updateProfile
+} from '@firebase/auth'
+import {initializeApp} from '@firebase/app'
 
 /*
 * 'cy.clearAuthState'
@@ -48,7 +55,9 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 
   cy.visit('/');    // initialize the app; wait for knowledge that it's opened
 
-  firebaseAuthChainable().then( async auth => {
+  const auth = firebaseAuth();
+
+  cy.wrap( async _ => {
     console.log("Signing in as:", { uid } );
 
     // Create a user based on the provided token (only '.uid' is used by Firebase)
@@ -66,15 +75,44 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
   )
 })
 
-/*
+/* REMOVE
 * Wait until the current page has initialized Firebase ('src/main' flags us by setting 'window["Let's test!"]').
 *
 * Note:
 *   If we need access to any source code side things, this is how to get them. We cannot 'import' since the source
 *   uses '/@xyz' module redirects that Cypress doesn't know of.
-*/
+*_/
 function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
   return cy.window().its("Let's test!").then( ([auth]) => {
     return auth;
   });
+}**/
+
+/*
+* Access to Firebase auth.
+*
+* Note: Cannot use 'getAuth()' - _even_ if waiting (by 'cy.window().its(...).then) until the browser has certainly
+*   initialized its first copy. Doing 'getAuth' here would still give:
+*
+*   <<
+*     Firebase: No Firebase App '[DEFAULT]' has been created
+*   <<
+*
+*   We *can* completely initialize our own app, and that's what we do. This keeps 'vitebox' completely unaware of
+*   Cypress, which is meaningful. ⭐️😊
+*/
+function firebaseAuth() {    // () => FirebaseAuth
+
+  const [projectId, AUTH_URL] = ["demo-abc", "http://emul:9100"];   // just know them #hack
+
+  const fah= initializeApp( {
+    projectId,
+    apiKey: "none",
+    authDomain: "no.domain"
+  } );
+
+  const auth = initializeAuth(fah, { errorMap: debugErrorMap });    // provide human readable error messages
+  connectAuthEmulator(auth, AUTH_URL);
+
+  return auth;
 }

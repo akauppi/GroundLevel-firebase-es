@@ -34,6 +34,8 @@ Like here: [Enable Top Level Await](https://github.com/eslint/eslint/issues/1317
 
 In "stage 3" (26 Oct 2020; Jan 2021).
 
+In "stage 4" (Aug 2021). Will be in ESLint 8.0.
+
 
 <!--
 | This one is for Rollup. We now use Vite for this level.

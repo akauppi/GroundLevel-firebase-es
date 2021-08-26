@@ -3,7 +3,7 @@
 */
 import { initializeApp } from 'firebase-admin/app'    // for "modular API" (in alpha)
 
-import { createUsers } from './createUsers/index.js'
+import { createUsers, wipeUsers } from './createUsers/index.js'
 import { primeData } from './primeData/index.js'
 import { wipe } from './primeData/wipe.js'
 
