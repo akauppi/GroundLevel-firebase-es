@@ -15,8 +15,8 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run _test_all; else docker compose run --rm test ; fi",
-    "//test:dc": "docker compose run --rm test",
+    "test": "docker compose run --rm test",
+    "//test:nodc": "if port-is-taken --silent 4000 ; then npm run _test_all; else docker compose run --rm test ; fi",
     "_test_all": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
     "start": "docker compose up",
@@ -35,11 +35,9 @@
     "  - --": "",
     "lint": "eslint .",
     "  -   -": "",
-    "//ci:test": "docker-compose run test",
-    "ci:test": "npm run -s ci:seq",
-    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run _ci_emul\" \"wait-for 4000 && node hack/ack-await && npm run -s _ci_seq\"",
-    "_ci_emul": "npx firebase emulators:start --project=demo-2",
-    "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
+    "//ci runs -->": "NODE=16 docker-compose run test",
+    "ci:test": "npm run test:fns:all && npm run test:rules:all",
+    "ci:warm-up": "npm run test:fns:userInfo",
     "  - - -": "",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
     "  -  --": "",
@@ -54,7 +52,7 @@
     "concurrently": "^6.2.1",
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.4-alpha.3",
-    "jest": "^27.0.6",
+    "jest": "^27.1.0",
     "node-fetch": "^3.0.0-beta.10"
   },
   "//comments": {

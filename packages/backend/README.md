@@ -15,8 +15,6 @@ Responsible for:
 
 ```
 ├── functions             # Cloud Functions definitions
-├── functions-warm-up     # code that makes sure Cloud Functions are awake
-├── sh                    # build tools
 ├── test-fns              # tests for Cloud Functions
 └── test-rules            # tests for Firestore Security Rules
 ```
@@ -30,16 +28,25 @@ The root has various configuration files.
 
    >`npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
 
-- Docker Desktop
+- Docker Compose 2.0
 
+	<details><summary>Installation on Linux</summary>
+   DC 2.0 comes with Docker Desktop for Windows and Mac. The Linux version
+   needs to be separately installed, for now.
+   
+   - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
+   - [Install on Linux](https://docs.docker.com/compose/cli-command/#install-on-linux)
+	</details>
+	
 <!-- 
 developed with:
 - macOS 11.5
-- node 16.6
-- npm 7.20
+- node 16.7
+- npm 7.21
 
 - Docker Desktop 3.6.0 with: 1 CPU core, 1.5 GB RAM
 -->
+
 
 ## Getting started
 

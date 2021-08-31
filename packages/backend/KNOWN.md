@@ -1,5 +1,9 @@
 # Known Issues
 
+*List of known issues that we try to live with.*
+
+
+<!-- Shouldn't happen any more?
 ## First `npm test` fails
 
 Not sure why this happens. `#help`
@@ -35,3 +39,4 @@ Error: Cannot find module '/proj/packages/app/hack/ack-await.js'
   requireStack: []
 }
 ```
+-->

@@ -20,6 +20,13 @@ beforeAll(  () => {
   abc_projectsC = coll.as({uid:'abc'});
   def_projectsC = coll.as({uid:'def'});
   ghi_projectsC = coll.as({uid:'ghi'});
+
+  // Warm up the client.
+  //
+  // This is important at least for DC (macOS). It helps keep test execution times below 2s (and provides more
+  // meaningful values, instead of the cold boot exceptions!).
+  //
+  unauth_projectsC.get();
 });
 
 describe("'/projects' rules", () => {
@@ -29,6 +36,17 @@ describe("'/projects' rules", () => {
   test('unauthenticated access should fail', async () => {
     await expect( unauth_projectsC.get() ).toDeny();
   });
+    // native (mac)
+    //  - no warm-up:     1018 ms
+    //  - client warm-up:  800 ms
+    //
+    // DC (mac):
+    //  - no warm-up:     2582, 2204 ms   <--X would fail, without the warm-up
+    //  - client warm-up:  743, 1066 ms
+    //
+    // CI (DC):
+    //  - no warm-up:
+    //  - client warm-up:
 
   test('user who is not part of the project shouldn\'t be able to read it', async () => {
     await expect( auth_projectsC.get() ).toDeny();

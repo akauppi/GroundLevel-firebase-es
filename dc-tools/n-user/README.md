@@ -1,4 +1,4 @@
-# n16-user
+# n-user
 
 Environment for running Firebase tests. 
 

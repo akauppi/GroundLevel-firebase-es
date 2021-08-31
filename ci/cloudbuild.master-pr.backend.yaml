@@ -43,10 +43,10 @@ steps:
 # Collaborates with 'package.json' to run both the emulators and tests at the same time (DC is more modular, nicer,
 # but slower..)
 #
-- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'ci:test']
-  dir: packages/backend
+#- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+#  entrypoint: npm
+#  args: ['run', 'ci:test']
+#  dir: packages/backend
 
 # Using DC
 #
@@ -59,12 +59,12 @@ steps:
 #
 # Have tried to get this to work, but since there's NO DIRECT BENEFIT over the native option, #later. Much later...!!
 #
-#/- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#/  args: ['run', 'test']
-#/  dir: packages/backend
-#/  env: [
-#/    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
-#/  ]
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['run', 'test']
+  dir: packages/backend
+  env: [
+    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
+  ]
 
 - name: node:16
   entrypoint: npm
@@ -79,4 +79,4 @@ timeout: 240s
 
 substitutions:
   _BUILDER_TAG: 9.16.0-node16-npm7
-  #_DOCKER_COMPOSE_TAG: 1.29.2
+  _DOCKER_COMPOSE_TAG: 1.29.2

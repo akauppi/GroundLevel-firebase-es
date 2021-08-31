@@ -42,24 +42,54 @@ services:
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
-      rm -f functions/.ack.* &&
       firebase emulators:start --project=${PROJECT_ID:-demo-2}
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
 
+  # WARM UP the engines!!!
+  #
+  # Firebase Emulators are SLOW to wake. This part runs a minimal set of tests (the results of which are not used),
+  # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
+  #
+  # Once warmed up, 'socat' is used to open a TCP connection. Just the existence of this connection is enough to
+  # signal to the tests that they can be started.
+  #
+  warm-up:
+    build:
+      context: ../../dc-tools/n-user/
+      args:
+        - NODE=${NODE:-16}
+    ports:
+      - "6768:6768"
+    volumes:
+      - .:/work
+    working_dir: /work
+    command: sh -o pipefail -c
+      'wait-for-it emul:6767 &&
+      npm run ci:warm-up &&
+      serve-port 6768
+      '
+    environment:
+      - EMUL_HOST=emul
+      - WARM_UP_TIMEOUT=15000
+    #
+    depends_on: ['emul']
+    profiles: ['manual']     # could also be automatic (then it'll launch with 'docker compose up')
+
   test:
-    build: ../../dc-tools/n16-user/
+    build:
+      context: ../../dc-tools/n-user/
+      args:
+        - NODE=${NODE:-16}
     user: '1000'    # WSL2 quick fix (..but messes the npm minor update notification banning!)
     volumes:
       - .:/work
     working_dir: /work
     command: bash -o pipefail -c
-      'wait-for-it emul:4000 --timeout=20 &&
-      npm run test:fns:all &&
-        npm run test:rules:all
+      'wait-for-it warm-up:6768 --timeout=60 &&
+      npm run ci:test
       '
-      #node hack/ack-await 1 2 &&   # <-- tbd. needs some debugging
 
     environment: ['EMUL_HOST=emul']
       #
-    depends_on: ['emul']
+    depends_on: ['emul', 'warm-up']
     profiles: ['manual']

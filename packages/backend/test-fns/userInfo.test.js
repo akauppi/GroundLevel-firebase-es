@@ -29,9 +29,12 @@ describe("userInfo shadowing", () => {
     await collection("userInfo").doc("abc").set(william);
 
     await expect( docListener("projects/1/userInfo/abc") ).resolves.toContainObject(william);
-  } );    // 340, 388, 406 ms
+  });
+    // native (macOS): 340, 388, 406 ms
+    // DC (macOS):
+    // CI (with DC): XXX
 
-  test ('Central user information is not distributed to a project where the user is not a member', async () => {
+  test('Central user information is not distributed to a project where the user is not a member', async () => {
 
     // Write in 'userInfo' -> should NOT turn up in project 1.
     //

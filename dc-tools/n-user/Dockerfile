@@ -1,9 +1,14 @@
 #
+# Using Firebase Emulators, from Docker Compose
+#
 # Provides:
-#   - node.js (16) and npm (>= 7.7)
-#   - bash, curl
+#   - node.js (14 or 16) and npm (6 or >= 7.7)
+#   - bash
+#   - socat
 #   - 'wait-for-it'       // from: https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
 #     The de-facto shell script standard for waiting a port, available eg. in Debian/Ubuntu by `apt-get install`.
+#   - 'serve-port'
+#     For building pipes of Docker containers.
 #
 # Context:
 #   - user 'user' created
@@ -13,11 +18,12 @@
 #   - Best practices for writing Dockerfiles
 #       -> https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 #
-FROM node:16-alpine
+ARG NODE
+FROM node:${NODE:-16}-alpine
 
 ENV USER user
 
-RUN apk --no-cache add bash curl
+RUN apk --no-cache add bash socat
 
 # 'wait-for-it'
 #
@@ -37,6 +43,10 @@ ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.s
 RUN echo "b7a04f38de1e51e7455ecf63151c8c7e405bd2d45a2d4e16f6419db737a125d6  /usr/local/bin/wait-for-it" | sha256sum -c \
   && chmod +rx /usr/local/bin/wait-for-it
 
+# serve-port <port>
+#
+ADD simple-server.js /usr/local/bin/serve-port
+
 RUN adduser --disabled-password \
   ${USER}
 
@@ -47,18 +57,8 @@ USER ${USER}
    # $ whoami
    # user
 
-# Suppress npm update announcements
-#
-# Note: Run it as the user (running as root wouldn't change the user's settings).
-#
-# ..and YET it shows:
-#   <<
-#     #npm notice New minor version of npm available! 7.20.3 -> 7.21.0
-#     #npm notice Changelog: https://github.com/npm/cli/releases/tag/v7.21.0
-#     #npm notice Run npm install -g npm@7.21.0 to update!
-#     #npm notice
-#   <<
+# Suppress npm update announcements (creates '~/.npmrc' with 'update-notifier=false')
 #
 RUN npm config set update-notifier false
 
-# No default entry point
+# No entry point
