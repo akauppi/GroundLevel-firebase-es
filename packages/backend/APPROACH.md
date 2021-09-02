@@ -1,33 +1,30 @@
 # Approach
 
 
-## Testing Security Rules
-
-The `firebase-jest-testing` library allows us to run the tests as-if they wouldn't change the database, when access is allowed.
-
-
 ## Waking up Cloud Functions
 
 The Firebase Emulators (`firebase-tools` 9.16.0) leave Cloud Functions "resting" after launch.
 
 This is tedious, and causes initial tests easily to time out. We've counteracted this with:
 
-- as part of the functions themselves, if emulation is detected, the functions are triggered so that they wake up.
+- `docker-compose.yml` has a `warm-up` service that exercises Cloud Functions by running some tests, and then opens port 6768 for business
+- Actual tests check for the 6768 port, before advancing
 
 
-This wake-up happens *after* Emulators have opened port 4000 for shop, so tests don't have an easy mechanism to know when Cloud Functions really have woken up.
 
-This is not a problem with manual use (starting `npm run start` in one terminal; moving to another; executing tests with `npm run test:fns:...`), but it does bother `npm test`. We'd need to place something like `sleep 7` (seconds) in the command to have `npm test` launch safely - and any such constant delays are normally a no-no. Changed `npm test` so that it -- for now -- requires Firebase Emulators already to have been started, in the background.
+## Use of DC
 
-### Deeper analysis
+**Developer Experience**
 
-Why do Cloud Functions take up to 5..6 s to wake up, if executed under Docker?
+We use Docker Compose for starting the Emulators, and warming them up, but *not* for running the tests.
 
-Are Firebase aware of this - something like 100's ms wake-up time would not cause these problems, but multiple seconds do.
+- Running tests under DC is way slower, for some reason (at least on Docker Desktop for Mac, 4.0)
+- There is no benefit from encapsulation
 
-### Implications to CI
+**CI**
 
-Left CI out of this. It runs in its own environment (not under Docker) and performance is better.
+In CI, tests are run via Docker Compose. Here, we have more control over the execution environment (Cloud Build) and probably problems don't affect fellow developers, just the project maintainers.
 
-It matters slightly if the timings are off, but as long as the tests pass within timeout limits, CI does its job.
-
+>Alternatives:
+>
+>The project earlier used the Emulator image (`firebase-ci-builder`) to also run the tests - since it has Node and `npm`. This works, but tightly couples the emulator container to the test execution environment (them being the same). DC provides more freedom.

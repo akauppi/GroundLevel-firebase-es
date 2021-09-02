@@ -15,12 +15,11 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "docker compose run --rm test",
-    "//test:nodc": "if port-is-taken --silent 4000 ; then npm run _test_all; else docker compose run --rm test ; fi",
-    "_test_all": "npm run test:fns:all && npm run test:rules:all",
+    "test": "if port-is-taken --silent 6768 ; then npm run _test2; else npm run -s _test1 ; fi",
+    "_test1": "concurrently --kill-others --success=first --prefix none \"npm run -s start\" \"wait-for 6768 && npm run -s test\"",
+    "_test2": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
-    "start": "docker compose up",
-    "//start": "docker compose up --abort-on-container-exit",
+    "start": "docker compose up --abort-on-container-exit",
     "  - -": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
@@ -35,15 +34,13 @@
     "  - --": "",
     "lint": "eslint .",
     "  -   -": "",
-    "//ci runs -->": "NODE=16 docker-compose run test",
+    "//ci runs -->": "NODE=16 docker-compose run ci",
+    "ci:warm-up": "npm run test:fns:all",
     "ci:test": "npm run test:fns:all && npm run test:rules:all",
-    "ci:warm-up": "npm run test:fns:userInfo",
     "  - - -": "",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
     "  -  --": "",
-    "pretest": "npm run -s _prepFunctions",
-    "prestart": "npm run -s _prepFunctions",
-    "preci:test": "npm run -s _prepFunctions",
+    "postinstall": "npm run -s _prepFunctions",
     "_prepFunctions": "npm --prefix functions install",
     "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json"
   },
@@ -53,7 +50,7 @@
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.4-alpha.3",
     "jest": "^27.1.0",
-    "node-fetch": "^3.0.0-beta.10"
+    "node-fetch": "^3.0.0"
   },
   "//comments": {
     "engines.node": [
@@ -75,6 +72,10 @@
         "",
         "ci:test is around to allow native execution (with npm and 'concurrently', without Docker Compose).",
         "If we can use 'docker-compose', 'concurrently' can leave the stage."
+      ],
+      "start": [
+        "'--abort-on-container-exit' means that if the warm up (or launch of the emulators themselves) fails,",
+        "the command will fall back to preceding state. Important"
       ]
     }
   }

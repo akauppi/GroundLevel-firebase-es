@@ -1,8 +1,6 @@
 /*
 * back-end/test-rules/invitesC.test.js
 */
-import { strict as assert } from 'assert'
-
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
 import { collection, serverTimestamp } from 'firebase-jest-testing/firestoreRules'

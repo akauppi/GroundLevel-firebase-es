@@ -42,8 +42,9 @@ services:
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
-      firebase emulators:start --project=${PROJECT_ID:-demo-2}
+      firebase emulators:start --project=demo-2
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
+    # Keep project ID in sync with 'test-fns/setup.jest.js'
 
   # WARM UP the engines!!!
   #
@@ -64,32 +65,32 @@ services:
       - .:/work
     working_dir: /work
     command: sh -o pipefail -c
-      'wait-for-it emul:6767 &&
+      'wait-for-it emul:6767 --timeout=20 &&
       npm run ci:warm-up &&
-      serve-port 6768
+      socat TCP-LISTEN:6768,fork TCP:emul:6767
       '
+      #serve-port 6768
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=15000
-    #
+      - WARM_UP_TIMEOUT=25000
+          # seen timeouts with: 19000 (macOS, DC 4.0); normally ~3500 ms
     depends_on: ['emul']
-    profiles: ['manual']     # could also be automatic (then it'll launch with 'docker compose up')
 
-  test:
+  ci:
     build:
       context: ../../dc-tools/n-user/
       args:
         - NODE=${NODE:-16}
-    user: '1000'    # WSL2 quick fix (..but messes the npm minor update notification banning!)
     volumes:
       - .:/work
     working_dir: /work
     command: bash -o pipefail -c
-      'wait-for-it warm-up:6768 --timeout=60 &&
+      'wait-for-it warm-up:6768 --timeout=30 &&
       npm run ci:test
       '
-
-    environment: ['EMUL_HOST=emul']
+    environment:
+      - EMUL_HOST=emul
+      #- WARM_UP_TIMEOUT=19999
       #
     depends_on: ['emul', 'warm-up']
     profiles: ['manual']

@@ -6,16 +6,20 @@
 */
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
-import { collection, doc } from 'firebase-jest-testing/firestoreAdmin'
+import { collection, doc, preheat_EXP } from 'firebase-jest-testing/firestoreAdmin'
 
 import './matchers/timesOut'
 import './matchers/toContainObject'
 
+// First call (when server is cold started) takes ~2500 ms (native macOS). To get away from that, DC runs a warm-up
+// lap on this test, reducing times by ~2s.
+
 describe("userInfo shadowing", () => {
 
-  beforeAll( async () => {
-    // Pre-heat also the client (cuts ~320ms off listening times for the stated collection). To show worst case times, skip it.
-    preHeat("projects/1/userInfo");
+  // Warm up the client. Cuts ~300ms from the reported test results (653 -> 367 ms); native macOS
+  //
+  beforeAll( () => {
+    preheat_EXP("projects/1/userInfo");
   })
 
   test('Central user information is distributed to a project where the user is a member', async () => {
@@ -30,9 +34,12 @@ describe("userInfo shadowing", () => {
 
     await expect( docListener("projects/1/userInfo/abc") ).resolves.toContainObject(william);
   });
-    // native (macOS): 340, 388, 406 ms
-    // DC (macOS):
-    // CI (with DC): XXX
+    // With warm-up:
+    //  - DC (macOS):    559 ms
+    //  - CI (with DC):  XXX
+    //
+    // Without warm-up:
+    //  - DC (macOS):   3622, 3795 ms     # run from clean: 'docker compose down', 'docker compose up warm-up'
 
   test('Central user information is not distributed to a project where the user is not a member', async () => {
 
@@ -60,9 +67,4 @@ function docListener(docPath) {    // (string) => Promise of {...Firestore docum
       /*await*/ unsub();
     });
   });
-}
-
-function preHeat(docPath) {    // (string) => ()
-  const unsub = doc(`${docPath}/...`).onSnapshot( ss => {} );
-  unsub();
 }

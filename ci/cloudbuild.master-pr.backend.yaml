@@ -38,33 +38,39 @@ steps:
   args: ['install']
   dir: packages/backend
 
-# Using native
+# EXPERIMENTING:
+# Do emulators start, without DC?
 #
-# Collaborates with 'package.json' to run both the emulators and tests at the same time (DC is more modular, nicer,
-# but slower..)
+# USE THIS TO DEBUG CASES where the emulators don't start. Easier to see the console output.
 #
 #- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+#  #entrypoint: 'npm'
+#  #args: ['run', '~~start']
+#  entrypoint: firebase
+#  args: ['emulators:start', '--project=demo-2']
+#  dir: packages/backend
+
+# --- --- --- 📣⚠️🪤🚨
+# WARNING!!!
+#
+#   If you have a problem with - say - Cloud Functions, INSTEAD OF EXITING, THE EMULATORS KEEP RUNNING!! This is NOT
+#   ideal for developers, because it gives the feeling things might be right. INSTEAD, FIREBASE EMULATORS SHOULD FAIL
+#   if there is a major problem like Cloud Functions cannot be started. **PLEASE PUT PRESSURE ON FIREBASE TO CHANGE
+#   THIS BEHAVIOUR if you agree with it.** Saves all of our time. Thank You.
+#
+# --- --- --- 📣⚠️🪤🚨
+
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['run', 'ci']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+
+# tbd. ALTERNATIVE
+#- name: node:16
 #  entrypoint: npm
 #  args: ['run', 'ci:test']
 #  dir: packages/backend
-
-# Using DC
-#
-# Too slow and unstable. At least:
-#   <<
-#     ✕ Central user information is distributed to a project where the user is a member (10004 ms)    <<-- exceeds any timeout
-#     ...
-#     Function 'http://emul:5002/demo-2/us-central1/cloudLoggingProxy_v0' not found (404): 'Function us-central1-cloudLoggingProxy_v0 does not exist, valid triggers are: '
-#   <<
-#
-# Have tried to get this to work, but since there's NO DIRECT BENEFIT over the native option, #later. Much later...!!
-#
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'test']
-  dir: packages/backend
-  env: [
-    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
-  ]
 
 - name: node:16
   entrypoint: npm
@@ -74,8 +80,9 @@ steps:
 # --- Timeout
 #
 # Cloud Build (native, no lint):  1:51, 1:45
+#     - DC, with lint:      2:23
 #
-timeout: 240s
+timeout: 400s
 
 substitutions:
   _BUILDER_TAG: 9.16.0-node16-npm7

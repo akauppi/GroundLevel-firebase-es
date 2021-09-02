@@ -19,6 +19,13 @@ Responsible for:
 └── test-rules            # tests for Firestore Security Rules
 ```
 
+**Important files**
+
+```
+docker-compose.yml    # Launching the emulators  
+firebase.json         # Port definitions for the emulators
+```
+
 The root has various configuration files.
 
 ## Requirements
@@ -41,7 +48,7 @@ The root has various configuration files.
 <!-- 
 developed with:
 - macOS 11.5
-- node 16.7
+- node 16.8
 - npm 7.21
 
 - Docker Desktop 3.6.0 with: 1 CPU core, 1.5 GB RAM
@@ -61,6 +68,8 @@ $ npm test
 ```
 
 The tests should pass, or be skipped.
+
+>Note: There's a lot of noise in the above step, because of starting and closing down the emulators. You can avoid this by launching emulators in another terminal, as described below.
 
 
 ## Development workflow

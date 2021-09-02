@@ -34,6 +34,17 @@ $ docker compose down
 >- Docker > Dashboard > Containers > `backend` > Delete
 
 
+## `docker compose build`
+
+If you change the build instructions under `../../dc-tools/`, run these on all affected DC services:
+
+```
+$ docker compose build --no-cache warm-up
+```
+
+Note the `--no-cache`.
+
+
 ## Console output per container
 
 You can *always* see any container's console output in the Docker Dashboard > `Containers / Apps` > `backend` > `backend_emul_1`

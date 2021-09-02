@@ -53,7 +53,10 @@ const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 //    If there is not, would Firebase folks please make some (or we can reverse engineer and do it here! ⭐️
 //---
 
+// Initialize Firebase only if actually needed? tbd.
+//
 admin.initializeApp();
+const db = admin.firestore();
 
 // Under emulation, run as the default region (makes testing simpler).
 // In production, the region is brought via Cloud Function configuration.
@@ -82,9 +85,6 @@ export const userInfoShadow_2 = regionalFunctions.firestore
   .document('/userInfo/{uid}')
   .onWrite( async (change, context) => {
     const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
-
-    const db = admin.firestore();
-
     const uid = change.after.id;
 
     const newValue = after.data();      // { ... } | undefined
