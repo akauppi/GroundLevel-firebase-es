@@ -1,0 +1,36 @@
+#
+# docker-compose.ci+.yml
+#
+# Extension of the basic Docker compose, adding Cypress testing.
+#
+# Used by:
+#   CI front-end testing
+#
+# Docker Compose (v3) note:
+#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+# References:
+#   Overview of Docker Compose (Docker docs)
+#     -> https://docs.docker.com/compose/
+#   Compose file version 3 reference
+#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+version: '3.0'
+
+services:
+  # Note:
+  #   - 'cypress/included:8.2.0' has Node 14.16.0 (not Node 16); by 'docker image inspect {image-name}'
+  #
+  cypress:
+    image: cypress/included:${CYPRESS_VERSION-latest}
+    volumes:
+      - ../..:/proj
+    working_dir: /proj/packages/app
+    # default entrypoint is: ['cypress', 'run']
+    entrypoint: /bin/bash
+    command: -o pipefail -c
+      'cypress run --config baseUrl=http://vite:3000'
+      #'cat cypress.json | sed s/localhost:/vite:/ > node_modules/.cypress.tmp.json &&
+      #cypress run --config-file node_modules/.cypress.tmp.json'
+    depends_on: ['vite']
+    profiles: ['cypress']

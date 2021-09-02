@@ -4,13 +4,12 @@
   "type": "module",
   "bin": {
     "abc": "./abc.sh",
-    "docker-run-cmd": "./docker-run-cmd.js",
     "port-is-free": "./port-is.sh",
     "port-is-taken": "./port-is.sh",
     "wait-for": "./wait-for.js"
   },
   "dependencies": {
-    "node-fetch": "3.0.0-beta.10"
+    "node-fetch": "3.0.0"
   },
   "//": {
     "": [

@@ -1,5 +1,5 @@
 #
-# docker-compose.yml
+# app/docker-compose.yml
 #
 # For development (via 'npm' scripts) and as a basis for CI.
 #
@@ -8,29 +8,42 @@
 #   - data and user priming
 #   - Vite                  front end Hot-Module Reloading; hosting
 #
+# Environment variables:
+#   CI_BUILDER_IMAGE (optional); name of the builder image.
+#
 # Intentions:
 #   Within a Docker universe,
 #     - launch Firebase Emulators using 'firebase.json' (UI could be disabled);
 #       - exposing ports for Firestore and Firebase Auth (Cloud Functions emulated but not used from the front end)
-#     - launch Vite, hosting the front-end at localhost:3000.
+#     - launch Vite, hosting the front-end at localhost:3000
 #     - Cypress use is locally (not within Docker) for development.
+#
+# Docker Compose NOTES:
+#   - Docker Compose isolates different subpackages from each other by the '{folder}_{service}' naming; we can use
+#     the same 'emul' both here and in backend without them becoming entangled.
+#   - 'docker compose up' *will* keep the containers available, for a while, and reuse them. This means they might
+#     come with state - or without - and our scripts must be tolerant of that!!!
+#
+#     To reset said state, 'docker compose down'.
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
 #
 # References:
+#   Cypress > Continuous Integration > Introduction
+#     -> https://docs.cypress.io/guides/continuous-integration/introduction#What-is-Continuous-Integration
 #   Overview of Docker Compose (Docker docs)
 #     -> https://docs.docker.com/compose/
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
-version: '3.4'
+version: '3.0'
 
 services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
   emul:
-    image: firebase-ci-builder:9.16.0-node16-npm7
+    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:9.16.0-node16-npm7}
     ports:
       - "4000:4000"
       - "9100:9100"
@@ -42,7 +55,7 @@ services:
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
       firebase emulators:start --project=${PROJECT_ID:-demo-abc}
-        | grep -v -E "Detected demo project ID|You are not currently authenticated|You are not signed in"'
+        | grep -v -E "Detected demo project ID|You are not signed in|You are not currently authenticated"'
 
   # Vite provides the front-end hosting, with on-the-fly ES module resolving and Hot Module Reload. 🪄
   #
@@ -62,7 +75,7 @@ services:
   #   needs to write files on the shared volume.
   #
   vite:
-    build: ../../firebase-dc-tools/
+    build: ../../dc-tools/firebase-prime/
     user: '1000'    # WSL2 quick fix
     ports:
       - "3000:3000"
@@ -72,7 +85,7 @@ services:
     command: bash -o pipefail -c
       'node node_modules/esbuild/install.js &&
       wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials") &&
+      firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js &&
       npx vite --port 3000 --mode dev_local'
     depends_on: ['emul']
 
@@ -81,15 +94,72 @@ services:
   # TEMPORARY - REMOVE ONCE HOT MODULE RELOAD WORKS IN DOCKER COMPOSE, and we can only use Vite that way!
   #
   init-hmr-work-around:
-    build: ../../firebase-dc-tools/
+    build: ../../dc-tools/firebase-prime/
     user: '1000'    # WSL2 quick fix
     volumes:
       - ../..:/proj
     working_dir: /proj/packages/app
     command: bash -o pipefail -c
       'wait-for-it emul:4000 --timeout=20 &&
-      (firebase-prime --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js | grep -v -E "Do not use with production credentials")'
+      firebase-prime --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js'
     depends_on: ['emul']
+    profiles: ['manual']
+
+  # CI: Run cypress tests
+  #
+  # Note: Cypress automatically waits until the 'baseUrl' service is available. This helps us - we can use the stock
+  #   Cypress image. :D
+  #
+  # KNOWN: IF CYPRESS IS STUCK, DO FIRST 'docker compose down'.
+  #
+  # Want to:
+  #   - [ ] have tests pass
+  #   - [ ] without needing Xvfb (how???) #help
+  #
+  # Needs "upstairs" to be mapped, otherwise:
+  #   <<
+  #     Module not found: Error: Can't resolve '@firebase/auth' in '/work/cypress/commands'
+  #   <<
+  #
+  # Note:
+  #   Cypress base image does fixed 3 retries for waiting for the server, no more. The intention is [1] to use an
+  #   external tool, if it takes longer. This means we need to use 'build:' to get 'wait-for-it' in the mix.
+  #
+  #   [1]: "Feature request: Add the ability to configure the server wait behavior" (Cypress GitHub Issues)
+  #         -> https://github.com/cypress-io/cypress/issues/8870
+  #
+  # Note:
+  #   Enabling 'ELECTRON_RUN_AS_NODE=1' (experimental) gives:
+  #     <<
+  #       Found an error while validating the `browsers` list. Expected `version` to be a non-empty string. Instead the value was: `{"name":"electron","channel":"stable","family":"chromium","displayName":"Electron","version":"","path":"","info":"Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."}`
+  #     <<
+  #   i.e. cannot use it=?
+  #
+  cypress:
+    #image: cypress/included:8.3.0        # won't wait long enough (on the first launch)
+    build:
+      context: ../../dc-tools/cypress-run/
+      args:
+        - CYPRESS_TAG=8.3.0
+    volumes:
+      - ../..:/proj
+    working_dir: /proj/packages/app
+    command: bash -o pipefail -c
+      'wait-for-it vite:3000 --timeout=60 &&
+      cypress run --headless
+      '
+        # wait for 'vite:3000': 19, 23 s (local DC)
+
+      # To test with Chrome (included):
+      #cypress run --headless --browser chrome
+
+    # If having stuck tests, try this:
+    #shm_size: 500MB
+    environment:
+      - CYPRESS_baseUrl=http://vite:3000    # CYPRESS_BASE_URL works as well
+      #- ELECTRON_RUN_AS_NODE=1             # EXPERIMENTAL (fails the run), https://docs.cypress.io/guides/continuous-integration/introduction#Running-headless-tests-without-Xvfb
+      #- DEBUG=cypress:*
+    depends_on: ['vite']
     profiles: ['manual']
 
   # DEBUG
@@ -105,7 +175,7 @@ services:
   #   - works on macOS (the output file is that of the host user)
   #
   debug:
-    build: ../../firebase-dc-tools/
+    build: ../../dc-tools/n16-user/
     user: '1000'    # WSL2 user
     volumes:
       - ../..:/proj

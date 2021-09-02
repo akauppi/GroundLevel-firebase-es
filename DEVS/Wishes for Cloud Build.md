@@ -53,3 +53,17 @@ The slowness of image pull seems a bit ridiculous. This would likely help, plus 
 
 *tbd. list how long it takes for Cloud Build to pull the custom builder (once per build)*
 
+
+## Caching Docker Compose builds
+
+The `ci/cloudbuild.master-pr.backend.yaml` now starts to be "production ready". Most of its time is spent either fetching images, or building those - it uses the `builds:` definition of Docker Compose.
+
+Subsequent CI runs do all of this anew. 
+
+The Kaniko caching provided by Google for building *Docker images* (running Docker itself) is not applicable here, because we cannot enable it for Docker Compose.
+
+Could that be done?
+
+- caching `builds:` results of `docker/compose` steps, within Cloud Build
+- caching images pulled by `docker/compose` steps, within Cloud Build 
+

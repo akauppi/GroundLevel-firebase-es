@@ -1,7 +1,28 @@
-# Known Issue
+# Known Issues
 
-## `npm run start` may get stuck, not starting the Cloud Functions
 
-- [Docker re-launches may fail in a way that cripples Cloud Function emulation](https://github.com/akauppi/GroundLevel-firebase-es/issues/67)
+## `docker compose run test` gets stuck
 
-Learn to identify this condition, and restart Docker.
+This happens on macOS (Docker Desktop 4.0).
+
+In another terminal:
+
+```
+$ npm run start
+```
+
+```
+$ docker compose run test
+...
+> test:rules:all
+> NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all
+
+(node:100) ExperimentalWarning: VM Modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+```
+
+If you don't see more output here, it's stuck.
+
+Try Docker > Restart.
+
+>This is one of the reasons why tests are run natively, not using DC. The other is that native runs don't need warming up, to avoid timeouts.

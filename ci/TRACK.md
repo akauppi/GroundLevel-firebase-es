@@ -1,22 +1,14 @@
 # Track
 
-## Cypress ❤️ Alpine
+## Caching of Cloud Build build steps
 
-- [Create a cypress/alpine minimal image](https://github.com/cypress-io/cypress-docker-images/issues/110)
+- [Google Cloud Build not caching custom build steps?](https://stackoverflow.com/questions/53420807/google-cloud-build-not-caching-custom-build-steps) (SO)
 
-If we can have Electron run on Alpine, a Cypress CI image could be built on top of `firebase-ci-builder`.
+This would **REALLY** be welcome!!!
 
-Otherwise, we need two different kinds of images (Debian for Cypress).
+Should cover:
 
-- [Alpine Linux support](https://github.com/cypress-io/cypress/issues/419) (Cypress issues)
+- any images the project has used within a caching period
+- any `build:` images, built via Docker Compose
 
-This would be the REAL THING!!
-
-- 💥💥 [Run Cypress Headless Without Binary](https://github.com/cypress-io/cypress/issues/1232) 💥💥
-
->...if we supported Chrome headless (which we will)
-
-- [Separate Electron, Cypress app code, and ffmpeg into individual downloads](https://github.com/cypress-io/cypress/issues/3899)
-- [Running cypress in headless mode should not use xvfb](https://github.com/cypress-io/cypress/issues/16505)
-
-*Sum-up: Forget about Alpine - too hard. Focus on tracking where work on headless-friendliness goes. Then .. at some point (2022/23?) introduce a Docker image for the UI side testing. 👏👏*
+*If you have knowledge that GCP is considering this, or a link to share to a ticket that can be tracked, that'd be SPLENDID!*

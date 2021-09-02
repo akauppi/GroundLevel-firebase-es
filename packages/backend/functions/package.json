@@ -12,11 +12,8 @@
   "dependencies": {
     "@google-cloud/functions-framework": "^1.9.0",
     "@google-cloud/logging": "^9.5.4",
-    "firebase-admin": "^9.11.0",
-    "firebase-functions": "^3.15.2"
-  },
-  "devDependencies": {
-    "node-fetch": "^3.0.0-beta.10"
+    "firebase-admin": "^9.11.1",
+    "firebase-functions": "^3.15.5"
   },
   "//": {
     "dependencies": {
@@ -34,6 +31,9 @@
     "scripts": {
       "@google-cloud/functions-framework": [
         "Included, since a post by Firebase suggests that (explicitly defining the version), moving to ES modules implementation (past 3.14.1)."
+      ],
+      "firebase-functions": [
+        "!3.15.2 - that was a bad one."
       ]
     }
   }

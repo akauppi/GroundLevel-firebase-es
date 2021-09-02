@@ -11,15 +11,15 @@
     "functions/*.js"
   ],
   "engines": {
-    "node": "14 || >=16 < 16.6 || >= 16.6.1",
+    "node": "14 || >= 16 < 16.6 || >= 16.6.1",
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 4000 ; then npm run _test1; else docker compose run test ; fi",
-    "_test1": "npm run test:fns:all && npm run test:rules:all",
+    "test": "if port-is-taken --silent 6768 ; then npm run _test2; else npm run -s _test1 ; fi",
+    "_test1": "concurrently --kill-others --success=first --prefix none \"npm run -s start\" \"wait-for 6768 && npm run -s test\"",
+    "_test2": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
     "start": "docker compose up --abort-on-container-exit",
-    "//start": "$(docker-run-cmd) firebase emulators:start --project=demo-2 | grep -v -E \"Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated\"",
     "  - -": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
@@ -34,26 +34,23 @@
     "  - --": "",
     "lint": "eslint .",
     "  -   -": "",
-    "ci:test": "npm run -s ci:seq",
-    "ci:seq": "concurrently --kill-others --success=first -n emul,test \"npm run _ci_emul\" \"wait-for 4000 && npm run -s _ci_seq\"",
-    "_ci_emul": "npx firebase emulators:start --project=demo-2",
-    "_ci_seq": "npm run test:fns:all && npm run test:rules:all",
+    "//ci runs -->": "NODE=16 docker-compose run ci",
+    "ci:warm-up": "npm run test:fns:all",
+    "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "  - - -": "",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
-    "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
     "  -  --": "",
-    "pretest": "npm run -s _prepFunctions",
-    "prestart": "npm run -s _prepFunctions",
-    "preci:test": "npm run -s _prepFunctions",
-    "_prepFunctions": "npm --prefix functions install"
+    "postinstall": "npm run -s _prepFunctions",
+    "_prepFunctions": "npm --prefix functions install",
+    "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.1",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-admin": "^9.100.0-alpha.1",
-    "firebase-jest-testing": "^0.0.4-alpha.2",
-    "jest": "^27.0.6"
+    "firebase-jest-testing": "^0.0.4-alpha.3",
+    "jest": "^27.1.0",
+    "node-fetch": "^3.0.0"
   },
   "//comments": {
     "engines.node": [
@@ -69,12 +66,16 @@
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
     "scripts": {
-      "ci:start": [
-        "DO NOT use '|' in the CI side. The combination of Alpine Linux, 'concurrently' and piping creates a problem,",
-        "where the killing of the emulators hits a wrong process id, and CI run never finishes. See TRACK.md"
+      "ci:test": [
+        "//ci:test shows the command Cloud Build *could* use, to run the tests in Docker.",
+        "It does not seem to work, however. Wait for Docker Compose v2 on Linux.",
+        "",
+        "ci:test is around to allow native execution (with npm and 'concurrently', without Docker Compose).",
+        "If we can use 'docker-compose', 'concurrently' can leave the stage."
       ],
-      "firebase-admin": [
-        "Needed _solely_ for the implementation of the 'warm up' ack model, via a 2nd project in Firestore."
+      "start": [
+        "'--abort-on-container-exit' means that if the warm up (or launch of the emulators themselves) fails,",
+        "the command will fall back to preceding state. Important"
       ]
     }
   }

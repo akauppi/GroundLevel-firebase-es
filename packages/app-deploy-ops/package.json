@@ -21,10 +21,9 @@
     "_prepBuildWorker": "rollup -c roll/rollup.config.worker.js",
     "_prepCopy": "cp node_modules/@local/app/dist/favicon.* node_modules/@local/app/dist/*.css roll/out/",
     "  - --": "",
-    "serve": "$(docker-run-cmd) firebase emulators:start --project=demo-9 | grep -v -E \"You are not currently authenticated|Detected demo project ID|The Emulator UI requires a project ID to start\"",
-    "//serve": "$(docker-run-cmd) /bin/bash -c \"firebase emulators:start --project=demo-9 | grep -v -E \\\"You are not currently authenticated|Detected demo project ID|The Emulator UI requires a project ID to start\\\"\"",
+    "serve": "docker compose up --abort-on-container-exit",
     "  - -- ": "",
-    "ci:build": "ENV=ci npm run build",
+    "ci:build": "sh/gen-firebase-ci.sh > ../../firebase.ci.js && ENV=ci npm run build",
     "ci:deploy": "firebase deploy --only hosting",
     "- -": "",
     "//build:vite": "vite build -c vite/vite.config.js",
@@ -37,20 +36,21 @@
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
+    "@firebase/auth": "file:../../node_modules/@firebase/auth",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "@local/app": "file:../app",
-    "raygun4js": "^2.22.3"
+    "raygun4js": "^2.22.4"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
     "@local/tools": "file:../../tools",
-    "@rollup/plugin-alias": "^3.1.4",
+    "@rollup/plugin-alias": "^3.1.5",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
-    "concurrently": "^6.2.0",
+    "concurrently": "^6.2.1",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "rollup": "^2.54.0",
+    "rollup": "^2.56.2",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-visualizer": "^5.5.2"

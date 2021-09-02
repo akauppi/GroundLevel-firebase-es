@@ -41,14 +41,13 @@ Likely the author has managed to mess up its configuration?=
 
 ## ES Lint: Top-level-await support
 
-Anything needs to be "stage 4", for ES Lint to touch it. TLA is stage 3, though stable (and not behind flags) in Node.js 16.
+Finally, ES Lint 8.0 will have it:
 
-- tc39/[proposal-top-level-await](https://github.com/eslint/eslint/issues/13178)
-- [Enable Top Level Await](https://github.com/eslint/eslint/issues/13178)
+- [Add Support to Top-level await](https://github.com/eslint/eslint/issues/14632)
 
-  Though those are closed, it doesn't mean top-level-await support is there. It's not, unless one uses Babel parser.
-  
-- [ ] Check when the [proposal](https://github.com/tc39/proposal-top-level-await) reaches Stage 4. 
+Remove this when we can upgrade all of these:
 
->This means there's bleed on `await` when we use it at top level. Nothing more.
-
+- [x] `8.0.0-beta.0` is available: [releases](https://github.com/eslint/eslint/releases)
+   - [ ] [eslint-plugin-node](https://github.com/mysticatea/eslint-plugin-node/releases) is not using it, yet (Aug-21)
+   - [ ] `eslint-plugin-vue`
+   - [ ] `eslint-plugin-cypress`

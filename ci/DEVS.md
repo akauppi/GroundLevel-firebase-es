@@ -29,7 +29,7 @@ The `*_cloudbuild` bucket has a `source/` folder with `.tgz` packages.
 To launch a Docker container, similar to what `gcloud builds submit` does:
 
 ```
-$ docker run -it --rm -v `pwd`/..:/workspace gcr.io/groundlevel-160221/firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
+$ docker run -it --rm -v `pwd`/..:/workspace firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
 bash-5.0#
 ```
 

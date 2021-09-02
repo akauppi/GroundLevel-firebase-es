@@ -27,6 +27,13 @@ describe ('Can proxy application logs', () => {
     expect(data).toBe(true);
   } );
 });
+  // DC (mac):
+  //  - no warm-up; cold emul:  1883 ms
+  //  - warmed up; cold emul:    135, 114 ms
+  //
+  // CI (DC):
+  //  - no warm-up:              890 ms     # warm-up disabled by editing the DC yml
+  //  - warmed up:                51, 44 ms
 
 // Copy-pasted from 'app-deploy-ops/adapters':
 //

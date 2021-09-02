@@ -13,7 +13,7 @@ Web application sample project.
 
 Cypress is brought in via `npm`, but in order to use it as a desktop application (which it is), please take the following steps:
 
-<details><summary>**macOS**</summary>
+<details><summary><b>macOS</b></summary>
 
 After `npm install`:
 
@@ -28,7 +28,7 @@ Move the icon to your favourite location and right click > `Options` > `Keep in 
 This helps you launch the tool as a desktop application, in the future.
 </details>
 
-<details><summary>**Linux**</summary>
+<details><summary><b>Linux</b></summary>
 
 As per the Cypress [installation instructions](https://docs.cypress.io/guides/getting-started/installing-cypress#Linux):
 
@@ -40,7 +40,7 @@ $ sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-
 That's all. You'll be using the Cypress version installed via `npm`. Launch it with `npx cypress open` after the install.
 </details>
 
-<details><summary>**Windows 10 + WSL2**</summary>
+<details><summary><b>Windows 10 + WSL2</b></summary>
 
 >*Within 2021, Microsoft is bringing the [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) to Windows 10. This will allow us to launch the Linux-side Cypress GUI, and use it from Windows. 🎉🎉🥁*
 

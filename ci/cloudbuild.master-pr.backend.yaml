@@ -7,12 +7,21 @@
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
 #
+# Uses images:
+#   - node:16
+#   - firebase-ci-builder   (pushed to Container Registry)
+#   - docker/compose
+#
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
 #   - env.variables (just some):
 #     PWD=/workspace
 #     HOME=/builder/home
+#
+# Note:
+#   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
+#   to regular users (of other images). This is normally not a concern.
 #
 
 steps:
@@ -28,20 +37,79 @@ steps:
   entrypoint: npm
   args: ['install']
   dir: packages/backend
-- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-  entrypoint: npm
-  args: ['run', 'ci:test']
-  dir: packages/backend
+
+# EXPERIMENTING:
+# Do emulators start, without DC?
+#
+# USE THIS TO DEBUG CASES where the emulators don't start. Easier to see the console output.
+#
 #- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#  entrypoint: npm
-#  args: ['run', 'lint']
+#  entrypoint: firebase
+#  args: ['emulators:start', '--project=demo-2']
 #  dir: packages/backend
+
+# --- --- --- 📣⚠️🪤🚨
+# WARNING!!!
+#
+#   If you have a problem with - say - Cloud Functions, INSTEAD OF EXITING, THE EMULATORS KEEP RUNNING!! This is NOT
+#   ideal for developers, because it gives the feeling things might be right. INSTEAD, FIREBASE EMULATORS SHOULD FAIL
+#   if there is a major problem like Cloud Functions cannot be started. **PLEASE PUT PRESSURE ON FIREBASE TO CHANGE
+#   THIS BEHAVIOUR if you agree with it.** Saves all of our time. Thank You.
+#
+# --- --- --- 📣⚠️🪤🚨
+
+# --- ALTERNATIVE A:
+# Run tests within DC
+#
+# Works.
+#
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['run', 'ci']
+  dir: packages/backend
+  env:
+    - NODE=16
+    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+
+# --- ALTERNATIVE B:
+# Launch emul/warm-up in DC, separate Cloud Build step for running the tests.
+#
+# - requires also 'ci:test' target to wait for '6768' in 'package.json'
+#
+# NOTE:
+#   - The 'up', '-d' pattern is used in online samples (eg. [1]), but is it valid in 2021? Does Cloud Build let
+#     an earlier step run, if placed on the background?
+#   - Below, 'npm run ci:test' remains waiting for port 6768. It doesn't seem to get it, from the DC. (study later, if we want to try it?)
+#
+#   [1]: https://github.com/Philmod/gcb-docker-compose/blob/master/cloudbuild.yaml
+#
+# Alt B is technically nicer (if it worked), since the setting up of servers and test steps are defined here, in
+# Cloud Build yml, instead buried into the DC yml.
+#
+#?- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#?  args: ['up', '-d']
+#?  dir: packages/backend
+#?  env:
+#?    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+#?    - NODE=16
+#?- name: node:16
+#?  entrypoint: npm
+#?  args: ['run', 'ci:test']
+#?  dir: packages/backend
+
+- name: node:16
+  entrypoint: npm
+  args: ['run', 'lint']
+  dir: packages/backend
 
 # --- Timeout
 #
-# Cloud Build:  1:51
+# Cloud Build
+#   - native, no lint:          1:51, 1:45  # (old results)
+#   - Alternative A, with lint: 2:23, 2:30
+#   - Alternative B, with lint:     (cannot run; 'npm' does not see the ports)
 #
 timeout: 240s
 
 substitutions:
   _BUILDER_TAG: 9.16.0-node16-npm7
+  _DOCKER_COMPOSE_TAG: 1.29.2

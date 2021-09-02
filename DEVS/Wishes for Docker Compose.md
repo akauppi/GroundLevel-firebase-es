@@ -68,3 +68,13 @@ Problem with the quick fix is that it adds unnecessary "magic" to the `docker-co
 
 
 
+## Show emojies in console output
+
+![](.images/docker-container-logs.png)
+<!--
+Docker Desktop on Mac 3.6.0
+-->
+
+Some software, like Firebase console (pictured) do heavy use of non-ASCII characters.
+
+It would be lovely to see them in their glory in the Docker Compose output.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2-Sep-21
+
+- Backend CI testing using Docker Compose
+
 ## 12-Aug-21
 
 - Using Docker Compose for handling concurrency in testing.

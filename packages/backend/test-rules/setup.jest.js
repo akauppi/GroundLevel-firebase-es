@@ -11,8 +11,6 @@ const projectId = "rules-test";   // must be lower case
 
 const setup = async _ => {
   await prime(projectId, docs);
-
-  console.debug("Docs primed for test-rules.");
 }
 
 export default setup;

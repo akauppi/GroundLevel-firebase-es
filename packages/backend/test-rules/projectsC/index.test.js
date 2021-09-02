@@ -12,7 +12,7 @@ const anyDate = new Date();   // a non-server date
 
 let unauth_projectsC, auth_projectsC, abc_projectsC, def_projectsC, ghi_projectsC;
 
-beforeAll(  () => {
+beforeAll(  async () => {
   const coll = collection('projects');
 
   unauth_projectsC = coll.as(null);
@@ -26,13 +26,25 @@ describe("'/projects' rules", () => {
 
   //--- ProjectsC read rules ---
 
-  test('unauthenticated access should fail', async () => {
-    await expect( unauth_projectsC.get() ).toDeny();
-  });
+  test('unauthenticated access should fail', () => (
+    expect( unauth_projectsC.get() ).toDeny()
+  ));
+    // native (mac); server is warm
+    //  - no client warm-up:               593, 625 ms
+    //  - client warm-up (with await):      68,  46 ms    <<-- technically more correct, but overall waits more
+    //  - client warm-up (without await):  145, 160 ms
+    //
+    // DC (mac):
+    //  - no warm-up:     2582, 2204 ms   <--X would fail, without the warm-up
+    //  - client warm-up:  743, 1066 ms
+    //
+    // CI (DC):
+    //  - no warm-up:
+    //  - client warm-up:
 
-  test('user who is not part of the project shouldn\'t be able to read it', async () => {
-    await expect( auth_projectsC.get() ).toDeny();
-  });
+  test('user who is not part of the project shouldn\'t be able to read it', () => (
+    expect( auth_projectsC.get() ).toDeny()
+  ));
 
   test('user who is an author or a collaborator can read a project (that is not \'removed\')', () => Promise.all([
     expect( abc_projectsC.doc("1").get() ).toAllow(),
@@ -131,11 +143,8 @@ describe("'/projects' rules", () => {
       expect( abc_projectsC.doc("1").update(p1_addAuthor) ).toAllow(),
       expect( abc_projectsC.doc("3-multiple-authors").update(p3_removeAuthor) ).toAllow(),
 
-      // Possible Firestore emulator bug: if we remove the author with '{ authors: [] }', we are denied.
-      //    If we remove it with 'FieldValue.arrayRemove', we are allowed.
-      //
       expect( abc_projectsC.doc("1").update(p1_removeAuthor) ).toDeny(),  // only author
-      expect( abc_projectsC.doc("1").update( { authors: [] }) ).toDeny(),  // only author
+      //expect( abc_projectsC.doc("1").update( { authors: [] }) ).toDeny(),  // only author (another way of testing it)
 
       expect( ghi_projectsC.doc("3-multiple-authors").update(p3_removeAuthor) ).toDeny()  // collaborator
     ]);

@@ -1,0 +1,33 @@
+#
+# docker-compose.yml
+#
+# For hosting the deployment candidate files
+#
+# Note: It is important we use Firebase Hosting for this step (if it's what is going to host the files in the cloud).
+#   This way, redirects etc. from 'firebase.json' get used, also by 'npm run serve'.
+#
+# Docker Compose (v3) note:
+#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+# References:
+#   Overview of Docker Compose (Docker docs)
+#     -> https://docs.docker.com/compose/
+#   Compose file version 3 reference
+#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+version: '3.0'
+
+services:
+  host:
+    image: firebase-ci-builder:9.16.0-node16-npm7
+    ports:
+      - "4000:4000"
+      - "3012:3012"
+      # Keep ports aligned with 'firebase.json'
+    volumes:
+      - .:/work
+    working_dir: /work
+    command: bash -o pipefail -c
+      'echo "Launching Docker... 🐳" &&
+      firebase emulators:start --project=demo-9
+        | grep -v -E "Detected demo project ID|You are not currently authenticated|The Emulator UI requires a project ID to start"'

@@ -11,6 +11,22 @@ Responsible for:
    - proxying to Cloud Logging (ops)
 - testing the back-end
 
+**Folder structure**
+
+```
+├── functions             # Cloud Functions definitions
+├── test-fns              # tests for Cloud Functions
+└── test-rules            # tests for Firestore Security Rules
+```
+
+**Important files**
+
+```
+docker-compose.yml    # Launching the emulators  
+firebase.json         # Port definitions for the emulators
+```
+
+The root has various configuration files.
 
 ## Requirements
 
@@ -19,16 +35,25 @@ Responsible for:
 
    >`npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
 
-- Docker Desktop
+- Docker Compose 2.0
 
+	<details><summary>Installation on Linux</summary>
+   DC 2.0 comes with Docker Desktop for Windows and Mac. The Linux version
+   needs to be separately installed, for now.
+   
+   - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
+   - [Install on Linux](https://docs.docker.com/compose/cli-command/#install-on-linux)
+	</details>
+	
 <!-- 
 developed with:
-- macOS 11.4
-- node 16.5
-- npm 7.19
+- macOS 11.5
+- node 16.8
+- npm 7.21
 
-- Docker Desktop 3.5.2 with: 1 CPU core, 1.5 GB RAM
+- Docker Desktop 3.6.0 with: 1 CPU core, 1.5 GB RAM
 -->
+
 
 ## Getting started
 
@@ -36,20 +61,7 @@ developed with:
 $ npm install
 ```
 
-<!-- Editor's note
-Ideally, we just instruct people to `npm test` and it automatically launches Firebase Emulators (and shuts them down.
-
-It used to be like this. However, timeouts and Docker jams caused to (hopefully, temporarily) go to this "keep emulators running all the time" approach.
--->
-
-For the time you are working with `backup`, start Firebase Emulators in another terminal and keep them running:
-
-```
-$ npm run start
-...
-```
-
-In the first terminal:
+Make sure Docker is running and:
 
 ```
 $ npm test
@@ -57,19 +69,18 @@ $ npm test
 
 The tests should pass, or be skipped.
 
+>Note: There's a lot of noise in the above step, because of starting and closing down the emulators. You can avoid this by launching emulators in another terminal, as described below.
+
+
 ## Development workflow
 
-<!-- was
 ```
 $ npm start
 ```
 
-This launches the Firebase emulator in one terminal, and automatically picks up changes to the sources.
+This launches the Firebase emulators in one terminal, and automatically picks up changes to the sources.
 
-You can then run individual tests against it (see `package.json` for the precise name of commands).
--->
-
-In addition to running all the tests at once, you can run individual tests like this:
+You can then run individual tests against it:
 
 ```
 $ npm run test:fns:userInfo
@@ -77,9 +88,10 @@ $ npm run test:fns:userInfo
 
 This is useful when working on a certain test. Look in `package.json` for all such commands.
 
+>Note: If you now run `npm test`, it will use the existing emulators instead of launching a new set.
+
+
 ## Deploying
 
-Actual deploying is expected to be done via Continuous Integration. See `ci` at the repo root.
-
-To deploy manually, follow the instructions in `../../`[Deployment to staging](../../Deployment%20to%20staging..md).
+Deploying is done via Continuous Integration. See `ci` at the repo root.
 

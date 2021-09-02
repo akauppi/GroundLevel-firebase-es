@@ -36,7 +36,7 @@ const LOCAL = import.meta.env.MODE === 'dev_local';
 //
 const VERSION = _VERSION;    // both dev and production
 
-const initializedProm = (async () => {    // Promise of ()
+(_ => {    // () => ()
   const tr = appInitTrack.start();
 
   // Set an error handler.
@@ -101,7 +101,7 @@ const initializedProm = (async () => {    // Promise of ()
 })();
 
 export {
-  initializedProm,
+  //initializedProm,
   LOCAL,
   VERSION
 }

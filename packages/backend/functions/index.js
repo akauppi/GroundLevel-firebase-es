@@ -43,9 +43,20 @@ const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 //  <<
 //
 //  Asked here: https://github.com/firebase/firebase-admin-node/discussions/1390
+//
+// GUESS: It's likely due to Cloud Functions running functions in their own Node environments. This would mean that
+//    the source gets read:
+//      - once to find out what functions are there
+//      - once per function, to load such function
+//
+//    If there is documentation about this (haven't found), place the URL here.
+//    If there is not, would Firebase folks please make some (or we can reverse engineer and do it here! ⭐️
 //---
 
+// Initialize Firebase only if actually needed? tbd.
+//
 admin.initializeApp();
+const db = admin.firestore();
 
 // Under emulation, run as the default region (makes testing simpler).
 // In production, the region is brought via Cloud Function configuration.
@@ -74,9 +85,6 @@ export const userInfoShadow_2 = regionalFunctions.firestore
   .document('/userInfo/{uid}')
   .onWrite( async (change, context) => {
     const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
-
-    const db = admin.firestore();
-
     const uid = change.after.id;
 
     const newValue = after.data();      // { ... } | undefined
@@ -131,14 +139,3 @@ exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // t
      ***_/
   })
 */
-
-// Wake up!!!!!!!! 😇⏰⏰⏰
-//
-// Cloud Functions remain sleeping, but we can wake them up right here, right now. O :)
-//
-if (EMULATION && process.env["FUNCTION_TARGET"] === undefined) {    // avoid loading warm-up twice
-
-  if (process.env['HOME'] !== '/builder/home') {    // don't warm up CI runs
-    import('../functions-warm-up/index.js');
-  }
-}

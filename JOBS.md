@@ -46,3 +46,8 @@ You get:
 
 Ability to participate in spreading good usability patterns to the audience using the template. Maybe you affect the people and their apps. 😀
 
+## Native Linux responsible
+
+You are interested in GroundLevel and run it on a regular basis on a suitable Linux OS (Debian, Ubuntu).
+
+The project is regularily tested only on macOS and Windows 10 + WSL2 environments; your responsibility is to see that all works - and continues to work - on your Linux platform of choice.

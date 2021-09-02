@@ -2,17 +2,19 @@
   "name": "@local/root",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "14 || >= 16 < 16.6 || >= 16.6.1"
+  },
   "scripts": {
-    "initStagingAndDeploy": "init-staging/launch.sh",
-    "- ": "",
-    "preinstall": "sh/npm-version-check.sh",
-    "postinstall": "npm run -s _postinstall1",
-    "_postinstall1": "npm --prefix tools install"
+    "first": "first/deploy.sh",
+    "--": "",
+    "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh",
+    "postinstall": "npm --prefix tools install"
   },
   "devDependencies": {
-    "eslint": "^7.31.0",
+    "eslint": "^7.32.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.0.0-beta.8"
+    "firebase": "^9.0.1"
   },
   "//": {
     "": [
@@ -21,6 +23,16 @@
       "",
       "Some tools ('wait-on', 'concurrently') are not here. Those are seen as implementation details of the particular",
       "submodules (so if you use a package in two subpackages, it does not mean you must declare it here)."
-    ]
+    ],
+    "engines.node": [
+      "Demanding it here provides the developer instant feedback if the Node.js is not suitable.",
+      "16.6.0 has an issue with Jest that's fixed in 16.6.1."
+    ],
+    "scripts": {
+      "$BUILDER_OUTPUT": [
+        "Indication of Cloud Build - defined both in automated and manually triggered builds.",
+        "Avoid '[[' (bash) since 'node:16-alpine' image (CI) won't have it."
+      ]
+    }
   }
 }

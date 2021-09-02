@@ -3,13 +3,18 @@
 *
 * Entry point for production build.
 */
-//import { assert } from './assert.js'
-
 import { initializeApp } from '@firebase/app'
 
-import './catch'
-
 import { default as config } from '/@env'
+
+// Initialize crash reporting and performance monitoring, before loading the payload.
+// NOTE: This means they need to init *fast* (spawn longer-taking initialization).
+//
+import '@ops/crash'
+import '@ops/perf'
+
+import './catch-ui-move-me-away'
+import { tickle } from '@ops/userChange'
 
 const t0 = performance.now();   // start ⏱
 
@@ -20,28 +25,16 @@ const t0 = performance.now();   // start ⏱
 //
 initializeApp(config);
 
-// tbd. Find a way to differentiate between:
-//    - running in a developer's machine ('npm run serve')
-//    - production
-//
-//let stage = "???";
+console.debug("Firebase ready (launching app):", Math.round(performance.now() - t0) );    // X ms (tbd. ops APM??)
 
 /*await*/ (async _ => {
-  console.debug("Firebase ready (launching app):", Math.round(performance.now() - t0) );    // tbd. #gunray
+  await import('@local/app');
 
-  await import('@local/app').then( mod => mod.initializedProm );
+  console.debug("App on its own :)", Math.round(performance.now() - t0) );   // 101
 
-  console.debug("App on its own :)", performance.now() - t0);   // 101
-
-  // Import 'ops/central' now that Firebase is initialized, and the app is on its way.
+  // Report the user to interested adapters
   //
-  // Note: This matters for:
-  //    - allowing 'crash.js' to see 'fatal' early on (...unnecessary comment removed..)
-  //    - seeing possible loading problems at launch, even if the app wouldn't use 'central' logging
-  //
-  const { central } = await import('./ops-implement/central');
-  console.debug("Central initialized:", performance.now() - t0);    // 157
-
-  window.central = central;   // TEMP; for use from console
+  const init = await import('./trackUserChange.js').then( mod => mod.init );
+  init(tickle);
 
 })();   // free-running tail

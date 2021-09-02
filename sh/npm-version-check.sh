@@ -3,6 +3,9 @@ set -eu -o pipefail
 
 # Check that 'npm' is recent enough.
 #
+# Context:
+#   Interactive use of 'npm' (not CI)
+#
 # - npm 6 is incompatible with this project (no 'file:' support)
 # - npm 7.6.x had some minor inconsistencies, so recommending 7.7.0+ (but allowing people to proceed)
 #
@@ -12,13 +15,6 @@ set -eu -o pipefail
 _HAVE="$(npm --version)"
   # e.g. "7.9.0"
 _WANT="7.7"
-
-# Pass always with Alpine - we know the image has npm high enough.
-#
-if sort --help 2>&1 | grep BusyBox; then
-  >&2 echo "Alpine: skipping npm version check ($_HAVE)."
-  exit 0
-fi
 
 printf "%s\n" "7.0" $_HAVE | sort -C -V || (
   >&2 echo "ERROR: Please upgrade to npm >= $_WANT"
