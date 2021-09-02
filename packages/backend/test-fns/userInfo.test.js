@@ -34,12 +34,13 @@ describe("userInfo shadowing", () => {
 
     await expect( docListener("projects/1/userInfo/abc") ).resolves.toContainObject(william);
   });
-    // With warm-up:
-    //  - DC (macOS):    559 ms
-    //  - CI (with DC):  XXX
+    // DC (mac):
+    //  - no warm-up:   3622, 3795 ms     # run from clean: 'docker compose down', 'docker compose up warm-up'
+    //  - warmed up:     559,  729 ms
     //
-    // Without warm-up:
-    //  - DC (macOS):   3622, 3795 ms     # run from clean: 'docker compose down', 'docker compose up warm-up'
+    // CI (DC):
+    //  - no warm-up:   2184 ms           # warm-up disabled by editing the DC yml
+    //  - warmed up:     550,  678 ms
 
   test('Central user information is not distributed to a project where the user is not a member', async () => {
 

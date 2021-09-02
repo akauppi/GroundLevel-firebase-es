@@ -44,8 +44,6 @@ steps:
 # USE THIS TO DEBUG CASES where the emulators don't start. Easier to see the console output.
 #
 #- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#  #entrypoint: 'npm'
-#  #args: ['run', '~~start']
 #  entrypoint: firebase
 #  args: ['emulators:start', '--project=demo-2']
 #  dir: packages/backend
@@ -60,17 +58,43 @@ steps:
 #
 # --- --- --- 📣⚠️🪤🚨
 
+# --- ALTERNATIVE A:
+# Run tests within DC
+#
+# Works.
+#
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
   args: ['run', 'ci']
   dir: packages/backend
   env:
+    - NODE=16
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
 
-# tbd. ALTERNATIVE
-#- name: node:16
-#  entrypoint: npm
-#  args: ['run', 'ci:test']
-#  dir: packages/backend
+# --- ALTERNATIVE B:
+# Launch emul/warm-up in DC, separate Cloud Build step for running the tests.
+#
+# - requires also 'ci:test' target to wait for '6768' in 'package.json'
+#
+# NOTE:
+#   - The 'up', '-d' pattern is used in online samples (eg. [1]), but is it valid in 2021? Does Cloud Build let
+#     an earlier step run, if placed on the background?
+#   - Below, 'npm run ci:test' remains waiting for port 6768. It doesn't seem to get it, from the DC. (study later, if we want to try it?)
+#
+#   [1]: https://github.com/Philmod/gcb-docker-compose/blob/master/cloudbuild.yaml
+#
+# Alt B is technically nicer (if it worked), since the setting up of servers and test steps are defined here, in
+# Cloud Build yml, instead buried into the DC yml.
+#
+#?- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#?  args: ['up', '-d']
+#?  dir: packages/backend
+#?  env:
+#?    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+#?    - NODE=16
+#?- name: node:16
+#?  entrypoint: npm
+#?  args: ['run', 'ci:test']
+#?  dir: packages/backend
 
 - name: node:16
   entrypoint: npm
@@ -79,10 +103,12 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build (native, no lint):  1:51, 1:45
-#     - DC, with lint:      2:23
+# Cloud Build
+#   - native, no lint:          1:51, 1:45  # (old results)
+#   - Alternative A, with lint: 2:23, 2:30
+#   - Alternative B, with lint:     (cannot run; 'npm' does not see the ports)
 #
-timeout: 400s
+timeout: 240s
 
 substitutions:
   _BUILDER_TAG: 9.16.0-node16-npm7

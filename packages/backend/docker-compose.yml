@@ -94,3 +94,12 @@ services:
       #
     depends_on: ['emul', 'warm-up']
     profiles: ['manual']
+
+# Alternative B:
+#   - copied from https://github.com/Philmod/gcb-docker-compose/blob/master/docker-compose.yml
+#
+# Even this did not matter for seeing port 6768 in the 'npm' step.
+#?networks:
+#?  default:
+#?    external:
+#?      name: cloudbuild
