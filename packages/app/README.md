@@ -5,9 +5,16 @@ Web application sample project.
 ## Requirements
 
 - `npm` >= 7.7.0
-- Docker Desktop
+- Docker Compose 2.0
 
-   >For Mac and Windows, Docker Compose comes as part of Docker Desktop. For Linux, see [Install Compose on Linux systems](https://docs.docker.com/compose/install/#install-compose-on-linux-systems).
+	<details><summary>Installation on Linux</summary>
+   DC 2.0 comes with Docker Desktop for Windows and Mac. The Linux version
+   needs to be separately installed, for now.
+   
+   - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
+   - [Install on Linux](https://docs.docker.com/compose/cli-command/#install-on-linux)
+	</details>
+
 
 ### Cypress setup
 
@@ -64,9 +71,9 @@ Try launching the `Cypress.exe` app.
 Development is done with: 
 
 - macOS 11.5
-- node 16.5
-- npm 7.19
-- Docker Desktop 3.5.2
+- node 16.8
+- npm 7.21
+- Docker Desktop 4.0
 -->
 
 ## Getting started
@@ -84,11 +91,14 @@ Launch the app:
 ```
 $ npm run dev
 ...
-[vite_1]   vite v2.4.4 dev server running at:
-[vite_1]
-[vite_1]   > Local:    http://localhost:3000/
-[vite_1]   > Network:	 ...
-[vite_1]
+
+  vite v2.4.4 dev server running at:
+
+  > Local:    http://localhost:3000/
+  > Network:  http://192.168.1.62:3000/
+
+  ready in 489ms.
+  
 ...
 ```
 
@@ -100,8 +110,11 @@ Try it:
 
 [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 
-Try making some changes in the `src/**` files (`src/pages/Home/index.vue` has the main page) and see that they are reflected in the browser.
+Try making some changes in the `src/**` files (eg. change the title in `src/pages/Home/index.vue`) and see that they are reflected in the browser.
 
+<!-- tbd. some more fun mod, perhaps?
+>![](.images/modded-welcome.png)
+-->
 
 ## Two development workflows
 
@@ -132,93 +145,12 @@ This is something of a hazy area - give feedback if you have practical suggestio
 
 Use this mode when:
 
-- you are developing back-end features (Firestore security rules, Cloud Functions) and want to test that they work with the front-end. <font color=gray>*[instructions later in this doc]*</font>
+- you are developing back-end features (Firestore security rules, Cloud Functions) and want to test that they work with the front-end.
 - you want to start with primed data and users, each time, instead of persisting the changes
 - you want to skip the sign-in dialog, to speed up development a few clicks
 - you don't have a Firebase account, yet
 
-With local mode, you can test back-end features while developing them, and only deploy working back-end stuff.
-
-#### Launch
-
-Let's see a bit in detail, what happens when you start the app:
-
-```
-$ npm run dev
-
-> dev
-> npm run dev:local
-
-> predev:local
-> port-is-free 3000,5002 && npm run --silent _genEnvLocal
-
-...
-> dev:local
-> concurrently --kill-others-on-fail -n emul,init "npm run --silent _dev_local_emul" "npm run -s _dev_local_init && npm run -s _dev_local_vite"
-
-[emul] Launching Docker... 🐳
-[emul] 
-```
-
-We launch Docker for running the Firebase Emulators.
-
-```
-...
-[emul] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI.
-[emul] i  emulators: Starting emulators: auth, functions, firestore
-[emul] ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: database, hosting, pubsub, storage
-[emul] ⚠  Your requested "node" version "14 || ^16" doesn't match your global version "16"
-[emul] ⚠  functions: You are not signed in to the Firebase CLI. If you have authorized this machine using gcloud application-default credentials those may be discovered and used to access production services.
-[emul] ⚠  functions: Unable to fetch project Admin SDK configuration, Admin SDK behavior in Cloud Functions emulator may be incorrect.
-[emul] i  firestore: Firestore Emulator logging to firestore-debug.log
-[emul] i  ui: Emulator UI logging to ui-debug.log
-[emul] i  functions: Watching "/work/functions" for Cloud Functions...
-[emul] ✔  functions[cloudLoggingProxy_v0]: http function initialized (http://0.0.0.0:5002/app/us-central1/cloudLoggingProxy_v0).
-[emul] ✔  functions[userInfoShadow_2]: firestore function initialized.
-[emul] 
-[emul] ┌─────────────────────────────────────────────────────────────┐
-[emul] │ ✔  All emulators ready! It is now safe to connect your app. │
-[emul] │ i  View Emulator UI at http://0.0.0.0:4000                  │
-[emul] └─────────────────────────────────────────────────────────────┘
-[emul] 
-[emul] ┌────────────────┬──────────────┬───────────────────────────────┐
-[emul] │ Emulator       │ Host:Port    │ View in Emulator UI           │
-[emul] ├────────────────┼──────────────┼───────────────────────────────┤
-[emul] │ Authentication │ 0.0.0.0:9100 │ http://0.0.0.0:4000/auth      │
-[emul] ├────────────────┼──────────────┼───────────────────────────────┤
-[emul] │ Functions      │ 0.0.0.0:5002 │ http://0.0.0.0:4000/functions │
-[emul] ├────────────────┼──────────────┼───────────────────────────────┤
-[emul] │ Firestore      │ 0.0.0.0:6767 │ http://0.0.0.0:4000/firestore │
-[emul] └────────────────┴──────────────┴───────────────────────────────┘
-[emul]   Emulator Hub running at localhost:4400
-[emul]   Other reserved ports: 4500
-...
-```
-
-The emulators are started in the background. The `wait-for` tool waits for them to be up and then launches a script that primes the emulated Firestore instance with data and local users:
-
-```
-[init] Creating... { uid: 'dev', displayName: 'Just Me' }
-```
-
-The command then proceeds to serve the files, using Vite:
-
-```
-[init]   vite v2.3.7 dev server running at:
-[init] 
-[init]   > Local: http://localhost:3000/
-[init]   > Network: use `--host` to expose
-[init] 
-[init]   ready in 1072ms.
-[init] 
-...
-```
-
-The data used for priming is located in `local/docs.js`. Users created are in `local/users.js`. You can customize these to your/your team's liking.
-
-Remember that ANY CHANGES TO THE DATA are lost when you close the emulator (with Ctrl-C). Use that as a feature...
-
->Note: You can use this way of launching for *both* the app and the backend; the other way doesn't cut it.
+With local mode, you can test back-end features while developing them, and only deploy working stuff.
 
 
 ### `dev:online`
@@ -233,7 +165,7 @@ Use this when:
 - you have a Firebase account
 - you want to sign in as a real user
 
-The mode needs `firebase.staging.js` (in the project's root), to find the staging project. Instructions for creating it are in the root `README`.
+The mode needs `firebase.staging.js` in the project's root, to find the staging project. Instructions for creating it are in the root `README`.
 
 #### Launch! 🚀
 
@@ -282,7 +214,7 @@ With the sample app, there may be warnings but there should not be errors.
 
 You can use Cypress for test based development as well as running all the tests, from command line.
 
-Make sure you have followed the instructions in the "Requirements" section, concerning Cypress desktop application.
+- [ ] Make sure you have followed the instructions in the "Requirements" section, concerning Cypress desktop application.
 
 
 ### Running all the tests
@@ -325,9 +257,8 @@ In short, you can:
 The Cypress approach changes the way we do software. The more time you spend with it, the more time it likely will save you.
 
 
-#### Note
-
-Some Cypress features like "stubs" and "proxies" are not need, at all. Those are intended for building scaffolding when running things locally, but we have the whole Firebase emulators so we can work against the Real Thing.
+>**Note:**
+>Some Cypress features like "stubs" and "proxies" are not need, at all. Those are intended for building scaffolding when running things locally, but we have the whole Firebase emulators so we can work against the Real Thing.
 
 
 ## Production build
@@ -350,9 +281,12 @@ dist/vue.js.map      512.57kb
 
 This builds your front end application in `dist/` folder. It contains all the logic and the styles that your application has, but it lacks the operational awareness that makes it fully ready for production.
 
-We'll add that layer around it in the final sub-package, `../app-deploy-ops`.
+We'll add that layer in the next sub-package, `app-deploy-ops`.
 
 
-## Maintenance
+## Maintenance 
+
+### Cleaning up after Cypress
 
 Cypress binaries are gathered in [a cache directory](https://docs.cypress.io/guides/getting-started/installing-cypress#Binary-cache). You might want to clean the earlier ones away, at times, to save disk space.
+

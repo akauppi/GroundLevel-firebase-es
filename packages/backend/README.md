@@ -19,13 +19,6 @@ Responsible for:
 └── test-rules            # tests for Firestore Security Rules
 ```
 
-**Important files**
-
-```
-docker-compose.yml    # Launching the emulators  
-firebase.json         # Port definitions for the emulators
-```
-
 The root has various configuration files.
 
 ## Requirements
@@ -51,7 +44,7 @@ developed with:
 - node 16.8
 - npm 7.21
 
-- Docker Desktop 3.6.0 with: 1 CPU core, 1.5 GB RAM
+- Docker Desktop 4.0.0 with: 1 CPU core, 1.5 GB RAM
 -->
 
 
@@ -69,16 +62,19 @@ $ npm test
 
 The tests should pass, or be skipped.
 
->Note: There's a lot of noise in the above step, because of starting and closing down the emulators. You can avoid this by launching emulators in another terminal, as described below.
+>Note: The above command uses Docker Compose to launch, and warm up, Firebase Emulators. They remain running until you run `docker compose down` in this directory.
 
 
 ## Development workflow
 
 ```
 $ npm start
+...
+Firebase Emulators are running. Use 'docker compose down' to run them down.
+
 ```
 
-This launches the Firebase emulators in one terminal, and automatically picks up changes to the sources.
+This launches the Firebase emulators, and automatically picks up changes to the sources.
 
 You can then run individual tests against it:
 
@@ -91,7 +87,17 @@ This is useful when working on a certain test. Look in `package.json` for all su
 >Note: If you now run `npm test`, it will use the existing emulators instead of launching a new set.
 
 
+## Leaving the scene
+
+```
+$ docker compose down
+```
+
+Closes the Firebase Emulators, releasing the ports they needed.
+
+Do this eg. when switching between backend and front-end work. Also `../app` uses Docker Compose and some of the ports overlap.
+
+
 ## Deploying
 
 Deploying is done via Continuous Integration. See `ci` at the repo root.
-

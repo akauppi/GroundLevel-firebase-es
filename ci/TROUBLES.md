@@ -16,7 +16,7 @@ Step #0: npm ERR! enoent
 Did you miss the `..` at the end of:
 
 ```
-$ gcloud builds submit --config=cloudbuild.master-pr.app.yaml ..
+$ gcloud builds submit --config=cloudbuild.app.yaml ..
 ```
 
 ## Deploying manually gives `[secretmanager.googleapis.com] not enabled`

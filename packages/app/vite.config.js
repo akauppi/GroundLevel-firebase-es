@@ -203,5 +203,8 @@ export default {
     },
     // Allows viewing from other devices, eg. a tablet.
     host: true
-  }
+  },
+
+  // Clearing the screen is considered distracting, though one can PgUp to see what was there just prior to Vite launching.
+  clearScreen: false
 }

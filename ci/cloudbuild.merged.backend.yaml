@@ -33,7 +33,7 @@ steps:
   entrypoint: npm
   args: ['install']
 
-# Tests (keep similar to 'cloudbuild.master-pr.backend.yaml')
+# Tests (keep similar to 'cloudbuild.backend.yaml')
 - name: $_1
   entrypoint: npm
   args: ['install']
@@ -62,4 +62,4 @@ timeout: 400s
 #
 substitutions:
   #_BUILDER_TAG: 9.16.0-node16-npm7
-  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.17.0-node16-npm7

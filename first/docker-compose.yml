@@ -40,7 +40,7 @@ services:
   #
   deploy:
     #build: ../firebase-ci-builder.sub/
-    image: firebase-ci-builder:9.16.0-node16-npm7
+    image: firebase-ci-builder:9.17.0-node16-npm7
     ports:
       - "9005:9005"
     # 9005 is needed by the auth dance

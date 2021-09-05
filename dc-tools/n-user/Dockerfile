@@ -14,6 +14,9 @@
 #   - user 'user' created
 #   - home '/home/user'
 #
+# Note: This could be based on 'gcr.io/cloud-builders/npm' (Google Cloud Build image), for faster CI runs, but that
+#   image is 943MB vs. 112MB for 'node:16-alpine'.
+#
 # References:
 #   - Best practices for writing Dockerfiles
 #       -> https://docs.docker.com/develop/develop-images/dockerfile_best-practices/

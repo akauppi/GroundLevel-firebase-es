@@ -135,7 +135,7 @@ The author is open to trying the approach with non-Firebase products, but they n
 
 <p />
 
->Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun (Youtube ca. 2019-20, especially!). It's recommended to check those out in parallel with this repo.
+>Note: You *don't* have to know anything in advance about Firebase. But their educational material is good and fun. [Welcome to Firebase](https://www.youtube.com/watch?v=zHomxNDEJqY) (1:00). It's recommended to check those out in parallel with this repo.
 
 
 ### Google Cloud Platform
@@ -287,7 +287,7 @@ Follow the instructions in [Firebase](https://github.com/akauppi/GroundLevel-fir
 
 ## First deployment
 
-Have the Firebase project? Great! 🎉🎉
+Have the Firebase project? Great! 🎉
 
 You can now deploy the current contents of the repo manually, to be able to see the app online. It will take ~5 minutes.
 
@@ -338,11 +338,11 @@ These values are needed in a couple of places in the repo:
 |`app`|`npm run dev:online`|Developing against the online backend|
 |`app-deploy-ops`|`npm run build`|Building the front-end|
 
-Firebase hosting provides these values (except for `locationId`) in the `__/firebase/init.js[on]` URL, but in GroundLevel we prefer to bake them right into the front-end's code. This takes away one return trip, and makes the launch of the web app snappier.
+Firebase hosting provides these values in the `__/firebase/init.js[on]` URL, but in GroundLevel we prefer to bake them right into the front-end's code. This takes away one return trip, and makes the launch of the web app snappier.
 
 >The values are *not* secrets - anyone having access to your URL will be able to get them. Try with `https://<your-app>.web.app/__/firebase/init.json`.
 
-You can have multiple deployment environments, and you can share the environments with your team. For more details on this, see [Staging](Staging.md).
+You can have multiple deployment environments, and you can share the environments with your team by adding the file(s) into git. For more details on this, see [Staging](Staging.md).
 
 
 ## Setting up CI/CD
@@ -375,56 +375,21 @@ Check these subfolders:
 - Growing with your user base ([`grow/`](grow/README.md)) (just-an-idea)
 -->
 
+Check this documentation:
+
+- [Living with Docker Compose](docs/Living%20with%20Docker%20Compose.md)
+
+   Information that helps you be more effective with Docker Compose, which we use for running the Firebase Emulators.
+
+- [Moving in!](docs/Moving%20in!.md)
+
+   Instructions on what to consider when turning this repo to serve *your* needs. Removing the branding, mainly.
+
 >We hope you are active also in the development - and giving feedback - of the GroundLevel repo. It doesn't serve its purpose unless it becomes the growing ground, a fertile soil, for many flowerful web apps! 
 >
 >🌷🌸🌼🌹🥀🌻🌾🌹🌺💐
 
 
-## Making it yours!
-
-Once you start making heavier modifications - that's why the repo exists, it's intended as a "ground level" of your spectacular app! - we hope that you remove the "GroundLevel" branding. Do so:
-
-```
-$ git rm -rf branding 
-```
-
-```
-$ git grep GroundLevel
-...
-```
-
-We don't mind you keeping the reference, but many `.md` files likely deserve to be removed/edited. That command helps you find the mentions.
-
-You *may* mention in your docs that the app was based on GroundLevel, but are not required to do so. See the [LICENSE.md](LICENSE.md).
-
-Apropos, the License. 
-
-You may now remove the top part of it:
-
->This license applies to the software (contents of the GitHub repo), except
-graphic art.
->
->In particular:
->
->- `branding/*`
->- symbolic links to `branding`
->
->Those files are PROPRIETARY to this project, and not to be used in other circumstances.
->You may, however, create a fork of this GitHub repo and continue working with the graphic
->files. Forks are regarded as just a way to collaborate and contribute, for the sake of
->the project itself.
->
->For the rest of the repo (code, configs and textual documentation), this applies:
->...
-
-### Follow the letter of the license
-
-Notice that the license states:
-
->The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-ie. do not remove the license. You may, of course, become active in further developing the app template and we'd like to hear if you use it.
 
 
 ## Credits

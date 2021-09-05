@@ -7,7 +7,7 @@
 *
 * Usage:
 *   <<
-*     $ serve-port 1234   # continues running
+*     $ serve-port 1234
 *   <<
 */
 import { createServer } from 'http'
@@ -21,6 +21,6 @@ const PORT = parseInt(argv2) || (_ => {
 })();
 
 createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.writeHead(200);
   res.end();
 }).listen(PORT, "0.0.0.0");

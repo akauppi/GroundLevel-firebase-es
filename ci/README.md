@@ -339,7 +339,7 @@ For the GCP project responsible of running tests.
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
-|Location|(●) Repository: `ci/cloudbuild.master-pr.backend.yaml`|
+|Location|(●) Repository: `ci/cloudbuild.backend.yaml`|
 
 It makes sense to keep the name of the CI entry and the respective `yaml` file the same (but the name cannot have a `.`).
 
@@ -373,7 +373,7 @@ Screenshot of the actual dialog (UI things may change):
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
-|Location|(●) Repository: `ci/cloudbuild.master-pr.app.yaml`|
+|Location|(●) Repository: `ci/cloudbuild.app.yaml`|
 
 >Hint: The easiest way to do the secondary triggers is `⋮` > `Duplicate`.
 
@@ -443,7 +443,7 @@ To make multiple deployments, just dedicate a certain branch to the deployment, 
 You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
 
 ```
-$ cloud-build-local  --config=cloudbuild.master-pr.backend.yaml --dryrun=false ..
+$ cloud-build-local  --config=cloudbuild.backend.yaml --dryrun=false ..
 2021/06/06 20:01:31 Warning: The server docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
 2021/06/06 20:01:31 Warning: The client docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
 2021/06/06 20:02:34 Error copying source to docker volume: exit status 1
@@ -459,7 +459,7 @@ $ cloud-build-local  --config=cloudbuild.master-pr.backend.yaml --dryrun=false .
 The below commands pack your sources, send them to Cloud Build and let you see the build logs, in real time.
 
 ```
-$ gcloud builds submit --config=cloudbuild.master-pr.{app|backend}.yaml ..
+$ gcloud builds submit --config=cloudbuild.{app|backend}.yaml ..
 ```
 
 ```

@@ -15,11 +15,10 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "if port-is-taken --silent 6768 ; then npm run _test2; else npm run -s _test1 ; fi",
-    "_test1": "concurrently --kill-others --success=first --prefix none \"npm run -s start\" \"wait-for 6768 && npm run -s test\"",
-    "_test2": "npm run test:fns:all && npm run test:rules:all",
+    "test": "docker compose run --rm warm-up && npm run -s _test1",
+    "_test1": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
-    "start": "docker compose up --abort-on-container-exit",
+    "start": "docker compose run --rm warm-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
     "  - -": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",

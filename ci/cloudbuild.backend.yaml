@@ -1,5 +1,5 @@
 #
-# ci/cloudbuild.master-pr.backend.yaml
+# ci/cloudbuild.backend.yaml
 #
 # Triggers:
 #   - PR is made or changed; changes affect 'packages/backend' (or '/package.json', or 'tools/**')
@@ -111,5 +111,5 @@ steps:
 timeout: 240s
 
 substitutions:
-  _BUILDER_TAG: 9.16.0-node16-npm7
+  _BUILDER_TAG: 9.17.0-node16-npm7
   _DOCKER_COMPOSE_TAG: 1.29.2

@@ -37,7 +37,7 @@ steps:
 #
 # Once/if we run Cypress tests, also backend needs 'npm install'.
 
-# --- App (keep similar to 'cloudbuild.master-pr.app.yaml' if it changes..)
+# --- App (keep similar to 'cloudbuild.app.yaml' if it changes..)
 #
 - name: $_1
   entrypoint: npm
@@ -80,7 +80,7 @@ timeout: 240s
 #
 substitutions:
   #_BUILDER_TAG: 9.16.0-node16-npm7
-  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
+  _1: gcr.io/ci-builder/firebase-ci-builder:9.17.0-node16-npm7
 
 # API Keys heading for the front end are not really hard secrets, but let's treat them as such, anyways.
 #
