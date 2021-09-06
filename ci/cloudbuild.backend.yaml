@@ -25,6 +25,18 @@
 #
 
 steps:
+# DEBUG
+#|- name: node:16
+#|  entrypoint: sh
+#|  args: ['-c', 'pwd && ls -al']
+#|  dir: packages/backend
+#|- name: docker
+#|  args: ['run',
+#|         '-v', '/workspace/packages/backend:/work', '-w', '/work',
+#|         '--entrypoint', '/bin/sh',
+#|         'node:16', '-c', 'pwd && ls -al && false']
+#/DEBUG
+
 # Root install
 #
 - name: node:16
@@ -38,8 +50,7 @@ steps:
   args: ['install']
   dir: packages/backend
 
-# EXPERIMENTING:
-# Do emulators start, without DC?
+# DEBUG:
 #
 # USE THIS TO DEBUG CASES where the emulators don't start. Easier to see the console output.
 #
@@ -56,24 +67,13 @@ steps:
 #   if there is a major problem like Cloud Functions cannot be started. **PLEASE PUT PRESSURE ON FIREBASE TO CHANGE
 #   THIS BEHAVIOUR if you agree with it.** Saves all of our time. Thank You.
 #
+#   Addition / correction: Above applies only to the case where there would be failures initially, when the emulators are
+#     loaded. In this case, I think emulators should refuse to launch. The emulators also have hot-reload capabilities
+#     for functions and Rules, and for this use case, it's vital that they keep running.
+#
 # --- --- --- 📣⚠️🪤🚨
 
-# --- ALTERNATIVE A:
-# Run tests within DC
-#
-# Works.
-#
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'ci']
-  dir: packages/backend
-  env:
-    - NODE=16
-    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-
-# --- ALTERNATIVE B:
-# Launch emul/warm-up in DC, separate Cloud Build step for running the tests.
-#
-# - requires also 'ci:test' target to wait for '6768' in 'package.json'
+# Launch emul/warm-up in DC, keeps them running in the background (Docker network 'workspace_default').
 #
 # NOTE:
 #   - The 'up', '-d' pattern is used in online samples (eg. [1]), but is it valid in 2021? Does Cloud Build let
@@ -82,19 +82,29 @@ steps:
 #
 #   [1]: https://github.com/Philmod/gcb-docker-compose/blob/master/cloudbuild.yaml
 #
-# Alt B is technically nicer (if it worked), since the setting up of servers and test steps are defined here, in
-# Cloud Build yml, instead buried into the DC yml.
-#
-#?- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#?  args: ['up', '-d']
-#?  dir: packages/backend
-#?  env:
-#?    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#?    - NODE=16
-#?- name: node:16
-#?  entrypoint: npm
-#?  args: ['run', 'ci:test']
-#?  dir: packages/backend
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['run', 'warmed-up']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+    - NODE=16
+
+  # Note: Calls reaching the emul need to be wrapped in 'docker run', in order to reach the DC network.
+  #
+- name: docker
+  args: ['run',
+         '--network', 'backend_default',
+         '-v', '/workspace/packages/backend:/work',
+         '-w', '/work',
+         '-e', 'EMUL_HOST=emul',      # name of the host in DC
+         '--entrypoint', 'npm',
+         'node:16', 'run', 'ci:test']
+
+  # Instead of:
+  #- name: node:16
+  #  entrypoint: npm
+  #  args: ['run', 'ci:test']
+  #  dir: packages/backend
 
 - name: node:16
   entrypoint: npm
@@ -105,10 +115,9 @@ steps:
 #
 # Cloud Build
 #   - native, no lint:          1:51, 1:45  # (old results)
-#   - Alternative A, with lint: 2:23, 2:30
-#   - Alternative B, with lint:     (cannot run; 'npm' does not see the ports)
+#   - DC/Docker, with lint:     3:13
 #
-timeout: 240s
+timeout: 300s
 
 substitutions:
   _BUILDER_TAG: 9.17.0-node16-npm7

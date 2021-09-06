@@ -1,5 +1,48 @@
 # Wishes for Cloud Build
 
+
+## Running CI tests with Docker Compose
+
+This was **painful**. 🥊👿👹🗡⚔️
+
+Cloud Build documentation says this on its front page:
+
+>Each build step is run with its container attached to a local Docker network named `cloudbuild`. This allows build steps to communicate with each other and share data.
+
+That's what we'd like to do.
+
+To have:
+
+1. One step that starts Firebase Emulators and warms them up (defined in DC)
+2. Other steps that run the tests, using whatever images that suit best (`node:16`), and being able to reach the emulator ports
+
+The only way the author was able to achieve this is by *not* using the `cloudbuild` network but wrapping tests into `docker run` calls. 
+
+```
+- name: docker
+  args: ['run',
+         '--network', 'backend_default',
+         '-v', '/workspace/packages/backend:/work',
+         '-w', '/work',
+         '-e', 'EMUL_HOST=emul',      # name of the host in DC
+         '--entrypoint', 'npm',
+         'node:16', 'run', 'ci:test']
+```
+
+..when we'd like to have:
+
+```
+- name: node:16
+  entrypoint: npm
+  args: ['run', 'ci:test']
+  dir: packages/backend
+```
+
+This is clumsy, but keeps the steps in the CI file (instead of spreading them to the DC definition).
+
+Cloud Build: what do you mean by the quote above?  Please give examples - and suggest how `ci/cloudbuild.backend.yaml` should be done.
+
+
 ## `<<: &npmStep` - YAML anchors et.al.?
 
 The YAML anchors and references don't seem to be supported by `gcloud beta builds submit`.

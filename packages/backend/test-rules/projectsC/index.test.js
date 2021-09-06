@@ -38,9 +38,8 @@ describe("'/projects' rules", () => {
     //  - no warm-up:     2582, 2204 ms   <--X would fail, without the warm-up
     //  - client warm-up:  743, 1066 ms
     //
-    // CI (DC):
-    //  - no warm-up:
-    //  - client warm-up:
+    // CI (Cloud Build; DC):
+    //  - no warm-up:     1190 ms
 
   test('user who is not part of the project shouldn\'t be able to read it', () => (
     expect( auth_projectsC.get() ).toDeny()

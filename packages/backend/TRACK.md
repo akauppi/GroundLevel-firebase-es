@@ -29,5 +29,4 @@ Note: We won't need it, until `firebase-functions` runs with ESM. And even then,
 
 - [Functions emulator needs pre-heating - slower test times on first test run](https://github.com/firebase/firebase-tools/issues/3488) (`firebase-tools` issues)
 
-Closed, but the issue remains. Track.
-   
+Closed, but the issue remains.

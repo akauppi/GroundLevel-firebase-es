@@ -49,3 +49,22 @@ Cloud Build does not support this, but let's imagine we set up a PubSub trail to
 Doesn't look enticing.
 
 
+## CI 💔 Docker Compose
+
+The idea was that `packages/{backend|app}` describe their Firebase Emulator setup as a Docker Compose (DC) config. That config can then be used for both development and CI runs.
+
+For a while, the author had also the test execution in the DC file, because it was easy to get going. But this essentially outsources what the Cloud Build YAML should do, to a large DC YAML, in the development directory. Did not feel right.
+
+So..
+
+It seems that some people have managed to use `docker-compose up -d` to run servers, and use them from later Cloud Build steps.
+
+Let's go for that!
+
+Did not work.
+
+The current pseudo-solution is to wrap the test steps in Docker. Whatever it takes to keep the definition within CI YAML, and not bleed it to the development folder, too much (having a `ci:test` target is fine).
+
+This feels half baked - there needs to be a way to use the `cloudbuild` network, as stated in the docs.
+
+`#help` me.

@@ -15,10 +15,10 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "docker compose run --rm warm-up && npm run -s _test1",
+    "test": "docker compose run --rm warmed-up && npm run -s _test1",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
-    "start": "docker compose run --rm warm-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
+    "start": "docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
     "  - -": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
@@ -33,10 +33,9 @@
     "  - --": "",
     "lint": "eslint .",
     "  -   -": "",
-    "//ci runs -->": "NODE=16 docker-compose run ci",
-    "ci:warm-up": "npm run test:fns:all",
-    "ci:test": "npm run test:fns:all && npm run test:rules:all",
+    "dc:warm-up": "npm run test:fns:all",
     "  - - -": "",
+    "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
     "  -  --": "",
     "postinstall": "npm run -s _prepFunctions",
@@ -65,16 +64,8 @@
       "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
     ],
     "scripts": {
-      "ci:test": [
-        "//ci:test shows the command Cloud Build *could* use, to run the tests in Docker.",
-        "It does not seem to work, however. Wait for Docker Compose v2 on Linux.",
-        "",
-        "ci:test is around to allow native execution (with npm and 'concurrently', without Docker Compose).",
-        "If we can use 'docker-compose', 'concurrently' can leave the stage."
-      ],
-      "start": [
-        "'--abort-on-container-exit' means that if the warm up (or launch of the emulators themselves) fails,",
-        "the command will fall back to preceding state. Important"
+      "ci:{test|deploy}": [
+        "These are the commands CI will use."
       ]
     }
   }
