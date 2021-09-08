@@ -118,9 +118,19 @@ const chunkTo = [     // Array of Regex
 ];
 
 export default {
-  ...(DEV ? {    // 'npm run dev:...'
+
+  ...(DEV ? {    // 'npm run dev:{local|online}'
     root: 'vitebox',
-    publicDir: '../public'    // relative to 'vitebox'
+
+    // With 2.4.x, this was a way to point up from 'vitebox', but creates lots of warnings on 2.5.6:
+    //  <<
+    //    files in the public directory are served at the root path.
+    //    Instead of /@vite/client, use /@vite/client.
+    //  <<
+    //
+    // ..so replaced with a symbolic link from 'vitebox/public' -> '../public'.
+    //
+    //publicDir: '../public'    // relative to 'vitebox'
   } : {
     // regular root
   }),

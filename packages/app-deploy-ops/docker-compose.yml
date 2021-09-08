@@ -19,7 +19,7 @@ version: '3.0'
 
 services:
   host:
-    image: firebase-ci-builder:9.16.0-node16-npm7
+    image: firebase-ci-builder:9.17.0-node16-npm7
     ports:
       - "4000:4000"
       - "3012:3012"
@@ -31,3 +31,14 @@ services:
       'echo "Launching Docker... 🐳" &&
       firebase emulators:start --project=demo-9
         | grep -v -E "Detected demo project ID|You are not currently authenticated|The Emulator UI requires a project ID to start"'
+
+  host-launched:
+    build:
+      context: ../../dc-tools/n-user/
+      args:
+        - NODE=${NODE:-16}
+    command: bash -o pipefail -c
+      'wait-for-it host:3012 --timeout=15
+      '
+    depends_on: ['host']
+    profiles: ['manual']

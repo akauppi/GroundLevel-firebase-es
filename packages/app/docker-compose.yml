@@ -67,6 +67,7 @@ services:
     working_dir: /work
     command: bash -o pipefail -c
       'wait-for-it emul:6767 --timeout=15 &&
+      wait-for-it emul:9100 --timeout=10 &&
       firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js
       '
     depends_on: ['emul']
@@ -124,6 +125,7 @@ services:
     working_dir: /work
     command: bash -o pipefail -c
       'wait-for-it emul:6767 --timeout=15 &&
+      wait-for-it emul:9100 --timeout=10 &&
       firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js &&
       wait-for-it vite-exp:3000 --timeout=10
       '

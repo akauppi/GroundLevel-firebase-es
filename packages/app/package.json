@@ -44,10 +44,6 @@
     "~~dc:start": "vite --port 3000 --mode dev_local",
     "--  --": "",
     "//vite:dc": "docker compose run --rm primed-dev && docker compose up vite-dev",
-    "--  -- ": "",
-    "//ci:test": "concurrently --kill-others -n dev,test \"npm run -s ci:dev\" \"wait-for 4000 && cypress run ${CYPRESS_RUN_FLAGS}\"",
-    "//ci:dev": "concurrently --kill-others-on-fail -n emul,init \"npm run -s _ci_dev_local_emul\" \"npm run -s _dev_local_init && npm run -s _dev_local_vite\"",
-    "//_ci_dev_local_emul": "firebase emulators:start --project=demo-abc",
     "-- ---": "",
     "_checkNoLinks": "check-no-links || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; false)",
     "//_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
@@ -62,25 +58,25 @@
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
-    "vue": "^3.1.2",
+    "vue": "^3.2.10",
     "vue-router": "^4.0.10"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
     "@local/self": "file:.",
     "@local/tools": "file:../../tools",
-    "@vitejs/plugin-vue": "^1.6.0",
+    "@vitejs/plugin-vue": "^1.6.2",
     "@vue/compiler-sfc": "latest",
     "concurrently": "^6.2.1",
     "cypress": "^8.3.1",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-cypress": "^2.11.3",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "eslint-plugin-vue": "^7.14.0",
+    "eslint-plugin-vue": "^7.17.0",
     "prettier": "2.3.2",
     "sass": "^1.35.1",
-    "vite": "2.4.4",
-    "vue-eslint-parser": "^7.9.0"
+    "vite": "2.5.6",
+    "vue-eslint-parser": "^7.11.0"
   },
   "//comments": {
     "devDependencies": {

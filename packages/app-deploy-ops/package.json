@@ -1,5 +1,5 @@
 {
-  "name": "@local/app-ops",
+  "name": "@local/app-deploy-ops",
   "description": "Front end (operations)",
   "license": "MIT",
   "private": true,
@@ -21,15 +21,16 @@
     "_prepBuildWorker": "rollup -c roll/rollup.config.worker.js",
     "_prepCopy": "cp node_modules/@local/app/dist/favicon.* node_modules/@local/app/dist/*.css roll/out/",
     "  - --": "",
-    "serve": "docker compose up --abort-on-container-exit",
+    "serve": "docker compose run --rm host-launched && echo \"✅ Application served at: http://localhost:3012\n\"",
     "  - -- ": "",
+    "ci:build:fake": "echo \"export default { }\" > ../../firebase.fake.js && ENV=fake RAYGUN_API_KEY=x npm run -s build",
     "ci:build": "sh/gen-firebase-ci.sh > ../../firebase.ci.js && ENV=ci npm run build",
     "ci:deploy": "firebase deploy --only hosting",
     "- -": "",
     "//build:vite": "vite build -c vite/vite.config.js",
     "-- ": "",
     "prebuild": "npm run -s _checkEnv",
-    "_checkEnv": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: Please create config file '../../firebase.${ENV-staging}.js' - see README.\n\"; false)",
+    "_checkEnv": "[ -f ../../firebase.${ENV-staging}.js ] || ( >&2 echo \"ERROR: Please create config file '../../firebase.${ENV-staging}.js' - see README.\n\"; false)",
     "//_checkPortIsFree": "port-is-free $PORT || ( >&2 echo \"ERROR: Port '$PORT' is taken!\n\"; false)",
     "-- - -": "",
     "klean": "rm -rf roll/out/*"
@@ -39,7 +40,7 @@
     "@firebase/auth": "file:../../node_modules/@firebase/auth",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "@local/app": "file:../app",
-    "raygun4js": "^2.22.4"
+    "raygun4js": "^2.22.5"
   },
   "devDependencies": {
     "@atomico/rollup-plugin-sizes": "^1.1.4",
@@ -50,7 +51,7 @@
     "concurrently": "^6.2.1",
     "eslint": "file:../../node_modules/eslint",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "rollup": "^2.56.2",
+    "rollup": "^2.56.3",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-visualizer": "^5.5.2"

@@ -43,6 +43,7 @@ services:
         - NODE=${NODE:-16}
     command: bash -o pipefail -c
       'wait-for-it emul:6767 --timeout=15 &&
+      wait-for-it emul:9100 --timeout=10 &&
       wait-for-it vite:3000 --timeout=15
       '
     depends_on: ['emul', 'vite-ci']

@@ -57,11 +57,6 @@ steps:
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
     - NODE=16
-
-# Is running:
-#   - vite:3000
-#   - emul:{6767|...}
-
 - name: cypress/included:${_CYPRESS_TAG}
   args: ['run', '--headless']
   dir: packages/app
@@ -77,7 +72,7 @@ steps:
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
-    # tbd. make so that doesn't need bash (maybe 'ci:build')
+    # keep building such that 'sh' is enough (maybe 'ci:build' target if needed)
 
 # --- App-deploy-ops
 #
@@ -87,20 +82,18 @@ steps:
   entrypoint: npm
   args: ['install']
   dir: packages/app-deploy-ops
+
 - name: node:16
-  entrypoint: sh
-  args: ['-c', 'echo "export default { }" > ../../firebase.fake.js']
+  entrypoint: npm
+  args: ['run', 'ci:build:fake']
   dir: packages/app-deploy-ops
-#- name: node:16
-#  # likely with n16-user???
-#  entrypoint: npm
-#  args: ['run', 'build']
-#  dir: packages/app-deploy-ops
-#  env: ['ENV=fake', 'RAYGUN_API_KEY=x']
+  #env: ['ENV=fake', 'RAYGUN_API_KEY=x']
 
 # --- Timeout
 #
-# Cloud Build:  2:33, 2:13, 2:04 (without Cypress tests)
+# Cloud Build:
+#   - without Cypress tests: 2:33, 2:13, 2:04
+#   - with Cypress tests:
 #
 timeout: 500s
 
