@@ -1,0 +1,51 @@
+#
+# docker-compose.ci.yml
+#
+# An override for using 'docker-compose.yml' in Cloud Build
+#
+# Intentions:
+#   Allow the 'docker-compose.yml' file be used, from Cloud Build scripts,
+#   so that the services are available to the following steps (using 'cloudbuild' network).
+#
+# References:
+#   - Share Compose configurations between files and projects (Docker Compose docs)
+#     -> https://docs.docker.com/compose/extends/
+#
+services:
+  emul:
+    network_mode: cloudbuild
+    container_name: emul
+
+  # Until (if ever) 'dev' Vite service is no longer experimental, have the whole step here.
+  #
+  vite-ci:
+    image: node:16
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../..:/proj
+    working_dir: /proj/packages/app
+    command: bash -o pipefail -c
+      'npx vite --port 3000 --mode dev_local'
+    environment:
+      - EMUL_HOST=emul
+    #depends_on: ['emul']
+      # marking the dependency since we build in the hostname (it doesn't really matter)
+    network_mode: cloudbuild
+    container_name: vite
+
+  # Launch emulator and Vite. Wait until both are running nice.
+  #
+  vite-launched-ci:
+    build:
+      context: ../../dc-tools/n-user/
+      args:
+        - NODE=${NODE:-16}
+    command: bash -o pipefail -c
+      'wait-for-it emul:6767 --timeout=15 &&
+      wait-for-it vite:3000 --timeout=15
+      '
+    depends_on: ['emul', 'vite-ci']
+    profiles: ['manual-ci']
+    network_mode: cloudbuild
+    # No need for 'container_name:' (no port exposed)

@@ -32,7 +32,7 @@ describe ('Can proxy application logs', () => {
   //  - warmed up; cold emul:    135, 114 ms
   //
   // CI (DC):
-  //  - no warm-up:              890 ms     # warm-up disabled by editing the DC yml
+  //  - no warm-up:              890, 1087 ms     # warm-up disabled by editing the DC yml
   //  - warmed up:                51, 44 ms
 
 // Copy-pasted from 'app-deploy-ops/adapters':

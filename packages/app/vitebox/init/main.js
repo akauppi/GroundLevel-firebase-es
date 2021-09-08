@@ -105,7 +105,9 @@ async function initFirebaseOnline() {
 
 /*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
   if (LOCAL) {
-    await initFirebaseLocal('localhost');
+    const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
+
+    await initFirebaseLocal(host);
   } else {
     await initFirebaseOnline();
   }
@@ -113,5 +115,3 @@ async function initFirebaseOnline() {
   const { initializedProm } = await import('/@/app.js');
   return initializedProm;
 })();
-
-function fail(msg) { throw new Error(msg) }

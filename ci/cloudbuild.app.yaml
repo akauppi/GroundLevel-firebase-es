@@ -1,8 +1,8 @@
 #
-# ci/cloudbuild.master-pr.app.yaml
+# ci/cloudbuild.app.yaml
 #
 # Trigger:
-#   - PR is made or changed; changes affect 'packages/app' or 'packages/app-deploy-ops'
+#   - PR is made or changed; changes affect 'packages/app' or 'packages/app-deploy-ops' (or '/package.json', or 'tools/**')
 #
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
@@ -47,22 +47,37 @@ steps:
   dir: packages/app
   env: ['CYPRESS_INSTALL_BINARY=0']
 
+# Launch emulators; keeps them running in the background.
+#
+# Note: Unlike in 'dev', no priming of data & users is needed. Cypress tests carry their own.
+#
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'cypress']
+  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-launched-ci']
   dir: packages/app
-  env: [
-    'CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}'
-  ]
+  env:
+    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+    - NODE=16
+
+# Is running:
+#   - vite:3000
+#   - emul:{6767|...}
+
+- name: cypress/included:${_CYPRESS_TAG}
+  args: ['run', '--headless']
+  dir: packages/app
+  env:
+    - CYPRESS_baseUrl=http://vite:3000
 
 - name: node:16
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
+
 - name: node:16
   entrypoint: npm
   args: ['run', 'build']
   dir: packages/app
-    # tbd. use 'n16-user' if needs bash
+    # tbd. make so that doesn't need bash (maybe 'ci:build')
 
 # --- App-deploy-ops
 #
@@ -90,10 +105,8 @@ steps:
 timeout: 500s
 
 substitutions:
-  # Has Node 16 and bash
-  #_1: gcr.io/${PROJECT_ID}/firebase-ci-builder:9.16.0-node16-npm7
-  #
-  _BUILDER_TAG: 9.16.0-node16-npm7
-  #
+  _BUILDER_TAG: 9.17.0-node16-npm7
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
+  _CYPRESS_TAG: 8.3.1
+    # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated

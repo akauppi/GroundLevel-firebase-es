@@ -1,8 +1,9 @@
 # Changelog
 
-## 2-Sep-21
+## 6-Sep-21
 
 - Backend CI testing using Docker Compose
+   - with `npm` running the tests
 
 ## 12-Aug-21
 

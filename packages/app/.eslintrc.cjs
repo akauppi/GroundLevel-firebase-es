@@ -68,7 +68,8 @@ module.exports = {
   },
 
   overrides: [
-    {   // general non-browser JS ('vite.config.js' etc.); not Node sources
+    // general non-browser JS ('vite.config.js' etc.); not Node sources
+    {
       files: ["*.js"],
       extends: ['eslint:recommended'],
       env: {  //?? what here?
@@ -78,32 +79,21 @@ module.exports = {
       }
     },
 
-    {   // run under node (ES modules sources)
+    // run under node (ES modules sources)
+    {
       files: ["local/*.js", "tools/*.js"],
       extends: ['plugin:node/recommended'],
       env: {
         node: true
       },
       globals: {
-        Buffer: true
+        //Buffer: true
+      },
+      rules: {
+        "no-process-exit": off,
+        "node/no-unpublished-bin": off
       }
     },
-
-    // We use "top level await" in some node js files. Unfortunately, cannot tell ESLint to understand them, since
-    // top level await is not a "stage 4" proposal.
-    //  See -> https://github.com/eslint/espree/issues/409
-    //      -> https://github.com/tc39/proposal-top-level-await (stage 3)
-    //
-    // tbd. Well, we can with Babel as parser.. See some day if it's worth it.
-    //
-    /*{   // run under 'node --top-level-await'
-      files: ["local/init.js"],
-      extends: ['plugin:node/recommended'],
-      env: {
-        node: true
-      },
-      globals: {}
-    },*/
 
     // cjs build files (including this one)   // tbd. these deserve cleanup one day; this file is not for node, for example
     {

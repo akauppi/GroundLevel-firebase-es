@@ -25,18 +25,6 @@
 #
 
 steps:
-# DEBUG
-#|- name: node:16
-#|  entrypoint: sh
-#|  args: ['-c', 'pwd && ls -al']
-#|  dir: packages/backend
-#|- name: docker
-#|  args: ['run',
-#|         '-v', '/workspace/packages/backend:/work', '-w', '/work',
-#|         '--entrypoint', '/bin/sh',
-#|         'node:16', '-c', 'pwd && ls -al && false']
-#/DEBUG
-
 # Root install
 #
 - name: node:16
@@ -52,59 +40,44 @@ steps:
 
 # DEBUG:
 #
-# USE THIS TO DEBUG CASES where the emulators don't start. Easier to see the console output.
+# USE THIS TO DEBUG CASES where the emulators don't start (or to see warm-up timings).
 #
-#- name: gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#  entrypoint: firebase
-#  args: ['emulators:start', '--project=demo-2']
-#  dir: packages/backend
+#>- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#>  args: ['up', 'warm-up']
+#>  dir: packages/backend
+#>  env:
+#>    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+#>    - NODE=16
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
 #
-#   If you have a problem with - say - Cloud Functions, INSTEAD OF EXITING, THE EMULATORS KEEP RUNNING!! This is NOT
-#   ideal for developers, because it gives the feeling things might be right. INSTEAD, FIREBASE EMULATORS SHOULD FAIL
+#   If there is a problem with Cloud Functions, INSTEAD OF EXITING, THE EMULATORS KEEP RUNNING!! This is NOT
+#   ideal for developers, because it gives the feeling things would be right. INSTEAD, FIREBASE EMULATORS SHOULD FAIL
 #   if there is a major problem like Cloud Functions cannot be started. **PLEASE PUT PRESSURE ON FIREBASE TO CHANGE
 #   THIS BEHAVIOUR if you agree with it.** Saves all of our time. Thank You.
 #
-#   Addition / correction: Above applies only to the case where there would be failures initially, when the emulators are
-#     loaded. In this case, I think emulators should refuse to launch. The emulators also have hot-reload capabilities
-#     for functions and Rules, and for this use case, it's vital that they keep running.
+#   ^-- Above applies only to the case where there would be failures INITIALLY, when the emulators are loaded.
+#       In this case, I think emulators should refuse to launch. The emulators also have hot-reload capabilities
+#       for functions and Rules, and for this use case, it's vital that they keep running.
 #
 # --- --- --- 📣⚠️🪤🚨
 
-# Launch emul/warm-up in DC, keeps them running in the background (Docker network 'workspace_default').
-#
-# NOTE:
-#   - The 'up', '-d' pattern is used in online samples (eg. [1]), but is it valid in 2021? Does Cloud Build let
-#     an earlier step run, if placed on the background?
-#   - Below, 'npm run ci:test' remains waiting for port 6768. It doesn't seem to get it, from the DC. (study later, if we want to try it?)
-#
-#   [1]: https://github.com/Philmod/gcb-docker-compose/blob/master/cloudbuild.yaml
+# Launch emul/warm-up in DC, keeps them running in the background.
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'warmed-up']
+  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'warmed-up']
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
     - NODE=16
 
-  # Note: Calls reaching the emul need to be wrapped in 'docker run', in order to reach the DC network.
-  #
-- name: docker
-  args: ['run',
-         '--network', 'backend_default',
-         '-v', '/workspace/packages/backend:/work',
-         '-w', '/work',
-         '-e', 'EMUL_HOST=emul',      # name of the host in DC
-         '--entrypoint', 'npm',
-         'node:16', 'run', 'ci:test']
-
-  # Instead of:
-  #- name: node:16
-  #  entrypoint: npm
-  #  args: ['run', 'ci:test']
-  #  dir: packages/backend
+- name: node:16
+  entrypoint: npm
+  args: ['run', 'ci:test']
+  dir: packages/backend
+  env:
+    - EMUL_HOST=emul
 
 - name: node:16
   entrypoint: npm
@@ -116,6 +89,7 @@ steps:
 # Cloud Build
 #   - native, no lint:          1:51, 1:45  # (old results)
 #   - DC/Docker, with lint:     3:13
+#   - DC/native, with lint:     2:35
 #
 timeout: 300s
 

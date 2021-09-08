@@ -1,0 +1,24 @@
+#
+# docker-compose.ci.yml
+#
+# An override for using 'docker-compose.yml' in Cloud Build
+#
+# Intentions:
+#   Allow the 'docker-compose.yml' file be used, from Cloud Build scripts,
+#   so that the services are available to the following steps (using 'cloudbuild' network).
+#
+# References:
+#   - Share Compose configurations between files and projects (Docker Compose docs)
+#     -> https://docs.docker.com/compose/extends/
+#
+services:
+  emul:
+    network_mode: cloudbuild
+    container_name: emul
+
+  warm-up:
+    network_mode: cloudbuild
+    container_name: warm-up
+
+  warmed-up:
+    network_mode: cloudbuild

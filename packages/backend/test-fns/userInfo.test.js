@@ -39,7 +39,7 @@ describe("userInfo shadowing", () => {
     //  - warmed up:     559,  729 ms
     //
     // CI (DC):
-    //  - no warm-up:   2184 ms           # warm-up disabled by editing the DC yml
+    //  - no warm-up:   2184, 2036 ms           # warm-up disabled by editing the DC yml (or by adding a DC 'up' step in the CI)
     //  - warmed up:     550,  678 ms
 
   test('Central user information is not distributed to a project where the user is not a member', async () => {

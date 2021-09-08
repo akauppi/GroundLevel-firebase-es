@@ -194,13 +194,13 @@ export default {
     }}})
   ],
 
-  // Vite 2.3.1: "The fsServe restrictions are going to be enabled by default in a future version."
-  //    -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md#231-2021-05-12
-  //
   server: {
+    // Vite 2.3.1 (still in 2.4.4): "The fsServe restrictions are going to be enabled by default in a future version."
+    //    -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md#231-2021-05-12
     fs: {
       strict: true    // restrict access to the work directory
     },
+
     // Allows viewing from other devices, eg. a tablet.
     host: true
   },

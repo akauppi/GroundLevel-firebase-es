@@ -1,7 +1,7 @@
 # Wishes for Cloud Build
 
 
-## Running CI tests with Docker Compose
+## Running CI tests with Docker Compose (give just one sample..)
 
 This was **painful**. 🥊👿👹🗡⚔️
 
@@ -9,38 +9,38 @@ Cloud Build documentation says this on its front page:
 
 >Each build step is run with its container attached to a local Docker network named `cloudbuild`. This allows build steps to communicate with each other and share data.
 
-That's what we'd like to do.
+However, it doesn't provide any samples.
 
-To have:
+None of the GCP Cloud Build samples mention `network_mode`.
 
-1. One step that starts Firebase Emulators and warms them up (defined in DC)
-2. Other steps that run the tests, using whatever images that suit best (`node:16`), and being able to reach the emulator ports
-
-The only way the author was able to achieve this is by *not* using the `cloudbuild` network but wrapping tests into `docker run` calls. 
+It was due to this **singular** [StackOverflow entry](https://stackoverflow.com/a/57835293/14455) that the author figured, how to use Cloud Build and DC together:
 
 ```
-- name: docker
-  args: ['run',
-         '--network', 'backend_default',
-         '-v', '/workspace/packages/backend:/work',
-         '-w', '/work',
-         '-e', 'EMUL_HOST=emul',      # name of the host in DC
-         '--entrypoint', 'npm',
-         'node:16', 'run', 'ci:test']
+network_mode: cloudbuild
+container_name: redis
 ```
 
-..when we'd like to have:
+Creating a network is not necessary (other samples having that likely do so, in order to be able to be run locally, as well).
+
+The `container_name` was something the author hadn't figured out.
+
+---
+
+The benefit we get is that:
+
+- DC can launch the elaborate services in the background
+- test steps can behave normal, like:
 
 ```
 - name: node:16
   entrypoint: npm
   args: ['run', 'ci:test']
   dir: packages/backend
+  env: ['EMUL_HOST=emul']
 ```
 
-This is clumsy, but keeps the steps in the CI file (instead of spreading them to the DC definition).
+Just... *MAKE IT VISIBLE IN SAMPLES*. Thanks.
 
-Cloud Build: what do you mean by the quote above?  Please give examples - and suggest how `ci/cloudbuild.backend.yaml` should be done.
 
 
 ## `<<: &npmStep` - YAML anchors et.al.?

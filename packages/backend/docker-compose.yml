@@ -6,6 +6,7 @@
 # Used by:
 #   - manual development ('docker compose up -d' directly or via 'npm run up')
 #   - CI
+#     - with 'docker-compose.ci.yml' overrides
 #
 # Environment:
 #   - CI_BUILDER_IMAGE (optional); name of the builder image.
@@ -38,20 +39,15 @@ services:
       - "6767:6767"
       # Keep ports aligned with 'firebase.json'
     volumes:
-      - .:/work1
-    #volumes:
-    #  - type: volume
-    #    source: .
-    #    target: /work1
-    #  - type: bind
-    #    source: .
-    #    target: /work1
-    working_dir: /work1
+      - .:/work
+    working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
       firebase emulators:start --project=demo-2
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
     # Keep project ID in sync with 'test-fns/setup.jest.js'
+    #CI network_mode: cloudbuild
+    #CI container_name: emul
 
   # WARM UP the engines
   #
@@ -77,6 +73,8 @@ services:
       - EMUL_HOST=emul
       - WARM_UP_TIMEOUT=25000
           # seen timeouts with: 19000 (macOS, DC 4.0); normally ~3500 ms
+    #CI network_mode: cloudbuild
+    #CI container_name: warm-up
     depends_on: ['emul']
     # Enable manual launch to debug 'emul' launch, only.
     #profiles: ['manual']
@@ -95,5 +93,6 @@ services:
       'wait-for-it warm-up:6768 --timeout=60
       '
       # macOS: seen cases where 40s timed out
+    #CI network_mode: cloudbuild
     depends_on: ['warm-up']
     profiles: ['manual']
