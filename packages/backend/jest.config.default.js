@@ -19,10 +19,15 @@ const opts = {
   // Without this, the 'firebase-jest-testing' modules don't load, due to being declared using 'exports'.
   // Jest 27.0.{1..4} resolver (aka browserify resolver) is not up to this, yet (Jun 2021).
   //
-  // Comment out, to test whether Jest needs it.
-  // See -> https://github.com/akauppi/firebase-jest-testing/blob/master/TRACK.md#jest-cannot-handle-package-exports-%EF%B8%8F
+  // TESTING whether this is still needed:
+  //  - comment it out
+  //  - 'docker compose down'
+  //  - 'docker compose up warm-up'
+  //
+  // If the warm-up happens great, Jest was able to resolve the modules, on its own.
   //
   resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
+    //  27.1.1  still needs it
 };
 
 export default opts;

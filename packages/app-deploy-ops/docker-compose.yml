@@ -21,7 +21,6 @@ services:
   host:
     image: firebase-ci-builder:9.17.0-node16-npm7
     ports:
-      - "4000:4000"
       - "3012:3012"
       # Keep ports aligned with 'firebase.json'
     volumes:

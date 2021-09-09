@@ -47,7 +47,7 @@
     "concurrently": "^6.2.1",
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.4-alpha.3",
-    "jest": "^27.1.0",
+    "jest": "^27.1.1",
     "node-fetch": "^3.0.0"
   },
   "//comments": {
