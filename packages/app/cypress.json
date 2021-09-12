@@ -5,7 +5,7 @@
   "video": false,
   "fixturesFolder": false,
   "pluginsFile": false,
-  "supportFile": "cypress/commands/index.js",
+  "supportFile": "cypress/_commands/index.js",
   "modifyObstructiveCode": false,
   "integrationFolder": "cypress",
 

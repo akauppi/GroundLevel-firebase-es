@@ -7,6 +7,13 @@
 #   Allow the 'docker-compose.yml' file be used, from Cloud Build scripts,
 #   so that the services are available to the following steps (using 'cloudbuild' network).
 #
+# To debug locally (with Docker Compose):
+#
+#   <<
+#     $ docker network create cloudbuild
+#     $ docker compose -f docker-compose.yml -f docker-compose.ci.yml up ...
+#   <<
+#
 # References:
 #   - Share Compose configurations between files and projects (Docker Compose docs)
 #     -> https://docs.docker.com/compose/extends/
@@ -19,14 +26,14 @@ services:
   # Until (if ever) 'dev' Vite service is no longer experimental, have the whole step here.
   #
   vite-ci:
-    image: node:16
+    image: node:16-alpine
     ports:
       - "3000:3000"
     volumes:
       - ../..:/proj
     working_dir: /proj/packages/app
-    command: bash -o pipefail -c
-      'npx vite --port 3000 --mode dev_local'
+    entrypoint: npm
+    command: ['run', 'ci:launch']
     environment:
       - EMUL_HOST=emul
     #depends_on: ['emul']
@@ -40,7 +47,7 @@ services:
     build:
       context: ../../dc-tools/n-user/
       args:
-        - NODE=${NODE:-16}
+        - NODE=${NODE_V:-16}
     command: bash -o pipefail -c
       'wait-for-it emul:6767 --timeout=15 &&
       wait-for-it emul:9100 --timeout=10 &&

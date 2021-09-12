@@ -1,5 +1,5 @@
 /*
-* cypress/support/auth.js
+* cypress/commands/index.js
 *
 * Provides signing in/out from Firebase auth.
 *
@@ -15,7 +15,8 @@ import {
   debugErrorMap,
   initializeAuth,
   signInWithCustomToken,
-  updateProfile
+  updateProfile,
+  getAuth
 } from '@firebase/auth'
 import {initializeApp} from '@firebase/app'
 
@@ -51,15 +52,21 @@ Cypress.Commands.add('clearAuthState', () => {
 * if needed).
 */
 Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
-  if (!uid) throw new Error("No 'uid' provided.");
+  if (!uid) fail("No 'uid' provided.");
 
-  cy.visit('/');    // initialize the app; wait for knowledge that it's opened
+  cy.log("Signing in as:", { uid } );
 
-  const auth = firebaseAuth();
+  firebaseAuthChainable().then( auth => {
+    cy.wrap(promGen(auth))
+  }).then( user =>
+    cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
+  )
 
-  cy.wrap( async _ => {
-    console.log("Signing in as:", { uid } );
-
+  // The auth logic.
+  //
+  // Note: No 'cy.log' (or any other 'cy.*') within the Promise definition.
+  //
+  async function promGen(auth) {
     // Create a user based on the provided token (only '.uid' is used by Firebase)
     //
     const { user: /*as*/ currentUser } = await signInWithCustomToken( auth, JSON.stringify({ uid }) );
@@ -69,25 +76,36 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
     await updateProfile(currentUser, { displayName, photoURL });
 
     return currentUser;
-
-  }).then( user =>
-    cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
-  )
+  }
 })
 
-/* REMOVE
-* Wait until the current page has initialized Firebase ('src/main' flags us by setting 'window["Let's test!"]').
+/*
+* Provide the auth handle that the _app itself_ has.
+*
+* This seems to be required, in order to steer its user login/logout behaviour.
+*
+* Note:
+*   Tried also creating our own auth handle, so there wouldn't be any awareness of Cypress in the 'vitebox' code,
+*   but that's not enough. The auth handle "works", but unrelated to the UI, thus - being pointless.
 *
 * Note:
 *   If we need access to any source code side things, this is how to get them. We cannot 'import' since the source
 *   uses '/@xyz' module redirects that Cypress doesn't know of.
-*_/
+*/
 function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
+
+  cy.visit('/');
+
   return cy.window().its("Let's test!").then( ([auth]) => {
+    console.log("Saimme:", auth);
     return auth;
   });
-}**/
+}
 
+// POINTLESS CODE - leave for now...
+//
+// Tried to manufacture (or gain, via 'getApp') the UI code's auth handle, without it collaborating. Didn't work.
+//
 /*
 * Access to Firebase auth.
 *
@@ -97,13 +115,10 @@ function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
 *   <<
 *     Firebase: No Firebase App '[DEFAULT]' has been created
 *   <<
-*
-*   We *can* completely initialize our own app, and that's what we do. This keeps 'vitebox' completely unaware of
-*   Cypress, which is meaningful. ⭐️😊
-*/
+*_/
 function firebaseAuth() {    // () => FirebaseAuth
 
-  const [projectId, AUTH_URL] = ["demo-abc", "http://emul:9100"];   // just know them #hack
+  const [projectId, AUTH_URL] = ["demo-abc", "http://localhost:9100"];   // just know them #hack
 
   const fah= initializeApp( {
     projectId,
@@ -115,4 +130,6 @@ function firebaseAuth() {    // () => FirebaseAuth
   connectAuthEmulator(auth, AUTH_URL);
 
   return auth;
-}
+} //**/
+
+function fail(msg) { throw new Error(msg) }

@@ -7,23 +7,21 @@
 import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
-import { getAuth, connectAuthEmulator, debugErrorMap, initializeAuth } from '@firebase/auth'
+import { getAuth, connectAuthEmulator, initializeAuth, debugErrorMap } from '@firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
 import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-/*** nah
-// Decide, whether you want human readable error messages - or maybe the normal ones are just fine.
-// This only applies to development. Samples:
+// For the sake of Cypress tests (at least), set up human readable error messages. This only applies to development.
 //
-//    true:   "The email address is already in use by another account."
-//    false:  "Firebase: Error (auth/email-already-in-use)."
+// Samples:
+//    "The email address is already in use by another account." vs.
+//    "Firebase: Error (auth/email-already-in-use)."
 //
 // See -> https://github.com/firebase/firebase-js-sdk/issues/5305
 //
 const HUMAN_READABLE_AUTH_ERRORS_PLEASE = true;
-***/
 
 async function initFirebaseLocal(host) {   // (string) => Promise of ()
   assert(LOCAL);
@@ -53,6 +51,7 @@ async function initFirebaseLocal(host) {   // (string) => Promise of ()
     import.meta.env.VITE_FUNCTIONS_PORT,
     import.meta.env.VITE_AUTH_PORT
   ];
+  assert(firestorePort && fnsPort && authPort, "Some Firebase param(s) are missing; problem in build");
 
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6767
   const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
@@ -68,14 +67,12 @@ async function initFirebaseLocal(host) {   // (string) => Promise of ()
   //
   const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
 
-  const auth = /*HUMAN_READABLE_AUTH_ERRORS_PLEASE ? initializeAuth(fah, { errorMap: debugErrorMap })
-    :*/ getAuth();
+  const auth = HUMAN_READABLE_AUTH_ERRORS_PLEASE ? initializeAuth(fah, { errorMap: debugErrorMap }) : getAuth();
 
   connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
   connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
   connectAuthEmulator(auth, AUTH_URL);
 
-  /*** REMOVE??
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
   // Note: Was NOT able to do 'getAuth()' on the Cypress side so we pass the auth handle (and whatever else is necessary?)
@@ -84,7 +81,6 @@ async function initFirebaseLocal(host) {   // (string) => Promise of ()
   // Importing anything from the app side must be done dynamically.
   //
   window["Let's test!"] = [auth];   // [FirebaseAuth]
-  ***/
 }
 
 /*

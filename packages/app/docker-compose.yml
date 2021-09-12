@@ -55,13 +55,13 @@ services:
 
   # Emulators are up, and primed with the users / data.
   #
-  # Note: Only for DEV. CI does not use the 'local' data.
+  # ! Only for DEV. Only when Vite is run natively (not via DC).
   #
   primed-dev:
     build:
       context: ../../dc-tools/firebase-prime/
       args:
-        - NODE=${NODE:-16}
+        - NODE=${NODE_V:-16}
     volumes:
       - .:/work
     working_dir: /work
@@ -74,8 +74,6 @@ services:
     profiles: ['manual']
 
   # EXPERIMENTAL!!
-  #
-  # - DEV: For studying, why HMR doesn't work from within DC
   #
   # Usage:
   #   <<
@@ -93,16 +91,15 @@ services:
   #   type (cannot have both installed, at once).
   #
   vite-exp:
-    image: node:16
+    image: node:16-alpine
     #user: '1000'    # WSL2 quick fix
     ports:
       - "3000:3000"
     volumes:
       - ../..:/proj
     working_dir: /proj/packages/app
-    command: bash -o pipefail -c
-      'node node_modules/esbuild/install.js &&
-      npx vite --port 3000 --mode dev_local'
+    entrypoint: npm
+    command: ['run', 'dc:launch']
     #depends_on: []
     profiles: ['exp']
 
@@ -115,11 +112,11 @@ services:
   #     $ docker compose run --rm vite-launched-exp
   #   <<
   #
-  vite-launched-exp:
+  vite-primed-exp:
     build:
       context: ../../dc-tools/firebase-prime/
       args:
-        - NODE=${NODE:-16}
+        - NODE=${NODE_V:-16}
     volumes:
       - .:/work
     working_dir: /work

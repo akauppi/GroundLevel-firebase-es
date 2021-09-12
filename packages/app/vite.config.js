@@ -120,7 +120,9 @@ const chunkTo = [     // Array of Regex
 export default {
 
   ...(DEV ? {    // 'npm run dev:{local|online}'
+    // Decides where 'index.html' is (and root for other dir configs)
     root: 'vitebox',
+    envDir: '..',     // actual 'app' dir
 
     // With 2.4.x, this was a way to point up from 'vitebox', but creates lots of warnings on 2.5.6:
     //  <<

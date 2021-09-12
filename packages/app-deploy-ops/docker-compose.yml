@@ -35,7 +35,7 @@ services:
     build:
       context: ../../dc-tools/n-user/
       args:
-        - NODE=${NODE:-16}
+        - NODE=${NODE_V:-16}
     command: bash -o pipefail -c
       'wait-for-it host:3012 --timeout=15
       '

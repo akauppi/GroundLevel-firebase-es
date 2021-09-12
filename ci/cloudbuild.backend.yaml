@@ -8,7 +8,7 @@
 #   - Common CI builder (not project specific; no deploys!)
 #
 # Uses images:
-#   - node:16
+#   - node:16-alpine
 #   - firebase-ci-builder   (pushed to Container Registry)
 #   - docker/compose
 #
@@ -27,13 +27,13 @@
 steps:
 # Root install
 #
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['install']
 
 # Backend
 #
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['install']
   dir: packages/backend
@@ -47,7 +47,7 @@ steps:
 #>  dir: packages/backend
 #>  env:
 #>    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#>    - NODE=16
+#>    - NODE_V=16
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -70,28 +70,32 @@ steps:
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-    - NODE=16
+    - NODE_V=16
 
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['run', 'ci:test']
   dir: packages/backend
   env:
     - EMUL_HOST=emul
 
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/backend
 
 # --- Timeout
 #
+# Cloud Build (Alpine Node image):
+#   - DC/Docker, with lint:     2:09, 2:24
+#
+timeout: 300s
+
+# (Old results for reference, before 10-Sep-21; 'node:16' image)
 # Cloud Build
 #   - native, no lint:          1:51, 1:45  # (old results)
 #   - DC/Docker, with lint:     3:13
 #   - DC/native, with lint:     2:35
-#
-timeout: 300s
 
 substitutions:
   _BUILDER_TAG: 9.17.0-node16-npm7

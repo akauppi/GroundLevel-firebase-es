@@ -8,7 +8,7 @@
 #   - Common CI builder (not project specific; no deploys!)
 #
 # Uses images:
-#   - node:16
+#   - node:16-alpine
 #   - firebase-ci-builder   (pushed to Container Registry; used via Docker Compose)
 #   - docker/compose
 #
@@ -26,7 +26,7 @@
 steps:
 # Root install
 #
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['install']
 
@@ -34,14 +34,14 @@ steps:
 #
 # Do not care to test it - separate PR task does it.
 #
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['install']
   dir: packages/backend
 
 # --- App
 #
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['install']
   dir: packages/app
@@ -56,34 +56,39 @@ steps:
   dir: packages/app
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-    - NODE=16
+    - NODE_V=16
+
 - name: cypress/included:${_CYPRESS_TAG}
   args: ['run', '--headless']
   dir: packages/app
   env:
     - CYPRESS_baseUrl=http://vite:3000
+    - CYPRESS_defaultCommandTimeout=10000
+    #
+    # Tests durations:
+    #   1: 7541, 7682 ms
+    #   2: 3980, 4289 ms
 
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
 
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
-  args: ['run', 'build']
+  args: ['run', 'ci:build']
   dir: packages/app
-    # keep building such that 'sh' is enough (maybe 'ci:build' target if needed)
 
 # --- App-deploy-ops
 #
 # Try that the code builds with fake access values.
 #
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['install']
   dir: packages/app-deploy-ops
 
-- name: node:16
+- name: node:16-alpine
   entrypoint: npm
   args: ['run', 'ci:build:fake']
   dir: packages/app-deploy-ops
@@ -92,8 +97,8 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - without Cypress tests: 2:33, 2:13, 2:04
-#   - with Cypress tests:
+#   - with Cypress tests: 5:54
+#   - without Cypress tests (old): 2:33, 2:13, 2:04
 #
 timeout: 500s
 

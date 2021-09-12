@@ -16,5 +16,4 @@
 /.screenshots
 
 # Generated files
-/vitebox/.env.dev*
-
+/.env.dev*
