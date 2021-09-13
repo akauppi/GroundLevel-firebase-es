@@ -39,12 +39,26 @@ services:
       - "6767:6767"
       # Keep ports aligned with 'firebase.json'
     volumes:
-      - .:/work
+      # --- RO
+      - ./firebase.json:/work/firebase.json:ro
+      # --- cached (may change; watched by the Emulators)
+      - ./functions:/work/functions:cached
+      - ./firestore.indexes.json:/work/firestore.indexes.json:cached
+      - ./firestore.rules:/work/firestore.rules:cached
+      # --- output
+      - ./firebase-debug.log:/work/firebase-debug.log:delegated
+      - ./firestore-debug.log:/work/firestore-debug.log:delegated
+      - ./ui-debug.log:/work/ui-debug.log:delegated
+
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
       firebase emulators:start --project=demo-2
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+        # Without this, Firebase-tools (9.17.0) don't see changes (Security Rules, Cloud Functions)
+
     # Keep project ID in sync with 'test-fns/setup.jest.js'
 
   # WARM UP the engines
@@ -60,8 +74,8 @@ services:
     ports:
       - "6768:6768"
     volumes:
-      - .:/work2
-    working_dir: /work2
+      - .:/work:ro
+    working_dir: /work
     command: sh -o pipefail -c
       'wait-for-it emul:6767 --timeout=20 &&
       npm run dc:warm-up &&

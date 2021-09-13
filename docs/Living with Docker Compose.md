@@ -64,7 +64,6 @@ To bring things down (and release the ports), either:
 This abstraction will hopefully grow into you. Instead of running things *on your machine* - you are running them in the Docker Compose parallel universe.
 
 
-
 ## Implications
 
 Commands like `npm test` launch the emulators behind the scenes. On the first run, this takes somewhat longer (~30s .. 1min) since the Docker images need to be pulled and the containers started. Later launches are way faster.
@@ -125,24 +124,56 @@ Sometimes, one needs to remove the whole container group (as described above).
 
 Seen on:
 
-- Docker Desktop for Mac 4.0.0
+- Docker Desktop for Mac 4.0.0 (`osxfs` file sharing option)
 
 
 ### Hot Module Reload doesn't work!!
 
-**File changes in the host are expected to be seen inside the containers, so that services can act accordingly.**
+|Statement|
+|---|
+|**File changes in the host are expected to be seen inside the containers, so that services can act accordingly.**|
 
 This is **not** true for Docker Desktop for Mac (4.0.0), at least not consistently.
 
-A "factory reset" seems to momentarily help, but soon the problems are back.
+- A "factory reset" seems to momentarily help, but soon the problems are back.
+- Choice of `osxfs` or `gRPC FUSE` does not seem to matter.
 
-A hack (-ehem- fix) is underway... Use it if:
-
-- you develop on Mac, and
-- ..you are developing backend, and want emulators to realign when Security Rules or Functions sources change (and they don't)
-- ..you are developing app, and changes in source are not reflected in the browser
+>A hack (-ehem- fix) is underway... Use it if:
+>
+>- you develop on Mac, and
+>- ..you are developing backend, and want emulators to realign when Security Rules or Functions sources change (and they don't)
+>- ..you are developing app, and changes in source are not reflected in the browser
 
 Links to real open issues where this is discussed are in the `TRACK.md`.
+
+
+## Other info
+
+### Docker Desktop for Mac - file system checkbox
+
+This one:
+
+![](.images/docker-desktop-fs-checkbox.png)
+
+..is a complex story.
+
+<!-- hidden
+For the dearing, here's the link: https://github.com/docker/roadmap/issues/7 🥶
+
+TL;DR Docker wants to offer only one file sharing protocol/engine, since otherwise one would need to align these across the team (makes sense). **They say** that "gRPC FUSE" is better than the other options (and it may be, for their maintenance). It's **not** however necessarily faster (though they state so!) - eg. with this repo the author gets similar results and prefers to use the "legacy".
+
+The "legacy" is legacy, because those people "left Docker some years back". Rrrright.
+
+Docker is **determined** to move away from `osxfs` implementation, but only when it doesn't break anything, to anyone.
+
+This **only affects Mac**, not Windows or Linux users.
+
+🥇 if you read the whole issue!
+-->
+
+Check or not to check.. That is (one possible) question.
+
+This repo has placed `:cached` and `:delegated` annotations to the volume shared, in the hope that this would help improve Docker Desktop for Mac disk performance. (It makes sense for showing the *intention* of the shares, which is already something..)
 
 
 ## Tips

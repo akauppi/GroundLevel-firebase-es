@@ -61,6 +61,7 @@ This issue has been open since 2017/18, in different variations.
 |---|---|---|
 |[File system change events broke after upgrade](https://github.com/docker/for-mac/issues/1802) (since Jun 2017)|open|Looks like the best issue to follow.|
 |[Unable to get inotify events inside container using kubernetes](https://github.com/docker/for-mac/issues/2375) (Jan 2018)|closed|Ours is not K8s, but some of the descriptions in this issue match ours spot on.|
+|[File-Event propagation stopping (worse in current stable/edge)](https://github.com/docker/for-mac/issues/2417) (Jan 2018)|closed|One more.|
 
 Highlighting [comment](https://github.com/docker/for-mac/issues/2375#issuecomment-653179768) from `azoff`:
 

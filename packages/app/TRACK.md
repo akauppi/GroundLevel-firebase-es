@@ -78,15 +78,17 @@ $ npm run build
 -->
 
 
-## Vite and HMR, under Docker
+## `Cannot set property 'peer' of null`
 
-Wasn't able to get it working. Tried:
 
-- changing the volume to `type: bind`
-- mounting `node_modules` separately, as described [here](https://github.com/vitejs/vite/issues/3161)
+```
+$ npm outdated
+npm ERR! Cannot set property 'peer' of null
 
-Neither worked. 
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /Users/asko/.npm/_logs/2021-09-12T14_28_48_226Z-debug.log
+```
 
-Track: 
+Not sure what causes that. `npm install` restored functionality - at least once.
 
-- [Vite and Docker](https://github.com/vitejs/vite/issues/4116)
+- [[BUG] Cannot set property 'peer' of null](https://github.com/npm/cli/issues/3711)
