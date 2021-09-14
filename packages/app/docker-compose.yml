@@ -6,7 +6,7 @@
 # Docker compose of:
 #   - firebase-ci-builder   brings Firebase Emulators
 #   - data and user priming
-#   - Vite                  front end Hot-Module Reloading; hosting   <<-- if HMR works, under DC
+#   - Vite                  front end Hot-Module Reloading; hosting
 #
 # Environment variables:
 #   CI_BUILDER_IMAGE (optional); name of the builder image
@@ -46,11 +46,19 @@ services:
       - "6767:6767"
       # Keep ports aligned with 'firebase.json'
     volumes:
-      - ..:/up:ro
-      #--- output
+      # --- RO
+      - ./firebase.json:/up/app/firebase.json:ro
+      - ../backend:/up/backend:ro
+        # ^-- Not wanting to shead too much focus on the backend so sharing it in bulk (and "ro"; we don't expect
+        #     changes, but change this to ':cached' (and add env.var. 'CHOKIDAR_USEPOLLING=true' if you do).
+      # --- cached
+      # --- output
       - ./firebase-debug.log:/up/app/firebase-debug.log:delegated
       - ./firestore-debug.log:/up/app/firestore-debug.log:delegated
       - ./ui-debug.log:/up/app/ui-debug.log:delegated
+      # --- MISC
+      # Wants to read something within the local 'node_modules'. What and why?
+      - ./node_modules:/up/app/node_modules:ro
 
     working_dir: /up/app
     command: bash -o pipefail -c
@@ -58,77 +66,64 @@ services:
       firebase emulators:start --project=${PROJECT_ID:-demo-abc}
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
 
-  # Emulators are up, and primed with the users / data.
-  #
-  # ! Only for DEV. Only when Vite is run natively (not via DC).
-  #
-  primed-dev:
-    build:
-      context: ../../dc-tools/firebase-prime/
-      args:
-        - NODE=${NODE_V:-16}
-    volumes:
-      - .:/work:ro
-    working_dir: /work
-    command: bash -o pipefail -c
-      'wait-for-it emul:6767 --timeout=15 &&
-      wait-for-it emul:9100 --timeout=10 &&
-      firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js
-      '
-    depends_on: ['emul']
-    profiles: ['manual']
+#| deprecated (was part of manual launch)
+#|  # Emulators are up, and primed with the users / data.
+#|  #
+#|  # ! Only for DEV. Only when Vite is run natively (not via DC).
+#|  #
+#|  primed-dev:
+#|    build:
+#|      context: ../../dc-tools/firebase-prime/
+#|      args:
+#|        - NODE=${NODE_V:-16}
+#|    volumes:
+#|      - .:/work:ro
+#|    working_dir: /work
+#|    command: bash -o pipefail -c
+#|      'wait-for-it emul:6767 --timeout=15 &&
+#|      wait-for-it emul:9100 --timeout=10 &&
+#|      firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js
+#|      '
+#|    depends_on: ['emul']
+#|    profiles: ['manual']
 
-  # EXPERIMENTAL!!
-  #
-  # Usage:
-  #   <<
-  #   $ docker compose run primed-dev     # waits until the database is ready
-  #   $ docker compose up vite-exp
-  #   <<
+  # Launch Vite for 'dev:local'
   #
   # NOTE:
-  #   If you use this, you MUST run when changing between Linux (DC) <-> macOS:
-  #     <<
-  #       $ node node_modules/esbuild/install.js      # or 'npm install --no-save esbuild'
-  #     <<
+  #   When using this (on Mac), one needs to run 'node node_modules/esbuild/install.js' when switching between Docker
+  #   / host environments (eg. 'vite build' on host). Wasn't able to use another folder within DC with mapping wizardy
+  #   (please try! #help).
   #
-  #   'esbuild' install is machine type dependent. With above command, you align it to the appropriate
-  #   type (cannot have both installed, at once).
-  #
-  vite-exp:
+  vite-local:
     image: node:16-alpine
     #user: '1000'    # WSL2 quick fix
     ports:
       - "3000:3000"
     volumes:
-      #--- RO
-      # eslint and Firebase client come from the top
-      - ../../node_modules:/proj/node_modules:ro
-      - ./package.json:/proj/packages/app/package.json:ro
+      # --- RO
+      - ../../node_modules:/proj/node_modules:ro                  # eslint and Firebase client come from the top
       - ./.env.dev_local:/proj/packages/app/.env.dev_local:ro
       - ./.npmrc:/proj/packages/app/.npmrc:ro
-      #- ./node_modules:/proj/packages/app/node_modules:ro
-      #--- cached
+      - ./package.json:/proj/packages/app/package.json:ro
+      #- ./node_modules:/proj/packages/app/node_modules:ro        # (see under 'other')
+      # --- cached
       - ./public:/proj/packages/app/public:cached
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
-      - ./vite.config.js:/proj/packages/app/vite.config.js:cached   # tbd. are changes to it detected, or a restart needed?
-      #--- output
-      #- ./node_modules/esbuild.dc:/proj/packages/app/node_modules/esbuild:delegated
-        # did not work - allowing container to modify 'node_modules/esbuild' contents (for now???)
-      - ./node_modules:/proj/packages/app/node_modules:rw
-      #--- misc
-      - ./tools:/proj/packages/app/tools:cached
-        # needs write access since npm tries to change '+x' (unnecessarily)
+      - ./vite.config.js:/proj/packages/app/vite.config.js:cached   # tbd. are changes to it detected, or a restart needed? (= is this ro?)
+      # --- output
+      # --- other
+      - ./node_modules:/proj/packages/app/node_modules:rw   # some writing happens to it
+      - ./tools:/proj/packages/app/tools:rw                 # npm tries to change '+x' (unnecessarily)
+
     working_dir: /proj/packages/app
     entrypoint: npm
     command: ['run', 'dc:launch']
     #depends_on: []
-    profiles: ['exp']
+    #profiles: ['...']   # enable for debugging the 'emul' launch
 
   # Make sure Vite and emulators are launched.
-  #
-  # No priming. Suitable for 'npm test'.
+  # No priming. Used by 'npm test'.
   #
   vite-launched:
     build:
@@ -138,21 +133,15 @@ services:
     command: bash -o pipefail -c
       'wait-for-it emul:6767 --timeout=15 &&
       wait-for-it emul:9100 --timeout=10 &&
-      wait-for-it vite-exp:3000 --timeout=10
+      wait-for-it vite-local:3000 --timeout=10
       '
-    depends_on: ['emul', 'vite-exp']
-    profiles: ['manual-exp', 'exp']
+    depends_on: ['emul', 'vite-local']
+    profiles: ['manual']
 
-  # A version suitable for launching also Vite, under DC.
+  # Make sure Vite and emulators are launched
+  # Local users and data primed. Used by 'npm run dev:local'.
   #
-  # DO NOT USE THIS for real, because of lack of Hot Module Reload!
-  #
-  # Usage:
-  #   <<
-  #     $ docker compose run --rm vite-launched-exp
-  #   <<
-  #
-  vite-primed-exp:
+  vite-primed:
     build:
       context: ../../dc-tools/firebase-prime/
       args:
@@ -164,7 +153,7 @@ services:
       'wait-for-it emul:6767 --timeout=15 &&
       wait-for-it emul:9100 --timeout=10 &&
       firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js &&
-      wait-for-it vite-exp:3000 --timeout=10
+      wait-for-it vite-local:3000 --timeout=10
       '
-    depends_on: ['emul', 'vite-exp']
-    profiles: ['manual-exp', 'exp']
+    depends_on: ['emul', 'vite-local']
+    profiles: ['manual']

@@ -1,0 +1,74 @@
+#
+# docker-compose.online.yml
+#
+# For development (via 'npm run dev:online').
+#
+# Docker compose of:
+#   - Vite                  front end Hot-Module Reloading; hosting
+#
+# Environment variables:
+#   - ENV (default: 'staging'); the staging environment to work against.
+#
+# Intentions:
+#   Within a Docker universe,
+#     - host the local files with a cloud backend, according to 'ENV' env.var. at the time of launching.
+#
+# Note:
+#   To change staging environments, 'docker compose -f docker-compose.online.yml down' and a new 'npm run dev:online'.
+#
+# Docker Compose (v3) note:
+#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+# References:
+#   Cypress > Continuous Integration > Introduction
+#     -> https://docs.cypress.io/guides/continuous-integration/introduction#What-is-Continuous-Integration
+#   Overview of Docker Compose (Docker docs)
+#     -> https://docs.docker.com/compose/
+#   Compose file version 3 reference
+#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+version: '3.0'
+
+services:
+  vite-3001:
+    image: node:16-alpine
+    #user: '1000'    # WSL2 quick fix
+    ports:
+      - "3001:3001"
+    volumes:
+      #--- RO
+      # eslint and Firebase client come from the top
+      - ../../node_modules:/proj/node_modules:ro
+      - ./package.json:/proj/packages/app/package.json:ro
+      - ./.env.development:/proj/packages/app/.env.development:ro
+      - ./.npmrc:/proj/packages/app/.npmrc:ro
+      #- ./node_modules:/proj/packages/app/node_modules:ro
+      #--- cached
+      - ./public:/proj/packages/app/public:cached
+      - ./src:/proj/packages/app/src:cached
+      - ./vitebox:/proj/packages/app/vitebox:cached
+      - ./vite.config.js:/proj/packages/app/vite.config.js:cached   # tbd. are changes to it detected, or a restart needed?
+      #--- output
+      #- ./node_modules/esbuild.dc:/proj/packages/app/node_modules/esbuild:delegated
+        # did not work - allowing container to modify 'node_modules/esbuild' contents (for now???)
+      - ./node_modules:/proj/packages/app/node_modules:rw
+      #--- misc
+      - ./tools:/proj/packages/app/tools:cached
+        # needs write access since npm tries to change '+x' (unnecessarily)
+    working_dir: /proj/packages/app
+    entrypoint: npm
+    command: ['run', 'dc:launch:online']
+    #depends_on: []
+
+  # Make sure Vite is launched.
+  #
+  vite-3001-launched:
+    build:
+      context: ../../dc-tools/n-user/
+      args:
+        - NODE=${NODE_V:-16}
+    command: bash -o pipefail -c
+      'wait-for-it vite-3001:3001 --timeout=10
+      '
+    depends_on: ['vite-3001']
+    profiles: ['manual']
