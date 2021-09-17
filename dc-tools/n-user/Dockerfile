@@ -7,8 +7,6 @@
 #   - socat
 #   - 'wait-for-it'       // from: https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
 #     The de-facto shell script standard for waiting a port, available eg. in Debian/Ubuntu by `apt-get install`.
-#   - 'serve-port'
-#     For building pipes of Docker containers.
 #
 # Context:
 #   - user 'user' created
@@ -48,17 +46,20 @@ RUN echo "b7a04f38de1e51e7455ecf63151c8c7e405bd2d45a2d4e16f6419db737a125d6  /usr
 
 # serve-port <port>
 #
-ADD simple-server.js /usr/local/bin/serve-port
+#ADD simple-server.js /usr/local/bin/serve-port
 
 RUN adduser --disabled-password \
   ${USER}
 
-WORKDIR /home/${USER}
-
-# Now changing to user (no more root)
-USER ${USER}
-   # $ whoami
-   # user
+# Remain running as root; easier especially for Windows+WSL2 (access rights stuff which isn't a concern
+# on macOS). Anyhow, running as root is fine.
+#
+#|# Now changing to user (no more root)
+#|USER ${USER}
+#|   # $ whoami
+#|   # user
+#|
+#|WORKDIR /home/${USER}
 
 # Suppress npm update announcements (creates '~/.npmrc' with 'update-notifier=false')
 #

@@ -56,8 +56,16 @@ services:
       - ./firebase-debug.log:/up/app/firebase-debug.log:delegated
       - ./firestore-debug.log:/up/app/firestore-debug.log:delegated
       - ./ui-debug.log:/up/app/ui-debug.log:delegated
+
+        # REMOVE:
+        # ^-- works on DDfM (4.0.0), but on Windows+WSL (DDfW 4.0.1) causes _folders_ to be created instead of files mapped.
+        #     Seems to be working "as intended", see -> https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume
+        #     But how come 'backup' works this way??
+
       # --- MISC
       # Wants to read something within the local 'node_modules'. What and why?
+      # Otherwise, "An unexpected error has occurred" (by Firebase Emulators)
+      #
       - ./node_modules:/up/app/node_modules:ro
 
     working_dir: /up/app
@@ -65,27 +73,6 @@ services:
       'echo "Launching Docker... 🐳" &&
       firebase emulators:start --project=${PROJECT_ID:-demo-abc}
         | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
-
-#| deprecated (was part of manual launch)
-#|  # Emulators are up, and primed with the users / data.
-#|  #
-#|  # ! Only for DEV. Only when Vite is run natively (not via DC).
-#|  #
-#|  primed-dev:
-#|    build:
-#|      context: ../../dc-tools/firebase-prime/
-#|      args:
-#|        - NODE=${NODE_V:-16}
-#|    volumes:
-#|      - .:/work:ro
-#|    working_dir: /work
-#|    command: bash -o pipefail -c
-#|      'wait-for-it emul:6767 --timeout=15 &&
-#|      wait-for-it emul:9100 --timeout=10 &&
-#|      firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js
-#|      '
-#|    depends_on: ['emul']
-#|    profiles: ['manual']
 
   # Launch Vite for 'dev:local'
   #
@@ -96,7 +83,6 @@ services:
   #
   vite-local:
     image: node:16-alpine
-    #user: '1000'    # WSL2 quick fix
     ports:
       - "3000:3000"
     volumes:

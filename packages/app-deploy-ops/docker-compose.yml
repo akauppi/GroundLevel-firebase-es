@@ -24,7 +24,11 @@ services:
       - "3012:3012"
       # Keep ports aligned with 'firebase.json'
     volumes:
-      - .:/work
+      # --- RO
+      - ./firebase.json:/work/firebase.json:ro
+      # --- cached
+      - ./roll/out:/work/roll/out:cached
+
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
