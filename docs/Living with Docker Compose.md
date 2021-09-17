@@ -1,6 +1,19 @@
 # Living with Docker Compose
 
-Docker Compose (DC for short) is used to launch Firebase emulators in both `packages/backend` and `packages/app`. This is intended to happen behind the scenes, but there are a few things you - as a developer - should know. 
+Docker Compose (DC for short) is used to launch background services (Firebase Emulators and Vite) throughout this repo.
+
+There are a few things that you - as a developer - should know, and some hints to nudge your development workflow to be more productive.
+
+- [Lesson 1](#Lesson_1)
+- [Lesson 2](#Lesson_2)
+- [Lesson 3](#Lesson_3)
+- [Lesson 4](#Lesson_4)
+- [Implications](#Implications)
+- [Why we use it?](#Why_we_use_it_)
+- [Troubleshooting](#Troubleshooting)
+- [Docker Desktop for Mac](#Docker_Desktop_for_Mac)
+
+---
 
 
 ## Lesson 1
@@ -27,7 +40,7 @@ wait-for-it: vite-exp:3000 is available after 0 seconds
 
 ... you return to the same command prompt.
 
-The services are still running in the background, and take up the ports (in this case):
+The services are still running in the background, and take up the ports.
 
 |||
 |---|---|
@@ -35,76 +48,98 @@ The services are still running in the background, and take up the ports (in this
 |9100|Firebase authentication|
 |3000|Serving the front-end files (Vite)|
 
+If you now run the same command again, it is way faster, since the services were already running.
+
+You can leave the services running this way - there is no real downside.
+
+If the selected ports collide with something you use otherwise, feel free to change the port numbering in the `package.json`, `docker-compose.yml` and `firebase.json` files.
+
+>Note: Changing port numbering should be easier than it currently (Sep 2021) is. It's currently spread across `package.json`, `docker-compose*.yml` and `firebase.json` files. Your best friend is to do something like `git grep 3000` to see where that port may be mentioned.
+>
+>Please send in ideas on how you'd prefer this to be configured/centralized. Maybe a `config.js` file, per each package?
+
+Closing Docker is completely fine. So is removing container groups ("apps") withing Docker Desktop, or running Docker > Restart. Next time you run the commands needing containers, they will be recreated from scratch.
+
 
 ## Lesson 2
 
-Since the services did not need another terminal to be opened, where can you see their output?
+Since the services do not need another terminal to be opened, where can you see their output?
 
 Docker > `Dashboard` > `Containers / Apps` > `app` > `app_emul_1`
 
 ![](.images/dd-dashboard.png)
 
-Docker Desktop becomes your periscope to all things running below the surface. Study it - use it!
+Once you know this exists, Docker Desktop becomes your (upside-down) periscope to all things below the surface. 🐋🦈 Study it - use it!
 
+Error messages here will help you debug eg.
+
+- Firebase Security Rules issues
+- Cloud Functions issues
 
 
 ## Lesson 3
 
-To bring things down (and release the ports), either:
+Running all backend services under DC helps in cleanup.
+
+To bring all background processes down, you can either:
 
 - `docker compose down` from the terminal
 
-   This brings down the services launched *in this particular folder* (and defined by the default `docker-compose.yml`).
+   This needs to be done **separately in each folder** and separately for each Docker Compose file (e.g. `-f docker-compose.online.yml` needs to be specifically added).
+   
+   It works, but there are other ways that may be better.
    
 - Docker > `Dashboard` > `Containers / Apps` > (pick) > `Delete` (trash bin icon)
 
-- Docker > `Restart` (or close Docker Desktop)
+   >Docker Desktop calls an "app" all the services launched within the same folder. For us, apps are the same as packages: `backend`, `app`, and `app-deploy-ops`. Underneath these are the individual containers.
+   
+   You can remove either full "apps" or individual containers.
 
+- Docker > `Restart` 
 
-This abstraction will hopefully grow into you. Instead of running things *on your machine* - you are running them in the Docker Compose parallel universe.
+   Works. Your containers remain, but they are no longer running. Thus, their ports are now available.
 
+- Docker > `Quit Docker Desktop`
 
+   Works.
+
+You shouldn't be able to do any damage to the repo, no matter what you do in the Docker Desktop. Everything is re-creatable so try around and find a workflow that suits you best! Break things. 😊
+
+   
 ## Implications
 
-Commands like `npm test` launch the emulators behind the scenes. On the first run, this takes somewhat longer (~30s .. 1min) since the Docker images need to be pulled and the containers started. Later launches are way faster.
+Apart from `npm run {start|dev|serve}`, also `npm test` launches services behind the scenes, using DC.
 
-These same services are used for your development, as well, so if you have done `npm test` there's no need for an `npm run dev`.
+On a cold start, `npm test` takes somewhat longer (~30s .. 1min) since the Docker images need to be pulled, maybe built and the containers started. Later launches are way faster.
 
-To use the same ports in another context, just run down the containers. 
-
->Obviously, you can also decide on a port numbering scheme across your projects where port numbers don't overlap. In this way, it's fine to leave the containers running.
+If you have run `npm test`, you should still run `npm run {start|dev}` for the interactive development support, as instructed in the package's `README`. These do things like priming the user data that may not be covered by `npm test`.
 
 
 ## Why we use it?
 
-The repo needs some way of managing the Firebase emulators and Vite, and DC turned out to be better than the alternatives.
+The repo needs some way of managing concurrency, and DC turned out to be better than the alternatives.[^1]
 
 - helps keep `package.json` simpler
 - is suitable for both development and CI use
 - is a standard tool good to gain experience with
 - helps make execution environments more alike between different users, machines and OSes
-- does not require extra terminals to be kept open, but allows centralized access to the service output, when needed
+- does not require extra terminals to be kept open,<br /> yet allows centralized access to the service output, when needed
+- makes it easy to close down started processes
 
-Before DC, the repo used `concurrently`, an `npm` package. This worked, but fell short of DC in most of the above cases.
+[^1]: Before DC, the repo used `concurrently`, an `npm` package. This worked, but fell short of DC in most of the above cases.
 
 ### Some downsides
 
-The main downsides of using DC are:
+- dependency on Docker Desktop being installed
+- **stability issues** (we're keeping an eye on this!)
 
-- dependency on Docker being installed
-- one needs to remember to `docker compose down`, to release the ports
-- some stability issues (we're keeping an eye on this!)
+   Stability issues are likely more of a bother developing the setup, than using it for app development. Anyhow, it's something we can take on, and create proper bug reports to Docker if there is a need.
 
+   Current problems we face can be seen at the project's [GitHub Issues](https://github.com/akauppi/GroundLevel-firebase-es/issues?q=is%3Aissue+is%3Aopen).
 
 ## Troubleshooting
 
-We're only moving to DC, and there may be some stability issues with the stack. 
-
 If you meet these, a Docker > `Restart` is often sufficient.
-
-<!-- hidden
-If you understand what causes them, please share the knowledge / suggest a PR to avoid them.
--->
 
 ### Network error in bringing DC down
 
@@ -116,40 +151,19 @@ $ docker compose down
 failed to remove network bf7b0a66db9138f6e9bf85c8d7dcb9643830e2c5f520d124d226e92e7232b7d8: Error response from daemon: error while removing network: network app_default id bf7b0a66db9138f6e9bf85c8d7dcb9643830e2c5f520d124d226e92e7232b7d8 has active endpoints
 ```
 
-Not known what's causing this.
+This is likely due to changes having been done to the DC YAML files. Docker > `Restart` and things can be fine, again.
 
-Docker > `Restart` and things can be fine, again.
+Sometimes, one needs to remove the whole container group (Docker "app").
 
-Sometimes, one needs to remove the whole container group (as described above).
-
+<!--
 Seen on:
 
-- Docker Desktop for Mac 4.0.0 (`osxfs` file sharing option)
+- Docker Desktop for Mac 4.0.0
+-->
 
+## Docker Desktop for Mac
 
-### Hot Module Reload doesn't work!!
-
-|Statement|
-|---|
-|**File changes in the host are expected to be seen inside the containers, so that services can act accordingly.**|
-
-This is **not** true for Docker Desktop for Mac (4.0.0), at least not consistently.
-
-- A "factory reset" seems to momentarily help, but soon the problems are back.
-- Choice of `osxfs` or `gRPC FUSE` does not seem to matter.
-
->A hack (-ehem- fix) is underway... Use it if:
->
->- you develop on Mac, and
->- ..you are developing backend, and want emulators to realign when Security Rules or Functions sources change (and they don't)
->- ..you are developing app, and changes in source are not reflected in the browser
-
-Links to real open issues where this is discussed are in the `TRACK.md`.
-
-
-## Other info
-
-### Docker Desktop for Mac - file system checkbox
+### File sharing option
 
 This one:
 
@@ -157,49 +171,22 @@ This one:
 
 ..is a complex story.
 
-<!-- hidden
-For the dearing, here's the link: https://github.com/docker/roadmap/issues/7 🥶
+The author keeps it disabled. The `osxfs` implementation works for most users, but its authors "left the company some years back" so Docker is thinking of replacing it with another implementation.
 
-TL;DR Docker wants to offer only one file sharing protocol/engine, since otherwise one would need to align these across the team (makes sense). **They say** that "gRPC FUSE" is better than the other options (and it may be, for their maintenance). It's **not** however necessarily faster (though they state so!) - eg. with this repo the author gets similar results and prefers to use the "legacy".
+Both of these can be **slow**.
 
-The "legacy" is legacy, because those people "left Docker some years back". Rrrright.
+With the number of files we have, that likely does not matter. 
 
-Docker is **determined** to move away from `osxfs` implementation, but only when it doesn't break anything, to anyone.
+---
 
-This **only affects Mac**, not Windows or Linux users.
+>For the daring, here's the link: https://github.com/docker/roadmap/issues/7 🥶
 
-🥇 if you read the whole issue!
--->
+>TL;DR Docker is **determined** to move away from `osxfs` implementation, but only when it doesn't break anything, to anyone.
 
-Check or not to check.. That is (one possible) question.
+>🥇 if you read the whole issue!
 
-This repo has placed `:cached` and `:delegated` annotations to the volume shared, in the hope that this would help improve Docker Desktop for Mac disk performance. (It makes sense for showing the *intention* of the shares, which is already something..)
+---
 
+This repo has placed `:cached` and `:delegated` annotations to the volumes shared, and shares only minimum necessary files/folders. This is anyhow good encapsulation, but also may help improve Docker Desktop for Mac performance.
 
-## Tips
-
-Some unrelated `docker compose` commands that may be useful:
-
-||what it does|
-|---|---|
-|`ps`|Lists the services currently running|
-
-
-## Mounting individual files
-
-Individual files can be mounted, as "volumes", just as folders. 
-
-There are a couple of twists, though:
-
-### 1. Touch them first
-
-They need to exist *as files* - otherwise Docker Compose (understandably) creates directories, instead. Not bad.
-
-### 2. Docker daemon insisting it wants a folder
-
->tbd. Error message here.
-
-If you see this, nothing seemed to work for the author. Not removing Docker container group, not restarting it. Only **restarting the whole machine** cleared the daemon's state, and from there on things were easy. 
-
-You end in this state if you haven't created a file before mounting, later remove the directory, create a file with the same name.
 

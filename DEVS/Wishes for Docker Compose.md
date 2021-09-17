@@ -78,3 +78,25 @@ Docker Desktop on Mac 3.6.0
 Some software, like Firebase console (pictured) do heavy use of non-ASCII characters.
 
 It would be lovely to see them in their glory in the Docker Compose output.
+
+
+## [BUG] Docker daemon state prevents mounting as a file
+
+You end in this state if you haven't created a file before mounting, later remove the directory, create a file with the same name.
+
+---
+<!--
+```
+...(didn't capture the error message tbd.)
+```
+-->
+
+With Docker Desktop for Mac 4.0.0, the daemon could enter a state where it insists "I want a folder" when you're trying to mount a file.
+
+Don't listen to it.
+
+Just reboot **the machine**. That helps.
+
+>It's likely that the daemon has some deep state (beyong Docker > Restart or even Quit and relaunch Docker) where it (thinks it) "knows" a certain volume should be a folder.
+>
+>By restarting the maching this state is cleaned, and if the file exists before the `docker compose` command, all should be dandy.

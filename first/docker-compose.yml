@@ -22,24 +22,9 @@
 version: '3.0'
 
 services:
-  debug:
-    build: ../firebase-ci-builder.sub/
-    volumes:
-      - ..:/proj
-    working_dir: /proj
-    command: bash -o pipefail -c
-      'echo "Launching Docker... 🐳" &&
-      npm --version &&
-      (cd packages/backend && npm install)
-      '
-    profiles: ['manual']
-    environment:
-    - NO_UPDATE_NOTIFIER=x
-
   # Using 'image' (not 'build') because it allows us to explicitly control the version of Firebase CLI.
   #
   deploy:
-    #build: ../firebase-ci-builder.sub/
     image: firebase-ci-builder:9.17.0-node16-npm7
     ports:
       - "9005:9005"
@@ -60,4 +45,3 @@ services:
       (cd packages/app-deploy-ops && npm install && npm run ci:deploy)
       '
     profiles: ['manual']
-    #environment: ['NO_UPDATE_NOTIFIER=x']    # (did not work; npm 7.19, 7.20.3)

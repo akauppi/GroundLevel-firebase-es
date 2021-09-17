@@ -53,7 +53,17 @@ Remove this when we can upgrade all of these:
    - [ ] `eslint-plugin-cypress`
 
 
-## Docker Desktop for Mac - file change events not seen in the container
+## Docker Desktop for Mac - host side file changes not seen in the container
+
+---
+
+>This is more of a "documented" and "works as intended" issue. Chokidar needs `CHOKIDAR_USEPOLLING=true` under "non-standard" networking conditions which Docker Desktop file sharing seems to be.
+>
+>So: nothing to see, but listing the issues anyhow, 'cause they are interesting..
+>
+>Note: If polling becomes a problem, there are ways to work around it, but for now this is "closed".
+
+---
 
 This issue has been open since 2017/18, in different variations.
 
@@ -63,25 +73,7 @@ This issue has been open since 2017/18, in different variations.
 |[Unable to get inotify events inside container using kubernetes](https://github.com/docker/for-mac/issues/2375) (Jan 2018)|closed|Ours is not K8s, but some of the descriptions in this issue match ours spot on.|
 |[File-Event propagation stopping (worse in current stable/edge)](https://github.com/docker/for-mac/issues/2417) (Jan 2018)|closed|One more.|
 
-Highlighting [comment](https://github.com/docker/for-mac/issues/2375#issuecomment-653179768) from `azoff`:
-
->+1 would like to understand how to better debug filesystem events over the osxfs bridge.
->
->for a case I'm working with:
->
->fsevents API appears to work on the host MacOS installation (i.e. tested via fswatch)
->inotify API appears to work on the containerized Ubuntu installation (i.e. tested via inotifytools)
->osxfs does not appear to bridge the fsevent over to inotify upon file change (i.e. tested using touch on MacOS)
->To workaround this, I wrote a script that binds to fsevents on the host machine, and delegates changes manually using docker exec [container_id] touch [file_path] in the target container. Not my favorite solution, but it beats having to restart docker or the host machine itself.
->
->As I understand it, this is still considered the only known workaround to the issue in question here.
-
-<!-- 
-|[File-system event CLOSE_WRITE not propagating from host to container](https://github.com/docker/for-mac/issues/896)|open|Related, but not really our itch (we don't get *any* notifications)... In fact, this should be closed(?) since the `CLOSE_WRITE` seem to be arriving, when things are dandy.|
--->
-
-Factory Reset helped **ONLY FOR A MOMENT** with Docker Desktop 4.0.0.
-
+<!-- disabled
 
 ### Our check (Alpine)
 
@@ -137,8 +129,6 @@ Same as above (Alpine), so seems not Linux flavour specific.
 - Docker Desktop on Windows doesn't seem to be affected
 - not tested on native Linux; assuming things work
 
-On Mac, you might be fine. Depends on OS version, maybe...  We don't know!
-
 ### What didn't work
 
 - In `packages/backend`, changes to `functions/**` or `firestore.rules` require the emulators to be restarted.
@@ -148,3 +138,4 @@ On Mac, you might be fine. Depends on OS version, maybe...  We don't know!
 - In `packages/app`, Hot Module Reloading is lost if Vite runs under Docker.
 
 	This is 💔 since we really need HMR to work. Cannot use DC for Vite until this is solved, one way or another.
+-->
