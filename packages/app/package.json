@@ -22,40 +22,33 @@
   "scripts": {
     "dev": "npm run dev:local",
     "-- ": "",
-    "test": "docker compose run --rm vite-launched && cypress run",
-    "//test": "if port-is-taken --silent 3000 ; then cypress run ; else npm run _test_1 ; fi",
-    "//_test_1": "concurrently --kill-others --success=first -n dev,cy \"npm run dev:local\" \"wait-for 3000 && npm run -s test\"",
+    "test": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose run --rm vite-launched && CYPRESS_defaultCommandTimeout=8000 cypress run",
     "-- -": "",
-    "dev:local": "npm run -s dev:local:dc",
-    "-- - ": "",
-    "~~dev:local:native": "npm run -s _genEnvLocal && npm run -s _dev_local1",
-    "~~_dev_local1": "docker compose run --rm primed-dev && npm run -s _dev_local2",
-    "~~_dev_local2": "vite --port 3000 --mode dev_local",
-    "--  -": "",
-    "dev:local:dc": "npm run -s _genEnvLocal && docker compose run --rm vite-primed",
+    "dev:local": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose run --rm vite-primed",
     "dc:launch": "npm install --no-save esbuild && vite --port 3000 --mode dev_local",
-    "--  - ": "",
+    "--  -": "",
     "ci:launch": "npm run -s _genEnvLocal && vite --port 3000 --mode dev_local",
     "ci:build": "vite build",
     "-- --": "",
-    "dev:online": "npm run -s dev:online:dc",
+    "dev:online": "npm run -s _genEnvOnline && docker compose -f docker-compose.online.yml run --rm vite-3001-launched",
+    "dc:launch:online": "npm install --no-save esbuild && vite --port 3001",
     "//dev:online": "concurrently --kill-others-on-fail -n log,vite \"npm run -s _dev_online_log\" \"npm run -s _dev_online_vite\"",
     "//_dev_online_log": "PORT=5050 node tools/printout.js",
     "//_dev_online_vite": "wait-for 5050 && vite --port 3001",
-    "dev:online:dc": "npm run -s _genEnvOnline && docker compose -f docker-compose.online.yml run --rm vite-3001-launched",
-    "dc:launch:online": "npm install --no-save esbuild && vite --port 3001",
     "--   -": "",
     "lint": "eslint --ext .js,.vue src",
     "-- - -": "",
-    "build": "node node_modules/esbuild/install.js && vite build",
-    "prebuild": "npm run -s _checkNoLinks",
+    "build": "npm run -s _checkNoLinks && npm run -s _macNudgeEsbuild && vite build",
     "--  --": "",
     "_checkNoLinks": "check-no-links || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; false)",
     "//_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
     "_genEnvLocal": "gen-vite-env-local --project=demo-abc > .env.dev_local",
     "_genEnvOnline": "gen-vite-env-online > .env.development",
     "-- ---": "",
-    "postbuild": "cp public/* dist/"
+    "postbuild": "cp public/* dist/",
+    "--    -": "",
+    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
+    "_macNudgeEsbuild": "!(uname -a | grep -q \"^Darwin\") || npm install --no-save esbuild"
   },
   "dependencies": {
     "@firebase/app": "file:../../node_modules/@firebase/app",
@@ -110,9 +103,21 @@
         "Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.",
         "A single 'grep -v -E' (needs -E) with '|' is fine."
       ],
+      "test / Cypress timeout": [
+        "When cold-starting DC with 'npm test' on macOS, the 2nd test has been seen to take 5s (and would time out",
+        "with the default 4s timeout). Thus, 'CYPRESS_defaultCommandTimeout'."
+      ],
       "ci:test": [
         "CI calls directly 'docker compose' since it's using a docker image that doesn't have 'npm'. We reflect the",
         "command here, mostly for just documenting the use."
+      ],
+      "_macNudgeEsbuild": [
+        "After running under DC, 'node_modules/esbuild' has been installed with Linux underpinnings. To build at host",
+        "(only if it's macOS), we need to nudge it back.", "Alternative would be running also the build under DC.",
+        "Unfortunately, we cannot have two Vite's, can we???"
+      ],
+      "_touchEm": [
+        "Vital for DC that files to be mapped to the container exist *before* the DC command."
       ]
     }
   }

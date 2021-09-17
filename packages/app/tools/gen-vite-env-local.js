@@ -34,11 +34,11 @@ const [firestorePort, functionsPort, authPort] = (_ => {   // => [int, int, int]
   return arr;
 })();
 
-const emulHost = process.env["EMUL_HOST"];    // overridden by CI
+const emulHost = process.env["EMUL_HOST"];    // overridden by CI only
 
 const out =
 `# Generated based on 'firebase.json'.
-# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev[:local]'
+# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev[:local]' and 'npm test'.
 #
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_FUNCTIONS_PORT=${functionsPort}

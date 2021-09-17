@@ -29,7 +29,7 @@ services:
       # --- cached
       - ./roll/out:/work/roll/out:cached
       # --- output
-      - ./firebase-debug.log:/up/app/firebase-debug.log:delegated
+      - ./firebase-debug.log:/work/firebase-debug.log:delegated
 
     working_dir: /work
     command: bash -o pipefail -c

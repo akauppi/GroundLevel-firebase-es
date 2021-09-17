@@ -15,10 +15,10 @@
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "docker compose run --rm warmed-up && npm run -s _test1",
+    "test": "npm run -s _touchEm && docker compose run --rm warmed-up && npm run -s _test1",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "  -": "",
-    "start": "docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
+    "start": "npm run -s _touchEm && docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
     "  - -": "",
     "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
@@ -40,14 +40,16 @@
     "  -  --": "",
     "postinstall": "npm run -s _prepFunctions",
     "_prepFunctions": "npm --prefix functions install",
-    "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json"
+    "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
+    "-- ": "",
+    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log"
   },
   "devDependencies": {
     "@local/tools": "file:../../tools",
     "concurrently": "^6.2.1",
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.4-alpha.3",
-    "jest": "^27.1.1",
+    "jest": "^27.2.0",
     "node-fetch": "^3.0.0"
   },
   "//comments": {
@@ -66,6 +68,9 @@
     "scripts": {
       "ci:{test|deploy}": [
         "These are the commands CI will use."
+      ],
+      "_touchEm": [
+        "Important that files to be mapped as DC volumes exist as files."
       ]
     }
   }

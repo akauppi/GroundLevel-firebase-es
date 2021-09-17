@@ -105,13 +105,15 @@ function tunnel(template, map) {    // (string, Map of string -> boolean) => str
       //
       // Note: expects '-' delimiter in Rollup 'output.entryFileNames'
       //
-      const s4 = s.replaceAll(/['"]\/([\w\d]+)-#\.js['"]/g,
+      const s4 = s.replace(/['"]\/([\w\d]+)-#\.js['"]/g,
         (match,c1) => {   // e.g. match="'/main-#.js'", c1="main"
           const hash = hashFor(c1);
           return match.replace('#',hash);
         }
       );
       if (s4 !== s) return s4;
+        //
+        // Note: Important to use 's.replace', above, to support Node 14.
 
       return s;   // unmatched
     });

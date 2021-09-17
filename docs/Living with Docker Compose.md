@@ -184,3 +184,22 @@ Some unrelated `docker compose` commands that may be useful:
 |---|---|
 |`ps`|Lists the services currently running|
 
+
+## Mounting individual files
+
+Individual files can be mounted, as "volumes", just as folders. 
+
+There are a couple of twists, though:
+
+### 1. Touch them first
+
+They need to exist *as files* - otherwise Docker Compose (understandably) creates directories, instead. Not bad.
+
+### 2. Docker daemon insisting it wants a folder
+
+>tbd. Error message here.
+
+If you see this, nothing seemed to work for the author. Not removing Docker container group, not restarting it. Only **restarting the whole machine** cleared the daemon's state, and from there on things were easy. 
+
+You end in this state if you haven't created a file before mounting, later remove the directory, create a file with the same name.
+
