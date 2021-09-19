@@ -32,7 +32,6 @@ version: '3.0'
 services:
   vite-3001:
     image: node:16-alpine
-    #user: '1000'    # WSL2 quick fix
     ports:
       - "3001:3001"
     volumes:
@@ -68,7 +67,7 @@ services:
       args:
         - NODE=${NODE_V:-16}
     command: bash -o pipefail -c
-      'wait-for-it vite-3001:3001 --timeout=10
+      'wait-for-it vite-3001:3001 --timeout=20
       '
     depends_on: ['vite-3001']
     profiles: ['manual']
