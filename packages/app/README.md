@@ -290,3 +290,13 @@ We'll add that layer in the next sub-package, `app-deploy-ops`.
 
 Cypress binaries are gathered in [a cache directory](https://docs.cypress.io/guides/getting-started/installing-cypress#Binary-cache). You might want to clean the earlier ones away, at times, to save disk space.
 
+### Updating `vite`, Vite config, `@vitejs/plugin-vue`
+
+The Vite server is running in DC, so in order to apply the changes, make sure to run down the earlier instance:
+
+```
+$ docker compose -f docker-compose.yml -f docker-compose.online.yml --env-file ./.env.dc down
+```
+
+>You can do the same in Docker Desktop's Dashboard: just remove the `app` > `app_vite*` containers.
+
