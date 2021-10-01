@@ -43,7 +43,7 @@ steps:
 # USE THIS TO DEBUG CASES where the emulators don't start (or to see warm-up timings).
 #
 #>- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#>  args: ['up', 'warm-up']
+#>  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'warm-up']
 #>  dir: packages/backend
 #>  env:
 #>    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}

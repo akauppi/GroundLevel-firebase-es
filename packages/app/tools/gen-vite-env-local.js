@@ -13,7 +13,7 @@
 *
 * Output to stdout.
 */
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 
 const [a] = process.argv.slice(2);
 const [_,projectId] = /^--project=(.+)$/.exec(a);
@@ -23,11 +23,11 @@ if (!projectId) {
   process.exit(1);
 }
 
-const [firestorePort, functionsPort, authPort] = (_ => {   // => [int, int, int]
+const [firestorePort, functionsPort, authPort, uiPort] = (_ => {   // => [int, int, int, int]
   const raw = readFileSync('./firebase.json');
   const json = JSON.parse(raw);
 
-  const arr = ["firestore","functions","auth"].map( k => {
+  const arr = ["firestore","functions","auth","ui"].map( k => {
     return (json.emulators && json.emulators[k] && json.emulators[k].port)    // cannot use '?.' because of the varying 'k'
       || fail(`Cannot read 'emulators.${k}.port' from 'firebase.json'`);
   });
@@ -47,6 +47,20 @@ VITE_PROJECT_ID=${projectId}${ emulHost ? `\nVITE_EMUL_HOST=${emulHost}` : '' }
 `;
 
 process.stdout.write(out);
+
+// Secondary output for DC
+//
+const out2 =
+  `# Generated based on 'firebase.json'.
+# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev[:local]' and 'npm test'.
+#
+EMUL_FIRESTORE_PORT=${firestorePort}
+EMUL_FUNCTIONS_PORT=${functionsPort}
+EMUL_AUTH_PORT=${authPort}
+EMUL_UI_PORT=${uiPort}
+`;
+
+writeFileSync('.env.dc', out2);
 
 function fail(msg) {
   process.stderr.write(`ERROR: ${msg}\n\n`);

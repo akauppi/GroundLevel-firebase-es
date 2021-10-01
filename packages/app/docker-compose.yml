@@ -41,9 +41,9 @@ services:
   emul:
     image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:9.17.0-node16-npm7}
     ports:
-      - "4000:4000"
-      - "9100:9100"
-      - "6767:6767"
+      - "${EMUL_AUTH_PORT}:${EMUL_AUTH_PORT}"
+      - "${EMUL_FIRESTORE_PORT}:${EMUL_FIRESTORE_PORT}"
+      - "${EMUL_UI_PORT}:${EMUL_UI_PORT}"
       # Keep ports aligned with 'firebase.json'
     volumes:
       # --- RO
@@ -56,11 +56,6 @@ services:
       - ./firebase-debug.log:/up/app/firebase-debug.log:delegated
       - ./firestore-debug.log:/up/app/firestore-debug.log:delegated
       - ./ui-debug.log:/up/app/ui-debug.log:delegated
-
-        # REMOVE:
-        # ^-- works on DDfM (4.0.0), but on Windows+WSL (DDfW 4.0.1) causes _folders_ to be created instead of files mapped.
-        #     Seems to be working "as intended", see -> https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume
-        #     But how come 'backup' works this way??
 
       # --- MISC
       # Wants to read something within the local 'node_modules'. What and why?
@@ -92,11 +87,11 @@ services:
       - ./.npmrc:/proj/packages/app/.npmrc:ro
       - ./package.json:/proj/packages/app/package.json:ro
       #- ./node_modules:/proj/packages/app/node_modules:ro        # (see under 'other')
+      - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
       # --- cached
       - ./public:/proj/packages/app/public:cached
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
-      - ./vite.config.js:/proj/packages/app/vite.config.js:cached   # tbd. are changes to it detected, or a restart needed? (= is this ro?)
       # --- output
       # --- other
       - ./node_modules:/proj/packages/app/node_modules:rw   # some writing happens to it
@@ -117,8 +112,8 @@ services:
       args:
         - NODE=${NODE_V:-16}
     command: bash -o pipefail -c
-      'wait-for-it emul:6767 --timeout=15 &&
-      wait-for-it emul:9100 --timeout=10 &&
+      'wait-for-it emul:${EMUL_FIRESTORE_PORT} --timeout=15 &&
+      wait-for-it emul:${EMUL_AUTH_PORT} --timeout=10 &&
       wait-for-it vite-local:3000 --timeout=10
       '
     depends_on: ['emul', 'vite-local']
@@ -136,8 +131,8 @@ services:
       - .:/work:ro
     working_dir: /work
     command: bash -o pipefail -c
-      'wait-for-it emul:6767 --timeout=15 &&
-      wait-for-it emul:9100 --timeout=10 &&
+      'wait-for-it emul:${EMUL_FIRESTORE_PORT} --timeout=15 &&
+      wait-for-it emul:${EMUL_AUTH_PORT} --timeout=10 &&
       firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js &&
       wait-for-it vite-local:3000 --timeout=10
       '

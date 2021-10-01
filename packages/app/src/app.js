@@ -34,7 +34,7 @@ const LOCAL = import.meta.env.MODE === 'dev_local';
 //
 // - 'VERSION' gives the version
 //
-const VERSION = _VERSION;    // both dev and production
+const VERSION = "0.0.0";    // both dev and production
 
 (_ => {    // () => ()
   const tr = appInitTrack.start();

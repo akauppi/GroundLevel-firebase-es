@@ -100,3 +100,19 @@ Just reboot **the machine**. That helps.
 >It's likely that the daemon has some deep state (beyong Docker > Restart or even Quit and relaunch Docker) where it (thinks it) "knows" a certain volume should be a folder.
 >
 >By restarting the maching this state is cleaned, and if the file exists before the `docker compose` command, all should be dandy.
+
+
+## Explicit mounting of a file
+
+Mounting of files in DC `volumes` is possible, but demands the file system entry to exist, as a file, before the `docker compose` call.
+
+This causes us to have these preventive measures in `package.json`:
+
+```
+    "postinstall": "[ -z $BUILDER_OUTPUT ] || npm run -s _touchEm",
+    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
+```
+
+These are output files, normally created by Firebase Emulator. Now we much make sure they exist, so they won't be mapped as folders, instead.
+
+>Syntax suggestion: `:f` as a postfix, concatenable with others (in our case, we'd use `:delegated:f`.

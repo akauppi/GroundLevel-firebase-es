@@ -53,9 +53,9 @@ async function initFirebaseLocal(host) {   // (string) => Promise of ()
   ];
   assert(firestorePort && fnsPort && authPort, "Some Firebase param(s) are missing; problem in build");
 
-  const FIRESTORE_PORT = parseInt(firestorePort);           // 6767
-  const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5002
-  const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9100"
+  const FIRESTORE_PORT = parseInt(firestorePort);           // 6769
+  const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5003
+  const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9101"
 
   const firestore = getFirestore();
 

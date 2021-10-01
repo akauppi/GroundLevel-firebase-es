@@ -22,9 +22,9 @@
   "scripts": {
     "dev": "npm run dev:local",
     "-- ": "",
-    "test": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose run --rm vite-launched && CYPRESS_defaultCommandTimeout=8000 cypress run",
+    "test": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose --env-file ./.env.dc run --rm vite-launched && CYPRESS_defaultCommandTimeout=10000 cypress run",
     "-- -": "",
-    "dev:local": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose run --rm vite-primed",
+    "dev:local": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose --env-file ./.env.dc run --rm vite-primed",
     "dc:launch": "npm install --no-save esbuild && vite --mode dev_local",
     "--  -": "",
     "ci:launch": "npm run -s _genEnvLocal && vite --mode dev_local",
@@ -43,6 +43,7 @@
     "_genEnvOnline": "gen-vite-env-online > .env.development",
     "-- ---": "",
     "postbuild": "cp public/* dist/",
+    "postinstall": "[ -z $BUILDER_OUTPUT ] || npm run -s _touchEm",
     "--    -": "",
     "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
     "_macNudgeEsbuild": "!(uname -a | grep -q \"^Darwin\") || npm install --no-save esbuild"
@@ -101,8 +102,11 @@
         "A single 'grep -v -E' (needs -E) with '|' is fine."
       ],
       "test / Cypress timeout": [
-        "When cold-starting DC with 'npm test' on macOS, the 2nd test has been seen to take 5s (and would time out",
-        "with the default 4s timeout). Thus, 'CYPRESS_defaultCommandTimeout'."
+        "When cold-starting DC with 'npm test' on macOS, the 2nd test has been seen to take ~~5s~~ over 8s (default",
+        "timeout is 4s). Thus, 'CYPRESS_defaultCommandTimeout'."
+      ],
+      "[ -z $BUILDER_OUTPUT ]": [
+        "Precedes commands only to be run in CI."
       ],
       "ci:test": [
         "CI calls directly 'docker compose' since it's using a docker image that doesn't have 'npm'. We reflect the",

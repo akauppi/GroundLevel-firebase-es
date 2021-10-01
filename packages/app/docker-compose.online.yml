@@ -42,11 +42,11 @@ services:
       - ./.env.development:/proj/packages/app/.env.development:ro
       - ./.npmrc:/proj/packages/app/.npmrc:ro
       #- ./node_modules:/proj/packages/app/node_modules:ro
+      - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes; 'ro'
       #--- cached
       - ./public:/proj/packages/app/public:cached
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
-      - ./vite.config.js:/proj/packages/app/vite.config.js:cached   # tbd. are changes to it detected, or a restart needed?
       #--- output
       #- ./node_modules/esbuild.dc:/proj/packages/app/node_modules/esbuild:delegated
         # did not work - allowing container to modify 'node_modules/esbuild' contents (for now???)
