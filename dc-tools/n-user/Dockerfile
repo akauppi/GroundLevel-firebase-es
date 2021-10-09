@@ -12,8 +12,8 @@
 #   - user 'user' created
 #   - home '/home/user'
 #
-# Note: This could be based on 'gcr.io/cloud-builders/npm' (Google Cloud Build image), for faster CI runs, but that
-#   image is 943MB vs. 112MB for 'node:16-alpine'.
+# Note:
+#   Using 'node:{14|16}-alpine' (~112MB) is FASTER than the Cloud Build 'gcr.io/cloud-builders/npm' (943MB) image.
 #
 # References:
 #   - Best practices for writing Dockerfiles
@@ -65,4 +65,4 @@ RUN adduser --disabled-password \
 #
 RUN npm config set update-notifier false
 
-# No entry point
+# No entrypoint

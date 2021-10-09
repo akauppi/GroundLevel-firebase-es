@@ -5,11 +5,6 @@
 
 Happens on Mac, due to the `esbuild` package needing a re-install on the DC side.
 
-<!--
-- Docker Desktop on Mac 4.0.1
-- Cypress 8.5.0
--->
-
 ### Steps
 
 - `npm test` (from clean, so DC gets run)
@@ -34,6 +29,10 @@ $ npm run _macNudgeEsbuild
 We can try to map a separate folder (eg. `node_modules/esbuild.linux`) for the DC, copying the original contents there before launching DC.
 
 
+
+<!-- Not getting this any more: Docker Desktop for Mac 4.1.0 (either osx or gRPC file sharing); Cypress 8.5.0.  
+Keep for a while, in case reoccurs.
+
 ## Timeouts in `npm test`
 
 ```
@@ -51,12 +50,10 @@ This happens on the *first* test run (when DC containers are created). Reason is
 
 Docker Desktop for Mac 4.0.1
 
-<!--
-tbd. Does it happen on Windows+WSL2 (or Mac only)?
--->
-
 **Work-around:**
 
 Run the tests a second time.
 
 This does not hinder CI runs (which is fortunate).
+-->
+
