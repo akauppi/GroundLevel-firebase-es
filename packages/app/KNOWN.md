@@ -30,10 +30,7 @@ We can try to map a separate folder (eg. `node_modules/esbuild.linux`) for the D
 
 
 
-<!-- Not getting this any more: Docker Desktop for Mac 4.1.0 (either osx or gRPC file sharing); Cypress 8.5.0.  
-Keep for a while, in case reoccurs.
-
-## Timeouts in `npm test`
+## First `npm test` times out
 
 ```
 $ npm test
@@ -55,5 +52,4 @@ Docker Desktop for Mac 4.0.1
 Run the tests a second time.
 
 This does not hinder CI runs (which is fortunate).
--->
 

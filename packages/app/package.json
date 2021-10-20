@@ -14,7 +14,8 @@
   "bin": {
     "check-no-links": "./tools/check-no-links.sh",
     "gen-vite-env-local": "./tools/gen-vite-env-local.js",
-    "gen-vite-env-online": "./tools/gen-vite-env-online.js"
+    "gen-vite-env-online": "./tools/gen-vite-env-online.js",
+    "gen-dc-env": "./tools/gen-dc-env.js"
   },
   "engines": {
     "node": ">= 14.3 || >= 16 <16.6 || >=16.6.1"
@@ -27,7 +28,7 @@
     "dev:local": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose --env-file ./.env.dc run --rm vite-primed",
     "dc:launch": "npm install --no-save esbuild && vite --mode dev_local",
     "--  -": "",
-    "ci:launch": "npm run -s _genEnvLocal && vite --mode dev_local",
+    "ci:launch": "vite --mode dev_local",
     "ci:build": "vite build",
     "-- --": "",
     "dev:online": "npm run -s _genEnvOnline && docker compose -f docker-compose.online.yml run --rm vite-3001-launched",
@@ -45,7 +46,7 @@
     "postbuild": "cp public/* dist/",
     "postinstall": "[ -z $BUILDER_OUTPUT ] || npm run -s _touchEm",
     "--    -": "",
-    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
+    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log && gen-dc-env",
     "_macNudgeEsbuild": "!(uname -a | grep -q \"^Darwin\") || npm install --no-save esbuild"
   },
   "dependencies": {

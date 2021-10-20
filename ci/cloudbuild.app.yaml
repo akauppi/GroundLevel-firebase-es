@@ -52,7 +52,7 @@ steps:
 # Note: Unlike in 'dev', no priming of data & users is needed. Cypress tests carry their own.
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-launched-ci']
+  args: ['--env-file', './.env.dc', '-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-launched-ci']
   dir: packages/app
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}

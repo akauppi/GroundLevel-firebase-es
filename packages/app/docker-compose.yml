@@ -44,7 +44,7 @@ services:
       - "${EMUL_AUTH_PORT}:${EMUL_AUTH_PORT}"
       - "${EMUL_FIRESTORE_PORT}:${EMUL_FIRESTORE_PORT}"
       - "${EMUL_UI_PORT}:${EMUL_UI_PORT}"
-      # Keep ports aligned with 'firebase.json'
+        # Keep ports aligned with 'firebase.json'
     volumes:
       # --- RO
       - ./firebase.json:/up/app/firebase.json:ro

@@ -44,12 +44,7 @@ ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.s
 RUN echo "b7a04f38de1e51e7455ecf63151c8c7e405bd2d45a2d4e16f6419db737a125d6  /usr/local/bin/wait-for-it" | sha256sum -c \
   && chmod +rx /usr/local/bin/wait-for-it
 
-# serve-port <port>
-#
-#ADD simple-server.js /usr/local/bin/serve-port
-
-RUN adduser --disabled-password \
-  ${USER}
+RUN adduser --disabled-password ${USER}
 
 # Remain running as root; easier especially for Windows+WSL2 (access rights stuff which isn't a concern
 # on macOS). Anyhow, running as root is fine.
