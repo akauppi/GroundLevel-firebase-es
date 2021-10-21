@@ -17,7 +17,9 @@ PATHS=". tools dc-tools/firebase-prime/package packages/backend packages/backend
 #
 npm --prefix packages/app prune
 
-for _PATH in $PATHS
+for _PATH in $PATHS   # overriding 'PATH'... not recommended.
 do
-  npm --prefix "$_PATH" outdated
+  # 'npm ... outdated' (npm 8.0.0) exits with non-0 if there are outdated entries. We want to keep going.
+  #
+  npm --prefix "$_PATH" outdated || true
 done
