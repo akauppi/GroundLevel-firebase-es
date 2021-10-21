@@ -24,5 +24,3 @@ $ docker compose run test
 If you don't see more output here, it's stuck.
 
 Try Docker > Restart.
-
->This is one of the reasons why tests are run natively, not using DC. The other is that native runs don't need warming up, to avoid timeouts.

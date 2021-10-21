@@ -27,7 +27,7 @@ const opts = {
   // If the warm-up happens great, Jest was able to resolve the modules, on its own.
   //
   resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
-    //  27.1.1  still needs it
+    //  27.2.5  still needs it
 };
 
 export default opts;

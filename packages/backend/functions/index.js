@@ -12,13 +12,11 @@
 *     -> https://firebase.google.com/docs/admin/setup
 */
 import functions from 'firebase-functions'
-const logger = functions.logger
-//import functions from 'firebase-functions'
-//import { logger } from 'firebase-functions/logger'    // tbd. using its 'exports' (where are the docs?)
+const { logger } = functions
 
-import admin from 'firebase-admin'
-//import { initializeApp } from 'firebase-admin/app'
-//import { getFirestore } from 'firebase-admin/firestore'
+//import admin from 'firebase-admin'
+import { initializeApp } from 'firebase-admin/app'
+import { getFirestore } from 'firebase-admin/firestore'
 
 import { cloudLoggingProxy_v0 as clp } from './cloudLoggingProxy.js'
 
@@ -57,10 +55,10 @@ const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 //    If there is not, would Firebase folks please make some (or we can reverse engineer and do it here! ⭐️
 //---
 
-admin.initializeApp();
-const db = admin.firestore();
-//initializeApp();
-//const db = getFirestore();
+//admin.initializeApp();
+//const db = admin.firestore();
+initializeApp();
+const db = getFirestore();
 
 // Under emulation, run as the default region (makes testing simpler).
 // In production, the region is brought via Cloud Function configuration.
