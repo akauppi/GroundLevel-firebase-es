@@ -20,9 +20,9 @@
     "  -": "",
     "start": "npm run -s _touchEm && docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
     "  - -": "",
-    "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
+    "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
-    "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
+    "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
     "  -  -": "",
     "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f invitesC.test.js --verbose --detectOpenHandles --all",
     "test:rules:projects": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/index.test.js --verbose --detectOpenHandles --all",
@@ -48,8 +48,8 @@
     "@local/tools": "file:../../tools",
     "concurrently": "^6.3.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.4-alpha.3",
-    "jest": "^27.2.5",
+    "firebase-jest-testing": "0.0.4-alpha.5",
+    "jest": "^27.3.1",
     "node-fetch": "^3.0.0"
   },
   "//comments": {

@@ -77,6 +77,7 @@ services:
       - ./jest.config.default.js:/work/jest.config.default.js:ro
       - ./firebase.json:/work/firebase.json:ro
       - ./package.json:/work/package.json:ro
+      - ./hack-jest:/work/hack-jest:ro
       - ./test-fns:/work/test-fns:ro
 
     working_dir: /work

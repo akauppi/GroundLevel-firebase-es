@@ -16,18 +16,8 @@ const opts = {
   // need to explicitly import 'test' etc.
   injectGlobals: false,
 
-  // Without this, the 'firebase-jest-testing' modules don't load, due to being declared using 'exports'.
-  // Jest 27.0.{1..4} resolver (aka browserify resolver) is not up to this, yet (Jun 2021).
-  //
-  // TESTING whether this is still needed:
-  //  - comment it out
-  //  - 'docker compose down'
-  //  - 'docker compose up warm-up'
-  //
-  // If the warm-up happens great, Jest was able to resolve the modules, on its own.
-  //
-  resolver: "firebase-jest-testing/src/cjs/jestResolver.cjs"
-    //  27.2.5  still needs it
+  // Without this, ESM modules with more than the default entry point don't load.. Jest 28 should not need this.
+  resolver: "../hack-jest/jestResolver.cjs"
 };
 
 export default opts;
