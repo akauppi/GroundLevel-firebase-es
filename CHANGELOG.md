@@ -1,5 +1,9 @@
 # Changelog
 
+## 9-Jan-21
+
+- Bumped Firebase Emulators to 10.0.1; the image now uses npm8
+
 ## 6-Sep-21
 
 - Backend CI testing using Docker Compose

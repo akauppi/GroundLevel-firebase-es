@@ -31,7 +31,7 @@ services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
   emul:
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:9.17.0-node16-npm7}
+    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.0.1-node16-npm8}
     ports:
       - "4000:4000"
       - "5002:5002"
