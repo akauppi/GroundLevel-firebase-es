@@ -12,7 +12,7 @@
     "postinstall": "npm --prefix tools install"
   },
   "devDependencies": {
-    "eslint": "^8.1.0",
+    "eslint": "^8.6.0",
     "eslint-plugin-node": "^11.1.0",
     "firebase": "^9.1.2"
   },

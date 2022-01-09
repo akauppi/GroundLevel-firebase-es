@@ -4,6 +4,10 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
+## 8-Jan-2022
+
+- Dependency upgrades (left Cypress at 8.7.0)
+
 ## 20-Jul-2021
 
 - **CHANGE:** Separated `vitebox` so it's clearly only for development; production builds work in the main folder.

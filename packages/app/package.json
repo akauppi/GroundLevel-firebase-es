@@ -18,7 +18,7 @@
     "gen-dc-env": "./tools/gen-dc-env.js"
   },
   "engines": {
-    "node": ">= 14.3 || >= 16 <16.6 || >=16.6.1"
+    "node": ">= 14.17 || >= 16 <16.6 || >=16.6.1"
   },
   "scripts": {
     "dev": "npm run dev:local",
@@ -55,27 +55,32 @@
     "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
     "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
-    "vue": "^3.2.11",
-    "vue-router": "^4.0.10"
+    "vue": "^3.2.26",
+    "vue-router": "^4.0.12"
   },
   "devDependencies": {
     "@local/backend": "file:../backend",
     "@local/self": "file:.",
     "@local/tools": "file:../../tools",
-    "@vitejs/plugin-vue": "^1.9.2",
-    "@vue/compiler-sfc": "latest",
-    "cypress": "^8.5.0",
+    "@vitejs/plugin-vue": "^2.0.1",
+    "cypress": "8.7.0",
     "eslint": "file:../../node_modules/eslint",
-    "eslint-plugin-cypress": "^2.11.3",
+    "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
     "eslint-plugin-vue": "^7.17.0",
-    "prettier": "2.4.1",
-    "sass": "^1.35.1",
-    "vite": "^2.6.2",
-    "vue-eslint-parser": "^7.11.0"
+    "prettier": "2.5.1",
+    "sass": "^1.47.0",
+    "vite": "^2.7.10",
+    "vue-eslint-parser": "^8.0.1"
+  },
+  "//devDependencies": {
+    "~~@vue/compiler-sfc": "latest"
   },
   "//comments": {
     "devDependencies": {
+      "cypress": [
+        "Using specific version (not '^') to reduce the number of binaries downloaded (600MB+ each): du -d 1 -h ~/Library/Caches/Cypress/"
+      ],
       "prettier": [
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
         "Thus, following suit."
@@ -92,9 +97,7 @@
       ]
     },
     "engines.node": [
-      "'>=14.3' for '—-harmony-top-level-await' (we don't use it)",
-      "'>=13.2' for ES module support",
-      "",
+      "'>=14.17' for 'vue-eslint-parser' 8.0; https://github.com/vuejs/vue-eslint-parser/releases",
       "Avoid 16.6.0 -> https://github.com/facebook/jest/issues/11708"
     ],
     "scripts": {

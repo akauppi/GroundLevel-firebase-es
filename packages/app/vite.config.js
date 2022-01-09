@@ -191,11 +191,6 @@ function configGen({ _ /*command*/, mode }) {
     ],
 
     server: {
-      // Vite 2.3.1 (still in 2.5.10): default "will change to true in future versions"
-      fs: {
-        strict: true    // restrict access to the work directory
-      },
-
       port: DEV_MODE === 'local' ? 3000:3001,
       strictPort: true,
 
