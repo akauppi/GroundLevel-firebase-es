@@ -19,7 +19,7 @@ version: '3.0'
 
 services:
   host:
-    image: firebase-ci-builder:9.17.0-node16-npm7
+    image: firebase-ci-builder:10.0.1-node16-npm8
     ports:
       - "3012:3012"
       # Keep ports aligned with 'firebase.json'
