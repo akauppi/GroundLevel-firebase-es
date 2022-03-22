@@ -104,6 +104,7 @@ timeout: 500s
 
 substitutions:
   _BUILDER_TAG: 9.17.0-node16-npm7
+  #_BUILDER_TAG: 10.4.0-node16-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _CYPRESS_TAG: 8.3.1

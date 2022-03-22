@@ -2,7 +2,7 @@
 # Using Firebase Emulators, from Docker Compose
 #
 # Provides:
-#   - node.js (14 or 16) and npm (6 or >= 7.7)
+#   - node.js 16 and npm >= 7.7
 #   - bash
 #   - socat
 #   - 'wait-for-it'       // from: https://github.com/vishnubob/wait-for-it/blob/master/wait-for-it.sh
@@ -13,7 +13,7 @@
 #   - home '/home/user'
 #
 # Note:
-#   Using 'node:{14|16}-alpine' (~112MB) is FASTER than the Cloud Build 'gcr.io/cloud-builders/npm' (943MB) image.
+#   Using 'node:16-alpine' (~112MB) is FASTER than the Cloud Build 'gcr.io/cloud-builders/npm' (943MB) image.
 #
 # References:
 #   - Best practices for writing Dockerfiles

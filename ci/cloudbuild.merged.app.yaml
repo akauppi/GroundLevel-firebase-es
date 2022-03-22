@@ -81,6 +81,7 @@ timeout: 240s
 substitutions:
   #_BUILDER_TAG: 9.16.0-node16-npm7
   _1: gcr.io/ci-builder/firebase-ci-builder:9.17.0-node16-npm7
+  #_1: gcr.io/ci-builder/firebase-ci-builder:10.4.0-node16-npm8
 
 # API Keys heading for the front end are not really hard secrets, but let's treat them as such, anyways.
 #

@@ -25,13 +25,11 @@
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
-version: '3.0'
-
 services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
   emul:
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.0.1-node16-npm8}
+    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.4.0-node16-npm8}
     ports:
       - "4000:4000"
       - "5002:5002"
@@ -48,16 +46,25 @@ services:
       - ./firebase-debug.log:/work/firebase-debug.log:delegated
       - ./firestore-debug.log:/work/firestore-debug.log:delegated
       - ./ui-debug.log:/work/ui-debug.log:delegated
+      #
+      - ./tmp/package.dc.json:/work/functions/package.json:ro
 
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
       firebase emulators:start --project=demo-2
-        | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+      '
       # Keep project ID in sync with 'test-fns/setup.jest.js'
     environment:
       - CHOKIDAR_USEPOLLING=true
         # Without this, Firebase-tools (9.17.0) don't see changes (Security Rules, Cloud Functions)
+
+    healthcheck:
+      test: "nc -z localhost 6767 && nc -z localhost 5002 && echo 'healthy!'"
+        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      interval: 0.7s
+      start_period: 23s
 
   # WARM UP the engines
   #
@@ -65,52 +72,58 @@ services:
   # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
   #
   warm-up:
-    build:
-      context: ../../dc-tools/n-user/
-      args:
-        - NODE=${NODE_V:-16}
-    ports:
-      - "6768:6768"
+    image: node:16-alpine
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
       - ./firebase.json:/work/firebase.json:ro
       - ./package.json:/work/package.json:ro
-      - ./hack-jest:/work/hack-jest:ro
       - ./test-fns:/work/test-fns:ro
+      # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
+      - ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
     command: sh -o pipefail -c
-      'wait-for-it emul:6767 --timeout=20 &&
-      wait-for-it emul:5002 --timeout=10 &&
+      'npm config set update-notifier false &&
       npm run dc:warm-up &&
-      echo "[DEBUG] Warmed up, opening port 6768" &&
-      socat TCP-LISTEN:6768,fork TCP:emul:6767
+      touch .healthy &&
+      sleep infinity
       '
       # Note: Returning from Jest (npm command) is taking ~30s on Windows+WSL2. Reason unknown. Be patient! #83
+      #       tbd. test - is this still so?
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=12000
-          # seen timeouts with: 19000 (macOS, DC 4.0); normally ~3500 ms
-    depends_on: ['emul']
+      - WARM_UP_TIMEOUT=30000
+          # Seen cold start execution times ('docker compose down; docker up warm-up'):
+          #
+          # 14859, 22591 (macOS Intel, DC 4.6)
+          #
+          # ~~19000 (macOS, DC 4.0); normally ~3500 ms
+
+    depends_on:
+      emul:
+        condition: service_healthy
+
+    healthcheck:
+      test: "[ -f .healthy ] && echo 'HEALTHY!'"
+      interval: 0.7s
+      start_period: 80s
+
     # Enable manual launch to debug 'emul' launch, only.
     #profiles: ['manual']
 
+  # A pass-through target.
+  #
   # Used via 'docker compose run --rm warmed-up'.
   #
   # A separate target, so that the warm-up log output is always visible only in Docker Desktop, not the terminal
   # output for something like 'npm test' (if launched with a cold DC).
   #
   warmed-up:
-    build:
-      context: ../../dc-tools/n-user/
-      args:
-        - NODE=${NODE_V:-16}
-    command: sh -o pipefail -c
-      'wait-for-it warm-up:6768 --timeout=120
-      '
-      # macOS: seen cases where 40s timed out
-      # Windows+WSL2: return from Jest is taking awefully long. Warm-up may take 1:50! [BUG]
-    depends_on: ['warm-up']
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      warm-up:
+        condition: service_healthy
     profiles: ['manual']

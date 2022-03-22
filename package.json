@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "14 || >= 16 < 16.6 || >= 16.6.1"
+    "node": ">= 16 < 16.6 || >= 16.6.1"
   },
   "scripts": {
     "first": "first/deploy.sh",
@@ -12,9 +12,9 @@
     "postinstall": "npm --prefix tools install"
   },
   "devDependencies": {
-    "eslint": "^8.7.0",
+    "eslint": "^8.11.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.6.4"
+    "firebase": "^9.6.9"
   },
   "//": {
     "": [

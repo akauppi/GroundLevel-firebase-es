@@ -19,6 +19,7 @@ services:
   warm-up:
     network_mode: cloudbuild
     container_name: warm-up
-
-  warmed-up:
-    network_mode: cloudbuild
+    environment:
+      - WARM_UP_TIMEOUT=30000
+      # seen durations of:
+      #   xxx s (fns:userInfo summary, CloudBuild)
