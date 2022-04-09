@@ -56,7 +56,7 @@ To complete the "course" 🏌️‍♂️⛳️ you'll need:
 
 - **A computer** with the following tools installed:
 
-   - `node` v. 14.3+ or 16.x
+   - `node` 16.x
    - `npm` - version 7.7 or later
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
    - Docker Desktop [on Mac](https://docs.docker.com/docker-for-mac/install/) or [on Windows](https://docs.docker.com/docker-for-windows/install/) 

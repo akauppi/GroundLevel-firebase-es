@@ -10,10 +10,11 @@
     "index.js"
   ],
   "dependencies": {
-    "@google-cloud/functions-framework": "^3.0.0",
-    "@google-cloud/logging": "^9.8.0",
+    "@google-cloud/firestore": "^5.0.2",
+    "@google-cloud/functions-framework": "^3.1.0",
+    "@google-cloud/logging": "^9.8.2",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.19.0"
+    "firebase-functions": "^3.20.0"
   },
   "//": {
     "engines.node": [

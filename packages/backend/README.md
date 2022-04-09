@@ -41,8 +41,8 @@ The root has various configuration files.
 <!-- 
 developed with:
 - macOS 12.3
-- node 17.5
-- npm 8.4
+- node 17.7
+- npm 8.5
 
 - Docker Desktop 4.6 with: 2 CPU cores, 2 GB RAM, 512 MB swap
    - experimental > Enable VirtioFS

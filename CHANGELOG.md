@@ -1,5 +1,13 @@
 # Changelog
 
+## 20-Mar-22
+
+- Updating to `firebase-jest-testing` 0.0.5-alpha.1
+- Using Docker Compose healthchecks and `depends_on:` with `condition:`
+  - means we don't need `dc-tools/n-user` any more!! 🪒
+- Abandoning Node.js 14 (no longer testing with it in CI)
+
+
 ## 9-Jan-21
 
 - Bumped Firebase Emulators to 10.0.1; the image now uses npm8

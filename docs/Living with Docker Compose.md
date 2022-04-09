@@ -12,6 +12,7 @@ There are a few things that you - as a developer - should know, and some hints t
 - [Why we use it?](#Why_we_use_it_)
 - [Troubleshooting](#Troubleshooting)
 - [Docker Desktop for Mac](#Docker_Desktop_for_Mac)
+- [Docker Desktop for Linux (Tech preview)](#Docker_Desktop_for_Linux)
 
 ---
 
@@ -30,17 +31,14 @@ $ npm run dev
 [+] Running 2/2
  ⠿ Container app_emul_1      Started          0.9s
  ⠿ Container app_vite-exp_1  Started          0.8s
-wait-for-it: waiting 15 seconds for emul:6767
-wait-for-it: emul:6767 is available after 4 seconds
-wait-for-it: waiting 10 seconds for emul:9100
-wait-for-it: emul:9100 is available after 5 seconds
-wait-for-it: waiting 10 seconds for vite-exp:3000
-wait-for-it: vite-exp:3000 is available after 0 seconds
 ```
+
+<!-- tbd. update the terminal output to match latest (depends_on: condition)
+-->
 
 ... you return to the same command prompt.
 
-The services are still running in the background, and take up the ports.
+The services are running in the background, and take up the ports.
 
 |||
 |---|---|
@@ -54,9 +52,12 @@ You can leave the services running this way - there is no real downside.
 
 If the selected ports collide with something you use otherwise, feel free to change the port numbering in the `package.json`, `docker-compose.yml` and `firebase.json` files.
 
+<!-- disabled; there are also benefits to not having them deducted (simplicity)
+
 >Note: Changing port numbering should be easier than it currently (Sep 2021) is. It's currently spread across `package.json`, `docker-compose*.yml` and `firebase.json` files. Your best friend is to do something like `git grep 3000` to see where that port may be mentioned.
 >
 >Please send in ideas on how you'd prefer this to be configured/centralized. Maybe a `config.js` file, per each package?
+-->
 
 Closing Docker is completely fine. So is removing container groups ("apps") withing Docker Desktop, or running Docker > Restart. Next time you run the commands needing containers, they will be recreated from scratch.
 
@@ -105,6 +106,47 @@ To bring all background processes down, you can either:
 
 You shouldn't be able to do any damage to the repo, no matter what you do in the Docker Desktop. Everything is re-creatable so try around and find a workflow that suits you best! Break things. 😊
 
+## Lesson 4: conditional `depends_on`
+
+This can be the most accidentially guarded secret in the Docker Compose ecosystem.
+
+In short:
+
+- If you add a `version:` entry in your `docker-compose.yml`, you are doomed! You cannot use the `depends_on: ... condition:` feature that allows one container to wait for another to launch up!
+- If you don't, you can!!
+
+Longer version:
+
+The background seems crooked for the author. The Internet offers discussions where Docker authors seem to argue that depending on a health checked container is not a good idea.
+
+<b>Ignore them!!</b>
+
+The outcome seems to have been that the `version` field is not a good idea, and the modern Docker Compose is no longer requiring it.
+
+What this allows you to do (see the sources for more details):
+
+```
+  emul:
+    healthcheck:
+      test: "nc -z localhost ${EMUL_FIRESTORE_PORT} && nc -z localhost ${EMUL_AUTH_PORT}"
+      interval: 0.9s
+      start_period: 25s
+```
+
+```
+  emul-primed:
+    depends_on:
+      emul:
+        condition: service_healthy  
+```
+
+Now, you can `docker compose run --rm emul-primed` and it will automatically wait until `emul` is not only launched, but also fulfills its `healthcheck`.
+
+>Realizing this can be done made the author drop:
+>
+>- two local Docker images (`n-user` and `cypress-run`)
+>- dependence on outside `wait-for-it` command tool
+
    
 ## Implications
 
@@ -117,7 +159,7 @@ If you have run `npm test`, you should still run `npm run {start|dev}` for the i
 
 ## Why we use it?
 
-The repo needs some way of managing concurrency, and DC turned out to be better than the alternatives.[^1]
+The repo needs some way of managing concurrency, and DC turned out to be better than the alternative.[^1]
 
 - helps keep `package.json` simpler
 - is suitable for both development and CI use
@@ -131,11 +173,14 @@ The repo needs some way of managing concurrency, and DC turned out to be better 
 ### Some downsides
 
 - dependency on Docker Desktop being installed
+
+<!-- disabled (there are some, but ... let's see #later
 - **stability issues** (we're keeping an eye on this!)
 
    Stability issues are likely more of a bother developing the setup, than using it for app development. Anyhow, it's something we can take on, and create proper bug reports to Docker if there is a need.
 
    Current problems we face can be seen at the project's [GitHub Issues](https://github.com/akauppi/GroundLevel-firebase-es/issues?q=is%3Aissue+is%3Aopen).
+-->
 
 ## Troubleshooting
 
@@ -161,32 +206,31 @@ Seen on:
 - Docker Desktop for Mac 4.0.0
 -->
 
+### Unable to remove an app group
+
+In Docker Desktop > `Dashboard`, it's pretty common that removing a whole app group (eg. `backup`) fails.
+
+If this is so, expand the group and delete each instance separately:
+
+![](.images/docker-group-expand.png)
+
+
 ## Docker Desktop for Mac
 
-### File sharing option
+### File sharing
 
-This one:
+Docker Desktop for Mac has been [moving to VirtioFS](https://www.docker.com/blog/speed-boost-achievement-unlocked-on-docker-desktop-4-6-for-mac/) and version 4.6 has this behind `Experimental features`. The author recommends enabling it, but do understand that [the journey here has been long](https://github.com/docker/roadmap/issues/7) and your "milage may vary".
 
-![](.images/docker-desktop-fs-checkbox.png)
+This repo has placed `:ro`, `:cached` and `:delegated` annotations to the volumes shared, and shares only minimum necessary files/folders. This is anyhow good encapsulation, but also *may* help improve Docker Desktop for Mac performance.
 
-..is a complex story.
+```
+  vite-local:
+    volumes:
+      # --- RO
+      - ../../node_modules:/proj/node_modules:ro   # eslint and Firebase client come from the top
+      - ./.env.dev_local:/proj/packages/app/.env.dev_local:ro
+```
 
-The author keeps it disabled. The `osxfs` implementation works for most users, but its authors "left the company some years back" so Docker is thinking of replacing it with another implementation.
+## Docker Desktop for Linux
 
-Both of these can be **slow**.
-
-With the number of files we have, that likely does not matter. 
-
----
-
->For the daring, here's the link: https://github.com/docker/roadmap/issues/7 🥶
-
->TL;DR Docker is **determined** to move away from `osxfs` implementation, but only when it doesn't break anything, to anyone.
-
->🥇 if you read the whole issue!
-
----
-
-This repo has placed `:cached` and `:delegated` annotations to the volumes shared, and shares only minimum necessary files/folders. This is anyhow good encapsulation, but also may help improve Docker Desktop for Mac performance.
-
-
+Docker Desktop workflow is on it's way to Linux. [More details](https://docs.docker.com/desktop/linux/).
