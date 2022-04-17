@@ -4,7 +4,7 @@ Web application sample project.
 
 ## Requirements
 
-- `npm` >= 7.7.0
+- `npm`
 - Docker Compose 2.0
 
 	<details><summary>Installation on Linux</summary>
@@ -79,9 +79,9 @@ This means you should be able to run the Cypress installed within Linux, and use
 Development is done with: 
 
 - macOS 12.3
-- node 17.7
+- node 17.9
 - npm 8.5
-- Docker Desktop 4.6
+- Docker Desktop 4.7
 -->
 
 ## Getting started
@@ -137,7 +137,7 @@ Differences of these modes:
 |`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|browser console|
 |`online`|in the cloud|in the cloud; changes are persistent|←|←|command line|
 
->**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase projects so their data and users won't overlap.
+>**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase project id's so their data and users won't overlap.
 
 <!-- Note on "online" mode's central logging:
 

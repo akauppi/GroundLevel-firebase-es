@@ -1,26 +1,15 @@
 #
-# docker-compose.yml
+# app/docker-compose.yml
 #
 # For development (via 'npm run dev:local') and as a basis for CI.
 #
 # Docker compose of:
-#   - firebase-ci-builder   brings Firebase Emulators
-#   - data and user priming
-#   - Vite                  front end Hot-Module Reloading; hosting
-#
-# Environment variables:
-#   CI_BUILDER_IMAGE (optional); name of the builder image
+#   - Vite      front end Hot-Module Reloading; hosting
 #
 # Intentions:
-#   Within a Docker universe,
-#     - launch Firebase Emulators using 'firebase.json'
-#       - exposing ports for Firestore and Firebase Auth (Cloud Functions are emulated but no callables used from the front end)
+#   Host and hot-module-reload the front end.
 #
 #   Cypress use is native (not within DC).
-#
-# Docker Compose NOTE:
-#   - 'docker compose up' *will* keep the containers available, for a while, and reuse them. This means they might
-#     come with state - or without - and our scripts must be tolerant of that!!!
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
@@ -33,49 +22,7 @@
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
-version: '3.0'
-
 services:
-  # Launch Firebase Emulators, with certain warning and info messages suppressed.
-  #
-  emul:
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.0.1-node16-npm8}
-    ports:
-      - "${EMUL_AUTH_PORT}:${EMUL_AUTH_PORT}"
-      - "${EMUL_FIRESTORE_PORT}:${EMUL_FIRESTORE_PORT}"
-      - "${EMUL_UI_PORT}:${EMUL_UI_PORT}"
-        # Keep ports aligned with 'firebase.json'
-    volumes:
-      # --- RO
-      - ./firebase.json:/up/app/firebase.json:ro
-      - ../backend:/up/backend:ro
-        # ^-- Not wanting to shead too much focus on the backend so sharing it in bulk (and "ro"; we don't expect
-        #     changes, but change this to ':cached' (and add env.var. 'CHOKIDAR_USEPOLLING=true' if you do).
-      # --- cached
-      # --- output
-      - ./firebase-debug.log:/up/app/firebase-debug.log:delegated
-      - ./firestore-debug.log:/up/app/firestore-debug.log:delegated
-      - ./ui-debug.log:/up/app/ui-debug.log:delegated
-
-      # --- MISC
-      # Wants to read something within the local 'node_modules'. What and why?
-      # Otherwise, "An unexpected error has occurred" (by Firebase Emulators)
-      #
-      - ./node_modules:/up/app/node_modules:ro
-
-    working_dir: /up/app
-    command: bash -o pipefail -c
-      'echo "Launching Docker... 🐳" &&
-      firebase emulators:start --project=${PROJECT_ID:-demo-abc}
-        | grep -v -E "Detected demo project ID|You are not signed in to the Firebase CLI|You are not currently authenticated"'
-
-  # Launch Vite for 'dev:local'
-  #
-  # NOTE:
-  #   When using this (on Mac), one needs to run 'node node_modules/esbuild/install.js' when switching between Docker
-  #   / host environments (eg. 'vite build' on host). Wasn't able to use another folder within DC with mapping wizardy
-  #   (please try! #help).
-  #
   vite-local:
     image: node:16-alpine
     ports:
@@ -84,57 +31,33 @@ services:
       # --- RO
       - ../../node_modules:/proj/node_modules:ro                  # eslint and Firebase client come from the top
       - ./.env.dev_local:/proj/packages/app/.env.dev_local:ro
-      - ./.npmrc:/proj/packages/app/.npmrc:ro
       - ./package.json:/proj/packages/app/package.json:ro
-      #- ./node_modules:/proj/packages/app/node_modules:ro        # (see under 'other')
+      - ./node_modules:/proj/packages/app/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
       # --- cached
       - ./public:/proj/packages/app/public:cached
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
-      # --- output
       # --- other
-      - ./node_modules:/proj/packages/app/node_modules:rw   # some writing happens to it
-      - ./tools:/proj/packages/app/tools:rw                 # npm tries to change '+x' (unnecessarily)
+      #- ./tools:/proj/packages/app/tools:rw                 # npm tries to change '+x' (unnecessarily)
+      - ./tmp.dc/node_modules:/proj/packages/node_modules:delegated             # see 'APPROACH.md'
+      - ./node_modules/.vite:/proj/packages/app/node_modules/.vite:delegated    # -''-
 
     working_dir: /proj/packages/app
     entrypoint: npm
     command: ['run', 'dc:launch']
-    #depends_on: []
-    #profiles: ['...']   # enable for debugging the 'emul' launch
 
-  # Make sure Vite and emulators are launched.
-  # No priming. Used by 'npm test'.
-  #
-  vite-launched:
-    build:
-      context: ../../dc-tools/n-user/
-      args:
-        - NODE=${NODE_V:-16}
-    command: bash -o pipefail -c
-      'wait-for-it emul:${EMUL_FIRESTORE_PORT} --timeout=15 &&
-      wait-for-it emul:${EMUL_AUTH_PORT} --timeout=10 &&
-      wait-for-it vite-local:3000 --timeout=10
-      '
-    depends_on: ['emul', 'vite-local']
-    profiles: ['manual']
+    healthcheck:
+      test: "nc -z localhost 3000"
+      interval: 0.9s
+      start_period: 25s
 
-  # Make sure Vite and emulators are launched
-  # Local users and data primed. Used by 'npm run dev:local'.
+  # Make sure emulators and Vite are launched. No priming. Used by 'npm test'.
   #
-  vite-primed:
-    build:
-      context: ../../dc-tools/firebase-prime/
-      args:
-        - NODE=${NODE_V:-16}
-    volumes:
-      - .:/work:ro
-    working_dir: /work
-    command: bash -o pipefail -c
-      'wait-for-it emul:${EMUL_FIRESTORE_PORT} --timeout=15 &&
-      wait-for-it emul:${EMUL_AUTH_PORT} --timeout=10 &&
-      firebase-prime --host=emul --project=${PROJECT_ID:-demo-abc} local/docs.js local/users.js &&
-      wait-for-it vite-local:3000 --timeout=10
-      '
-    depends_on: ['emul', 'vite-local']
+  vite-local-launched:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      vite-local:
+        condition: service_healthy
     profiles: ['manual']

@@ -137,6 +137,12 @@ function configGen({ _ /*command*/, mode }) {
       // regular root
     }),
 
+    css: {
+      devSourceMap: true    // experimental feature of Vite 2.9
+    },
+
+    esbuild: false,
+
     resolve: {
       alias: {
         ...subAliases,

@@ -8,13 +8,11 @@
 # (follow project root's .gitignore on those)
 #/.firebaserc
 
-/firebase-debug.log
-/firestore-debug.log
-/ui-debug.log
-
 # Cypress
 /.screenshots
 
 # Generated files
 /.env.dev*
 /.env.dc
+
+/tmp/
