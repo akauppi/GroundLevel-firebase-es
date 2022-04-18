@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "aside-keys": "^0.0.2-alpha.5",
+    "firebase": "9.6.10",
     "vue": "^3.2.33",
     "vue-router": "^4.0.12"
   },
@@ -92,10 +93,11 @@
       ]
     },
     "dependencies": {
-      "/not/ firebase": [
-        "It's important we don't list 'firebase' as a peer dependency. Doing so would force 'app-ops-deploy' to pull in",
-        "*all* the sub-packages (most of which are unnecessary).",
-        "Instead, root defines the version and both us and 'app-ops-deploy' pull in the necessary '@firebase' modules, directly."
+      "firebase": [
+        "Main package used for versioning (and getting change logs); actual imports use '@firebase/...' subpackages",
+        "",
+        "Note: We depend on the _exact_ version because the author wants to manually check the changelogs of Firebase,",
+        "      even for minor releases."
       ]
     },
     "engines.node": [

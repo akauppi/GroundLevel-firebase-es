@@ -2,10 +2,11 @@
 # ci/cloudbuild.backend.yaml
 #
 # Triggers:
-#   - PR is made or changed; changes affect 'packages/backend' (or '/package.json', or 'tools/**')
+#   - PR is made or changed; changes affect 'packages/backend' (or '/package.json')
 #
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
+#     https://console.cloud.google.com/cloud-build/triggers?project=ci-builder
 #
 # Uses images:
 #   - node:16-alpine
@@ -25,29 +26,24 @@
 #
 
 steps:
-# Root install
+# Install
 #
 - name: node:16-alpine
-  entrypoint: npm
-  args: ['install']
-
-# Backend
-#
-- name: node:16-alpine
-  entrypoint: npm
-  args: ['install']
-  dir: packages/backend
+  entrypoint: sh
+  args: ['-c', '
+    npm install &&
+    npm --prefix packages/backend install
+  ']
 
 # DEBUG:
 #
 # USE THIS TO DEBUG CASES where the emulators don't start (or to see warm-up timings).
 #
-#>- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#>  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'warm-up']
-#>  dir: packages/backend
-#>  env:
-#>    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-#>    - NODE_V=16
+#- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'up', 'warm-up']
+#  dir: packages/backend
+#  env:
+#    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -66,7 +62,7 @@ steps:
 # Launch emul/warm-up in DC, keeps them running in the background.
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'warmed-up']
+  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', '--rm', 'warmed-up']
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
@@ -86,7 +82,7 @@ steps:
 # --- Timeout
 #
 # Cloud Build (Alpine Node image):
-#   - DC/Docker, with lint:     2:09, 2:24
+#   - 2:17
 #
 timeout: 300s
 
@@ -97,6 +93,5 @@ timeout: 300s
 #   - DC/native, with lint:     2:35
 
 substitutions:
-  #_BUILDER_TAG: 9.17.0-node16-npm7
   _BUILDER_TAG: 10.4.0-node16-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2

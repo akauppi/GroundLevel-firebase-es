@@ -2,8 +2,7 @@
 # ci/cloudbuild.merged.backend.yaml
 #
 # Triggers:
-#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**',
-#     root 'package.json' or 'tools'
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**' or root 'package.json'
 #
 # GCP Project:
 #   Same GCP project that carries the Firebase deployment.

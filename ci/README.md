@@ -10,10 +10,8 @@ Let's first set the target - what do we want the CI/CD pipeline to do for us?
 
 |Files changed in...|then...|
 |---|---|
-|`packages/backend` (or `/package.json`, or `/tools`)|test `packages/backend`|
-|`packages/app` (or `/package.json`, or `/tools`)|test `packages/app`|
-
-*We could also do something when `packages/app-deploy-ops` changes; at least see that it builds.*
+|`packages/backend` (or `/package.json`)|test `packages/backend`|
+|`packages/app` (or `/package.json`)|test `packages/app`|
 
 <!-- tbd.
 Testing with Cypress still WIP.
@@ -23,8 +21,8 @@ Testing with Cypress still WIP.
 
 |Files changed in...|then...|
 |---|---|
-|`packages/backend` (or `/package.json`, or `/tools`)|test and deploy `packages/backend`|
-|`packages/app` or `packages/app-deploy-ops` (or `/package.json`, or `/tools`)|test and build `packages/app`<br />build and deploy `packages/app-deploy-ops`|
+|`packages/backend` (or `/package.json`)|test and deploy `packages/backend`|
+|`packages/app` (or `/package.json`)|test and build `packages/app`<br />build and deploy `packages/app`|
 
 **With Cloud Build integrated with GitHub, one *cannot restrict* merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.**
 
@@ -179,7 +177,7 @@ These are already created, by Firebase.
 
 ### Push the builder image
 
-The CI scripts require `ci-builder` Container Registry to have the `firebase-ci-builder:9.16.0-node16-npm7` image.
+The CI scripts require `ci-builder` Container Registry to have the `firebase-ci-builder:10.4.0-node16-npm8` image.
 
 1. Log into your "CI builder" GCloud project (see steps above).
 2. Build and push the image
@@ -199,7 +197,7 @@ The `cloudbuild.merged.*.yaml` scripts have these lines at the end:
 
 ```
 substitutions:
-  _1: gcr.io/ci-builder/firebase-ci-builder:9.16.0-node16-npm7
+  _1: gcr.io/ci-builder/firebase-ci-builder:10.4.0-node16-npm8
 ```
 
 This tells the deployment project, where it can fetch its builder images. The `ci-builder` project belongs to the author and doesn't provide public pull access, so replace it with the GCP project you use for the same purpose.
@@ -233,6 +231,10 @@ Also check that the following are enabled:
 
 ### Steps for the deploying project
 
+*Not ready with this, yet. Coming `#later`*
+
+<!-- NOT HERE YET!!!  tbd.
+
 For the GCP project that handles deployment (the one matching a Firebase project's name), in addition to the above, do these steps:
 
 <details><summary>Grant Firebase IAM roles to the Cloud Build service account</summary>
@@ -242,7 +244,7 @@ For the GCP project that handles deployment (the one matching a Firebase project
 
 >![](.images/firebase-admin-enabled.png)
 
-<!-- YEEAAH... 
+<!_-- YEEAAH... 
 There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
 
 - Get the number from the "Service account email" (above screenshot).
@@ -266,7 +268,7 @@ $ gcloud auth logout
 
 <!_-- whisper
 Interestingly, the GUI does not change the state of `Service Account User` to `ENABLED` - maybe it contains more roles than the one we changed at the command line?
--->
+--_>
 </details>
 
 <details><summary>Add "API Keys Admin" role to the Cloud Build service account</summary>
@@ -303,7 +305,7 @@ We need to grant the `Storage Object Viewer` role to the needing service account
 
 Your deployment project Cloud Build runs should now be able to pull the builder images.
 </details>
-
+-->
 
 ## Enable GitHub / Cloud Build integration
 
@@ -335,7 +337,7 @@ For the GCP project responsible of running tests.
 |Repository|*pick (\*)*|
 |Base branch|`^master$`|
 |Comment control|(●) Required except for owners and collaborators|
-|Included files filter (glob)|`packages/backend/**`, `package.json`, `tools/**`|
+|Included files filter (glob)|`packages/backend/**`, `package.json`|
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
@@ -369,7 +371,7 @@ Screenshot of the actual dialog (UI things may change):
 |Repository|*pick*|
 |Base branch|`^master$`|
 |Comment control|(●) Required except for owners and collaborators|
-|Included files filter (glob)|`packages/app/**`|
+|Included files filter (glob)|`packages/app/**`, `package.json`|
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
@@ -392,6 +394,7 @@ You should see these (under `Checks`):
 ![](.images/github-pr-checks.png)
 
 
+<!-- tbd. #later??
 ### Deploy
 
 You may have 1..n deployment projects (eg. production and staging). Each such would listen to a different branch of the GitHub repo.
@@ -436,8 +439,7 @@ To make multiple deployments, just dedicate a certain branch to the deployment, 
 >
 >The author is thinking of adding a version number to the back-end that the front-end deployment script can detect, and refuse to deploy if the version is not what is requested. If your front-end deployment fails for this reason, just manually restart it. *This is not implemented, yet.*
 
-
-<!-- hidden; `cloud-build-local` doesn't get love
+<_!-- hidden; `cloud-build-local` doesn't get love
 ## Run CI jobs manually (`cloud-build-local`; doesn't work)
 
 You are supposed to be able to use `cloud-build-local` to package files, and run locally like Cloud Build, but it does not seem to work.
@@ -452,6 +454,7 @@ $ cloud-build-local  --config=cloudbuild.backend.yaml --dryrun=false ..
 `cloud-build-local` seems to be pretty abandoned by Google, so the author looked further... 
 
 >`#help`: Anyone know how to fix this?
+--_>
 -->
 
 ## Run CI jobs manually (`gcloud builds submit`)

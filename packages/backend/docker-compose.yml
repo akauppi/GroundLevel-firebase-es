@@ -81,7 +81,7 @@ services:
       - ./package.json:/work/package.json:ro
       - ./test-fns:/work/test-fns:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
-      - ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
+      #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
     command: sh -o pipefail -c

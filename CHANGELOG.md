@@ -1,5 +1,11 @@
 # Changelog
 
+## 18-Apr-22
+
+- Rearranged the way `packages/app` uses the backend
+   - now all backend details in `packages/backend`; also for the instance used for front-end development
+- Backend CI runs work, again
+
 ## 20-Mar-22
 
 - Updating to `firebase-jest-testing` 0.0.5-alpha.1

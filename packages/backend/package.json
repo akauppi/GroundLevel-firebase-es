@@ -42,17 +42,15 @@
     "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
     "--  --": "",
-    "postinstall": "npm --prefix functions install",
+    "postinstall": "npm --prefix functions install && ([ -z $BUILDER_OUTPUT ] || npm run -s _prepDC)",
     "_prepDC": "npm run -s _touchEm && npm run -s _prepFunctionsForDC",
     "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
     "_prepFunctionsForDC": "sed -E 's/(\"node\": \").+(\")/\\116\\2/' functions/package.json > tmp/package.dc.json",
-    "-- ---": "",
-    "~~postinstall": "npm run -s _prepFunctions && ([ -z $BUILDER_OUTPUT ] || npm run -s _touchEm)",
-    "~~_prepFunctions": "npm --prefix functions install"
+    "-- ---": ""
   },
   "devDependencies": {
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "file:~/Git/firebase-jest-testing/package",
+    "firebase-jest-testing": "^0.0.5-alpha.1",
     "jest": "^28.0.0-alpha.8"
   },
   "//comments": {
