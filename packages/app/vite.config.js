@@ -197,7 +197,7 @@ function configGen({ _ /*command*/, mode }) {
     ],
 
     server: {
-      port: DEV_MODE === 'local' ? 3000:3001,
+      port: DEV_MODE !== 'online' ? 3000:3001,
       strictPort: true,
 
       // Allows viewing from other devices, eg. a tablet.

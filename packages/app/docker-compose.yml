@@ -30,7 +30,7 @@ services:
     volumes:
       # --- RO
       - ../../node_modules:/proj/node_modules:ro                  # eslint and Firebase client come from the top
-      - ./.env.dev_local:/proj/packages/app/.env.dev_local:ro
+      - ./.env.local:/proj/packages/app/.env:ro
       - ./package.json:/proj/packages/app/package.json:ro
       - ./node_modules:/proj/packages/app/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
@@ -39,13 +39,12 @@ services:
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
       # --- other
-      #- ./tools:/proj/packages/app/tools:rw                 # npm tries to change '+x' (unnecessarily)
       - ./tmp.dc/node_modules:/proj/packages/node_modules:delegated             # see 'APPROACH.md'
       - ./node_modules/.vite:/proj/packages/app/node_modules/.vite:delegated    # -''-
 
     working_dir: /proj/packages/app
     entrypoint: npm
-    command: ['run', 'dc:launch']
+    command: ['run', 'dc:launch:local']
 
     healthcheck:
       test: "nc -z localhost 3000"

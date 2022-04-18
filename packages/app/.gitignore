@@ -12,7 +12,6 @@
 /.screenshots
 
 # Generated files
-/.env.dev*
-/.env.dc
+/.env.*
 
 /tmp/

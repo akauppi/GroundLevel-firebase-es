@@ -43,15 +43,29 @@
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+firebase-debug.app.log
+firestore-debug.app.log
+ui-debug.app.log
 .lock
-vitebox/dist/
+#vitebox/dist/
 .screenshots/
-roll/out/*
-vite/out/*
-firebase.*.json
+#roll/out/*
+#vite/out/*
 stats.html
 *.~
 
+packages/backend/tmp/*
+!.gitkeep
+
+packages/app/.env.*
+packages/app/dist/
+
+tmp.dc/
+
+# Being deprecated
+app-deploy-ops/
+
+# v-- Might not be accurate, any more... #cleanup
 # Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
 # the folder in the root level (if CI run is involved).
 

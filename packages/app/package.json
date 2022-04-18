@@ -1,6 +1,6 @@
 {
   "name": "@local/app",
-  "description": "Sample front end (development, build)",
+  "description": "Sample front end",
   "license": "MIT",
   "private": true,
   "author": "<akauppi@gmail.com>",
@@ -9,13 +9,11 @@
     "dist/*"
   ],
   "exports": {
-    ".": "./dist/app.es.js"
   },
   "bin": {
     "check-no-links": "./tools/check-no-links.sh",
     "gen-vite-env-local": "./tools/gen-vite-env-local.js",
-    "gen-vite-env-online": "./tools/gen-vite-env-online.js",
-    "gen-dc-env": "./tools/gen-dc-env.js"
+    "gen-vite-env-online": "./tools/gen-vite-env-online.js"
   },
   "engines": {
     "node": ">=16.6.1"
@@ -29,10 +27,10 @@
     "_emulRunning": "(cd ../backend && npm run app:start)",
     "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
     "_prime": "FIREBASE_JSON=../backend/firebase.app.json firebase-prime --project=demo-main local/docs.js local/users.js",
-    "dc:launch": "(cd .. && npm install --no-save esbuild) && vite --mode dev_local",
+    "dc:launch:local": "(cd .. && npm install --no-save esbuild) && vite --mode dev_local",
     "--  -": "",
     "ci:launch": "vite --mode dev_local",
-    "ci:build": "vite build",
+    "//ci:build": "vite build",
     "-- --": "",
     "dev:online": "npm run -s _genEnvOnline && docker compose -f docker-compose.online.yml run --rm vite-3001-launched",
     "dc:launch:online": "npm install --no-save esbuild && vite",
@@ -43,25 +41,18 @@
     "--  --": "",
     "_checkNoLinks": "check-no-links || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; false)",
     "//_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
-    "_genEnvLocal": "FIREBASE_JSON=../backend/firebase.app.json gen-vite-env-local --project=demo-main > .env.dev_local",
+    "_genEnvLocal": "FIREBASE_JSON=../backend/firebase.app.json gen-vite-env-local --project=demo-main > .env.local",
     "_genEnvOnline": "gen-vite-env-online > .env.development",
+    "_genEnv": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env.local",
     "-- ---": "",
     "postbuild": "cp public/* dist/",
-    "postinstall": "[ -z $BUILDER_OUTPUT ] || npm run -s _touchEm",
-    "--    -": "",
-    "~~_touchEm2": "gen-dc-env && npm run _touchEm3"
+    "postinstall": "[ -z $BUILDER_OUTPUT ] || (npm install --prefix .. --no-save esbuild && npm run -s _genEnv)"
   },
   "dependencies": {
     "aside-keys": "^0.0.2-alpha.5",
     "firebase": "9.6.10",
     "vue": "^3.2.33",
     "vue-router": "^4.0.12"
-  },
-  "//dependencies": {
-    "//@firebase/app": "file:../../node_modules/@firebase/app",
-    "//@firebase/auth": "file:../../node_modules/@firebase/auth",
-    "//@firebase/firestore": "file:../../node_modules/@firebase/firestore",
-    "//@firebase/functions": "file:../../node_modules/@firebase/functions"
   },
   "devDependencies": {
     "@local/self": "file:.",
@@ -74,10 +65,6 @@
     "sass": "^1.50.0",
     "vite": "^2.9.5",
     "vue-eslint-parser": "^8.0.1"
-  },
-  "//devDependencies": {
-    "//eslint": "file:../../node_modules/eslint",
-    "//eslint-plugin-node": "file:../../node_modules/eslint-plugin-node"
   },
   "//comments": {
     "devDependencies": {
@@ -115,7 +102,7 @@
       "[ -z $BUILDER_OUTPUT ]": [
         "Precedes commands only to be run in CI."
       ],
-      "dc:launch": [
+      "dc:launch:local": [
         "Installs a Linux version of 'esbuild' to the parent level (so as to not mess up 'node_modules', and also",
         "to bypass the read-only nature of that folder's sharing. It's a hack, but it works.."
       ],
@@ -128,6 +115,10 @@
       ],
       "_touchEm": [
         "Vital for DC that files to be mapped to the container exist *before* the DC command."
+      ],
+      "_genEnv": [
+        "Used by CI. Creates a '.env' file and after that, the mode used by 'dc:launch' ('--mode dev_local') doesn't",
+        "matter, any more.."
       ]
     }
   }

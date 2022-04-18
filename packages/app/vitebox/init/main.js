@@ -42,9 +42,7 @@ async function initFirebaseLocal(host) {   // (string) => Promise of ()
 
   // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
   //
-  // Build has poured the necessary values from '../firebase.json' to us, as VITE_... constants.
-  //
-  // Note: Even LOCAL needs auth emulation to be started. Otherwise the impersonation fails.
+  // Build has poured the necessary values from 'firebase.json' to us, as VITE_... constants.
   //
   const [firestorePort, fnsPort, authPort] = [
     import.meta.env.VITE_FIRESTORE_PORT,
