@@ -55,7 +55,7 @@ One can use eg. Firestore with any number of projects, on the same emulator inst
 Cypress cache gathers easily some weight.
 
 ```
-du -d 1 -h /Users/x/Library/Caches/Cypress/
+du -d 1 -h ~/Library/Caches/Cypress/
 783M	/Users/x/Library/Caches/Cypress//7.1.0
 750M	/Users/x/Library/Caches/Cypress//7.5.0
 777M	/Users/x/Library/Caches/Cypress//7.2.0

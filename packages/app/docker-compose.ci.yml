@@ -19,41 +19,9 @@
 #     -> https://docs.docker.com/compose/extends/
 #
 services:
-  emul:
-    network_mode: cloudbuild
-    container_name: emul
-
-  # Until (if ever) 'dev' Vite service is no longer experimental, have the whole step here.
-  #
-  vite-ci:
-    image: node:16-alpine
-    ports:
-      - "3000:3000"
-    volumes:
-      - ../..:/proj
-    working_dir: /proj/packages/app
-    entrypoint: npm
+  vite-local:
     command: ['run', 'ci:launch']
-    environment:
-      - EMUL_HOST=emul
-    #depends_on: ['emul']
-      # marking the dependency since we build in the hostname (it doesn't really matter)
+
     network_mode: cloudbuild
     container_name: vite
-
-  # Launch emulator and Vite. Wait until both are running nice.
-  #
-  vite-launched-ci:
-    build:
-      context: ../../dc-tools/n-user/
-      args:
-        - NODE=${NODE_V:-16}
-    command: bash -o pipefail -c
-      'wait-for-it emul:${EMUL_FIRESTORE_PORT} --timeout=15 &&
-      wait-for-it emul:${EMUL_AUTH_PORT} --timeout=10 &&
-      wait-for-it vite:3000 --timeout=15
-      '
-    depends_on: ['emul', 'vite-ci']
-    profiles: ['manual-ci']
-    network_mode: cloudbuild
-    # No need for 'container_name:' (no port exposed)
+      # The domain node name (not 'localhost'!) to use for the front end, e.g. 'http://vite:3000'

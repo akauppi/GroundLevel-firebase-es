@@ -23,3 +23,6 @@ Closed, but the issue remains.
 ## Using `firebase-admin` 10.0 with `firebase-functions` 
 
 - [Cannot install firebase-admin v10](https://github.com/firebase/firebase-functions/issues/996)
+
+- This might not apply any more; we are using `type: "module"` in the functions. Once we really log to Google logs, mention that this might no longer be an issue?
+

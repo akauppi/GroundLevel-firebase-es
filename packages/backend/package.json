@@ -11,59 +11,55 @@
     "functions/*.js"
   ],
   "engines": {
-    "node": "14 || >= 16 < 16.6 || >= 16.6.1",
+    "node": ">= 16.6.1",
     "npm": ">= 7.7.0"
   },
   "scripts": {
-    "test": "npm run -s _touchEm && docker compose run --rm warmed-up && npm run -s _test1",
+    "test": "npm run -s start && npm run -s _test1",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
-    "  -": "",
-    "start": "npm run -s _touchEm && docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
-    "  - -": "",
-    "test:fns:logging": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
-    "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --detectOpenHandles --all",
-    "test:fns:all": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-json-modules\" jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
-    "  -  -": "",
-    "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f invitesC.test.js --verbose --detectOpenHandles --all",
-    "test:rules:projects": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/index.test.js --verbose --detectOpenHandles --all",
-    "test:rules:projectsSymbols": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/symbolsC.test.js --verbose --detectOpenHandles --all",
-    "test:rules:projectsUserInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --detectOpenHandles --all",
-    "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --detectOpenHandles --all",
+    "-- ": "",
+    "start": "npm run -s _prepDC && docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
+    "-- -": "",
+    "test:fns:logging": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f logging.test.js --verbose --all",
+    "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
+    "test:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
+    "--  -": "",
+    "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f invitesC.test.js --verbose --all",
+    "test:rules:projects": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/index.test.js --verbose --all",
+    "test:rules:projectsSymbols": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/symbolsC.test.js --verbose --all",
+    "test:rules:projectsUserInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --all",
+    "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --all",
     "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
-    "  - --": "",
+    "-- --": "",
     "lint": "eslint .",
-    "  -   -": "",
-    "dc:warm-up": "npm run test:fns:all",
-    "  - - -": "",
+    "--   -": "",
+    "app:start": "npm run -s _prepAppDC && PROJECT_ID=demo-main docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
+    "_prepAppDC": "npm run -s _touchEmApp && npm run -s _prepFunctionsForDC",
+    "--   - ": "",
+    "dc:warm-up": "npm run -s _dc_fns",
+    "_dc_fns": "npm run test:fns:all",
+    "-- - -": "",
     "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "ci:deploy": "npm run -s _prepFunctions && npm run -s _prepDeploy && firebase deploy --only functions,firestore",
-    "  -  --": "",
-    "postinstall": "npm run -s _prepFunctions && ([ -z $BUILDER_OUTPUT ] || npm run -s _touchEm)",
-    "_prepFunctions": "npm --prefix functions install",
-    "_prepDeploy": "sed -i -E 's/(\"node\": \")(.+)(\")/\\114\\3/' functions/package.json",
-    "-- ": "",
-    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log"
+    "--  --": "",
+    "postinstall": "npm --prefix functions install && ([ -z $BUILDER_OUTPUT ] || (npm run -s _prepDC && npm run -s _touchEmApp))",
+    "_prepDC": "npm run -s _touchEm && npm run -s _prepFunctionsForDC",
+    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
+    "_touchEmApp": "touch firebase-debug.app.log firestore-debug.app.log ui-debug.app.log",
+    "_prepFunctionsForDC": "sed -E 's/(\"node\": \").+(\")/\\116\\2/' functions/package.json > tmp/package.dc.json",
+    "-- ---": ""
   },
   "devDependencies": {
-    "@local/tools": "file:../../tools",
-    "concurrently": "^6.3.0",
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.4-alpha.3",
-    "jest": "^27.2.5",
-    "node-fetch": "^3.0.0"
+    "firebase-jest-testing": "^0.0.5-alpha.1",
+    "jest": "^28.0.0-alpha.8"
   },
   "//comments": {
     "engines.node": [
-      "'>=14.3' for '—harmony-top-level-await'",
-      "'>=13.2' for ES module support",
-      "",
       "Avoid 16.6.0 - a bad 🍏 -> https://github.com/facebook/jest/issues/11708"
     ],
     "engines.npm": [
-      "There is no single *pressing* reason why, but the two (6 vs. 7) seem slightly incompatible. Instead of being",
-      "bitten by this, since npm 7 is now stable and released, let's require it.",
-      "",
-      "NOTE: 'npm@6' does not seem to observe the 'engines.npm' - it still runs!"
+      ">= 7.7.0 because of this (only matters for 'npm publish') -> https://github.com/npm/cli/issues/2834"
     ],
     "scripts": {
       "[ -z $BUILDER_OUTPUT ]": [

@@ -4,6 +4,14 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
+## 17-Apr-2022
+
+- LOTS of small changes, to make the backend/app split between the subpackages clearer. `emul-for-app` in `../backend`
+
+## 8-Jan-2022
+
+- Dependency upgrades (left Cypress at 8.7.0)
+
 ## 20-Jul-2021
 
 - **CHANGE:** Separated `vitebox` so it's clearly only for development; production builds work in the main folder.

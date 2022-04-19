@@ -1,5 +1,10 @@
 # Changelog
 
+## 22-Mar-22
+
+- Using Docker Compose conditional `depends_on:` (and healthchecks) for seeing services are up. 
+  - No need for `wait-for-it` or `n-user`
+
 ## 21-Jul-21
 
 - Wake-up of Cloud Functions, to have consistent test execution times. 

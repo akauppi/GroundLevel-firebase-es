@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from 'fs'
 
 let projectId, host;
 
-const firebaseJson = "./firebase.json";
+const firebaseJson = process.env.FIREBASE_JSON || fail("'FIREBASE_JSON' env.var. not defined");
 
 function init(a, b) {   // (string, string) => ()
   projectId = a;

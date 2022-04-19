@@ -1,6 +1,6 @@
 {
   "name": "@local/app",
-  "description": "Sample front end (development, build)",
+  "description": "Sample front end",
   "license": "MIT",
   "private": true,
   "author": "<akauppi@gmail.com>",
@@ -9,73 +9,68 @@
     "dist/*"
   ],
   "exports": {
-    ".": "./dist/app.es.js"
   },
   "bin": {
     "check-no-links": "./tools/check-no-links.sh",
     "gen-vite-env-local": "./tools/gen-vite-env-local.js",
-    "gen-vite-env-online": "./tools/gen-vite-env-online.js",
-    "gen-dc-env": "./tools/gen-dc-env.js"
+    "gen-vite-env-online": "./tools/gen-vite-env-online.js"
   },
   "engines": {
-    "node": ">= 14.3 || >= 16 <16.6 || >=16.6.1"
+    "node": ">=16.6.1"
   },
   "scripts": {
     "dev": "npm run dev:local",
     "-- ": "",
-    "test": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose --env-file ./.env.dc run --rm vite-launched && CYPRESS_defaultCommandTimeout=10000 cypress run",
+    "test": "npm run -s _emulRunning && npm run -s _genEnvLocal && docker compose run --rm vite-local-launched && CYPRESS_defaultCommandTimeout=10000 cypress run",
     "-- -": "",
-    "dev:local": "npm run -s _genEnvLocal && npm run -s _touchEm && docker compose --env-file ./.env.dc run --rm vite-primed",
-    "dc:launch": "npm install --no-save esbuild && vite --mode dev_local",
+    "dev:local": "npm run -s _emulPrimed && npm run -s _genEnvLocal && docker compose up vite-local",
+    "_emulRunning": "(cd ../backend && npm run app:start)",
+    "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
+    "_prime": "FIREBASE_JSON=../backend/firebase.app.json firebase-prime --project=demo-main local/docs.js local/users.js",
+    "dc:launch:local": "(cd .. && npm install --no-save esbuild) && vite --mode dev_local",
     "--  -": "",
     "ci:launch": "vite --mode dev_local",
-    "ci:build": "vite build",
+    "//ci:build": "vite build",
     "-- --": "",
-    "dev:online": "npm run -s _genEnvOnline && docker compose -f docker-compose.online.yml run --rm vite-3001-launched",
-    "dc:launch:online": "npm install --no-save esbuild && vite",
+    "dev:online": "npm run -s _genEnvOnline && docker compose -f docker-compose.online.yml up vite-3001",
+    "dc:launch:online": "(cd .. && npm install --no-save esbuild) && vite --mode dev_online",
     "--   -": "",
-    "lint": "eslint --ext .js,.vue src",
+    "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "npm run -s _checkNoLinks && npm run -s _macNudgeEsbuild && vite build",
+    "build": "npm run -s _checkNoLinks && vite build",
     "--  --": "",
     "_checkNoLinks": "check-no-links || ( >&2 echo \"ERROR: 'npm' links not allowed in a production build. Use them only at development.\n\tUse 'npm list' to see them; 'npm unlink x; npm install' to remove.\n\"; false)",
     "//_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
-    "_genEnvLocal": "gen-vite-env-local --project=demo-abc > .env.dev_local",
-    "_genEnvOnline": "gen-vite-env-online > .env.development",
+    "_genEnvLocal": "FIREBASE_JSON=../backend/firebase.app.json gen-vite-env-local --project=demo-main > .env.local",
+    "_genEnvOnline": "gen-vite-env-online > .env.online",
+    "_genEnv": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env.local",
     "-- ---": "",
     "postbuild": "cp public/* dist/",
-    "postinstall": "[ -z $BUILDER_OUTPUT ] || npm run -s _touchEm",
-    "--    -": "",
-    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log && gen-dc-env",
-    "_macNudgeEsbuild": "!(uname -a | grep -q \"^Darwin\") || npm install --no-save esbuild"
+    "postinstall": "[ -z $BUILDER_OUTPUT ] || (npm install --prefix .. --no-save esbuild && npm run -s _genEnv)"
   },
   "dependencies": {
-    "@firebase/app": "file:../../node_modules/@firebase/app",
-    "@firebase/auth": "file:../../node_modules/@firebase/auth",
-    "@firebase/firestore": "file:../../node_modules/@firebase/firestore",
-    "@firebase/functions": "file:../../node_modules/@firebase/functions",
     "aside-keys": "^0.0.2-alpha.5",
-    "vue": "^3.2.11",
-    "vue-router": "^4.0.10"
+    "firebase": "9.6.10",
+    "vue": "^3.2.33",
+    "vue-router": "^4.0.12"
   },
   "devDependencies": {
-    "@local/backend": "file:../backend",
     "@local/self": "file:.",
-    "@local/tools": "file:../../tools",
-    "@vitejs/plugin-vue": "^1.9.2",
-    "@vue/compiler-sfc": "latest",
-    "cypress": "^8.5.0",
-    "eslint": "file:../../node_modules/eslint",
-    "eslint-plugin-cypress": "^2.11.3",
-    "eslint-plugin-node": "file:../../node_modules/eslint-plugin-node",
-    "eslint-plugin-vue": "^7.17.0",
-    "prettier": "2.4.1",
-    "sass": "^1.35.1",
-    "vite": "^2.6.2",
-    "vue-eslint-parser": "^7.11.0"
+    "@_/firebase-prime": "file:tools/firebase-prime",
+    "@vitejs/plugin-vue": "^2.3.1",
+    "cypress": "9.5.4",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-vue": "^8.6.0",
+    "prettier": "2.6.2",
+    "sass": "^1.50.0",
+    "vite": "^2.9.5",
+    "vue-eslint-parser": "^8.0.1"
   },
   "//comments": {
     "devDependencies": {
+      "cypress": [
+        "Using specific version (not '^') to reduce the number of binaries downloaded (600MB+ each): du -d 1 -h ~/Library/Caches/Cypress/"
+      ],
       "prettier": [
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
         "Thus, following suit."
@@ -85,17 +80,15 @@
       ]
     },
     "dependencies": {
-      "/not/ firebase": [
-        "It's important we don't list 'firebase' as a peer dependency. Doing so would force 'app-ops-deploy' to pull in",
-        "*all* the sub-packages (most of which are unnecessary).",
-        "Instead, root defines the version and both us and 'app-ops-deploy' pull in the necessary '@firebase' modules, directly."
+      "firebase": [
+        "Main package used for versioning (and getting change logs); actual imports use '@firebase/...' subpackages",
+        "",
+        "Note: We depend on the _exact_ version because the author wants to manually check the changelogs of Firebase,",
+        "      even for minor releases."
       ]
     },
     "engines.node": [
-      "'>=14.3' for '—-harmony-top-level-await' (we don't use it)",
-      "'>=13.2' for ES module support",
-      "",
-      "Avoid 16.6.0 -> https://github.com/facebook/jest/issues/11708"
+      "16.6.1+ because of -> https://github.com/facebook/jest/issues/11708"
     ],
     "scripts": {
       "| grep -v": [
@@ -109,17 +102,23 @@
       "[ -z $BUILDER_OUTPUT ]": [
         "Precedes commands only to be run in CI."
       ],
+      "dc:launch:local": [
+        "Installs a Linux version of 'esbuild' to the parent level (so as to not mess up 'node_modules', and also",
+        "to bypass the read-only nature of that folder's sharing. It's a hack, but it works.."
+      ],
       "ci:test": [
         "CI calls directly 'docker compose' since it's using a docker image that doesn't have 'npm'. We reflect the",
         "command here, mostly for just documenting the use."
       ],
-      "_macNudgeEsbuild": [
-        "After running under DC, 'node_modules/esbuild' has been installed with Linux underpinnings. To build at host",
-        "(only if it's macOS), we need to nudge it back.", "Alternative would be running also the build under DC.",
-        "Unfortunately, we cannot have two Vite's, can we???"
+      "_prime": [
+        "The project name used _must_ match that in '../backend/', used for launching the emulators."
       ],
       "_touchEm": [
         "Vital for DC that files to be mapped to the container exist *before* the DC command."
+      ],
+      "_genEnv": [
+        "Used by CI. Creates a '.env' file and after that, the mode used by 'dc:launch' ('--mode dev_local') doesn't",
+        "matter, any more.."
       ]
     }
   }

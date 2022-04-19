@@ -1,4 +1,4 @@
-# app-deploy
+# app-deploy-ops
 
 Takes the app developed in `../app` sister package and prepares it for operations.
 
@@ -17,23 +17,11 @@ Available integrations:
 
 ||adapters|comments|
 |---|---|---|
-|Performance monitoring|tbd.|
+|Performance monitoring||Raygun considered|
 |Logging|[Cloud Logging](https://cloud.google.com/logging)|
-|Crash reporting|tbd.|
-
-><font color=red>WARN: Adapters are still work-in-progress.</font>
-
-<p />
+|Crash reporting||Raygun considered|
 
 >Note: You can use more than one adapter of a specific kind at any one time. This may be useful if evaluating vendors or transitioning between them.
-
-<!-- DELME?
-### Relation to deployment
-
-For this sub-package, you need to log in to a Firebase project (instructions below).
-
-This project can be a staging project - you should only deal with the production instance via CI/CD. This allows you eg. to develop the operational wrapping, but often even being in this sub-package is not necessary: CI/CD takes your backend and app, and changes here are presumed to be rather rare.
--->
 
 
 ## Requirements
@@ -46,17 +34,11 @@ This project can be a staging project - you should only deal with the production
 $ (cd ../app && npm install && npm run build)
 ```
 
->⚠️ We don't set up a watch for the app folder. The latest build done there is picked up by `app-deploy`. If you change app sources, also rebuild it.
+>⚠️ We don't set up a watch from the app folder. The latest build done there is picked up by `app-deploy`. If you change app sources, also rebuild it.
 
 ### Have staging prepared
 
-See [Deployment to staging](../../README.md#deployment-to-staging) in the main `README.md`.
-
-<!-- Editor's note:
-The link above should work in GitHub; it doesn't work with the MacDown editor
--->
-
-This means there's a `../../firebase.staging.js` file that contains the means to reach the backend:
+This means there's a `../../firebase.${ENV:-staging}.js` file that contains the means to reach the backend:
 
 ```
 export default {
@@ -79,24 +61,47 @@ $ npm install
 Build for deployment:
 
 ```
-$ ENV=[production|staging|...] npm run build
+$ RAYGUN_API_KEY=x ENV=[production|staging|...] npm run build
 ...
 created roll/out in 8.1s
 ```
+
+>Note: Above, we give a fake Raygun API key. If you have a real one, and want to use it before deployment, just provide it, instead.
+
+<!-- tbd.
+Revisit this. How to tag reports differently so that local runs don't blur the real '${ENV:-staging}' data? 'dry-run' tag, maybe?, in addition to the env tag.
+
+- [ ] 'dry-run' tag: true
+- [ ] 'env' tag: "staging"|...
+-->
+
 
 ### Try it out
 
 ```
 $ npm run serve
 ...
-i  hosting: Serving hosting files from: roll/out
-✔  hosting: Local server: http://0.0.0.0:3012
-...
+Application served at: http://localhost:3012
 ```
 
 Visit [http://localhost:3012](http://localhost:3012) and you should see a UI.
 
 
+### Pulling things back
+
+To pull down the DC stack used for hosting the pages (reserves port 3012), do:
+
+```
+$ docker compose down
+```
+
+>Note: It may be wise to do this, if you switch from one staging environment to another. And to clear browser cache.
+
+<!-- tbd. Consider placing the `staging` env. name in the URL, to make sure there are no misunderstandings.
+-->
+
+
+<!-- REMOVE all?  (it's now done as part of root, right??)
 ## Deploying
 
 Deploying is intended to be done via CI/CD.
@@ -190,8 +195,11 @@ There are adapters for:
 - crash analytics
 
 Let's first look at development commands in general, then peek at each of the adapter types, in particular.
+-->
 
 ## Development
+
+This development refers to when you are developing a new ops adapter, for example - not the app.
 
 ### Watch mode
 
@@ -228,9 +236,7 @@ We have:
 
 ## Logging
 
-The logging adapters are added in this stage.
-
-This is a very organization specific (or personal, if you are a one-person organization) choice. The reasons to pick a logging system might be:
+Logging is very organization specific (or personal, if you are a one-person organization). The reasons to pick a logging system might be:
 
 1. **You already have one.** 
 
@@ -259,14 +265,16 @@ You can create adapters yourself, and even publish and share them with others as
 >Another nice one could be [Datadog](https://www.datadoghq.com). 
 
 <!--
-## Crash analytics
+## Crash analysis
 
 ...tbd.
 -->
 
 ## Final yards 🏃‍♂️🏃‍♀️
 
-We've now covered *building* the backend, the front end and preparing the front end for deployment.
+You've now covered building the backend, the front end and preparing the front end for deployment.
+
+You have likely done one preliminary deployment (as part of the root `README`), to get all things going.
 
 Next, you can check these two sub-folders in either order:
 
@@ -274,19 +282,16 @@ Next, you can check these two sub-folders in either order:
 
    Shows setting up a CI/CD pipeline, using [Cloud Build](https://cloud.google.com/build), for continuous testing and deployment.
 
+<!-- tbd. too early
 - [Operations](../../ops/README.md)
 
    Discussion about the operational aspects of running an application. The contents are firmly connected to what's in this sub-package but more general and discussive in nature (thus they aren't here).
+   
+- [People](../../people/README.md)
 
-
-Getting your application deployed is simply the beginning of your journey. The author hopes that this repo helped you to get *there* fast. 😋 
-
-<!--
-But now what?
-
-Have a look at the [ops](../../ops) folder. It has documentation about how one can build operational prowness on top of a running product.
-
-Then... build features... test... deploy... monitor... 🔁
+   How to handle the social side of your app. Getting more crowd - facilitating a meaningful discussion with them - without being their bitch.
 -->
+
+Getting your application deployed is simply the beginning of your journey. The author hopes that this repo helped you get faster to the beginning. 😋 
 
 Be your bugs simple 🐞 and users friendly.

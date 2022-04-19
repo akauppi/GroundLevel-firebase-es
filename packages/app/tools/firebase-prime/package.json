@@ -14,12 +14,12 @@
     "firebase-prime": "src/index.js"
   },
   "dependencies": {
-    "commander": "^8.1.0",
-    "firebase-admin": "^9.100.0-alpha.1"
+    "commander": "^9.1.0",
+    "firebase-admin": "^10.0.2"
   },
   "//": {
     "usage": [
-      "'firebase-prime [--host=abc] --project=xyz docs.js users.js"
+      "FIREBASE_JSON=<path> firebase-prime [--host=abc] --project=xyz docs.js users.js"
     ]
   }
 }

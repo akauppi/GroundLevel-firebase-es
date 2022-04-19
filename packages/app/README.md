@@ -4,7 +4,7 @@ Web application sample project.
 
 ## Requirements
 
-- `npm` >= 7.7.0
+- `npm`
 - Docker Compose 2.0
 
 	<details><summary>Installation on Linux</summary>
@@ -13,6 +13,8 @@ Web application sample project.
    
    - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
    - [Install on Linux](https://docs.docker.com/compose/cli-command/#install-on-linux)
+
+   If you are brave and curious, check out [Tech preview](https://docs.docker.com/desktop/linux/) of Docker Desktop for Linux.
 	</details>
 
 
@@ -49,8 +51,6 @@ That's all. You'll be using the Cypress version installed via `npm`. Launch it w
 
 <details><summary><b>Windows 10 + WSL2</b></summary>
 
->*Within 2021, Microsoft is bringing the [WSLg](https://devblogs.microsoft.com/commandline/the-initial-preview-of-gui-app-support-is-now-available-for-the-windows-subsystem-for-linux-2/) to Windows 10. This will allow us to launch the Linux-side Cypress GUI, and use it from Windows. 🎉🎉🥁*
-
 Windows and WSL2 duo is not a supported Cypress platform. This means you will need to do a little bit more than the other OSes. In short, you'll use *one* Cypress via `npm`, within WSL2, for "headless" testing (`npm test`).
 
 For test based development, we recommend installing *another* instance, this time on the Windows side.
@@ -66,14 +66,22 @@ For test based development, we recommend installing *another* instance, this tim
 Try launching the `Cypress.exe` app.
 </details>
 
+<details><summary><b>Windows 11</b></summary>
+
+Windows 11 brings WSLg, allowing one to [run Linux GUI apps](https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps).
+
+This means you should be able to run the Cypress installed within Linux, and use its GUI from Windows.
+
+*The author does not have access to Windows 11, so any guidance on how this works in practice is appreciated. i.e. a PR :)*
+</details>
 
 <!--
 Development is done with: 
 
-- macOS 11.5
-- node 16.8
-- npm 7.21
-- Docker Desktop 4.0
+- macOS 12.3
+- node 17.9
+- npm 8.5
+- Docker Desktop 4.7
 -->
 
 ## Getting started
@@ -129,7 +137,7 @@ Differences of these modes:
 |`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|browser console|
 |`online`|in the cloud|in the cloud; changes are persistent|←|←|command line|
 
->**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase projects so their data and users won't overlap.
+>**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase project id's so their data and users won't overlap.
 
 <!-- Note on "online" mode's central logging:
 

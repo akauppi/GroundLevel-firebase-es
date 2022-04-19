@@ -28,3 +28,10 @@ In CI, tests are run via Docker Compose. Here, we have more control over the exe
 >Alternatives:
 >
 >The project earlier used the Emulator image (`firebase-ci-builder`) to also run the tests - since it has Node and `npm`. This works, but tightly couples the emulator container to the test execution environment (them being the same). DC provides more freedom.
+
+
+**App**
+
+The application sub-package needs backend support that is slightly different than the needs for the backend testing.
+
+Also, it should be a separate instance since we want to keep these two separate. `docker-compose.app.yml` and the `app:start` `npm` target do this: they provide the `app` package a stable backend instance while keeping backend and app concerns separated.

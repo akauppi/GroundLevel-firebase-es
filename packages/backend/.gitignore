@@ -8,7 +8,12 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
+firebase-debug.app.log
+firestore-debug.app.log
+ui-debug.app.log
+
 # Temporary file
-#/functions/package.json.~
 /functions/.ack.*
+
+/tmp/
 

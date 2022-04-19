@@ -125,3 +125,24 @@ We only need `index.html` in this development level; it doesn't deserve to be in
 This gave a good excuse to place anything involving only this level (not production build) to such a folder.
 
 Production build does not need anything from `vitebox`, so when you do `npm run build`, this configuration does not involve it (but runs the build in the main folder).
+
+
+## Making Vite and DC house buddies
+
+Problem:
+
+- Running `vite` under Docker Compose needs a Linux version of `esbuild`
+
+Solution:
+
+- Have `esbuild` separately installed within the DC *at one level higher up*.
+
+   This way, the Linux installation can have its way in the *parent* folder (Node packages from parents are automatically visible).
+
+   >Note: Also tried providing `:delegated` (write) access to `node_modules/esbuild` but that didn't work.
+
+Line in `docker-compose[.online].yml`:
+
+```
+- ./tmp.dc/node_modules:/proj/packages/node_modules:delegated
+```

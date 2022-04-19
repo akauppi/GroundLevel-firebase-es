@@ -24,39 +24,39 @@
 #   to regular users (of other images). This is normally not a concern.
 
 steps:
-# Root install
+# Install
 #
 - name: node:16-alpine
-  entrypoint: npm
-  args: ['install']
+  entrypoint: sh
+  args: ['-c', '
+    npm config set update-notifier false &&
+    
+    npm install &&
+    npm --prefix packages/backend install --omit optional &&
+    npm --prefix packages/app install --omit optional
+  ']
+    # Note: Not sure if '--omit optional' makes any difference
 
-# --- Backend
-#
-# Do not care to test it - separate PR task does it.
-#
-- name: node:16-alpine
-  entrypoint: npm
-  args: ['install']
-  dir: packages/backend
+  env: ['CYPRESS_INSTALL_BINARY=0']
 
 # --- App
 #
-- name: node:16-alpine
-  entrypoint: npm
-  args: ['install']
-  dir: packages/app
-  env: ['CYPRESS_INSTALL_BINARY=0']
-
-# Launch emulators; keeps them running in the background.
+# Launch emulators and Vite; keeps them running in the background.
 #
-# Note: Unlike in 'dev', no priming of data & users is needed. Cypress tests carry their own.
+# Note: Launching emulators just like 'start:app' (but cannot mix npm and DC).
+# Note: No priming of data & users is needed. Cypress tests carry their own (we do 'npm test', not dev).
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['--env-file', './.env.dc', '-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-launched-ci']
+  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', '--rm', 'emul-for-app-launched']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-local-launched']
   dir: packages/app
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
-    - NODE_V=16
 
 - name: cypress/included:${_CYPRESS_TAG}
   args: ['run', '--headless']
@@ -74,25 +74,10 @@ steps:
   args: ['run', 'lint']
   dir: packages/app
 
-- name: node:16-alpine
-  entrypoint: npm
-  args: ['run', 'ci:build']
-  dir: packages/app
-
-# --- App-deploy-ops
-#
-# Try that the code builds with fake access values.
-#
-- name: node:16-alpine
-  entrypoint: npm
-  args: ['install']
-  dir: packages/app-deploy-ops
-
-- name: node:16-alpine
-  entrypoint: npm
-  args: ['run', 'ci:build:fake']
-  dir: packages/app-deploy-ops
-  #env: ['ENV=fake', 'RAYGUN_API_KEY=x']
+#- name: node:16-alpine
+#  entrypoint: npm
+#  args: ['run', 'ci:build']
+#  dir: packages/app
 
 # --- Timeout
 #
@@ -103,8 +88,8 @@ steps:
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 9.17.0-node16-npm7
+  _BUILDER_TAG: 10.4.0-node16-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
-  _CYPRESS_TAG: 8.3.1
+  _CYPRESS_TAG: 9.5.4
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated

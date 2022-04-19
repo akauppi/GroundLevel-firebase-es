@@ -2,8 +2,7 @@
 # ci/cloudbuild.merged.backend.yaml
 #
 # Triggers:
-#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**',
-#     root 'package.json' or 'tools'
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**' or root 'package.json'
 #
 # GCP Project:
 #   Same GCP project that carries the Firebase deployment.
@@ -63,3 +62,4 @@ timeout: 400s
 substitutions:
   #_BUILDER_TAG: 9.16.0-node16-npm7
   _1: gcr.io/ci-builder/firebase-ci-builder:9.17.0-node16-npm7
+  #_1: gcr.io/ci-builder/firebase-ci-builder:10.4.0-node16-npm8

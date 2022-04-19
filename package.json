@@ -3,26 +3,21 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "14 || >= 16 < 16.6 || >= 16.6.1"
+    "node": ">= 16 < 16.6 || >= 16.6.1"
   },
   "scripts": {
     "first": "first/deploy.sh",
     "--": "",
-    "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh",
-    "postinstall": "npm --prefix tools install"
+    "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh"
   },
   "devDependencies": {
-    "eslint": "^8.0.1",
-    "eslint-plugin-node": "^11.1.0",
-    "firebase": "^9.1.2"
+    "eslint": "^8.13.0",
+    "eslint-plugin-node": "^11.1.0"
   },
   "//": {
     "": [
-      "This serves for pulling in libraries and tools used commonly in the subpackages, so that a) version choice is in",
-      "one place and b) we save both download bandwidth and disk space.",
-      "",
-      "Some tools ('wait-on', 'concurrently') are not here. Those are seen as implementation details of the particular",
-      "submodules (so if you use a package in two subpackages, it does not mean you must declare it here)."
+      "This serves for pulling tools used commonly in the subpackages, so that the version choice is in one place",
+      "(we also save on downloads and disk space)."
     ],
     "engines.node": [
       "Demanding it here provides the developer instant feedback if the Node.js is not suitable.",

@@ -23,10 +23,10 @@ The root has various configuration files.
 
 ## Requirements
 
-- Node 14 or 16
+- Node 16
 - `npm` >= 7.7.0
 
-   >`npm` 7 is needed for the way we refer between subpackages (`file://`). For Node 14, please update to `npm` 7.
+   >`npm` 7 is needed for the way we refer between subpackages (`file://`).
 
 - Docker Compose 2.0
 
@@ -40,11 +40,12 @@ The root has various configuration files.
 	
 <!-- 
 developed with:
-- macOS 11.5
-- node 16.8
-- npm 7.21
+- macOS 12.3
+- node 17.7
+- npm 8.5
 
-- Docker Desktop 4.0.0 with: 1 CPU core, 1.5 GB RAM
+- Docker Desktop 4.6 with: 2 CPU cores, 2 GB RAM, 512 MB swap
+   - experimental > Enable VirtioFS
 -->
 
 

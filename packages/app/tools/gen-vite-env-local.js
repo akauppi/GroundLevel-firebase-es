@@ -5,7 +5,7 @@
 *
 * Usage:
 *   <<
-*     gen-vite-env-local --project=demo-...
+*     FIREBASE_JSON=<path> gen-vite-env-local --project=demo-...
 *   <<
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
@@ -18,13 +18,15 @@ import { readFileSync } from 'fs'
 const [a] = process.argv.slice(2);
 const [_,projectId] = /^--project=(.+)$/.exec(a);
 
+const FIREBASE_JSON = process.env['FIREBASE_JSON'] || fail("Please provide 'FIREBASE_JSON' env.var.")
+
 if (!projectId) {
   process.stderr.write(`\nUsage: gen-vite-env-local --project=demo-...\n`);
   process.exit(1);
 }
 
 const [firestorePort, functionsPort, authPort] = (_ => {   // => [int, int, int]
-  const raw = readFileSync('./firebase.json');
+  const raw = readFileSync( FIREBASE_JSON );
   const json = JSON.parse(raw);
 
   const arr = ["firestore","functions","auth"].map( k => {

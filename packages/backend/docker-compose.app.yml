@@ -1,0 +1,63 @@
+#
+# docker-compose.app.yml
+#
+# A version of the DC definition for front-end development and testing.
+#
+# Note:
+#   Was unable to override definitions on 'docker-compose.yml' and have both this and the backend 'emul'
+#   runnable at the same time. Doing a full rewrite adds a bit to maintenance (not DRY), but also makes
+#   things way simpler: the 'docker-compose.yml' is now only for the backend and its CI.
+#
+# References:
+#   - Share Compose configurations between files and projects (Docker Compose docs)
+#     -> https://docs.docker.com/compose/extends/
+#
+services:
+  emul-for-app:
+    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.4.0-node16-npm8}
+    ports:
+      - "5003:5003"
+      - "6768:6768"
+      - "9101:9101"
+      - "4001:4001"
+      #
+      # Map ports to different than the backend - don't cause problems running backend development and app at the same time.
+      # Keep the ports aligned with '../app'.
+
+    volumes:
+      # --- RO
+      - ./firebase.app.json:/work/firebase.json:ro
+      # --- cached (may change; watched by the Emulators)
+      - ./functions:/work/functions:cached
+      - ./firestore.indexes.json:/work/firestore.indexes.json:cached
+      - ./firestore.rules:/work/firestore.rules:cached
+      # --- output
+      - ./firebase-debug.app.log:/work/firebase-debug.log:delegated
+      - ./firestore-debug.app.log:/work/firestore-debug.log:delegated
+      - ./ui-debug.app.log:/work/ui-debug.log:delegated
+      #
+      - ./tmp/package.dc.json:/work/functions/package.json:ro
+
+    working_dir: /work
+    command: bash -o pipefail -c
+      'echo "Launching Docker... 🐳" &&
+      firebase emulators:start --project=${PROJECT_ID:-demo-main}
+      | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+      '
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    healthcheck:
+      test: "nc -z localhost 6768 && nc -z localhost 5003 && echo 'healthy!'"
+      # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      interval: 1.0s
+      start_period: 25s
+
+  # No warm-up (as with the backend)
+
+  emul-for-app-launched:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      emul-for-app:
+        condition: service_healthy
+    profiles: ['manual']
