@@ -27,8 +27,6 @@
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
-version: '3.0'
-
 services:
   vite-3001:
     image: node:16-alpine
@@ -36,38 +34,32 @@ services:
       - "3001:3001"
     volumes:
       #--- RO
-      # eslint and Firebase client come from the top
-      - ../../node_modules:/proj/node_modules:ro
+      - ../../node_modules:/proj/node_modules:ro                  # eslint and Firebase client come from the top
+      - ./.env.online:/proj/packages/app/.env:ro
       - ./package.json:/proj/packages/app/package.json:ro
-      - ./.env.development:/proj/packages/app/.env.development:ro
-      - ./.npmrc:/proj/packages/app/.npmrc:ro
-      #- ./node_modules:/proj/packages/app/node_modules:ro
-      - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes; 'ro'
-      #--- cached
+      - ./node_modules:/proj/packages/app/node_modules:ro         # note: should not have 'esbuild' in it
+      - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
+      # --- cached
       - ./public:/proj/packages/app/public:cached
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
-      #--- output
-      #- ./node_modules/esbuild.dc:/proj/packages/app/node_modules/esbuild:delegated
-        # did not work - allowing container to modify 'node_modules/esbuild' contents (for now???)
-      - ./node_modules:/proj/packages/app/node_modules:rw
-      #--- misc
-      - ./tools:/proj/packages/app/tools:cached
-        # needs write access since npm tries to change '+x' (unnecessarily)
+      # --- other
+      - ./tmp.dc/2/node_modules:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
+
     working_dir: /proj/packages/app
     entrypoint: npm
     command: ['run', 'dc:launch:online']
-    #depends_on: []
+
+    healthcheck:
+      test: "nc -z localhost 3001"
+      interval: 1.2s
+      start_period: 13s
 
   # Make sure Vite is launched.
   #
-  vite-3001-launched:
-    build:
-      context: ../../dc-tools/n-user/
-      args:
-        - NODE=${NODE_V:-16}
-    command: bash -o pipefail -c
-      'wait-for-it vite-3001:3001 --timeout=20
-      '
-    depends_on: ['vite-3001']
-    profiles: ['manual']
+  #|vite-3001-launched:
+  #|  image: node:16-alpine
+  #|  command: sh -c true
+  #|  depends_on:
+  #|    vite-3001:
+  #|      condition: service_healthy

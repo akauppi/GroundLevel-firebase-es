@@ -116,13 +116,15 @@ function configGen({ _ /*command*/, mode }) {
   //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"development"|"production"
 
   const DEV_MODE = (mode === 'production') ? null :
-    (mode === 'dev_local' && 'local') || (mode === 'development' && 'online') || fail(`Unexpected mode: ${mode}`);
+    (mode === 'dev_local' && 'local') || (mode === 'dev_online' && 'online') || fail(`Unexpected mode: ${mode}`);
 
   return {
     ...(DEV_MODE ? {    // 'npm run dev:{local|online}'
       // Decides where 'index.html' is (and root for other dir configs)
       root: 'vitebox',
       envDir: '..',     // actual 'app' dir
+
+      cacheDir: '/tmp/.vite',   // so 'node_modules' can remain read-only
 
       // With 2.4.x, this was a way to point up from 'vitebox', but creates lots of warnings on 2.5.6:
       //  <<

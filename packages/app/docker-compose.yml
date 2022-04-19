@@ -39,8 +39,7 @@ services:
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
       # --- other
-      - ./tmp.dc/node_modules:/proj/packages/node_modules:delegated             # see 'APPROACH.md'
-      - ./node_modules/.vite:/proj/packages/app/node_modules/.vite:delegated    # -''-
+      - ./tmp.dc/node_modules:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
 
     working_dir: /proj/packages/app
     entrypoint: npm
@@ -51,7 +50,7 @@ services:
       interval: 0.9s
       start_period: 25s
 
-  # Make sure emulators and Vite are launched. No priming. Used by 'npm test'.
+  # Make sure Vite is launched. Used by 'npm test'.
   #
   vite-local-launched:
     image: node:16-alpine

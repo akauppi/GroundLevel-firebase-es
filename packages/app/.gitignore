@@ -15,3 +15,4 @@
 /.env.*
 
 /tmp/
+/tmp.dc/
