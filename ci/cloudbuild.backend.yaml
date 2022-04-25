@@ -81,8 +81,8 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build (Alpine Node image):
-#   - 2:17
+# Cloud Build:
+#   - 2:17, 2:15
 #
 timeout: 300s
 
@@ -93,5 +93,5 @@ timeout: 300s
 #   - DC/native, with lint:     2:35
 
 substitutions:
-  _BUILDER_TAG: 10.4.0-node16-npm8
+  _BUILDER_TAG: 10.6.0-node16-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2

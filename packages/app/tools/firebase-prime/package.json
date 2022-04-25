@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "commander": "^9.1.0",
-    "firebase-admin": "^10.0.2"
+    "firebase-admin": "^10.1.0"
   },
   "//": {
     "usage": [

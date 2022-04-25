@@ -1,0 +1,86 @@
+#
+# ci/cloudbuild.backend.merged.yaml
+#
+# Triggers:
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**' or root 'package.json'
+#
+# GCP Project:
+#   Same GCP project that carries the Firebase deployment.
+#
+# Responsibility:
+#   - test and deploy backend
+#
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
+#
+#   - env.variables (just some):
+#     PWD=/workspace
+#     HOME=/builder/home
+#
+# References:
+#   - Cloud Build > Substituting variable values
+#     -> https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
+#
+steps:
+# Flight check: don't run deploy off general 'ci-builder'
+- name: node:16-alpine
+  entrypoint: sh
+  args: ['-c',
+    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
+  ]
+
+# Install
+- name: node:16-alpine
+  entrypoint: sh
+  args: ['-c', '
+    npm install &&
+    npm --prefix packages/backend install
+  ']
+
+# Tests (keep similar to 'cloudbuild.backend.yaml')
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'warmed-up']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=$_1
+
+- name: node:16-alpine
+  entrypoint: npm
+  args: ['run', 'ci:test']
+  dir: packages/backend
+  env:
+    - EMUL_HOST=emul
+
+# DEPLOY
+#
+- name: $_1
+  entrypoint: firebase
+  args: ['use', '$PROJECT_ID']
+  dir: packages/backend
+
+# Can directly tamper with 'functions/package.json' (to have it Firebase-friendly). Means we don't need DC.
+#
+- name: node:16-alpine
+  entrypoint: sh
+  args: ['-c', '
+    mv tmp/package.dc.json functions/package.json
+  ']
+  dir: packages/backend
+
+- name: $_1
+  entrypoint: firebase
+  args: ['deploy', '--only', 'functions,firestore']
+  dir: packages/backend
+
+# --- Timeout
+#
+# Cloud Build: 4:14
+#
+timeout: 400s
+
+# Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
+#
+substitutions:
+  #_BUILDER_TAG: 10.6.0-node16-npm8
+  _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
+  _DOCKER_COMPOSE_TAG: 1.29.2
