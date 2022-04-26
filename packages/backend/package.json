@@ -49,8 +49,8 @@
   },
   "devDependencies": {
     "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.5-alpha.1",
-    "jest": "^28.0.0-alpha.11"
+    "firebase-jest-testing": "^0.0.5-beta.1",
+    "jest": "^28.0.1"
   },
   "//comments": {
     "engines.node": [

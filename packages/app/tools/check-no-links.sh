@@ -1,10 +1,9 @@
-#!/bin/bash
-set -euf -o pipefail
+#!/bin/sh
 
-# Check that there are no 'npm link' dependencies when doing a production build.
+# Check that there are no 'npm link' dependencies when doing a production build (we only do production builds).
 #
-# 'npm link' are handy in co-development of repos, but they would bring in dependencies at the file system and we
-# don't want that. Also it's just good manners to build production things from stable code.
+# 'npm link' are handy in co-development of repos, but they should not make it to a 'master' branch (or preferably,
+# any commits intended to be shared with others..).
 #
 # Usage:
 #   <<
@@ -15,8 +14,7 @@ set -euf -o pipefail
 #   - grep
 #
 
-# Also 'file:' references show as links, so we need to grep them out.
+# Intended 'file:' references are okay.
 #
-if [[ ! -z $(npm list | grep -- "->" | grep -v @local/ | grep -v @firebase | grep -v eslint@ | grep -v eslint-plugin-node@ ) ]]; then
-  exit 7
-fi
+
+[ -z $( npm list | grep -- '->' | grep -v '@local/' | grep -v '@_' ) ]

@@ -8,7 +8,7 @@ set -eu -o pipefail
 #     $ sh/run-no.sh
 #   <<
 #
-PATHS=". packages/backend packages/backend/functions packages/app packages/app/tools/firebase-prime/package packages/app-deploy-ops"
+PATHS=". packages/backend packages/backend/functions packages/app packages/app/tools/firebase-prime"
 
 # Compensate for the macOS/Linux (Docker) modifications of 'esbuild'. Otherwise:
 #   <<

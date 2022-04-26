@@ -1,0 +1,111 @@
+#
+# ci/cloudbuild.app.merged.yaml
+#
+# Triggers:
+#   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/app/**' or root 'package.json'.
+#
+# Cloud Build project:
+#   Same GCP project that carries the Firebase deployment.
+#
+# Responsibility:
+#   - (maybe test,) build and deploy front-end
+#
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
+#
+#   - env.variables (just some):
+#     PWD=/workspace
+#     HOME=/builder/home
+#
+# References:
+#   - Cloud Build > Substituting variable values
+#     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
+
+steps:
+# Flight check: don't run deploy off general 'ci-builder'
+- name: node:16-alpine
+  entrypoint: sh
+  args: ['-c',
+    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
+  ]
+
+# Install
+- name: node:16-alpine
+  entrypoint: sh
+  args: ['-c', '
+    npm config set update-notifier false &&
+    
+    npm install &&
+    npm --prefix packages/backend install --no-optional &&
+    npm --prefix packages/app install --no-optional
+  ']
+  env: ['CYPRESS_INSTALL_BINARY=0']
+
+# Test
+#
+# 1-to-1 from 'cloudbuild.app.yaml'.
+#
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', '--rm', 'emul-for-app-launched']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=$_1
+
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-local-launched']
+  dir: packages/app
+  env:
+    - CI_BUILDER_IMAGE=$_1
+
+- name: cypress/included:${_CYPRESS_TAG}
+  args: ['run', '--headless']
+  dir: packages/app
+  env:
+    - CYPRESS_baseUrl=http://vite:3000
+    - CYPRESS_defaultCommandTimeout=10000
+
+# Build
+#
+- name: node:16-alpine
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app
+
+
+# DEPLOY
+#
+- name: $_1
+  entrypoint: firebase
+  args: ['use', '$PROJECT_ID']
+  dir: packages/app
+
+# tbd. enable when 'staging' etc. have been refactored...
+#
+#- name: $_1
+#  entrypoint: firebase
+#  args: ['deploy', '--only', 'hosting']
+#  dir: packages/APP
+
+# --- Timeout
+#
+# Cloud Build: ~x:yy
+#
+# (old CI; no tests): 2:03
+#
+timeout: 400s
+
+# Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
+#
+substitutions:
+  #_BUILDER_TAG: 10.6.0-node16-npm8
+  _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
+  _DOCKER_COMPOSE_TAG: 1.29.2
+  _CYPRESS_TAG: 9.5.4
+
+# API Keys heading for the front end are not really hard secrets, but let's treat them as such, anyways.
+#
+# Disabled (but keep around; we might use some monitoring id's..)
+#|availableSecrets:
+#|  secretManager:
+#|  - versionName: projects/$PROJECT_ID/secrets/SOME_API_KEY/versions/latest
+#|    env: 'SOME_API_KEY'

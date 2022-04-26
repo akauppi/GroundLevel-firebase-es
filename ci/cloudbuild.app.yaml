@@ -32,10 +32,10 @@ steps:
     npm config set update-notifier false &&
     
     npm install &&
-    npm --prefix packages/backend install --omit optional &&
-    npm --prefix packages/app install --omit optional
+    npm --prefix packages/backend install --no-optional &&
+    npm --prefix packages/app install --no-optional
   ']
-    # Note: Not sure if '--omit optional' makes any difference
+    # Note: Not sure if '--no-optional' makes any difference
 
   env: ['CYPRESS_INSTALL_BINARY=0']
 
@@ -66,24 +66,25 @@ steps:
     - CYPRESS_defaultCommandTimeout=10000
     #
     # Tests durations:
-    #   1: 7541, 7682 ms
-    #   2: 3980, 4289 ms
+    #   1: 7541, 7682, 8565 ms
+    #   2: 3980, 4289, 3804 ms
 
 - name: node:16-alpine
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
 
-#- name: node:16-alpine
-#  entrypoint: npm
-#  args: ['run', 'ci:build']
-#  dir: packages/app
+- name: node:16-alpine
+  entrypoint: npm
+  args: ['run', 'build']
+  dir: packages/app
 
 # --- Timeout
 #
 # Cloud Build:
-#   - with Cypress tests: 5:54
-#   - without Cypress tests (old): 2:33, 2:13, 2:04
+#   - with tests, and build: 4:54
+#
+#   - with tests (no build): 5:54 (old)
 #
 timeout: 500s
 
