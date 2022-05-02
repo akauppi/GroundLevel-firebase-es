@@ -50,10 +50,13 @@
     "//postinstall": "[ -z $BUILDER_OUTPUT ] || (npm install --prefix .. --no-save esbuild && npm run -s _genEnv)"
   },
   "dependencies": {
-    "aside-keys": "^0.0.2-alpha.5",
+    "aside-keys": "file://Git/aside-keys/package",
     "firebase": "^9.6.11",
     "vue": "^3.2.33",
     "vue-router": "^4.0.12"
+  },
+  "//dependencies": {
+    "aside-keys": "^0.0.3-alpha.1"
   },
   "devDependencies": {
     "@local/self": "file:.",

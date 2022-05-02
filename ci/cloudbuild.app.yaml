@@ -47,7 +47,7 @@ steps:
 # Note: No priming of data & users is needed. Cypress tests carry their own (we do 'npm test', not dev).
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', '--rm', 'emul-for-app-launched']
+  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}

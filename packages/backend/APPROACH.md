@@ -10,28 +10,30 @@ This is tedious, and causes initial tests easily to time out. We've counteracted
 - `docker-compose.yml` has a `warm-up` service that exercises Cloud Functions by running some tests, and then opens port 6768 for business
 - Actual tests check for the 6768 port, before advancing
 
+>Note: Around `firebase-tools` 10.6.0, the warm-up no longer seems to be sufficient / behave as before. Tests often time out (> 2000 ms), anyhow.
 
 
-## Use of DC
+## Use of Docker Compose
+
+We've gone "all in" - happened step by step. Launching the emulators (and doing warm-up) in Docker Compose just *is* simpler than alternative means (handling concurrency with `npm` packages).
+
+Added benefit is unification of the Developer Experience.
 
 **Developer Experience**
 
-We use Docker Compose for starting the Emulators, and warming them up, but *not* for running the tests.
-
-- Running tests under DC is way slower, for some reason (at least on Docker Desktop for Mac, 4.0)
-- There is no benefit from encapsulation
+We still run tests (Jest) natively, not in DC. This seems like a good balance.
 
 **CI**
 
-In CI, tests are run via Docker Compose. Here, we have more control over the execution environment (Cloud Build) and probably problems don't affect fellow developers, just the project maintainers.
-
->Alternatives:
->
->The project earlier used the Emulator image (`firebase-ci-builder`) to also run the tests - since it has Node and `npm`. This works, but tightly couples the emulator container to the test execution environment (them being the same). DC provides more freedom.
-
+In CI, everything is Docker Compose.
 
 **App**
 
 The application sub-package needs backend support that is slightly different than the needs for the backend testing.
 
-Also, it should be a separate instance since we want to keep these two separate. `docker-compose.app.yml` and the `app:start` `npm` target do this: they provide the `app` package a stable backend instance while keeping backend and app concerns separated.
+This repo provides those:
+
+- `docker-compose.app[.ci].yaml`
+- `package.json`: `app:start`
+
+This is a small burden. Since these are backend services, it feels best to declare them here rather than in the `app` folder.

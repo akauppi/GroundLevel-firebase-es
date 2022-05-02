@@ -36,8 +36,7 @@
     "app:start": "npm run -s _prepAppDC && PROJECT_ID=demo-main docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
     "_prepAppDC": "npm run -s _touchEmApp && npm run -s _prepFunctionsForDC",
     "--   - ": "",
-    "dc:warm-up": "npm run -s _dc_fns",
-    "_dc_fns": "npm run test:fns:all",
+    "dc:warm-up": "npm run test:fns:all && npm run test:rules:all",
     "-- - -": "",
     "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "--  --": "",
@@ -50,7 +49,7 @@
   "devDependencies": {
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.5-beta.1",
-    "jest": "^28.0.1"
+    "jest": "^28.0.3"
   },
   "//comments": {
     "engines.node": [
@@ -62,6 +61,9 @@
     "scripts": {
       "[ -z $BUILDER_OUTPUT ]": [
         "Precedes commands only to be run in CI."
+      ],
+      "dc:warm-up": [
+        "Since ~ 'firebase-tools' 10.6.0, also Rules seem to need warming up."
       ],
       "ci:{test|deploy}": [
         "These are the commands CI will use."

@@ -26,7 +26,7 @@ If you don't see more output here, it's stuck.
 Try Docker > Restart.
 
 
-## `npm test` fails with timeouts (2000 ms)
+## `npm test` fails with timeouts (2000 ms) ‼️‼️‼️‼️
 
 This is known to happen on the first run (macOS). The reason is not known, and the author keeps thinking that *any* backend test should be runnable within 2000ms. So, this is essentially a bug.
 

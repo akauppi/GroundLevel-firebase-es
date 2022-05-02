@@ -8,8 +8,11 @@ Responsible for:
    - data structures
    - access rights
    - database back-end processes 
-   - proxying to Cloud Logging (ops)
 - testing the back-end
+
+<!-- disabled: not going to proxy logging??
+   - proxying to Cloud Logging (ops)
+-->
 
 **Folder structure**
 
@@ -25,9 +28,6 @@ The root has various configuration files.
 
 - Node 16
 - `npm` >= 7.7.0
-
-   >`npm` 7 is needed for the way we refer between subpackages (`file://`).
-
 - Docker Compose 2.0
 
 	<details><summary>Installation on Linux</summary>
@@ -35,16 +35,16 @@ The root has various configuration files.
    needs to be separately installed, for now.
    
    - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
-   - [Install on Linux](https://docs.docker.com/compose/cli-command/#install-on-linux)
+   - [Install on Linux](https://docs.docker.com/compose/install/#install-compose-on-linux-systems)
 	</details>
 	
 <!-- 
 developed with:
 - macOS 12.3
-- node 17.7
+- node 17.9
 - npm 8.5
 
-- Docker Desktop 4.6 with: 2 CPU cores, 2 GB RAM, 512 MB swap
+- Docker Desktop 4.7.1 with: 2 CPU cores, 2 GB RAM, 512 MB swap
    - experimental > Enable VirtioFS
 -->
 
@@ -96,8 +96,9 @@ $ docker compose down
 
 Closes the Firebase Emulators, releasing the ports they needed.
 
+<!-- remove: not so any more
 Do this eg. when switching between backend and front-end work. Also `../app` uses Docker Compose and some of the ports overlap.
-
+-->
 
 ## Deploying
 

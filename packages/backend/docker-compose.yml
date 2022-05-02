@@ -80,12 +80,14 @@ services:
       - ./firebase.json:/work/firebase.json:ro
       - ./package.json:/work/package.json:ro
       - ./test-fns:/work/test-fns:ro
+      - ./test-rules:/work/test-rules:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
       #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
     command: sh -o pipefail -c
       'npm config set update-notifier false &&
+      
       npm run dc:warm-up &&
       touch .healthy &&
       sleep infinity

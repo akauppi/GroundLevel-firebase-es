@@ -22,7 +22,10 @@ Cons:
 
 Problems:
 
-- Our builds require not only Node 16, but also `bash` (and some other tools). We don't have the `firebase-ci-builder` image available, in Cloud Build.
+- <strike>Our builds require not only Node 16, but also `bash` (and some other tools). We don't have the `firebase-ci-builder` image available, in Cloud Build.</strike>
+
+   >This is likely no longer a problem. Could use DC without `version`..
+
 
 ## Current approach
 

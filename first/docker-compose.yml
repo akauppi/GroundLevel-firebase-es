@@ -19,16 +19,12 @@
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
-version: '3.0'
-
 services:
-  # Using 'image' (not 'build') because it allows us to explicitly control the version of Firebase CLI.
-  #
   deploy:
-    image: firebase-ci-builder:9.17.0-node16-npm7
+    build: ../firebase-ci-builder.sub
     ports:
       - "9005:9005"
-    # 9005 is needed by the auth dance
+      # 9005 is needed by the auth dance
     volumes:
       - ..:/proj
     working_dir: /proj
@@ -37,11 +33,12 @@ services:
       firebase login
         &&
       (cd packages/backend && firebase use --add) &&
-      (cd packages/app-deploy-ops && firebase use $$(cd ../backend && firebase use)) &&
-      (cd packages/backend && firebase apps:sdkconfig) > ${CAPTURE_FILE}
+      (cd packages/app && firebase use $$(cd ../backend && firebase use)) &&
+      #(cd packages/backend && firebase apps:sdkconfig) > ${CAPTURE_FILE}
         &&
-      (cd packages/backend &&        npm install && npm run ci:deploy) &&
-      (cd packages/app &&            npm install && npm run build) &&
-      (cd packages/app-deploy-ops && npm install && npm run ci:deploy)
+      (cd packages/backend && npm install && firebase deploy --only functions,firestore) &&
+      (cd packages/app &&     npm install && npm run build && firebase deploy --only hosting)
       '
     profiles: ['manual']
+
+  # tbd. Is the '> ${CAPTURE_FILE}' needed? #rework

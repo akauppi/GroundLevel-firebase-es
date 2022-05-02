@@ -14,7 +14,6 @@
 import functions from 'firebase-functions'
 const { logger } = functions
 
-//import admin from 'firebase-admin'
 import { initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 
