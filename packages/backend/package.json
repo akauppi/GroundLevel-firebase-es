@@ -19,6 +19,7 @@
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "-- ": "",
     "start": "npm run -s _prepDC && docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
+    "_prepDC": "npm run -s _touchEm",
     "-- -": "",
     "test:fns:logging": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f logging.test.js --verbose --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
@@ -34,22 +35,22 @@
     "lint": "eslint .",
     "--   -": "",
     "app:start": "npm run -s _prepAppDC && PROJECT_ID=demo-main docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
-    "_prepAppDC": "npm run -s _touchEmApp && npm run -s _prepFunctionsForDC",
+    "_prepAppDC": "npm run -s _touchEmApp",
     "--   - ": "",
     "dc:warm-up": "npm run test:fns:all && npm run test:rules:all",
     "-- - -": "",
     "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "--  --": "",
-    "postinstall": "npm --prefix functions install && ([ -z $BUILDER_OUTPUT ] || (npm run -s _prepDC && npm run -s _touchEmApp))",
-    "_prepDC": "npm run -s _touchEm && npm run -s _prepFunctionsForDC",
+    "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
+    "_postinstall_local": "docker compose run --rm functions-install",
+    "_postinstall_ci": "npm --prefix functions install && npm run -s _touchEm && npm run -s _touchEmApp",
     "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
-    "_touchEmApp": "touch firebase-debug.app.log firestore-debug.app.log ui-debug.app.log",
-    "_prepFunctionsForDC": "sed -E 's/(\"node\": \").+(\")/\\116\\2/' functions/package.json > tmp/package.dc.json"
+    "_touchEmApp": "touch firebase-debug.app.log firestore-debug.app.log ui-debug.app.log"
   },
   "devDependencies": {
     "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.5-beta.1",
-    "jest": "^28.0.3"
+    "jest": "^28.1.0"
   },
   "//comments": {
     "engines.node": [

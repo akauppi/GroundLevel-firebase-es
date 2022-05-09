@@ -37,3 +37,18 @@ This repo provides those:
 - `package.json`: `app:start`
 
 This is a small burden. Since these are backend services, it feels best to declare them here rather than in the `app` folder.
+
+
+## Installing `functions/` packages
+
+This is now always done within DC, ensuring that we have a specific Node.js version in place. The host Node.js version does not matter - and thus we don't see the Firebase "unsupported version" error:
+
+```
+npm WARN EBADENGINE Unsupported engine {
+npm WARN EBADENGINE   package: undefined,
+npm WARN EBADENGINE   required: { node: '16' },
+npm WARN EBADENGINE   current: { node: 'v18.0.0', npm: '8.6.0' }
+npm WARN EBADENGINE }
+```
+
+*Above happened before using DC for installing `firebase/node_modules`.*

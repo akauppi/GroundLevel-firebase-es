@@ -1,5 +1,9 @@
 # Changelog
 
+## 8-May-22
+
+- Always installing `functions/node_modules` within DC (strictly steered Node.js version).
+
 ## 22-Mar-22
 
 - Using Docker Compose conditional `depends_on:` (and healthchecks) for seeing services are up. 

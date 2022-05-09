@@ -46,8 +46,6 @@ services:
       - ./firebase-debug.log:/work/firebase-debug.log:delegated
       - ./firestore-debug.log:/work/firestore-debug.log:delegated
       - ./ui-debug.log:/work/ui-debug.log:delegated
-      #
-      - ./tmp/package.dc.json:/work/functions/package.json:ro
 
     working_dir: /work
     command: bash -o pipefail -c
@@ -85,7 +83,7 @@ services:
       #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
-    command: sh -o pipefail -c
+    command: sh -c
       'npm config set update-notifier false &&
       
       npm run dc:warm-up &&
@@ -128,4 +126,24 @@ services:
     depends_on:
       warm-up:
         condition: service_healthy
+    profiles: ['manual']
+
+  # Separate target for installing 'functions/node_modules', within DC.
+  #
+  # Doing this - instead of installing them on host - avoids the "unsupported (Node.js) version" error, by Firebase
+  # (since we steer strictly the version used in the installation, which should match 'functions/package.json').
+  #
+  functions-install:
+    image: node:16-alpine
+    volumes:
+      # --- RO
+      - ./functions/package.json:/work/functions/package.json:ro
+      # --- output (show installed packages on the host; from where they are shared to running images)
+      - ./functions/node_modules:/work/functions/node_modules:delegated
+
+    working_dir: /work
+    command: sh -c
+      'npm config set update-notifier false &&
+      npm install --prefix functions
+      '
     profiles: ['manual']

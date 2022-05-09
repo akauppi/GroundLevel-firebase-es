@@ -40,10 +40,15 @@ services:
       - ./vitebox:/proj/packages/app/vitebox:cached
       # --- other
       - ./tmp.dc/node_modules:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
+      # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
+      - ${HOME}/Git/aside-keys/package:/aside-keys/package:ro
 
     working_dir: /proj/packages/app
-    entrypoint: npm
-    command: ['run', 'dc:launch:local']
+    command: sh -c
+      'npm config set update-notifier false &&
+
+      npm run dc:launch:local
+      '
 
     healthcheck:
       test: "nc -z localhost 3000"

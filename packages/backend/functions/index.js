@@ -54,8 +54,6 @@ const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 //    If there is not, would Firebase folks please make some (or we can reverse engineer and do it here! ⭐️
 //---
 
-//admin.initializeApp();
-//const db = admin.firestore();
 initializeApp();
 const db = getFirestore();
 

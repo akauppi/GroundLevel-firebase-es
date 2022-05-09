@@ -5,18 +5,7 @@ Web application sample project.
 ## Requirements
 
 - `npm`
-- Docker Compose 2.0
-
-	<details><summary>Installation on Linux</summary>
-   DC 2.0 comes with Docker Desktop for Windows and Mac. The Linux version
-   needs to be separately installed, for now.
-   
-   - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
-   - [Install on Linux](https://docs.docker.com/compose/cli-command/#install-on-linux)
-
-   If you are brave and curious, check out [Tech preview](https://docs.docker.com/desktop/linux/) of Docker Desktop for Linux.
-	</details>
-
+- Docker Compose 2.x
 
 ### Cypress setup
 
@@ -79,9 +68,10 @@ This means you should be able to run the Cypress installed within Linux, and use
 Development is done with: 
 
 - macOS 12.3
-- node 17.9
-- npm 8.5
-- Docker Desktop 4.7
+- node 18.0
+- npm 8.6
+- Docker Desktop 4.7.x with: 2 CPU cores, 2 GB RAM, 512 MB swap
+  - experimental > Enable VirtioFS
 -->
 
 ## Getting started
@@ -112,7 +102,9 @@ $ npm run dev
 
 This serves the UI locally, against an emulated Firebase back-end.
 
->Within local mode, you sign in by `?user=dev` query parameter (even though the social sign-in button is visible - it might not work). 
+>Within local mode, you sign in by `?user=dev` query parameter. Even though the social sign-in button is visible, don't use it.
+
+<!-- tbd. Could dim the social sign-in with a hover tip on `?user=dev` -->
 
 Try it:
 
@@ -138,15 +130,6 @@ Differences of these modes:
 |`online`|in the cloud|in the cloud; changes are persistent|←|←|command line|
 
 >**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase project id's so their data and users won't overlap.
-
-<!-- Note on "online" mode's central logging:
-
-This sub-package is not operations aware, and thus we'll likely not roll the central logs onto the cloud in the way `app-deploy-ops` does.
-
-We *could* log to the Firebase staging project's Cloud Functions log, rather easily. Is there a benefit in doing so, vs. the local command line?
-
-This is something of a hazy area - give feedback if you have practical suggestions.
--->
 
 
 ### `dev:local`

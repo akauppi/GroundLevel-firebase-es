@@ -65,21 +65,12 @@ $ npm run build
 [vite:css] Preprocessor dependency "sass" not found. Did you install it?
 ```
 
-- [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
+- [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
 
-
-<!-- not important?
-## Use of pipe or `&&` in Docker Compose commands
-
-- [Answer to "docker-compose use pipe in command
-"](https://stackoverflow.com/a/68590318/14455)
-
-   Is there a more robust method? (apart from making each command a script?)
--->
+> Still there, with Vite 2.9.8. 
 
 
 ## `Cannot set property 'peer' of null`
-
 
 ```
 $ npm outdated
