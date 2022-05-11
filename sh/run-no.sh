@@ -8,15 +8,11 @@ set -eu -o pipefail
 #     $ sh/run-no.sh
 #   <<
 #
-PATHS=". packages/backend packages/backend/functions packages/app packages/app/tools/firebase-prime"
-
-# REMOVE? changed 'esbuild' to be in the interim folder level; can we remove this??
-# Compensate for the macOS/Linux (Docker) modifications of 'esbuild'. Otherwise:
-#   <<
-#     npm ERR! Cannot set property 'peer' of null
-#   <<
+# Note:
+#   - 'packages/app/.../firebase-prime' considered a dockerized tool (implemented in 'npm' but we don't want to know
+#     about its specifics; also it can use old versions).
 #
-#npm --prefix packages/app prune
+PATHS=". packages/backend packages/backend/functions packages/app"
 
 for _PATH in $PATHS   # overriding 'PATH'... not recommended.
 do

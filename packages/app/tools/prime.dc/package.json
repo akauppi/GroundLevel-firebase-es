@@ -14,12 +14,16 @@
     "firebase-prime": "src/index.js"
   },
   "dependencies": {
+    "@_/self": "file:.",
     "commander": "^9.1.0",
     "firebase-admin": "^10.2.0"
   },
   "//": {
     "usage": [
       "FIREBASE_JSON=<path> firebase-prime [--host=abc] --project=xyz docs.js users.js"
+    ],
+    "self-dependency": [
+      "Needed for 'npx firebase-prime' to work."
     ]
   }
 }

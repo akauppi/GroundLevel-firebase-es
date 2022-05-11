@@ -1,19 +1,18 @@
 /*
 * config.js
-*
-* Provide configuration info, based on 'firebase.json' (in the current folder) and CLI parameters.
 */
 import { existsSync, readFileSync } from 'fs'
 
 let projectId, host;
 
-const firebaseJson = process.env.FIREBASE_JSON || fail("'FIREBASE_JSON' env.var. not defined");
+//const firebaseJson = process.env.FIREBASE_JSON || 'firebase.json'
 
 function init(a, b) {   // (string, string) => ()
   projectId = a;
   host = b;
 }
 
+/*** Use of 'firebase.json' disabled
 // Get the Firebase emulator ports from Firebase configuration file.
 //
 const [firestorePort, authPort] = (_ => {
@@ -29,6 +28,12 @@ const [firestorePort, authPort] = (_ => {
     return [a, b];
   }
 })();
+***/
+
+const [firestorePort, authPort] = [
+  process.env.FIRESTORE_PORT || fail("'FIRESTORE_PORT' env.var. missing"),
+  process.env.AUTH_PORT || fail("'AUTH_PORT' env.var. missing")
+]
 
 function fail(msg) {
   console.error(msg);

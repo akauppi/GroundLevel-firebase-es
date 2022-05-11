@@ -26,7 +26,7 @@
     "dev:local": "npm run -s _emulPrimed && npm run -s _genEnvLocal && docker compose down vite-local && docker compose run --rm --service-ports vite-local",
     "_emulRunning": "(cd ../backend && npm run app:start)",
     "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
-    "_prime": "FIREBASE_JSON=../backend/firebase.app.json firebase-prime --project=demo-main local/docs.js local/users.js",
+    "_prime": "docker compose run --rm prime",
     "dc:launch:local": "(cd .. && npm install --no-save esbuild) && vite --mode dev_local",
     "--  -": "",
     "ci:launch": "vite --mode dev_local",
@@ -59,7 +59,6 @@
   },
   "devDependencies": {
     "@local/self": "file:.",
-    "@_/firebase-prime": "file:tools/firebase-prime",
     "@vitejs/plugin-vue": "^2.3.2",
     "cypress": "9.6.0",
     "eslint-plugin-cypress": "^2.12.1",
@@ -112,7 +111,10 @@
         "command here, mostly for just documenting the use."
       ],
       "_prime": [
-        "The project name used _must_ match that in '../backend/', used for launching the emulators."
+        "The project name used _must_ match that in '../backend/', used for launching the emulators.",
+        "",
+        "To develop the 'prime.dc', rebuild by:",
+        " 'docker compose build prime && docker compose run --rm prime'"
       ],
       "_touchEm": [
         "Vital for DC that files to be mapped to the container exist *before* the DC command."

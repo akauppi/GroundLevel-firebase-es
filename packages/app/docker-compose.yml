@@ -64,3 +64,32 @@ services:
       vite-local:
         condition: service_healthy
     profiles: ['manual']
+
+  # Separate target; priming with 'local/{docs|users}.js'
+  #
+  # NOTE:
+  #   How reliable is use of 'host.docker.internal' (works on macOS; Docker 4.7.1)
+  #
+  # References:
+  #   "How to access host port from docker container" (SO)
+  #     -> https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container
+  #
+  # Note:
+  #   'host.docker.interenal' likely provides access to _all_ the host ports. It's not ideal, but if it works for us,
+  #   good.
+  #
+  prime:
+    build:
+      context: tools/prime.dc
+    volumes:
+      # --- RO
+      - ./local:/work/data:ro
+      - ../backend/firebase.app.json:/work/firebase.json:ro
+    environment:
+      - FIRESTORE_PORT=6768
+      - AUTH_PORT=9101
+      - PROJECT=demo-main
+    command:
+      npx firebase-prime --host host.docker.internal --project demo-main data/docs.js data/users.js
+
+    profiles: ['manual']
