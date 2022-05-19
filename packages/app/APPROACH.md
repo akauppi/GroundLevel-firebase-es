@@ -6,7 +6,7 @@
 
 In the earlier times of the repo, Cloud Function Callables were used for a couple of things. However, they have one huge drawback: they are not available offline.
 
-FireStore is (it caches data), so the approach is to use Cloud Functions only in the background and do all cloud-client data exchange via Firestore.
+Firestore is (it caches data), so the approach is to use Cloud Functions only in the background and do all cloud-client data exchange via Firestore.
 
 When, later, we need to do some more real time dataflow, it's either Firebase Realtime Database or a message bus like PubSub. In such a case, we might need to prepare offline awareness ourselves, into the app. `#speculative`
 
@@ -29,7 +29,11 @@ In short, the author gave up hope on it ever catching up with modern times.
 
 If features are lacking in the web component, let's build them in there.
 
->As a side note, the author wonders why browsers don't provide more built-in  support for authentication UI? Something like [Google OneTap for web](https://developers.google.com/identity/one-tap/web/reference/js-reference) on Android. We trust browsers and it would be better to see a native login screen instead of something that can be easily faked in the browser land. If you know the answer, please chime in. 🔔
+>As a side note, the author wonders why browsers don't provide more built-in support for authentication UI? Something like [Google OneTap for web](https://developers.google.com/identity/one-tap/web/reference/js-reference) on Android. We trust browsers and it would be better to see a native login screen instead of something that can be easily faked in the browser land. If you know the answer, please chime in. 🔔
+
+<p />
+
+>Note: [WebAuthn](https://webauthn.guide) please?
 
 
 ## Component naming convention
@@ -144,5 +148,5 @@ Solution:
 Line in `docker-compose[.online].yml`:
 
 ```
-- ./tmp.dc/node_modules:/proj/packages/node_modules:delegated
+- ./tmp/node_modules.linux:/proj/packages/node_modules:delegated
 ```

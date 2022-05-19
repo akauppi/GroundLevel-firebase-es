@@ -29,26 +29,31 @@ services:
       - "3000:3000"
     volumes:
       # --- RO
-      - ../../node_modules:/proj/node_modules:ro                  # eslint and Firebase client come from the top
-      - ./.env.local:/proj/packages/app/.env:ro
+      - ../../node_modules:/proj/node_modules:ro                  # eslint comes from the top
       - ./package.json:/proj/packages/app/package.json:ro
       - ./node_modules:/proj/packages/app/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
+      - ../backend/firebase.app.json:/proj/packages/app/firebase.json:ro
+      - ./tools/gen-vite-env-local.js:/proj/packages/app/tools/gen-vite-env-local.js:ro
       # --- cached
       - ./public:/proj/packages/app/public:cached
       - ./src:/proj/packages/app/src:cached
       - ./vitebox:/proj/packages/app/vitebox:cached
       # --- other
-      - ./tmp.dc/node_modules:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
+      - ./tmp/node_modules.linux:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
       # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
-      - ${HOME}/Git/aside-keys/package:/aside-keys/package:ro
+      - ${HOME}/Git/aside-keys/package:/proj/packages/app/node_modules/aside-keys:ro
 
     working_dir: /proj/packages/app
     command: sh -c
       'npm config set update-notifier false &&
+      [ ! -d node_modules/esbuild ] || (echo >&2 ERROR:\ please remove 'node_modules/esbuild*'; false) &&
 
+      npm install --prefix .. --no-save esbuild &&
       npm run dc:launch:local
       '
+    environment:
+      - SENTRY_DNS
 
     healthcheck:
       test: "nc -z localhost 3000"

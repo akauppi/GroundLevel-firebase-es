@@ -26,6 +26,7 @@ Great tools selected for you:
 - [Vue.js 3](https://v3.vuejs.org)
 - [Cypress](https://www.cypress.io)
 - [Cloud Build](https://cloud.google.com/build)
+- [Sentry](https://sentry.io)
 
 <!-- tbd. Add operational tools
 -->

@@ -47,7 +47,7 @@
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style scoped>
 #dialog {
   position: relative;  /*anchor for close 'position: absolute'*/
 
@@ -106,8 +106,6 @@
 </style>
 
 <script>
-  import { assert } from '/@tools/assert'
-
   import { onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { getAuth, signOut as fbSignOut } from '@firebase/auth'
@@ -120,7 +118,7 @@
 
   // Borrowing a component from deep in. (maybe it is moved to '/components', later, if used in multiple places?)
   //
-  import MemberFace from '/@pages/Home/ProjectTile/MemberFace.vue'    // #later
+  //import MemberFace from '/@pages/Home/ProjectTile/MemberFace.vue'    // #later
 
   let closeEl;    // DOM element, gets set during mounting
 

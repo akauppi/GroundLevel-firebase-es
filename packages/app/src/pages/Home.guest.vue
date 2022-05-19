@@ -45,7 +45,7 @@ function setup() {
 }
 
 export default {
-  name: 'Home.guest',
+  name: 'HomeGuest',
   props: {
     final: { type: String, required: false }    // to mitigate a warning; sign-in uses it to get to a shared link's destination
   },

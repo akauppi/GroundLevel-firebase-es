@@ -17,6 +17,8 @@ import { computed, ref, watchEffect } from 'vue'
 import { onAuthStateChanged, getAuth } from '@firebase/auth'
 const auth = getAuth();
 
+import * as Sentry from '@sentry/browser'
+
 import { assert } from '/@tools/assert'
 
 // Fed either by Firebase auth changes or the router (LOCAL mode)
@@ -69,6 +71,8 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
 
   if (v) {
     const o = v;
+
+    Sentry.setUser({ id: o.uid })
     return {    // expose a controlled subset (minimalistic)
       uid: o.uid,
       displayName: o.displayName,
@@ -76,6 +80,7 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
       photoURL: o.photoURL
     }
   } else {
+    Sentry.setUser({})
     return v;   // undefined|null
   }
 });

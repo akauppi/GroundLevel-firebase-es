@@ -11,8 +11,4 @@
 # Cypress
 /.screenshots
 
-# Generated files
-/.env.*
-
 /tmp/
-/tmp.dc/

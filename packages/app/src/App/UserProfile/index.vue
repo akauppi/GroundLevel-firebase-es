@@ -54,7 +54,13 @@
     padding-left: 0.6em;
   }
 
-  /* Note: Firefox (Aug 2020): 'backdrop-filter' implemented but not enabled by default
+  /*
+  * backdrop-filter support (17-May-22):
+  *   - Chrome works          (Chrome 100)
+  *   - Safari doesn't blur   (Safari 15.4; needs '-webkit')
+  *   - Firefox               (not enabled, by default)
+  *
+  * Note: Firefox (Aug 2020): 'backdrop-filter' implemented but not enabled by default
   *     -> https://bugzilla.mozilla.org/show_bug.cgi?id=1178765
   */
   #modal-background {
@@ -68,6 +74,7 @@
     z-index: 9999;
 
     backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
   .fixed-top-right {

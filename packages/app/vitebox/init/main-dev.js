@@ -1,8 +1,7 @@
 /*
-* /init/main.js
+* /init/main-dev.js
 *
-* Entry point for Vite. Development mode harness that is *not* part of the application, itself.
-* Does *not* get packed.
+* Entry point for Vite. Development mode harness that is *not* part of the application's production builds.
 */
 import { assert } from './assert.js'
 

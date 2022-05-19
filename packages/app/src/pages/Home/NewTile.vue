@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import 'shared.css';    // .new-tile
 
 .new-tile {

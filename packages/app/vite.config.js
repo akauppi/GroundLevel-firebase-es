@@ -2,8 +2,8 @@
 // vite.config.js
 //
 // Two modes:
-//  - for 'npm run dev:...', compile on-the-fly and use files from 'vitebox'
-//  - for 'npm run build', stay in the main folder
+//  - for 'npm run dev{|:local|:online}', compile on-the-fly and use files from 'vitebox'
+//  - for 'npm run build', use ... (tbd. production!!!)
 //
 import path, { dirname, join as pJoin } from 'path'
 import { readdirSync, statSync } from 'fs'
@@ -44,23 +44,6 @@ const forcedVueComponents = new Set([
   "router-view",
   "router-link"
 ]);
-
-/*
-* Map '@ops/goo' to 'vitebox/ops/goo.js' (for 'npm run dev:...' only!)
-*/
-function opsAliases_DEV() {
-  const opsPath = pJoin(myPath, 'vitebox/ops');
-
-  const pairs = readdirSync(opsPath).map( s => {    // e.g. 'central.js'
-    const [_,c1] = s.match(/(.+)\.js$/) || [];    // pick
-    if (c1) {
-      const tmp = path.resolve(opsPath, s);
-      return [`@ops/${c1}`, tmp];
-    }
-  }).filter( x => x !== undefined ); // Array of ['@ops/...', '...path...']
-
-  return Object.fromEntries(pairs);
-}
 
 // Help Rollup in packaging.
 //
@@ -108,8 +91,8 @@ const chunkTo = [     // Array of Regex
   /\/node_modules\/(vue-router)\//,
   /\/node_modules\/(aside-keys)\//,
 
-  // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed 'aside-keys';
-  // Firebase is marked as a peer dependency, and provided by the upper level.
+  // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed or
+  // 'file://') 'aside-keys'.
 ];
 
 function configGen({ _ /*command*/, mode }) {
@@ -124,7 +107,7 @@ function configGen({ _ /*command*/, mode }) {
       root: 'vitebox',
       envDir: '..',     // actual 'app' dir
 
-      cacheDir: '/tmp/.vite',   // so 'node_modules' can remain read-only
+      cacheDir: '/tmp/.vite',   // so 'node_modules' remains read-only
 
       // With 2.4.x, this was a way to point up from 'vitebox', but creates lots of warnings on 2.5.6:
       //  <<
@@ -143,13 +126,12 @@ function configGen({ _ /*command*/, mode }) {
       devSourceMap: true    // experimental feature of Vite 2.9
     },
 
-    esbuild: false,
+    esbuild: false,   // "set to 'false' to disable esbuild transforms."    // (then, why do we have 'esbuild', at all?? tbd.)
 
     resolve: {
       alias: {
         ...subAliases,
-        '/@': srcPath,
-        ...(DEV_MODE ? opsAliases_DEV() : {}),
+        '/@': srcPath
       }
     },
 
@@ -170,11 +152,6 @@ function configGen({ _ /*command*/, mode }) {
       },
 
       rollupOptions: {
-        external: [
-          /^@?firebase\//,    // don't try packing these - 'app-deploy-ops' provides them (of the same version)
-          //"/favicon.png"
-          ...(DEV_MODE ? [] : ['@ops/central', '@ops/perf'])
-        ],
         output: {manualChunks}
       },
 

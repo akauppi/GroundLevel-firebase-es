@@ -6,7 +6,6 @@
 * This is needed to clear away possible existing cruft from an earlier run.
 */
 import { strict as assert } from 'assert'
-import fetch from 'node-fetch'
 
 import { firestorePort, host, projectId } from '../config.js'
 

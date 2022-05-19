@@ -70,7 +70,7 @@ Development is done with:
 - macOS 12.3
 - node 18.0
 - npm 8.6
-- Docker Desktop 4.7.x with: 2 CPU cores, 2 GB RAM, 512 MB swap
+- Docker Desktop 4.8 with: 2 CPU cores, 2 GB RAM, 512 MB swap
   - experimental > Enable VirtioFS
 -->
 
@@ -110,7 +110,7 @@ Try it:
 
 [http://localhost:3000?user=dev](http://localhost:3000?user=dev)
 
-Try making some changes in the `src/**` files (eg. change the title in `src/pages/Home/index.vue`) and see that they are reflected in the browser.
+Try making some changes in the `src/**` files and see that they are reflected in the browser.
 
 <!-- tbd. some more fun mod, perhaps?
 >![](.images/modded-welcome.png)
@@ -127,7 +127,7 @@ Differences of these modes:
 ||Back-end|Data|Users|Authentication|Central logging|
 |---|---|---|---|---|---|
 |`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|browser console|
-|`online`|in the cloud|in the cloud; changes are persistent|←|←|command line|
+|`online`|in the cloud|in the cloud; changes are persistent|←|against real accounts|command line|
 
 >**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase project id's so their data and users won't overlap.
 
@@ -184,6 +184,7 @@ If you work on removing data, `dev:local` may suit best, since it always boots f
 
 You can customize the `local/*` setup to your development needs. Tests carry their own data and users, so they are safe from your changes.
 
+<!-- remove?
 Before we look at tests, a brief mention on linting.
 
 
@@ -199,13 +200,13 @@ This gives you warnings that you may or may not wish to fix. Steer them at `.esl
 >Note: At the moment (Apr 2021) we're not focused on reducing the number of lint warnings (or even errors).
 
 With the sample app, there may be warnings but there should not be errors.
-
+-->
 
 ## Testing
 
 You can use Cypress for test based development as well as running all the tests, from command line.
 
-- [ ] Make sure you have followed the instructions in the "Requirements" section, concerning Cypress desktop application.
+- Make sure you have followed the instructions in the "Requirements" section, concerning Cypress desktop application.
 
 
 ### Running all the tests
@@ -235,7 +236,7 @@ As you can see in the image, always keep the developer tools open while running 
 
 Now edit some test in the IDE (they are under `cypress/anonymous` and `cypress/joe`).
 
->**Disclaimer:** 
+>**Note on folder structure:** 
 >
 >After long retaining to the Cypress convention of `cypress/integration`, the author changed the folder structure to reflect the various user stories a front end might have. Thus, within `cypress` folder, tests for a certain user story are in their own folder. Naturally, you may set this back to Cypress defaults if you wish. Also, `cypress/support` was renamed to `commands` since it's where custom commands come from.
 
@@ -270,24 +271,32 @@ dist/vue.js          132.61kb / brotli: 26.22kb
 dist/vue.js.map      512.57kb
 ```
 
-This builds your front end application in `dist/` folder. It contains all the logic and the styles that your application has, but it lacks the operational awareness that makes it fully ready for production.
-
-We'll add that layer in the next sub-package, `app-deploy-ops`.
+This builds your front end application in `dist/` folder.
 
 
-## Maintenance 
+## Next steps...
 
-### Cleaning up after Cypress
+You can now start developing your own application - both backend and front-end.
 
-Cypress binaries are gathered in [a cache directory](https://docs.cypress.io/guides/getting-started/installing-cypress#Binary-cache). You might want to clean the earlier ones away, at times, to save disk space.
+When you feel like it, take a look at the following folders that have information about managing the application's full lifecycle:
 
-### Updating `vite`, Vite config, `@vitejs/plugin-vue`
+- [`/ci`](../../ci/README.md) - Continuous Integration, using [Cloud Build](https://cloud.google.com/build)
 
-The Vite server is running in DC, so in order to apply the changes, make sure to run down the earlier instance:
+   You set up the cloud to track changes to your version control, so that code changes get automatically tested and deployed.
+   
+- [`/ops`](../../ops/README.md) - Operational monitoring, using [Sentry](https://sentry.io/for/javascript/)
 
-```
-$ docker compose -f docker-compose.yml -f docker-compose.online.yml --env-file ./.env.dc down
-```
+   Learn about how to see whether your users are there, and how their experience using the app is.
 
->You can do the same in Docker Desktop's Dashboard: just remove the `app` > `app_vite*` containers.
+<!-- tbd.
+- `/chat` - User engagement, using [Discord](https://discord.com)
 
+   Set up a discussion area, where your users can meet each other and you.
+-->   
+
+This concludes the web app feedback loop. Make great apps, gain users and have a great time!!!
+
+<!-- tbd. image of merry-go-round:
+	idea -> development -> deployment -> feedback -> development
+-->	
+	

@@ -16,14 +16,23 @@
   </header>
   <main>
     <router-view />
-    <aside-keys />
+    <aside-keys>
+      <!--
+      - Facade on top of 'aside-keys' so it won't be clickable during 'dev:local'.
+      -
+      - tbd. Could have tooltip, but that's a non-tablet abstraction.   "Sign-in disabled for local development. Use 'npm run dev:online'."
+      -->
+      <div id="ak-cover" v-if="LOCAL">
+        <span>Sign-in disabled</span>
+      </div>
+    </aside-keys>
   </main>
   <footer>
     <AppFooter />
   </footer>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
   #mode {
     position: fixed;
     top: 40px;
@@ -64,11 +73,28 @@
     background: #f8f8f8;
     border: 0.5px solid rgba(100,100,100,0.4);
   }
+
+  /*
+  * tbd. Intention is to have the text in the middle, but it's.. good enough. You may #fix ;)
+  */
+  #ak-cover {
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    position: absolute;
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+
+    color: #888;
+  }
 </style>
 
 <script>
-  import { assert } from '/@tools/assert'
-
   import { onMounted, getCurrentInstance } from 'vue'
 
   import AppLogo from './AppLogo.vue'

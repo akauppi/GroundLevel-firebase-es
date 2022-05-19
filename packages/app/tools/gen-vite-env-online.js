@@ -3,26 +3,27 @@
 /*
 * tools/gen-vite-env-online.js
 *
+* Expects:
+*   ./firebase.js to exist
+*
 * Usage:
 *   <<
-*     $ [ENV=...] gen-vite-env-online
+*     $ gen-vite-env-online
 *   <<
 *
-* Based on the '../../../firebase.${ENV-staging}.js' file, prepare content for '.env' file for online mode.
+* Based on the 'firebase.js' file, prepare content for '.env' file for online mode.
 *
 * Output to stdout.
 */
-const staging = process.env["ENV"] || "staging";
+const fn = '../firebase.js';
 
-const fn = `../../../firebase.${staging}.js`;
+// tbd. Use top-level-await (Node.js 14.8+ and we have 16.x, guaranteed).
 
 /*await*/ import(fn).then( (mod) => {
   const { projectId, appId, apiKey, authDomain } = mod.default;
-  (apiKey && appId && authDomain && projectId) || fail(`Some values missing from: ${ fn.replace("../","") }`);
+  (apiKey && appId && authDomain && projectId) || fail(`Some values missing from: ${fn.replace("../","") }`);
 
-  const out =
-    `# Generated based on '../../firebase.${staging}.js'.
-# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev:online'
+  const out = `# Generated based on '${fn}'.
 #
 VITE_API_KEY=${apiKey}
 VITE_APP_ID=${appId}

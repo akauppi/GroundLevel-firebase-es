@@ -5,7 +5,7 @@
 *
 * Usage:
 *   <<
-*     FIREBASE_JSON=<path> gen-vite-env-local --project=demo-...
+*     [SENTRY_DNS=...] FIREBASE_JSON=<path> gen-vite-env-local --project=demo-...
 *   <<
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
@@ -18,12 +18,14 @@ import { readFileSync } from 'fs'
 const [a] = process.argv.slice(2);
 const [_,projectId] = /^--project=(.+)$/.exec(a);
 
-const FIREBASE_JSON = process.env['FIREBASE_JSON'] || fail("Please provide 'FIREBASE_JSON' env.var.")
+const FIREBASE_JSON = process.env['FIREBASE_JSON'] || 'firebase.json'
 
 if (!projectId) {
   process.stderr.write(`\nUsage: gen-vite-env-local --project=demo-...\n`);
   process.exit(1);
 }
+
+const SENTRY_DNS = process.env['SENTRY_DNS'];     // optional
 
 const [firestorePort, functionsPort, authPort] = (_ => {   // => [int, int, int]
   const raw = readFileSync( FIREBASE_JSON );
@@ -40,12 +42,15 @@ const emulHost = process.env["EMUL_HOST"];    // overridden by CI only
 
 const out =
 `# Generated based on 'firebase.json'.
-# DON'T MAKE CHANGES HERE. THIS FILE IS OVERRIDDEN by 'npm run dev[:local]' and 'npm test'.
 #
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_FUNCTIONS_PORT=${functionsPort}
 VITE_AUTH_PORT=${authPort}
-VITE_PROJECT_ID=${projectId}${ emulHost ? `\nVITE_EMUL_HOST=${emulHost}` : '' }
+VITE_PROJECT_ID=${projectId}${
+  emulHost ? `\nVITE_EMUL_HOST=${emulHost}` : ''
+}${
+  SENTRY_DNS ? `\nVITE_SENTRY_DNS=${SENTRY_DNS}` : ''
+}
 `;
 
 process.stdout.write(out);

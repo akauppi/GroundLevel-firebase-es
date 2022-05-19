@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "files": [
     "src/**"
@@ -24,6 +24,9 @@
     ],
     "self-dependency": [
       "Needed for 'npx firebase-prime' to work."
+    ],
+    "engines.node": [
+      ">=18: provides 'fetch' API natively"
     ]
   }
 }

@@ -1,13 +1,5 @@
 # Track
 
-Priorized by:
-
-|||
-|---|---|
-|🔥|high prio; we are hurt by this!|
-|👁|medium; keep an eye on it|
-|🐌|low prio|
-
 
 ## Cypress will provide means to config what gets cleared, between tests 🐌
 
@@ -22,6 +14,7 @@ Currently (5.3.0), Cypress does not clear IndexedDB storage and therefore Fireba
 Once there is a way to configure this (instead of code), we might prefer that.
 
 
+<!--
 ## ESLint: top level await support pending "stage 4"
 
 We'd like the ESlint error for top level await (e.g. in `local/init.js`) to be configured out, without bringing in Babel parser.
@@ -35,7 +28,7 @@ Like here: [Enable Top Level Await](https://github.com/eslint/eslint/issues/1317
 In "stage 3" (26 Oct 2020; Jan 2021).
 
 In "stage 4" (Aug 2021). Will be in ESLint 8.0.
-
+-->
 
 <!--
 | This one is for Rollup. We now use Vite for this level.
@@ -68,18 +61,3 @@ $ npm run build
 - [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
 
 > Still there, with Vite 2.9.8. 
-
-
-## `Cannot set property 'peer' of null`
-
-```
-$ npm outdated
-npm ERR! Cannot set property 'peer' of null
-
-npm ERR! A complete log of this run can be found in:
-npm ERR!     /Users/asko/.npm/_logs/2021-09-12T14_28_48_226Z-debug.log
-```
-
-Not sure what causes that. `npm install` restored functionality - at least once.
-
-- [[BUG] Cannot set property 'peer' of null](https://github.com/npm/cli/issues/3711)

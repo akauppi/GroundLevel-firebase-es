@@ -108,7 +108,7 @@
   }
 
   export default {
-    name: 'Project',
+    name: 'Project_',
     props: {
       id: { type: String, required: true },
       uid: { type: String, required: true, validator: uidValidator }

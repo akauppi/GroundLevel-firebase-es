@@ -60,7 +60,7 @@ packages/backend/tmp/*
 packages/app/.env.*
 packages/app/dist/
 
-tmp.dc/
+#tmp.dc/
 
 # Being deprecated
 app-deploy-ops/

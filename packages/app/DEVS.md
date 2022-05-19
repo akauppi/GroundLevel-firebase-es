@@ -1,28 +1,5 @@
 # Developer notes
 
-## Peer problems when updating Vue
-
-```
-$ npm install
-...
-Found: @vue/compiler-sfc@3.0.5
-npm ERR! node_modules/@vue/compiler-sfc
-npm ERR!   peer @vue/compiler-sfc@"^3.0.4" from @vitejs/plugin-vue@1.1.4
-npm ERR!   node_modules/@vitejs/plugin-vue
-npm ERR!     dev @vitejs/plugin-vue@"^1.1.4" from the root project
-npm ERR!   dev @vue/compiler-sfc@"^3.0.6" from the root project
-...
-```
-
-If you run into such problems, remove the existing installation by:
-
-```
-$ rm -rf node_modules/@vue node_modules/vue
-```
-
-Try again.
-
-
 ## Cypress naming conventions
 
 We're taking liberties naming the folders differently.
@@ -55,7 +32,7 @@ One can use eg. Firestore with any number of projects, on the same emulator inst
 Cypress cache gathers easily some weight.
 
 ```
-du -d 1 -h ~/Library/Caches/Cypress/
+$ du -d 1 -h ~/Library/Caches/Cypress/
 783M	/Users/x/Library/Caches/Cypress//7.1.0
 750M	/Users/x/Library/Caches/Cypress//7.5.0
 777M	/Users/x/Library/Caches/Cypress//7.2.0
@@ -64,11 +41,13 @@ du -d 1 -h ~/Library/Caches/Cypress/
 3,0G	/Users/x/Library/Caches/Cypress/
 ```
 
+>That's the macOS directory. For Windows and Linux, see [here](https://docs.cypress.io/guides/getting-started/installing-cypress#Binary-cache) (Cypress docs).
+
 When new versions come available, they pile up here.
 
 To reclaim disk space, just remove the unneeded folders.
 
->Note: Moving to trash bin does not clear the space. `rm -rf` does. ;)
+>Note: Moving to trash bin does not clear the space. `rm -rf` does.
 
 You can also use:
 
@@ -78,10 +57,11 @@ $ npx cypress cache prune
 Deleted all binary caches except for the 7.6.0 binary cache.
 ```
 
+<!-- disabled
 **More depth:**
 
 - [Cleaning Up Space on Development Machine](https://glebbahmutov.com/blog/cleaning-up-space/#cleaning-old-cypress-binaries) (blog, Apr 2020)
-
+-->
 
 ## Building the Docker image, after it's changed
 
@@ -93,5 +73,4 @@ To reflect changes, use:
 $ docker compose build
 ```
 
->If you change a service’s Dockerfile or the contents of its build directory, run docker-compose build to rebuild it. <sub>source: [Docker Compose CLI reference](https://docs.docker.com/compose/reference/build/)</sub>
-
+>If you change a service’s Dockerfile or the contents of its build directory, run `docker-compose build` to rebuild it. <sub>source: [Docker Compose CLI reference](https://docs.docker.com/compose/reference/build/)</sub>

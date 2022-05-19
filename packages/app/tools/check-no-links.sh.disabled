@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Check that there are no 'npm link' dependencies (this is only called on production builds).
+#
+# Usage:
+#   <<
+#     $ tools/check-no-links.sh || ...had links...
+#   <<
+#
+# Requires:
+#   - grep
+#
+
+# Intended 'file:' references are okay.
+#
+
+[ -z $( npm list | grep -- '->' | grep -v '@local/' | grep -v '@_' ) ]

@@ -121,7 +121,7 @@
   }
 
   export default {
-    name: 'Home',
+    name: 'Home_',
     props: {
       uid: {
         type: String,

@@ -12,7 +12,6 @@
 *     -> https://firebase.google.com/docs/firestore/reference/rest/v1/Write
 */
 import { strict as assert } from 'assert'
-import fetch from 'node-fetch'
 
 import { firestorePort, host } from '../config.js'
 
