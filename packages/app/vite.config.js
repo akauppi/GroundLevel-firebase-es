@@ -48,7 +48,6 @@ const forcedVueComponents = new Set([
 // Help Rollup in packaging.
 //
 // Want:
-//  - 'init/**' as 'init' (only for development; ops replaces with its own)
 //  - application in main chunk
 //  - dependencies in their own, nice cubicles
 //
@@ -57,14 +56,12 @@ const forcedVueComponents = new Set([
 //
 function manualChunks(id) {
   let name;
-  for( const x of chunkTo ) {
-    const [re,s] = Array.isArray(x) ? x : [x,"default"];    // 's' is the name override (if no capture block)
-      //
-      // ^-- note: default name doesn't get applied (vite uses "app" instead); don't know why..
 
-    const tmp = id.match(re);   // [_, capture] | null
-    if (tmp) {
-      name = (tmp[1] || s).replace('/','-');    // flattening output names ('/'->'-') is just for us humans
+  for (const [k,rr] of Object.entries(chunkTo)) {   // ""|<chunk-name> -> Regex | Array of Regex
+    const arr = Array.isArray(rr) ? rr:[rr];
+
+    if (arr.some( re => id.match(re) )) {
+      name = k || "app";
       break;
     }
   }
@@ -77,23 +74,52 @@ function manualChunks(id) {
   }
 }
 
-// Regex's for grouping the chunks.
+// Regex's for grouping the chunks
 //
-const chunkTo = [     // Array of Regex
-  // /Users/.../app/src/app.js    # ..and others
+const chunkTo = {     // Map of string -> (Regex | Array of Regex)
+
+  // default chunk; application itself and small stuff
+  "": [
+    /\/app\/src\//,
+
+    // vite/preload-helper
+    /^vite\/preload-helper$/,      // Vite runtime (small, ~600b)
+
+    // plugin-vue:export-helper
+    /^plugin-vue:export-helper/,  // very small, ~180b
+
+    // TypeScript runtime
+    /\/node_modules\/tslib\//,    // needed by Firebase and Sentry (15.2k)
+  ],
+
+  "vue": /\/node_modules\/@?vue\//,
+  "vue-router": /\/node_modules\/vue-router\//,
+  "aside-keys": /\/node_modules\/aside-keys\//,
+
+  // Firebase
   //
-  /\/app\/src\//,
+  // @firebase/{auth|firestore|app|util|logger|component|webchannel-wrapper}
+  "firebase-auth": /\/node_modules\/@firebase\/auth\//,
+  "firebase": [
+    /\/node_modules\/@firebase\/(?:app|util|logger|component)\//,
+    /\/node_modules\/idb\//     // needed by '@firebase/{app|installations|messaging}' (place in the same chunk) (9.89k)
+  ],
+  "firebase-firestore": [
+    /\/node_modules\/@firebase\/firestore\//,
+    /\/node_modules\/@firebase\/webchannel-wrapper\//,
+  ],
 
-  // vite/preload-helper
-  /^vite\/preload-helper$/,      // Vite runtime (small, ~600b)
+  // Sentry
+  //
+  // @sentry/{browser|tracing|core|utils|hub|minimal|types}
+  "sentry-browser": /\/node_modules\/@sentry\/browser\//,
+  "sentry-tracing": /\/node_modules\/@(sentry\/tracing)\//,
 
-  /\/node_modules\/@?(vue)\//,
-  /\/node_modules\/(vue-router)\//,
-  /\/node_modules\/(aside-keys)\//,
+  "sentry": /\/node_modules\/@sentry\/(?:core|utils|hub|minimal|types)\//,    // Note: 'minimal' is no more in Sentry 7.x
 
   // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed or
   // 'file://') 'aside-keys'.
-];
+};
 
 function configGen({ _ /*command*/, mode }) {
   //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"development"|"production"
@@ -137,7 +163,7 @@ function configGen({ _ /*command*/, mode }) {
 
     build: {
       ...(!DEV_MODE ? {
-        //outDir: "dist"    // also the default (relative to 'app' folder)
+        outDir: "dist"    // also the default (relative to 'app' folder)
       } : {}),
 
       minify: false,

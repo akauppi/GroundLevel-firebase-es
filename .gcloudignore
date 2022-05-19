@@ -57,10 +57,8 @@ stats.html
 packages/backend/tmp/*
 !.gitkeep
 
-packages/app/.env.*
 packages/app/dist/
-
-#tmp.dc/
+packages/app/tmp/
 
 # Being deprecated
 app-deploy-ops/

@@ -47,7 +47,7 @@ services:
       # --- other
       - ./tmp/node_modules.linux:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
       # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
-      - ${HOME}/Git/aside-keys/package:/proj/packages/app/node_modules/aside-keys:ro
+      #- ${HOME}/Git/aside-keys/package:/proj/packages/app/node_modules/aside-keys:ro
 
     working_dir: /proj/packages/app
     command: sh -c

@@ -52,20 +52,20 @@
   "dependencies": {
     "@sentry/browser": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
-    "aside-keys": "file:/~/Git/aside-keys/package",
+    "aside-keys": "^0.0.3-alpha.1",
     "firebase": "^9.8.1",
-    "vue": "^3.2.33",
+    "vue": "^3.2.34",
     "vue-router": "^4.0.15"
   },
   "//dependencies": {
-    "aside-keys": "^0.0.3-alpha.1"
+    "aside-keys": "file:/~/Git/aside-keys/package"
   },
   "devDependencies": {
     "@local/self": "file:.",
     "@vitejs/plugin-vue": "^2.3.2",
     "cypress": "9.6.0",
     "eslint-plugin-cypress": "^2.12.1",
-    "eslint-plugin-vue": "^8.7.1",
+    "eslint-plugin-vue": "^9.0.1",
     "prettier": "2.6.2",
     "vite": "^2.9.9",
     "vue-eslint-parser": "^9.0.2"
