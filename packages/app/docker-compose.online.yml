@@ -1,70 +1,29 @@
 #
-# docker-compose.online.yml
+# app/docker-compose.online.yml
 #
-# For development (via 'npm run dev:online').
-#
-# Docker compose of:
-#   - Vite                  front end Hot-Module Reloading; hosting
+# Overlay, for 'npm run dev:online' specificity.
 #
 # Environment variables:
 #   - ENV (default: 'staging'); the staging environment to work against.
 #
 # Intentions:
-#   Within a Docker universe,
-#     - host the local files with a cloud backend, according to 'ENV' env.var. at the time of launching.
-#
-# Note:
-#   To change staging environments, 'docker compose -f docker-compose.online.yml down' and a new 'npm run dev:online'.
-#
-# Docker Compose (v3) note:
-#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
-#
-# References:
-#   Cypress > Continuous Integration > Introduction
-#     -> https://docs.cypress.io/guides/continuous-integration/introduction#What-is-Continuous-Integration
-#   Overview of Docker Compose (Docker docs)
-#     -> https://docs.docker.com/compose/
-#   Compose file version 3 reference
-#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#   - Host the front end files with a cloud backend, according to 'ENV' env.var.
 #
 services:
-  vite-3001:
-    image: node:16-alpine
+  vite-dev:
     ports:
-      - "3001:3001"
+      - "3001:3001"     # wasn't able to have "$PORT:$PORT" here, in 'docker-compose.yml'
     volumes:
       #--- RO
-      - ../../node_modules:/proj/node_modules:ro                  # eslint comes from the top
-      - ./package.json:/proj/packages/app/package.json:ro
-      - ./node_modules:/proj/packages/app/node_modules:ro         # note: should not have 'esbuild' in it
-      - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
-      - ./tools/gen-vite-env-online.js:/proj/packages/app/tools/gen-vite-env-online.js:ro
-      - ../../firebase.${ENV:-staging}.js:/proj/packages/app/firebase.js:ro
-      # --- cached
-      - ./public:/proj/packages/app/public:cached
-      - ./src:/proj/packages/app/src:cached
-      - ./vitebox:/proj/packages/app/vitebox:cached
-      # --- other
-      - ./tmp/node_modules.linux:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
-      # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
-      #- ${HOME}/Git/aside-keys/package:/proj/packages/app/node_modules/aside-keys:ro
-
-    working_dir: /proj/packages/app
-    command: sh -c
-      'npm config set update-notifier false &&
-      [ ! -d node_modules/esbuild ] || (echo >&2 ERROR:\ please remove 'node_modules/esbuild*'; false) &&
-
-      npm install --prefix .. --no-save esbuild &&
-      npm run dc:launch:online
-      '
+      - ./tools/gen-vite-env-online.js:/work/tools/gen-vite-env-online.js:ro
+      - ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
     environment:
       - SENTRY_DNS
+      - PORT=3001
+      - MODE=online
+      - ENV
 
-    healthcheck:
-      test: "nc -z localhost 3001"
-      interval: 1.2s
-      start_period: 13s
-
+  #REMOVE???
   # Make sure Vite is launched.
   #
   #|vite-3001-launched:

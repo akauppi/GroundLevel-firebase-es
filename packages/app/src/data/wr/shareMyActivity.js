@@ -5,8 +5,6 @@
 *
 * This gets called by opening a project, and in certain activities within there.
 */
-import { central } from '@ops/central'
-
 import { setDoc } from '@firebase/firestore'
 
 import { getCurrentUserWarm } from "/@/user"
@@ -46,7 +44,7 @@ function shareMyActivity(projectId) {
       console.debug("Activity posted", { uid, lastActive });
     })
     .catch( err => {
-      central.error("Reporting activity failed:", err);
+      //tbd. central.error("Reporting activity failed:", err);
     });
   }
 }

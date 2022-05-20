@@ -120,33 +120,28 @@ The ability to have multiple test folders within `cypress` is intentional. This 
 - `joe`: testing the UI from Joe D.'s point of view
 
 
-## Role of `vitebox`
+## DC `run` vs. `up`
 
-The main role of this folder is to hide `index.html` from the main level.
+The `docker compose up` command drives a singleton. There's either one such service, or none.
 
-We only need `index.html` in this development level; it doesn't deserve to be in a central position. Vite gives no configuration entry for hiding it.
+This is fine for eg. `npm test` where we can keep a service ready in the background.
 
-This gave a good excuse to place anything involving only this level (not production build) to such a folder.
+Using `docker compose run -e ...`, or overlaying Docker Compose files, allows *multiple* variants of the same theme to run, simultaneously. We use this for `npm run dev:{local|online}`.
 
-Production build does not need anything from `vitebox`, so when you do `npm run build`, this configuration does not involve it (but runs the build in the main folder).
+For `npm run build`, the choice is simple (we use `run`), since it's a task, not a service.
 
 
-## Making Vite and DC house buddies
+## Running Vite as a Docker tool
 
-Problem:
+There is a movement (in 2022) for "JavaScript containers". 
 
-- Running `vite` under Docker Compose needs a Linux version of `esbuild`
+We're carefully testing these waters, and eg. have baked a Docker container for Vite. We treat it *as any other (command line level) tool*.
+ 
+Pros:
 
-Solution:
+- Tool is pushed aside a bit more (more simple, maybe?)
 
-- Have `esbuild` separately installed within the DC *at one level higher up*.
+Cons:
 
-   This way, the Linux installation can have its way in the *parent* folder (Node packages from parents are automatically visible).
+- Harder to notice version changes (might also be a good thing to update build tools less frequently than libraries..?)
 
-   >Note: Also tried providing `:delegated` (write) access to `node_modules/esbuild` but that didn't work.
-
-Line in `docker-compose[.online].yml`:
-
-```
-- ./tmp/node_modules.linux:/proj/packages/node_modules:delegated
-```

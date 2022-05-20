@@ -10,7 +10,6 @@ import { query, onSnapshot, QueryConstraint, Timestamp } from '@firebase/firesto
 import {shallowRef, triggerRef} from 'vue'
 
 import { assert } from './assert'
-import { central } from '@ops/central'
 
 /*
 * Follow a certain collection, or query, as a 'Ref of Map'.
@@ -25,12 +24,12 @@ function collRef(_C, ...args) {    // (CollectionReference, QueryConstraint?, { 
   if (qc) {
     const q = query(_C,qc);
     unsub = onSnapshot(q, ssHandler, err => {
-      central.error(`Failed to listen to '${_C.path}' with  constraint '${qc}':`, err);
+      //tbd. central.error(`Failed to listen to '${_C.path}' with  constraint '${qc}':`, err);
     });
 
   } else {
     unsub = onSnapshot(_C, ssHandler, err => {
-      central.error(`Failed to listen to '${_C.path}':`, err);
+      //tbd. central.error(`Failed to listen to '${_C.path}':`, err);
     });
   }
 
@@ -107,7 +106,7 @@ function docRef(_D) {   // ( DocumentReference ) => [Ref of undefined | null | {
     ref.value = data ? convTimestamps(data) : null;
 
   }, (err) => {   // (FirestoreError) => ()
-    central.error(`Failure listening to '${_D.path}':`, err);
+    //tbd. central.error(`Failure listening to '${_D.path}':`, err);
   });
 
   return [ref, unsub];

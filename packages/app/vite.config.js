@@ -2,7 +2,7 @@
 // vite.config.js
 //
 // Two modes:
-//  - for 'npm run dev{|:local|:online}', compile on-the-fly and use files from 'vitebox'
+//  - for 'npm run dev{|:local|:online}', compile on-the-fly and use files from 'dev'
 //  - for 'npm run build', use ... (tbd. production!!!)
 //
 import path, { dirname, join as pJoin } from 'path'
@@ -10,6 +10,10 @@ import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 
 import vue from '@vitejs/plugin-vue'
+
+import { manualChunks } from './rollup.chunks.js'
+
+const PORT = process.env["PORT"] || fail("Missing 'PORT' env.var.");
 
 const myPath = dirname(fileURLToPath(import.meta.url))
 const srcPath = pJoin(myPath, 'src');
@@ -45,95 +49,30 @@ const forcedVueComponents = new Set([
   "router-link"
 ]);
 
-// Help Rollup in packaging.
-//
-// Want:
-//  - application in main chunk
-//  - dependencies in their own, nice cubicles
-//
-// References:
-//    -> https://rollupjs.org/guide/en/#outputmanualchunks
-//
-function manualChunks(id) {
-  let name;
-
-  for (const [k,rr] of Object.entries(chunkTo)) {   // ""|<chunk-name> -> Regex | Array of Regex
-    const arr = Array.isArray(rr) ? rr:[rr];
-
-    if (arr.some( re => id.match(re) )) {
-      name = k || "app";
-      break;
-    }
-  }
-
-  if (!name) {
-    console.warn("Unexpected dependency found (not mapped in 'manualChunks'):", id);
-    return;   // do NOT return a value -> let Rollup do its default
-  } else {
-    return name;
-  }
-}
-
-// Regex's for grouping the chunks
-//
-const chunkTo = {     // Map of string -> (Regex | Array of Regex)
-
-  // default chunk; application itself and small stuff
-  "": [
-    /\/app\/src\//,
-
-    // vite/preload-helper
-    /^vite\/preload-helper$/,      // Vite runtime (small, ~600b)
-
-    // plugin-vue:export-helper
-    /^plugin-vue:export-helper/,  // very small, ~180b
-
-    // TypeScript runtime
-    /\/node_modules\/tslib\//,    // needed by Firebase and Sentry (15.2k)
-  ],
-
-  "vue": /\/node_modules\/@?vue\//,
-  "vue-router": /\/node_modules\/vue-router\//,
-  "aside-keys": /\/node_modules\/aside-keys\//,
-
-  // Firebase
-  //
-  // @firebase/{auth|firestore|app|util|logger|component|webchannel-wrapper}
-  "firebase-auth": /\/node_modules\/@firebase\/auth\//,
-  "firebase": [
-    /\/node_modules\/@firebase\/(?:app|util|logger|component)\//,
-    /\/node_modules\/idb\//     // needed by '@firebase/{app|installations|messaging}' (place in the same chunk) (9.89k)
-  ],
-  "firebase-firestore": [
-    /\/node_modules\/@firebase\/firestore\//,
-    /\/node_modules\/@firebase\/webchannel-wrapper\//,
-  ],
-
-  // Sentry
-  //
-  // @sentry/{browser|tracing|core|utils|hub|minimal|types}
-  "sentry-browser": /\/node_modules\/@sentry\/browser\//,
-  "sentry-tracing": /\/node_modules\/@(sentry\/tracing)\//,
-
-  "sentry": /\/node_modules\/@sentry\/(?:core|utils|hub|minimal|types)\//,    // Note: 'minimal' is no more in Sentry 7.x
-
-  // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed or
-  // 'file://') 'aside-keys'.
-};
-
+/**
+ * @return {import('vite').UserConfig}
+ */
 function configGen({ _ /*command*/, mode }) {
-  //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"development"|"production"
+  //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"dev_online"|"production"
+
+  // Note: If you wish to read '.env' files, see -> https://vitejs.dev/config/#environment-variables
+  //
+  //    They are considered for 'import.meta.env.VITE_...' (in browser) automatically.
 
   const DEV_MODE = (mode === 'production') ? null :
-    (mode === 'dev_local' && 'local') || (mode === 'dev_online' && 'online') || fail(`Unexpected mode: ${mode}`);
+    (mode === 'dev_local') ? 'local' : (mode === 'dev_online') ? 'online' : fail(`Unexpected mode: ${mode}`);
+  const PROD = !DEV_MODE;
 
   return {
     ...(DEV_MODE ? {    // 'npm run dev:{local|online}'
       // Decides where 'index.html' is (and root for other dir configs)
-      root: 'vitebox',
-      envDir: '..',     // actual 'app' dir
+      root: 'dev',
+      envDir: '..',     // actual 'app' dir (DC has '.env' there)
 
-      cacheDir: '/tmp/.vite',   // so 'node_modules' remains read-only
+      cacheDir: '../tmp/.vite',  // so 'node_modules' remains read-only (also persists the cache)
+
+      // "Files in this directory are served as '/' during dev"
+      publicDir: false
 
       // With 2.4.x, this was a way to point up from 'vitebox', but creates lots of warnings on 2.5.6:
       //  <<
@@ -162,24 +101,29 @@ function configGen({ _ /*command*/, mode }) {
     },
 
     build: {
-      ...(!DEV_MODE ? {
-        outDir: "dist"    // also the default (relative to 'app' folder)
-      } : {}),
-
       minify: false,
       sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
       target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
       //polyfillDynamicImport: false
 
+      ...( PROD ? {
+        outDir: "public/dist",  // default: 'dist'
+
+        rollupOptions: {
+          output: {manualChunks}
+        }
+      } : {   // tbd. Is it beneficial to use manual chunks, also in development?
+        rollupOptions: {
+          output: {manualChunks}
+        }
+      }),
+
+      /*** REMOVE
       // Expose the code side, with a predictable export path.
       lib: {
         entry: path.resolve(srcPath, 'app.js'),
         formats: ['es']   // internal use only (ESM; no 'name' field needed)
-      },
-
-      rollupOptions: {
-        output: {manualChunks}
-      },
+      },***/
 
       // Note:
       //    Documentation says 'true' would have: "..CSS imported in async chunks will be inlined into the async chunk
@@ -201,8 +145,8 @@ function configGen({ _ /*command*/, mode }) {
       })
     ],
 
-    server: {
-      port: DEV_MODE !== 'online' ? 3000:3001,
+    server: {   // for production, just for debugging
+      port: PORT,
       strictPort: true,
 
       // Allows viewing from other devices, eg. a tablet.

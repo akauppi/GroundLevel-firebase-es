@@ -1,0 +1,57 @@
+#
+# app/docker-compose.test.yml
+#
+# Mostly carbon copy of 'docker-compose.yml' and 'docker-compose.local.yml'
+#
+# Also, separating 'npm test' and 'npm run dev[:local]' a bit from each other may be good, for maintenance.
+#
+# Intentions:
+#   Host and hot-module-reload the front end, for "npm test".
+#   Unlike dev, no priming is needed. Cypress tests take care of it.
+#
+services:
+  vite-for-test:
+    build:
+      context: tools/vite.dc
+    ports:
+      - "3003:3003"
+    volumes:
+      # --- RO
+      - ./package.json:/work/package.json:ro
+      - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
+      - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
+      - ../backend/firebase.app.json:/work/firebase.json:ro
+      - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
+      # --- cached
+      - ./public:/work/public:cached
+      - ./src:/work/src:cached
+      - ./dev:/work/dev:cached
+      # --- other
+      - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
+
+    working_dir: /work
+    command: sh -c
+      'npm config set update-notifier false &&
+      [ ! -d node_modules/esbuild ] || (echo >&2 ERROR:\ please remove 'node_modules/esbuild*'; false) &&
+
+      npm run dc:launch:test
+      '
+    environment:
+    #  - SENTRY_DNS
+      - PORT=3003
+
+    healthcheck:
+      test: "nc -z localhost 3003"
+      interval: 0.9s
+      start_period: 25s
+
+  # Make sure Vite is launched. Used by 'npm test'.
+  #
+  vite-for-test-launched:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      vite-for-test:
+        condition: service_healthy
+    profiles: ['manual']

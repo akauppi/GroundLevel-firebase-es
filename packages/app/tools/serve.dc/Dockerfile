@@ -1,22 +1,15 @@
 #
-# Dockerfile for Firebase prime.dc
-#
-# Calling environment:
-#   - local development
-#
-# Environment:
-#   - root user
-#   - '/work' as CWD
+# Dockerfile for local HTTP serving
 #
 # Expects:
-#   - host having Firebase Firestore and auth ports open
-#     - '${FIRESTORE_PORT}' and '${AUTH_PORT}' pointing to them
-#   - /work/users.js
-#   - /work/docs.js
+#   - a folder with web content, mapped to '/work/public'
+#   - 'PORT' env.var. (optional; default 8080)
 #
 # Notes:
 #   All we want is a minimal Node.js container (no native compilation tools required). However, such are not widely
 #   available, yet (May-2022). Once they are, we could switch to them (maybe ~40MB footprint).
+#
+#   i.e. this means a Node.js image without the native compilation tools (g++, make, Python).
 #
 #   Also, the base image could provide a user; we don't need root access.
 
@@ -27,27 +20,22 @@
 
 # Node images -> https://hub.docker.com/_/node
 #   node:18-alpine  171MB
+#   node:16-alpine  110MB
 #
-FROM node:18-alpine
+FROM node:16-alpine
+
+ARG HTTP_SERVER_VER=14.1.0
+  # Releases -> https://github.com/http-party/http-server/releases
 
 WORKDIR /work
 
 # Suppress npm update announcements
 RUN npm config set update-notifier false
 
-COPY src src
-COPY package.json .
-
-RUN echo package-lock=false > .npmrc
-
-# Seems both 'npm install' (for getting the dependencies) and 'npm install -g' (for having 'firebase-prime' as a CLI)
-# are needed.
+# Install
 #
-RUN npm install && \
-  npm install -g
-
-ENV NODE_PATH=/usr/local/lib/node_modules
+RUN npm install -g http-server@$HTTP_SERVER_VER
 
 # Override
 CMD \
-  firebase-prime --help
+  http-server --help

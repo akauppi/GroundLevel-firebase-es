@@ -1,15 +1,21 @@
 #
 # app/docker-compose.yml
 #
-# For development (via 'npm run dev:local') and as a basis for CI.
+# DC definition for 'npm run dev[:local]' and (via an overlay), for 'npm run dev:online'.
+#
+# Note:
+#   DC overlays (using the same service name and loading multiple files with '-f') does not allow for REMOVAL of
+#   eg. mounts, but it does allow concatenation to the mounts. Thus the common stuff is in here.
+#
+# Override:
+#   PORT (3000|3001)
+#   MODE ("local"|"online")
 #
 # Docker compose of:
 #   - Vite      front end Hot-Module Reloading; hosting
 #
 # Intentions:
 #   Host and hot-module-reload the front end.
-#
-#   Cypress use is native (not within DC).
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
@@ -23,53 +29,51 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
-  vite-local:
-    image: node:16-alpine
-    ports:
-      - "3000:3000"
+  vite-dev:   # used for both 'npm run dev:local' and 'npm run dev:online'
+    build:
+      context: tools/vite.dc
+    #ports:
+    #  - "3000:3000"
+        #
+        # tbd. Wasn't able to use '$PORT' here (must separately override it for both 'local' and 'online').
+        #   <<
+        #     WARN[0000] The "PORT" variable is not set. Defaulting to a blank string.
+        #   <<
     volumes:
       # --- RO
-      - ../../node_modules:/proj/node_modules:ro                  # eslint comes from the top
-      - ./package.json:/proj/packages/app/package.json:ro
-      - ./node_modules:/proj/packages/app/node_modules:ro         # note: should not have 'esbuild' in it
-      - ./vite.config.js:/proj/packages/app/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
-      - ../backend/firebase.app.json:/proj/packages/app/firebase.json:ro
-      - ./tools/gen-vite-env-local.js:/proj/packages/app/tools/gen-vite-env-local.js:ro
+      - ../../node_modules:/node_modules:ro                  # eslint comes from the top
+      - ./package.json:/work/package.json:ro
+      - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
+      - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
       # --- cached
-      - ./public:/proj/packages/app/public:cached
-      - ./src:/proj/packages/app/src:cached
-      - ./vitebox:/proj/packages/app/vitebox:cached
+      - ./public:/work/public:cached
+      - ./src:/work/src:cached
+      - ./dev:/work/dev:cached
       # --- other
-      - ./tmp/node_modules.linux:/proj/packages/node_modules:delegated   # see 'APPROACH.md'
+      - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
+      #
       # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
-      #- ${HOME}/Git/aside-keys/package:/proj/packages/app/node_modules/aside-keys:ro
+      #- ${HOME}/Git/aside-keys/package:/work/node_modules/aside-keys:ro
 
-    working_dir: /proj/packages/app
+    working_dir: /work
     command: sh -c
       'npm config set update-notifier false &&
-      [ ! -d node_modules/esbuild ] || (echo >&2 ERROR:\ please remove 'node_modules/esbuild*'; false) &&
 
-      npm install --prefix .. --no-save esbuild &&
-      npm run dc:launch:local
+      npm run dc:launch:$$MODE
       '
     environment:
       - SENTRY_DNS
+      # Following overrun by 'docker-compose.online.yml'
+      - PORT=3000
+      - MODE=local
 
     healthcheck:
-      test: "nc -z localhost 3000"
+      test: "nc -z localhost $$PORT"
       interval: 0.9s
       start_period: 25s
 
-  # Make sure Vite is launched. Used by 'npm test'.
-  #
-  vite-local-launched:
-    image: node:16-alpine
-    command: sh -c true
-    depends_on:
-      vite-local:
-        condition: service_healthy
-    profiles: ['manual']
-
+  #---
   # Separate target; priming with 'local/{docs|users}.js'
   #
   # NOTE:
@@ -80,7 +84,7 @@ services:
   #     -> https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container
   #
   # Note:
-  #   'host.docker.interenal' likely provides access to _all_ the host ports. It's not ideal, but if it works for us,
+  #   'host.docker.internal' likely provides access to _all_ the host ports. It's not ideal, but if it works for us,
   #   good.
   #
   prime:
@@ -90,11 +94,27 @@ services:
       # --- RO
       - ./local:/work/data:ro
       - ../backend/firebase.app.json:/work/firebase.json:ro
+    command:
+      firebase-prime --host host.docker.internal --project demo-main data/docs.js data/users.js
     environment:
       - FIRESTORE_PORT=6768
       - AUTH_PORT=9101
       - PROJECT=demo-main
-    command:
-      npx firebase-prime --host host.docker.internal --project demo-main data/docs.js data/users.js
+    profiles: ['manual']
 
+  #---
+  # Separate target (may be undocumented); serving the results of 'npm run build'
+  #
+  _serve:
+    build:
+      context: tools/serve.dc
+    ports:
+      - "8080:8080"
+    volumes:
+      # --- RO
+      - ./public:/work/public:ro
+    command:
+      npx http-server ./public -p $${PORT}
+    environment:
+      - PORT=8080
     profiles: ['manual']

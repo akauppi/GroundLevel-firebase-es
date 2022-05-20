@@ -1,5 +1,5 @@
 /*
-* /init/main-dev.js
+* dev/main.js
 *
 * Entry point for Vite. Development mode harness that is *not* part of the application's production builds.
 */
