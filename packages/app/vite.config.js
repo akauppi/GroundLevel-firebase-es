@@ -13,8 +13,6 @@ import vue from '@vitejs/plugin-vue'
 
 import { manualChunks } from './rollup.chunks.js'
 
-const PORT = process.env["PORT"] || fail("Missing 'PORT' env.var.");
-
 const myPath = dirname(fileURLToPath(import.meta.url))
 const srcPath = pJoin(myPath, 'src');
 
@@ -52,8 +50,12 @@ const forcedVueComponents = new Set([
 /**
  * @return {import('vite').UserConfig}
  */
-function configGen({ _ /*command*/, mode }) {
+function configGen({ command, mode }) {
   //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"dev_online"|"production"
+
+  const BUILD = command === "build";
+
+  const SERVE_PORT = BUILD ? null : (process.env["PORT"] || fail("Missing 'PORT' env.var."));
 
   // Note: If you wish to read '.env' files, see -> https://vitejs.dev/config/#environment-variables
   //
@@ -106,17 +108,11 @@ function configGen({ _ /*command*/, mode }) {
       target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
       //polyfillDynamicImport: false
 
-      ...( PROD ? {
-        outDir: "public/dist",  // default: 'dist'
+      //output: "dist",
 
-        rollupOptions: {
-          output: {manualChunks}
-        }
-      } : {   // tbd. Is it beneficial to use manual chunks, also in development?
-        rollupOptions: {
-          output: {manualChunks}
-        }
-      }),
+      rollupOptions: {
+        output: {manualChunks}
+      },
 
       /*** REMOVE
       // Expose the code side, with a predictable export path.
@@ -145,13 +141,13 @@ function configGen({ _ /*command*/, mode }) {
       })
     ],
 
-    server: {   // for production, just for debugging
-      port: PORT,
+    server: SERVE_PORT ? {   // for production, just for debugging
+      port: SERVE_PORT,
       strictPort: true,
 
       // Allows viewing from other devices, eg. a tablet.
       host: true
-    },
+    } : {},
 
     // Clearing the screen is considered distracting, though one can PgUp to see what was there just prior to Vite launching.
     clearScreen: false

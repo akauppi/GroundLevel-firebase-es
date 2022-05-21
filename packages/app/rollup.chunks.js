@@ -39,10 +39,16 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
 
   // default chunk; application itself and small stuff
   "": [
-    /\/app\/src\//,
+    /^\/work\/src\//,
+
+    // /work/index.html
+    // /work/index.html?html-proxy&index=0.js
+    /^\/work\/index.html/,
 
     // vite/preload-helper
+    // vite/modulepreload-polyfill
     /^vite\/preload-helper$/,      // Vite runtime (small, ~600b)
+    /^vite\/modulepreload-polyfill$/,
 
     // plugin-vue:export-helper
     /^plugin-vue:export-helper/,  // very small, ~180b

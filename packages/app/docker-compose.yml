@@ -41,7 +41,7 @@ services:
         #   <<
     volumes:
       # --- RO
-      - ../../node_modules:/node_modules:ro                  # eslint comes from the top
+      #- ../../node_modules:/node_modules:ro                  # eslint comes from the top
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
@@ -100,6 +100,31 @@ services:
       - FIRESTORE_PORT=6768
       - AUTH_PORT=9101
       - PROJECT=demo-main
+    profiles: ['manual']
+
+  #---
+  # Separate target; build production delivery
+  #
+  build:
+    build:
+      context: tools/vite.dc
+    volumes:
+      # --- RO
+      - ./package.json:/work/package.json:ro
+      - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
+      - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
+      # --- RO (since we're a task)
+      - ./src:/work/src:ro
+      - ./public:/work/public:ro
+      # --- Output
+      - ./dist:/work/dist:delegated
+      - ../../../branding/favicon.png/:/work/public/favicon.png:ro
+      # --- other
+      - ./prod/index.html:/work/index.html:ro     # trick to not need to have production 'index.html' in the host subproject root
+      - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
+    command:
+      vite build
     profiles: ['manual']
 
   #---

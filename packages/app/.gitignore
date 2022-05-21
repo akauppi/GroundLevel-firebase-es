@@ -1,8 +1,6 @@
 # 'node_modules' ignored by the main project
 
-# tbd. dim out /dist/
 /dist/
-/public/dist/
 
 # (follow project root's .gitignore on those)
 #/.firebaserc

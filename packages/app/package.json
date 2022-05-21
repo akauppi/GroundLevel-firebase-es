@@ -40,7 +40,7 @@
     "--   -": "",
     "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "vite build -c vite.config.js",
+    "build": "docker compose run --rm build",
     "serve": "docker compose run --rm --service-ports _serve",
     "--  --": "",
     "_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
