@@ -1,6 +1,9 @@
 //
 // vite.config.js
 //
+// Note:
+//    This is run _only within DC_ environment.
+//
 // Two modes:
 //  - for 'npm run dev{|:local|:online}', compile on-the-fly and use files from 'dev'
 //  - for 'npm run build', use ... (tbd. production!!!)
@@ -10,6 +13,21 @@ import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 
 import vue from '@vitejs/plugin-vue'
+
+//REMOVE
+// NOTE: ANYWAYS, we need to use dynamic import (cause 'dev' DC environments don't need - or have - this).
+//
+// Note: 'rollup-plugin-visualizer' (as of May 2022) has no 'exports' section in its package.json. This may be the
+//    reason that when installed globally, it requires a precise path to the 'index.js'.
+//
+//    The reason we install globally is that within DC, 'node_modules' is read-only.
+//
+//  <<
+//    Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'rollup-plugin-visualizer' imported from /work/vite.config.js
+//  <<
+//
+//import { visualizer } from 'rollup-plugin-visualizer'
+//import { visualizer } from 'rollup-plugin-visualizer/dist/plugin/index.js'    // ALSO FAILS (May 22)
 
 import { manualChunks } from './rollup.chunks.js'
 
@@ -50,7 +68,7 @@ const forcedVueComponents = new Set([
 /**
  * @return {import('vite').UserConfig}
  */
-function configGen({ command, mode }) {
+async function configGen({ command, mode }) {
   //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"dev_online"|"production"
 
   const BUILD = command === "build";
@@ -64,6 +82,11 @@ function configGen({ command, mode }) {
   const DEV_MODE = (mode === 'production') ? null :
     (mode === 'dev_local') ? 'local' : (mode === 'dev_online') ? 'online' : fail(`Unexpected mode: ${mode}`);
   const PROD = !DEV_MODE;
+
+  /*
+  * Chunk visualizer for production builds.
+  */
+  const visualizer = (BUILD && PROD) && await (import("rollup-plugin-visualizer")).then( mod => mod.visualizer );
 
   return {
     ...(DEV_MODE ? {    // 'npm run dev:{local|online}'
@@ -86,7 +109,10 @@ function configGen({ command, mode }) {
       //
       //publicDir: '../public'    // relative to 'vitebox'
     } : {
-      // regular root
+      // Production
+      root: 'prod',
+      cacheDir: '../tmp/.vite',     // tbd. to not use the development caches, set to '/tmp/.vite' or '../tmp/.vite.prod'
+
     }),
 
     css: {
@@ -98,28 +124,38 @@ function configGen({ command, mode }) {
     resolve: {
       alias: {
         ...subAliases,
-        '/@': srcPath
+        '/@': srcPath,
+
+        ...(PROD ? {
+          '/@firebase.config.json': `${myPath}/firebase.config.js`   // DC maps this
+        }: {})
       }
     },
 
-    build: {
+    build: PROD ? {
       minify: false,
       sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
       target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
       //polyfillDynamicImport: false
 
-      //output: "dist",
+      outDir: "../dist",
+      emptyOutDir: true,
+      assetsDir: '.',   // relative to 'outDir'
 
       rollupOptions: {
-        output: {manualChunks}
-      },
+        output: {manualChunks},
 
-      /*** REMOVE
-      // Expose the code side, with a predictable export path.
-      lib: {
-        entry: path.resolve(srcPath, 'app.js'),
-        formats: ['es']   // internal use only (ESM; no 'name' field needed)
-      },***/
+        plugins: [ BUILD &&
+          // Visualizer is an add-on brought in the 'docker-compose.yml' ('build' target). https://github.com/btd/rollup-plugin-visualizer
+          //
+          visualizer({    // Provided in the 'tools/vite.dc' Docker image
+            //filename: './stats.html',
+            sourcemap: true,
+            template: 'sunburst',
+            brotliSize: true
+          })
+        ].filter(x => x)    // remove falsy
+      },
 
       // Note:
       //    Documentation says 'true' would have: "..CSS imported in async chunks will be inlined into the async chunk
@@ -129,7 +165,7 @@ function configGen({ command, mode }) {
       //
       //cssCodeSplit: true,   // true: creates 'app.css'
       cssCodeSplit: false,   // false: creates 'style.css'
-    },
+    } : {},
 
     plugins: [
       vue({

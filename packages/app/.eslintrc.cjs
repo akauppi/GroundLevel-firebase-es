@@ -1,5 +1,5 @@
 /*
-* /.eslintrc.cjs
+* .eslintrc.cjs
 *
 * References:
 *   - Configuring ESLint

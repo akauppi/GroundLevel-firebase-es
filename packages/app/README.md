@@ -271,7 +271,38 @@ dist/vue.js          132.61kb / brotli: 26.22kb
 dist/vue.js.map      512.57kb
 ```
 
-This builds your front end application in `dist/` folder.
+This builds your front end application in `dist/` folder:
+
+```
+$ tree dist
+dist
+├── assets
+│   ├── aside-keys.5dea6d63.js
+│   ├── aside-keys.5dea6d63.js.map
+...
+│   ├── style.ac5ddd16.css
+│   ├── vue-router.f6d35745.js
+│   ├── vue-router.f6d35745.js.map
+│   ├── vue.ee0c66d7.js
+│   └── vue.ee0c66d7.js.map
+├── favicon.png
+└── index.html
+```
+
+>Hint. We also use [rollup-plugin-visualizer](https://github.com/btd/rollup-plugin-visualizer) to provide a browsable report of the modules. Check it out at `stats.html`.
+
+
+<!-- Hidden; didn't get the DC solution to work.  Needs `npm install -g http-server`
+### Serve the `dist` (optional)
+
+Just to peek that the build results are useful, you can run:
+
+```
+$ npm run serve
+```
+
+>Note: `serve` simply serves what's in the `dist/` folder. It does not rebuild the application.
+-->
 
 
 ## Next steps...

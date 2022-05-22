@@ -18,8 +18,8 @@ FROM node:16-alpine
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
-ARG VITE_VER=2.9.9
-  # 3.0.0-alpha.1 is out
+ARG VITE_VER=3.0.0-alpha.1
+  # 2.9.9
 
 WORKDIR /work
 

@@ -8,8 +8,6 @@
   "files": [
     "dist/*"
   ],
-  "exports": {
-  },
   "bin": {
     "gen-vite-env-local": "./tools/gen-vite-env-local.js",
     "gen-vite-env-online": "./tools/gen-vite-env-online.js"
@@ -40,14 +38,16 @@
     "--   -": "",
     "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "docker compose run --rm build",
-    "serve": "docker compose run --rm --service-ports _serve",
+    "build": "npm run _checkNoEsbuild && npm run -s _touchStats && docker compose run --rm build",
+    "_touchStats": "touch stats.html",
+    "serve": "http-server -p 8080 dist",
+    "//serve": "docker compose run --rm --service-ports _serve",
     "--  --": "",
     "_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
     "_checkNoEsbuild": "[[ ! -d node_modules/esbuild ]] || ( >&2 echo \"INTERNAL ERROR: 'node_modules/esbuild*' shouldn't be there; please remove them. (rm -rf node_modules/esbuild*)\"; false) ",
     "-- ---": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
-    "_postinstall_dev": "rm -rf node_modules/vite node_modules/esbuild node_modules/esbuild-*",
+    "_postinstall_dev": "rm -rf node_modules/vite node_modules/rollup node_modules/esbuild node_modules/esbuild-*",
     "_postinstall_ci": "npm run -s _genEnvCi",
     "//_postinstall_ci": "npm install --prefix .. --no-save esbuild && npm run -s _genEnvCi)",
     "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env"
@@ -57,6 +57,7 @@
     "@sentry/tracing": "^6.19.7",
     "aside-keys": "^0.0.3-alpha.1",
     "firebase": "^9.8.1",
+    "tslib": "^2.4.0",
     "vue": "^3.2.35",
     "vue-router": "^4.0.15"
   },

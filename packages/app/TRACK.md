@@ -61,3 +61,30 @@ $ npm run build
 - [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
 
 > Still there, with Vite 2.9.8. 
+
+
+## `import` of JSON in browser
+
+- Track [proposal-json-modules](https://github.com/tc39/proposal-json-modules) (tc39 proposal)
+   - [ ] reaching stage 4 (stage 3 in May 2022)
+   - [ ] being implemented in browsers
+
+Might take a while. 
+
+Once available on modern browsers, consider movig the Firebase config reading (in prod) to use this???
+
+- [How to import a JSON file ...?](https://stackoverflow.com/a/68593192/14455) (SO)
+
+
+## `rollup-plugin-visualizer` to have better ESM support
+
+At May 2022, the [`package.json`](https://github.com/btd/rollup-plugin-visualizer/blob/master/package.json) does not have an `exports` section.
+
+Having one might help us use it, within the `build` DC task.
+
+Background:
+
+We need to install it globally (`-g`), since the `/work/node_modules` is read-only and installing to `/node_modules` is not allowed, by Node.js.
+
+>Tried a work-around of making `/work/2` and then we can use `--prefix ..`, but that's kind of over-complicating things.
+

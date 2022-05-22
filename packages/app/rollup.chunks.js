@@ -16,6 +16,16 @@
 function manualChunks(id) {
   let name;
 
+  // Vite 3.0.0-alpha.1 has an '\0' prepended ahead of "vite/preload-helper" (2.9.9 did not have that).
+  //
+  // Keep this while we check whether that's intentional, or a glitch.
+  //
+  //if (id.includes("vite")) { console.log("!!!YAY", id, Array.from(id)) }    // DEBUG (remove #later)
+
+  if (id === "\0vite/preload-helper") {
+    return manualChunks(id.substring(1))
+  }
+
   for (const [k,rr] of Object.entries(chunkTo)) {   // ""|<chunk-name> -> Regex | Array of Regex
     const arr = Array.isArray(rr) ? rr:[rr];
 
@@ -41,9 +51,12 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   "": [
     /^\/work\/src\//,
 
-    // /work/index.html
-    // /work/index.html?html-proxy&index=0.js
-    /^\/work\/index.html/,
+    // /work/prod/index.html
+    // /work/prod/index.html?html-proxy&index=0.js
+    // /work/prod/main.js
+    // /work/firebase.config.js
+    /^\/work\/prod\//,
+    /^\/work\/firebase\.config\.js$/,
 
     // vite/preload-helper
     // vite/modulepreload-polyfill
@@ -52,9 +65,6 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
 
     // plugin-vue:export-helper
     /^plugin-vue:export-helper/,  // very small, ~180b
-
-    // TypeScript runtime
-    /\/node_modules\/tslib\//,    // needed by Firebase and Sentry (15.2k)
   ],
 
   "vue": /\/node_modules\/@?vue\//,
@@ -81,6 +91,12 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   "sentry-tracing": /\/node_modules\/@(sentry\/tracing)\//,
 
   "sentry": /\/node_modules\/@sentry\/(?:core|utils|hub|minimal|types)\//,    // Note: 'minimal' is no more in Sentry 7.x
+
+  // TypeScript runtime
+  //
+  // NOTE: Seems important that this is placed in its own chunk (had it in the app chunk).
+  //
+  "tslib": /\/node_modules\/tslib\//,    // needed by Firebase and Sentry (15.2k)
 
   // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed or
   // 'file://') 'aside-keys'.

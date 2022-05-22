@@ -145,3 +145,17 @@ Cons:
 
 - Harder to notice version changes (might also be a good thing to update build tools less frequently than libraries..?)
 
+
+## Baking in the Firebase access values
+
+Normally, Firebase hosting provides the access values at `/__/firebase/init.js[on]`.
+
+This is true also for our project, but it takes one extra network round trip to fetch those, and we prefer to avoid it. This makes the web app start snappier.
+
+Instead:
+
+- you set up a staging project (creates `../../firebase.{staging}.js`)
+- build scripts read the access values from there, and inject them into the build
+
+This also means that the front end can be hosted on *any* service provider, not just Firebase Hosting.
+

@@ -8,4 +8,7 @@
 # Cypress
 /.screenshots
 
+# Rollup visualization
+/stats.html
+
 /tmp/
