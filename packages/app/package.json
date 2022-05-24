@@ -23,22 +23,22 @@
     "_testRun": "CYPRESS_defaultCommandTimeout=10000 cypress run",
     "dc:launch:test": "npm run -s _genEnvLocal && vite --mode dev_local",
     "-- -": "",
-    "dev:local": "npm run -s _checkNoEsbuild && npm run -s _emulPrimed && docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm --service-ports vite-dev",
+    "dev:local": "npm run -s _checkNoEsbuild && npm run -s _emulPrimed && PORT=3000 docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm --service-ports vite-dev",
     "_emulRunning": "(cd ../backend && npm run app:start)",
     "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
-    "_prime": "docker compose run --rm prime",
+    "_prime": "PORT=0 docker compose run --rm prime",
     "dc:launch:local": "npm run -s _genEnvLocal && vite --mode dev_local",
     "_genEnvLocal": "gen-vite-env-local --project=demo-main > .env",
     "--  -": "",
     "ci:launch": "vite --mode dev_local",
     "-- --": "",
-    "dev:online": "npm run -s _checkStaging && npm run -s _checkNoEsbuild && docker compose -f docker-compose.yml -f docker-compose.online.yml run --rm --service-ports vite-dev",
+    "dev:online": "npm run -s _checkStaging && npm run -s _checkNoEsbuild && PORT=3001 docker compose -f docker-compose.yml -f docker-compose.online.yml run --rm --service-ports vite-dev",
     "dc:launch:online": "npm run -s _genEnvOnline && vite --mode dev_online",
     "_genEnvOnline": "gen-vite-env-online > .env",
     "--   -": "",
     "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "npm run _checkNoEsbuild && npm run -s _touchStats && docker compose run --rm build",
+    "build": "npm run _checkNoEsbuild && npm run -s _touchStats && PORT=0 docker compose run --rm build",
     "_touchStats": "touch stats.html",
     "serve": "http-server -p 8080 dist",
     "//serve": "docker compose run --rm --service-ports _serve",
@@ -53,12 +53,11 @@
     "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env"
   },
   "dependencies": {
-    "@sentry/browser": "^6.19.7",
-    "@sentry/tracing": "^6.19.7",
+    "@sentry/browser": "^7.0.0-beta.2",
+    "@sentry/tracing": "^7.0.0-beta.2",
     "aside-keys": "^0.0.3-alpha.1",
     "firebase": "^9.8.1",
-    "tslib": "^2.4.0",
-    "vue": "^3.2.35",
+    "vue": "^3.2.36",
     "vue-router": "^4.0.15"
   },
   "//dependencies": {
@@ -69,10 +68,7 @@
     "@vitejs/plugin-vue": "^2.3.2",
     "cypress": "9.6.0",
     "sass": "^1.52.1",
-    "eslint-plugin-cypress": "^2.12.1",
-    "eslint-plugin-vue": "^9.0.1",
-    "prettier": "2.6.2",
-    "vue-eslint-parser": "^9.0.2"
+    "prettier": "2.6.2"
   },
   "//comments": {
     "devDependencies": {

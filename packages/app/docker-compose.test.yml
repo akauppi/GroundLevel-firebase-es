@@ -3,7 +3,12 @@
 #
 # Mostly carbon copy of 'docker-compose.yml' and 'docker-compose.local.yml'
 #
-# Also, separating 'npm test' and 'npm run dev[:local]' a bit from each other may be good, for maintenance.
+# Reasons to keep them apart:
+#   - 'npm test' uses "docker compose up" (leaving the service running), whereas 'dev' uses "docker compose run"
+#   - separation may help in maintaining (which one is less complex?)
+#
+# Expects:
+#   PORT with a number to a free port (e.g. 3002)
 #
 # Intentions:
 #   Host and hot-module-reload the front end, for "npm test".
@@ -14,7 +19,7 @@ services:
     build:
       context: tools/vite.dc
     ports:
-      - "3003:3003"
+      - "$PORT:$PORT"
     volumes:
       # --- RO
       - ./package.json:/work/package.json:ro
@@ -39,10 +44,10 @@ services:
       '
     environment:
     #  - SENTRY_DNS
-      - PORT=3003
+      - PORT=$PORT
 
     healthcheck:
-      test: "nc -z localhost 3003"
+      test: "nc -z localhost $PORT"
       interval: 0.9s
       start_period: 25s
 

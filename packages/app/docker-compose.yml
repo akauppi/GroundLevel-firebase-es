@@ -32,13 +32,8 @@ services:
   vite-dev:   # used for both 'npm run dev:local' and 'npm run dev:online'
     build:
       context: tools/vite.dc
-    #ports:
-    #  - "3000:3000"
-        #
-        # tbd. Wasn't able to use '$PORT' here (must separately override it for both 'local' and 'online').
-        #   <<
-        #     WARN[0000] The "PORT" variable is not set. Defaulting to a blank string.
-        #   <<
+    ports:
+      - "${PORT}:${PORT}"
     volumes:
       # --- RO
       #- ../../node_modules:/node_modules:ro                  # eslint comes from the top
@@ -64,14 +59,16 @@ services:
       '
     environment:
       - SENTRY_DNS
-      # Following overrun by 'docker-compose.online.yml'
-      - PORT=3000
-      - MODE=local
+      - MODE=abc      # defined in 'docker-compose.{local|online}.yml'
+      # Pass 'PORT' to inside DC, at least 'vite.config.js'
+      - PORT=$PORT
 
     healthcheck:
-      test: "nc -z localhost $$PORT"
+      test: "nc -z localhost $PORT"
       interval: 0.9s
       start_period: 25s
+
+    profiles: []    # run this only via derived 'docker-compose.{local|online}.yml'
 
   #---
   # Separate target; priming with 'local/{docs|users}.js'

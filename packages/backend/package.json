@@ -48,7 +48,6 @@
     "_touchEmApp": "touch firebase-debug.app.log firestore-debug.app.log ui-debug.app.log"
   },
   "devDependencies": {
-    "eslint-plugin-node": "^11.1.0",
     "firebase-jest-testing": "^0.0.5-beta.1",
     "jest": "^28.1.0"
   },

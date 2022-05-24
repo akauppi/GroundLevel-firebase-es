@@ -14,21 +14,6 @@ import { fileURLToPath } from 'url'
 
 import vue from '@vitejs/plugin-vue'
 
-//REMOVE
-// NOTE: ANYWAYS, we need to use dynamic import (cause 'dev' DC environments don't need - or have - this).
-//
-// Note: 'rollup-plugin-visualizer' (as of May 2022) has no 'exports' section in its package.json. This may be the
-//    reason that when installed globally, it requires a precise path to the 'index.js'.
-//
-//    The reason we install globally is that within DC, 'node_modules' is read-only.
-//
-//  <<
-//    Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'rollup-plugin-visualizer' imported from /work/vite.config.js
-//  <<
-//
-//import { visualizer } from 'rollup-plugin-visualizer'
-//import { visualizer } from 'rollup-plugin-visualizer/dist/plugin/index.js'    // ALSO FAILS (May 22)
-
 import { manualChunks } from './rollup.chunks.js'
 
 const myPath = dirname(fileURLToPath(import.meta.url))

@@ -74,3 +74,73 @@ $ docker compose build
 ```
 
 >If you change a service’s Dockerfile or the contents of its build directory, run `docker-compose build` to rebuild it. <sub>source: [Docker Compose CLI reference](https://docs.docker.com/compose/reference/build/)</sub>
+
+
+## Env.vars with Docker Compose
+
+There are two levels to tweak Docker Compose runs, by using environment variables.
+
+### 1. From the OS level
+
+```
+$ PORT=123 docker compose ...
+```
+
+Now `${PORT}` is replaced by `123`. This is handy.
+
+**Note:** These substitutions are rendered for the whole of the DC file(s) you use, *not* restricted to the service you launch. This may cause errors about not having declared them.
+
+>WARN[0000] The "PORT" variable is not set. Defaulting to a blank string. 
+
+To counter these, consider splitting the DC file, or providing defaults: `${PORT:-}`.
+
+
+### 2. `environment` section within the DC file
+
+```
+    environment:
+      - SENTRY_DNS
+      - MODE=abc
+```
+
+These values are NOT used in the browsing of the DC file. Instead, they affect the *execution* of commands once within the DC.
+
+This means, to use the values one needs to escape the dollars: 
+
+```
+      npm run dc:launch:$$MODE
+```
+
+>Note: Applying `-e` in the DC command line is the same as listing the values here.
+
+
+# Updates to `tools/*.dc/**`
+
+E.g. updating the Vite version in `tools/vite.dc/Dockerfile` is not immediately in effect.
+
+```
+$ npm run dev
+...
+
+  vite v2.9.9 dev server running at:
+
+  > Local:    http://localhost:3001/
+  > Network:  http://192.168.32.3:3001/
+```
+
+This was when the `Dockerfile` had already been pumped to `3.0.0-alpha.2`.
+
+```
+$ docker compose build vite-dev
+```
+
+That rebuilds the used images, and we have the right version in use.
+
+```
+vite v3.0.0-alpha.2 dev server running at:
+```
+
+>Note: This is not a bug. It's more of a feature that updating rarely changed tooling versions may require more knowledge.
+>
+>If you disagree, please file an Issue and let's discuss.
+

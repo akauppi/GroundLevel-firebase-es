@@ -5,14 +5,10 @@
 #
 services:
   vite-dev:
-    ports:
-      - "3000:3000"     # wasn't able to have "$PORT:$PORT" here, in 'docker-compose.yml'
     volumes:
       # --- RO
       - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
       - ../backend/firebase.app.json:/work/firebase.json:ro
     environment:
-      - PORT=3000
       - MODE=local
-
     profiles: ['manual']

@@ -11,8 +11,11 @@
     "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh"
   },
   "devDependencies": {
-    "eslint": "^8.15.0",
-    "eslint-plugin-node": "^11.1.0"
+    "eslint": "^8.16.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-vue": "^9.0.1",
+    "vue-eslint-parser": "^9.0.2"
   },
   "//": {
     "": [

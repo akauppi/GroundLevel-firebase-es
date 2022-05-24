@@ -11,24 +11,12 @@
 #
 services:
   vite-dev:
-    ports:
-      - "3001:3001"     # wasn't able to have "$PORT:$PORT" here, in 'docker-compose.yml'
     volumes:
       #--- RO
       - ./tools/gen-vite-env-online.js:/work/tools/gen-vite-env-online.js:ro
       - ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
     environment:
       - SENTRY_DNS
-      - PORT=3001
       - MODE=online
       - ENV
-
-  #REMOVE???
-  # Make sure Vite is launched.
-  #
-  #|vite-3001-launched:
-  #|  image: node:16-alpine
-  #|  command: sh -c true
-  #|  depends_on:
-  #|    vite-3001:
-  #|      condition: service_healthy
+    profiles: ['manual']
