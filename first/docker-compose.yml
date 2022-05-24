@@ -26,19 +26,26 @@ services:
       - "9005:9005"
       # 9005 is needed by the auth dance
     volumes:
-      - ..:/proj
+      # tbd. Realign the mappings. RULE APP OUT completely from the 'first'.
+      #     Consider user changing to 'first' before running the script.
+
+      #-- RO
+      - ../packages:/proj/packages:ro
+      #-- Output
+      - ${CAPTURE_FILE}:/proj/.captured:delegated
+
     working_dir: /proj
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
-      firebase login
-        &&
+      firebase login &&
+
       (cd packages/backend && firebase use --add) &&
       (cd packages/app && firebase use $$(cd ../backend && firebase use)) &&
-      #(cd packages/backend && firebase apps:sdkconfig) > ${CAPTURE_FILE}
-        &&
-      (cd packages/backend && npm install && firebase deploy --only functions,firestore) &&
-      (cd packages/app &&     npm install && npm run build && firebase deploy --only hosting)
-      '
-    profiles: ['manual']
+      (cd packages/backend && firebase apps:sdkconfig) > .captured &&
 
-  # tbd. Is the '> ${CAPTURE_FILE}' needed? #rework
+      (cd packages/backend && npm install && firebase deploy --only functions,firestore)
+      '
+      # Cannot deploy front-end like that; 'npm run build' now needs DC. tbd. Can we live without it??
+      # (cd packages/app &&     npm install && npm run build && firebase deploy --only hosting)
+
+    profiles: ['manual']

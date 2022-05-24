@@ -3,25 +3,50 @@
 #
 # An override for using 'docker-compose.yml' in Cloud Build
 #
+# Expects:
+#   - PORT to declare the port to show UI in
+#
 # Intentions:
 #   Allow the 'docker-compose.yml' file be used, from Cloud Build scripts,
 #   so that the services are available to the following steps (using 'cloudbuild' network).
 #
-# To debug locally (with Docker Compose):
-#
-#   <<
-#     $ docker network create cloudbuild
-#     $ docker compose -f docker-compose.yml -f docker-compose.ci.yml up ...
-#   <<
+# To debug locally:
+#   - temporarily comment out the 'network_mode' and 'container_name' fields.
 #
 # References:
 #   - Share Compose configurations between files and projects (Docker Compose docs)
 #     -> https://docs.docker.com/compose/extends/
 #
 services:
-  vite-local:
-    command: ['run', 'ci:launch']
+
+  # Note: The implementation is /very/ similar to 'docker-compose.local.yml' (essentially the same, without
+  #     'profiles: ["manual"]'), but decided to keep them unrelated (no chain of three '-f's).
+  #
+  #     Also: no "profile: ['manual']" here, since we run the service up.
+  #
+  # NOTE!!! Trying to use a different port _within_ the DC than that exposed did not work (browser ends up in a
+  #     weird confused state). No harm in keeping them the same.
+  #
+  vite-dev:
+    ports:
+      - "$PORT:$PORT"
+    volumes:
+      # --- RO
+      - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
+      - ../backend/firebase.app.json:/work/firebase.json:ro
+    environment:
+      - PORT=$PORT
+      - MODE=local
 
     network_mode: cloudbuild
     container_name: vite
       # The domain node name (not 'localhost'!) to use for the front end, e.g. 'http://vite:3000'
+
+  # Make sure Vite is launched.
+  #
+  vite-dev-launched:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      vite-dev:
+        condition: service_healthy

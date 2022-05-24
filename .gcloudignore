@@ -60,9 +60,6 @@ packages/backend/tmp/*
 packages/app/dist/
 packages/app/tmp/
 
-# Being deprecated
-app-deploy-ops/
-
 # v-- Might not be accurate, any more... #cleanup
 # Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
 # the folder in the root level (if CI run is involved).
@@ -83,6 +80,7 @@ app-deploy-ops/
 
 *.disabled
 *.delme
+/_Scrap/
 
 # Possible left-overs
 *.tgz

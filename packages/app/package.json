@@ -48,7 +48,7 @@
     "-- ---": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
     "_postinstall_dev": "rm -rf node_modules/vite node_modules/rollup node_modules/esbuild node_modules/esbuild-*",
-    "_postinstall_ci": "npm run -s _genEnvCi",
+    "_postinstall_ci": "npm run -s _genEnvCi && touch stats.html",
     "//_postinstall_ci": "npm install --prefix .. --no-save esbuild && npm run -s _genEnvCi)",
     "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env"
   },
@@ -68,6 +68,7 @@
     "@local/self": "file:.",
     "@vitejs/plugin-vue": "^2.3.2",
     "cypress": "9.6.0",
+    "sass": "^1.52.1",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-vue": "^9.0.1",
     "prettier": "2.6.2",
@@ -81,6 +82,14 @@
       "prettier": [
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
         "Thus, following suit."
+      ],
+      "sass": [
+        "Needed for 'lang=scss' to work, in Vue.",
+        "",
+        "Note: Vue docs [1] display 'sass-loader' and 'node-sass', but the latter's npm page [2] says it's deprecated.",
+        "",
+        "[1]: https://vue-loader.vuejs.org/guide/pre-processors.html#sass",
+        "[2]: https://www.npmjs.com/package/node-sass"
       ]
     },
     "engines.node": [

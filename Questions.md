@@ -4,14 +4,7 @@
 
 It doesn't support ES6 modules.
 
-If you need it, here are some pointers.
-
-- Check out [@rollup/plugin-buble](https://github.com/rollup/plugins/tree/master/packages/buble) and take it to use
-- Change the Rollup output format from `esm` to e.g. `iife`
-
-You may need to experiment. Once done - and if you wish to maintain the work - it could be incorperated as an `ie11` branch.
-
-The reason this is not default is just avoiding any complexity, and because the author doesn't have a need to support other than "evergreen" browsers.
+Also, tools we use (tbd. specifics?) are ending IE11 support.
 
 
 ## Firestore

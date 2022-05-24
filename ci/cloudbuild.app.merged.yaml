@@ -18,7 +18,7 @@
 #     HOME=/builder/home
 #
 # Staging:
-#   While development uses 'firebase.${ENV:-staging}.js' in the project root, here the staging comes from the _GCP
+#   While development uses 'firebase.${ENV:-staging}.js' in the project root, here the stage comes from the _GCP
 #   project itself_.
 #
 # References:
@@ -38,12 +38,12 @@ steps:
   entrypoint: sh
   args: ['-c', '
     npm config set update-notifier false &&
-    
+
     npm install &&
-    npm --prefix packages/backend install --no-optional &&
     npm --prefix packages/app install --no-optional
   ']
   env: ['CYPRESS_INSTALL_BINARY=0']
+     # npm --prefix packages/backend install --no-optional &&     <-- put back if re-enabling emulators
 
 # Test
 #
@@ -71,27 +71,40 @@ steps:
 
 # Build
 #
-- name: node:16-alpine
-  entrypoint: npm
+
+# Sign in (to Firebase) and create a 'firebase.live.js' that captures the current project's config.
+#
+- name: $_1
+  entrypoint: bash
+  args: ['-c', '
+    firebase use $PROJECT_ID && 
+    CAPTURE=$$( firebase apps:sdkconfig
+      | grep -E ''^\s+".+":\s.+,'' | grep -E "projectId|appId|locationId|apiKey|authDomain"
+    ) &&
+
+    echo "export default { $$CAPTURE }" > ../../firebase.current.js
+  ']
+  dir: packages/backend
+
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
   args: ['run', 'build']
   dir: packages/app
-
+  env:
+    - ENV=current
 
 # DEPLOY
 #
 - name: $_1
-  entrypoint: firebase
-  args: ['use', '$PROJECT_ID']
+  entrypoint: bash
+  args: ['-c', '
+    firebase use $PROJECT_ID &&
+    firebase deploy --only hosting
+  ']
   dir: packages/app
-
-- name: $_1
-  entrypoint: firebase
-  args: ['deploy', '--only', 'hosting']
-  dir: packages/APP
 
 # --- Timeout
 #
-# Cloud Build: ~x:yy
+# Cloud Build (no tests): 2:00, 1:52
 #
 # (old CI; no tests): 2:03
 #
@@ -103,12 +116,4 @@ substitutions:
   #_BUILDER_TAG: 10.6.0-node16-npm8
   _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
-  _CYPRESS_TAG: 9.6.0
-
-# API Keys heading for the front end are not really hard secrets, but let's treat them as such, anyways.
-#
-# Disabled (but keep around; we might use some monitoring id's..)
-#|availableSecrets:
-#|  secretManager:
-#|  - versionName: projects/$PROJECT_ID/secrets/SOME_API_KEY/versions/latest
-#|    env: 'SOME_API_KEY'
+  #_CYPRESS_TAG: 9.6.0
