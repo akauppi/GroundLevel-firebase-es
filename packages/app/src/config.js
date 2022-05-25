@@ -3,7 +3,7 @@
 *
 * Application configuration
 */
-const allowAnonymousAuth = true;
+//const allowAnonymousAuth = true;
 const appTitle = "GroundLevel - sample app"
 
 /*
@@ -23,6 +23,6 @@ const appTitle = "GroundLevel - sample app"
 //const authPersistenceLevel = 'none';   // 'local'/'session'/'ask'/'none'  (tbd. handle with 'aside-keys', in App/index.vue)
 
 export {
-  allowAnonymousAuth,
+  //allowAnonymousAuth,
   appTitle
 }

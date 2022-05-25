@@ -24,13 +24,16 @@
 # References:
 #   - Cloud Build > Substituting variable values
 #     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
-
+#
 steps:
 # Flight check: don't run deploy off general 'ci-builder'
 - name: node:16-alpine
   entrypoint: sh
   args: ['-c',
-    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
+    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
+
+    [ ! -z $SENTRY_DNS ] || ( >2& echo "ERROR: Please provide ''SENTRY_DNS'' env.var. to enable operational monitoring."; false )
+    '
   ]
 
 # Install
@@ -87,10 +90,13 @@ steps:
   dir: packages/backend
 
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'build']
+  args: ['-f', 'docker-compose.tools.yml', 'run', 'build']
   dir: packages/app
   env:
     - ENV=current
+    - SENTRY_DNS=...
+  #secretEnv:
+  #  - SENTRY_DNS
 
 # DEPLOY
 #
@@ -117,3 +123,10 @@ substitutions:
   _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
   #_CYPRESS_TAG: 9.6.0
+
+# API Keys heading for the front end are not really hard secrets, but let's treat them as such, anyways.
+#
+#|availableSecrets:
+#|  secretManager:
+#|    - versionName: projects/$PROJECT_ID/secrets/SENTRY_DNS/versions/latest
+#|      env: 'SENTRY_DNS'

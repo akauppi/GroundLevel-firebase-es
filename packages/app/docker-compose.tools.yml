@@ -1,21 +1,12 @@
 #
-# app/docker-compose.yml
+# app/docker-compose.tools.yml
 #
-# DC definition for 'npm run dev[:local]' and (via an overlay), for 'npm run dev:online'.
+# DC for the separate tasks, 'prime' and 'build'.
 #
-# Note:
-#   DC overlays (using the same service name and loading multiple files with '-f') does not allow for REMOVAL of
-#   eg. mounts, but it does allow concatenation to the mounts. Thus the common stuff is in here.
-#
-# Override:
-#   PORT (3000|3001)
-#   MODE ("local"|"online")
-#
-# Docker compose of:
-#   - Vite      front end Hot-Module Reloading; hosting
+# Not used in any overlays.
 #
 # Intentions:
-#   Host and hot-module-reload the front end.
+#   Bridge the 'package.json' and 'tools/*.dc' Docker images.
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
@@ -29,47 +20,6 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
-  vite-dev:   # used for both 'npm run dev:local' and 'npm run dev:online'
-    build:
-      context: tools/vite.dc
-    ports:
-      - "${PORT}:${PORT}"
-    volumes:
-      # --- RO
-      #- ../../node_modules:/node_modules:ro                  # eslint comes from the top
-      - ./package.json:/work/package.json:ro
-      - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
-      - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
-      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
-      # --- cached
-      - ./public:/work/public:cached
-      - ./src:/work/src:cached
-      - ./dev:/work/dev:cached
-      # --- other
-      - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
-      #
-      # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
-      #- ${HOME}/Git/aside-keys/package:/work/node_modules/aside-keys:ro
-
-    working_dir: /work
-    command: sh -c
-      'npm config set update-notifier false &&
-
-      npm run dc:launch:$$MODE
-      '
-    environment:
-      - SENTRY_DNS
-      - MODE=abc      # defined in 'docker-compose.{local|online}.yml'
-      # Pass 'PORT' to inside DC, at least 'vite.config.js'
-      - PORT=$PORT
-
-    healthcheck:
-      test: "nc -z localhost $PORT"
-      interval: 0.9s
-      start_period: 25s
-
-    profiles: []    # run this only via derived 'docker-compose.{local|online}.yml'
-
   #---
   # Separate target; priming with 'local/{docs|users}.js'
   #
@@ -133,8 +83,9 @@ services:
     command: sh -c
       '
       npm install -g rollup-plugin-visualizer &&
-
       (cd / && mkdir node_modules && cd node_modules && ln -s $$NODE_PATH/rollup-plugin-visualizer .) &&
+
+      ([ -z "${SENTRY_DNS}" ] || echo "VITE_SENTRY_DNS=${SENTRY_DNS}" > .env) &&
       vite build
       '
     profiles: ['manual']

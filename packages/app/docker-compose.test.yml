@@ -1,11 +1,12 @@
 #
 # app/docker-compose.test.yml
 #
-# Mostly carbon copy of 'docker-compose.yml' and 'docker-compose.local.yml'
+# Mostly carbon copy of 'docker-compose.base.yml' and 'docker-compose.local.yml'
 #
 # Reasons to keep them apart:
 #   - 'npm test' uses "docker compose up" (leaving the service running), whereas 'dev' uses "docker compose run"
-#   - separation may help in maintaining (which one is less complex?)
+#     It's nice we can have a separate name for the service.
+#   - Separation may also help in maintaining (keeping things simple)
 #
 # Expects:
 #   PORT with a number to a free port (e.g. 3002)

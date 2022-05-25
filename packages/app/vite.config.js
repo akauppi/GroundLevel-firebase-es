@@ -96,8 +96,9 @@ async function configGen({ command, mode }) {
     } : {
       // Production
       root: 'prod',
-      cacheDir: '../tmp/.vite',     // tbd. to not use the development caches, set to '/tmp/.vite' or '../tmp/.vite.prod'
+      envDir: '..',     // actual 'app' dir
 
+      cacheDir: '../tmp/.vite',     // tbd. to not use the development caches, set to '/tmp/.vite' or '../tmp/.vite.prod'
     }),
 
     css: {

@@ -17,6 +17,8 @@
 */
 const fn = '../firebase.js';
 
+const SENTRY_DNS = process.env['SENTRY_DNS'];     // optional
+
 // tbd. Use top-level-await (Node.js 14.8+ and we have 16.x, guaranteed).
 
 /*await*/ import(fn).then( (mod) => {
@@ -28,7 +30,9 @@ const fn = '../firebase.js';
 VITE_API_KEY=${apiKey}
 VITE_APP_ID=${appId}
 VITE_AUTH_DOMAIN=${authDomain}
-VITE_PROJECT_ID=${projectId}
+VITE_PROJECT_ID=${projectId}${
+  SENTRY_DNS ? `\nVITE_SENTRY_DNS=${SENTRY_DNS}` : ''
+}
 `;
 
   process.stdout.write(out);

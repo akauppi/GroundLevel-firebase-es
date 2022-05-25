@@ -8,6 +8,8 @@
 *
 * We do:
 *   - Set up ops monitoring
+*   - Set up authentication UI
+*   - Create the app, and its router
 */
 import { createApp } from 'vue'
 
@@ -40,7 +42,7 @@ const VERSION = "0.0.0";    // both dev and production
 
 const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
 
-(_ => {    // () => ()
+async function init() {    // () => ()
   // Initialize Sentry
 
   if (SENTRY_DNS) {
@@ -68,8 +70,8 @@ const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
     //    its backend)?   i.e. don't say "initialized" if the DNS was rejected.
 
     console.debug("Sentry initialized");
-  } else {
-    console.debug("Sentry not configured; launch with 'SENTRY_DNS' to use it.");
+  } else if (DEV) {
+    console.debug("Sentry not configured; build with 'SENTRY_DNS' env.var. defined to use it.");
   }
 
   //const tr = appInitTrack.start();
@@ -136,7 +138,8 @@ const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
   //tr.end();
 
   //central.info("App is mounted.");
-})();
+}
+/*await*/ init();   // free-running tail
 
 export {
   //initializedProm,
