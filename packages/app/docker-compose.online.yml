@@ -16,7 +16,6 @@ services:
       - ./tools/gen-vite-env-online.js:/work/tools/gen-vite-env-online.js:ro
       - ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
     environment:
-      - SENTRY_DNS
       - MODE=online
       - ENV
     profiles: ['manual']

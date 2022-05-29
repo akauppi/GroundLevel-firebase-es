@@ -44,7 +44,7 @@ services:
       npm run dc:launch:test
       '
     environment:
-    #  - SENTRY_DNS
+    #  - SENTRY_DSN
       - PORT=$PORT
 
     healthcheck:

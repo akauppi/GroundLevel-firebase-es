@@ -65,7 +65,7 @@ services:
       npm run dc:launch:$$MODE
       '
     environment:
-      - SENTRY_DNS
+      - SENTRY_DSN
       - MODE=abc      # defined in 'docker-compose.{local|online}.yml'
       # Pass 'PORT' to inside DC, at least 'vite.config.js'
       - PORT=$PORT

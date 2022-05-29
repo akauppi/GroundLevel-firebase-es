@@ -5,7 +5,7 @@
 *
 * Usage:
 *   <<
-*     [SENTRY_DNS=...] FIREBASE_JSON=<path> gen-vite-env-local --project=demo-...
+*     [SENTRY_DSN=...] FIREBASE_JSON=<path> gen-vite-env-local --project=demo-...
 *   <<
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
@@ -25,7 +25,7 @@ if (!projectId) {
   process.exit(1);
 }
 
-const SENTRY_DNS = process.env['SENTRY_DNS'];     // optional
+const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
 const [firestorePort, functionsPort, authPort] = (_ => {   // => [int, int, int]
   const raw = readFileSync( FIREBASE_JSON );
@@ -49,7 +49,7 @@ VITE_AUTH_PORT=${authPort}
 VITE_PROJECT_ID=${projectId}${
   emulHost ? `\nVITE_EMUL_HOST=${emulHost}` : ''
 }${
-  SENTRY_DNS ? `\nVITE_SENTRY_DNS=${SENTRY_DNS}` : ''
+  SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;
 

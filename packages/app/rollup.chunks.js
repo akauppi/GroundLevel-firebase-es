@@ -73,11 +73,15 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
 
   // Firebase
   //
-  // @firebase/{auth|firestore|app|util|logger|component|webchannel-wrapper}
+  // @firebase/{auth|firestore|app|util|logger|component|webchannel-wrapper|performance}
   "firebase-auth": /\/node_modules\/@firebase\/auth\//,
   "firebase": [
     /\/node_modules\/@firebase\/(?:app|util|logger|component)\//,
     /\/node_modules\/idb\//     // needed by '@firebase/{app|installations|messaging}' (place in the same chunk) (9.89k)
+  ],
+  "firebase-performance": [
+    /\/node_modules\/@firebase\/performance\//,
+    /\/node_modules\/@firebase\/installations\//,   // only used by '@firebase/performance' (so place in same chunk) (36.9k)
   ],
   "firebase-firestore": [
     /\/node_modules\/@firebase\/firestore\//,

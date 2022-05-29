@@ -26,7 +26,7 @@
     "dev:local": "npm run -s _checkNoEsbuild && npm run -s _emulPrimed && PORT=3000 docker compose -f docker-compose.base.yml -f docker-compose.local.yml run --rm --service-ports vite-dev",
     "_emulRunning": "(cd ../backend && npm run app:start)",
     "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
-    "_prime": "docker compose -f docker-compose.tools.yml run --rm prime",
+    "_prime": "docker compose -f docker-compose.tools.local.yml run --rm prime",
     "dc:launch:local": "npm run -s _genEnvLocal && vite --mode dev_local",
     "_genEnvLocal": "gen-vite-env-local --project=demo-main > .env",
     "--  -": "",
@@ -38,7 +38,7 @@
     "--   -": "",
     "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "npm run _checkNoEsbuild && npm run -s _checkSentryDNS && npm run -s _touchStats && docker compose -f docker-compose.tools.yml run --rm build",
+    "build": "npm run -s _checkNoEsbuild && npm run -s _touchStats && docker compose -f docker-compose.tools.prod.yml run --rm build",
     "_touchStats": "touch stats.html",
     "serve": "http-server -p 8080 dist",
     "//serve": "docker compose run --rm --service-ports _serve",
@@ -53,15 +53,19 @@
     "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env"
   },
   "dependencies": {
-    "@sentry/browser": "^7.0.0-beta.2",
-    "@sentry/tracing": "^7.0.0-beta.2",
+    "@sentry/browser": "^7.0.0-rc.0",
+    "@sentry/tracing": "^7.0.0-rc.0",
     "aside-keys": "^0.0.3-alpha.1",
-    "firebase": "^9.8.1",
+    "@firebase/app": "^0.7.25",
+    "@firebase/firestore": "^3.4.9",
+    "@firebase/functions": "^0.8.1",
+    "@firebase/performance": "^0.5.9",
     "vue": "^3.2.36",
     "vue-router": "^4.0.15"
   },
   "//dependencies": {
-    "aside-keys": "file:/~/Git/aside-keys/package"
+    "aside-keys": "file:/~/Git/aside-keys/package",
+    "firebase": "^9.8.1"
   },
   "devDependencies": {
     "@local/self": "file:.",
@@ -107,13 +111,13 @@
         "Both 'npm test' and 'npm run dev' use the same DC container ('vite-local').",
         "",
         "'npm test':",
-        "   - runs without 'SENTRY_DNS' (well, it could use one but we don't set it)",
+        "   - runs without 'SENTRY_DSN' (well, it could use one but we don't set it)",
         "   - leaves the container running (this is needed for Cypress and makes a subsequent tests faster).",
         "",
         "'npm run dev':",
         "   - uses 'docker compose run' to show the Vite output on the launching terminal",
         "   - shuts down any previous DC container left running by 'npm test'.",
-        "     This ensures setting 'SENTRY_DNS' gets through, but also that changes to the DC config are always active."
+        "     This ensures setting 'SENTRY_DSN' gets through, but also that changes to the DC config are always active."
       ],
       "dc:launch:{local|online}": [
         "Installs a Linux version of 'esbuild' to the parent level (so as to not mess up 'node_modules', and also",

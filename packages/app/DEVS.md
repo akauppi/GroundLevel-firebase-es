@@ -99,7 +99,7 @@ To counter these, consider splitting the DC file, or providing defaults: `${PORT
 
 ```
     environment:
-      - SENTRY_DNS
+      - SENTRY_DSN
       - MODE=abc
 ```
 

@@ -112,9 +112,10 @@
 
   import { userRef2 as user } from '/@/user'
 
-  // #testing - can we use 'VERSION' by (circular) import of 'app'?
-  import { VERSION } from '/@/app'
   const LOCAL = import.meta.env.MODE === 'dev_local'
+
+  const VER = import.meta.env.VITE_RELEASE ||
+    LOCAL ? "(local development)" : "(local production build)";
 
   // Borrowing a component from deep in. (maybe it is moved to '/components', later, if used in multiple places?)
   //
@@ -158,7 +159,7 @@
     return {
       closeEl,
       user,
-      version: VERSION,    // provided by the build
+      version: VER,
       closeMe,
       signOut,
       LOCAL

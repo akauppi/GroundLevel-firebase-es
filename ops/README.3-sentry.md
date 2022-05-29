@@ -1,57 +1,4 @@
-# Operations
-
-
-![](.images/feedback-loop.png)
-
-*Figure 1. You are in a loop*
-
-<!-- source (draw.io):
-href="https://app.diagrams.net/#G1QM56IXBlnFXuJvLmKuDH8QiGTHjfPMkS
--->
-
-Operational monitoring, A/B tests and discussions with users close the development loop.
-
-Without feedback, you operate in the blind. Your users have no voice and you won't know whether your app has been healthy or not.
-
-When you do your first deploy (using CI/CD), it's just the beginning. Release "early and often", and try to get a discussion going with your user base.
-
-Automate as much as you can - this helps save time for the human-to-human interactions, that are an essential part of the feedback loop.
-
----
-
-Let's look at the three mentioned feedback methods, separately. If you haven't deployed your application, yet, you may consider doing that and returning here once it's "out there". Or you can skim the contents now and return, once you need to implement the steps.
-
-
-## Operational monitoring
-
-Operational monitoring ("ops" for short) is like a sports watch on your app. It lets you know:
-
-- are users actually using your application?
-   - from where are they from?
-   - do they return frequently?
-
-- is the application behaving healthy?
-   - are there any crashes?
-   - is performance at the level you anticipate? 
-
-To do all this, operational monitoring ties to multiple other services (source code control; alerts) and is more of an *ecosystem* than a single product.
-
-For your web app, [Sentry](http://sentry.io) is the operational monitoring framework to use. It's comprehensive, yet easy to use. You should study its documents at your own pace, but to get things started it's enough to follow this lead.
-
-
-### Requirements 
-
-- A [Sentry](https://sentry.io/welcome/) account
-
-   - [free developer tier](https://sentry.io/pricing/) should be enough
-
-- ~20..30 minutes
-
-   - *Would be nice to get actual metrics, how long this took. So please start your ⏱ now and let the author know how accurate the estimate was.*
-
-
-
-## Sentry
+# 3. Sentry
 
 [Sentry](https://sentry.io/welcome/) is a fun, high quality and affordable way to track how your app (and its users) are doing.
 
@@ -62,7 +9,7 @@ Let's let it present itself:
 We use Sentry for front-end monitoring only, but - as the description says - it can be used for backend tracking, as well.
 
 
-### Creating a project
+## Creating a project
 
 Name the project as you like[^1]. Collect events from multiple stages (`dev`, `dev:online`, `staging`, ...) under the same Sentry project - you can filter among them in the Sentry dashboard.
 
@@ -85,13 +32,13 @@ But one is all we need to get started.
 [^1]: The author prefers attaching a creation date to such id's, eg. `groundlevel-110522`.
 
 
-### Using Sentry at production
+## Using Sentry at production
 
 The DSN is not *really* a secret, but it's not a good idea to save them in version controlled source code, either.
 
 We'll treat it as a secret, and make the Cloud Build deployment script pick it up from Secrets Manager.
 
-#### Create the secret
+### Create the secret
 
 - Go to [GCP console](https://console.cloud.google.com)
    -  Pick the right project
@@ -109,7 +56,7 @@ Correction: In the screenshot, the name is wrong. Should be `SENTRY_DSN`.
 You now have a "secret" created, but Cloud Build does not yet reach it. Let's change that.
 
 
-#### Provide access to the builder to the secret
+### Provide access to the builder to the secret
 
 1. Go to [GCP console](https://console.cloud.google.com)
 2. Pick the right project
@@ -129,7 +76,7 @@ That should be it!
 
 If you have multiple Firebase projects (eg. `staging`, `prod`), repeat these steps for each of them.
 
-#### Check that Sentry gets used
+### Check that Sentry gets used
 
 Run the front-end -deploying CI script, either manually of from the GCP console.
 
@@ -156,7 +103,7 @@ You can also check the Sentry dashboard for your Sentry project. Does it have a 
 
 
 
-### Using Sentry at development
+## Using Sentry at development
 
 You can use Sentry also when developing the app. Just define `SENTRY_DSN` with the right value to the launch commands:
 
@@ -173,10 +120,15 @@ $ SENTRY_DSN=... npm run dev:online
 This may help you in optimizing performance, or you might want to see that changes to new Sentry instrumentation are being appropriately picked up.
 
 
-### What we collect
+## What we collect
 
 <!-- tbd.
 
 -->
 
+---
 
+<div class="wrapper" style="display: grid; grid-template-columns: 1fr 1fr;">
+  <div>≪ <a href="README.2-perf.md">Performance monitoring</a></div>
+  <div align=right><a href="README.4-some.md">Some</a> ≫</div>
+</div>

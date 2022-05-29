@@ -31,16 +31,8 @@ onAuthStateChanged( auth, user => {
 
   authRef.value = user;    // null | { ..Firebase User object }
 
-  /*** disabled
-  // DEBUG: Compare with 'Auth.currentUser'
-  //
-  const currentUser = auth.currentUser;
-  if (user ? !currentUser : currentUser) {
-    console.error("[FIREBASE INTERNAL MISMATCH]:", {user: user?.uid, currentUser: currentUser?.uid})
-  } else {
-    console.info("*** Users in sync:", {user: user?.uid, currentUser: currentUser?.uid})
-  }
-  ***/
+  // Inform Sentry
+  Sentry.setUser(user ? { id: user.uid } : null );
 },
   // Documentation does NOT state what will happen if we don't provide an error handler. So let's provide one. #firebase
   //
@@ -72,7 +64,6 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
   if (v) {
     const o = v;
 
-    Sentry.setUser({ id: o.uid })
     return {    // expose a controlled subset (minimalistic)
       uid: o.uid,
       displayName: o.displayName,
@@ -80,7 +71,6 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
       photoURL: o.photoURL
     }
   } else {
-    Sentry.setUser({})
     return v;   // undefined|null
   }
 });

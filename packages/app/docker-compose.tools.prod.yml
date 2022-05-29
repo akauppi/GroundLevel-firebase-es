@@ -1,54 +1,7 @@
 #
-# app/docker-compose.tools.yml
-#
-# DC for the separate tasks, 'prime' and 'build'.
-#
-# Not used in any overlays.
-#
-# Intentions:
-#   Bridge the 'package.json' and 'tools/*.dc' Docker images.
-#
-# Docker Compose (v3) note:
-#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
-#
-# References:
-#   Cypress > Continuous Integration > Introduction
-#     -> https://docs.cypress.io/guides/continuous-integration/introduction#What-is-Continuous-Integration
-#   Overview of Docker Compose (Docker docs)
-#     -> https://docs.docker.com/compose/
-#   Compose file version 3 reference
-#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+# app/docker-compose.tools.prod.yml
 #
 services:
-  #---
-  # Separate target; priming with 'local/{docs|users}.js'
-  #
-  # NOTE:
-  #   How reliable is use of 'host.docker.internal' (works on macOS; Docker 4.7.1)
-  #
-  # References:
-  #   "How to access host port from docker container" (SO)
-  #     -> https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container
-  #
-  # Note:
-  #   'host.docker.internal' likely provides access to _all_ the host ports. It's not ideal, but if it works for us,
-  #   good.
-  #
-  prime:
-    build:
-      context: tools/prime.dc
-    volumes:
-      # --- RO
-      - ./local:/work/data:ro
-      - ../backend/firebase.app.json:/work/firebase.json:ro
-    command:
-      firebase-prime --host host.docker.internal --project demo-main data/docs.js data/users.js
-    environment:
-      - FIRESTORE_PORT=6768
-      - AUTH_PORT=9101
-      - PROJECT=demo-main
-    profiles: ['manual']
-
   #---
   # Separate target; build production delivery
   #
@@ -85,9 +38,18 @@ services:
       npm install -g rollup-plugin-visualizer &&
       (cd / && mkdir node_modules && cd node_modules && ln -s $$NODE_PATH/rollup-plugin-visualizer .) &&
 
-      ([ -z "${SENTRY_DNS}" ] || echo "VITE_SENTRY_DNS=${SENTRY_DNS}" > .env) &&
+      ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:---}" >> .env) &&
+      ([ -z "$RELEASE" ] || echo "VITE_RELEASE=${RELEASE:---}" >> .env) &&
+      ([ -z "$ENV" ] || echo "VITE_STAGE=${ENV:---}" >> .env) &&
+      ([ -z "${SENTRY_SAMPLE_RATE:-}" ] || echo "VITE_SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE:---}" >> .env) &&
+
       vite build
       '
+      # Note: '{...:-}' (providing an empty default) avoids warnings; used for optional env.vars.
+
+    #|environment:
+    #|  - RELEASE
+    #|  - ENV     # e.g. "staging"
     profiles: ['manual']
 
   # DISABLED (using native 'http-server')
