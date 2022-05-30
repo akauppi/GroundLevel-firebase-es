@@ -10,7 +10,11 @@
 #   - Host the front end files with a cloud backend, according to 'ENV' env.var.
 #
 services:
-  vite-dev:
+  vite-online:
+    extends:
+      file: docker-compose.base.yml
+      service: vite-base
+
     volumes:
       #--- RO
       - ./tools/gen-vite-env-online.js:/work/tools/gen-vite-env-online.js:ro

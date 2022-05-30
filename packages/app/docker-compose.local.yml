@@ -5,6 +5,10 @@
 #
 services:
   vite-dev:
+    extends:
+      file: docker-compose.base.yml
+      service: vite-base
+
     volumes:
       # --- RO
       - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro

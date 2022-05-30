@@ -1,16 +1,17 @@
 #
 # app/docker-compose.base.yml
 #
-# Base for 'docker-compose{local|online}.yml
+# Base for 'docker-compose.{local|online}.yml (and via 'local' to 'docker-compose.{test|ci}.yml').
 #
 # Note:
-#   DC overlays (using the same service name and loading multiple files with '-f') does not allow for REMOVAL of
-#   eg. mounts, but it does allow concatenation to the mounts. Thus the common stuff is in here.
+#   DC overlays do allow for removal of mounts (eg. by overriding them to point to '/dev/nul'; mounts are overridable
+#   by their container side path as a key). But that would be too fine-grained. This file just provides the common
+#   things for both 'local' and 'online' and they add their specific mounts.
 #
 # Note 2:
 #   Docker Compose checks for use of $SOME substitutions in _all_ of the services in the DC files (not the ones used
-#   for starting a task/service). This means it's best to have this separate from the main 'docker-compose.yml'
-#   (makes use of '$PORT' have less side effects).
+#   for starting a task/service). This means it's best to have this separate from tool DC definitions (makes use of
+#   '$PORT' have less side effects).
 #
 # Expects:
 #   PORT with a number to a free port (e.g. 3000)
@@ -36,14 +37,13 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
-  vite-dev:   # used for both 'npm run dev:local' and 'npm run dev:online'
+  vite-base:   # used for 'npm run dev:local', 'npm run dev:online', 'npm test'
     build:
       context: tools/vite.dc
     ports:
       - "$PORT:$PORT"
     volumes:
       # --- RO
-      #- ../../node_modules:/node_modules:ro                  # eslint comes from the top
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
@@ -66,13 +66,12 @@ services:
       '
     environment:
       - SENTRY_DSN
-      - MODE=abc      # defined in 'docker-compose.{local|online}.yml'
+      - MODE=x   # defined in 'docker-compose.{local|online}.yml'
       # Pass 'PORT' to inside DC, at least 'vite.config.js'
       - PORT=$PORT
 
-    healthcheck:
-      test: "nc -z localhost $PORT"
-      interval: 0.9s
-      start_period: 25s
-
-    profiles: []    # run this only via derived 'docker-compose.{local|online}.yml'
+    # tbd. Should we keep the healthcheck here; 'local' and 'online' don't depend on it.
+    #|healthcheck:
+    #|  test: "nc -z localhost $PORT"
+    #|  interval: 0.9s
+    #|  start_period: 25s

@@ -181,3 +181,5 @@ Can we trust weight on it?
 <font size=8>🤨</font>
 -->
 
+>Maybe this means it's documented: [Compose Spec > `extends`](https://github.com/compose-spec/compose-spec/blob/master/spec.md#extends)
+>

@@ -32,7 +32,9 @@ steps:
   args: ['-c',
     '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
 
-    [ ! -z $$SENTRY_DSN ] || ( >2& echo "ERROR: Please provide ''SENTRY_DSN'' env.var. to enable operational monitoring."; false )
+    [ ! -z $$SENTRY_DSN ] || ( >2& echo "ERROR: Please provide ''SENTRY_DSN'' env.var. to enable operational monitoring."; false ) &&
+    
+    [ ! -z $_STAGE ] || ( >2& echo "ERROR: Please provide ''_STAGE'' substitution, e.g. with ''--substitutions _STAGE=abc'' or a CI task setting."; false )
     '
   ]
   secretEnv:
@@ -87,16 +89,17 @@ steps:
       | grep -E ''^\s+".+":\s.+,'' | grep -E "projectId|appId|locationId|apiKey|authDomain"
     ) &&
 
-    echo "export default { $$CAPTURE }" > ../../firebase.current.js
+    echo "export default { $$CAPTURE }" > ../../firebase.$_STAGE.js
   ']
   dir: packages/backend
 
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.tools.yml', 'run', 'build']
+  args: ['-f', 'docker-compose.tools.prod.yml', 'run', 'build']
   dir: packages/app
   env:
-    - ENV=current
+    - ENV=$_STAGE
     - RELEASE=${SHORT_SHA:-0}
+    #- SENTRY_SAMPLE_RATE=${_SENTRY_SAMPLE_RATE:-}
   secretEnv:
     - SENTRY_DSN
 
@@ -122,9 +125,11 @@ timeout: 400s
 #
 substitutions:
   #_BUILDER_TAG: 10.6.0-node16-npm8
-  _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
+  _1: gcr.io/ci-builder/firebase-ci-builder:11.0.1-node18-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
   #_CYPRESS_TAG: 9.6.0
+  _STAGE: manual      # set by CI, eg. "staging"
+  #_SENTRY_SAMPLE_RATE: "1.0" # overridable by CI
 
 # API Keys heading for the front end are not really hard secrets, but let's treat them as such, anyways.
 #

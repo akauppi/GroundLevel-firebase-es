@@ -1,42 +1,21 @@
 #
 # app/docker-compose.test.yml
 #
-# Mostly carbon copy of 'docker-compose.base.yml' and 'docker-compose.local.yml'
-#
-# Reasons to keep them apart:
-#   - 'npm test' uses "docker compose up" (leaving the service running), whereas 'dev' uses "docker compose run"
-#     It's nice we can have a separate name for the service.
-#   - Separation may also help in maintaining (keeping things simple)
+# Overlay, for 'npm test' speificity.
 #
 # Expects:
 #   PORT with a number to a free port (e.g. 3002)
 #
 # Intentions:
 #   Host and hot-module-reload the front end, for "npm test".
-#   Unlike dev, no priming is needed. Cypress tests take care of it.
+#   Unlike 'dev:local', no priming is needed. Cypress tests take care of it.
 #
 services:
   vite-for-test:
-    build:
-      context: tools/vite.dc
-    ports:
-      - "$PORT:$PORT"
-    volumes:
-      # --- RO
-      - ./package.json:/work/package.json:ro
-      - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
-      - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
-      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
-      - ../backend/firebase.app.json:/work/firebase.json:ro
-      - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
-      # --- cached
-      - ./public:/work/public:cached
-      - ./src:/work/src:cached
-      - ./dev:/work/dev:cached
-      # --- other
-      - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
+    extends:
+      file: docker-compose.local.yml
+      service: vite-dev
 
-    working_dir: /work
     command: sh -c
       'npm config set update-notifier false &&
       [ ! -d node_modules/esbuild ] || (echo >&2 ERROR:\ please remove 'node_modules/esbuild*'; false) &&

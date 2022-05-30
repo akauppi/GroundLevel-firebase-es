@@ -23,7 +23,7 @@
     "_testRun": "CYPRESS_defaultCommandTimeout=10000 CYPRESS_baseUrl=http://localhost:3003 cypress run",
     "dc:launch:test": "npm run -s _genEnvLocal && vite --mode dev_local",
     "-- -": "",
-    "dev:local": "npm run -s _checkNoEsbuild && npm run -s _emulPrimed && PORT=3000 docker compose -f docker-compose.base.yml -f docker-compose.local.yml run --rm --service-ports vite-dev",
+    "dev:local": "npm run -s _checkNoEsbuild && npm run -s _emulPrimed && PORT=3000 docker compose -f docker-compose.local.yml run --rm --service-ports vite-dev",
     "_emulRunning": "(cd ../backend && npm run app:start)",
     "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
     "_prime": "docker compose -f docker-compose.tools.local.yml run --rm prime",
@@ -32,7 +32,7 @@
     "--  -": "",
     "ci:launch": "vite --mode dev_local",
     "-- --": "",
-    "dev:online": "npm run -s _checkStaging && npm run -s _checkNoEsbuild && PORT=3001 docker compose -f docker-compose.base.yml -f docker-compose.online.yml run --rm --service-ports vite-dev",
+    "dev:online": "npm run -s _checkStaging && npm run -s _checkNoEsbuild && PORT=3001 docker compose -f docker-compose.online.yml run --rm --service-ports vite-online",
     "dc:launch:online": "npm run -s _genEnvOnline && vite --mode dev_online",
     "_genEnvOnline": "gen-vite-env-online > .env",
     "--   -": "",
@@ -50,7 +50,9 @@
     "_postinstall_dev": "rm -rf node_modules/vite node_modules/rollup node_modules/esbuild node_modules/esbuild-*",
     "_postinstall_ci": "npm run -s _genEnvCi && touch stats.html",
     "//_postinstall_ci": "npm install --prefix .. --no-save esbuild && npm run -s _genEnvCi)",
-    "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env"
+    "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env",
+    "--    -": "",
+    "_flush": "docker image rm app_vite-base app_vite-dev app_build app_prime"
   },
   "dependencies": {
     "@sentry/browser": "^7.0.0-rc.0",

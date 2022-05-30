@@ -130,17 +130,22 @@ $ npm run dev
 
 This was when the `Dockerfile` had already been pumped to `3.0.0-alpha.2`.
 
-```
-$ docker compose build vite-dev
-```
+>There are instructions for `docker compose -f ... build` and `--build up <service>` that should do the trick. The author didn't get these to successfully work (DD 4.8.2).
 
-That rebuilds the used images, and we have the right version in use.
+What works is removing the underlying Docker images.
 
 ```
-vite v3.0.0-alpha.2 dev server running at:
+$ docker images "app_*"
+REPOSITORY          TAG       IMAGE ID       CREATED          SIZE
+app_vite-dev        latest    9435cbb37de3   11 minutes ago   145MB
+app_build           latest    05558b651323   7 days ago       145MB
+app_prime           latest    03dcaf20ddab   8 days ago       268MB
+app_vite-for-test   latest    18a33f4f4613   8 days ago       145MB
+app_emul-primed     latest    7688969941ed   2 months ago     171MB
 ```
 
->Note: This is not a bug. It's more of a feature that updating rarely changed tooling versions may require more knowledge.
->
->If you disagree, please file an Issue and let's discuss.
+```
+$ docker image rm app_vite-dev
+```
 
+>Hint: `npm run _flush` might be there.

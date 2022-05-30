@@ -45,6 +45,84 @@ function manualChunks(id) {
 
 // Regex's for grouping the chunks
 //
+// Note: Vite 3.0.0-alpha.7 (something after 'alpha.2') changed the chunking.
+//
+const chunkTo = {     // Map of string -> (Regex | Array of Regex)
+
+  // default chunk; application itself and small stuff
+  //
+  //  /work/prod/index.html
+  //  /work/prod/index.html?html-proxy&index=0.js
+  //  /work/prod/main.js
+  //  /work/firebase.config.js
+  //  /work/src/app.js
+  //    ...
+  //  /work/src/pages/Home.guest.vue?vue&type=style&index=0&scoped=true&lang.css
+  //    ...
+  //  vite/modulepreload-polyfill
+  //  vite/preload-helper
+  //  plugin-vue:export-helper
+  //
+  "": [
+    /^\/work\/prod\//,
+    /^\/work\/firebase\.config\.js$/,
+    /^\/work\/src\//,
+
+    /^vite\/preload-helper$/,       // Vite runtime (small, ~600b)
+    /^vite\/modulepreload-polyfill$/,
+    /^plugin-vue:export-helper$/,    // very small, ~180b
+  ],
+
+  // Note: Since Vite 3.0.0.alpha.{3..7}, these are based on '/work/tmp/.vite/depsBuild' (and not 'node_modules').
+
+  // Vue.js
+  //
+  //  /work/tmp/.vite/depsBuild/vue.js
+  //  /work/tmp/.vite/depsBuild/vue-router.js
+  //
+  "vue": /\/depsBuild\/vue\.js$/,     // causes "Generated an empty chunk: "vue""
+  "vue-router": /\/depsBuild\/vue-router\.js$/,
+
+  // Firebase
+  //
+  //  /work/tmp/.vite/depsBuild/@firebase_app.js
+  //  /work/tmp/.vite/depsBuild/@firebase_performance.js
+  //  /work/tmp/.vite/depsBuild/@firebase_auth.js
+  //  /work/tmp/.vite/depsBuild/@firebase_firestore.js
+  //
+  "firebase-app": /\/depsBuild\/@firebase_app\.js$/,
+  "firebase-auth": /\/depsBuild\/@firebase_auth\.js$/,
+  "firebase-firestore": /\/depsBuild\/@firebase_firestore\.js$/,
+  "firebase-performance": /\/depsBuild\/@firebase_performance\.js$/,
+
+  // ??? What are these (started showing up past Vite 3.0.0-alpha.2):
+  //
+  //  /work/tmp/.vite/depsBuild/chunk-LYCR3OCH.js?v=158f2df3
+  //  /work/tmp/.vite/depsBuild/chunk-JC4IRQUL.js?v=158f2df3
+  //  /work/tmp/.vite/depsBuild/chunk-UWFB6V5R.js?v=158f2df3
+  //  /work/tmp/.vite/depsBuild/chunk-YY36X6P6.js?v=158f2df3
+  //  /work/tmp/.vite/depsBuild/chunk-XNLT5KZI.js?v=158f2df3
+  //
+  "mystery": /\/depsBuild\/chunk-[A-Z0-9]{8}\.js/,
+
+  // Sentry
+  //
+  //  /work/tmp/.vite/depsBuild/@sentry_browser.js
+  //  /work/tmp/.vite/depsBuild/@sentry_tracing.js
+  //
+  "sentry-browser": /\/depsBuild\/@sentry_browser\.js$/,
+  "sentry-tracing": /\/depsBuild\/@sentry_tracing\.js$/,
+
+  // Auth UI component
+  //
+  //  /work/tmp/.vite/depsBuild/aside-keys.js
+  //
+  "aside-keys": /\/depsBuild\/aside-keys\.js$/,
+
+  // There should not be others. Production builds are banned with 'npm link'ed or 'file://') 'aside-keys'.
+};
+
+/*** OLD Vite 3.0.0-alpha.2 :
 const chunkTo = {     // Map of string -> (Regex | Array of Regex)
 
   // default chunk; application itself and small stuff
@@ -105,5 +183,6 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   // There should not be others. Production builds (where this code is involved) are banned with 'npm link'ed or
   // 'file://') 'aside-keys'.
 };
+***/
 
 export { manualChunks };
