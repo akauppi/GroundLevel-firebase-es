@@ -38,7 +38,7 @@
     "--   -": "",
     "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "npm run -s _checkNoEsbuild && npm run -s _touchStats && docker compose -f docker-compose.tools.prod.yml run --rm build",
+    "build": "npm run -s _checkNoEsbuild && npm run -s _touchStats && RELEASE=manual docker compose -f docker-compose.tools.prod.yml run --rm build",
     "_touchStats": "touch stats.html",
     "serve": "http-server -p 8080 dist",
     "//serve": "docker compose run --rm --service-ports _serve",
@@ -120,6 +120,9 @@
         "   - uses 'docker compose run' to show the Vite output on the launching terminal",
         "   - shuts down any previous DC container left running by 'npm test'.",
         "     This ensures setting 'SENTRY_DSN' gets through, but also that changes to the DC config are always active."
+      ],
+      "build": [
+        "Only for manual builds. CI runs DC, directly."
       ],
       "dc:launch:{local|online}": [
         "Installs a Linux version of 'esbuild' to the parent level (so as to not mess up 'node_modules', and also",

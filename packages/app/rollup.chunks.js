@@ -71,6 +71,9 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
     /^vite\/preload-helper$/,       // Vite runtime (small, ~600b)
     /^vite\/modulepreload-polyfill$/,
     /^plugin-vue:export-helper$/,    // very small, ~180b
+
+    // Moved here, to avoid a "Generated an empty chunk" warning.
+    /\/depsBuild\/vue\.js$/
   ],
 
   // Note: Since Vite 3.0.0.alpha.{3..7}, these are based on '/work/tmp/.vite/depsBuild' (and not 'node_modules').
@@ -80,7 +83,7 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //  /work/tmp/.vite/depsBuild/vue.js
   //  /work/tmp/.vite/depsBuild/vue-router.js
   //
-  "vue": /\/depsBuild\/vue\.js$/,     // causes "Generated an empty chunk: "vue""
+  //"vue": /\/depsBuild\/vue\.js$/,     // causes "Generated an empty chunk: "vue""
   "vue-router": /\/depsBuild\/vue-router\.js$/,
 
   // Firebase
@@ -90,8 +93,8 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //  /work/tmp/.vite/depsBuild/@firebase_auth.js
   //  /work/tmp/.vite/depsBuild/@firebase_firestore.js
   //
-  "firebase-app": /\/depsBuild\/@firebase_app\.js$/,
-  "firebase-auth": /\/depsBuild\/@firebase_auth\.js$/,
+  "firebase-app": /\/depsBuild\/@firebase_app\.js$/,      // just 0.03 kB
+  "firebase-auth": /\/depsBuild\/@firebase_auth\.js$/,    // just 0.03 kB
   "firebase-firestore": /\/depsBuild\/@firebase_firestore\.js$/,
   "firebase-performance": /\/depsBuild\/@firebase_performance\.js$/,
 

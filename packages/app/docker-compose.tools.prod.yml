@@ -39,7 +39,7 @@ services:
       (cd / && mkdir node_modules && cd node_modules && ln -s $$NODE_PATH/rollup-plugin-visualizer .) &&
 
       ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:---}" >> .env) &&
-      ([ -z "$RELEASE" ] || echo "VITE_RELEASE=${RELEASE:---}" >> .env) &&
+      ([ -z "${RELEASE}" ] || echo "VITE_RELEASE=${RELEASE:---}" >> .env) &&
       ([ -z "$ENV" ] || echo "VITE_STAGE=${ENV:---}" >> .env) &&
       ([ -z "${SENTRY_SAMPLE_RATE:-}" ] || echo "VITE_SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE:---}" >> .env) &&
 

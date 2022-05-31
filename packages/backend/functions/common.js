@@ -1,8 +1,12 @@
 /*
 * Common config stuff for actual routines.
 */
-import functions from 'firebase-functions';
+import functions from 'firebase-functions'   // v1
 const logger = functions.logger;    // for backend logging
+
+// tbd. Enable v2
+//import { https as fun_https } from 'firebase-functions/v2'
+//import { logger } from 'firebase-functions/v2'
 
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 

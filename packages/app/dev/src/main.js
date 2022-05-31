@@ -68,7 +68,7 @@ async function initFirebaseLocal(host) {   // (string) => Promise of ()
 
   connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
   connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
-  connectAuthEmulator(auth, AUTH_URL);
+  connectAuthEmulator(auth, AUTH_URL, { disableWarnings: true });
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //

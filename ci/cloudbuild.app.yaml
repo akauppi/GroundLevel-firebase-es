@@ -40,6 +40,8 @@ steps:
 - name: node:16-alpine
   entrypoint: sh
   args: ['-c', '
+    [ $PROJECT_ID == ci-builder ] || ( >2& echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+
     npm config set update-notifier false &&
     
     echo ''export default {}'' > firebase.fake.js &&
@@ -78,20 +80,20 @@ steps:
 #     FirebaseError: Firebase: A network AuthError (such as timeout, interrupted connection or unreachable host) has occurred. (auth/network-request-failed).
 #   <<
 #
-- name: cypress/included:${_CYPRESS_TAG}
-  args: ['run', '--headless']
-  dir: packages/app
-  env:
-    - CYPRESS_baseUrl=http://vite:3002
-    - CYPRESS_defaultCommandTimeout=20000
-    #
-    # Tests durations:
-    #   1: 8555 ms
-    #   2: -
-    #
-    # Test durations (old; different Cypress etc.):
-    #   1: 7541, 7682, 8565 ms
-    #   2: 3980, 4289, 3804 ms
+#|- name: cypress/included:${_CYPRESS_TAG}
+#|  args: ['run', '--headless']
+#|  dir: packages/app
+#|  env:
+#|    - CYPRESS_baseUrl=http://vite:3002
+#|    - CYPRESS_defaultCommandTimeout=20000
+#|    #
+#|    # Tests durations:
+#|    #   1: 8555 ms
+#|    #   2: -
+#|    #
+#|    # Test durations (old; different Cypress etc.):
+#|    #   1: 7541, 7682, 8565 ms
+#|    #   2: 3980, 4289, 3804 ms
 
 - name: node:16-alpine
   entrypoint: npm

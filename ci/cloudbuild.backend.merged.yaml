@@ -73,5 +73,5 @@ timeout: 400s
 #
 substitutions:
   #_BUILDER_TAG: 10.6.0-node16-npm8
-  _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
+  _1: gcr.io/ci-builder/firebase-ci-builder:11.0.1-node18-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2

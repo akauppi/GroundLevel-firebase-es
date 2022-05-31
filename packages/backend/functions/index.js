@@ -11,8 +11,11 @@
 *   - Add the Firebase Admin SDK to your server (Firebase docs)
 *     -> https://firebase.google.com/docs/admin/setup
 */
-import functions from 'firebase-functions'
+import functions from 'firebase-functions'    // v1
 const { logger } = functions
+
+//import * as functions_v2 from 'firebase-functions/v2'
+//import { logger } from 'firebase-functions/v2'
 
 import { initializeApp } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'

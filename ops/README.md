@@ -1,182 +1,83 @@
 # Operations
 
-
 ![](.images/feedback-loop.png)
 
-*Figure 1. You are in a loop*
-
+<!--
+*Figure 1. Development loop*
+-->
 <!-- source (draw.io):
 href="https://app.diagrams.net/#G1QM56IXBlnFXuJvLmKuDH8QiGTHjfPMkS
 -->
 
-Operational monitoring, A/B tests and discussions with users close the development loop.
+Without feedback, you operate in the blind. You don't know, whether you have any users, and not what their experience might be like. Your users have no voice to express their gratitude or wishes.
 
-Without feedback, you operate in the blind. Your users have no voice and you won't know whether your app has been healthy or not.
+Closing the development loop (figure above) is mostly a *cultural* issue. If you *want* to learn from and interact with your user base, we'll show you the tools how.
 
-When you do your first deploy (using CI/CD), it's just the beginning. Release "early and often", and try to get a discussion going with your user base.
+>Before diving into the details, realize that running the loop depends on *automating* as much as you can - this helps save time for the human-to-human interactions, which collecting feedback and reconsidering the next steps inevitably are. It's in these steps - not in development - where your application really gets baked.
 
-Automate as much as you can - this helps save time for the human-to-human interactions, that are an essential part of the feedback loop.
+<!-- hidden
+>Note: In test-based development, one writes tests first and the implementation after. Meaning the two ovals about them can be blurred, swapped or merged. It does not matter to this level.
+-->
+
+
+If you haven't deployed your application, yet, please consider doing so first and returning here once its first version is "out there". Without a deployed version you are not going to have an audience to talk with.
+
+Release early and often.
 
 ---
 
-Let's look at the three mentioned feedback methods, separately. If you haven't deployed your application, yet, you may consider doing that and returning here once it's "out there". Or you can skim the contents now and return, once you need to implement the steps.
+## Tools
 
+We've selected some tools for you.
 
-## Operational monitoring
+||Used for|
+|---|---|
+|[Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon)|- collecting web vitals<br/>- collecting custom code traces (duration, counts)|
+|[Sentry.io](https://sentry.io/welcome/)|- collecting web vitals<br/>- ...|
+|Proxy to [Cloud Logging](https://cloud.google.com/logging)|- centralized logging|
 
-Operational monitoring ("ops" for short) is like a sports watch on your app. It lets you know:
-
-- are users actually using your application?
-   - from where are they from?
-   - do they return frequently?
-
-- is the application behaving healthy?
-   - are there any crashes?
-   - is performance at the level you anticipate? 
-
-To do all this, operational monitoring ties to multiple other services (source code control; alerts) and is more of an *ecosystem* than a single product.
-
-For your web app, [Sentry](http://sentry.io) is the operational monitoring framework to use. It's comprehensive, yet easy to use. You should study its documents at your own pace, but to get things started it's enough to follow this lead.
-
-
-### Requirements 
-
-- A [Sentry](https://sentry.io/welcome/) account
-
-   - [free developer tier](https://sentry.io/pricing/) should be enough
-
-- ~20..30 minutes
-
-   - *Would be nice to get actual metrics, how long this took. So please start your ⏱ now and let the author know how accurate the estimate was.*
-
-
-
-## Sentry
-
-[Sentry](https://sentry.io/welcome/) is a fun, high quality and affordable way to track how your app (and its users) are doing.
-
-Let's let it present itself:
-
->![](.images/sentry-welcome.png)
-
-We use Sentry for front-end monitoring only, but - as the description says - it can be used for backend tracking, as well.
-
-
-### Creating a project
-
-Name the project as you like[^1]. Collect events from multiple stages (`dev`, `dev:online`, `staging`, ...) under the same Sentry project - you can filter among them in the Sentry dashboard.
-
-**Pick up a DSN**
-
-A Data Source Name (DSN) is a unique identifier that the Sentry client uses to pass your monitoring information to the right project (so you can search and observe it in the dashboard).
-
-It looks like a URL:
-
-```
-https://66b7...127@o39..58.ingest.sentry.io/52...04
-```
-
-Once you have the project, visit `Settings` > `Projects` > (project) > `Client Keys (DSN)` and pick up your DSN. <sub>[more details](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)</sub>
-
-The DSN might not be forever. You can generate more DSN's if needed, and circulate them. There may be more than one pointing to your Sentry project, at any one time.
-
-But one is all we need to get started.
-
-[^1]: The author prefers attaching a creation date to such id's, eg. `groundlevel-110522`.
-
-
-### Using Sentry at production
-
-The DSN is not *really* a secret, but it's not a good idea to save them in version controlled source code, either.
-
-We'll treat it as a secret, and make the Cloud Build deployment script pick it up from Secrets Manager.
-
-#### Create the secret
-
-- Go to [GCP console](https://console.cloud.google.com)
-   -  Pick the right project
-   - (search bar) > `Secrets Manager`
-      - `+ CREATE SECRET`
-      - Provide name `SENTRY_DSN` the value, leave all other fields as-is
-      - `CREATE SECRET`
-
-![](.images/gcp-secret-created.png)
-
-<!-- #doc #bug
-Correction: In the screenshot, the name is wrong. Should be `SENTRY_DSN`.
+<!--
+- A/B testing; add mention of the tool(s), once selected (own config + Sentry filters??)
 -->
 
-You now have a "secret" created, but Cloud Build does not yet reach it. Let's change that.
+>Author's impressions.
+>
+>Firebase Performance Monitoring is included because "why not" - we are using Firebase anyhow. However, it doesn't actually blow my mind as to the usefulness of the charts it generates (May 2022).
+>
+>Sentry, on the other hand, is a tool exclusively made for performance and other monitoring. It's awesome. There is some overlap between the two tools (eg. both collect web vitals). Check what use is comfortable for you.
+>
+>Logging is not covered by Sentry (it collects breadcrumbs that are similar to logging, but those only get sent to the server in case they lead to an error). 
+>
+>There is a use case for centralized logging, even for web applications. The author is not aware of a great browser-to-logging-service product, so the solution is to route logs via Cloud Functions in the Firebase backend.
+>
+>*See [Sentry vs. Logging](https://sentry.io/vs/logging/) for a great (and short) discussion on the relationship of the two.*
 
 
-#### Provide access to the builder to the secret
+## Requirements
 
-1. Go to [GCP console](https://console.cloud.google.com)
-2. Pick the right project
-3. `≡` > `IAM & Admin`
-
-   ![](.images/gcp-iam-secrets-manager.png)
-
-4. Click `edit` (pencil icon) on the `...@cloudbuild.gserviceaccount.com` line.
-
-   > `+ ADD ANOTHER ROLE`
-   
-   Start typing "secret" to the filter field and pick `Secret Manager Secret Accessor` role.
-
->For more information: [https://cloud.google.com/secret-manager/docs/configuring-secret-manager](https://cloud.google.com/secret-manager/docs/configuring-secret-manager)
-
-That should be it!
-
-If you have multiple Firebase projects (eg. `staging`, `prod`), repeat these steps for each of them.
-
-#### Check that Sentry gets used
-
-Run the front-end -deploying CI script, either manually of from the GCP console.
-
-```
-$ ci {project-dir}/ci
-$ gcloud builds submit --config=cloudbuild.app.merged.yaml ..
-...
-Step #4: Hosting URL: https://groundlevel-160221.web.app
-Finished Step #4
-```
-
->Details: Within `cloudbuild.app.merged.yaml`, there's a reference to the secret we created. The build script sees it as `SENTRY_DSN` env.var. and bakes into the browser's code as `import.meta.env.VITE_SENTRY_DSN` - which is used to initialize the Sentry client.
-
-After deploying, open your app and development tools (browser console). You should see:
-
-```
-...   tbd. Sentry initialized 
-```
-<!-- tbd. Provide actual message -->
-
-You can also check the Sentry dashboard for your Sentry project. Does it have a drop-down with your stage name on it?
-
-...tbd. ... <!-- stage names - not done, yet!!! -->
+- A [Sentry account](https://sentry.io/welcome/)
+   - free developer tier should be enough
+   - Go through [Setting up Sentry](./Setting up Sentry.md) before continuing.
 
 
+## Next steps
 
-### Using Sentry at development
+- [Operational monitoring](./1-ops.md)
+   - [Performance monitoring](./1.1-perf.md)
+   - [Error monitoring](./1.2-errors.md)
+   - [Central logging](./1.3-logging.md)
 
-You can use Sentry also when developing the app. Just define `SENTRY_DSN` with the right value to the launch commands:
+- <font color=gray>A/B testing
 
-```
-$ SENTRY_DSN=... npm run dev
-```
+   tbd. Planning to add material on A/B testing. Likely using configuration and Sentry tagging (not introducing a separate tool).
+   </font>
 
-and/or:
+- <font color=gray>Meet your users
 
-```
-$ SENTRY_DSN=... npm run dev:online
-```
+   tbd. Planning to add material on setting up and using [Discord](https://discord.com).
+   </font>
 
-This may help you in optimizing performance, or you might want to see that changes to new Sentry instrumentation are being appropriately picked up.
+---
 
-
-### What we collect
-
-<!-- tbd.
-
--->
-
+<div align=right><a href="1-ops.md">Operational monitoring</a> ≫</div>
 

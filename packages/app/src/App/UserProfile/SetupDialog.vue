@@ -42,7 +42,7 @@
     </div>
     <hr />
     <!-- tbd. layout sucks -->
-    <label>Version:</label><span>{{ version || "(not available)" }}</span>
+    <label>Version:</label><span>&nbsp;{{ RELEASE }}</span>
     <button class="signOut" @click.stop="signOut" >Sign out</button>
   </div>
 </template>
@@ -114,8 +114,8 @@
 
   const LOCAL = import.meta.env.MODE === 'dev_local'
 
-  const VER = import.meta.env.VITE_RELEASE ||
-    LOCAL ? "(local development)" : "(local production build)";
+  const RELEASE = import.meta.env.VITE_RELEASE ||
+    (LOCAL ? "(local development)" : "(local production build)");
 
   // Borrowing a component from deep in. (maybe it is moved to '/components', later, if used in multiple places?)
   //
@@ -159,10 +159,10 @@
     return {
       closeEl,
       user,
-      version: VER,
       closeMe,
       signOut,
-      LOCAL
+      LOCAL,
+      RELEASE
     }
   }
 

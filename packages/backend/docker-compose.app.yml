@@ -14,7 +14,7 @@
 #
 services:
   emul-for-app:
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.6.0-node16-npm8}
+    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:11.0.1-node18-npm8}
     ports:
       - "5003:5003"
       - "6768:6768"
