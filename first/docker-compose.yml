@@ -2,7 +2,7 @@
 # docker-compose.yml
 #
 # For:
-#   - manual deployment of backend and front-end
+#   - manual deployment of backend
 #   - getting the access values to 'firebase.${ENV-staging}.js'
 #
 # Usage:
@@ -26,9 +26,6 @@ services:
       - "9005:9005"
       # 9005 is needed by the auth dance
     volumes:
-      # tbd. Realign the mappings. RULE APP OUT completely from the 'first'.
-      #     Consider user changing to 'first' before running the script.
-
       #-- RO
       - ../packages:/proj/packages:ro
       #-- Output
@@ -40,12 +37,14 @@ services:
       firebase login &&
 
       (cd packages/backend && firebase use --add) &&
-      (cd packages/app && firebase use $$(cd ../backend && firebase use)) &&
       (cd packages/backend && firebase apps:sdkconfig) > .captured &&
 
       (cd packages/backend && npm install && firebase deploy --only functions,firestore)
       '
+    profiles: ['manual']
+
+  #REMOVE? deploy.app:
+      #(cd packages/app && firebase use $$(cd ../backend && firebase use)) &&
       # Cannot deploy front-end like that; 'npm run build' now needs DC. tbd. Can we live without it??
       # (cd packages/app &&     npm install && npm run build && firebase deploy --only hosting)
 
-    profiles: ['manual']

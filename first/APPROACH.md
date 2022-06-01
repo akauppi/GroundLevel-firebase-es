@@ -1,8 +1,9 @@
 # Approach (first deployment)
 
-This was hard...
+The aim is to get people to have their first deployment done *fast*. Not needing to learn CI.
 
-The aim was to get people to have a deployment done *fast*. There are multiple hurdles to that.
+<!--
+There are multiple hurdles to that.
 
 Tried:
 
@@ -25,7 +26,7 @@ Problems:
 - <strike>Our builds require not only Node 16, but also `bash` (and some other tools). We don't have the `firebase-ci-builder` image available, in Cloud Build.</strike>
 
    >This is likely no longer a problem. Could use DC without `version`..
-
+-->
 
 ## Current approach
 

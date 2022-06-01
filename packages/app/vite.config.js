@@ -163,6 +163,11 @@ async function configGen({ command, mode }) {
       })
     ],
 
+    worker: {
+      // tbd. see if Firefox is up to this.
+      //format: 'es'    // default: 'iife'
+    },
+
     server: SERVE_PORT ? {   // for production, just for debugging
       port: SERVE_PORT,
       strictPort: true,

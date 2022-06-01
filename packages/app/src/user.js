@@ -17,7 +17,9 @@ import { computed, ref, watchEffect } from 'vue'
 import { onAuthStateChanged, getAuth } from '@firebase/auth'
 const auth = getAuth();
 
-import * as Sentry from '@sentry/browser'
+import { setUser as sentry_setUser } from '@sentry/browser'
+
+import { countSessions } from "/@/logs"
 
 import { assert } from '/@tools/assert'
 
@@ -31,8 +33,13 @@ onAuthStateChanged( auth, user => {
 
   authRef.value = user;    // null | { ..Firebase User object }
 
-  // Inform Sentry
-  Sentry.setUser(user ? { id: user.uid } : null );
+  if (user) {
+    countSessions();
+  }
+
+  // Inform Sentry client
+  //
+  sentry_setUser(user ? { id: user.uid } : null );
 },
   // Documentation does NOT state what will happen if we don't provide an error handler. So let's provide one. #firebase
   //

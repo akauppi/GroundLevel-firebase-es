@@ -28,7 +28,8 @@ module.exports = {
   },
 
   parserOptions: {
-    ecmaVersion: 2020,  // we use: object spread (2018), dynamic import (2020)
+    ecmaVersion: 2022,  // we use: top-level await (2022), dynamic import (2020)
+    //ecmaVersion: 2020,  // we use: dynamic import (2020)
     sourceType: 'module'
   },
 

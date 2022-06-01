@@ -58,6 +58,9 @@ services:
       # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
       #- ${HOME}/Git/aside-keys/package:/work/node_modules/aside-keys:ro
 
+      # EXPERIMENTAL. Allow passing 'VITE_SENTRY_DSN' via '.env'
+      - ./.env:/work/.env.local:ro
+
     working_dir: /work
     command: sh -c
       'npm config set update-notifier false &&
@@ -67,8 +70,8 @@ services:
     environment:
       - SENTRY_DSN
       - MODE=x   # defined in 'docker-compose.{local|online}.yml'
-      # Pass 'PORT' to inside DC, at least 'vite.config.js'
-      - PORT=$PORT
+      - PORT
+        # Pass 'PORT' to inside DC, at least 'vite.config.js'
 
     # tbd. Should we keep the healthcheck here; 'local' and 'online' don't depend on it.
     #|healthcheck:

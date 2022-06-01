@@ -84,10 +84,3 @@ EOF
 fi
 
 rm ${CAPTURE_FILE}
-
-# Deployment has changed the one file; clean it back to development state.
-#
-# Note: This is because Firebase CLI (9.16.0) refuses to allow '14 || ^16' that is a perfectly valid Node.js environment
-#     requirement string. Go figure.
-#
-git restore packages/backend/functions/package.json

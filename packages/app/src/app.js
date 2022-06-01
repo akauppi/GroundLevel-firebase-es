@@ -22,14 +22,15 @@ import { appTitle } from './config.js'
 import { router } from './router.js'
 
 // Ops monitoring
-import * as Sentry from "@sentry/browser";
-import { BrowserTracing } from "@sentry/tracing";   // after 'import * as Sentry'
+import * as Sentry from "@sentry/browser"
+import { BrowserTracing } from "@sentry/tracing"    // after 'import * as Sentry'
 
 import App from '/@App/index.vue'
 
 import './common.css'
 
-import { startupTrace } from "/@/traces";
+import { startupTrace } from "/@/traces"
+import { logHey } from "/@/logs"
 
 document.title = appTitle;
 
@@ -46,6 +47,8 @@ async function init() {    // () => ()
   // Initialize Firebase Performance monitoring
 
   const tr = startupTrace();
+
+  logHey();
 
   // Initialize Sentry
 
@@ -142,7 +145,7 @@ async function init() {    // () => ()
   app.mount('#app');
 
   // Sample of adding a meta data to the measurement (not sure if we need that)
-  tr.setAttribute('appId', app.id);
+  //tr.setAttribute('appId', app.id);
 
   tr.end();
 

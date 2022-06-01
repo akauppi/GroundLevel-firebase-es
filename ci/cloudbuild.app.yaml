@@ -68,32 +68,34 @@ steps:
     - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
 
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', 'vite-for-ci-launched']
+  args: ['-f', 'docker-compose.local.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-for-ci-launched']
   dir: packages/app
   env:
     - PORT=3002
 
 # BROKEN.
 #
+# Sometimes just gets stuck.
+#
 # First test might pass, but second (Joe sign-in) fails:
 #   <<
 #     FirebaseError: Firebase: A network AuthError (such as timeout, interrupted connection or unreachable host) has occurred. (auth/network-request-failed).
 #   <<
 #
-#|- name: cypress/included:${_CYPRESS_TAG}
-#|  args: ['run', '--headless']
-#|  dir: packages/app
-#|  env:
-#|    - CYPRESS_baseUrl=http://vite:3002
-#|    - CYPRESS_defaultCommandTimeout=20000
-#|    #
-#|    # Tests durations:
-#|    #   1: 8555 ms
-#|    #   2: -
-#|    #
-#|    # Test durations (old; different Cypress etc.):
-#|    #   1: 7541, 7682, 8565 ms
-#|    #   2: 3980, 4289, 3804 ms
+- name: cypress/included:${_CYPRESS_TAG}
+  args: ['run', '--headless']
+  dir: packages/app
+  env:
+    - CYPRESS_baseUrl=http://vite:3002
+    - CYPRESS_defaultCommandTimeout=20000
+    #
+    # Tests durations:
+    #   1: 8555 ms
+    #   2: -
+    #
+    # Test durations (old; different Cypress etc.):
+    #   1: 7541, 7682, 8565 ms
+    #   2: 3980, 4289, 3804 ms
 
 - name: node:16-alpine
   entrypoint: npm
@@ -121,5 +123,5 @@ substitutions:
   _BUILDER_TAG: 11.0.1-node18-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
-  _CYPRESS_TAG: 9.7.0
+  _CYPRESS_TAG: 9.6.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated

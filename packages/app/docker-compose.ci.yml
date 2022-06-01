@@ -5,6 +5,7 @@
 #
 # Expects:
 #   - PORT to declare the port to show UI in
+#   - to be launched with '-f' of also 'docker-compose.local.yml' (overlays on it, without 'extends')
 #
 # To debug locally:
 #   - temporarily comment out the 'network_mode' and 'container_name' fields.
@@ -23,11 +24,7 @@ services:
   # NOTE!!! Trying to use a different port _within_ the DC than that exposed did not work (browser ends up in a
   #     weird confused state). No harm in keeping them the same.
   #
-  vite-for-ci:
-    extends:
-      file: docker-compose.local.yml
-      service: vite-dev
-
+  vite-dev:
     network_mode: cloudbuild
     container_name: vite
       # The domain node name (not 'localhost'!) to use for the front end, e.g. 'http://vite:3000'
@@ -43,6 +40,6 @@ services:
     image: node:16-alpine
     command: sh -c true
     depends_on:
-      vite-for-ci:
+      vite-dev:
         condition: service_healthy
     profiles: ['manual']

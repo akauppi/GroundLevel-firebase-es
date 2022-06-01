@@ -1,5 +1,5 @@
 <!--
-- src/App/UserProfile/SetupDialog.vue
+- src/App/UserProfile/SettingsDialog.vue
 -
 - Dialog that shows a person's settings (if any) and a Sign out -button.
 -
@@ -43,6 +43,8 @@
     <hr />
     <!-- tbd. layout sucks -->
     <label>Version:</label><span>&nbsp;{{ RELEASE }}</span>
+
+    <button class="gimme-error" @click.stop="gimmeError" >Cause an ERROR</button>    <!-- for Sentry exercising -->
     <button class="signOut" @click.stop="signOut" >Sign out</button>
   </div>
 </template>
@@ -161,13 +163,14 @@
       user,
       closeMe,
       signOut,
+      gimmeError: () => { throw new Error('for sentry') },
       LOCAL,
       RELEASE
     }
   }
 
   export default {
-    name: 'SetupDialog',
+    name: 'SettingsDialog',
     components: {
       //MemberFace
     },

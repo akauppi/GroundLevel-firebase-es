@@ -12,3 +12,6 @@
 /stats.html
 
 /tmp/
+
+# EXPERIMENTAL. For semi-permanently adding SENTRY_SDK to development runs
+/.env

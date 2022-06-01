@@ -55,8 +55,8 @@
     "_flush": "docker image rm app_vite-base app_vite-dev app_build app_prime"
   },
   "dependencies": {
-    "@sentry/browser": "^7.0.0-rc.0",
-    "@sentry/tracing": "^7.0.0-rc.0",
+    "@sentry/browser": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
     "aside-keys": "^0.0.3-alpha.1",
     "@firebase/app": "^0.7.25",
     "@firebase/firestore": "^3.4.9",

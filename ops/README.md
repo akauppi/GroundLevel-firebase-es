@@ -65,7 +65,8 @@ We've selected some tools for you.
 - [Operational monitoring](./1-ops.md)
    - [Performance monitoring](./1.1-perf.md)
    - [Error monitoring](./1.2-errors.md)
-   - [Central logging](./1.3-logging.md)
+   - [Logging and counters](./1.3-logging.md)
+   - [Uptime monitoring](./1.4-uptime.md)
 
 - <font color=gray>A/B testing
 
