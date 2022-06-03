@@ -1,20 +1,24 @@
 # Staging in detail
 
-><img src=".images/staging.svg" width=500 style="background-color:white" />
-
 For development, it is good to have a project online where you can see your changes in a real environment. These are called "staging" projects and we'll set up one now, for you / your team.
 
->Note: Some developers may be fond of "dev" environments. With Firebase Emulators doing a good job for development, the need for such is reduced, but if you need one, it's just setting up another staging environment (for the person or team needing it). That is, you can have any number of staging environments you want. More about this later..
+<!-- tbd. #rework
+><img src=".images/staging.svg" width=500 style="background-color:white" />
+-->
+
+
+>Note: Some developers may be used to "dev" environments. With Firebase Emulators doing a good job for development, the need for such is reduced, or removed. If you need one, it's just setting up another staging environment for the person or team needing it. That is, you can have any number of staging environments you want.
 
 
 ## Multiple staging environments
 
-Just prefix `ENV=abc` to any of the above `npm` commands and they'll use `firebase.${ENV}.js` access values.
+Just prefix `ENV=abc` to any of the `npm` commands and they'll use `firebase.${ENV}.js` access values.
 
-To create such a file, run `ENV=abc npm run first`, or simply fill in the file manually, based on the template you now have.
+To create such a file, run `ENV=abc npm run first`, or simply fill in the file manually, based on the template from the first environment.
 
+<!-- hmm... should we have this?
 For a longer term solution, have a look at the `ci` folder on how to set up CI/CD for your multiple environments.
-
+-->
 
 ## Sharing the staging (optional)
 

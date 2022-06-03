@@ -88,7 +88,7 @@ services:
       
       npm run dc:warm-up &&
       touch .healthy &&
-      sleep infinity
+        sleep infinity
       '
       # Note: Returning from Jest (npm command) is taking ~30s on Windows+WSL2. Reason unknown. Be patient! #83
       #       tbd. test - is this still so?

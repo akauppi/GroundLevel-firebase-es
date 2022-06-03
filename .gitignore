@@ -4,8 +4,9 @@
 # Firebase hosting caches
 #/.firebase/
 
-# Note: Depending on your team's work habits, you might want to keep it in version control.
-/**/.firebaserc
+# Comment out if you wish to share the access values via version control.
+/firebase.*.js
 
-# Remove this line if you wish to keep the access values in version control.
-/firebase.staging.js
+# Temporary
+#/first/.captured.sdkconfig
+/first/.state/

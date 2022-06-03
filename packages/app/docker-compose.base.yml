@@ -54,12 +54,10 @@ services:
       - ./dev:/work/dev:cached
       # --- other
       - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
+      - ../../branding/favicon.png:/branding/favicon.png:ro   # trick to make the 'ln -s' work, also within DC
       #
       # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
       #- ${HOME}/Git/aside-keys/package:/work/node_modules/aside-keys:ro
-
-      # EXPERIMENTAL. Allow passing 'VITE_SENTRY_DSN' via '.env'
-      - ./.env:/work/.env.local:ro
 
     working_dir: /work
     command: sh -c

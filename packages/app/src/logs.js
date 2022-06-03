@@ -7,7 +7,7 @@
 */
 import { getApp } from '@firebase/app'
 
-function fail(msg) { throw new Error(msg); }
+//function fail(msg) { throw new Error(msg); }
 
 let myWorker;
 
@@ -29,8 +29,8 @@ function lazyInit() {   // () => Worker
     } = fah.options;
 
     const worker = new Worker(new URL('./logs.worker.js', import.meta.url), {
-      type: 'module'
-    })
+      type: 'module'    // fails 'npm run build' if this is here
+    });
 
     worker.postMessage({ "":"init",
       apiKey,

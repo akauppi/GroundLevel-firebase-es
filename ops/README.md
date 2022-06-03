@@ -32,9 +32,12 @@ We've selected some tools for you.
 
 ||Used for|
 |---|---|
-|[Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon)|- collecting web vitals<br/>- collecting custom code traces (duration, counts)|
-|[Sentry.io](https://sentry.io/welcome/)|- collecting web vitals<br/>- ...|
+|[Plausible Analytics](https://plausible.io)|- aggregated user data|
+|[Sentry.io](https://sentry.io/welcome/)|- web vitals<br/>- ...|
+|[Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon)|- web vitals<br/>- collecting custom code traces (duration, counts)|
 |Proxy to [Cloud Logging](https://cloud.google.com/logging)|- centralized logging|
+
+<!-- tbd. counters -->
 
 <!--
 - A/B testing; add mention of the tool(s), once selected (own config + Sentry filters??)
@@ -59,14 +62,18 @@ We've selected some tools for you.
    - free developer tier should be enough
    - Go through [Setting up Sentry](./Setting up Sentry.md) before continuing.
 
+- A [Plausible account](https://plausible.io) (optional)
+   - 30 day trial; no free tier
+   - Go through [Setting up Plausible](./Setting up Plausible.md)
+
 
 ## Next steps
 
 - [Operational monitoring](./1-ops.md)
-   - [Performance monitoring](./1.1-perf.md)
+   - [User analytics](./1.1-analytics.md)
    - [Error monitoring](./1.2-errors.md)
-   - [Logging and counters](./1.3-logging.md)
-   - [Uptime monitoring](./1.4-uptime.md)
+   - [Performance monitoring](./1.3-perf.md)
+   - [Logging](./1.4-logging.md)
 
 - <font color=gray>A/B testing
 

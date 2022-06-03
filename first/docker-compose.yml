@@ -2,13 +2,8 @@
 # docker-compose.yml
 #
 # For:
-#   - manual deployment of backend
+#   - manual deployment
 #   - getting the access values to 'firebase.${ENV-staging}.js'
-#
-# Usage:
-#   <<
-#     $ CAPTURE_FILE=... docker compose run --service-ports all
-#   <<
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
@@ -20,31 +15,100 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
-  deploy:
+  # Usage:
+  #   <<
+  #     $ touch tmp/.captured.sdkconfig tmp/.firebaserc tmp/firebase-tools.json
+  #     $ docker compose run --service-ports --rm deploy-auth
+  #   <<
+  #
+  # Let the user authenticate (via a host-side browser session) and select the right Firebase deployment project.
+  #
+  # Note:
+  #   This needs to be 'run' (not started as a service): Firebase needs an interactive terminal for project selection.
+  #
+  # Once authenticated, the auth information is stored in:
+  #   /root/.config/configstore/firebase-tools.json
+  #
+  # 'firebase use --add' demands to have a 'firebase.json' (maybe a dummy would do?) and creates '.firebaserc' in the
+  # current folder.
+  #
+  deploy-auth:
     build: ../firebase-ci-builder.sub
     ports:
-      - "9005:9005"
-      # 9005 is needed by the auth dance
+      - "9005:9005"   # needed by the auth dance
     volumes:
       #-- RO
-      - ../packages:/proj/packages:ro
+      # 'firebase use --add' needs to have a 'firebase.json'; also a dummy would likely do?
+      - ../packages/backend/firebase.json:/work/firebase.json:ro
       #-- Output
-      - ${CAPTURE_FILE}:/proj/.captured:delegated
+      #
+      # Note: Cannot map directly from '/root' (likely because the file already exists) - but can copy stuff.
+      #
+      - ./.state/firebase-tools.json:/work/firebase-tools.json:delegated
+      - ./.state/.captured.sdkconfig:/work/.captured:delegated
+      - ./.state/.firebaserc:/work/.firebaserc:delegated
 
-    working_dir: /proj
+    working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
       firebase login &&
 
-      (cd packages/backend && firebase use --add) &&
-      (cd packages/backend && firebase apps:sdkconfig) > .captured &&
+      firebase use --add &&
+      cat /root/.config/configstore/firebase-tools.json > firebase-tools.json &&
+      
+      (firebase apps:sdkconfig > .captured)
+      '
+      # Note: 'cp -f' wasn't able to copy
 
-      (cd packages/backend && npm install && firebase deploy --only functions,firestore)
+    profiles: ['manual']
+
+  # Usage:
+  #   <<
+  #     docker compose run --rm deploy-backend
+  #   <<
+  #
+  deploy-backend:
+    build: ../firebase-ci-builder.sub
+    volumes:
+      #-- RO
+      # Note: Problem with mapping '.firebaserc' on top of a read-only '/work' (DD-on-Mac 4.8.2; VirtioFS; macOS 12.4)
+      #     Work-arounds:
+      #       a) map 'backend' as rw (deployment will need to happen within it; and we need the '.firebaserc').
+      #       b) map only the files ('functions', 'firebase.json', ...?) really needed
+      #
+      #- ../packages/backend:/work:ro
+      - ../packages/backend/functions:/work/functions:ro
+      - ../packages/backend/firebase.json:/work/firebase.json:ro
+      - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
+      - ../packages/backend/firestore.rules:/work/firestore.rules:ro
+        #
+      - ./.state/firebase-tools.json:/root/.config/configstore/firebase-tools.json:ro
+      - ./.state/.firebaserc:/work/.firebaserc:ro
+    working_dir: /work
+    command: sh -c
+      'firebase deploy --only functions,firestore
       '
     profiles: ['manual']
 
-  #REMOVE? deploy.app:
-      #(cd packages/app && firebase use $$(cd ../backend && firebase use)) &&
-      # Cannot deploy front-end like that; 'npm run build' now needs DC. tbd. Can we live without it??
-      # (cd packages/app &&     npm install && npm run build && firebase deploy --only hosting)
-
+  # Usage:
+  #   <<
+  #     docker compose run --rm deploy-app
+  #   <<
+  #
+  # Context:
+  #   - the app has been recently built (only 'dist' contents are deployed)
+  #
+  deploy-app:
+    build: ../firebase-ci-builder.sub
+    volumes:
+      #-- RO
+      - ../packages/app/dist:/work/dist:ro
+      - ../packages/app/firebase.json:/work/firebase.json:ro
+        #
+      - ./.state/firebase-tools.json:/root/.config/configstore/firebase-tools.json:ro
+      - ./.state/.firebaserc:/work/.firebaserc:ro
+    working_dir: /work
+    command: bash -o pipefail -c
+      'firebase deploy --only hosting
+      '
+    profiles: ['manual']

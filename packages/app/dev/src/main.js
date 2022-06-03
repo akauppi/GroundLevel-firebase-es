@@ -12,7 +12,7 @@ import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-// For the sake of Cypress tests (at least), set up human readable error messages. This only applies to development.
+// For the sake of Cypress tests (at least), set up human-readable error messages. This only applies to dev:local.
 //
 // Samples:
 //    "The email address is already in use by another account." vs.
@@ -22,7 +22,9 @@ const LOCAL = import.meta.env.MODE === "dev_local";
 //
 const HUMAN_READABLE_AUTH_ERRORS_PLEASE = true;
 
-async function initFirebaseLocal(host) {   // (string) => Promise of ()
+async function initFirebaseLocal() {   // () => Promise of ()
+  const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
+
   assert(LOCAL);
 
   console.info("Initializing for LOCAL EMULATION");
@@ -96,11 +98,17 @@ async function initFirebaseOnline() {
   initializeApp( { apiKey, appId, authDomain, projectId } );
 }
 
+// NOTE ABOUT TOP-LEVEL AWAIT:
+//
+//  Browsers support them, but Safari DOES NOT REPORT ERRORS within a top-level-await block properly. Thus, DO NOT USE
+//  top-level-await until we know which version has it fixed.
+//
+//  Note:         This matters mostly in development, presuming that there's no errors that take place in production.
+//  Work-around:  Possible risks can be managed by adding a manual '.catch' to the block.
+
 /*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
   if (LOCAL) {
-    const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
-
-    await initFirebaseLocal(host);
+    await initFirebaseLocal();
   } else {
     await initFirebaseOnline();
   }
@@ -108,3 +116,14 @@ async function initFirebaseOnline() {
   const { initializedProm } = await import('/@/app.js');
   return initializedProm;
 })();
+
+/***
+// TESTING
+//  Safari 15.5:  nothing in console!! silently stops executing at the error line
+//  Chrome 102:   ok; reports: "Uncaught ReferenceError: init is not defined\n at {snip}:1"
+//
+await (async function () {
+  no_such_thing;
+})()
+  .catch( err => console.error("Error in top-level async block", err) )   // band-aid; shows the error also on Safari
+***/

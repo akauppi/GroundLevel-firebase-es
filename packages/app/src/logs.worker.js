@@ -6,10 +6,12 @@
 *     -> https://vitejs.dev/guide/features.html#web-workers
 */
 import { initializeApp } from '@firebase/app'
-import { getFunctions, httpsCallable } from '@firebase/functions'
+import {connectFunctionsEmulator, getFunctions, httpsCallable} from '@firebase/functions'
 
 import { logWorker } from '/@/config.js';
 const { maxBatchDelayMs, maxBatchEntries } = logWorker;
+
+const LOCAL = import.meta.env.MODE === "dev_local";
 
 function fail(msg) { throw new Error(msg); }
 
@@ -29,14 +31,30 @@ let cloudLoggingProxy_v0;
 */
 function init({ apiKey, projectId, locationId }) {    // 'locationId' is optional (undefined == default region)
 
-  const fah = initializeApp({
-    apiKey,
-    projectId
-  });
+  if (LOCAL) {    // "dev:local"; logs visible in Docker console
+    const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
+    const FUNCTIONS_PORT = import.meta.env.VITE_FUNCTIONS_PORT;
 
-  const fnsRegional = getFunctions( fah, locationId );
+    const fah= initializeApp( {
+      projectId,
+      apiKey: "none"
+    });
 
-  cloudLoggingProxy_v0 = httpsCallable(fnsRegional,"cloudLoggingProxy_v0");
+    const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
+    connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
+
+    cloudLoggingProxy_v0 = httpsCallable(fns,"cloudLoggingProxy_v0");
+
+  } else {
+    const fah = initializeApp({
+      apiKey,
+      projectId
+    });
+
+    const fnsRegional = getFunctions( fah, locationId );
+
+    cloudLoggingProxy_v0 = httpsCallable(fnsRegional,"cloudLoggingProxy_v0");
+  }
 
   console.log("Worker initialized");
 }

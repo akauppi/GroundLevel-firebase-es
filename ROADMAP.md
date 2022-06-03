@@ -1,14 +1,6 @@
 # Roadmap 🗺
 
-The author has some ideas on when the repo would be "ready". 🙂 It doesn't mean it's already useful - but these are the directions it may grow to.
-
-
-## Operational awareness <sub>`must`</sub>
-
-Dev-ops aspects (monitoring, logging, ...) have been on the agenda all the time. The repo is not complete, until these are covered.
-
-- Picking suitable services for this
-- Showing how those are set up and used
+The author has some ideas on when the repo would be "done". 🙂
 
 
 ## Interactive browser-to-browser comms 
@@ -38,10 +30,11 @@ This means the repo would not only iron out the *initial* cost of setting up an 
 
 Can this be done??
 
+<!-- hidden
 The thinking is that:
 
 - app specific things would live in Git subpackages (different changelogs)
 - the main repo can then `git pull` to remain up-to-date
+-->
 
-This will need experimenting with 2..3 application authors willing to put effort into this. To be done after the operational aspects are in place.
-
+This will need experimenting with 2..3 application authors willing to put effort into this.

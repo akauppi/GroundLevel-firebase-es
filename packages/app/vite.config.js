@@ -131,7 +131,7 @@ async function configGen({ command, mode }) {
       rollupOptions: {
         output: {manualChunks},
 
-        plugins: [ BUILD &&
+        plugins: [ ... BUILD ? [
           // Visualizer is an add-on brought in the 'docker-compose.yml' ('build' target). https://github.com/btd/rollup-plugin-visualizer
           //
           visualizer({    // Provided in the 'tools/vite.dc' Docker image
@@ -140,7 +140,7 @@ async function configGen({ command, mode }) {
             template: 'sunburst',
             brotliSize: true
           })
-        ].filter(x => x)    // remove falsy
+        ] : []]
       },
 
       // Note:
@@ -164,7 +164,11 @@ async function configGen({ command, mode }) {
     ],
 
     worker: {
-      // tbd. see if Firefox is up to this.
+      // Firefox (v.100; Jun 2022) is not ready for "es", yet. Other major browsers likely are.
+      //
+      //  Firefox gives a console error:
+      //    "import declarations may only appear at top level of a module"
+      //
       //format: 'es'    // default: 'iife'
     },
 

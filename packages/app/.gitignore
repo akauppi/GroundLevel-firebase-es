@@ -2,6 +2,9 @@
 
 /dist/
 
+# Public (copied from '../../branding'
+/public/favicon.png
+
 # (follow project root's .gitignore on those)
 #/.firebaserc
 
@@ -13,5 +16,6 @@
 
 /tmp/
 
-# EXPERIMENTAL. For semi-permanently adding SENTRY_SDK to development runs
-/.env
+# .env.dev_{local|online}
+# .env.{${ENV:-staging}}
+/.env.*

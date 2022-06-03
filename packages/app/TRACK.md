@@ -88,3 +88,40 @@ We need to install it globally (`-g`), since the `/work/node_modules` is read-on
 
 >Tried a work-around of making `/work/2` and then we can use `--prefix ..`, but that's kind of over-complicating things.
 
+
+## Safari: not showing errors within a top-level `await`
+
+Version: Safari 15.5
+
+- [ ] tbd. look for an issue to track / create one?
+
+The Safari 15 browser shows NO ERROR IN CONSOLE OUTPUT if an error happens within a top-level `await` block.
+
+Sample (in a JavaScript file):
+
+```
+await (async function () {
+  no_such_thing;
+})();
+```
+
+**Expected**
+
+An error would be logged in console, when this is executed.
+
+Chrome 102 shows this:
+
+```
+Uncaught ReferenceError: no_such_thing is not defined
+at main.js:109:3
+    at main.js:111:3
+```    
+
+**Actual**
+
+No error. The script silently stops executing at the `await`.
+
+**Outcome**
+
+DO NOT use top-level `await` in browser code, for now. 
+

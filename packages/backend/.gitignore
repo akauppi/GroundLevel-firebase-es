@@ -1,8 +1,6 @@
 # Firebase hosting caches
 #/.firebase/
 
-/.firebaserc
-
 # These occur at /, /back-end/functions/, /back-end/rules-test
 firebase-debug.log
 firestore-debug.log

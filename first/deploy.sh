@@ -6,6 +6,11 @@ set -euf -o pipefail
 #   - building and deploying the front-end
 #   - fetching access values that we use for creating 'firebase.${ENV-staging}.js'
 #
+# Usage:
+#   [ENV=<stage-id>] ./deploy.sh    # default is called 'staging'
+#
+#   The given name only affects the stage file created.
+#
 # Note:
 #   If 'firebase.${ENV-staging}.js' already exists, the user is asked to confirm its overwriting. If no overwriting,
 #   deployment *still* proceeds (this allows using the script for multiple manual deployments).
@@ -15,12 +20,12 @@ set -euf -o pipefail
 #   - docker compose
 #   - grep
 #
-STAGING_JS="firebase.${ENV-staging}.js"
+STAGING_JS="../firebase.${ENV-staging}.js"
 OVERWRITE=1
 
 if [[ -f $STAGING_JS ]]; then
   echo ""
-  echo "'$STAGING_JS' exists."
+  echo "'$(basename $STAGING_JS)' exists."
   echo ""
   read -p "Overwrite it (y/N)?" -n 1 CHOICE
   echo
@@ -35,11 +40,12 @@ echo "Going to:"
 echo "  1. Log you in with Firebase CLI (allows the script to make changes to the Firebase project)"
 echo "     - please visit the URL soon given and click through the authentication"
 echo "  2. Pick the Firebase project"
-echo "  3. Deploy the backend and front-end"
+echo "  3. Deploy the backend"
+echo "  4. Build and deploy the front-end"
 if [[ $OVERWRITE ]]; then
-  echo "  4. Write access values to 'firebase.${ENV-staging}.js' for front-end development"
+  echo "  5. Write access values to 'firebase.${ENV-staging}.js' for front-end development"
 else
-  echo "  4. (NOT update 'firebase.${ENV-staging}.js')"
+  echo "  5. (NOT update 'firebase.${ENV-staging}.js')"
 fi
 echo ""
 read -p "Continue (Y/n)?" -n 1 CHOICE
@@ -48,23 +54,22 @@ if [[ ! ${CHOICE:-y} =~ ^[Yy]$ ]]; then
   exit 0
 fi
 
-CAPTURE_FILE=.captured.sdkconfig
-
-# In case old cruft
-rm -f ${CAPTURE_FILE}
-
-# Note: Need to change to the directory of the 'docker-compose.yaml'. Something didn't work with '-f'. (Docker 20.10.8)
+#--- Execute
 #
-(cd first && CAPTURE_FILE=${CAPTURE_FILE} \
-  docker compose run --rm --service-ports deploy
-)
+install -d .state && \
+  rm -f .state/*
 
-if [[ ! -f ${CAPTURE_FILE} ]]; then
-  echo &>2 "ERROR: Did not get '${CAPTURE_FILE}"
+# Create the state
+touch .state/.captured.sdkconfig .state/.firebaserc .state/firebase-tools.json && \
+  docker compose run --rm --service-ports deploy-auth
+
+if [[ ! -f .state/.captured.sdkconfig ]]; then
+  >&2 echo "ERROR: Did not get '.state/.captured.sdkconfig'"
+  false
 fi
 
 if [[ $OVERWRITE ]]; then
-  XX=$(cat ${CAPTURE_FILE} | grep -E '^\s+".+":\s.+,' | grep -E "projectId|appId|locationId|apiKey|authDomain")
+  XX=$(cat .state/.captured.sdkconfig | grep -E '^\s+".+":\s.+,' | grep -E "projectId|appId|locationId|apiKey|authDomain")
     #     "projectId": "...",
     #     "appId": "...",
     #     "locationId": "...",
@@ -83,4 +88,21 @@ export default config;
 EOF
 fi
 
-rm ${CAPTURE_FILE}
+rm .state/.captured.sdkconfig
+
+# Backend
+[[ -f .state/firebase-tools.json && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
+
+# Note: There's an unexplained error after the deployments. For now, just ignoring it..
+#
+#docker compose run --rm deploy-backend
+(docker compose run --rm deploy-backend || true)
+
+# App
+[[ -f .state/firebase-tools.json && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
+
+(cd ../packages/app && npm install && ENV=${ENV-staging} npm run build)
+docker compose run --rm deploy-app
+
+# Cleanup
+rm -rf .state

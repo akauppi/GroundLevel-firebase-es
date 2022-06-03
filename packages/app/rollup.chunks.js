@@ -73,7 +73,7 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
     /^plugin-vue:export-helper$/,    // very small, ~180b
 
     // Moved here, to avoid a "Generated an empty chunk" warning.
-    /\/depsBuild\/vue\.js$/
+    /\/deps_build\/vue\.js$/
   ],
 
   // Note:

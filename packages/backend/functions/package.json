@@ -14,19 +14,24 @@
     "firebase-admin": "^10.2.0",
     "firebase-functions": "^3.21.2"
   },
-  "//dependencies": {
-    "//@google-cloud/firestore": "^5.0.2",
-    "//@google-cloud/functions-framework": "^3.1.1"
+  "scripts": {
+    "preinstall": "npm run -s _checkCloudFunctions",
+    "_checkCloudFunctions": "[ ! -z $BUILDER_OUTPUT ] || ( >&2 echo \"You don't need to do 'npm install' in this folder.\"; false )"
   },
   "//": {
     "engines.node": [
-      "Firebase emulators require the field to be plain '16' and such. This is okay for us, since Functions are always",
-      "run within the DC node instance (not what one would have natively installed, which might be -say- an uneven",
-      "version number)."
+      "Firebase emulators require the field to be plain '16'. We run it under DC, using Node 18. This causes a warning,",
+      "but doesn't seem harmful."
     ],
     "scripts": {
-      "@google-cloud/functions-framework": [
-        "Included, since a post by Firebase suggests that (explicitly defining the version), moving to ES modules implementation (past 3.14.1)."
+      "preinstall": [
+        "We only need 'npm install' to run within (and by) Cloud Functions. Here are some env.vars it defines:", [
+          "GOOGLE_RUNTIME=nodejs16",
+          "GOOGLE_CONTAINER_MEMORY_HINT_MB=256",
+          "X_GOOGLE_TARGET_PLATFORM=gcf",
+          "BUILDER_OUTPUT=/builder/outputs",
+          "GOOGLE_FUNCTION_TARGET=cloudLoggingProxy_v0"
+        ]
       ]
     }
   }

@@ -25,6 +25,8 @@ import { router } from './router.js'
 import * as Sentry from "@sentry/browser"
 import { BrowserTracing } from "@sentry/tracing"    // after 'import * as Sentry'
 
+import Plausible from 'plausible-tracker'
+
 import App from '/@App/index.vue'
 
 import './common.css'
@@ -41,9 +43,58 @@ const SENTRY_DSN= import.meta.env.VITE_SENTRY_DSN;   // undefined | string
 const SENTRY_SAMPLE_RATE= import.meta.env.VITE_SENTRY_SAMPLE_RATE;   // undefined (dev) | 0.0..1.0 (CI production builds)
 
 const STAGE = import.meta.env.VITE_STAGE;   // undefined (dev) | "staging"|... (production build)
-const RELEASE = import.meta.env.RELEASE;    // undefined (dev) | "<git commit checksum>" (CI build) | "0" (local production build)
+const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev) | "<git commit checksum>" (CI build) | "0" (local production build)
 
-async function init() {    // () => ()
+const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
+const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;
+
+if (!DEV && !PLAUSIBLE_ENABLED) {   // tbd. such warning in build script (console) would be a better place.
+  //console.info("Plausible Analytics not enabled; add 'PLAUSIBLE_ENABLED=true|false' to mitigate this warning.")
+}
+
+async function init() {    // () => Promise of ()
+
+  // Initialize Plausible Analytics
+  //
+  if (!LOCAL) {
+    let pl;
+
+    if (DEV && PLAUSIBLE_DEV_DOMAIN) {    // dev:online
+      pl = Plausible({
+        domain: PLAUSIBLE_DEV_DOMAIN,   // e.g. "dev-online.{your-id}"
+        trackLocalhost: true
+      });
+
+      console.info("Tracking access to Plausible Analytics:", PLAUSIBLE_DEV_DOMAIN);
+
+    } else if (!DEV && PLAUSIBLE_ENABLED) {  // production stages
+      pl = Plausible({
+        // default domain ('location.hostname')
+      });
+    }
+
+    if (pl) {
+      const {
+        trackEvent,             // "Tracks a custom event. Use it to track your defined goals by providing the goal's name as eventName."
+        //trackPageview,
+        enableAutoPageviews,            // "Tracks the current page and all further pages automatically."
+        //enableAutoOutboundTracking    // "Tracks all outbound link clicks automatically"
+      } = pl;
+
+      enableAutoPageviews();
+
+      // 'trackEvent' calling prototype is pretty complex, but in practice boils down to just providing a name that's
+      // registered as a Goal in the Plausible dashboard. One cannot post arbitrary extra data (which makes sense,
+      // since Plausible is about aggregation, not logging..).
+      //
+      //  <<
+      //    trackEvent( evName: string, EventOptions?, PlausibleOptions? )
+      //  <<
+      //
+      window.plausible = { trackEvent };    // for 'events.js'
+    }
+  }
+
   // Initialize Firebase Performance monitoring
 
   const tr = startupTrace();
@@ -151,6 +202,7 @@ async function init() {    // () => ()
 
   //central.info("App is mounted.");
 }
+
 /*await*/ init();   // free-running tail
 
 export {

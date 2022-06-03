@@ -3,12 +3,10 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">= 16 < 16.6 || >= 16.6.1"
+    "node": ">= 16 < 16.6 || >= 16.6.1 || 18"
   },
   "scripts": {
-    "first": "first/deploy.sh",
-    "--": "",
-    "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh"
+    "first": "(cd first && ./deploy.sh)"
   },
   "devDependencies": {
     "eslint": "^8.16.0",
@@ -24,12 +22,6 @@
     "engines.node": [
       "Demanding it here provides the developer instant feedback if the Node.js version is not suitable.",
       "16.6.0 has an issue with Jest that's fixed in 16.6.1."
-    ],
-    "scripts": {
-      "$BUILDER_OUTPUT": [
-        "Indication of Cloud Build - defined both in automated and manually triggered builds.",
-        "Avoid '[[' (bash) since 'node:16-alpine' image (CI) won't have it."
-      ]
-    }
+    ]
   }
 }
