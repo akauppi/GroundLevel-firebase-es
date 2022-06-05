@@ -110,6 +110,12 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //
   "mystery": /\/deps_build\/chunk-[A-Z0-9]{8}\.js/,
 
+  // Plausible
+  //
+  //  /work/tmp/.vite/deps_build/plausible-tracker.js
+  //
+  "plausible": /\/deps_build\/plausible-tracker\.js$/,
+
   // Sentry
   //
   //  /work/tmp/.vite/deps_build/@sentry_browser.js

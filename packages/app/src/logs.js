@@ -28,6 +28,7 @@ function lazyInit() {   // () => Worker
       locationId    // available if 'main.js' has placed it at initialization
     } = fah.options;
 
+    /*** disabled
     const worker = new Worker(new URL('./logs.worker.js', import.meta.url), {
       type: 'module'    // fails 'npm run build' if this is here
     });
@@ -39,12 +40,16 @@ function lazyInit() {   // () => Worker
     });
 
     myWorker = worker;
+    ***/
   }
 
   return myWorker;
 }
 
 function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fatal"?) => (msg, ...) => ()
+  return;   // TEMP
+
+  /*** TEMP
   const worker = lazyInit();
 
   //console.debug("!!! Creating log:", { id });
@@ -53,10 +58,13 @@ function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fa
     worker.postMessage({ "":"log", id, level, msg, args });
 
     console.debug("Central log:", { id, msg, level, args })
-  }
+  } ***/
 }
 
 function createCounter(id) {
+  return;   // TEMP
+
+  /***
   const worker = lazyInit();
 
   //console.debug("!!! Creating counter:", { id });
@@ -65,7 +73,7 @@ function createCounter(id) {
     //tbd. worker.postMessage({ "":"counter", id, diff });
 
     console.debug("Changing counter:", { id, diff });
-  }
+  }***/
 }
 
 const logHey = createLog("hey!");
