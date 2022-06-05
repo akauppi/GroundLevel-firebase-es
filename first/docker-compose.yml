@@ -17,7 +17,8 @@
 services:
   # Usage:
   #   <<
-  #     $ touch tmp/.captured.sdkconfig tmp/.firebaserc tmp/firebase-tools.json
+  #     $ install -d tmp/configstore     # important on WSL2 (otherwise 'root')
+  #     $ touch tmp/.captured.sdkconfig tmp/.firebaserc
   #     $ docker compose run --service-ports --rm deploy-auth
   #   <<
   #
@@ -26,8 +27,8 @@ services:
   # Note:
   #   This needs to be 'run' (not started as a service): Firebase needs an interactive terminal for project selection.
   #
-  # Once authenticated, the auth information is stored in:
-  #   /root/.config/configstore/firebase-tools.json
+  # Once authenticated, the auth information is stored in: 
+  #   'tmp/configstore/firebase-tools.json'
   #
   # 'firebase use --add' demands to have a 'firebase.json' (maybe a dummy would do?) and creates '.firebaserc' in the
   # current folder.
@@ -42,9 +43,10 @@ services:
       - ../packages/backend/firebase.json:/work/firebase.json:ro
       #-- Output
       #
-      # Note: Cannot map directly from '/root' (likely because the file already exists) - but can copy stuff.
+      # Firebase CLI saves the login information in '/root/.config/configstore/firebase-tools.json'.
+      # It also creates '/root/.config/configstore/update-notifier-firebase-tools.json'.
       #
-      - ./.state/firebase-tools.json:/work/firebase-tools.json:delegated
+      - ./.state/configstore:/root/.config/configstore:rw
       - ./.state/.captured.sdkconfig:/work/.captured:delegated
       - ./.state/.firebaserc:/work/.firebaserc:delegated
 
@@ -54,12 +56,35 @@ services:
       firebase login &&
 
       firebase use --add &&
-      cat /root/.config/configstore/firebase-tools.json > firebase-tools.json &&
-      
       (firebase apps:sdkconfig > .captured)
       '
-      # Note: 'cp -f' wasn't able to copy
 
+    profiles: ['manual']
+
+  # Run before 'deploy-backend'. Prepares the Function dependencies.
+  #
+  # Note: Kept separate from 'deploy-backend' because we don't want to eternally rely on the Firebase Emulators
+  #     having 'npm' capability. They are conceptually different.
+  #
+  #     Not done on the host side, because we don't want the 'functions/node_modules' to be visible.
+  #
+  prepare-backend-state:
+    image: node:16-alpine
+    volumes:
+      #-- RO
+      - ../packages/backend/functions/package.json:/work/functions/package.json:ro
+      #-- output
+      - ./.state/functions-node_modules:/work/functions/node_modules:delegated
+
+    working_dir: /work/functions
+    command: sh -c
+      'npm config set update-notifier false &&
+      echo package-lock=false > .npmrc &&
+
+      npm install --no-optional
+      '
+    environment:
+    - NO_GUARD=1
     profiles: ['manual']
 
   # Usage:
@@ -71,19 +96,21 @@ services:
     build: ../firebase-ci-builder.sub
     volumes:
       #-- RO
-      # Note: Problem with mapping '.firebaserc' on top of a read-only '/work' (DD-on-Mac 4.8.2; VirtioFS; macOS 12.4)
+      # Note: Could not map '.firebaserc' on top of a read-only '/work' (DD-on-Mac 4.8.2; VirtioFS; macOS 12.4)
       #     Work-arounds:
       #       a) map 'backend' as rw (deployment will need to happen within it; and we need the '.firebaserc').
       #       b) map only the files ('functions', 'firebase.json', ...?) really needed
       #
-      #- ../packages/backend:/work:ro
       - ../packages/backend/functions:/work/functions:ro
       - ../packages/backend/firebase.json:/work/firebase.json:ro
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
-        #
-      - ./.state/firebase-tools.json:/root/.config/configstore/firebase-tools.json:ro
+      #
+      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up.
+      - ./.state/configstore:/root/.config/configstore:rw
       - ./.state/.firebaserc:/work/.firebaserc:ro
+      - ./.state/functions-node_modules:/work/functions/node_modules:ro
+
     working_dir: /work
     command: sh -c
       'firebase deploy --only functions,firestore
@@ -104,11 +131,12 @@ services:
       #-- RO
       - ../packages/app/dist:/work/dist:ro
       - ../packages/app/firebase.json:/work/firebase.json:ro
-        #
-      - ./.state/firebase-tools.json:/root/.config/configstore/firebase-tools.json:ro
+      #
+      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up.
+      - ./.state/configstore:/root/.config/configstore:rw
       - ./.state/.firebaserc:/work/.firebaserc:ro
     working_dir: /work
-    command: bash -o pipefail -c
+    command: sh -c
       'firebase deploy --only hosting
       '
     profiles: ['manual']

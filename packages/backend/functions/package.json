@@ -10,13 +10,14 @@
     "index.js"
   ],
   "dependencies": {
+    "@google-cloud/firestore": "^5.0.2",
     "@google-cloud/logging": "^10.0.2",
     "firebase-admin": "^10.2.0",
     "firebase-functions": "^3.21.2"
   },
   "scripts": {
-    "preinstall": "npm run -s _checkCloudFunctions",
-    "_checkCloudFunctions": "[ ! -z $BUILDER_OUTPUT ] || ( >&2 echo \"You don't need to do 'npm install' in this folder.\"; false )"
+    "preinstall": "npm run -s _checkEnv",
+    "_checkEnv": "[ ! -z $BUILDER_OUTPUT$NO_GUARD ] || ( >&2 echo \"You don't need to do 'npm install' in this folder.\"; false )"
   },
   "//": {
     "engines.node": [

@@ -60,7 +60,12 @@ install -d .state && \
   rm -f .state/*
 
 # Create the state
-touch .state/.captured.sdkconfig .state/.firebaserc .state/firebase-tools.json && \
+#
+# Note: Important that we create also the mapped folders at host side; otherwise Docker Compose
+#   creates them with 'root' access. (WSL2)
+#
+install -d .state/configstore && \
+  touch .state/.captured.sdkconfig .state/.firebaserc && \
   docker compose run --rm --service-ports deploy-auth
 
 if [[ ! -f .state/.captured.sdkconfig ]]; then
@@ -91,17 +96,18 @@ fi
 rm .state/.captured.sdkconfig
 
 # Backend
-[[ -f .state/firebase-tools.json && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
+[[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
-# Note: There's an unexplained error after the deployments. For now, just ignoring it..
-#
-#docker compose run --rm deploy-backend
-(docker compose run --rm deploy-backend || true)
+install -d .state/functions-node_modules && \
+  docker compose run --rm prepare-backend-state
+
+docker compose run --rm deploy-backend
 
 # App
-[[ -f .state/firebase-tools.json && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
+[[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
 (cd ../packages/app && npm install && ENV=${ENV-staging} npm run build)
+
 docker compose run --rm deploy-app
 
 # Cleanup

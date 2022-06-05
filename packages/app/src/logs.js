@@ -47,7 +47,7 @@ function lazyInit() {   // () => Worker
 }
 
 function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fatal"?) => (msg, ...) => ()
-  return;   // TEMP
+  return () => undefined;   // TEMP
 
   /*** TEMP
   const worker = lazyInit();
@@ -62,7 +62,7 @@ function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fa
 }
 
 function createCounter(id) {
-  return;   // TEMP
+  return () => undefined;   // TEMP
 
   /***
   const worker = lazyInit();

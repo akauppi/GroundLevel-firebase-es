@@ -35,6 +35,8 @@ services:
       - ./firebase-debug.app.log:/work/firebase-debug.log:delegated
       - ./firestore-debug.app.log:/work/firestore-debug.log:delegated
       - ./ui-debug.app.log:/work/ui-debug.log:delegated
+      # --- other
+      - ./tmp/functions-node_modules:/work/functions/node_modules:ro
 
     working_dir: /work
     command: bash -o pipefail -c

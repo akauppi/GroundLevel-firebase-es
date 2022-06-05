@@ -46,6 +46,8 @@ services:
       - ./firebase-debug.log:/work/firebase-debug.log:delegated
       - ./firestore-debug.log:/work/firestore-debug.log:delegated
       - ./ui-debug.log:/work/ui-debug.log:delegated
+      # --- other
+      - ./tmp/functions-node_modules:/work/functions/node_modules:ro
 
     working_dir: /work
     command: bash -o pipefail -c
@@ -128,13 +130,15 @@ services:
         condition: service_healthy
     profiles: ['manual']
 
-  # Separate target for installing 'functions/node_modules', within DC.
+  # Separate target for installing (what looks to DC as) 'functions/node_modules' for development.
   #
-  # Note: This allows us to separate 'npm' use from Firebase Emulators image (though it has 'npm', we prefer not to
-  #     rely on it).
+  # Context:
+  #   - development; actual deployments use 'functions/node_modules'
   #
-  # Doing this - instead of installing them on host - avoids the "unsupported (Node.js) version" error, by Firebase
-  # (since we steer strictly the version used in the installation, which should match 'functions/package.json').
+  # Why bother?
+  #   - Avoids the "unsupported (Node.js) version" error, by Firebase (because we control the Node version,
+  #     avoiding variation the developer machine would have).
+  #   - Avoids conflicts between OS versions (not sure if we had any...).
   #
   functions-install:
     image: node:16-alpine
@@ -142,12 +146,15 @@ services:
       # --- RO
       - ./functions/package.json:/work/functions/package.json:ro
       # --- output (show installed packages on the host; from where they are shared to running images)
-      - ./functions/node_modules:/work/functions/node_modules:delegated
+      - ./tmp/functions-node_modules:/work/functions/node_modules:delegated
 
     working_dir: /work
     command: sh -c
       'npm config set update-notifier false &&
+      echo package-lock=false > functions/.npmrc &&
 
       npm install --prefix functions
       '
+    environment:
+      - NO_GUARD=1
     profiles: ['manual']

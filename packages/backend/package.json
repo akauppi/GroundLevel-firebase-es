@@ -42,7 +42,7 @@
     "ci:test": "npm run test:fns:all && npm run test:rules:all",
     "--  --": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
-    "_postinstall_local": "docker compose run --rm functions-install",
+    "_postinstall_local": "install -d tmp/functions-node_modules && docker compose run --rm functions-install",
     "_postinstall_ci": "npm --prefix functions install && npm run -s _touchEm && npm run -s _touchEmApp",
     "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
     "_touchEmApp": "touch firebase-debug.app.log firestore-debug.app.log ui-debug.app.log"
@@ -67,6 +67,10 @@
       ],
       "ci:{test|deploy}": [
         "These are the commands CI will use."
+      ],
+      "_postinstall_local": [
+        "Important to create the 'tmp/functions-node_modules' in the host side; otherwise, WSL2 Docker",
+        "will create one with 'root' access (instead of the current user)."
       ],
       "_touchEm": [
         "Important that files to be mapped as DC volumes exist as files."
