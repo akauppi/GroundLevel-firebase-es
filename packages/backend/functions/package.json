@@ -25,8 +25,14 @@
       "but doesn't seem harmful."
     ],
     "scripts": {
-      "preinstall": [
-        "We only need 'npm install' to run within (and by) Cloud Functions. Here are some env.vars it defines:", [
+      "_checkEnv": [
+        "Guards again the developer locally running 'npm install'. Actual use cases:",
+        "- manual deployment (first/*; DC)",
+        "- CI (deployment)",
+        "- Cloud Functions (runtime)",
+        [
+          "Env.vars in runtime:",
+          "",
           "GOOGLE_RUNTIME=nodejs16",
           "GOOGLE_CONTAINER_MEMORY_HINT_MB=256",
           "X_GOOGLE_TARGET_PLATFORM=gcf",

@@ -35,24 +35,6 @@ Use this to pinpoint the rule that caused the unexpected behaviour.
 *Edit*: We've given Firebase the [idea](https://github.com/firebase/firebase-js-sdk/issues/4793) of attaching also possible `debug` output here.
 
 
-## WARNING: Firestore emulator does *not* change the rules
-
-If you edit `firestore.rules`, you'll see this on the console
-
-```
-...
-[emul] i  firestore: Change detected, updating rules...
-[emul] ✔  firestore: Rules updated.
-...
-```
-
-One would expect the rules are changed. DO NOT TRUST IT. At least `firebase-tools` version 8.12.0 happily carries on with the old rules.
-
-Always Ctrl-C + `npm run start`, to have rule changes actually applied.
-
-( This is obviously a bug. If you wish to `#help`, try to reproduce it and please inform Firebase about it.. )
-
-
 ## WARNING: Use of dates in `docs.js`
 
 Firebase Web client can take JavaScript `Date` objects and convert them to its `Timestamp` automatically. However, `Date.now()` and `Date.parse` do <u>not</u> produce Date objects but Unix epoch numbers, so be warned.
@@ -63,14 +45,3 @@ Firebase Web client can take JavaScript `Date` objects and convert them to its `
 |Specific time|`new Date('27 Mar 2020 14:17:00 EET')`|
 
 *Note: We could detect these automatically by read validation in the access rules (not assuming existing data complies with the schema). That turned out to be non-trivial, so just be careful.*
-
-
-## Debugging Cloud Function deployment failures
-
-If a deploy fails, and the local CLI does not give proper details, try:
-
-Firebase Console > project > `Functions` > `Logs`
-
->![](.images/firebase-console-functions-logs.png)
-
-This was enough detail to fix it.

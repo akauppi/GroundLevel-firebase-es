@@ -1,19 +1,22 @@
 # Track (backend)
 
-## 🍒 (Jest: native ES module support)
-
-- [Support ESM versions of all pluggable modules](https://github.com/facebook/jest/issues/11167)
-
-  - [ ] `resolver` still unchecked. Why? Jest 28 needs no custom resolver.
-
-
-<!-- Q: Is this still a thing?
 ## `@google-cloud/logging` ESM support
+
+*Q: Is this still a thing?*
 
 - [es6 import not able to import Logging](https://github.com/googleapis/nodejs-logging/issues/559)
 
 Note: We won't need it, until `firebase-functions` runs with ESM. And even then, node allows using `require` in `type: "module"` packages.
--->
+
+
+## Node 18 support for `firebase-functions`
+
+- [ ] When available, pump up `functions/package.json`.
+
+	<!-- No ticket, as of 6-Jun-22: https://github.com/firebase/firebase-functions/issues?q=is%3Aissue+is%3Aopen+18 -->
+
+   We already run it with Node 18 in DC.
+  
 
 ## Pre-heating the Cloud Functions
 

@@ -1,32 +1,20 @@
 # Known issues
 
-## Stuck at "there are left over .."
+## Backend: warnings of bad `npm` version
 
 ```
-$ cloud-build-local --dryrun=false --config=cloudbuild.pr.yaml ..
-2021/03/24 16:03:52 Warning: there are left over step containers from a previous build, cleaning them.
+Step #1: npm WARN EBADENGINE Unsupported engine {
+Step #1: npm WARN EBADENGINE   package: undefined,
+Step #1: npm WARN EBADENGINE   required: { node: '16' },
+Step #1: npm WARN EBADENGINE   current: { node: 'v18.2.0', npm: '8.9.0' }
+Step #1: npm WARN EBADENGINE }
 ```
 
-If this happens to you (and nothing more is output).
+This is ok, and can be ignored.
 
-Restart Docker. Retry.
+The reason is that we (`packages/backend/docker-compose.yaml`) install Firebase `functions` stuff using Node 18, which it isn't technically supporting, yet. We also run emulations using Node 18, so...
 
-After the restart, the cleanup logic seems to pass, reliably.
+There's no harm. This fades away once Firebase starts supporting Node 18. Any year now? :P
 
-## `cloud-build-local` error 1
+>Node.js 18 was released on April 19th 2022.
 
-```
-$ cloud-build-local -dryrun=false --config=ci/cloudbuild.pr.yaml .
-2021/05/24 08:26:18 Warning: there are left over step volumes from a previous build, cleaning it.
-2021/05/24 08:26:19 Warning: The server docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
-2021/05/24 08:26:19 Warning: The client docker version installed (20.10.6) is different from the one used in GCB (19.03.8)
-2021/05/24 08:26:38 Error copying source to docker volume: exit status 1
-```
-
-No solution to this.
-
-`cloud-build-local` has no verbose flag. How to know what could be wrong??
-
-Docker Desktop doesn't allow using certain Docker version.
-
-For the moment, cannot use `cloud-build-local`. Use `gcloud build submit` (runs the builds in the cloud), instead.

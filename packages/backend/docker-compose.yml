@@ -72,7 +72,7 @@ services:
   # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
   #
   warm-up:
-    image: node:16-alpine
+    image: node:18-alpine
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
@@ -97,10 +97,17 @@ services:
     environment:
       - EMUL_HOST=emul
       - WARM_UP_TIMEOUT=30000
-          # Seen cold start execution times ('docker compose down; docker up warm-up'):
+          # Seen cold start execution times ('docker compose down; docker compose up warm-up'):
           #
+          #   fns       rules
+          #   ---       -----
+          #   15.148s   20.248s       # MacOS Intel (DC 4.9.0)
+          #   26.126s   20.55s        #   -''-
+          #
+          #   9.122s    12.48s        # Cloud Build (CI)
+          #
+          #---
           # 14859, 22591 (macOS Intel, DC 4.6)
-          #
           # ~~19000 (macOS, DC 4.0); normally ~3500 ms
 
     depends_on:
@@ -123,7 +130,7 @@ services:
   # output for something like 'npm test' (if launched with a cold DC).
   #
   warmed-up:
-    image: node:16-alpine
+    image: node:18-alpine
     command: sh -c true
     depends_on:
       warm-up:
