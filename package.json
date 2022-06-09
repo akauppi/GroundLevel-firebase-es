@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">= 16 < 16.6 || >= 16.6.1 || 18"
+    "node": ">= 16 < 16.6 || >= 16.6.1 < 17 || 18"
   },
   "scripts": {
     "first": "(cd first && ./deploy.sh)"

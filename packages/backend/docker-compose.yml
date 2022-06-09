@@ -61,7 +61,7 @@ services:
         # Without this, Firebase-tools (9.17.0) don't see changes (Security Rules, Cloud Functions)
 
     healthcheck:
-      test: "nc -z localhost 6767 && nc -z localhost 5002 && echo 'healthy!'"
+      test: "nc -z localhost 6767 && nc -z localhost 5002 && sleep 2"
         # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
       start_period: 23s

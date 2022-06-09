@@ -1,5 +1,7 @@
 /*
-* src/logs.worker.js
+* src/central/ship.worker.js
+*
+* Ship log and counter information to Firebase Cloud Functions, in batches.
 *
 * References:
 *   - Vite > Web Workers
@@ -11,15 +13,15 @@ import {connectFunctionsEmulator, getFunctions, httpsCallable} from '@firebase/f
 import { logWorker } from '/@/config.js';
 const { maxBatchDelayMs, maxBatchEntries } = logWorker;
 
+if (!maxBatchDelayMs || !maxBatchEntries) {
+  fail( "Missing configuration: 'max-batch-delay-ms' and/or 'max-batch-entries'");
+}
+
 const LOCAL = import.meta.env.MODE === "dev_local";
 
 function fail(msg) { throw new Error(msg); }
 
-if (!maxBatchDelayMs || !maxBatchEntries) {
-  fail( "Expecting web worker to be launched with '?max-batch-delay-ms=...&max-batch-entries=...'");
-}
-
-let cloudLoggingProxy_v0;
+let landingZone_v0;
 
 /*
 * Initialize the worker
@@ -31,7 +33,7 @@ let cloudLoggingProxy_v0;
 */
 function init({ apiKey, projectId, locationId }) {    // 'locationId' is optional (undefined == default region)
 
-  if (LOCAL) {    // "dev:local"; logs visible in Docker console
+  if (LOCAL) {    // "dev:local"; logs visible in DC output
     const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
     const FUNCTIONS_PORT = import.meta.env.VITE_FUNCTIONS_PORT;
 
@@ -43,7 +45,7 @@ function init({ apiKey, projectId, locationId }) {    // 'locationId' is optiona
     const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
     connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
 
-    cloudLoggingProxy_v0 = httpsCallable(fns,"cloudLoggingProxy_v0");
+    landingZone_v0 = httpsCallable(fns,"landingZone_v0");
 
   } else {
     const fah = initializeApp({
@@ -53,7 +55,7 @@ function init({ apiKey, projectId, locationId }) {    // 'locationId' is optiona
 
     const fnsRegional = getFunctions( fah, locationId );
 
-    cloudLoggingProxy_v0 = httpsCallable(fnsRegional,"cloudLoggingProxy_v0");
+    landingZone_v0 = httpsCallable(fnsRegional,"landingZone_v0");
   }
 
   console.log("Worker initialized");
@@ -61,56 +63,59 @@ function init({ apiKey, projectId, locationId }) {    // 'locationId' is optiona
 
 console.log("Worker loaded");
 
-const pending= [];
-let timer = schedule();    // ongoing timer, which forces a shipment
-
-function schedule() {   // () => Timer
-  return setTimeout(ship, maxBatchDelayMs);
-}
+const pending= [];    // Array of { "": "log"|"counter", { ... } }
+let timer;    // Timer; ongoing timer, which forces a shipment
 
 /*
-* Ship things; don't alter the schedule.
+* Ship things; reschedule.
 */
 function ship() {
-  clearTimeout(timer);
+  if (timer) clearTimeout(timer);
 
   if (pending.length === 0) {
     // nada
   } else {
-    console.debug(`Shipping ${pending.length} 🪵🪵...`);
+    console.debug(`Shipping ${pending.length} logs/counters...`);
 
     // tbd. handle offline
 
-    cloudLoggingProxy_v0({les: pending /*, ignore*/});
+    landingZone_v0( pending );
     pending.length = 0;   // clear
   }
 
   // Reschedule after each successful shipment / empty visit.
-  timer = schedule();
+  timer = setTimeout(ship, maxBatchDelayMs);
 }
+ship();   // gets the timer started
 
 /*
-* Queue a log entry for shipping.
 */
-function log({ msg, args, level }) {    // ({ msg: string, args: Array of any, level: string }) => ()
+function push(o, force = false) {   // ({ "": "log"|"inc", ... }, true?) => ()
 
-  const le = createLogEntry(level, msg, args);
+  pending.push(o);
 
-  pending.push(le);
-
-  // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
-  //
-  if (level === 'fatal' || pending.length >= maxBatchEntries) {   // always max 'maxBatchEntries' long (==)
+  if (force || pending.length >= maxBatchEntries) {
     ship();
   }
 }
 
 /*
+* Queue a log entry for shipping.
+*/
+function pushLog({ msg, args, level }) {    // ({ msg: string, args: Array of any, level: string }) => ()
+
+  const entry = createLogEntry(level, msg, args);
+
+  // If it's fatal, we might want to try shipping right away (if the user were to close the browser, not to lose logs).
+  //
+  push({ "": "log", entry }, level === 'fatal');
+}
+
+/*
 * Turn the received format to CloudLogging 'LogEntry'.
 *
-* Note: The documentation for such is not very clear (as often the case with log entries). It is preferable to
-*   support preferred schema, but the docs don't clearly state such. This is our best effort - please suggest
-*   improvements! :)
+* Note: The documentation for such is not very clear (as often the case with log entries). This is a best effort.
+*   Please suggest improvements! :)
 *
 *   Cloud Logging API docs > LogEntry
 *     -> https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
@@ -135,9 +140,18 @@ const severityLookup = new Map([
   ["fatal","CRITICAL"]
 ]);
 
+/*
+* Queue a counter.
+*/
+function pushInc({ name, diff, tags }) {    // ({ name: string, diff: number, tags: object }) => ()
+
+  push({ "": "inc", name, diff, tags });
+}
+
 const lookup = {
   init,
-  log
+  pushLog,
+  pushInc
 };
 
 /*
@@ -150,7 +164,7 @@ const lookup = {
 *   locationId: string
 * }
 *
-* Initialize the worker. First message after creation.
+*   Initialize the worker. First message after creation.
 *
 * {
 *   "": "log",
@@ -159,7 +173,16 @@ const lookup = {
 *   level: "info"|"warn"|"error"|"fatal"
 * }
 *
-* Logging. Handles that the message gets delivered - eventually - if possible.
+*   Logging. Handles that the message gets delivered - eventually - if possible.
+*
+* {
+*   "": "inc",
+*   name: string,
+*   diff: number,
+*   tags: object
+* }
+*
+*   Counter.
 */
 onmessage = function(e) {
   console.log("Worker received:", e);

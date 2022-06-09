@@ -22,6 +22,7 @@
     "_prepDC": "npm run -s _touchEm",
     "-- -": "",
     "test:fns:logging": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f logging.test.js --verbose --all",
+    "test:fns:counters": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f counters.test.js --verbose --all",
     "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
     "test:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
     "--  -": "",
@@ -49,7 +50,7 @@
   },
   "devDependencies": {
     "firebase-jest-testing": "^0.0.5-beta.1",
-    "jest": "^28.1.0"
+    "jest": "^28.1.1"
   },
   "//comments": {
     "engines.node": [

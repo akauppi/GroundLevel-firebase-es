@@ -30,13 +30,15 @@ describe("userInfo shadowing", () => {
 
     // Write in 'userInfo' -> causes Cloud Function to update 'projectC/{project-id}/userInfo/{uid}'
     //
-    await collection("userInfo").doc("abc").set(william);
+    // Note: We can start waiting for the result already in parallel with the writing.
+    //
+    /*const prom=*/ collection("userInfo").doc("abc").set(william);
 
     await expect( docListener("projects/1/userInfo/abc") ).resolves.toContainObject(william);
   });
-    // DC (mac):
-    //  - no warm-up:   3622, 3795 ms     # run from clean: 'docker compose down', 'docker compose up warm-up'
-    //  - warmed up:     559,  729 ms
+    // DC (mac, DC 4.9.0):
+    //  - no warm-up:   5830 ms           # run from clean: 'docker compose down; docker compose up emul' (with 'warm-up' disabled by editing 'docker-compose.yml' 'profile=['manual']' line)
+    //  - warmed up:     466 ms
     //
     // CI (DC):
     //  - no warm-up:   2184, 2036 ms           # warm-up disabled by editing the DC yml (or by adding a DC 'up' step in the CI)

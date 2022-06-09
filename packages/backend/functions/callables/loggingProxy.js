@@ -1,21 +1,18 @@
 /*
-* functions/cloudLoggingProxy.js
+* functions/callables/loggingProxy.js
 *
-* Proxy for passing log entries to Cloud Logging. Back-end for the 'app-deploy-ops' proxy logging adapter.
-*
-* Note:
-*   'HttpsError' 'code' values must be from a particular set
-*     -> https://firebase.google.com/docs/reference/js/firebase.functions#functionserrorcode
-*
-* Note:
-*   We shouldn't need to do any Cloud Functions specific imports here; adaption done elsewhere.
+* Proxy for passing log entries to Cloud Logging (or showing them among the emulator console, if emulated).
 */
+
 import { Logging } from '@google-cloud/logging'
 
-import { EMULATION, logger, failInvalidArgument } from './common.js'
+import { EMULATION, regionalFunctions_v1, HttpsError } from '../common.js'
+const { https: /*as*/ rf1_https } = regionalFunctions_v1;
 
-function failWhileLoading(msg) {
-  throw new Error(msg);
+function failWhileLoading(msg) { throw new Error(msg) }
+
+function failInvalidArgument(msg) {
+  throw new HttpsError('invalid-argument',msg);
 }
 
 //---
@@ -51,20 +48,21 @@ function failWhileLoading(msg) {
 //      - tests
 //      - 'npm run serve' under localhost
 //
-//    If so, place the logs in another log, keeping the production log prestine (otherwise 1-to-1 behaviour!)
+//    tbd. <write about 'ignore'>   WAS: If so, place the logs in another log, keeping the production log prestine (otherwise 1-to-1 behaviour!)
 
 /*
 * EMULATION variant
 *
 * Used when running against locally emulated Cloud Functions:
 *   - backend 'npm test'
-*   - app 'npm run dev[:local]'
-*   - app 'npm run dev:online'    <-- tbd. currently using its own logging server.
+*   - app 'dev[:local]'
 *
 * Logs using Cloud Function 'logger' (since we don't have Cloud Logging credentials, nor want to rely on online-needing
 * services).
 */
-const cloudLoggingProxy_v0_EMUL = EMULATION && ((les, { _ }) => {    // (Array of LogEntry, { }) => ()
+const cloudLoggingProxy_v0_EMUL = EMULATION && await (async () => {
+
+  const ffLogger = await import('firebase-functions/v1').then( mod => mod.logger );
 
   const backLookup = new Map([   // 'LogEvent' '.severity' to Cloud Function logging level
     ['INFO','info'],
@@ -73,25 +71,28 @@ const cloudLoggingProxy_v0_EMUL = EMULATION && ((les, { _ }) => {    // (Array o
     ['CRITICAL','error']    // no 'logger.fatal' in Cloud Functions
   ]);
 
-  les.forEach( le => {
-    function failLE(prefix) { failInvalidArgument(`${prefix} ${ JSON.stringify(le) }`); }
+  return (les, { _ }) => {    // (Array of LogEntry, { }) => true
+    function failLE(prefix) { failInvalidArgument(`${prefix} ${ JSON.stringify(les) }`); }
 
-    const level = backLookup.get(le.severity) || failLE("Unexpected 'severity' in:");
-    const timestamp = le.timestamp || failLE("No 'timestamp' in:");
-    const msg = le.jsonPayload?.msg || failLE("No 'jsonPayload.msg' in:");
-    const args = le.jsonPayload?.args;    // omit from output if not there
+    les.forEach(le => {
+      const level = backLookup.get(le.severity) || failLE("Unexpected 'severity' in:");
+      const timestamp = le.timestamp || failLE("No 'timestamp' in:");
+      const msg = le.jsonPayload?.msg || failLE("No 'jsonPayload.msg' in:");
+      const args = le.jsonPayload?.args;    // omit from output if not there
 
-    logger[level](msg, { timestamp, ...(args ? {args}:{}) } );
-  })
+      ffLogger[level](msg, {timestamp, ...(args ? {args} : {})});
+    })
 
-  return true;    // to help tests and make sure the emulation variant was run
-});
+    return true;    // to help tests and make sure the emulation variant was run
+  }
+})();
 
 /*
 * REAL variant
 *
 * Used by:
-*   - app-deploy-ops 'npm serve' (with 'ignore' marker in the calls)
+*   - 'dev:online' (with 'ignore' marker in the calls)
+*   - 'npm serve' (with 'ignore' marker in the calls)
 *   - production deployed front-end
 *
 * Firebase provides credentials automatically so that we can use Cloud Logging APIs in production.
@@ -102,8 +103,7 @@ const cloudLoggingProxy_v0_PROD = (!EMULATION) && (_ => {
 
   const logging = new Logging({ projectId });    // @google-cloud/logging
 
-  // Note: The same implementation may be taking in both production and development ('ignore == true') logs. Thus,
-  //    it's not an either-or.
+  // Note: The same implementation takes in both production and development ('ignore == true') logs.    <-- tbd. Do we need the 'ignore'? Let's provide stage support!!
   //
   const appLog = logging.log('app-central');
   const appLog2 = logging.log('app-central.ignore');    // logs from development client
@@ -117,12 +117,25 @@ const cloudLoggingProxy_v0_PROD = (!EMULATION) && (_ => {
     prom.then(_ => {
       //logger.info(`Logged to ${log.name}: ${les.size()} entries`);
     }).catch(err => {
-      logger.error("Failure to ship application logs:", err);
+      console.error("Failure to ship application logs:", err);
     })
   }
 })();
 
-const cloudLoggingProxy_v0 = cloudLoggingProxy_v0_PROD || cloudLoggingProxy_v0_EMUL;
+const f = cloudLoggingProxy_v0_PROD || cloudLoggingProxy_v0_EMUL;
+
+const cloudLoggingProxy_v0 = rf1_https
+  .onCall(({ les, ignore }, context) => {
+    const uid = context.auth?.uid;
+
+    /**if (!uid) {   // skip if not authenticated
+      throw new HttpsError('unauthenticated', "You must be logged in.");
+    }**/
+
+    console.debug("Logging request from:", uid || "(unknown user)");
+
+    return f(les, { ignore, uid });
+  });
 
 export {
   cloudLoggingProxy_v0
