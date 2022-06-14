@@ -5,11 +5,11 @@
 */
 import { test, expect, describe } from '@jest/globals'
 
-import { httpsCallable } from 'firebase-jest-testing/firebaseClientLike'
-
 const COUNTER_PATH="/_counters"
 
 import { doc as adminDoc } from 'firebase-jest-testing/firestoreAdmin'
+
+import { fnBeam } from 'common/beam.js'
 
 describe ('Can proxy counter increments', () => {
 
@@ -67,22 +67,17 @@ describe ('Can proxy counter increments', () => {
   //  - warmed up:               xxx ms
 
 /*
+* Call the callable to increment a counter.
+*/
+async function fnCount(name, diff, tags) {
+  await fnBeam([{ "": "inc", name, diff, tags }] );
+}
+
+/*
 * Read a certain counter's object, for comparisons.
 */
 async function readCounter(name) {
   const o = await adminDoc(`${COUNTER_PATH}/${name}`).get();
 
   return o.exists ? o.data() : undefined;
-}
-
-/*
-* Wrapper around the callable; throws if there's a 'HttpError'.
-*/
-const fnCount2 = httpsCallable("counterProxy_v0");   // ({ name: string, diff: number, tags: { <k>: <v> }|undefined}) => Promise of { data: any?, error: object? }
-
-async function fnCount(name, diff, tags) {    // (name: string, diff: number, tags: { <k>:<v> }?) => Promise of ()
-
-  await fnCount2({ name, diff, tags }).then( ({ data, error }) => {
-    expect(error).toBeUndefined();    // gives a decent error message
-  })
 }

@@ -1,5 +1,5 @@
 /*
-* functions/callables/counterProxy.js
+* functions/callables/shipInc.js
 *
 * Proxy for passing central counter increments to a database.
 *
@@ -11,8 +11,7 @@
 *   - "Callable functions from your app" (Firebase docs)
 *     -> https://firebase.google.com/docs/functions/callable
 */
-//import { logger, failInvalidArgument } from '../common.js'
-import { EMULATION, regionalFunctions_v1, HttpsError } from '../common.js'
+import { regionalFunctions_v1, HttpsError } from '../common.js'
 const { https: /*as*/ rf1_https } = regionalFunctions_v1;
 
 import { firestore as db } from '../firebase.js'      // tbd. is this slowing down loading??
@@ -56,28 +55,22 @@ async function countersPump(name, subnames, diff) {    // (string, Array of "<ta
   await docRef.set(data, { merge: true });
 }
 
-// name: string
-// diff: number             // should be > 0.0
-// tags: { string: string }?
-//
-const counterProxy_v0 = rf1_https
-  .onCall(async ({ name, diff, tags }, context) => {
-    const uid = context.auth?.uid;
+/*
+* Ship a single counter entry to the database.
+*/
+await function shipIncEntry(name, diff, tags) {   // (string, number, { <string>: <any> }) => Promise of ()
 
-    //console.debug("Incrementing counter:", { name, diff, tags });   // DEBUG
+  // tbd. Check all input validity (these can be coming from anywhere) - can also be done in the 'landingZone' level.
+  //
+  if (typeof diff !== 'number') {
+    throw new HttpsError('invalid-argument', `Expecting 'diff' to be a number, but got: ${diff}`);
+  }
 
-    /**if (!uid) {   // skip if not authenticated (doesn't seem we can define a Cloud Function that would only get called on valid users, can we?)
-      throw new HttpsError('unauthenticated', "You must be logged in.");
-    }**/
-
-    const diffNum = diff + 0.0;
-    if (isNaN(diff)) throw new HttpsError('invalid-argument', `Expecting 'diff' to be a number, but got: ${diff}`);
-
-    const subnames = (_ => {    // Array of '{k}={v}'
-      const o = (tags === undefined) ? {}
-        : (typeof tags !== 'object') ? failWith( new HttpsError('invalid-argument', `Expecting 'tags' to be object, but got: ${tags}`) )
-        : (Object.keys(tags).length > MAX_TAGS) ? failWith( new HttpsError('out-of-range', `Too many tags: ${o.size()} > ${MAX_TAGS}`) )
-        : tags;
+  const subnames = (_ => {    // Array of '{k}={v}'
+    const o = (tags === undefined) ? {}
+      : (typeof tags !== 'object') ? failWith( new HttpsError('invalid-argument', `Expecting 'tags' to be object, but got: ${tags}`) )
+      : (Object.keys(tags).length > MAX_TAGS) ? failWith( new HttpsError('out-of-range', `Too many tags: ${o.size()} > ${MAX_TAGS}`) )
+      : tags;
 
       return Object.entries(o).map( ([k,v]) => `${k}=${v}`);
     })();
@@ -89,5 +82,5 @@ const counterProxy_v0 = rf1_https
 //await db.doc("/some/else").set({ "_": "aaa" });    // DEBUG   // Firestore document cannot have an empty string as key, it seems.
 
 export {
-  counterProxy_v0
+  counterProxy as shipIncEntry
 }

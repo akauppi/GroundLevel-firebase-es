@@ -1,5 +1,5 @@
 /*
-* functions/callables/loggingProxy.js
+* functions/callables/shipLog.js
 *
 * Proxy for passing log entries to Cloud Logging (or showing them among the emulator console, if emulated).
 */
@@ -124,19 +124,21 @@ const cloudLoggingProxy_v0_PROD = (!EMULATION) && (_ => {
 
 const f = cloudLoggingProxy_v0_PROD || cloudLoggingProxy_v0_EMUL;
 
+/***
 const cloudLoggingProxy_v0 = rf1_https
   .onCall(({ les, ignore }, context) => {
     const uid = context.auth?.uid;
 
-    /**if (!uid) {   // skip if not authenticated
+    /_**if (!uid) {   // skip if not authenticated
       throw new HttpsError('unauthenticated', "You must be logged in.");
-    }**/
+    }**_/
 
     console.debug("Logging request from:", uid || "(unknown user)");
 
     return f(les, { ignore, uid });
   });
+***/
 
 export {
-  cloudLoggingProxy_v0
+  f as shipLogEntry
 }

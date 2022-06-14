@@ -3,13 +3,11 @@
 */
 import { test, expect, describe } from '@jest/globals'
 
-import { httpsCallable } from 'firebase-jest-testing/firebaseClientLike'
+import { fnBeam } from 'common/beam.js'
 
 const fail = (msg) => { throw new Error(msg) }
 
 describe ('Can proxy application logs', () => {
-
-  const fnLog = httpsCallable("cloudLoggingProxy_v0");
 
   test('good log entries', async () => {
     const msgs = [
@@ -23,8 +21,7 @@ describe ('Can proxy application logs', () => {
       return createLogEntry(level, msg, []);
     });
 
-    const { data } = await fnLog({ les });
-    expect(data).toBe(true);
+    await fnLog(les);   // expecting no return value but failures of the callable are caught
   } );
 });
   // DC (mac, DC 4.9.0):
@@ -52,4 +49,11 @@ function createLogEntry(level, msg, args) {    // (string, string, Array of any)
     timestamp,
     jsonPayload
   }
+}
+
+/*
+* Call the callable to store a log entry.
+*/
+async function fnLog(les) {
+  await fnBeam( les.map( o => ({ "":"log", ...o })) );
 }
