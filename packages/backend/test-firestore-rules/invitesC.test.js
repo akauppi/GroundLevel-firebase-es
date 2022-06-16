@@ -1,5 +1,5 @@
 /*
-* back-end/test-rules/invitesC.test.js
+* back-end/test-firestore-rules/invitesC.test.js
 */
 import { test, expect, describe, beforeAll } from '@jest/globals'
 

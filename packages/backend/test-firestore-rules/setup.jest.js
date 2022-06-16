@@ -1,5 +1,5 @@
 /*
-* back-end/test-rules/setup.jest.js
+* back-end/test-firestore-rules/setup.jest.js
 *
 * Sets the (immutable) data for the Rules tests.
 */

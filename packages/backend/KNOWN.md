@@ -15,7 +15,7 @@ $ npm run start
 $ docker compose run test
 ...
 > test:rules:all
-> NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all
+> NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all
 
 (node:100) ExperimentalWarning: VM Modules is an experimental feature. This feature could change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)

@@ -1,4 +1,4 @@
-// test-rules/jest.config.js
+// test-firestore-rules/jest.config.js
 
 import opts from '../jest.config.default.js'
 

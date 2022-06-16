@@ -29,39 +29,18 @@ services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
   emul:
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:11.0.1-node18-npm8}
+    extends:
+      file: docker-compose.base.yml
+      service: emul-base
     ports:
-      - "4000:4000"
       - "5002:5002"
       - "6767:6767"
-      # Keep ports aligned with 'firebase.json'
-    volumes:
-      # --- RO
-      - ./firebase.json:/work/firebase.json:ro
-      # --- cached (may change; watched by the Emulators)
-      - ./functions:/work/functions:cached
-      - ./firestore.indexes.json:/work/firestore.indexes.json:cached
-      - ./firestore.rules:/work/firestore.rules:cached
-      # --- output
-      - ./firebase-debug.log:/work/firebase-debug.log:delegated
-      - ./firestore-debug.log:/work/firestore-debug.log:delegated
-      - ./ui-debug.log:/work/ui-debug.log:delegated
-      # --- other
-      - ./tmp/functions-node_modules:/work/functions/node_modules:ro
-
-    working_dir: /work
-    command: bash -o pipefail -c
-      'echo "Launching Docker... 🐳" &&
-      firebase emulators:start --project=demo-2
-        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
-      '
-      # Keep project ID in sync with 'test-fns/setup.jest.js'
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-        # Without this, Firebase-tools (9.17.0) don't see changes (Security Rules, Cloud Functions)
+      - "6800:6800"
+      - "4000:4000"
+        # Keep ports aligned with 'firebase.js'
 
     healthcheck:
-      test: "nc -z localhost 6767 && nc -z localhost 5002 && sleep 2"
+      test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800 && sleep 1"
         # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
       start_period: 23s
@@ -77,10 +56,10 @@ services:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
-      - ./firebase.json:/work/firebase.json:ro
+      - ./tmp/firebase.json:/work/firebase.json:ro
       - ./package.json:/work/package.json:ro
       - ./test-fns:/work/test-fns:ro
-      - ./test-rules:/work/test-rules:ro
+      - ./test-firestore-rules:/work/test-firestore-rules:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
       #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
@@ -96,19 +75,16 @@ services:
       #       tbd. test - is this still so?
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=30000
-          # Seen cold start execution times ('docker compose down; docker compose up warm-up'):
+      - WARM_UP_TIMEOUT=24000
+          # Seen cold start execution times ('docker compose down; PROJECT_ID=demo-2 docker compose up warm-up'):
           #
           #   fns       rules
           #   ---       -----
-          #   15.148s   20.248s       # MacOS Intel (DC 4.9.0)
-          #   26.126s   20.55s        #   -''-
+          #   3889ms    1148ms        # MacOS Intel (DC 4.9.0)
           #
-          #   9.122s    12.48s        # Cloud Build (CI)
+          #   ~~9.122s    ~~12.48s        # Cloud Build (CI)
           #
-          #---
-          # 14859, 22591 (macOS Intel, DC 4.6)
-          # ~~19000 (macOS, DC 4.0); normally ~3500 ms
+          #   Times are the _longest_ individual test's execution time, per run. These are where timeout is applied.
 
     depends_on:
       emul:
@@ -135,33 +111,4 @@ services:
     depends_on:
       warm-up:
         condition: service_healthy
-    profiles: ['manual']
-
-  # Separate target for installing (what looks to DC as) 'functions/node_modules' for development.
-  #
-  # Context:
-  #   - development; actual deployments use 'functions/node_modules'
-  #
-  # Why bother?
-  #   - Avoids the "unsupported (Node.js) version" error, by Firebase (because we control the Node version,
-  #     avoiding variation the developer machine would have).
-  #   - Avoids conflicts between OS versions (not sure if we had any...).
-  #
-  functions-install:
-    image: node:16-alpine
-    volumes:
-      # --- RO
-      - ./functions/package.json:/work/functions/package.json:ro
-      # --- output (show installed packages on the host; from where they are shared to running images)
-      - ./tmp/functions-node_modules:/work/functions/node_modules:delegated
-
-    working_dir: /work
-    command: sh -c
-      'npm config set update-notifier false &&
-      echo package-lock=false > functions/.npmrc &&
-
-      npm install --prefix functions
-      '
-    environment:
-      - NO_GUARD=1
     profiles: ['manual']

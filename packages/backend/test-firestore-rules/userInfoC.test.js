@@ -1,5 +1,5 @@
 /*
-* back-end/test-rules/userInfoC.test.js
+* back-end/test-firestore-rules/userInfoC.test.js
 */
 import { test, expect, describe, beforeAll } from '@jest/globals'
 
@@ -7,7 +7,7 @@ import { collection } from 'firebase-jest-testing/firestoreRules'
 
 // tbd. userinfo likely going to be handled differently (no need for clients to write to it)
 //
-describe("'/userInfo' rules", () => {
+describe("/userInfo rules", () => {
   let unauth_userinfoC, abc_userinfoC, def_userinfoC;
 
   beforeAll( () => {

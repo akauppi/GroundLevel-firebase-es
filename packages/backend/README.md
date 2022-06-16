@@ -10,52 +10,57 @@ Responsible for:
    - database back-end processes 
 - testing the back-end
 
-<!-- disabled: not going to proxy logging??
-   - proxying to Cloud Logging (ops)
--->
-
 **Folder structure**
 
 ```
 ├── functions             # Cloud Functions definitions
 ├── test-fns              # tests for Cloud Functions
-└── test-rules            # tests for Firestore Security Rules
+└── test-firestore-rules  # tests for Firestore Security Rules
 ```
+
+These are the main folders. There are also:
+
+```
+├── logs     # Logs from Firebase Emulator runs. Useful for debugging.
+└── tmp      # Temporary files; used in interfacing with DC
+```
+
+>Note: The approach taken in this repo differs from "normal" Firebase Emulator use. We use Docker Compose and never need the emulators to be installed on the development machine. See [`APPROACH.md`](APPROACH.md).
 
 The root has various configuration files.
 
 ## Requirements
 
-- Node 16
-- `npm` >= 7.7.0
+- Node 16+
+- `npm` 8
 - Docker Compose 2.0
 
 	<details><summary>Installation on Linux</summary>
-   DC 2.0 comes with Docker Desktop for Windows and Mac. The Linux version
-   needs to be separately installed, for now.
+	If you use a command line version of Docker, follow these instructions to have DC 2.0:
    
-   - [Compose v2 Release Candidate](https://docs.docker.com/compose/cli-command/) (Docker docs)
    - [Install on Linux](https://docs.docker.com/compose/install/#install-compose-on-linux-systems)
+
+	Alternatively, you can use [Docker Desktop on Linux](https://docs.docker.com/desktop/linux/install/).
 	</details>
 	
 <!-- 
 developed with:
-- macOS 12.3
-- node 17.9
-- npm 8.5
+- macOS 12.4
+- node 18.3
+- npm 8.11
 
-- Docker Desktop 4.7.1 with: 2 CPU cores, 2 GB RAM, 512 MB swap
+- Docker Desktop 4.9.0 with: 3 CPU cores, 2 GB RAM, 512 MB swap
    - experimental > Enable VirtioFS
 -->
 
 
 ## Getting started
 
+Make sure Docker is running (we use it already in the installing phase).
+
 ```
 $ npm install
 ```
-
-Make sure Docker is running and:
 
 ```
 $ npm test
@@ -95,10 +100,6 @@ $ docker compose down
 ```
 
 Closes the Firebase Emulators, releasing the ports they needed.
-
-<!-- remove: not so any more
-Do this eg. when switching between backend and front-end work. Also `../app` uses Docker Compose and some of the ports overlap.
--->
 
 ## Deploying
 

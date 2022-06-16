@@ -1,0 +1,33 @@
+#
+# backend/docker-compose.tools.yml
+#
+services:
+  #
+  # Separate target for installing (what looks to DC as) 'functions/node_modules' for development.
+  #
+  # Context:
+  #   - development; actual deployments use 'functions/node_modules'
+  #
+  # Why bother?
+  #   - Avoids the "unsupported (Node.js) version" error, by Firebase (because we control the Node version,
+  #     avoiding variation the developer machine would have).
+  #   - Avoids conflicts between OS versions (not sure if we had any...).
+  #
+  functions-install:
+    image: node:16-alpine
+    volumes:
+      # --- RO
+      - ./functions/package.json:/work/functions/package.json:ro
+      # --- output (show installed packages on the host; from where they are shared to running images)
+      - ./tmp/functions-node_modules:/work/functions/node_modules:delegated
+
+    working_dir: /work
+    command: sh -c
+      'npm config set update-notifier false &&
+      echo package-lock=false > functions/.npmrc &&
+      
+      npm install --prefix functions
+      '
+    environment:
+      - NO_GUARD=1
+    profiles: ['manual']

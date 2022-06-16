@@ -1,5 +1,5 @@
 /*
-* back-end/test-rules/docs.js
+* back-end/test-firestore-rules/docs.js
 *
 * Constant data used for the rules test cases
 */
