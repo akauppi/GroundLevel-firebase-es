@@ -5,8 +5,8 @@
 * routing.
 *
 * References:
-*   - Vue Router (next) > Guide
-*     https://next.router.vuejs.org/guide/
+*   - Vue Router > Guide
+*     https://router.vuejs.org/guide/
 */
 import { assert } from '/@tools/assert'
 
@@ -17,19 +17,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Pages
 //
-// Note: Static import is shorter and recommended [1]. However, also the dynamic 'await import('./pages/Some.vue')'
-//      should work.
-//
-//    [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
-//
-import Home from './pages/Home/index.vue'
-import HomeGuest from './pages/Home.guest.vue'
-import Project from './pages/Project.vue'
-import NotFound from './pages/_NotFound.vue'
+import Home from './App/pages/Home/index.vue'
+import HomeGuest from './App/pages/Home.guest.vue'
+import Project from './App/pages/Project.vue'
+import NotFound from './App/pages/_NotFound.vue'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-import { getCurrentUserWarm, isReadyProm } from './user'
+import { getCurrentUserId_sync, getCurrentUserId } from './user'
+
+function fail(msg) { throw new Error(msg) }
 
 // #rework?
 // "Try to keep the props function stateless, as it's only evaluated on route changes. Use a wrapper component if you
@@ -38,34 +35,20 @@ import { getCurrentUserWarm, isReadyProm } from './user'
 // ^--- = when do we hear of user changes?
 
 /*
-* Asking the current user, when the auth pipeline may still be warming up.
-*
-* This isolates the authentication delays to the router, which can be asynchronous.
-*/
-async function getCurrentUserProm_online() {
-  assert(!LOCAL);
-
-  await isReadyProm;
-  return getCurrentUserWarm();
-}
-
-/*
 * Provide props for a component that relies on a logged in user.
 *
-*   - "uid": undefined | null | { ..Firebase user fields }
-*   - ..: any parameters from the path (eg. project id as '/:id')
+*   "uid":  undefined | null | { ..user fields }
+*   ..:     any parameters from the path (eg. project id as '/:id')
 */
 function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
   let uid;
   if (LOCAL && r.query.user) {
     uid = r.query.user;   // 'dev:local' (not tests)
   } else {
-    uid = getCurrentUserWarm()?.uid;
+    uid = getCurrentUserId_sync();
   }
 
   assert(uid, _ => "[INTERNAL]: 'lockedProps' called without an active user");
-
-  console.debug("'lockedProps' passing uid:", uid);    // DEBUG
 
   return { uid, ...r.params }
 }
@@ -80,16 +63,16 @@ const rOpen = (path, component, o) => ({ ...o, path, component });
 //      the server config.
 //
 const routes = [
-  // Home page allowed either signed in or not - will just render differently.
+  // Home page allows either signed in or not - will just render differently.
   //
   // Notes:
   //  - 'props: true' passes the 'route.params' (eg. '/:id') to the component, as props.
   //  - for query params, we also pass them as props so the component doesn't need to parse things (we do)
   //
-  // Note: By using a '.name', we can distinguish between the guest home path and the signed one, without need for
-  //    a designated URL for sign-in. :)
+  // Note: By using a '.name', we can distinguish between the guest home path and the signed one. ALWAYS USE THE
+  //    '{ name: ... }' in 'router.push'. Otherwise, rendering gets confused!
   //
-  rLocked('/', Home ),
+  rLocked('/', Home, { name: 'Home' }),
   rOpen('/', HomeGuest, { name: 'Home.guest' }),
 
   rLocked('/projects/:id', Project),   // '/projects/<project-id>[&user=...]'
@@ -111,14 +94,13 @@ const router = createRouter({
 });
 
 // See: Vue Router > Navigation Guards
-//    -> https://next.router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
+//    -> https://router.vuejs.org/guide/advanced/navigation-guards.html
 //
-router.beforeResolve(async (to, _from) => {
-  assert(to.path !== null);   // "/some"
+router.beforeResolve(async (to, _ /*from*/) => {
+  const { path, meta, query, fullPath } = to;
+  assert(path !== null);   // "/some"
 
-  console.log(`router entering page: ${to.path}`);
-
-  const needAuth = to.meta.needAuth;    // Note: For deeper URL trees, study if you need to use 'to.matched[].meta.needAuth'. Likely not.
+  const needAuth = meta.needAuth;
 
   // What is the relationship of the router with the components being created?
   //
@@ -135,32 +117,28 @@ router.beforeResolve(async (to, _from) => {
     let ret;
 
     if (needAuth) {
-      const currentUid = getCurrentUserWarm()?.uid;   // might already be signed in
-      const queryUser = to.query.user;   // '?user=...' in the URL
+      const currentUid = await getCurrentUserId();    // null | string
+      const queryUser = query.user;   // '?user=...' in the URL
 
       if (currentUid && (!queryUser || queryUser === currentUid)) {   // already signed in; no abrupt change of user in the URL
         ret = true;   // proceed
 
-      } else if (queryUser) {   // uid given by the developer ('&user=...')
+      } else if (queryUser) {   // uid given by '&user=...'
         const uid = queryUser;
-        console.debug("Signing in as:", uid);
+        //console.debug("Signing in as:", uid);
 
         // Sign in in Firebase emulator. This
         //  a) ensures the user existed in 'local/users.js'
         //  b) provides the user details (displayName, photoURL) the normal route to the application (see 'user.js')
+        //  c) means we don't need to carry the query parameter to subpages
         //
-        await signInWithCustomToken( auth, JSON.stringify({ uid }) )
-          .then( creds => {
-            console.debug("Signed in as:", { creds });
-          })
-          .catch( err => {
-            console.error("Sign-in failed:", err);
-          });
+        const creds = await signInWithCustomToken( auth, JSON.stringify({ uid }) )
 
+        console.debug("Signed in as:", { creds });
         ret= true;
 
       } else {    // not signed in; no 'user=' in the URL
-        if (to.path === '/') {   // aiming at home; we can provide a guest version (same URL)
+        if (path === '/') {   // aiming at home; we provide a guest version (same URL)
           ret= { name: 'Home.guest' };
         } else {
           console.warn("Missing 'user' parameter");
@@ -171,52 +149,47 @@ router.beforeResolve(async (to, _from) => {
       ret= true;  // just proceed
     }
 
-    assert(ret !== undefined, "route missing");
+    (ret !== undefined) || fail("route missing");   // IDE note: if highlighted, just because there's no path that it'd be left "undefined". leave
     return ret;
 
   } else {  // real world
     let ret;
 
     if (needAuth) {
-      // '__guest' is an undocumented way to force routing to go to 'Home.guest' (even when authenticated)
+      // tbd. Do we need it?
+      // '?__guest' is an undocumented way to force routing to go to 'Home.guest' (even when authenticated)
+      const uid = /*query.__guest ? null :*/ await getCurrentUserId();    // null | string
 
-      const user = to.query.__guest ? null : await getCurrentUserProm_online();    // null | { ..Firebase user object }
-
-      if (user) {    // authenticated; pass 'uid' as a prop (since we already know it)
-        // NOTE: This is alternative to asking the user from 'user' module, in the page.
-        //     ALL pages that require authentication receive the 'uid' prop.
-        console.debug("!!!", {to, props: to?.props});
-
+      if (uid) {    // authenticated
         ret = true;
-        //ret = {...to, params: { uid: user.uid }};     // we could do it with params, but won't
 
-        /*ret= to?.props?.uid ? true : {...to,
-          props: {...to?.props || {}, uid: user.uid}
+        // tbd. See if we can deliver the user as props
+        /*ret= to?.props?.uid ? false : {...to,
+          props: {...to?.props || {}, uid}
         };*/
 
-      } else if (to.path === '/') {   // okay to head to the root; we'll show sign-in
+      /**} else if (path === '/') {   // okay to head to the root; we'll show sign-in
         ret= {
           name: 'Home.guest'
-        };
+        };**/
 
       } else {  // need auth but user is not signed in
         console.log("Wanting to go to (but not signed in):", to);  // DEBUG
 
         ret= {
           name: 'Home.guest',
-          query: {"final": to.fullPath}
+          query: {"final": fullPath}
         };
       }
-    } else {    // Home.guest
-      ret= true;   // just proceed
+    } else {    // any non-auth needing page (practically: 'Home.guest')
+      ret= true;   // proceed
     }
 
-    assert( ret !== undefined, "route missing");
+    (ret !== undefined) || fail("route missing");
     return ret;
   }
 });
 
 export {
-  router,
-  //localUserRef
+  router
 }

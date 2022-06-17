@@ -91,19 +91,19 @@
 
   import SettingsDialog from './SettingsDialog.vue'
 
-  const isOpen = ref(false);
+  const isOpen = ref();
 
   function openDialog() {
-    console.log("Shazam!");
     isOpen.value = true;
   }
 
   function closeDialog() {
-    console.log("BAM!");
     isOpen.value = false;
   }
 
   function setup() {
+    isOpen.value = false;
+
     return {
       isOpen,
       openDialog,

@@ -12,7 +12,7 @@ services:
     volumes:
       # --- RO
       - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
-      - ../backend/firebase.app.json:/work/firebase.json:ro
+      - ./tmp/firebase.app.json:/work/firebase.json:ro
       - ./.env.dev_local:/work/.env.local:ro
     environment:
       - MODE=local

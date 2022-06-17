@@ -103,3 +103,9 @@ DO NOT use top-level `await` in browser code, for now.
 Once/if implemented in browsers, we don't need the `lang="scss"` any more.
 
 Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
+
+
+## Vite
+
+- [ ] [Vite: `You are using a wildcard host. Ports might be overridden.` - how to make it go?](https://stackoverflow.com/questions/72649249/vite-you-are-using-a-wildcard-host-ports-might-be-overridden-how-to-make) (StackOverflow)
+

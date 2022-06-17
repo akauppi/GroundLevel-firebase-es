@@ -45,6 +45,8 @@
     <label>Version:</label><span>&nbsp;{{ RELEASE }}</span>
 
     <button class="gimme-error" @click.stop="gimmeError" >Cause an ERROR</button>    <!-- for Sentry exercising -->
+    <button class="log-hey" @click.stop="gimmeHey" >Log HEY!</button>    <!-- for Realtime Database logging exercising -->
+
     <button class="signOut" @click.stop="signOut" >Sign out</button>
   </div>
 </template>
@@ -114,6 +116,8 @@
 
   import { userRef2 as user } from '/@/user'
 
+  import { logHey } from '/@central/logs'
+
   const LOCAL = import.meta.env.MODE === 'dev_local'
 
   const RELEASE = import.meta.env.VITE_RELEASE ||
@@ -149,9 +153,7 @@
     async function signOut () {
       await fbSignOut( getAuth() );    // sign out also under emulation (LOCAL)
 
-      closeMe();    // avoid the dialog from popping up if re-authenticating
-
-      router.push('/');   // BUG: Under LOCAL, this doesn't remove '?user=...' from the URL (nothing happens)
+      router.push({ name: 'Home.guest' });
     }
 
     function closeMe() {
@@ -165,7 +167,11 @@
       signOut,
       gimmeError: () => { throw new Error('for sentry') },
       LOCAL,
-      RELEASE
+      RELEASE,
+      gimmeHey: async () => {
+        await logHey();
+        console.log("!!! Logged to central; please check?")
+      }
     }
   }
 

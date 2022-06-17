@@ -32,7 +32,6 @@ import App from '/@App/index.vue'
 import './common.css'
 
 import { startupTrace } from "/@/traces"
-import { logHey } from "/@/logs"
 
 document.title = appTitle;
 
@@ -98,8 +97,6 @@ async function init() {    // () => Promise of ()
   // Initialize Firebase Performance monitoring
 
   const tr = startupTrace();
-
-  logHey();
 
   // Initialize Sentry
 

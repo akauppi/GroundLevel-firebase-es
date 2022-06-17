@@ -46,13 +46,15 @@ services:
       # --- RO
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
-      - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
-      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
       # --- cached
       - ./public:/work/public:cached
       - ./src:/work/src:cached
       - ./dev:/work/dev:cached
       # --- other
+      # Vite needs a restart (ctrl-c; 'npm run dev[:online]') to see config changes.
+      - ./vite.config.js:/work/vite.config.js:ro    # :cached
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro  # :cached
+      #
       - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
       - ../../branding/favicon.png:/branding/favicon.png:ro   # trick to make the 'ln -s' work, also within DC
       #

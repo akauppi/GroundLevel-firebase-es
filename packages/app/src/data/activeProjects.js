@@ -8,7 +8,7 @@
 */
 import { collection, where } from '@firebase/firestore'
 
-import { db } from '/@firebase'
+import { db } from '/@firebase/firestore'
 
 import { collRef } from '/@tools/listen.ref'
 

@@ -1,18 +1,38 @@
 /*
 * src/central/logs.js
 *
-* Logs and counters.
-*
-* Client side support for sending logs / counter increments to Cloud Functions.
+* Client side support for central logs.
 */
-import { queue } from './ship.js'
+import { push, set } from '@firebase/database'
 
-function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fatal") => (msg, ...) => ()
+import { dbRefGen } from '/@firebase/database'
+import { getCurrentUserId } from '../user'
 
-  return (msg, ...args) => {
-    queue({ "":"log", id, level, msg, args });
+function fail(msg) { throw new Error(msg) }
 
-    console.debug("Central log:", { id, msg, level, args })
+const DEV = import.meta.env.MODE .startsWith("dev");    // Place development stuff to a separate logging path.
+
+const pushRef = push( dbRefGen(`logging_v0${ DEV ? ":dev":"" }`));
+  // note: '.' not allowed in key name
+
+function createLog(id /*, level = "info"*/) {   // (string, "info"|"warn"|"error"|"fatal") => (msg, ...) => Promise of ()
+
+  /*
+  * Send a log. Only allowed for logged in users (an attempt to keep improper postings few).
+  */
+  return async (msg, ...args) => {
+    const uid = await getCurrentUserId()
+      || fail("Central logging needs the user id.");
+
+    const entry = {
+      user: uid,
+      id,
+      msg: msg || "",       // string
+      args                  // Array of Any
+      // tbd. context
+    }
+
+    await set(pushRef, entry);
   }
 }
 

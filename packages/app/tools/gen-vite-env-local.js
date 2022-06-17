@@ -27,11 +27,11 @@ if (!projectId) {
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
-const [firestorePort, functionsPort, authPort] = (_ => {   // => [int, int, int]
+const [firestorePort, authPort, databasePort] = (_ => {   // => [int, int, int]
   const raw = readFileSync( FIREBASE_JSON );
   const json = JSON.parse(raw);
 
-  const arr = ["firestore","functions","auth"].map( k => {
+  const arr = ["firestore","auth","database"].map( k => {
     return (json.emulators && json.emulators[k] && json.emulators[k].port)    // cannot use '?.' because of the varying 'k'
       || fail(`Cannot read 'emulators.${k}.port' from 'firebase.json'`);
   });
@@ -44,8 +44,8 @@ const out =
 `# Generated based on 'firebase.json'.
 #
 VITE_FIRESTORE_PORT=${firestorePort}
-VITE_FUNCTIONS_PORT=${functionsPort}
 VITE_AUTH_PORT=${authPort}
+VITE_DATABASE_PORT=${databasePort}
 VITE_PROJECT_ID=${projectId}${
   emulHost ? `\nVITE_EMUL_HOST=${emulHost}` : ''
 }${

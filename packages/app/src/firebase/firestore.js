@@ -1,7 +1,7 @@
 /*
-* src/firebase/index.js
+* src/firebase/firestore.js
 *
-* Provide Firebase handles to application level.
+* Provide Firestore handles to application level.
 */
 import { getFirestore, doc, collection } from '@firebase/firestore'
 

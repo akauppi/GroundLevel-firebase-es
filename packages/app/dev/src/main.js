@@ -8,7 +8,7 @@ import { assert } from './assert.js'
 import { initializeApp } from '@firebase/app'
 import { getAuth, connectAuthEmulator, initializeAuth, debugErrorMap } from '@firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
-import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
+import { getDatabase, connectDatabaseEmulator } from '@firebase/database'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
@@ -45,32 +45,26 @@ async function initFirebaseLocal() {   // () => Promise of ()
   //
   // Build has poured the necessary values from 'firebase.json' to us, as VITE_... constants.
   //
-  const [firestorePort, fnsPort, authPort] = [
+  const [firestorePort, authPort, databasePort] = [
     import.meta.env.VITE_FIRESTORE_PORT,
-    import.meta.env.VITE_FUNCTIONS_PORT,
-    import.meta.env.VITE_AUTH_PORT
+    import.meta.env.VITE_AUTH_PORT,
+    import.meta.env.VITE_DATABASE_PORT
   ];
-  assert(firestorePort && fnsPort && authPort, "Some Firebase param(s) are missing; problem in build");
+  assert(firestorePort && authPort && databasePort, "Some Firebase param(s) are missing; problem in build");
 
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6769
-  const FUNCTIONS_PORT = parseInt(fnsPort);                 // 5003
   const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9101"
+  const DATABASE_PORT = parseInt(databasePort);             // 6801
 
   const firestore = getFirestore();
 
-  // If you use a region when Cloud Functions are emulated, set it here.
-  //
-  // Firebase API inconsistency (9.0-beta.{1..3}):
-  //    For some reason, there is no 'initializeFunctions' but the 'getFunctions' takes parameters (which it doesn't,
-  //    on other subpackages). #firebase
-  //
-  const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
-
   const auth = HUMAN_READABLE_AUTH_ERRORS_PLEASE ? initializeAuth(fah, { errorMap: debugErrorMap }) : getAuth();
 
+  const database = getDatabase();
+
   connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
-  connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
   connectAuthEmulator(auth, AUTH_URL, { disableWarnings: true });
+  connectDatabaseEmulator(database, host, DATABASE_PORT);
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //

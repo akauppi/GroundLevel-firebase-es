@@ -97,6 +97,7 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //
   "firebase-app": /\/deps_build\/@firebase_app\.js$/,      // just 0.03 kB
   "firebase-auth": /\/deps_build\/@firebase_auth\.js$/,    // just 0.03 kB
+  "firebase-database": /\/deps_build\/@firebase_database\.js$/,
   "firebase-firestore": /\/deps_build\/@firebase_firestore\.js$/,
   "firebase-performance": /\/deps_build\/@firebase_performance\.js$/,
 

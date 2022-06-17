@@ -163,22 +163,15 @@ async function configGen({ command, mode }) {
       })
     ],
 
-    /*** worker: {
-      // Firefox (v.100; Jun 2022) is not ready for "es", yet. Other major browsers likely are.
-      //
-      //  Firefox gives a console error:
-      //    "import declarations may only appear at top level of a module"
-      //
-      //format: 'es'    // default: 'iife'
-    }, ***/
-
-    server: SERVE_PORT ? {   // for production, just for debugging
-      port: SERVE_PORT,
+    server: {
+      // Allows viewing from other devices, eg. a tablet.
+      host: true,
       strictPort: true,
 
-      // Allows viewing from other devices, eg. a tablet.
-      host: true
-    } : {},
+      ...(SERVE_PORT ? {   // for production, just for debugging
+        port: SERVE_PORT
+      } : {})
+    },
 
     // Clearing the screen is considered distracting, though one can PgUp to see what was there just prior to Vite launching.
     clearScreen: false

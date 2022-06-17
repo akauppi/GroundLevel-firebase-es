@@ -3,6 +3,9 @@
 #
 # A version of the DC definition for front-end development and testing.
 #
+# Expects:
+#   'DOT_APP' env.var. to be ".app"
+#
 # Note:
 #   Ports exposed at the host are defined so that they do not overlap with those of 'docker-compose.yml'.
 #   This means backend containers can be left running while doing front-end development.
@@ -25,15 +28,6 @@ services:
         # Ports that don't overlap those for backend development.
         # Keep the ports aligned with '../app'.
 
-    # Note: Overwrites the mapping (for plain) done in 'base' image. DC keys these by the target path.
-    volumes:
-      # --- RO
-      - ./tmp/firebase.app.json:/work/firebase.json:ro
-      # --- output
-      - ./firebase-debug.app.log:/work/firebase-debug.log:delegated
-      - ./firestore-debug.app.log:/work/firestore-debug.log:delegated
-      - ./ui-debug.app.log:/work/ui-debug.log:delegated
-
     environment:
       - CHOKIDAR_USEPOLLING=true
     healthcheck:
@@ -46,7 +40,9 @@ services:
 
   emul-for-app-launched:
     image: node:16-alpine
-    command: sh -c true
+    command: sh -c
+      '[ ${DOT_APP} == ".app" ] || ( >&2 echo "ERROR. Please provide 'DOT_APP=.app' env.var. Just Do it. :)"; false )
+      '
     depends_on:
       emul-for-app:
         condition: service_healthy

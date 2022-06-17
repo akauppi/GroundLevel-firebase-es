@@ -1,5 +1,5 @@
 /*
-* src/firebase/sentinel.js
+* src/firebase/firestore-sentinel-exp.js
 *
 * Provide sentinel values for Firebase Firestore queries.
 *

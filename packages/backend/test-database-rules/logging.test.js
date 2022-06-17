@@ -8,7 +8,6 @@ import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
 import admin from 'firebase-admin'
 import { getDatabase } from 'firebase-admin/database'
-import {performance} from "perf_hooks";
 
 //const fail = (msg) => { throw new Error(msg) }
 
@@ -34,6 +33,7 @@ describe ("/logging_v0 rules", () => {
     abc_loggingRef = dbAbc.ref("logging_v0");
     abc_anyRef = dbAbc.ref("random");
 
+    // tbd. Is this needed?
     await primeAsAdmin()
   });
 
@@ -156,7 +156,7 @@ async function peekOne(ref) {    // (DatabaseRef) => Promise of Any|null
 /*
 * Write an initial value.
 */
-async function primeAsAdmin() {
+async function primeAsAdmin() {   // tbd. might not be needed
 
   // If '.databaseURL' is not given, even if 'BLAHBLAH' env.var. is, we get:
   //  <<
