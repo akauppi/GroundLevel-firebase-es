@@ -67,10 +67,10 @@ This means you should be able to run the Cypress installed within Linux, and use
 <!--
 Development is done with: 
 
-- macOS 12.3
-- node 18.0
-- npm 8.6
-- Docker Desktop 4.8 with: 2 CPU cores, 2 GB RAM, 512 MB swap
+- macOS 12.4
+- node 18.3
+- npm 8.11
+- Docker Desktop 4.9.0 with: 3 CPU cores, 2 GB RAM, 512 MB swap
   - experimental > Enable VirtioFS
 -->
 
@@ -80,7 +80,7 @@ Development is done with:
 $ npm install
 ```
 
->Note: This will take *ages* on the first time, since it's loading not only the `npm` dependencies but a ~600MB Cypress binary, as well.
+>Note: This will take *ages* on the first time, since it's loading not only the `npm` dependencies but a ~500MB Cypress binary, as well.
 >
 >If you don't need Cypress (yet), `CYPRESS_INSTALL_BINARY=0 npm install` speeds up the install by skipping downloading the binary part.
 
@@ -90,30 +90,39 @@ Launch the app:
 $ npm run dev
 ...
 
-  vite v2.4.4 dev server running at:
+  VITE v3.0.0-alpha.12  ready in 1341 ms
 
-  > Local:    http://localhost:3000/
-  > Network:  http://192.168.1.62:3000/
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://172.20.0.2:3000/
+  ❖  Note:    You are using a wildcard host. Ports might be overridden.
 
-  ready in 489ms.
-  
 ...
 ```
 
 This serves the UI locally, against an emulated Firebase back-end.
 
->Within local mode, you sign in by `?user=dev` query parameter. Even though the social sign-in button is visible, don't use it.
+>Within local mode, you sign in by `?user=dev` query parameter.
 
 <!-- tbd. Could dim the social sign-in with a hover tip on `?user=dev` -->
 
-Try it:
+Try it: 
 
-[http://localhost:3000?user=dev](http://localhost:3000?user=dev)
+[`http://localhost:3000?user=dev`](http://localhost:3000?user=dev)
 
 Try making some changes in the `src/**` files and see that they are reflected in the browser.
 
 <!-- tbd. some more fun mod, perhaps?
 >![](.images/modded-welcome.png)
+-->
+
+>Note: Ignore the `You are using a wildcard host.` message. We need it for running under Docker Compose, and haven't found a way to skip the message.
+
+<p />
+
+>Note: The IP (`172.20.0.2`) mentioned above exists only within the Docker container. Ignore it.
+
+<!--
+tbd. Use color-preserving piping (with `socat`) within the DC, taking the two lines out.
 -->
 
 ## Two development workflows
@@ -126,8 +135,8 @@ Differences of these modes:
 
 ||Back-end|Data|Users|Authentication|Central logging|
 |---|---|---|---|---|---|
-|`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|browser console|
-|`online`|in the cloud|in the cloud; changes are persistent|←|against real accounts|command line|
+|`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|Realtime Database being emulated|
+|`online`|in the cloud|in the cloud; changes are persistent|←|against real accounts|Realtime Database in the cloud|
 
 >**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase project id's so their data and users won't overlap.
 
@@ -158,10 +167,12 @@ Use this when:
 
 The mode needs `firebase.staging.js` in the project's root, to find the staging project. Instructions for creating it are in the root `README`.
 
+>Note: You can choose another project by `ENV=abc npm run dev:online`.
+
 #### Launch! 🚀
 
 Launch the server:
-  
+
 ```
 $ npm run dev:online
 ...
@@ -169,7 +180,7 @@ $ npm run dev:online
 
 Point your browser to `http://localhost:3001`.
 
-Changes to your front-end files are still reflected in the browser, but back-end services are now run in the cloud. Changes you do to the data will persist. Traffic you create will be using your [quotas](https://firebase.google.com/docs/functions/quotas).
+Changes to your front-end files are still reflected in the browser, but back-end services are now run in the cloud. Changes you do to the data will persist. So will your logs. Traffic you create will be using your [quotas](https://firebase.google.com/docs/functions/quotas).
 
 The two development modes are completely orthogonal - you can run them side by side, in different terminals. By default, local uses port 3000 and online port 3001.
 
@@ -215,7 +226,7 @@ You can use Cypress for test based development as well as running all the tests,
 $ npm test
 ```
 
-`npm test` launches the same local server as `npm run dev`, and runs Cypress tests on it.
+`npm test` launches a DC environment in the background. It remains running until a `npm run dev:start` would shut it down. This reduces the startup time, in case you were to run `npm test` multiple times.
 
 
 ### Test based development

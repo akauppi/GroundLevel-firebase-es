@@ -1,14 +1,14 @@
 /*
-* cypress/commands/index.js
+* cypress/support/e2e.js
 *
-* Provides signing in/out from Firebase auth.
+* Add commands for signing in/out from Firebase auth.
 *
 * Implementation note:
 *   We use "real" 'signInWithCustomToken' that signs up the users in Firebase Auth Emulation. 'npm run dev' has the
 *   '?user=xyz' parameter that would do the same but we don't need to go through it.
 *
 * Note:
-*   We cannot 'import' any of the application sources, since they use '/@xxx' path mapping. (This should be fine.)
+*   Cannot 'import' any of the application sources, since they use '/@xxx' path mapping. (This should be fine.)
 */
 import {
   connectAuthEmulator,

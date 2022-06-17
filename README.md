@@ -20,17 +20,14 @@ https://github.com/leg100/cloud-build-badge
 
 Great tools selected for you: 
 
-[Vite](https://github.com/vitejs/vite)
-- [Firebase](https://firebase.google.com)
+[Firebase](https://firebase.google.com)
+- [Vite](https://github.com/vitejs/vite)
 - [Vue.js 3](https://vuejs.org)
 - [Jest](https://jestjs.io)
 - [Cypress](https://www.cypress.io)
 - [Cloud Build](https://cloud.google.com/build)
 - [Plausible](https://plausible.io)
 - [Sentry](https://sentry.io)
-
-<!-- tbd. Add operational tools
--->
 
 <font color=green>&check;</font> Built on 2020's technology (ES2022, async/await), aiming to stay up to date and lean.
 
