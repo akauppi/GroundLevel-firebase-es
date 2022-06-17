@@ -164,8 +164,7 @@ async function configGen({ command, mode }) {
     ],
 
     server: {
-      // Allows viewing from other devices, eg. a tablet.
-      host: true,
+      host: true,   // needed for the DC port mapping to work
       strictPort: true,
 
       ...(SERVE_PORT ? {   // for production, just for debugging

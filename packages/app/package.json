@@ -56,18 +56,18 @@
     "//_postinstall_ci": "npm install --prefix .. --no-save esbuild && npm run -s _genEnvCi)",
     "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env",
     "--    -": "",
-    "_flush": "docker image rm app_vite-base app_vite-dev app_build app_prime"
+    "_flush": "docker image rm app_vite-base app_vite-dev app_vite-online app_build app_prime"
   },
   "dependencies": {
     "@sentry/browser": "^7.0.0",
     "@sentry/tracing": "^7.0.0",
     "aside-keys": "^0.0.3-alpha.1",
-    "@firebase/app": "^0.7.25",
+    "@firebase/app": "^0.7.26",
     "@firebase/database": "^0.13.1",
-    "@firebase/firestore": "^3.4.9",
-    "@firebase/performance": "^0.5.9",
+    "@firebase/firestore": "^3.4.10",
+    "@firebase/performance": "^0.5.10",
     "plausible-tracker": "^0.3.5",
-    "vue": "^3.2.36",
+    "vue": "^3.2.37",
     "vue-router": "^4.0.16"
   },
   "//dependencies": {
@@ -77,8 +77,8 @@
   "devDependencies": {
     "@local/self": "file:.",
     "@vitejs/plugin-vue": "^2.3.2",
-    "cypress": "9.6.0",
-    "sass": "^1.52.1",
+    "cypress": "10.1.0",
+    "sass": "^1.52.3",
     "prettier": "2.6.2"
   },
   "//comments": {

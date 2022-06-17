@@ -168,18 +168,13 @@ router.beforeResolve(async (to, _ /*from*/) => {
           props: {...to?.props || {}, uid}
         };*/
 
-      /**} else if (path === '/') {   // okay to head to the root; we'll show sign-in
-        ret= {
-          name: 'Home.guest'
-        };**/
-
       } else {  // need auth but user is not signed in
         console.log("Wanting to go to (but not signed in):", to);  // DEBUG
 
-        ret= {
+        ret = {
           name: 'Home.guest',
-          query: {"final": fullPath}
-        };
+          ...( (fullPath && fullPath !== '/') ? { query: {"final": fullPath} } : {} )
+        }
       }
     } else {    // any non-auth needing page (practically: 'Home.guest')
       ret= true;   // proceed
