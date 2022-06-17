@@ -226,16 +226,26 @@ You can use Cypress for test based development as well as running all the tests,
 $ npm test
 ```
 
-`npm test` launches a DC environment in the background. It remains running until a `npm run dev:start` would shut it down. This reduces the startup time, in case you were to run `npm test` multiple times.
+`npm test` launches a DC environment in the background. This reduces the startup time, in case you were to run `npm test` multiple times.
 
 
 ### Test based development
 
 The other way is to keep `npm run dev` running, and edit both one's code and tests (and Security Rules) while keeping an eye on the test results.
 
-Have `npm run dev` running in the background. 
+Have `npm run dev` running in a terminal.
+
+Visit `http://localhost:3000` at with a browser, at least once. The first load warms up Vite.
+
+<!-- tbd.
+Could do a `curl` within DC, to warm up automatically.
+-->
 
 Launch Cypress and pick the `packages/app` subfolder.
+
+><sub>There are two ways to launch Cypress, either from its Desktop icon (recommended) or by `npx cypress open --e2e` in the `packages/app` folder.</sub>
+
+- Choose `End to End tests`
 
 ![](.images/cypress-launch.png)
 
@@ -245,11 +255,9 @@ Try to run the tests.
 
 As you can see in the image, always keep the developer tools open while running Cypress tests. It helps.
 
-Now edit some test in the IDE (they are under `cypress/anonymous` and `cypress/joe`).
+>Note: It seems, with Cypress 10 there is no longer a "Run all tests" option in the dashboard. That's a shame (so you'll end up `npm test`ing for seeing what fails, and drilling into it here).
 
->**Note on folder structure:** 
->
->After long retaining to the Cypress convention of `cypress/integration`, the author changed the folder structure to reflect the various user stories a front end might have. Thus, within `cypress` folder, tests for a certain user story are in their own folder. Naturally, you may set this back to Cypress defaults if you wish. Also, `cypress/support` was renamed to `commands` since it's where custom commands come from.
+Now edit some test in the IDE (they are under `cypress/e2e`).
 
 Cypress will automatically re-run tests while you make changes to the source - or the tests. A big display becomes useful, here!
 
@@ -264,22 +272,42 @@ The Cypress approach changes the way we do software. The more time you spend wit
 >Some Cypress features like "stubs" and "proxies" are not need, at all. Those are intended for building scaffolding when running things locally, but we have the whole Firebase emulators so we can work against the Real Thing.
 
 
+## Manual testing on other devices
+
+Both `npm run dev` and `npm run dev:online` expose their ports to all network interfaces, within your computer.
+
+This means, the web app is browsable also from a phone, tablet etc. in the same network. All you need is to find out the outwards-facing IP number of your computer (let's say it's `192.168.1.62`), and open `http://192.168.1.62:3000` (or 3001) from your other device.
+
+>Note: There's a LOT more to developing with another device. You can tie both the Safari and Chrome browsers with a desktop browser, seeing the debugging information within the desktop.
+>
+>This is beyond the purpose of a `README`, though.
+
+### Finding your IP number
+
+|OS|Steps|
+|---|---|
+|macOS (UI)|`Preferences` > `Network` > (adapter) > `IP address`|
+|macOS (terminal)|`ifconfig`|
+
+<!--
+|Windows 10 + WSL2|...|
+|Linux|`ipconfig` ??|
+-->
+
+
 ## Production build
 
 ```
 $ npm run build
 ...
-vite v2.3.8 building for production...
-✓ 55 modules transformed.
-dist/aside-keys.js   17.91kb / brotli: 5.64kb
-dist/aside-keys.js.map 28.60kb
-dist/style.css       5.26kb / brotli: 1.43kb
-dist/app.es.js       33.24kb / brotli: 8.14kb
-dist/app.es.js.map   65.48kb
-dist/vue-router.js   52.54kb / brotli: 11.63kb
-dist/vue-router.js.map 172.74kb
-dist/vue.js          132.61kb / brotli: 26.22kb
-dist/vue.js.map      512.57kb
+vite v3.0.0-alpha.12 building for production...
+✓ 64 modules transformed.
+../dist/index.html                         1.24 KiB
+../dist/firebase-app.e5e64390.js           0.03 KiB / gzip: 0.05 KiB
+../dist/firebase-app.e5e64390.js.map       0.10 KiB
+...
+../dist/mystery.3ee42f39.js                381.16 KiB / gzip: 86.57 KiB
+../dist/mystery.3ee42f39.js.map            1101.28 KiB
 ```
 
 This builds your front end application in `dist/` folder:
@@ -287,15 +315,10 @@ This builds your front end application in `dist/` folder:
 ```
 $ tree dist
 dist
-├── assets
-│   ├── aside-keys.5dea6d63.js
-│   ├── aside-keys.5dea6d63.js.map
+├── aside-keys.5dea6d63.js
+├── aside-keys.5dea6d63.js.map
 ...
-│   ├── style.ac5ddd16.css
-│   ├── vue-router.f6d35745.js
-│   ├── vue-router.f6d35745.js.map
-│   ├── vue.ee0c66d7.js
-│   └── vue.ee0c66d7.js.map
+├── style.8cd2db39.css
 ├── favicon.png
 └── index.html
 ```

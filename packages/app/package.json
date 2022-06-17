@@ -56,7 +56,7 @@
     "//_postinstall_ci": "npm install --prefix .. --no-save esbuild && npm run -s _genEnvCi)",
     "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env",
     "--    -": "",
-    "_flush": "docker image rm app_vite-base app_vite-dev app_vite-online app_build app_prime"
+    "_flush": "docker image rm app_vite-base app_vite-dev app_vite-online app_build app_prime app_vite-for-test"
   },
   "dependencies": {
     "@sentry/browser": "^7.0.0",

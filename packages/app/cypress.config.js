@@ -15,7 +15,9 @@ export default defineConfig({
 
   e2e: {
     //setupNodeEvents(on, config) {},
-    baseUrl: 'http://localhost:3003',
+
+    // For test-based development, we use a running 'npm run dev' (port 3000) instance.
+    baseUrl: 'http://localhost:3000',
 
     //specPattern   // default: cypress/e2e/**/*.cy.{js,jsx,ts,tsx}
     //supportFile   // default: cypress/support/e2e.js
