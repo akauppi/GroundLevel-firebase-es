@@ -3,7 +3,7 @@
 *
 * Increment central counters.
 */
-function crCounter(name) {  // (string) => (diff = 1.0, { tag: v }?) => ()
+function crCounter(_name) {  // (string) => (diff = 1.0, { tag: v }?) => ()
 
   return () => {}
   /***

@@ -80,16 +80,24 @@ async function initFirebaseLocal() {   // () => Promise of ()
 * Running against an online project
 */
 async function initFirebaseOnline() {
-  const [apiKey, appId, authDomain, projectId] = [
+  const [apiKey, appId, authDomain, projectId, locationId, databaseLocationId] = [
     import.meta.env.VITE_API_KEY,
     import.meta.env.VITE_APP_ID,      // needed only for Firebase Performance Monitoring
     import.meta.env.VITE_AUTH_DOMAIN,
-    import.meta.env.VITE_PROJECT_ID
+    import.meta.env.VITE_PROJECT_ID,
+    import.meta.env.VITE_LOCATION_ID,
+    import.meta.env.VITE_DATABASE_LOCATION_ID
   ];
 
   assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 
-  initializeApp( { apiKey, appId, authDomain, projectId } );
+  // Note: If the deployed region matches the dbRegion, there might be no need to do anything (tbd. check that case, one day).
+  //
+  // tbd. Could we pick up the URL from anywhere?  (see Firebase client code)
+  //
+  const databaseURL = `https://${ projectId }-default-rtdb.${ databaseLocationId || locationId }.firebasedatabase.app/`;
+
+  initializeApp( { apiKey, appId, authDomain, projectId, databaseURL } );
 }
 
 // NOTE ABOUT TOP-LEVEL AWAIT:

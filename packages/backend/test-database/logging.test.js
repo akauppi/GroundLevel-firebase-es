@@ -1,8 +1,7 @@
 /*
 * test-database-rules/logging.test.js
 *
-* Logging is additive by its nature. Also, to test it, we don't need to be concerned about possible earlier
-* contents. Just add on top.
+* Logging is additive by its nature. Also, to test it, we don't need to be concerned about possible earlier contents.
 */
 import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 

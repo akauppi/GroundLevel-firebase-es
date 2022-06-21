@@ -29,7 +29,6 @@ module.exports = {
 
   parserOptions: {
     ecmaVersion: 2022,  // we use: top-level await (2022), dynamic import (2020)
-    //ecmaVersion: 2020,  // we use: dynamic import (2020)
     sourceType: 'module'
   },
 
@@ -81,18 +80,22 @@ module.exports = {
     },
 
     // run under node (ES modules sources)
+    //
+    // Note: Top-level awaits should be okay, but the 'plugin_node/recommended' still gives the warning:
+    //    <<
+    //      expressions are not supported yet.(node/no-unsupported-features/es-syntax)
+    //    <<
     {
       files: ["local/*.js", "tools/*.js"],
       extends: ['plugin:node/recommended'],
       env: {
         node: true
       },
-      globals: {
-        //Buffer: true
-      },
       rules: {
         "no-process-exit": off,
-        "node/no-unpublished-bin": off
+        "node/no-unpublished-bin": off,
+
+        "node/no-unsupported-features/es-syntax": off   // top-level await, without warning
       }
     },
 
