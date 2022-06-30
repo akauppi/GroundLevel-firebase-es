@@ -34,13 +34,15 @@
     "-- --": "",
     "lint": "eslint .",
     "--   -": "",
+    "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
+    "--   - ": "",
     "app:start": "npm run -s _prepAppDC && PROJECT_ID=demo-main DOT_APP=.app docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
     "_prepAppDC": "npm run -s _touchEmApp && npm run -s _genFirebaseJsonApp && npm run -s _genDatabaseRulesJson",
-    "--   - ": "",
-    "dc:warm-up": "npm run test:fns:allDC && npm run test:rules:allDC",
     "-- - -": "",
-    "ci:test": "npm run test:fns:allDC && npm run test:rules:allDC",
+    "dc:warm-up": "npm run test:fns:allDC && npm run test:rules:allDC",
     "--  --": "",
+    "ci:test": "npm run test:fns:allDC && npm run test:rules:allDC",
+    "-- ---": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
     "_postinstall_local": "install -d tmp/functions-node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
     "_postinstall_ci": "npm --prefix functions install && npm run -s _touchEm && npm run -s _touchEmApp && npm run -s _genFirebaseJson && npm run -s _genFirebaseJsonApp",
@@ -53,7 +55,7 @@
   "devDependencies": {
     "firebase-admin": "^11.0.0",
     "firebase-jest-testing": "^0.0.5-beta.1",
-    "jest": "^28.1.1"
+    "jest": "^28.1.2"
   },
   "//comments": {
     "engines.node": [
@@ -71,6 +73,9 @@
       ],
       "ci:{test|deploy}": [
         "These are the commands CI will use."
+      ],
+      "first:prepare": [
+        "For '/first/deploy.sh' - makes sure the configuration files are generated."
       ],
       "_postinstall_local": [
         "Important to create the 'tmp/functions-node_modules' in the host side; otherwise, WSL2 Docker",

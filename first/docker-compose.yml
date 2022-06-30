@@ -30,7 +30,7 @@ services:
   # Once authenticated, the auth information is stored in: 
   #   'tmp/configstore/firebase-tools.json'
   #
-  # 'firebase use --add' demands to have a 'firebase.json' (maybe a dummy would do?) and creates '.firebaserc' in the
+  # 'firebase use --add' demands to have a 'firebase.json' (a dummy will do) and creates '.firebaserc' in the
   # current folder.
   #
   deploy-auth:
@@ -39,8 +39,6 @@ services:
       - "9005:9005"   # needed by the auth dance
     volumes:
       #-- RO
-      # 'firebase use --add' needs to have a 'firebase.json'; also a dummy would likely do?
-      - ../packages/backend/firebase.json:/work/firebase.json:ro
       #-- Output
       #
       # Firebase CLI saves the login information in '/root/.config/configstore/firebase-tools.json'.
@@ -53,6 +51,8 @@ services:
     working_dir: /work
     command: bash -o pipefail -c
       'echo "Launching Docker... 🐳" &&
+      
+      echo '{}' > firebase.json &&
       firebase login &&
 
       firebase use --add &&
@@ -96,24 +96,27 @@ services:
     build: ../firebase-ci-builder.sub
     volumes:
       #-- RO
-      # Note: Could not map '.firebaserc' on top of a read-only '/work' (DD-on-Mac 4.8.2; VirtioFS; macOS 12.4)
-      #     Work-arounds:
-      #       a) map 'backend' as rw (deployment will need to happen within it; and we need the '.firebaserc').
-      #       b) map only the files ('functions', 'firebase.json', ...?) really needed
-      #
       - ../packages/backend/functions:/work/functions:ro
-      - ../packages/backend/firebase.json:/work/firebase.json:ro
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
       #
-      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up.
-      - ./.state/configstore:/root/.config/configstore:rw
+      # Note: Caller has generated these.
+      #   Though they are created in a 'tmp' folder, also 'backend' uses DC mapping, to place them in the work folder.
+      #   This suits us well.
+      #
+      - ../packages/backend/tmp/firebase.json:/work/firebase.json:ro
+      - ../packages/backend/tmp/database.rules.json:/work/database.rules.json:ro
+      #
       - ./.state/.firebaserc:/work/.firebaserc:ro
       - ./.state/functions-node_modules:/work/functions/node_modules:ro
 
+      #-- other
+      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up (no changes are anticipated).
+      - ./.state/configstore:/root/.config/configstore:rw
+
     working_dir: /work
     command: sh -c
-      'firebase deploy --only functions,firestore
+      'firebase deploy --only functions,firestore,database
       '
     profiles: ['manual']
 

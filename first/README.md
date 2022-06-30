@@ -8,7 +8,12 @@ The commands are to be executed in the `first` folder.
 ## Requirements
 
 - You have a Firebase project created
-   - it has "Blaze" plan, Cloud Functions and Cloud Firestore enabled
+   - it has "Blaze" plan with these enabled:
+      - [x] Cloud Firestore
+      - [x] Cloud Functions
+      - [x] Realtime Database
+      - [x] Hosting
+  - it has an "application"
 - Have Docker running
 
 

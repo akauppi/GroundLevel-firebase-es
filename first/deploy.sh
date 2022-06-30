@@ -55,9 +55,6 @@ if [[ ! ${CHOICE:-y} =~ ^[Yy]$ ]]; then
 fi
 
 #--- Execute
-#
-install -d .state && \
-  rm -f .state/*
 
 # Create the state
 #
@@ -65,7 +62,8 @@ install -d .state && \
 #   creates them with 'root' access. (WSL2)
 #
 install -d .state/configstore && \
-  touch .state/.captured.sdkconfig .state/.firebaserc && \
+  touch .state/.captured.sdkconfig && \
+  ([ -f .state/.firebaserc ] || echo '{}' > .state/.firebaserc) && \
   docker compose run --rm --service-ports deploy-auth
 
 if [[ ! -f .state/.captured.sdkconfig ]]; then
@@ -97,6 +95,8 @@ rm .state/.captured.sdkconfig
 
 # Backend
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
+
+(cd ../packages/backend && npm run -s first:prepare)
 
 install -d .state/functions-node_modules && \
   docker compose run --rm prepare-backend-state
