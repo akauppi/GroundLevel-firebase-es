@@ -17,3 +17,34 @@ services:
     environment:
       - MODE=local
     profiles: ['manual']
+
+  #---
+  # This is normally not needed, but CAN BECOME USEFUL if 'main.js' doesn't launch 'app.js' properly, to debug.
+  #
+  # Used via 'npm run _build:dev'
+  #
+  # tbd. Undocumented; broken. Fix. May be useful!
+  #
+  build:
+    extends:
+      file: docker-compose.base.yml
+      service: vite-base
+
+    volumes:
+      # --- RO
+      - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
+      - ./tmp/firebase.app.json:/work/firebase.json:ro
+      - ./.env.dev_local:/work/.env.local:ro
+    command: sh -c
+      'npm config set update-notifier false &&
+
+      npm install -g rollup-plugin-visualizer &&
+      (cd / && mkdir node_modules && cd node_modules && ln -s $$NODE_PATH/rollup-plugin-visualizer .) &&
+
+      ([ -z "${SENTRY_SAMPLE_RATE:-}" ] || echo "VITE_SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE:---}" >> .env) &&
+
+      vite build --mode dev_local
+      '
+    environment:
+      - MODE=local
+    profiles: ['manual']

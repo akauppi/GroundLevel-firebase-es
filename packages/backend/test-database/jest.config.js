@@ -1,10 +1,8 @@
-// test-database-rules/jest.config.js
+// test-database/jest.config.js
 
 import opts from '../jest.config.default.js'
 
 export default { ...opts,
 
-  testTimeout: Math.max( opts.testTimeout, 8000 ),    //TEMP
-
-  globalSetup: "./setup.jest.js"
+  //testTimeout: Math.max( opts.testTimeout, 8000 ),    //TEMP
 };

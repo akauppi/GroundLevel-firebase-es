@@ -19,27 +19,26 @@ const fn = '../firebase.js';
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
-// tbd. Use top-level-await (Node.js 14.8+ and we have 16.x, guaranteed).
+const { projectId, appId, apiKey, authDomain, locationId } = await import(fn).then(mod => mod.default)
+  .catch(err => {
+    process.stderr.write(`ERROR: ${err.message}\n\n`);
+    process.exit(2);
+  });
 
-/*await*/ import(fn).then( (mod) => {
-  const { projectId, appId, apiKey, authDomain } = mod.default;
-  (apiKey && appId && authDomain && projectId) || fail(`Some values missing from: ${fn.replace("../","") }`);
+(apiKey && appId && authDomain && projectId && locationId)
+  || fail(`Some values missing from: ${fn.replace("../","") }`);
 
-  const out = `# Generated based on '${fn}'.
+const out = `# Generated based on '${fn}'.
 #
 VITE_API_KEY=${apiKey}
 VITE_APP_ID=${appId}
 VITE_AUTH_DOMAIN=${authDomain}
-VITE_PROJECT_ID=${projectId}${
+VITE_PROJECT_ID=${projectId}
+VITE_LOCATION_ID=${locationId}${
   SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;
 
-  process.stdout.write(out);
-
-}).catch(err => {
-  process.stderr.write(`ERROR: ${err.message}\n\n`);
-  process.exit(2);
-});
+process.stdout.write(out);
 
 function fail(msg) { throw new Error(msg); }

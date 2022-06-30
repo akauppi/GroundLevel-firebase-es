@@ -33,7 +33,7 @@ The root has various configuration files.
 
 - Node 16+
 - `npm` 8
-- Docker Compose 2.0
+- Docker Compose 2.0 <sub>as per `docker compose version`</sub>
 
 	<details><summary>Installation on Linux</summary>
 	If you use a command line version of Docker, follow these instructions to have DC 2.0:

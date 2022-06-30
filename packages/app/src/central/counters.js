@@ -3,18 +3,9 @@
 *
 * Increment central counters.
 */
-function crCounter(_name) {  // (string) => (diff = 1.0, { tag: v }?) => ()
+import { createCounter } from './support'
 
-  return () => {}
-  /***
-  return (diff = 1.0, tags = {}) => {
-    queue({ "":"inc", name, diff, tags });
-
-    console.debug("Central inc:", { name, diff, tags });
-  }***/
-}
-
-const countLogins = crCounter("login");
+const countLogins = createCounter("login");
 
 export {
   countLogins

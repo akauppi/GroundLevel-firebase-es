@@ -32,3 +32,28 @@ Closed, but the issue remains.
 This might not apply any more; we are using `type: "module"` in the functions. Once we really log to Google logs, mention that this might no longer be an issue?
 -->
 
+## Impersonation with `firebase-admin` against Realtime Database Emulator does not work
+
+- [ ] [RTDB emulator doesn't work properly with databaseAuthVariableOverride](https://github.com/firebase/firebase-tools/issues/2554)
+
+It seems like something that's simply omitted. The Firebase approach seems to be to do impersonation in the client SDK. 
+
+This approach is ..strange.. since impersonation use case is in tests that can use `firebase-admin`.
+
+- [ ] [Documentation on using impersonation with Realtime Database Emulator](https://github.com/firebase/firebase-admin-node/issues/1777)
+
+<!-- hidden
+
+>Firebase [docs](https://firebase.google.com/docs/database/admin/start?authuser=0#admin-sdk-setup) say:
+>>If you are interested in using the Node.js SDK as a client for end-user access (for example, in a Node.js desktop or IoT application), as opposed to admin access from a privileged environment (like a server), you should instead follow the instructions for setting up the client JavaScript SDK.
+-->
+
+Also:
+
+- ["How to connect Firebase Admin to Emulator Auth"](https://stackoverflow.com/questions/71268856/how-to-connect-firebase-admin-to-emulator-auth) (SO)
+
+- [Add the Firebase Admin SDK to your server](https://firebase.google.com/docs/admin/setup?authuser=0) (Firebase docs)
+
+   No mention of emulators. Could fit nicely, there... (it does mention "When testing the Admin SDK locally").
+   
+   

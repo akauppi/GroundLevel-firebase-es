@@ -47,6 +47,8 @@
     "serve": "http-server -p 8080 dist",
     "//serve": "docker compose run --rm --service-ports _serve",
     "--  --": "",
+    "_build:dev": "npm run -s _touchDevLocalEnv && docker compose -f docker-compose.local.yml run --rm build",
+    "--  -- ": "",
     "_checkStaging": "[ -f ../../firebase.${ENV-staging}.js ] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
     "_checkNoEsbuild": "[ ! -d node_modules/esbuild ] || ( >&2 echo \"INTERNAL ERROR: 'node_modules/esbuild*' shouldn't be there; please remove them. (rm -rf node_modules/esbuild*)\"; false) ",
     "-- ---": "",
@@ -76,10 +78,10 @@
   },
   "devDependencies": {
     "@local/self": "file:.",
-    "@vitejs/plugin-vue": "^2.3.2",
+    "@vitejs/plugin-vue": "^2.3.3",
     "cypress": "10.1.0",
-    "sass": "^1.52.3",
-    "prettier": "2.6.2"
+    "sass": "^1.53.0",
+    "prettier": "2.7.1"
   },
   "//comments": {
     "devDependencies": {

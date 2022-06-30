@@ -5,6 +5,7 @@ This file contains wishes regarding the `firebase-tools` (Firebase CLI), includi
 Library/runtime wishes are in [Wishes for Firebase](./Wishes for Firebase.md).
 
 
+<!-- hidden; solved by using DC
 ## Would like to control, whether Firebase hosting emulation changes the port if taken, or fails
 
 Using port 3000 for `dev` (online) and 3001 for `dev:local` gets blurred, if a `npm run dev` is launched twice. Firebase emulator automatically looks for the next available port, and we just see the warning:
@@ -18,18 +19,22 @@ It would be nice to have a flag/config setting to disallow changing ports. It ca
 **Work-around:**
 
 We now have a special script to check the availability of the wanted port. Works, but adds complexity.
-
-
-## Firebase emulator configuration from a `.js` file
-
-It is nowadays customary (babel etc.) that configuration can be provided in a `.json`, or a `.js` file. Using `.js` files allows one to have comments in there.
-
-Firebase CLI (9.5.0) seems to be fixed on `firebase.json` and providing a `firebase.js` is ignored.
-
+-->
 
 ## Firebase emulators should fail fast ‼️
 
-The emulator should fail to start if there is no configuration available. Currently, it proceeds and gives a runtime error when one tries to use it.
+The emulator should fail to start if:
+
+- there is no configuration available
+- ..or its initial state is broken
+
+Current (`firebase-tools` 11.0.1) behavior is to log warning messages, but keep going.
+
+This assumes the developer is keenly looking at the log output. When using Docker, they are not. It would be cleaner if the process would simply terminate.
+
+Once things are launched, the current behavior makes sense. It allows the developer to make changes to the rules, see if they pass, without needing to restart the services. The author is not suggesting to change this behaviour.
+
+Example 1:
 
 ```
 $ firebase emulators:start --project=bunny --only functions,firestore
@@ -44,7 +49,48 @@ i  functions: Watching "/Users/asko/Git/GroundLevel-es-firebase/packages/backend
 i  functions: Your functions could not be parsed due to an issue with your node_modules (see above)
 ```
 
-..but the emulator keeps running. **THIS IS NOT ACCEPTABLE!** We developers lose time, because one needs to really scan the logs to find out the functions aren't really up. You are not being resilient here - you are simply pretending like things are okay when they aren't. Exit!!! (with non-zero) 👺
+..but the process keeps running.
+
+Example 2:
+
+```
+i  logging: Stopping Logging Emulator
+
+Error: Failed to load initial Database Emulator rules:
+
+database.rules.json:60:40: No such method/property 'value'.
+
+69:40: No such method/property 'value'.
+
+Error: An unexpected error has occurred.
+```
+
+..again, it keeps running. The developer sees this on the OS terminal:
+
+```
+ $ npm run start
+
+> start
+> npm run -s _prepDC && PROJECT_ID=demo-2 docker compose run --rm warmed-up && echo "Firebase Emulators are running. Use 'docker compose down' to run them down.
+> "
+
+[+] Running 3/3
+ ⠿ Network backend_default      Created                                                                                                                                                                                                                            0.1s
+ ⠿ Container backend-emul-1     Created                                                                                                                                                                                                                            0.4s
+ ⠿ Container backend-warm-up-1  Created                                                                                                                                                                                                                            0.4s
+[+] Running 2/2
+ ⠿ Container backend-emul-1     Healthy                                                                                                                                                                                                                           23.0s
+ ⠿ Container backend-warm-up-1  Started                                                                                                                                                                                                                            0.7s
+...
+```
+
+Nothing indicates anything to be wrong, here.
+
+Despite the Realtime Database rules being wrong, the emulator still serves the port. Because of this, Docker Compose health check passes and there's *no way* the author can think of to automatically figure out the initial state is bad.
+
+**Idea**
+
+We could patch `firebase-tools` (since we use it via a Docker image) so that it does early failure. Provide that change as a PR, upstream, if it's useful.
 
 
 ## Firestore emulator: ability to load rules from multiple files 🌺🌸🌺
@@ -88,75 +134,6 @@ If security rules are broken, the test output is garbage:
 ```
 
 The Firebase testing library could provide a function to check the validity of the current Security Rules, from the emulator. I can then use this in a "before all" hook, and not run the tests if they are not going to work.
-
-
-## Emulator: if you cannot deliver, please fail!
-
-```
-$ npm run start:rest
-
-...
-> concurrently -n emul,init "firebase emulators:start --config firebase.norules.json --only functions,firestore" "npm run _start_rest_2"
-
-[init] 
-[init] > firebase-jest-testing@0.0.1-alpha.2 _start_rest_2 /Users/asko/Git/firebase-jest-testing
-[init] > wait-on http://localhost:4000 && FIREBASE_JSON=firebase.norules.json node --harmony-top-level-await sample/prime-docs.js
-[init] 
-[emul] i  emulators: Starting emulators: firestore
-[emul] ⚠  functions: Not starting the functions emulator, make sure you have run firebase init.
-[emul] ⚠  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file.
-[emul] ⚠  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
-[emul] i  firestore: Firestore Emulator logging to firestore-debug.log
-[emul] i  ui: Emulator UI logging to ui-debug.log
-[emul] 
-...
-```
-
-Above, the emulators are clearly started with `--only functions,firestore` parameter.
-
-The log output states (as a warning):
-
->[emul] ⚠  functions: Not starting the functions emulator, make sure you have run firebase init.
-
-It's like. I know you want Cloud Functions, but I don't know how to. But I'll keep on going anyhow. (maybe you won't notice)
-
-PLEASE NO‼️‼️
-
-It drains developers' time that something *seems* to launch, but doesn't do its job. The only meaningful way out when required features are explicitly requested is **to fail with a non-zero return code**. This would make the developer instantly understand something went wrong.
-
-`firebase` 8.7.0
-
-### Similar
-
-```
-> firebase emulators:start --config firebase.json --only firestore
-
-⚠  Could not find config (firebase.json) so using defaults.
-i  emulators: Starting emulators: firestore
-⚠  firestore: Did not find a Cloud Firestore rules file specified in a firebase.json config file.
-⚠  firestore: The emulator will default to allowing all reads and writes. Learn more about this option: https://firebase.google.com/docs/emulator-suite/install_and_configure#security_rules_configuration.
-i  firestore: Firestore Emulator logging to firestore-debug.log
-i  ui: Emulator UI logging to ui-debug.log
-
-┌───────────────────────────────────────────────────────────────────────┐
-│ ✔  All emulators ready! View status and logs at http://localhost:4000 │
-└───────────────────────────────────────────────────────────────────────┘
-
-┌───────────┬────────────────┬─────────────────────────────────┐
-│ Emulator  │ Host:Port      │ View in Emulator UI             │
-├───────────┼────────────────┼─────────────────────────────────┤
-│ Firestore │ localhost:8080 │ http://localhost:4000/firestore │
-└───────────┴────────────────┴─────────────────────────────────┘
-  Other reserved ports: 4400, 4500
-
-Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
-```
-
->⚠  Could not find config (firebase.json) so using defaults.
-
-I'd prefer a failed launch, when the config file is explicitly stated: `--config firebase.json` and not found.
-
-In this case, the file *was there* but it wasn't valid JSON. Please strive to make the error messages precise. The file **was found** but its contents were not valid. I don't want line-wise error message, just "not valid JSON" is enough to get one fast on the right bug. 🏹🐞
 
 
 ## Emulators: don't leak to the cloud

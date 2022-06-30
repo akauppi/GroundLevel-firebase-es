@@ -1,34 +1,21 @@
 # Known issues
 
 
-<!-- REMOVE Not seen, lately (15-May-22)
-## `npm outdated`: "Cannot set property 'peer' of null"
+## Cannot see a thing
 
-Happens on Mac, due to the `esbuild` package needing a re-install on the DC side.
+If, after `npm run dev`, there's nothing in the browser and the console shows:
 
-### Steps
+`Unable to load module .. app.js`
 
-- `npm test` (from clean, so DC gets run)
-- `npm outdated` (as any other npm command not wrapped for in `package.json`)
+..or something, nothing's necessarily wrong.
 
-   ```
-   $ npm outdated
-   npm ERR! Cannot set property 'peer' of null
+**Remedy #1**
 
-   npm ERR! A complete log of this run can be found in:
-   npm ERR!     /Users/asko/.npm/_logs/2021-09-25T11_56_51_951Z-debug.log
-   ```
+Clear cache, refresh the browser.
 
-### Cure
+**Remedy #2**
 
-```
-$ npm run _macNudgeEsbuild 
-```
-
-### Better cure?
-
-We can try to map a separate folder (eg. `node_modules/esbuild.linux`) for the DC, copying the original contents there before launching DC.
--->
+Try with multiple browsers. E.g. Chrome may give more debugging information than Safari.
 
 
 ## First `npm test` times out

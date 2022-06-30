@@ -25,3 +25,6 @@
 /tmp/database.rules.json
 /tmp/package.dc.json
 /tmp/functions-node_modules/
+
+# Cruft
+/old-logs/

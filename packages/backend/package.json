@@ -28,8 +28,9 @@
     "test:rules:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
     "test:rules:allDC": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
     "--  - ": "",
-    "test:rules2:logs": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database-rules/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
-    "//test:rules2:counters": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database-rules/jest.config.js -f counters.test.js --verbose --all",
+    "test:rules2:logging": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
+    "test:rules2:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
+    "test:rules2:allDC": "NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
     "-- --": "",
     "lint": "eslint .",
     "--   -": "",
@@ -50,7 +51,7 @@
     "_genDatabaseRulesJson": "node --input-type=module -e \"import o from './database.rules.js'; console.log(JSON.stringify(o, null, 2));\" > tmp/database.rules.json"
   },
   "devDependencies": {
-    "firebase-admin": "^10.3.0",
+    "firebase-admin": "^11.0.0",
     "firebase-jest-testing": "^0.0.5-beta.1",
     "jest": "^28.1.1"
   },
