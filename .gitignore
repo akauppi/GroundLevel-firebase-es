@@ -1,9 +1,6 @@
 # For all the subpackages
 /**/node_modules/
 
-# Firebase hosting caches
-#/.firebase/
-
 # Comment out if you wish to share the access values via version control.
 /firebase.*.js
 

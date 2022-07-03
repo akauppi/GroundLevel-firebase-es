@@ -181,6 +181,42 @@ Return code is 0, even when there's no active project. This is the problem and c
 This is a breaking change.
 
 
+## `firebase apps:sdkconfig` prints errors to `stdout` (and causes us to do extra dance to bring them to the user)
+
+`firebase-tools` 11.0.1
+
+`first/docker-compose.yml` could have:
+
+```
+      (firebase apps:sdkconfig > .captured)
+```
+
+Expected:
+
+If there's an error, Firebase CLI prints such to `stderr` and the user (developer) sees it.
+
+Actual:
+
+The error is printed to `stdout`, and gets hidden.
+
+>The error is:
+>
+>```
+>$ cat .captured
+>
+>ESC[1mESC[31mError:ESC[39mESC[22m There are no apps associated with this Firebase project
+>```
+
+**Work-around:**
+
+```
+      ((firebase apps:sdkconfig > .captured) ||
+        (cat >&2 .captured && false)
+      )
+```
+
+There's way enough **needed complexity** in a repo like this. We don't need Firebase CLI to need **ANY SPECIAL TREATMENT** but it must follow the normal behaviour rules of any Unix-like CLI.
+
 
 <!-- (moved from general "Wishes for Firebase"; are these already covered?
 

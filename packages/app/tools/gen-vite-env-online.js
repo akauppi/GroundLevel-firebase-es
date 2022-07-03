@@ -19,13 +19,13 @@ const fn = '../firebase.js';
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
-const { projectId, appId, apiKey, authDomain, locationId } = await import(fn).then(mod => mod.default)
+const { projectId, appId, apiKey, authDomain, locationId, databaseURL } = await import(fn).then(mod => mod.default)
   .catch(err => {
     process.stderr.write(`ERROR: ${err.message}\n\n`);
     process.exit(2);
   });
 
-(apiKey && appId && authDomain && projectId && locationId)
+(apiKey && appId && authDomain && projectId && locationId && databaseURL)
   || fail(`Some values missing from: ${fn.replace("../","") }`);
 
 const out = `# Generated based on '${fn}'.
@@ -34,7 +34,8 @@ VITE_API_KEY=${apiKey}
 VITE_APP_ID=${appId}
 VITE_AUTH_DOMAIN=${authDomain}
 VITE_PROJECT_ID=${projectId}
-VITE_LOCATION_ID=${locationId}${
+VITE_LOCATION_ID=${locationId}
+VITE_DATABASE_URL=${databaseURL}${
   SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;

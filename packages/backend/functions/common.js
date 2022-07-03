@@ -10,11 +10,6 @@ import functions_v1, { region as f1_region, config as f1_config, https as f1_htt
 
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
 
-// If callables need to throw errors, they should use dedicated codes from:
-//  https://firebase.google.com/docs/reference/functions/providers_https_#functionserrorcode
-//
-const HttpsError = f1_https.HttpsError;
-
 // Under emulation, run as the default region (makes testing simpler).
 // In production, the region is brought via Cloud Function configuration.
 //
@@ -23,6 +18,5 @@ const regionalFunctions_v1 = EMULATION ? functions_v1
 
 export {
   regionalFunctions_v1,
-  EMULATION,
-  HttpsError
+  EMULATION
 }

@@ -34,11 +34,10 @@ services:
   # current folder.
   #
   deploy-auth:
-    build: ../firebase-ci-builder.sub
+    build: ../dc/firebase-tools
     ports:
       - "9005:9005"   # needed by the auth dance
     volumes:
-      #-- RO
       #-- Output
       #
       # Firebase CLI saves the login information in '/root/.config/configstore/firebase-tools.json'.
@@ -49,15 +48,19 @@ services:
       - ./.state/.firebaserc:/work/.firebaserc:delegated
 
     working_dir: /work
-    command: bash -o pipefail -c
+    command: sh -c
       'echo "Launching Docker... 🐳" &&
       
       echo '{}' > firebase.json &&
       firebase login &&
 
       firebase use --add &&
-      (firebase apps:sdkconfig > .captured)
+      ((firebase apps:sdkconfig > .captured) ||
+        (cat >&2 .captured && false)
+      )
       '
+        # Note: The above acrobatics ('|| (cat ...)') is needed to bring Firebase CLI's error message (11.0.1) to
+        #     the developer's terminal. It writes errors to 'stdout' (why; don't know...).
 
     profiles: ['manual']
 
@@ -68,13 +71,13 @@ services:
   #
   #     Not done on the host side, because we don't want the 'functions/node_modules' to be visible.
   #
-  prepare-backend-state:
+  pre-deploy-backend:
     image: node:16-alpine
     volumes:
       #-- RO
       - ../packages/backend/functions/package.json:/work/functions/package.json:ro
       #-- output
-      - ./.state/functions-node_modules:/work/functions/node_modules:delegated
+      - ./.state/functions/node_modules:/work/functions/node_modules:delegated
 
     working_dir: /work/functions
     command: sh -c
@@ -93,25 +96,19 @@ services:
   #   <<
   #
   deploy-backend:
-    build: ../firebase-ci-builder.sub
+    build: ../dc/firebase-tools
     volumes:
       #-- RO
-      - ../packages/backend/functions:/work/functions:ro
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
-      #
-      # Note: Caller has generated these.
-      #   Though they are created in a 'tmp' folder, also 'backend' uses DC mapping, to place them in the work folder.
-      #   This suits us well.
-      #
       - ../packages/backend/tmp/firebase.json:/work/firebase.json:ro
       - ../packages/backend/tmp/database.rules.json:/work/database.rules.json:ro
       #
       - ./.state/.firebaserc:/work/.firebaserc:ro
-      - ./.state/functions-node_modules:/work/functions/node_modules:ro
+      - ./.state/functions:/work/functions:ro
 
       #-- other
-      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up (no changes are anticipated).
+      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up (though no changes are anticipated).
       - ./.state/configstore:/root/.config/configstore:rw
 
     working_dir: /work
@@ -129,7 +126,7 @@ services:
   #   - the app has been recently built (only 'dist' contents are deployed)
   #
   deploy-app:
-    build: ../firebase-ci-builder.sub
+    build: ../dc/firebase-tools
     volumes:
       #-- RO
       - ../packages/app/dist:/work/dist:ro

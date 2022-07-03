@@ -85,31 +85,6 @@ $ npm install
 >
 >If you don't need Cypress (yet), `CYPRESS_INSTALL_BINARY=0 npm install` speeds up the install by skipping downloading the binary part.
 
-### Setting up Realtime Database region (for `dev:online`)
-
-Realtime Database only exists for some Firebase regions ([current list](https://firebase.google.com/docs/projects/locations#rtdb-locations)).
-
-At the time of writing:
-
-```
-us-central1
-europe-west1
-asia-southeast1
-```
-
-If your Firebase project's `location` is other than these, do the following:
-
-- Add a line to the `.env.dev.staging` file:
-
-   ```
-   VITE_DATABASE_LOCATION_ID=europe-west1
-   ```
-
->Note: `.env.dev_local` and `.env[.dev].{deployment-target}` files are used for providing configuration from the build environment to the browser environment.
-
-The Realtime Database region only matters for `dev:online`, and actual deployments.
-
-
 ### Launch the app
 
 ```

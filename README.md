@@ -1,6 +1,6 @@
 # GroundLevel
 
-<!-- not active; we're going for Discourd, #later
+<!-- not active; we're going for Discord, #later
 [![Join the chat at https://gitter.im/akauppi/GroundLevel-firebase-web](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/akauppi/GroundLevel-firebase-web)
 -->
 
@@ -16,20 +16,20 @@ https://github.com/leg100/cloud-build-badge
 -->
 <img alt="Logo" src="branding/icon_512x512.png" width=300 align="left" style="padding-right: 3em">
 
-**A modern (ES modules based and "Serverless") Web App template**
+**An ES modules and "serverless" based Web App template**
 
 Great tools selected for you: 
 
 [Firebase](https://firebase.google.com)
 - [Vite](https://github.com/vitejs/vite)
-- [Vue.js 3](https://vuejs.org)
+- [Vue.js](https://vuejs.org)
 - [Jest](https://jestjs.io)
 - [Cypress](https://www.cypress.io)
 - [Cloud Build](https://cloud.google.com/build)
 - [Plausible](https://plausible.io)
 - [Sentry](https://sentry.io)
 
-<font color=green>&check;</font> Built on 2020's technology (ES2022, async/await), aiming to stay up to date and lean.
+<font color=green>&check;</font> Built on 2020's technology (ES2022), aiming to stay up to date and lean.
 
 <font color=green>&check;</font> Covers deployment (CI/CD).
 
@@ -37,13 +37,23 @@ Great tools selected for you:
 
 <br clear=all />
 
-This repo is intended for professionals and beginners alike. Its main point is to showcase how easy making, maintaining and expanding web applications in the 2020's can be, when modern tools and techniques are used.
+This repo is intended for professionals and beginners alike. Its main intention is to provide a working environment for building, deploying and operating modern web applications.
 
-Much of starting a web app goes into setting up the frameworks. Especially so with modern (ES modules based) workflows, where frameworks (such as Vite, Jest and Node itself) have been growing fast. Apply this repo and you should be up, developing *your web app* already on the first week!
+In the medium term, the goal is to become a de-facto modern web app platform, in the way that *changes to the platform* can be subscribed to by applications using it. An abstraction level above the individual web, serverless, testing and monitoring frameworks.
 
-The repo is intended to *keep developing* and the author wants to find a way where you can track its changes to your app, as if the workflow itself were the dependency.
+Apply this repo and you should be up, developing *your* web app already on the first week!
 
-Finally, the repo has an emphasis on *operating* a real app. You can also see it as course material for modern web development. See [Training](TRAINING.md) if you are interesting in arranging an actual course.
+You can also see this as course material for modern (2020's) web development. See [Training](TRAINING.md) if you are interesting in arranging an actual course.
+
+All the selected components or services are free, or low cost<sup>`[1]`</sup>. Despite this, one can scale to unknown numbers of users, without needing to change the underlying approach.
+
+<!--
+"unknown numbers" = better tell when we can prove it.
+-->
+
+<small>[1]: Exceptions: <br />
+- Plausible, which is optional, has a 30 days free trial, USD 9 / month thereafter.<br />- Deploying Firebase Cloud Functions requires one to provide a credit card but there may not be any costs.
+</small>
 
 
 ## Pre-requisites and tools
@@ -55,9 +65,9 @@ You'll need:
    - `node` 16+
    - `npm` - version 8+
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
-   - Docker Desktop [on Mac](https://docs.docker.com/desktop/mac/install/) or [on Windows](https://docs.docker.com/desktop/windows/install/) 
+   - Docker Desktop [on Mac](https://docs.docker.com/desktop/mac/install/) or [on Windows](https://docs.docker.com/desktop/windows/install/)
 
-      >Docker is used extensively, e.g. for running the Firebase Emulators, and various development environments and tasks. The workflow presented always uses Firebase CLI through a Docker container, so you don't need to have it installed on your development machine. <!-- This should also be somewhat safer since the Firebase credentials are not stored locally on developers' computers. -->
+      >Docker is used extensively, e.g. the Firebase Emulators and Firebase CLI are only run through it. <!-- This should also be somewhat safer since the Firebase credentials are not stored locally on developers' computers. -->
   
   For Windows development, we require [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with an Ubuntu LTS image. WSL2 also happens to be a requirement for Docker Desktop for Windows.
 
@@ -70,12 +80,12 @@ You'll need:
    </details>
 
    <details style="margin-left: 2em;"><summary><b>Linux</b></summary>
-   *The repo is not tested as extensively on Linux, as on Mac and Windows. Having said that, it should work (= will be made to work ;).*
+   *The repo is not tested regularly on Linux, as it is on Mac and Windows 10+WSL2. Having said that, it should work (= will be made to work ;).*
    
    You can either:
    
    - Use [Docker Desktop for Linux](https://docs.docker.com/desktop/linux/install/) which brings a similar developer experience as that on Mac/Windows.
-   - Use Docker Compose v2 from the command line. You'll need to install it; see [Install Docker Compose](https://docs.docker.com/compose/install/#install-compose-on-linux-systems) > `Linux`
+   - Use Docker CLI with the Docker Compose plugin; see [Install Docker Compose](https://docs.docker.com/compose/install)
    </details>
    
 - **A capable IDE**
@@ -90,7 +100,7 @@ You'll need:
   - JavaScript
   - CSS
 
-  We use ECMAScript features (up to ES2018) in the code, where-ever possible. Meaning no `var`, no `this` (ever!), yes `Promise`s and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
+  We use ECMAScript features in the code, where-ever possible. Meaning no `var`, no `this` (ever!), yes `Promise`s and `async`/`await`. No Webpack. If you learn JavaScript from scratch, pay attention what year your material was made. Or just *dive in!* and learn from the code - the chef recommends this way!
 
   >Hint: [MDN resources](https://developer.mozilla.org) are a great place to learn the basics, and advanced material alike. Eg. [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript). You might even have it in your native language.
 
@@ -111,9 +121,9 @@ Apropos, Firebase. What is it??
 
 <a href="https://firebase.google.com"><img src="https://firebase.google.com/downloads/brand-guidelines/SVG/logo-logomark.svg" align="left" style="padding-right: 3em" /></a>
 
-This repo uses the [Firebase](https://firebase.google.com) serverless framework for authentication, database, background functions and hosting.
+This repo uses the [Firebase](https://firebase.google.com) serverless framework for authentication, database, background functions, and hosting.
 
-Firebase allows a mere mortal to create fully functional cloud-based applications. You don't need to set up and maintain servers. You still have a back end but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
+Firebase allows a mere mortal to create fully functional cloud based applications. You don't need to set up and maintain servers. You still have a back end but it's operated for you. You don't need to care about scalability (though you need to care about costs). Interface definitions become less burdensome than in traditional REST API world, since your front end deals directly with the database. Authentication and access rights management are integrated in the database (instead of a separate back end service you need to build).
 
 >![](.images/backend-vs-firebase.png)
 
@@ -131,19 +141,12 @@ The author is open to trying the approach with non-Firebase products, but they n
 
 >You *don't* have to know anything in advance about Firebase. However, some of their Youtube material is good, start eg. with [Welcome to Firebase](https://www.youtube.com/watch?v=zHomxNDEJqY) (1:00). It's recommended to learn Firebase in parallel with using this repo.
 
-<!-- whisper
-The videos don't always state which platforms they apply to, and iOS/Android seems to be preferred (implied default) over web.
--->
-
 
 ### Google Cloud Platform
 
-Firebase and Google Cloud Platform (GCP) have a relation. Firebase runs on top of GCP (and is owned by Google). They have separate dashboards, but some Firebase tasks require one to visit the GCP Console. When you create a Firebase project, a GCP project of the same name is also created (and is where your code really runs!).
+Firebase and Google Cloud Platform (GCP) have a relation. Firebase runs on top of GCP (and is owned by Google). <!-- They have separate dashboards, but some Firebase tasks require one to visit the GCP Console. --> When you create a Firebase project, a GCP project of the same name is also created (and is where your code really runs!).
 
 We stay at the Firebase side of things most of the time, except CI/CD (Cloud Build) and operations.
-
-<!-- tbd. ^-- add mention of the GCP things we end up using in ops... Cloud Logging? 
--->
 
 You'll be instructed about GCP where necessary. 
 
@@ -153,9 +156,9 @@ You'll be instructed about GCP where necessary.
 ```
 ├── ci                   # all CI/CD setup
 ├── DEVS                 # notes about developing the repo (optional)
-├── firebase-ci-builder.sub # sub-repo for the Docker image
-├── first                # (tools for manual deployment)
-├── ops                  # operational monitoring
+├── firebase-ci-builder.sub # sub-repo for a Docker image (Firebase CLI/Emulators)
+├── first                # tools for manual deployment
+├── ops                  # operational monitoring (documentation)
 └── packages
     ├── app              # front-end logic and looks
     └── backend          # Firestore Security Rules, Cloud Functions
@@ -172,7 +175,7 @@ The two `packages`, `ci` and `ops` each contain their own documentation.
 $ npm install
 ```
 
-This installs some common tools, especially ESLint, used in multiple parts of the repo. Subpackages see them from the root, and this is where you update their versions.
+This installs common tools, especially ESLint, used in multiple parts of the repo. Subpackages see them from the root, and this is where you update their versions.
 
 Each of the `packages` has its own `npm install` that you'll run separately. We'll come back to that, soon.
 
@@ -197,6 +200,7 @@ $ git submodule update
 The `firebase-ci-builder.sub` folder is now populated. 
 
 
+<!-- disabled; just point to it?
 ### Build the CI builder
 
 <details style="border: 2px solid lightblue; padding: 0.4em;"><summary>Note to Windows users:</summary>
@@ -225,7 +229,7 @@ You don't need to push this image anywhere - it's enough that it resides on your
 >$ docker run -it --rm firebase-ci-builder:11.0.1-node18-npm8 firebase --version
 >11.0.1
 >```
-
+-->
 
 ### Tour of the subpackages 🚌
 
@@ -245,9 +249,14 @@ This folder has the Firebase back-end features:
 
 We provide means to test these things. Deployment is done using CI/CD.
 
+Also:
+
+- Realtime Database Security Rules, used by operational monitoring (we'll get back to it).
+
+
 **`packages/backend/functions`**
 
-A sub-subpackage ;), this folder runs Firebase Functions. It's only ever exercised via Firebase Emulators (Docker), or in the cloud. Do not run the install on it.
+A sub-subpackage ;), this folder has Cloud Functions. It's only ever exercised via Firebase Emulators (Docker), or when in the cloud. You don't need to run install on it.
 
 
 **`packages/app`**
@@ -256,7 +265,7 @@ This is where your web app lives.
 
 The logic, the looks, the authentication. Everything that gets shipped to your customers once they open the right URL.
 
-You can develop the code with Hot Module Reloading, thanks to Vite, seeing changes in the browser while you edit the underlying HTML, CSS or ECMAScript.
+You can develop the code with Hot Module Reloading, seeing changes in the browser while you edit the underlying HTML, CSS or ECMAScript.
 
 Once you're pleased, test the creature using Cypress.
 
@@ -270,7 +279,9 @@ This repo uses Firebase as your cloud presence. It:
 - hosts the client-side files
 - offers you a console to supervise the above
 
-Follow the instructions in [Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (Wiki) to create your Firebase account and a project.
+While you can develop a project locally, without having a dedicated Firebase project for it, sooner or later you'll want to deploy to the cloud. Let's make it right away!
+
+Follow the instructions in [Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (GitHub Wiki) to create your Firebase account and a project.
 
 >You *will* need a credit card for creating the "Blaze" plan (which is needed for deploying the default back-end).
 
@@ -280,13 +291,14 @@ Follow the instructions in [Firebase](https://github.com/akauppi/GroundLevel-fir
 
 Have the Firebase project? Great! 🎉
 
-You can now deploy the current contents of the repo manually, to be able to see the app online. It will take ~5-10 minutes.
+You can now deploy the current contents of the repo manually, to be able to see the app online. It will take only ~5-10 minutes.
 
->Note. The recommended way of deployment is with a CI/CD pipeline, but setting such up takes longer. Having at least the backend deployed in the cloud enables you to use `dev:online` mode in front end development (more about that in `packages/app`).
+>Note. The recommended way of deployment is with a CI/CD pipeline, but setting such up needs more training. Having at least the backend deployed in the cloud enables you to use `dev:online` mode in front end development (more about that in `packages/app`).
 
-- Step aside to [first/README](first/README.md)
-   - follow the instructions
-   - ...and then return here.
+- Open a terminal
+- Follow the instructions in [first/README](first/README.md)
+
+...then return here.
 
 
 ### `firebase.staging.js`
