@@ -1,8 +1,9 @@
 /*
 * functions/userInfoShadow.js
 */
-import { regionalFunctions_v1 } from './common.js'
-  // 'v2' doesn't have '.firestore', yet (Jun 2022)
+
+import { regionalFunctions_v1 } from './regional.js'
+  // 'v2' doesn't have '.firestore', yet (Jul 2022)
 
 //import { firestore as db } from './firebase.js'
 

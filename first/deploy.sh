@@ -19,6 +19,7 @@ set -euf -o pipefail
 #   - read (bash built-in)
 #   - docker compose
 #   - grep
+#   - sed
 #
 STAGING_JS="../firebase.${ENV-staging}.js"
 OVERWRITE=1
@@ -53,18 +54,6 @@ echo
 if [[ ! ${CHOICE:-y} =~ ^[Yy]$ ]]; then
   exit 0
 fi
-
-#--- Prepare
-#
-# Running the build explicitly guarantees changes (e.g. of the version number) in the Firebase CLI DC definition
-# are actually used. ('docker compose run' has no '--build' flag that would do this as a side effect). Only needs
-# to be done for one of the targets; others pick up the refreshed image.
-#
-# HIDDEN because it has a nasty effect on the CLI output, even when no rebuild is needed. Return to this if non-refreshed
-# images are a problem. (Using a Makefile would help; maybe we start using one within this folder?)
-#
-#docker compose build deploy-auth
-
 
 #--- Execute
 
@@ -104,6 +93,9 @@ export default config;
 EOF
 fi
 
+LOCATION_ID=$( cat .state/.captured.sdkconfig | grep "\"locationId\":" | cut -d '"' -f4 )
+[ ! -z $LOCATION_ID ] || ( >&2 echo "WARN: Did not find 'locationId' in Firebase app configuration." )    # if we get this warning, no guarantee how deployment will succeed
+
 # Backend
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
@@ -115,8 +107,21 @@ fi
 #   needs to be created where the developer would see it. Maybe overkill.
 #
 install -d .state/functions/node_modules && \
-  cp -r ../packages/backend/functions/ .state/functions &&
+  cp -r ../packages/backend/functions/ .state/functions && \
   docker compose run --rm pre-deploy-backend
+
+# ANCIENT
+# Cloud Functions deployment picks up 'functions/.env'.
+#
+# NOTE: THIS DID NOT CUT IT. Maybe the values are applied only once functions have been deployed, not at the time
+#     they are run to figure out their meta-relations.
+#
+#echo "X_LOCATION_ID=$LOCATION_ID" >> .state/functions/.env
+
+# Inject the location id to the right source file.
+#
+cat .state/functions/regional.js | sed -E 's/import\.meta\.env\.LOCATION_ID/"'"${LOCATION_ID}"'"/' > .state/functions/tmp
+mv .state/functions/tmp .state/functions/regional.js
 
 docker compose run --rm deploy-backend
 

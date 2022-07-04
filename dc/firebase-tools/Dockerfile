@@ -20,13 +20,16 @@
 #
 FROM node:16-alpine
 
-ENV FIREBASE_VERSION=11.2.0
+ARG FIREBASE_TOOLS_VERSION=missing
+  #
+  # Having a no-good default means the value must be given from Docker Compose.
 
 # Suppress npm update announcements
 RUN npm config set update-notifier false
 
 RUN apk --no-cache add openjdk11-jre-headless
 
+#REMOVE
 # Auxiliary tools; The '-alpine' base image is based on 'busybox' and doesn't have these.
 #
 #RUN apk --no-cache add bash curl
@@ -35,10 +38,10 @@ RUN apk --no-cache add openjdk11-jre-headless
 #
 # '--ignore-optional' eliminates warnings on 'gyp'
 #
-RUN yarn global add --ignore-optional firebase-tools@${FIREBASE_VERSION} \
+RUN yarn global add --ignore-optional firebase-tools@${FIREBASE_TOOLS_VERSION} \
   && yarn cache clean
   #
   # Note: The installation approach from Firebase docs does not allow stating the version:
   #   'curl -sL https://firebase.tools | bash'
 
-# Don't define an 'ENTRYPOINT' since we provide multiple ('firebase', 'npm'). Cloud Build scripts can choose one.
+# Don't define an 'ENTRYPOINT' since the caller runs a shell command.

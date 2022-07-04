@@ -26,7 +26,9 @@
 #
 services:
   emul-base:   # used for 'npm run start', 'npm test', 'npm run app:start'
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:11.0.1-node18-npm8}
+    extends:
+      file: ../../dc/firebase-emulators/base.yml
+      service: base
     volumes:
       # --- RO
       - ./tmp/firebase${DOT_APP:-}.json:/work/firebase.json:ro
@@ -44,18 +46,6 @@ services:
       - ./tmp/functions-node_modules:/work/functions/node_modules:ro
 
     working_dir: /work
-    command: bash -o pipefail -c
-      'echo "Launching Docker... 🐳" &&
-      ([ ! -z ${PROJECT_ID} ] || ( >&2 echo "ERROR. Missing ''PROJECT_ID'' env.var. (e.g. ''PROJECT_ID=demo-x ...'')"; false )) &&
-      
-      firebase emulators:start --project=${PROJECT_ID}
-        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
-      '
-      # Keep project ID in sync with 'test-fns/setup.jest.js'
-
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-        # Without this, Firebase-tools (9.17.0; 11.0.x) don't see changes (Security Rules, Cloud Functions)
 
     # If we provide ports by Env.vars, could have also health check here.
     #|healthcheck:

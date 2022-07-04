@@ -1,5 +1,10 @@
 # Changelog
 
+## 5-Jul-22
+
+- Manual deployment done so that Cloud Functions always deployed to the "default GCP resource location" (aka `locationId`). This is what Cloud Firestore also uses.
+- Wrote a section on regions. <!-- DEVS/Firebase regions.md -->
+
 ## 30-Jun-22
 
 - Revising the READMEs.

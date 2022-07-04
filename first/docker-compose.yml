@@ -34,7 +34,9 @@ services:
   # current folder.
   #
   deploy-auth:
-    build: ../dc/firebase-tools
+    extends:
+      file: ../dc/firebase-tools/base.yml
+      service: base
     ports:
       - "9005:9005"   # needed by the auth dance
     volumes:
@@ -96,7 +98,9 @@ services:
   #   <<
   #
   deploy-backend:
-    build: ../dc/firebase-tools
+    extends:
+      file: ../dc/firebase-tools/base.yml
+      service: base
     volumes:
       #-- RO
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
@@ -126,7 +130,9 @@ services:
   #   - the app has been recently built (only 'dist' contents are deployed)
   #
   deploy-app:
-    build: ../dc/firebase-tools
+    extends:
+      file: ../dc/firebase-tools/base.yml
+      service: base
     volumes:
       #-- RO
       - ../packages/app/dist:/work/dist:ro

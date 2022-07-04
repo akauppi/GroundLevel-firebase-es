@@ -180,6 +180,7 @@ This installs common tools, especially ESLint, used in multiple parts of the rep
 Each of the `packages` has its own `npm install` that you'll run separately. We'll come back to that, soon.
 
 
+<!-- Hidden; not needed since we put `firebase-ci-builder` to sleep. MAY be needed later (packages/*.sub)
 ### Update the submodules
 
 We use a Docker image for running Firebase Emulators. The recipe for building this image comes from the [firebase-ci-builder](https://github.com/akauppi/firebase-ci-builder) repo and is linked here as a git submodule.
@@ -198,38 +199,8 @@ $ git submodule update
 ```
 
 The `firebase-ci-builder.sub` folder is now populated. 
-
-
-<!-- disabled; just point to it?
-### Build the CI builder
-
-<details style="border: 2px solid lightblue; padding: 0.4em;"><summary>Note to Windows users:</summary>
-![](.images/defender-docker.png)
-   
-If you get this warning about Docker Desktop, at least
-   
-- **uncheck the "public networks" checkbox**. It's not needed.
-   
-It seems weird to the author that Windows would default to opening up things like that. Anyways, things continue to proceed in the background, regardless of what you select, but at least consider this.
-</details>
-
-```
-$ (cd firebase-ci-builder.sub && ./build)
-...
- => => naming to docker.io/library/firebase-ci-builder:11.0.1-node18-npm8
-```
-
->*Note:* Did you use the parantheses in the command above? Without them, you'll end up in the `firebase-ci-builder.sub` folder. `cd ..` to climb back.
-
-You don't need to push this image anywhere - it's enough that it resides on your development machine. The image is launched by the sub-packages whenever Firebase Emulators are required.
-
->You can test it:
->
->```
->$ docker run -it --rm firebase-ci-builder:11.0.1-node18-npm8 firebase --version
->11.0.1
->```
 -->
+
 
 ### Tour of the subpackages 🚌
 
@@ -237,8 +208,9 @@ The application is divided into subpackages, each having their own `README` and 
 
 We'll briefly mention them, as if shown from a bus window. To do the work, step out to each of the folders separately, study their contents and make changes.
 
+<!--
 >*'subpackage'* is an `npm` term (whereas *'submodule'* is a git term). It means a folder with its own `package.json` so you need to separately run `npm install` within it.
-
+-->
 
 **`packages/backend`**
 
@@ -298,7 +270,7 @@ You can now deploy the current contents of the repo manually, to be able to see 
 - Open a terminal
 - Follow the instructions in [first/README](first/README.md)
 
-...then return here.
+...then return here
 
 
 ### `firebase.staging.js`
