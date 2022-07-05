@@ -4,29 +4,28 @@
 # Base for using Firebase Emulators, via Docker Compose.
 #
 services:
-
   # Expects:
   #   - PROJECT_ID  to be a Firebase project id ('demo-...').
   #
   #     Such project's data is visible in the emulator UIs. ALSO OTHER PROJECT ID's will work, but behind the scenes.
   #
   base:
-    #image: local_firebase_tools      # could use this to be able to extend the emulators Dockerfile from the CLI's, but... it's not a clear linkage. No thanks.
     build:
       context: .
-      cache_from:
-        - alpine:latest
+      #cache_from:
+      #  - node:16-alpine
+      #  #- node:18-alpine
       args:
         - FIREBASE_TOOLS_VERSION=11.2.0
 
-      # 'ports', 'volumes', 'working_dir' to be provided by downstream
+    # 'ports', 'volumes', 'working_dir' to be provided by downstream
 
-      command: sh -c
-        'echo "Launching Docker... 🐳" &&
-        ([ ! -z ${PROJECT_ID} ] || ( >&2 echo "ERROR. Missing ''PROJECT_ID'' env.var. (e.g. ''PROJECT_ID=demo-x ...'')"; false )) &&
-        
-        firebase emulators:start --project=${PROJECT_ID}
-          | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
-        '
+    command: sh -c
+      'echo "Launching Docker... 🐳" &&
+      ([ ! -z ${PROJECT_ID} ] || ( >&2 echo "ERROR. Missing ''PROJECT_ID'' env.var. (e.g. ''PROJECT_ID=demo-x ...'')"; false )) &&
+      
+      firebase emulators:start --project=${PROJECT_ID}
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+      '
 
-      # 'healthcheck' to be provided by downstream
+    # 'healthcheck' to be provided by downstream

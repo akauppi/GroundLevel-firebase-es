@@ -24,7 +24,7 @@
 #
 FROM node:16-alpine
 
-ARG FIREBASE_TOOLS_VERSION=0
+ARG FIREBASE_TOOLS_VERSION=missing
   # must be provided
 
 # Suppress npm update announcements

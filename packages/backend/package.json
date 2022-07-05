@@ -32,7 +32,7 @@
     "test:rules2:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
     "test:rules2:allDC": "NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
     "-- --": "",
-    "lint": "eslint .",
+    "lint": "eslint --ignore-pattern tmp/functions-node_modules .",
     "--   -": "",
     "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
     "--   - ": "",

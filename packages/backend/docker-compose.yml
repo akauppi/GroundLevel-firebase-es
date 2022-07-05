@@ -8,9 +8,6 @@
 #   - CI
 #     - with 'docker-compose.ci.yml' overrides
 #
-# Environment:
-#   - CI_BUILDER_IMAGE (optional); name of the builder image.
-#
 # Intentions:
 #   Within a Docker universe,
 #     - launch Firebase Emulators using 'firebase.json'
@@ -39,8 +36,6 @@ services:
       - "4000:4000"
         # Keep ports aligned with 'firebase.js'
 
-    environment:
-      - CHOKIDAR_USEPOLLING=true
     healthcheck:
       test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800 && sleep 1"
         # Note: 'nc' in that image doesn't handle checking multiple ports at once.
@@ -82,9 +77,10 @@ services:
           #
           #   fns       rules
           #   ---       -----
-          #   3889ms    1148ms        # MacOS Intel (DC 4.9.0)
+          #   7433ms    1106ms    # macOS Intel (DC 4.10.0)
           #
-          #   ~~9.122s    ~~12.48s        # Cloud Build (CI)
+          #   --- (history)
+          #   3889ms    1148ms    # MacOS Intel (DC 4.9.0)
           #
           #   Times are the _longest_ individual test's execution time, per run. These are where timeout is applied.
 

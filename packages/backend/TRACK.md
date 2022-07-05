@@ -1,5 +1,6 @@
 # Track (backend)
 
+<!--
 ## `@google-cloud/logging` ESM support
 
 *Q: Is this still a thing?*
@@ -7,7 +8,7 @@
 - [es6 import not able to import Logging](https://github.com/googleapis/nodejs-logging/issues/559)
 
 Note: We won't need it, until `firebase-functions` runs with ESM. And even then, node allows using `require` in `type: "module"` packages.
-
+-->
 
 ## Node 18 support for `firebase-functions`
 
@@ -16,7 +17,18 @@ Note: We won't need it, until `firebase-functions` runs with ESM. And even then,
 	<!-- No ticket, as of 6-Jun-22: https://github.com/firebase/firebase-functions/issues?q=is%3Aissue+is%3Aopen+18 -->
 
    We already run it with Node 18 in DC.
-  
+
+
+## Cloud Functions v2: maturity
+
+- [ ] [Limitations ...](https://firebase.google.com/docs/functions/beta#limitations_during_public_preview) (Firebase docs)
+
+Change `functions/*.js` to use `v2` only once:
+
+- all regions available for Cloud Firestore (see `../../DEVS/Firebase regions.md`) are supported
+  - e.g. `europe-west2` not so
+- Cloud Firestore is supported as triggers
+
 
 ## Pre-heating the Cloud Functions
 
