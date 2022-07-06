@@ -1,0 +1,42 @@
+#
+# backend/docker-compose.app.ci.yml
+#
+# Extends 'docker-compose.ci.yml' so that:
+#   - authentication is included
+#
+# Note: Should be kept relatively close to 'docker-compose.app.yml' (manual development backend).
+#
+# Expects:
+#   AUTH_PORT
+#   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
+#   FIRESTORE_PORT
+#   DATABASE_PORT
+#   FUNCTIONS_PORT
+#
+services:
+  emul-for-app:
+    extends:
+      file: docker-compose.ci.yml
+      service: emul
+    ports:
+      - "${AUTH_PORT}:${AUTH_PORT}"
+        # Keep ports aligned with 'firebase[.ci].js'    <-- tbd. revise?
+
+    #volumes:
+      # nothing to change
+
+    #working_dir: /work
+    #healthcheck:
+    #   ...
+
+    # Allows the ports to be seen (as 'emul:{port}') by Cloud Build steps.
+    #
+    container_name: emul
+
+  emul-for-app-launched:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      emul-for-app:
+        condition: service_healthy
+    profiles: ['manual']

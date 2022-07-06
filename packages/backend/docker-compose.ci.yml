@@ -1,5 +1,5 @@
 #
-# backend/docker-compose.ci.app.yml
+# backend/docker-compose.ci.yml
 #
 # Takes the role of both 'docker-compose.base.yml' and 'docker-compose.yml', for CI.
 # Works as a basis for 'docker-compose.ci.app.yml'.
@@ -14,12 +14,12 @@
 #   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
 #
 services:
-  emul:   # used for CI backend tests, app tests
+  emul:
     image: ${CI_BUILDER_IMAGE}
     ports:
-      - "5002:5002"
-      - "6767:6767"
-      - "6800:6800"
+      - "${FUNCTIONS_PORT:-5002}:${FUNCTIONS_PORT:-5002}"
+      - "${FIRESTORE_PORT:-6767}:${FIRESTORE_PORT:-6767}"
+      - "${DATABASE_PORT:-6800}:${DATABASE_PORT:-6800}"
         # Keep ports aligned with 'firebase[.ci].js'
 
     volumes:
@@ -41,8 +41,12 @@ services:
         #     It only steers which project is visible in the UI, and since we run in CI, there is no UI.
 
     healthcheck:
-      test: "nc -z localhost 6767 && echo '6767 is up' && nc -z localhost 5002 && echo '5002 is up' && nc -z localhost 6800 && echo '6800 is up'"
-        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      test: '
+        nc -z localhost ${FIRESTORE_PORT} && echo "${FIRESTORE_PORT} is up" && 
+        nc -z localhost ${FUNCTIONS_PORT} && echo "${FUNCTIONS_PORT} is up" && 
+        nc -z localhost ${DATABASE_PORT} && echo "${DATABASE_PORT} is up"
+        '
+          # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.5s
       start_period: 23s
 
@@ -79,13 +83,13 @@ services:
       '
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=24000
+      - WARM_UP_TIMEOUT=12000
         # Seen CI execution times:
         #
         #   fns       rules
         #   ---       -----
         #   (gets stuck, see #95)
-        #             (may exceed 24s timeout)
+        #             1501ms
         #
         #   --- (comparison: on local)
         #   7433ms    1106ms    # macOS Intel (DC 4.10.0)

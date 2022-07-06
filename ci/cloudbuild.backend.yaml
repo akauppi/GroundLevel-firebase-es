@@ -6,20 +6,17 @@
 #
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
-#     https://console.cloud.google.com/cloud-build/triggers?project=ci-builder
-#
-# Expects:
-#   - Artifact Registry of the GCP project to contain a "firebase-ci-builder" image.
 #
 # Uses images:
 #   - node:16-alpine
-#   - firebase-ci-builder   (project specific)
+#   - firebase-ci-builder   (pushed to Artifact Registry)
 #   - docker/compose
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
 #   - env.variables:
+#     PWD=/workspace
 #     HOME=/builder/home
 #     BUILDER_OUTPUT=/builder/outputs
 #
@@ -36,6 +33,8 @@ steps:
   args: ['-c', '
     [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
 
+    npm config set update-notifier false &&
+
     npm install &&
     npm --prefix packages/backend install
   ']
@@ -44,26 +43,21 @@ steps:
   #   - 'packages/backend/tmp/firebase.json' has been created
   #   - 'packages/backend/tmp/database.rules.json' has been created
 
-#DEBUG
-- name: node:${_NODE_VER}-alpine
-  entrypoint: sh
-  args: ['-c', '
-    cat tmp/firebase.json
-  ']
-  dir: packages/backend
-
 # DEBUG:
 #
 # USE THIS TO DEBUG CASES where the emulators don't start (or to see warm-up timings).
 #
 # Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
 #
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  #args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
-  args: ['-f', 'docker-compose.ci.yml', 'up', 'warm-up']
-  dir: packages/backend
-  env:
-    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#|  #args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
+#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'warm-up']
+#|  dir: packages/backend
+#|  env:
+#|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+#|    - FIRESTORE_PORT=6767
+#|    - FUNCTIONS_PORT=5002
+#|    - DATABASE_PORT=6800
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -86,6 +80,9 @@ steps:
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: npm
@@ -102,10 +99,10 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - 2:38  (no lint)
+#   - 2:06  (no functions test)
 #
 # OLD:
-#   - 2:17, 2:15, 2:46
+#   - 2:17, 2:15, 2:46, 2:38 (no lint)
 #
 timeout: 300s
 

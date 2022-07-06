@@ -9,15 +9,15 @@
 #
 # Uses images:
 #   - node:16-alpine
-#   - firebase-ci-builder   (pushed to Container Registry; used via Docker Compose)
 #   - docker/compose
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
-#   - env.variables (just some):
+#   - env.variables:
 #     PWD=/workspace
 #     HOME=/builder/home
+#     BUILDER_OUTPUT=/builder/outputs
 #
 # Note:
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
@@ -37,7 +37,7 @@ steps:
 
 # Install
 #
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
     [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
@@ -55,17 +55,33 @@ steps:
 
   env: ['CYPRESS_INSTALL_BINARY=0']
 
+# DEBUG:
+#
+# USE THIS TO DEBUG CASES where the emulators don't start.
+#
+# Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
+#
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.app.ci.yml', 'up', 'emul-for-app']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+    - FIRESTORE_PORT=6768
+    - FUNCTIONS_PORT=5003
+    - DATABASE_PORT=6801
+    - AUTH_PORT=9101
+
 # --- App
 #
 # Launch emulators and Vite; keeps them running in the background.
 #
-# Note: No priming of data & users is needed. Cypress tests carry their own (we do 'npm test', not dev).
+# Note: No priming of data & users is needed (that's for "dev", we only do "npm test").
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
+  args: ['-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
   dir: packages/backend
   env:
-    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
   args: ['-f', 'docker-compose.local.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-for-ci-launched']
@@ -73,11 +89,7 @@ steps:
   env:
     - PORT=3002
 
-# BROKEN.
-#
-# Sometimes just gets stuck.
-#
-# First test might pass, but second (Joe sign-in) fails:
+# First test might pass, but second (Joe sign-in) fails: [BUG]
 #   <<
 #     FirebaseError: Firebase: A network AuthError (such as timeout, interrupted connection or unreachable host) has occurred. (auth/network-request-failed).
 #   <<
@@ -120,8 +132,11 @@ steps:
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 11.2.0-node18-npm8
+  _BUILDER_TAG: 11.2.0
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
-  _CYPRESS_TAG: 9.6.0
+  _NODE_VER: "16"
+  _CYPRESS_TAG: 10.3.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
+  _AR_FOLDER: builders
+    # You may use any name, or create such a folder in AR.
