@@ -64,7 +64,7 @@ services:
     command: sh -c
       'npm config set update-notifier false &&
       
-      npm run dc:warm-up &&
+      npm run dc:warm-up-PARTIAL &&
       touch .healthy &&
         sleep infinity
       '
@@ -98,7 +98,7 @@ services:
         #   warm-up, causes warm-up to not pass).
 
     # Enable manual launch to debug 'emul' launch, only.
-    #profiles: ['manual']
+    profiles: ['manual']
 
   # A pass-through target.
   #

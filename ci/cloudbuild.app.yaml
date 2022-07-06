@@ -40,7 +40,7 @@ steps:
 - name: node:16-alpine
   entrypoint: sh
   args: ['-c', '
-    [ $PROJECT_ID == ci-builder ] || ( >2& echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+    [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
 
     npm config set update-notifier false &&
     
@@ -120,7 +120,7 @@ steps:
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 11.0.1-node18-npm8
+  _BUILDER_TAG: 11.2.0-node18-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _CYPRESS_TAG: 9.6.0

@@ -1,26 +1,132 @@
 #
-# docker-compose.ci.yml
+# backend/docker-compose.ci.app.yml
 #
-# An override for using 'docker-compose.yml' in Cloud Build
+# Takes the role of both 'docker-compose.base.yml' and 'docker-compose.yml', for CI.
+# Works as a basis for 'docker-compose.ci.app.yml'.
 #
-# Intentions:
-#   Allow the 'docker-compose.yml' file be used, from Cloud Build scripts,
-#   so that the services are available to the following steps (using 'cloudbuild' network).
+# Reasons:
+#   - in CI, we don't need separate emulator instances for backend and front-end (same can handle both)
+#   - in CI, we always run on Linux, so don't need the 'tmp/functions-node_modules' tricks, done in development (simpler)
+#   - separating development and CI causes some overlap, but also frees the implementations from breaking each other!!
+#   - uses a pre-built image instead of pointing to '../dc/', as development does.
 #
-# References:
-#   - Share Compose configurations between files and projects (Docker Compose docs)
-#     -> https://docs.docker.com/compose/extends/
+# Expects:
+#   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
 #
 services:
-  emul:
+  emul:   # used for CI backend tests, app tests
+    image: ${CI_BUILDER_IMAGE}
+    ports:
+      - "5002:5002"
+      - "6767:6767"
+      - "6800:6800"
+        # Keep ports aligned with 'firebase[.ci].js'
+
+    volumes:
+      # --- RO
+      - ./tmp/firebase.json:/work/firebase.json:ro
+      - ./tmp/database.rules.json:/work/database.rules.json:ro
+      - ./firestore.indexes.json:/work/firestore.indexes.json:ro
+      - ./firestore.rules:/work/firestore.rules:ro
+      - ./functions:/work/functions:ro
+
+    working_dir: /work
+    command: sh -c
+      'echo "Launching Docker... 🐳" &&
+      
+      firebase emulators:start --project=demo-poof
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI|The Emulator UI is not starting"
+      '
+        # Note: The '--project' parameter does not matter, but Firebase Emulators demands to have one (11.2.0).
+        #     It only steers which project is visible in the UI, and since we run in CI, there is no UI.
+
+    healthcheck:
+      test: "nc -z localhost 6767 && echo '6767 is up' && nc -z localhost 5002 && echo '5002 is up' && nc -z localhost 6800 && echo '6800 is up'"
+        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      interval: 0.5s
+      start_period: 23s
+
+    # Allows the ports to be seen (as 'emul:{port}') by Cloud Build steps.
+    #
     network_mode: cloudbuild
     container_name: emul
 
+  # WARM UP the engines
+  #
+  # Firebase Emulators are SLOW to wake. This part runs a minimal set of tests (the results of which are not used),
+  # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
+  #
   warm-up:
+    image: node:16-alpine
+    volumes:
+      # --- RO
+      - ./node_modules:/work/node_modules:ro
+      - ./jest.config.default.js:/work/jest.config.default.js:ro
+      - ./tmp/firebase.json:/work/firebase.json:ro
+      - ./package.json:/work/package.json:ro
+      - ./test-fns:/work/test-fns:ro
+      - ./test-firestore-rules:/work/test-firestore-rules:ro
+      # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
+      #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
+
+    working_dir: /work
+    command: sh -c
+      'npm config set update-notifier false &&
+      
+      npm run dc:warm-up-PARTIAL &&
+      touch .healthy &&
+      sleep infinity
+      '
+    environment:
+      - EMUL_HOST=emul
+      - WARM_UP_TIMEOUT=24000
+        # Seen CI execution times:
+        #
+        #   fns       rules
+        #   ---       -----
+        #   (gets stuck, see #95)
+        #             (may exceed 24s timeout)
+        #
+        #   --- (comparison: on local)
+        #   7433ms    1106ms    # macOS Intel (DC 4.10.0)
+        #   3889ms    1148ms    # MacOS Intel (DC 4.9.0)
+        #
+        #   Times are the _longest_ individual test's execution time, per run. These are where timeout is applied.
+
+      # seen durations of:
+      #   9.122s (fns)    **OLD**
+      #   12.48s (rules)  **OLD**
+
+    depends_on:
+      emul:
+        condition: service_healthy
+
+    healthcheck:
+      test: "[ -f .healthy ] && echo 'Healthy!'"
+      interval: 1.0s
+      start_period: 40s
+        #
+        # Note: Start period shouldn't be overly long. If there's a problem with the Firebase Emulators setup, it's
+        #   causing the warm-up not to pass (weirdly, even a misconfigured Realtime Database config, not used by the
+        #   warm-up, causes warm-up to not pass).
+
+    # for us to see 'emul'
+    #
+    # tbd. Is this needed??
     network_mode: cloudbuild
     container_name: warm-up
-    environment:
-      - WARM_UP_TIMEOUT=15000
-      # seen durations of:
-      #   9.122s (fns)
-      #   12.48s (rules)
+
+  # A pass-through target.
+  #
+  # Used via 'docker compose run --rm warmed-up'.
+  #
+  # A separate target, so that the warm-up log output is always visible only in Docker Desktop, not the terminal
+  # output for something like 'npm test' (if launched with a cold DC).
+  #
+  warmed-up:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      warm-up:
+        condition: service_healthy
+    profiles: ['manual']

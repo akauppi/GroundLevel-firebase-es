@@ -134,7 +134,7 @@ This layout seems light enough, yet flexible, to recommend. In the following tex
 Create a GCP project for the CI builder role, and make it the active project for `gcloud`. 
 
 <!-- tbd. more details
-- enabling Container Registry etc. (a link to the Wiki?)
+- enabling Artifact Registry etc. (a link to the Wiki?)
 -->
 
 ```
@@ -175,34 +175,55 @@ $ gcloud config set project <project-id>
 These are already created, by Firebase.
 
 
-### Push the builder image
+### Build and push the builder image
 
-The CI scripts require `ci-builder` Container Registry to have the `firebase-ci-builder:10.4.0-node16-npm8` image.
+The CI scripts require your `gcloud` builder project to have the `firebase-emulators:11.2.0` image in the Artifact Registry. We'll build such an image, and push it there.
 
 1. Log into your "CI builder" GCloud project (see steps above).
 2. Build and push the image
 
    ```
-   $ pushd ../firebase-ci-builder.sub
    $ ./build
-   $ ./push-to-gcr
    ...
-   $ popd
+   Going to push us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.0
+   
+   Continue (y/N)?
    ```
+
+   If everything seems well, press `y` and you'll have the image stored in `us-central1` Artifact Registry.
+
+<details style="margin-left: 2em"><summary>Why `us-central1`?</summary>
+
+It's good to have the image in the same region where your Cloud Build (CI) runs.
+
+Note that this has no implications to GDPR and other privacy aspects: the CI runs simply compile the sources from your GitHub repo, and deploy the products. The CI jobs don't deal with your users, or their data, ever.
+</details>
+
+>**Costs involved (and how to have none)**
+>
+>Storing Docker images in Artifact Registry has a cost. The free tier provides 1GB of free storage (July 2022). The image is slightly less than 500MB, so you can have two versions without inducing billing.
+>
+>You may want to occasionally visit the [GCP Console](https://console.cloud.google.com/artifacts) and clear away earlier versions.
 
 
 ### Update the references to `ci-builder` GCP project
 
-The `cloudbuild.merged.*.yaml` scripts have these lines at the end:
+The `cloudbuild.merged.*.yaml` scripts are run under your *deployment* GCP project, not the builder. 
+
+They reference the builder image as such:
 
 ```
 substitutions:
-  _1: gcr.io/ci-builder/firebase-ci-builder:10.4.0-node16-npm8
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.0
 ```
 
-This tells the deployment project, where it can fetch its builder images. The `ci-builder` project belongs to the author and doesn't provide public pull access, so replace it with the GCP project you use for the same purpose.
+Replace `ci-builder` with the name of the builder project you created.
 
----
+<!-- tbd. Eventually, we'll need to come up with a solution that doesn't require edits to the template. (Public pull rights, or build using Kaniko???)
+-->
+
+>The `ci-builder` project belongs to the author and doesn't provide public pull access. We need to eventually do something about this (it is not the intention that you need to edit *anything* in the repo, to customize it). Using Kaniko image caching would be a likely solution (but needs testing)...
+
 
 Next, let's introduce GitHub and Cloud Build to each other.
 

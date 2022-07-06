@@ -30,11 +30,11 @@ steps:
 - name: node:16-alpine
   entrypoint: sh
   args: ['-c',
-    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
+    '[ $PROJECT_ID != ci-builder ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
 
-    [ ! -z $$SENTRY_DSN ] || ( >2& echo "ERROR: Please provide ''SENTRY_DSN'' env.var. to enable operational monitoring."; false ) &&
+    [ ! -z $$SENTRY_DSN ] || ( >&2 echo "ERROR: Please provide ''SENTRY_DSN'' env.var. to enable operational monitoring."; false ) &&
     
-    [ ! -z $_STAGE ] || ( >2& echo "ERROR: Please provide ''_STAGE'' substitution, e.g. with ''--substitutions _STAGE=abc'' or a CI task setting."; false )
+    [ ! -z $_STAGE ] || ( >&2 echo "ERROR: Please provide ''_STAGE'' substitution, e.g. with ''--substitutions _STAGE=abc'' or a CI task setting."; false )
     '
   ]
   secretEnv:
@@ -125,7 +125,7 @@ timeout: 400s
 #
 substitutions:
   #_BUILDER_TAG: 10.6.0-node16-npm8
-  _1: gcr.io/ci-builder/firebase-ci-builder:11.0.1-node18-npm8
+  _1: gcr.io/ci-builder/firebase-ci-builder:11.2.0-node18-npm8
   _DOCKER_COMPOSE_TAG: 1.29.2
   #_CYPRESS_TAG: 9.6.0
   _STAGE: manual      # set by CI, eg. "staging"

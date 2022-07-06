@@ -8,17 +8,20 @@
 #   - Common CI builder (not project specific; no deploys!)
 #     https://console.cloud.google.com/cloud-build/triggers?project=ci-builder
 #
+# Expects:
+#   - Artifact Registry of the GCP project to contain a "firebase-ci-builder" image.
+#
 # Uses images:
 #   - node:16-alpine
-#   - firebase-ci-builder   (pushed to Container Registry)
+#   - firebase-ci-builder   (project specific)
 #   - docker/compose
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
-#   - env.variables (just some):
-#     PWD=/workspace
+#   - env.variables:
 #     HOME=/builder/home
+#     BUILDER_OUTPUT=/builder/outputs
 #
 # Note:
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
@@ -31,17 +34,23 @@ steps:
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
-    [ $PROJECT_ID == ci-builder ] || ( >2& echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+    [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
 
     npm install &&
     npm --prefix packages/backend install
   ']
+  # State:
+  #   - 'packages/backend/functions/node_modules' have been populated
+  #   - 'packages/backend/tmp/firebase.json' has been created
+  #   - 'packages/backend/tmp/database.rules.json' has been created
 
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', 'run', 'functions-install']
+#DEBUG
+- name: node:${_NODE_VER}-alpine
+  entrypoint: sh
+  args: ['-c', '
+    cat tmp/firebase.json
+  ']
   dir: packages/backend
-  #env:
-  #  - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
 
 # DEBUG:
 #
@@ -49,11 +58,12 @@ steps:
 #
 # Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
 #
-#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#|  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'up', 'warm-up']
-#|  dir: packages/backend
-#|  env:
-#|    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  #args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
+  args: ['-f', 'docker-compose.ci.yml', 'up', 'warm-up']
+  dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -72,10 +82,10 @@ steps:
 # Launch emul/warm-up in DC, keeps them running in the background.
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', '--rm', 'warmed-up']
+  args: ['-f', 'docker-compose.ci.yml', 'run', '--rm', 'warmed-up']
   dir: packages/backend
   env:
-    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: npm
@@ -84,11 +94,10 @@ steps:
   env:
     - EMUL_HOST=emul
 
-# Temporarily skipped
-#|- name: node:${_NODE_VER}-alpine
-#|  entrypoint: npm
-#|  args: ['run', 'lint']
-#|  dir: packages/backend
+- name: node:${_NODE_VER}-alpine
+  entrypoint: npm
+  args: ['run', 'lint']
+  dir: packages/backend
 
 # --- Timeout
 #
@@ -107,6 +116,8 @@ timeout: 300s
 #   - DC/native, with lint:     2:35
 
 substitutions:
-  _BUILDER_TAG: 11.0.1-node18-npm8
+  _BUILDER_TAG: 11.2.0
   _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "16"
+  _AR_FOLDER: builders
+    # You may use any name, or create such a folder in AR.

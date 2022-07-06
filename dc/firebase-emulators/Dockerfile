@@ -77,7 +77,7 @@ RUN firebase setup:emulators:ui \
   # $ ls /root/.cache/firebase/emulators/
   #   cloud-firestore-emulator-v1.14.3.jar    (57.6 MB)
   #   cloud-storage-rules-runtime-v1.0.2.jar  (34.1 MB)   <-- old version
-  #   firebase-database-emulator-v4.7.3.jar   (27.5 MB)   <-- old version
+  #   firebase-database-emulator-v4.8.0.jar   (32.1 MB)
   #   pubsub-emulator-0.1.0                   (37.9 MB)   <-- old version
   #   ui-v1.7.0                               (15.1 MB)
 
@@ -95,4 +95,4 @@ RUN firebase setup:emulators:ui \
 ENV FIREBASE_EMULATORS_PATH '/root/.cache/firebase/emulators'
 
 # Allows emulators to see changes to (host side, volume mapped) Security Rules, Cloud Functions
-ENV CHOKIDAR_USEPOLLING true
+#ENV CHOKIDAR_USEPOLLING true

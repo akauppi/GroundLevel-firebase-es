@@ -5,6 +5,8 @@
 *   - Schema
 *     -> https://github.com/firebase/firebase-tools/blob/master/schema/firebase-config.json
 */
+const CI = !! process.env["BUILDER_OUTPUT"];
+
 export default {
   firestore: {
     rules: "./firestore.rules",
@@ -29,7 +31,7 @@ export default {
       port: 5002,
       host: "0.0.0.0"
     },
-    ui: {
+    ui: CI ? { enabled: false } : {   // no need to put CPU cycles to waste in CI
       port: 4000,
       host: "0.0.0.0"
     }

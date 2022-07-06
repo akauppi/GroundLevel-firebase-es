@@ -46,6 +46,9 @@ services:
       - ./tmp/functions-node_modules:/work/functions/node_modules:ro
 
     working_dir: /work
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+        # Allows emulators to see changes to (host side, volume mapped) Security Rules, Cloud Functions
 
     # If we provide ports by Env.vars, could have also health check here.
     #|healthcheck:

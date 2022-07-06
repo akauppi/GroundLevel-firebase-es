@@ -18,7 +18,8 @@
 
 /.gitmodules
 /ci/
-/firebase-ci-builder.sub/
+/first/
+/sh/run-no.sh
 
 # Global '.gitignore' (of the author); not observed by Cloud Build defaults
 #
@@ -38,19 +39,15 @@
 # #!include:packages/backend/.gitignore
 #   ^-- ERROR: "May only include files in the same directory." (Google Cloud SDK 332.0.0)
 
-.firebase/
-.firebaserc
+#.firebase/
+#.firebaserc
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
 firebase-debug.app.log
 firestore-debug.app.log
 ui-debug.app.log
-.lock
-#vitebox/dist/
 .screenshots/
-#roll/out/*
-#vite/out/*
 stats.html
 *.~
 
@@ -74,6 +71,7 @@ packages/app/tmp/
 # Documentation-like folders (irrelevant for build)
 #
 /DEVS/
+/docs/
 /**/.images/
 *.md
 .editorconfig

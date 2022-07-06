@@ -28,8 +28,6 @@ services:
         # Ports that don't overlap those for backend development.
         # Keep the ports aligned with '../app'.
 
-    environment:
-      - CHOKIDAR_USEPOLLING=true
     healthcheck:
       test: "nc -z localhost 6768 && nc -z localhost 5003 && nc -z localhost 6801"
       # Note: 'nc' in that image doesn't handle checking multiple ports at once.

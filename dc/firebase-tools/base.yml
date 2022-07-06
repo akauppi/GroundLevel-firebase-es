@@ -5,7 +5,6 @@
 #
 services:
   base:
-    #image: local_firebase_tools      # could use this to be able to extend the emulators Dockerfile from the CLI's, but... it's not a clear linkage. No thanks.
     build:
       context: .
       cache_from:
