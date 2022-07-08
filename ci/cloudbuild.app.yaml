@@ -48,12 +48,15 @@ steps:
     
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/app install --no-optional
+    npm --prefix packages/app install --omit=optional
   ']
-    # Note: '--no-optional' can make a slight speedup, not installing 'vite', 'rollup' etc. (that then get immediately
+    # Note: '--omit=optional' can make a slight speedup, not installing 'vite', 'rollup' etc. (that then get immediately
     #   removed). However, have not measured.
 
-  env: ['CYPRESS_INSTALL_BINARY=0']
+  env: ['CYPRESS_INSTALL_BINARY=0', '_APP=App']
+
+  # State:
+  #   - packages/backend/tmp/firebase.app.json    <-- has geen generated
 
 # DEBUG:
 #
@@ -135,7 +138,8 @@ substitutions:
   _BUILDER_TAG: 11.2.0
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
-  _NODE_VER: "16"
+  _NODE_VER: "18"
+    # ^-- Using 18, why not?
   _CYPRESS_TAG: 10.3.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders

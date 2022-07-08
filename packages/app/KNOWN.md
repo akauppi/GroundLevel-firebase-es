@@ -92,3 +92,19 @@ If you encounter this, just retry `npm run dev`.
 The reason is unknown. 
 
 - [ ] Make a GitHub Issue and try to resolve.
+
+
+## Changes to `tools/*.dc/` not having effect
+
+This is because of Docker Compose. Its `run` command is not sniffing, whether the source `Dockerfile` was changed, since the last build.
+
+We *can* do this ourselves, once we move to using Makefiles. Currently checking for changes would be overly complex, and running a `build` for every `run` would take ~1s, unnecessarily (though still an option).
+
+**Work-around:**
+
+To bring changes into effect, run:
+
+```
+$ npm run _refresh
+```
+

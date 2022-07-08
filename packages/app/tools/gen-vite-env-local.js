@@ -5,20 +5,31 @@
 *
 * Usage:
 *   <<
-*     [SENTRY_DSN=...] FIREBASE_JSON=<path> gen-vite-env-local --project=demo-...
+*     [FIREBASE_APP_JS=...] [SENTRY_DSN=...] gen-vite-env-local --project=demo-...
 *   <<
+*
+* Expects:
+*   - top level await to be supported (node 18)
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
 * side to get copies of these build values.
 *
 * Output to stdout.
 */
-import { readFileSync } from 'fs'
+const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || "firebase.app.js";
+
+const { emulators } = await import(`../${FIREBASE_APP_JS}`).then( mod => mod.default );
+
+// DEBUG
+console.debug("!!!", { emulators });
 
 const [a] = process.argv.slice(2);
 const [_,projectId] = /^--project=(.+)$/.exec(a);
 
-const FIREBASE_JSON = process.env['FIREBASE_JSON'] || 'firebase.json'
+// Safety check: no longer using 'FIREBASE_JSON'
+if (process.env['FIREBASE_JSON']) {
+  fail("INTERNAL: not expecting 'FIREBASE_JSON' be defined");
+}
 
 if (!projectId) {
   process.stderr.write(`\nUsage: gen-vite-env-local --project=demo-...\n`);
@@ -28,11 +39,9 @@ if (!projectId) {
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
 const [firestorePort, authPort, databasePort] = (_ => {   // => [int, int, int]
-  const raw = readFileSync( FIREBASE_JSON );
-  const json = JSON.parse(raw);
 
   const arr = ["firestore","auth","database"].map( k => {
-    return (json.emulators && json.emulators[k] && json.emulators[k].port)    // cannot use '?.' because of the varying 'k'
+    return (emulators && emulators[k] && emulators[k].port)    // cannot use '?.' because of the varying 'k'
       || fail(`Cannot read 'emulators.${k}.port' from 'firebase.json'`);
   });
   return arr;

@@ -5,7 +5,7 @@ Web application sample project.
 ## Requirements
 
 - `npm`
-- Docker Compose 2.x <sub>as per `docker compose version`</sub>
+- `docker`
 
 
 ### Cypress setup

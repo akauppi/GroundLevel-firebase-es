@@ -4,7 +4,7 @@
 # Base for 'docker-compose.{local|online}.yml (and via 'local' to 'docker-compose.{test|ci}.yml').
 #
 # Note:
-#   DC overlays do allow for removal of mounts (eg. by overriding them to point to '/dev/nul'; mounts are overridable
+#   DC overlays do allow for removal of mounts (e.g. by overriding them to point to '/dev/nul'; mounts are overridable
 #   by their container side path as a key). But that would be too fine-grained. This file just provides the common
 #   things for both 'local' and 'online' and they add their specific mounts.
 #
@@ -40,11 +40,12 @@ services:
   vite-base:   # used for 'npm run dev:local', 'npm run dev:online', 'npm test'
     build:
       context: tools/vite.dc
+      target: vite_plain
     ports:
       - "$PORT:$PORT"
     volumes:
       # --- RO
-      - ./package.json:/work/package.json:ro
+      - ./package.dc.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       # --- cached
       - ./public:/work/public:cached

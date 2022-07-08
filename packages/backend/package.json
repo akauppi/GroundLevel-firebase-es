@@ -46,7 +46,7 @@
     "-- ---": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
     "_postinstall_local": "install -d tmp/functions-node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
-    "_postinstall_ci": "npm --prefix functions install && npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
+    "_postinstall_ci": "npm --prefix functions install && npm run -s _genFirebaseJson${_APP:-} && npm run -s _genDatabaseRulesJson",
     "_touchEm": "(cd logs && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)",
     "_touchEmApp": "(cd logs && touch firebase-debug.app.log firestore-debug.app.log database-debug.app.log ui-debug.app.log)",
     "_genFirebaseJson": "node --input-type=module -e \"import o from './firebase.js'; console.log(JSON.stringify(o));\" > tmp/firebase.json",

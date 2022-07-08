@@ -12,19 +12,23 @@
 #
 # Expects:
 #   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
+#   FIRESTORE_PORT
+#   FUNCTIONS_PORT
+#   DATABASE_PORT
+#   DOT_APP         ".app" if building for emulating app backend; undefined otherwise
 #
 services:
   emul:
     image: ${CI_BUILDER_IMAGE}
     ports:
-      - "${FUNCTIONS_PORT:-5002}:${FUNCTIONS_PORT:-5002}"
-      - "${FIRESTORE_PORT:-6767}:${FIRESTORE_PORT:-6767}"
-      - "${DATABASE_PORT:-6800}:${DATABASE_PORT:-6800}"
+      - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
+      - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
         # Keep ports aligned with 'firebase[.ci].js'
 
     volumes:
       # --- RO
-      - ./tmp/firebase.json:/work/firebase.json:ro
+      - ./tmp/firebase${_DOT_APP:-}.json:/work/firebase.json:ro
       - ./tmp/database.rules.json:/work/database.rules.json:ro
       - ./firestore.indexes.json:/work/firestore.indexes.json:ro
       - ./firestore.rules:/work/firestore.rules:ro
@@ -60,13 +64,15 @@ services:
   # Firebase Emulators are SLOW to wake. This part runs a minimal set of tests (the results of which are not used),
   # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
   #
+  # Note: Warm-up is only applied to backend launch; not to backend-for-app.
+  #
   warm-up:
     image: node:16-alpine
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
-      - ./tmp/firebase.json:/work/firebase.json:ro
+      - ./tmp/firebase.json:/work/firebase.json:ro    # no need for '${DOT_APP}' (only used for backend)
       - ./package.json:/work/package.json:ro
       - ./test-fns:/work/test-fns:ro
       - ./test-firestore-rules:/work/test-firestore-rules:ro
@@ -113,6 +119,8 @@ services:
         # Note: Start period shouldn't be overly long. If there's a problem with the Firebase Emulators setup, it's
         #   causing the warm-up not to pass (weirdly, even a misconfigured Realtime Database config, not used by the
         #   warm-up, causes warm-up to not pass).
+
+    profile: ["manual"]
 
     # for us to see 'emul'
     #

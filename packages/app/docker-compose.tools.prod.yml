@@ -16,9 +16,10 @@ services:
   build:
     build:
       context: tools/vite.dc
+      target: vite_for_build
     volumes:
       # --- RO
-      - ./package.json:/work/package.json:ro
+      #- ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
@@ -35,9 +36,6 @@ services:
       - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
     command: sh -c
       '
-      npm install -g rollup-plugin-visualizer &&
-      (cd / && mkdir node_modules && cd node_modules && ln -s $$NODE_PATH/rollup-plugin-visualizer .) &&
-
       ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:---}" >> .env) &&
       ([ -z "${RELEASE}" ] || echo "VITE_RELEASE=${RELEASE:---}" >> .env) &&
       ([ -z "$ENV" ] || echo "VITE_STAGE=${ENV:---}" >> .env) &&

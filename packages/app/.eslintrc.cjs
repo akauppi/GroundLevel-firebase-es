@@ -72,19 +72,12 @@ module.exports = {
     {
       files: ["*.js"],
       extends: ['eslint:recommended'],
-      env: {  //?? what here?
-      },
       globals: {
         process: true,
       }
     },
 
     // run under node (ES modules sources)
-    //
-    // Note: Top-level awaits should be okay, but the 'plugin_node/recommended' still gives the warning:
-    //    <<
-    //      expressions are not supported yet.(node/no-unsupported-features/es-syntax)
-    //    <<
     {
       files: ["local/*.js", "tools/*.js"],
       extends: ['plugin:node/recommended'],

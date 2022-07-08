@@ -1,6 +1,8 @@
 /*
 * Firebase emulation for front-end development
 */
+const CI = !! process.env["BUILDER_OUTPUT"];
+
 export default {
   firestore: {
     rules: "./firestore.rules",
@@ -29,7 +31,7 @@ export default {
       port: 9101,
       host: "0.0.0.0"
     },
-    ui: {
+    ui: CI ? { enabled: false } :{    // no need to burden CI with a UI
       port: 4001,
       host: "0.0.0.0"
     }

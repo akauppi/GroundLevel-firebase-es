@@ -1,10 +1,13 @@
 /*
 * config.js
 */
-import { existsSync, readFileSync } from 'fs'
+//import { existsSync, readFileSync } from 'fs'
 
 let projectId, host;
 
+// tbd. If wanting to read Firestore and auth ports from a file (instead of env.var), import them directly from
+//    '../backend/firebase.app.js'.
+//
 //const firebaseJson = process.env.FIREBASE_JSON || 'firebase.json'
 
 function init(a, b) {   // (string, string) => ()

@@ -20,18 +20,13 @@ services:
       service: emul
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
-        # Keep ports aligned with 'firebase[.ci].js'    <-- tbd. revise?
 
-    #volumes:
-      # nothing to change
+    environment:
+      _DOT_APP=.app
 
-    #working_dir: /work
-    #healthcheck:
-    #   ...
-
-    # Allows the ports to be seen (as 'emul:{port}') by Cloud Build steps.
+    # Allows the ports to be seen (as 'emul-for-app:{port}') by Cloud Build steps.
     #
-    container_name: emul
+    container_name: emul-for-app
 
   emul-for-app-launched:
     image: node:16-alpine
