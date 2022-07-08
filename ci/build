@@ -2,7 +2,7 @@
 set -eu -o pipefail
 
 #
-# Build the '/dc/firebase-emulators/' Docker image
+# Build the 'firebase-emulators' Docker image
 #
 # Requires:
 #	  - docker
@@ -16,16 +16,20 @@ set -eu -o pipefail
 #   - 'firebase-tools' releases
 #     -> https://github.com/firebase/firebase-tools/releases
 
-_VERSION=11.2.0
-  # ^-- keep that name. 'push-to-artifacts' reads it
+# Note: We can use a different version than the default in the Dockerfile. This is the one CI scripts expect (can change
+#   less frequently; if you change, remove earlier images from Artifact Registry).
+#
+# Note: >= 11.2.1 to avoid Artifact Registry API enabling need, by hand.
+#
+_VERSION=11.2.1
 
-_DOCKERPATH=../dc/firebase-emulators
+_DOCKERPATH=../dc/firebase-tools
 _IMAGE_NAME=firebase-emulators
 
 _TAG=${_VERSION}
   # note: can vary the tag, eg. adding a postfix to it
 
-docker build --pull --build-arg FIREBASE_TOOLS_VERSION=${_VERSION} ${_DOCKERPATH} -t ${_IMAGE_NAME}:${_TAG}
+docker build --pull --build-arg FIREBASE_TOOLS_VERSION=${_VERSION} --target firebase-emulators ${_DOCKERPATH} -t ${_IMAGE_NAME}:${_TAG}
 
 #
 # Push to Artifact Registry

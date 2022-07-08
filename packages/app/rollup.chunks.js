@@ -71,65 +71,74 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
     /^vite\/preload-helper$/,       // Vite runtime (small, ~600b)
     /^vite\/modulepreload-polyfill$/,
     /^plugin-vue:export-helper$/,    // very small, ~180b
-
-    // Moved here, to avoid a "Generated an empty chunk" warning.
-    /\/deps_build-.{8}\/vue\.js$/
   ],
-
-  // Note:
-  //    Since Vite 3.0.0-alpha.{3..7}, these are based on '/work/tmp/.vite/depsBuild' (and not 'node_modules').
-  //    Since 3.0.0-alpha.8, they are under 'deps_build'
 
   // Vue.js
   //
-  //  /work/tmp/.vite/deps_build-.../vue.js
-  //  /work/tmp/.vite/deps_build-.../vue-router.js
+  //  /work/node_modules/vue/dist/vue.runtime.esm-bundler.js
+  //  /work/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+  //  /work/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+  //  /work/node_modules/@vue/devtools-api/lib/esm/api/api.js
+  //  /work/node_modules/vue-router/dist/vue-router.esm-bundler.js
   //
-  //"vue": /\/deps_build\/vue\.js$/,     // causes "Generated an empty chunk: "vue""
-  "vue-router": /\/deps_build-.{8}\/vue-router\.js$/,
+  "vue": /\/node_modules\/@?vue\//,
+  "vue-router": /\/node_modules\/vue-router\//,
 
   // Firebase
   //
-  //  /work/tmp/.vite/deps_build-.../@firebase_app.js
-  //  /work/tmp/.vite/deps_build-.../@firebase_performance.js
-  //  /work/tmp/.vite/deps_build-.../@firebase_auth.js
-  //  /work/tmp/.vite/deps_build-.../@firebase_firestore.js
+  //  /work/node_modules/@firebase/app/dist/esm/index.esm2017.js
+  //  /work/node_modules/@firebase/performance/dist/esm/index.esm2017.js
+  //  /work/node_modules/@firebase/util/dist/index.esm2017.js
+  //  /work/node_modules/@firebase/logger/dist/esm/index.esm2017.js
+  //  /work/node_modules/@firebase/component/dist/esm/index.esm2017.js
+  //  /work/node_modules/@firebase/installations/dist/esm/index.esm2017.js
+  //  /work/node_modules/@firebase/auth/dist/esm2017/index.js
+  //  /work/node_modules/@firebase/firestore/dist/index.esm2017.js
+  //  /work/node_modules/@firebase/database/dist/index.esm2017.js
+  //  /work/node_modules/@firebase/webchannel-wrapper/dist/index.esm2017.js
   //
-  "firebase-app": /\/deps_build-.{8}\/@firebase_app\.js$/,      // just 0.03 kB
-  "firebase-auth": /\/deps_build-.{8}\/@firebase_auth\.js$/,    // just 0.03 kB
-  "firebase-database": /\/deps_build-.{8}\/@firebase_database\.js$/,
-  "firebase-firestore": /\/deps_build-.{8}\/@firebase_firestore\.js$/,
-  "firebase-performance": /\/deps_build-.{8}\/@firebase_performance\.js$/,
-
-  // ??? What are these (started showing up past Vite 3.0.0-alpha.2):
+  //  /work/node_modules/idb/build/index.js   # used by Firebase app and performance
   //
-  //  /work/tmp/.vite/deps_build-.../chunk-LYCR3OCH.js?v=158f2df3
-  //  /work/tmp/.vite/deps_build-.../chunk-JC4IRQUL.js?v=158f2df3
-  //  /work/tmp/.vite/deps_build-.../chunk-UWFB6V5R.js?v=158f2df3
-  //  /work/tmp/.vite/deps_build-.../chunk-YY36X6P6.js?v=158f2df3
-  //  /work/tmp/.vite/deps_build-.../chunk-XNLT5KZI.js?v=158f2df3
-  //
-  "mystery": /\/deps_build-.{8}\/chunk-[A-Z0-9]{8}\.js/,
+  "firebase-auth": /\/node_modules\/@firebase\/auth\//,
+  "firebase-database": /\/node_modules\/@firebase\/database\//,
+  "firebase-firestore": /\/node_modules\/@firebase\/firestore\//,
+  "firebase-performance": /\/node_modules\/@firebase\/performance\//,
+  "firebase": [
+    /\/node_modules\/@firebase\/(?:app|util|logger|component|installations|webchannel-wrapper)\//,
+    /\/node_modules\/idb\//,
+  ],
 
   // Plausible
   //
-  //  /work/tmp/.vite/deps_build-.../plausible-tracker.js
+  //  /work/node_modules/plausible-tracker/build/module/index.js
+  //  /work/node_modules/plausible-tracker/build/module/lib/tracker.js
   //
-  "plausible": /\/deps_build-.{8}\/plausible-tracker\.js$/,
+  "plausible": /\/node_modules\/plausible-tracker\//,
 
   // Sentry
   //
-  //  /work/tmp/.vite/deps_build-.../@sentry_browser.js
-  //  /work/tmp/.vite/deps_build-.../@sentry_tracing.js
+  //  /work/node_modules/@sentry/browser/esm/index.js
+  //  /work/node_modules/@sentry/tracing/esm/index.js
+  //  /work/node_modules/@sentry/hub/esm/index.js
+  //  /work/node_modules/@sentry/utils/esm/buildPolyfills/index.js
+  //  /work/node_modules/@sentry/core/esm/api.js
+  //  /work/node_modules/@sentry/hub/esm/index.js
   //
-  "sentry-browser": /\/deps_build-.{8}\/@sentry_browser\.js$/,
-  "sentry-tracing": /\/deps_build-.{8}\/@sentry_tracing\.js$/,
+  "sentry-browser": /\/node_modules\/@sentry\/browser\//,
+  "sentry-tracing": /\/node_modules\/@sentry\/tracing\//,
+  "sentry": /\/node_modules\/@sentry\/(?:core|utils|hub)\//,
+
+  // Other
+  //
+  //  /work/node_modules/tslib/tslib.es6.js   # used by Firebase, but also Sentry
+  //
+  "tslib": /\/node_modules\/tslib\//,
 
   // Auth UI component
   //
-  //  /work/tmp/.vite/deps_build-.../aside-keys.js
+  //  /work/node_modules/aside-keys/dist/bundle.js
   //
-  "aside-keys": /\/deps_build-.{8}\/aside-keys\.js$/,
+  "aside-keys": /\/node_modules\/aside-keys\//,
 
   // There should not be others. Production builds are banned with 'npm link'ed or 'file://') 'aside-keys'.
 };

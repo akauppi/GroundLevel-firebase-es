@@ -177,7 +177,7 @@ These are already created, by Firebase.
 
 ### Build and push the builder image
 
-The CI scripts require your `gcloud` builder project to have the `firebase-emulators:11.2.0` image in the Artifact Registry. We'll build such an image, and push it there.
+The CI scripts require your `gcloud` builder project to have the `firebase-emulators:11.2.1` image in the Artifact Registry. We'll build such an image, and push it there.
 
 1. Log into your "CI builder" GCloud project (see steps above).
 2. Build and push the image
@@ -185,7 +185,7 @@ The CI scripts require your `gcloud` builder project to have the `firebase-emula
    ```
    $ ./build
    ...
-   Going to push us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.0
+   Going to push us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.1
    
    Continue (y/N)?
    ```
@@ -214,7 +214,7 @@ They reference the builder image as such:
 
 ```
 substitutions:
-  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.0
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.1
 ```
 
 Replace `ci-builder` with the name of the builder project you created.

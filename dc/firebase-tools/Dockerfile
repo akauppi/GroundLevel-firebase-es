@@ -20,7 +20,8 @@
 #
 FROM node:16-alpine AS firebase-cli
 
-ENV FIREBASE_TOOLS_VERSION=11.2.1
+# CI overrides with a version it prefers.
+ARG FIREBASE_TOOLS_VERSION=11.2.1
 
 # Suppress npm update announcements
 RUN npm config set update-notifier false

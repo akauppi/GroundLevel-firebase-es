@@ -27,8 +27,8 @@
 services:
   emul-base:   # used for 'npm run start', 'npm test', 'npm run app:start'
     extends:
-      file: ../../dc/firebase-tools/base.yml
-      service: firebase-emulators
+      file: ../../dc/firebase-emulators/base.yml
+      service: base
     volumes:
       # --- RO
       - ./tmp/firebase${DOT_APP:-}.json:/work/firebase.json:ro

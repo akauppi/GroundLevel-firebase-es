@@ -135,7 +135,7 @@ steps:
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 11.2.0
+  _BUILDER_TAG: 11.2.1
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"

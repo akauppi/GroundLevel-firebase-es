@@ -13,14 +13,8 @@ The commands are to be executed in the `first` folder.
       - [x] Cloud Functions
       - [x] Realtime Database
       - [x] Hosting
-  - it has an "application"
+  - it has an "application" created (needed for authentication)
 - Have Docker running
-
-  ```
-  $ docker compose version
-  Docker Compose version v2.6.0
-  ```
-
 
 ## Manual deployment
 
@@ -42,7 +36,6 @@ This asks you to log into the Firebase project.
 >Security note. Authentication is done using Docker containers; your deployment credentials should not get stored on the development machine.
 
 ![](.images/first-1.png)
-![](.images/first-2.png)
 
 >Hint: On macOS, press Cmd(⌘) and double click on the URL in the terminal, to open it.
 
