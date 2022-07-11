@@ -6,7 +6,7 @@ Web application sample project.
 
 - `npm`
 - `docker`
-- GNU `make`
+- `make` (GNU make)
 
    <small>We use the GNU `make` indirectly, but may opt for a greater role for it, in the future.</small>
 
@@ -71,9 +71,9 @@ This means you should be able to run the Cypress installed within Linux, and use
 Development is done with: 
 
 - macOS 12.4
-- node 18.3
-- npm 8.11
-- Docker Desktop 4.9.0 with: 3 CPU cores, 2 GB RAM, 512 MB swap
+- node 18.4
+- npm 8.12
+- Docker Desktop 4.10.1 with: 3 CPU cores, 2 GB RAM, 512 MB swap
   - experimental > Enable VirtioFS
 -->
 
@@ -93,11 +93,10 @@ $ npm install
 $ npm run dev
 ...
 
-  VITE v3.0.0-alpha.12  ready in 1341 ms
+  VITE v3.0.0-beta.9  ready in 1341 ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Network: http://172.20.0.2:3000/
-  ❖  Note:    You are using a wildcard host. Ports might be overridden.
 
 ...
 ```
@@ -106,26 +105,20 @@ This serves the UI locally, against an emulated Firebase back-end.
 
 >Within local mode, you sign in by `?user=dev` query parameter.
 
-<!-- tbd. Could dim the social sign-in with a hover tip on `?user=dev` -->
-
 Try it: 
 
 [`http://localhost:3000?user=dev`](http://localhost:3000?user=dev)
 
-Try making some changes in the `src/**` files and see that they are reflected in the browser.
+Make some changes in the `src/**` files and see that they are reflected in the browser.
 
 <!-- tbd. some more fun mod, perhaps?
 >![](.images/modded-welcome.png)
 -->
 
->Note: Ignore the `You are using a wildcard host.` message. We need it for running under Docker Compose, and haven't found a way to skip the message.
-
-<p />
-
 >Note: The IP (`172.20.0.2`) mentioned above exists only within the Docker container. Ignore it.
 
 <!--
-tbd. Use color-preserving piping (with `socat`) within the DC, taking the two lines out.
+tbd. Use color-preserving piping (with `socat`) within the DC, taking the `Network` line out.
 -->
 
 ## Two development workflows
@@ -168,7 +161,7 @@ Use this when:
 - you have a Firebase account
 - you want to sign in as a real user
 
-The mode needs `firebase.staging.js` in the project's root, to find the staging project. Instructions for creating it are in the root `README`.
+The mode needs `firebase.staging.js` in the project's root, to find the staging project. This should have been created during your first deployment (see root `README.md`).
 
 >Note: You can choose another project by `ENV=abc npm run dev:online`.
 
@@ -188,21 +181,9 @@ Changes to your front-end files are still reflected in the browser, but back-end
 The two development modes are completely orthogonal - you can run them side by side, in different terminals. By default, local uses port 3000 and online port 3001.
 
 
-### When to use which mode?
-
-Just try, which suits your way. :)
-
-As mentioned above, if you work on UI features only, `dev:online` may be better.
-
-If you work on removing data, `dev:local` may suit best, since it always boots from a known-good data set (and users).
-
-You can customize the `local/*` setup to your development needs. Tests carry their own data and users, so they are safe from your changes.
-
-<!-- remove?
-Before we look at tests, a brief mention on linting.
-
-
 ## Linting
+
+Before we look at tests, a brief mention on linting.
 
 ```
 $ npm run lint
@@ -211,10 +192,9 @@ $ npm run lint
 
 This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
 
->Note: At the moment (Apr 2021) we're not focused on reducing the number of lint warnings (or even errors).
+>Note: At the moment (<strike>Apr 2021</strike> Jul 2022) we're not focused on reducing the number of lint warnings.
 
 With the sample app, there may be warnings but there should not be errors.
--->
 
 ## Testing
 
@@ -229,7 +209,9 @@ You can use Cypress for test based development as well as running all the tests,
 $ npm test
 ```
 
-`npm test` launches a DC environment in the background. This reduces the startup time, in case you were to run `npm test` multiple times.
+This runs all the front-end tests and returns you back to the OS prompt.
+
+>Note: `npm test` launches a DC environment in the background. This reduces the startup time, in case you were to run `npm test` multiple times.
 
 
 ### Test based development
@@ -238,7 +220,7 @@ The other way is to keep `npm run dev` running, and edit both one's code and tes
 
 Have `npm run dev` running in a terminal.
 
-Visit `http://localhost:3000` at with a browser, at least once. The first load warms up Vite.
+Visit `http://localhost:3000` with a browser, at least once. The first load warms up Vite.
 
 <!-- tbd.
 Could do a `curl` within DC, to warm up automatically.
@@ -248,7 +230,9 @@ Launch Cypress and pick the `packages/app` subfolder.
 
 ><sub>There are two ways to launch Cypress, either from its Desktop icon (recommended) or by `npx cypress open --e2e` in the `packages/app` folder.</sub>
 
-- Choose `End to End tests`
+- Choose `E2E testing`
+
+  - Choose any browser (depends on what you have installed on your computer).
 
 ![](.images/cypress-launch.png)
 
@@ -266,9 +250,11 @@ Cypress will automatically re-run tests while you make changes to the source - o
 
 In short, you can:
 
-- *time travel* to see what the UI looked, at the time the tests were executed.
+- *time travel* to see what the UI looked, at the time the tests were executed. (hover over the test steps)
+  - *pin* your view to a particular step in time, by clicking on it
+- Use the *regular browser tools* to inspect components, see the console etc. also within a time-travelled render!
 
-The Cypress approach changes the way we do software. The more time you spend with it, the more time it likely will save you.
+<font size="+3">*The Cypress approach changes the way we do software. The more time you spend with it, the more time it likely will save you.*</font>
 
 
 >**Note:**
@@ -281,52 +267,48 @@ Both `npm run dev` and `npm run dev:online` expose their ports to all network in
 
 This means, the web app is browsable also from a phone, tablet etc. in the same network. All you need is to find out the outwards-facing IP number of your computer (let's say it's `192.168.1.62`), and open `http://192.168.1.62:3000` (or 3001) from your other device.
 
+<!-- hidden
+
 >Note: There's a LOT more to developing with another device. You can tie both the Safari and Chrome browsers with a desktop browser, seeing the debugging information within the desktop.
 >
 >This is beyond the purpose of a `README`, though.
+-->
 
 ### Finding your IP number
 
 |OS|Steps|
 |---|---|
-|macOS (UI)|`Preferences` > `Network` > (adapter) > `IP address`|
+|macOS|`Preferences` > `Network` > (adapter) > `IP address`|
 |macOS (terminal)|`ifconfig`|
+|Windows 10 + WSL2|...tbd.|
 
-<!--
-|Windows 10 + WSL2|...|
+<!-- tbd. #contribute
+|Windows 11|...|
 |Linux|`ipconfig` ??|
 -->
 
+<!-- tbd.
+Make a nice helper (`make show-ip`) to cover the OS differences.
+-->
 
 ## Production build
 
 ```
 $ npm run build
 ...
-vite v3.0.0-alpha.12 building for production...
-✓ 64 modules transformed.
-../dist/index.html                         1.24 KiB
-../dist/firebase-app.e5e64390.js           0.03 KiB / gzip: 0.05 KiB
-../dist/firebase-app.e5e64390.js.map       0.10 KiB
+vite v3.0.0-beta.9 building for production...
+✓ 197 modules transformed.
+../dist/index.html                         1.51 KiB
+../dist/aside-keys.42ab51fe.js             14.01 KiB / gzip: 5.86 KiB
+../dist/aside-keys.42ab51fe.js.map         44.04 KiB
 ...
-../dist/mystery.3ee42f39.js                381.16 KiB / gzip: 86.57 KiB
-../dist/mystery.3ee42f39.js.map            1101.28 KiB
+../dist/firebase-firestore.1ecd9c81.js     464.63 KiB / gzip: 111.93 KiB
+../dist/firebase-firestore.1ecd9c81.js.map 1140.85 KiB
 ```
 
-This builds your front end application in `dist/` folder:
+This builds your front end application in `dist/` folder.
 
-```
-$ tree dist
-dist
-├── aside-keys.5dea6d63.js
-├── aside-keys.5dea6d63.js.map
-...
-├── style.8cd2db39.css
-├── favicon.png
-└── index.html
-```
-
->Hint. We also use [rollup-plugin-visualizer](https://github.com/btd/rollup-plugin-visualizer) to provide a browsable report of the modules. Check it out at `stats.html`.
+>Hint. We also use [rollup-plugin-visualizer](https://github.com/btd/rollup-plugin-visualizer) to provide a browsable report of the modules. Check it out by opening `stats.html`.
 
 
 <!-- Hidden; didn't get the DC solution to work.  Needs `npm install -g http-server`
@@ -356,15 +338,5 @@ When you feel like it, take a look at the following folders that have informatio
 
    Learn about how to see whether your users are there, and how their experience using the app is.
 
-<!-- tbd.
-- `/chat` - User engagement, using [Discord](https://discord.com)
-
-   Set up a discussion area, where your users can meet each other and you.
--->   
 
 This concludes the web app feedback loop. Make great apps, gain users and have a great time!!!
-
-<!-- tbd. image of merry-go-round:
-	idea -> development -> deployment -> feedback -> development
--->	
-	

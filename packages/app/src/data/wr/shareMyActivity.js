@@ -43,9 +43,9 @@ function shareMyActivity(projectId) {
 
       console.debug("Activity posted", { uid, lastActive });
     })
-    .catch( err => {
+    /*** .catch( err => {
       //tbd. central.error("Reporting activity failed:", err);
-    });
+    }); ***/
   }
 }
 
