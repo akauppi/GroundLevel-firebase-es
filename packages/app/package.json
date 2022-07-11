@@ -55,13 +55,13 @@
     "@sentry/browser": "^7.0.0",
     "@sentry/tracing": "^7.0.0",
     "aside-keys": "^0.0.3-alpha.1",
-    "@firebase/app": "^0.7.26",
-    "@firebase/database": "^0.13.1",
-    "@firebase/firestore": "^3.4.10",
-    "@firebase/performance": "^0.5.10",
+    "@firebase/app": "^0.7.28",
+    "@firebase/database": "^0.13.3",
+    "@firebase/firestore": "^3.4.12",
+    "@firebase/performance": "^0.5.12",
     "plausible-tracker": "^0.3.5",
     "vue": "^3.2.37",
-    "vue-router": "^4.0.16"
+    "vue-router": "^4.1.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",

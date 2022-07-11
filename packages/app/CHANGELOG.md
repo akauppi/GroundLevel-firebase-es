@@ -4,6 +4,11 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
+## 11-Jul-2022
+
+- Updated dependencies, esp. `vue-router` to 4.1.2
+- Using GNU Makefile for bringing changes to `tools/*.dc` automatically in
+
 ## 17-Jun-2022
 
 - Transitioned to Cypress 10.1.0
