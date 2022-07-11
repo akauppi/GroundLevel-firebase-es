@@ -94,17 +94,24 @@ The reason is unknown.
 - [ ] Make a GitHub Issue and try to resolve.
 
 
+<!-- Solved(?) by using a Makefile 
 ## Changes to `tools/*.dc/` not having effect
 
-This is because of Docker Compose. Its `run` command is not sniffing, whether the source `Dockerfile` was changed, since the last build.
+This is because of Docker Compose (`v2.6.1`). Its `run` command is not sniffing, whether the source `Dockerfile` was changed, since the last build.
 
-We *can* do this ourselves, once we move to using Makefiles. Currently checking for changes would be overly complex, and running a `build` for every `run` would take ~1s, unnecessarily (though still an option).
+>The author is not aware of how to make the sniff. Throw good ideas, or submit a PR. :)
+
+We *can* do this ourselves, once using Makefiles. Currently checking for changes would be overly complex, and running a `build` for every `run` would take ~1s, unnecessarily (though still an option).
+
+>Note: Even `build` doesn't cut it.
 
 **Work-around:**
 
-To bring changes into effect, run:
+To bring changes into effect, run:<sup>
 
 ```
-$ npm run _refresh
+$ make refresh
 ```
 
+<sub>[1]: This expects you to have Gnu Make installed. This may be a requisite for the repo in the future, splitting dependency management and building away from the `npm` package files.</sub>
+-->

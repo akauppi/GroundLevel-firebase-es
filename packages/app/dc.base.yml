@@ -1,5 +1,5 @@
 #
-# app/docker-compose.base.yml
+# app/dc.base.yml
 #
 # Base for 'docker-compose.{local|online}.yml (and via 'local' to 'docker-compose.{test|ci}.yml').
 #

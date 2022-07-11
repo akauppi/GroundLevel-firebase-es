@@ -6,7 +6,9 @@ Web application sample project.
 
 - `npm`
 - `docker`
+- GNU `make`
 
+   <small>We use the GNU `make` indirectly, but may opt for a greater role for it, in the future.</small>
 
 ### Cypress setup
 

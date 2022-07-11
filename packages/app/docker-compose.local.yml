@@ -6,7 +6,7 @@
 services:
   vite-dev:
     extends:
-      file: docker-compose.base.yml
+      file: dc.base.yml
       service: vite-base
 
     volumes:
@@ -27,7 +27,7 @@ services:
   #
 #|  build:
 #|    extends:
-#|      file: docker-compose.base.yml
+#|      file: dc.base.yml
 #|      service: vite-base
 #|
 #|    volumes:

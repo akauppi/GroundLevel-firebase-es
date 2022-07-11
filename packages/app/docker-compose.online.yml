@@ -12,7 +12,7 @@
 services:
   vite-online:
     extends:
-      file: docker-compose.base.yml
+      file: dc.base.yml
       service: vite-base
 
     volumes:

@@ -46,9 +46,10 @@
     "--    -": "",
     "_genFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\" > tmp/firebase.hosting.json",
     "-- -  -": "",
-    "_refresh": "npm run -s _refresh1 && npm run -s _refresh2",
-    "_refresh1": "PORT=0 docker-compose -f docker-compose.base.yml build vite-base",
-    "_refresh2": "docker compose -f docker-compose.tools.local.yml build prime"
+    "predev:local": "make refresh-vite-dev refresh-prime",
+    "predev:online": "make refresh-vite-online",
+    "pretest": "make refresh-vite-dev",
+    "prebuild": "make refresh-build"
   },
   "dependencies": {
     "@sentry/browser": "^7.0.0",

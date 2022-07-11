@@ -339,53 +339,37 @@ We hope you are active also in the development - and giving feedback - of the Gr
 
 
 
-<!--
 ## Credits
 
 Thanks to:
 
 - Jaakko Roppola for wonderful icon art!! 🙌
 
+<!--
 - Jonatas Walker for his [jonataswalker/vue-rollup-example](https://github.com/jonataswalker/vue-rollup-example) template. Based this work on it (in 2019), then changed a few things.
 
 - Gaute Meek Olsen for his template and [associated blog entry](https://gaute.dev/dev-blog/vue-router-firebase-auth) (Nov '19). This taught me how to use a Promise with `firebase.auth().onAuthStateChanged` properly.
 -->
 
-<!-- hidden...
 ## Contribution
 
 As always, contributions and discussions are welcome.
 
 - Please use primarily [GitHub Issues](https://github.com/akauppi/GroundLevel-es-firebase/issues) for questions and bug reports.
+- For now, there's no active discussion forum (fine to create an Issue about that, though.. ;).
+
+<!-- tbd. Replace with Discord link, once/if we get it up.
 - For casual conversation, head to the [Gitter](https://gitter.im/akauppi/GroundLevel-firebase-web).
+-->
 
 Have Fun, and spread the word!!
--->
 
-## References
 
-<!-- (aged; now using Vite)
-### Serving ES6 modules, HTTP/2 etc.
-
-- [Using Native JavaScript Modules in Production Today](https://philipwalton.com/articles/using-native-javascript-modules-in-production-today/) (blog, Aug 2019)
-   - this step-by-step guidance was instrumental in making the production build work with ES modules. Brilliant write!!! 💎
--->
-
-### Other app templates
-
-- [Firelayer](https://firelayer.io)
-  - seems visually pleasing!
-  - likely Vue.js 2?
-  - likely uses bundling
-
-- [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app)
-  - Showcasing use of Cypress
-
-*tbd. When someone has checked Firelayer in detail, and can make a brief (2 sentence!) summary on how it differs from this repo, that is most welcome. `#contribution`*
-
-### Online forums
+<!--
+## Online forums
 
 - [Firebase developers](https://discord.gg/BN2cgc3) (Discord server)
+-->
 
 
 ---
