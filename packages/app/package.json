@@ -11,9 +11,9 @@
   "scripts": {
     "dev": "npm run dev:local",
     "-- ": "",
-    "test": "npm run -s _emulRunning && npm run -s _testDC && npm run -s _testRun",
-    "_testDC": "PORT=3003 docker compose -f docker-compose.test.yml run --rm vite-for-test-launched",
-    "_testRun": "CYPRESS_defaultCommandTimeout=10000 CYPRESS_baseUrl=http://localhost:3003 cypress run",
+    "test": "npm run -s _checkNoEsbuild && npm run -s _touchDevLocalEnv && npm run -s _test1 && npm run -s _test2",
+    "_test1": "PORT=3002 docker compose -f docker-compose.local.yml run --rm vite-dev-launched",
+    "_test2": "CYPRESS_defaultCommandTimeout=10000 CYPRESS_baseUrl=http://localhost:3002 cypress run",
     "-- -": "",
     "dev:local": "npm run -s _checkNoEsbuild && npm run -s _touchDevLocalEnv && npm run -s _emulPrimed && PORT=3000 docker compose -f docker-compose.local.yml run --rm --service-ports vite-dev",
     "_touchDevLocalEnv": "touch .env.dev_local",

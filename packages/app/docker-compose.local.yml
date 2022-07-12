@@ -16,6 +16,21 @@ services:
       - ./.env.dev_local:/work/.env.local:ro
     environment:
       - MODE=local
+
+    healthcheck:
+      test: "nc -z localhost $PORT"
+      interval: 0.9s
+      start_period: 25s
+    profiles: ['manual']
+
+  # 'npm test' uses this, to have 'vite-dev' run in the background
+  #
+  vite-dev-launched:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      vite-dev:
+        condition: service_healthy
     profiles: ['manual']
 
   #---
