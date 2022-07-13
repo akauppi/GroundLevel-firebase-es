@@ -136,13 +136,13 @@ services:
     volumes:
       #-- RO
       - ../packages/app/dist:/work/dist:ro
-      - ../packages/app/firebase.json:/work/firebase.json:ro
+      - ./.state/firebase.hosting.json:/work/firebase.hosting.json:ro
       #
       # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up.
       - ./.state/configstore:/root/.config/configstore:rw
       - ./.state/.firebaserc:/work/.firebaserc:ro
     working_dir: /work
     command: sh -c
-      'firebase deploy --only hosting
+      'firebase --config firebase.hosting.json deploy --only hosting
       '
     profiles: ['manual']

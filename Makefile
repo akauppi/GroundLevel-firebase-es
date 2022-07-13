@@ -18,7 +18,7 @@ list-outdated:
 	@# 'npm ... outdated' (npm 8.0.0) exits with non-0 if there are outdated entries. That's why '|| true'.
 
 #---
-#echo:
-#	@sh -c 'set -eu; ABC="abc"; echo $$ABC'
+echo:
+	@sh -c 'set -eu; ABC="abc"; echo $$ABC'
 
 .PHONY: list-outdated

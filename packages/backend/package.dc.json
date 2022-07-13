@@ -7,7 +7,14 @@
   "scripts": {
     "dc:warm-up": "npm run -s _dcWarmup1 && npm run -s _dcWarmup2",
     "--": "",
-    "_dcWarmup1": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
+    "_dcWarmup1": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
     "_dcWarmup2": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all"
+  },
+  "//": {
+    "scripts": {
+      "_dcWarmup1": [
+        "'--detectOpenHandles' is needed in Windows 10+WSL2 (works without it in macOS). Keep it."
+      ]
+    }
   }
 }

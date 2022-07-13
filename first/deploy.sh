@@ -20,6 +20,7 @@ set -euf -o pipefail
 #   - docker compose
 #   - grep
 #   - sed
+#   - make
 #
 STAGING_JS="../firebase.${ENV-staging}.js"
 OVERWRITE=1
@@ -65,6 +66,7 @@ fi
 install -d .state/configstore && \
   touch .state/.captured.sdkconfig && \
   ([ -f .state/.firebaserc ] || echo '{}' > .state/.firebaserc) && \
+  make -q refresh-deploy-auth && \
   docker compose run --rm --service-ports deploy-auth
 
 if [[ ! -f .state/.captured.sdkconfig ]]; then
@@ -107,7 +109,7 @@ LOCATION_ID=$( cat .state/.captured.sdkconfig | grep "\"locationId\":" | cut -d 
 #   needs to be created where the developer would see it. Maybe overkill.
 #
 install -d .state/functions/node_modules && \
-  cp -r ../packages/backend/functions/ .state/functions && \
+  cp -r ../packages/backend/functions .state/ && \
   docker compose run --rm pre-deploy-backend
 
 # ANCIENT
@@ -123,14 +125,18 @@ install -d .state/functions/node_modules && \
 cat .state/functions/regional.js | sed -E 's/import\.meta\.env\.LOCATION_ID/"'"${LOCATION_ID}"'"/' > .state/functions/tmp
 mv .state/functions/tmp .state/functions/regional.js
 
-docker compose run --rm deploy-backend
+make -q refresh-deploy-backend && \
+  docker compose run --rm deploy-backend
 
 # App
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
 (cd ../packages/app && (CYPRESS_INSTALL_BINARY=0 npm install --omit=optional) && ENV=${ENV-staging} npm run build)
 
-docker compose run --rm deploy-app
+(cd ../packages/app && npm run -s first:echoFirebaseHostingJson) > .state/firebase.hosting.json
+
+make -q refresh-deploy-app && \
+  docker compose run --rm deploy-app
 
 # Wipe clean
 rm -rf .state

@@ -18,22 +18,21 @@ tmp/.stamp.emul: ${DC_PATH}/firebase-tools/Dockerfile
 	touch $@
 
 tmp/.stamp.emul-for-app: ${DC_PATH}/firebase-tools/Dockerfile
-	LOGS_PATH= DOT_APP= docker compose -f docker-compose.app.yml build emul-for-app
+	LOGS_PATH= DOT_APP= FUNCTIONS_PORT=0 docker compose -f docker-compose.app.yml build emul-for-app
 	touch $@
 
 refresh-emul: tmp/.stamp.emul
 
 refresh-emul-for-app: tmp/.stamp.emul-for-app
 
-refresh-all: refresh-emul refresh-emul-for-app
-
-#refresh-force:
-#	$(MAKE) --allways-make refresh-all
+#refresh-all: refresh-emul refresh-emul-for-app
 
 #---
-down-all:
-	LOGS_PATH= $(DC) down
-	LOGS_PATH= DOT_APP= $(DC) -f docker-compose.app.yml down
+# Undocumented (maintenance/dev)
+_down-all:
+	LOGS_PATH= FUNCTIONS_PORT=0 $(DC) down
+	LOGS_PATH= DOT_APP= FUNCTIONS_PORT=0 $(DC) -f docker-compose.app.yml down
 
 #---
-.PHONY: all refresh-emul refresh-all refresh-force
+.PHONY: all \
+  refresh-emul refresh-emul-for-app refresh-all

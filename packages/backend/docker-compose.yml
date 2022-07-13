@@ -83,16 +83,8 @@ services:
       #       tbd. test - is this still so?
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=30000
-          #
-          # Historic cold start execution times:
-          #
-          # | time | setup |
-          # | ---- | ----- |
-          # | 23.314, 25.263 s | macOS 12.4 Intel, DC 4.10.1 (3 cores, 2GB) |
-          #
-          # NOTE: Normal execution times are lower. When there's other load on the machine, the ~30s times are
-          #     indeed possible.
+      - WARM_UP_TIMEOUT=10000
+        # tbd. document what that steers
 
     depends_on:
       emul:
@@ -100,12 +92,17 @@ services:
 
     healthcheck:
       test: "[ -f .healthy ]"
-      interval: 1.0s
-      start_period: 40s
+      interval: 0.9s
+      start_period: 240s
         #
-        # Note: Start period shouldn't be overly long. If there's a problem with the Firebase Emulators setup, it's
-        #   causing the warm-up not to pass (weirdly, even a misconfigured Realtime Database config, not used by the
-        #   warm-up, causes warm-up to not pass).
+        # That's long. But Windows 10 + WSL2 cold start times justify it.
+        #
+        #   - Lenovo X230 (ca. 2015), Windows 10, 12MB, DC 4.10.1: 3m11.946 s
+        #   - macOS 12.4 Intel, DC 4.10.1 (3 cores, 2GB): 23.314, 25.263 s 
+        #
+        # Measure by:
+        #   1. Delete all running DC containers
+        #   2. $ time LOGS_PATH=./logs FUNCTIONS_PORT=5002 docker compose run --rm warmed-up
 
     # Enable manual launch to debug 'emul' launch, only.
     profiles: ['manual']

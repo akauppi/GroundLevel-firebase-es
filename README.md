@@ -62,9 +62,9 @@ You'll need:
 
 - **A computer** with the following tools installed:
 
-   - `node` 16+
-   - `npm` - version 8+
-   - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`
+   - `node` 18+
+   - `npm` - 8+
+   - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`, `make`
    - Docker Desktop [on Mac](https://docs.docker.com/desktop/mac/install/) or [on Windows](https://docs.docker.com/desktop/windows/install/)
 
       >Docker is used extensively, e.g. the Firebase Emulators and Firebase CLI are only run through it. <!-- This should also be somewhat safer since the Firebase credentials are not stored locally on developers' computers. -->

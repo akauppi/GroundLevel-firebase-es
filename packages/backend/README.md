@@ -49,7 +49,7 @@ developed with:
 - node 18.3
 - npm 8.11
 
-- Docker Desktop 4.9.0 with: 3 CPU cores, 2 GB RAM, 512 MB swap
+- Docker Desktop 4.10.1 with: 3 CPU cores, 2 GB RAM
    - experimental > Enable VirtioFS
 -->
 

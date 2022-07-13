@@ -5,8 +5,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">= 16.6.1",
-    "npm": ">= 7.7.0"
+    "node": "18"
   },
   "scripts": {
     "test": "npm run -s start && npm run -s _test1",
@@ -59,10 +58,7 @@
   },
   "//comments": {
     "engines.node": [
-      "Avoid 16.6.0 - a bad 🍏 -> https://github.com/facebook/jest/issues/11708"
-    ],
-    "engines.npm": [
-      ">= 7.7.0 because of this (only matters for 'npm publish') -> https://github.com/npm/cli/issues/2834"
+      "18 has built-in fetch"
     ],
     "scripts": {
       "[ -z $BUILDER_OUTPUT ]": [
