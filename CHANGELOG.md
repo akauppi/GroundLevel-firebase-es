@@ -1,5 +1,12 @@
 # Changelog
 
+## 13-Jul-22
+
+- "June 2022" release candidate 
+  - [ ] testing on Windows 10 + WSL2
+  - [ ] CI
+
+
 ## 5-Jul-22
 
 - Manual deployment done so that Cloud Functions always deployed to the "default GCP resource location" (aka `locationId`). This is what Cloud Firestore also uses.

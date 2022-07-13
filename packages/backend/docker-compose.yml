@@ -83,18 +83,16 @@ services:
       #       tbd. test - is this still so?
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=12000
-          # Seen cold start execution times ('docker compose down; PROJECT_ID=demo-2 docker compose up warm-up'):
+      - WARM_UP_TIMEOUT=30000
           #
-          #   fns       rules
-          #   ---       -----
-          #   3111 ms   766 ms   # macOS Intel (DC 4.10.1)
+          # Historic cold start execution times:
           #
-          #   --- (history)
-          #   7433ms    1106ms    # macOS Intel (DC 4.10.0)
-          #   3889ms    1148ms    # MacOS Intel (DC 4.9.0)
+          # | time | setup |
+          # | ---- | ----- |
+          # | 23.314, 25.263 s | macOS 12.4 Intel, DC 4.10.1 (3 cores, 2GB) |
           #
-          #   Times are the _longest_ individual test's execution time, per run. These are where timeout is applied.
+          # NOTE: Normal execution times are lower. When there's other load on the machine, the ~30s times are
+          #     indeed possible.
 
     depends_on:
       emul:

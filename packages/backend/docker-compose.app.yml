@@ -20,17 +20,19 @@ services:
       file: docker-compose.base.yml
       service: emul-base
     ports:
-      - "5003:5003"
+      - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "6768:6768"
       - "6801:6801"
       - "9101:9101"
       - "4001:4001"
         # Ports that don't overlap those for backend development.
         # Keep the ports aligned with '../app'.
+    environment:
+      - PROJECT_ID=demo-main    # must match with what's in '../app/' (package[.dc].json, docker-compose.tools.local.yml)
 
     healthcheck:
-      test: "nc -z localhost 6768 && nc -z localhost 5003 && nc -z localhost 6801"
-      # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      test: "nc -z localhost 6768 && nc -z localhost ${FUNCTIONS_PORT} && nc -z localhost 6801"
+        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 1.0s
       start_period: 25s
 
@@ -39,7 +41,9 @@ services:
   emul-for-app-launched:
     image: node:16-alpine
     command: sh -c
-      '[ ${DOT_APP} == ".app" ] || ( >&2 echo "INTERNAL ERROR. Caller *must* set 'DOT_APP=.app' env.var. Just Do it."; false )
+      '([ ${DOT_APP} == ".app" ] || ( >&2 echo "INTERNAL ERROR. You as the caller *must* set 'DOT_APP=.app'. Just Do it."; false )) &&
+      
+      ([ ! -z ${LOGS_PATH} ] || ( >&2 echo "INTERNAL ERROR. You as the caller *must* set 'LOGS_PATH'."; false ))
       '
     depends_on:
       emul-for-app:

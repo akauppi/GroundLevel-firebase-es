@@ -44,10 +44,10 @@ services:
       - ./firestore.rules:/work/firestore.rules:cached
       - ./tmp/database.rules.json:/work/database.rules.json:cached    # could get recreated on the host (or manually tweaked)
       # --- output
-      - ${LOGS_PATH}/firebase-debug${DOT_APP:-}.log:/work/firebase-debug.log:delegated
-      - ${LOGS_PATH}/firestore-debug${DOT_APP:-}.log:/work/firestore-debug.log:delegated
-      - ${LOGS_PATH}/database-debug${DOT_APP:-}.log:/work/database-debug.log:delegated
-      - ${LOGS_PATH}/ui-debug${DOT_APP:-}.log:/work/ui-debug.log:delegated
+      - ${LOGS_PATH}/firebase-debug.log:/work/firebase-debug.log:delegated
+      - ${LOGS_PATH}/firestore-debug.log:/work/firestore-debug.log:delegated
+      - ${LOGS_PATH}/database-debug.log:/work/database-debug.log:delegated
+      - ${LOGS_PATH}/ui-debug.log:/work/ui-debug.log:delegated
       # --- other
       - ./tmp/functions/node_modules:/work/functions/node_modules:ro
 
