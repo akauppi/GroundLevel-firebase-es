@@ -19,7 +19,7 @@ services:
       # --- RO
       - ./functions/package.json:/work/functions/package.json:ro
       # --- output (show installed packages on the host; from where they are shared to running images)
-      - ./tmp/functions-node_modules:/work/functions/node_modules:delegated
+      - ./tmp/functions/node_modules:/work/functions/node_modules:delegated
 
     working_dir: /work
     command: sh -c

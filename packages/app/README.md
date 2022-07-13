@@ -103,11 +103,11 @@ $ npm run dev
 
 This serves the UI locally, against an emulated Firebase back-end.
 
->Within local mode, you sign in by `?user=dev` query parameter.
-
 Try it: 
 
 [`http://localhost:3000?user=dev`](http://localhost:3000?user=dev)
+
+>Within local mode, you sign in by `?user=dev` query parameter.
 
 Make some changes in the `src/**` files and see that they are reflected in the browser.
 

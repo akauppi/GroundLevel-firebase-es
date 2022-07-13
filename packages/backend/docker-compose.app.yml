@@ -39,7 +39,7 @@ services:
   emul-for-app-launched:
     image: node:16-alpine
     command: sh -c
-      '[ ${DOT_APP} == ".app" ] || ( >&2 echo "ERROR. Please provide 'DOT_APP=.app' env.var. Just Do it. :)"; false )
+      '[ ${DOT_APP} == ".app" ] || ( >&2 echo "INTERNAL ERROR. Caller *must* set 'DOT_APP=.app' env.var. Just Do it."; false )
       '
     depends_on:
       emul-for-app:

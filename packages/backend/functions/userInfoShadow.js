@@ -5,14 +5,12 @@
 import { regionalFunctions_v1 } from './regional.js'
   // 'v2' doesn't have '.firestore', yet (Jul 2022)
 
-//import { firestore as db } from './firebase.js'
+import { firestore as db } from './firebase.js'
 
 // UserInfo shadowing
 //
 // Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
 // renewed user info.
-//
-// tbd. Needs #rework
 //
 const userInfoShadow_2 = regionalFunctions_v1.firestore
   .document('/userInfo/{uid}')
@@ -26,9 +24,6 @@ const userInfoShadow_2 = regionalFunctions_v1.firestore
     // Removal of userInfo is not propagated. Only tests do it, as 'beforeAll'.
     //
     if (newValue !== undefined) {
-      // Note: Check whether importing here makes startup more reliable / speedy.. :)
-      //
-      const db = await import("./firebase.js").then( mod => mod.firestore );
 
       // Find the projects where the person is a member.
       //
@@ -44,8 +39,8 @@ const userInfoShadow_2 = regionalFunctions_v1.firestore
         console.debug(`User '${uid}' not found in any of the projects.`);
 
       } else {
-        const proms = qss.docs.map( qdss => {
-          console.debug(`Updating userInfo for: projects/${qdss.id}/userInfo/${uid} ->`, newValue);
+        const arr = qss.docs;   // Array of QueryDocumentSnapshot
+        const proms = arr.map( qdss => {
 
           return qdss.ref.collection("userInfo").doc(uid).set(newValue);    // Promise of WriteResult
         });

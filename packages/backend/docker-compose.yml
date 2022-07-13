@@ -25,19 +25,27 @@
 services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
+  # Expects:
+  #   - 'FUNCTIONS_PORT'
+  #
   emul:
     extends:
       file: docker-compose.base.yml
       service: emul-base
     ports:
-      - "5002:5002"
+      - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "6767:6767"
       - "6800:6800"
       - "4000:4000"
         # Keep ports aligned with 'firebase.js'
 
+    environment:
+      - PROJECT_ID=demo-2
+        # Project id for 'test-fns'.
+        # Cloud Functions get triggered only for this project; Firebase Emulator UI shows only it.
+
     healthcheck:
-      test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800 && sleep 1"
+      test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800"
         # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
       start_period: 23s
@@ -47,6 +55,8 @@ services:
   # Firebase Emulators are SLOW to wake. This part runs a minimal set of tests (the results of which are not used),
   # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
   #
+  # NOTE: Use Node.js 18 to have built-in fetch.
+  #
   warm-up:
     image: node:18-alpine
     volumes:
@@ -54,17 +64,18 @@ services:
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
       - ./tmp/firebase.json:/work/firebase.json:ro
-      - ./package.json:/work/package.json:ro
-      - ./test-fns:/work/test-fns:ro
+      - ./package.dc.json:/work/package.json:ro
+      #- ./test-database:/work/test-database:ro
       - ./test-firestore-rules:/work/test-firestore-rules:ro
+      - ./test-fns:/work/test-fns:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
-      #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
+      - ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
     command: sh -c
       'npm config set update-notifier false &&
-      
-      npm run dc:warm-up-PARTIAL &&
+
+      npm run dc:warm-up &&
       touch .healthy &&
         sleep infinity
       '

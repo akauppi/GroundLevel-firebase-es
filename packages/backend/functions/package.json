@@ -19,6 +19,11 @@
       "Firebase emulators require the field to be plain '16'. We run it under DC, using Node 18. This causes a warning,",
       "but doesn't seem harmful."
     ],
+    "dependencies": {
+      "@google-cloud/firestore": [
+        "Optional dep of 'firebase-admin'"
+      ]
+    },
     "scripts": {
       "_checkEnv": [
         "Guards again the developer locally running 'npm install'. Actual use cases:",

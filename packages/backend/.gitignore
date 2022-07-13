@@ -1,17 +1,8 @@
 # Firebase hosting caches
 #/.firebase/
 
-# These occur at /, /back-end/functions/, /back-end/rules-test
-#firebase-debug.log
-#firestore-debug.log
-#ui-debug.log
-#
-#firebase-debug.app.log
-#firestore-debug.app.log
-#ui-debug.app.log
-
 /logs/*-debug.log
-/logs/*-debug.app.log
+/logs.app/*-debug.log
 
 # This shouldn't get created
 !functions/node_modules/
@@ -20,11 +11,7 @@
 #
 # Note: You can also just mark '/tmp/'. Being explicit shows what files the current version intends to create, there.
 #
-/tmp/firebase.json
-/tmp/firebase.app.json
-/tmp/database.rules.json
-/tmp/package.dc.json
-/tmp/functions-node_modules/
+/tmp/
 
 # Cruft
-/old-logs/
+#/old-logs/

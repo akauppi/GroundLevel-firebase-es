@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "18"
+  },
+  "scripts": {
+    "dc:warm-up": "npm run -s _dcWarmup1 && npm run -s _dcWarmup2",
+    "--": "",
+    "_dcWarmup1": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
+    "_dcWarmup2": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all"
+  }
+}

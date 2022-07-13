@@ -13,7 +13,7 @@ export default { ...opts,
   //
   // It's better to allow those to pass. On next runs, they'll be faster.
   //
-  testTimeout: Math.max( opts.testTimeout, 9000 ),
+  testTimeout: Math.max( opts.testTimeout, 7000 ),
 
   globalSetup: "./setup.jest.js"
 };

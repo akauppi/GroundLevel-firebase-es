@@ -22,7 +22,7 @@ services:
       ([ ! -z $${PROJECT_ID:-} ] || ( >&2 echo "ERROR. Missing ''PROJECT_ID'' env.var. (e.g. ''PROJECT_ID=demo-x'')"; false )) &&
       
       firebase emulators:start --project=$${PROJECT_ID:-}
-      | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
       '
       # Note: Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.
       #     A single 'grep -v -E' (needs -E) with '|' is fine."

@@ -10,6 +10,4 @@
 *     -> https://firebase.google.com/docs/admin/setup
 */
 
-//console.log("!!!", process.env );
-
 export { userInfoShadow_2 } from './userInfoShadow.js'

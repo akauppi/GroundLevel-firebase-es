@@ -12,12 +12,11 @@
     "test": "npm run -s start && npm run -s _test1",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "-- ": "",
-    "start": "npm run -s _prepDC && PROJECT_ID=demo-2 docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
+    "start": "npm run -s _prepDC && make refresh-emul && PROJECT_ID=demo-2 LOGS_PATH=./logs FUNCTIONS_PORT=5002 docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
     "_prepDC": "npm run -s _touchEm && npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
     "-- -": "",
     "test:fns:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
     "test:fns:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
-    "test:fns:allDC": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
     "--  -": "",
     "test:rules:invites": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f invitesC.test.js --verbose --all",
     "test:rules:projects": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/index.test.js --verbose --all",
@@ -25,27 +24,24 @@
     "test:rules:projectsUserInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --all",
     "test:rules:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f userInfoC.test.js --verbose --all",
     "test:rules:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
-    "test:rules:allDC": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
     "--  - ": "",
     "test:rules2:logging": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
     "test:rules2:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
-    "test:rules2:allDC": "NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
     "-- --": "",
-    "lint": "eslint --ignore-pattern tmp/functions-node_modules .",
+    "lint": "eslint .",
     "--   -": "",
     "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
     "--   - ": "",
-    "app:start": "npm run -s _prepAppDC && PROJECT_ID=demo-main DOT_APP=.app docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
+    "app:start": "npm run -s _prepAppDC && make refresh-emul-for-app && PROJECT_ID=demo-main LOGS_PATH=./logs.app DOT_APP=.app docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
     "_prepAppDC": "npm run -s _touchEmApp && npm run -s _genFirebaseJsonApp && npm run -s _genDatabaseRulesJson",
     "-- - -": "",
-    "dc:warm-up": "npm run test:fns:allDC && npm run test:rules:allDC",
-    "dc:warm-up-PARTIAL": "npm run test:rules:allDC",
-    "--  --": "",
     "ci:test": "npm run test:rules:all",
     "//ci:test": "npm run test:fns:all && npm run test:rules:all",
     "-- ---": "",
+    "pretest": "[ ! -d functions/node_modules ] || ( >&2 echo \"ERROR: There's not supposed to be 'functions/node_modules'. Please remove it.\\n\"; false )",
+    "-- --- ": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
-    "_postinstall_local": "install -d tmp/functions-node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
+    "_postinstall_local": "install -d tmp/functions/node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
     "_postinstall_ci": "npm --prefix functions install && npm run -s _genFirebaseJson${_APP:-} && npm run -s _genDatabaseRulesJson",
     "_touchEm": "(cd logs && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)",
     "_touchEmApp": "(cd logs && touch firebase-debug.app.log firestore-debug.app.log database-debug.app.log ui-debug.app.log)",
@@ -55,8 +51,11 @@
   },
   "devDependencies": {
     "firebase-admin": "^11.0.0",
-    "firebase-jest-testing": "^0.0.5-beta.1",
+    "firebase-jest-testing": "file:../../../firebase-jest-testing/package",
     "jest": "^28.1.2"
+  },
+  "//devDependencies": {
+    "firebase-jest-testing": "^0.0.5-beta.3"
   },
   "//comments": {
     "engines.node": [
@@ -69,9 +68,6 @@
       "[ -z $BUILDER_OUTPUT ]": [
         "Precedes commands only to be run in CI."
       ],
-      "dc:warm-up": [
-        "Since ~ 'firebase-tools' 10.6.0, also Rules seem to need warming up."
-      ],
       "ci:{test|deploy}": [
         "These are the commands CI will use."
       ],
@@ -79,8 +75,8 @@
         "For '/first/deploy.sh' - makes sure the configuration files are generated."
       ],
       "_postinstall_local": [
-        "Important to create the 'tmp/functions-node_modules' in the host side; otherwise, WSL2 Docker",
-        "will create one with 'root' access (instead of the current user)."
+        "Important to create the 'tmp/functions/node_modules' in the host side; otherwise, WSL2 Docker will create one",
+        "with 'root' access (instead of the current user)."
       ],
       "_touchEm": [
         "Important that files to be mapped as DC volumes exist as files."

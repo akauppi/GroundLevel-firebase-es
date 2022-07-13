@@ -6,6 +6,7 @@
 # Expects:
 #   - 'PROJECT_ID' to be given ('demo-2' for backend; 'demo-main' for app).
 #   - 'DOT_APP' to be ".app" (for app) or not given (backend)
+#   - 'LOGS_PATH' can be used for placing (app) logs away from the backend's
 #
 # Note:
 #   DC overlays do allow for removal of mounts (e.g. by overriding them to point to '/dev/nul'; mounts are overridable
@@ -25,6 +26,11 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
+  #
+  # Expects:
+  #   - 'LOGS_PATH' to be defined (examples: './logs', './logs.app')
+  #   - 'DOT_APP' to be defined as ".app" for App backend
+  #
   emul-base:   # used for 'npm run start', 'npm test', 'npm run app:start'
     extends:
       file: ../../dc/firebase-emulators/base.yml
@@ -38,19 +44,17 @@ services:
       - ./firestore.rules:/work/firestore.rules:cached
       - ./tmp/database.rules.json:/work/database.rules.json:cached    # could get recreated on the host (or manually tweaked)
       # --- output
-      - ./logs/firebase-debug${DOT_APP:-}.log:/work/firebase-debug.log:delegated
-      - ./logs/firestore-debug${DOT_APP:-}.log:/work/firestore-debug.log:delegated
-      - ./logs/database-debug${DOT_APP:-}.log:/work/database-debug.log:delegated
-      - ./logs/ui-debug${DOT_APP:-}.log:/work/ui-debug.log:delegated
+      - ${LOGS_PATH}/firebase-debug${DOT_APP:-}.log:/work/firebase-debug.log:delegated
+      - ${LOGS_PATH}/firestore-debug${DOT_APP:-}.log:/work/firestore-debug.log:delegated
+      - ${LOGS_PATH}/database-debug${DOT_APP:-}.log:/work/database-debug.log:delegated
+      - ${LOGS_PATH}/ui-debug${DOT_APP:-}.log:/work/ui-debug.log:delegated
       # --- other
-      - ./tmp/functions-node_modules:/work/functions/node_modules:ro
+      - ./tmp/functions/node_modules:/work/functions/node_modules:ro
 
     working_dir: /work
     environment:
       - CHOKIDAR_USEPOLLING=true
         # Allows emulators to see changes to (host side, volume mapped) Security Rules, Cloud Functions
-      - PROJECT_ID=demo-main
-        # The project to show in Firebase Emulators UI
 
     # If we provide ports by Env.vars, could have also health check here.
     #|healthcheck:

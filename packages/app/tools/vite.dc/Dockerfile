@@ -20,7 +20,7 @@ FROM node:18-alpine AS vite_plain
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
-ARG VITE_VER=3.0.0-beta.9
+ARG VITE_VER=3.0.0-beta.10
   #
   # NOTE: IF YOU CHANGE THE VERSION, RUN 'npm run _refresh' TO FORCE A REBUILD. (If You know how to make 'docker compose run'
   #     automatically notice a build file has changed, please say so!)
