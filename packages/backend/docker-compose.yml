@@ -69,7 +69,7 @@ services:
       - ./test-firestore-rules:/work/test-firestore-rules:ro
       - ./test-fns:/work/test-fns:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
-      - ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
+      #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
     command: sh -c
@@ -83,14 +83,15 @@ services:
       #       tbd. test - is this still so?
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=24000
+      - WARM_UP_TIMEOUT=12000
           # Seen cold start execution times ('docker compose down; PROJECT_ID=demo-2 docker compose up warm-up'):
           #
           #   fns       rules
           #   ---       -----
-          #   7433ms    1106ms    # macOS Intel (DC 4.10.0)
+          #   3111 ms   766 ms   # macOS Intel (DC 4.10.1)
           #
           #   --- (history)
+          #   7433ms    1106ms    # macOS Intel (DC 4.10.0)
           #   3889ms    1148ms    # MacOS Intel (DC 4.9.0)
           #
           #   Times are the _longest_ individual test's execution time, per run. These are where timeout is applied.

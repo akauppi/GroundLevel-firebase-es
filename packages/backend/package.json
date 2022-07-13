@@ -12,8 +12,8 @@
     "test": "npm run -s start && npm run -s _test1",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "-- ": "",
-    "start": "npm run -s _prepDC && make refresh-emul && PROJECT_ID=demo-2 LOGS_PATH=./logs FUNCTIONS_PORT=5002 docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
-    "_prepDC": "npm run -s _touchEm && npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
+    "start": "npm run -s _start1 && make refresh-emul && PROJECT_ID=demo-2 LOGS_PATH=./logs FUNCTIONS_PORT=5002 docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
+    "_start1": "npm run -s _touchEm && npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson && npm run -s _checkFunctionsNode",
     "-- -": "",
     "test:fns:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
     "test:fns:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
@@ -38,7 +38,7 @@
     "ci:test": "npm run test:rules:all",
     "//ci:test": "npm run test:fns:all && npm run test:rules:all",
     "-- ---": "",
-    "pretest": "[ ! -d functions/node_modules ] || ( >&2 echo \"ERROR: There's not supposed to be 'functions/node_modules'. Please remove it.\\n\"; false )",
+    "_checkFunctionsNode": "[ ! -f functions/node_modules/* ] || ( >&2 echo \"WARN: Files under 'functions/node_modules' are not being used.\\n\"; false )",
     "-- --- ": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
     "_postinstall_local": "install -d tmp/functions/node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
@@ -51,11 +51,11 @@
   },
   "devDependencies": {
     "firebase-admin": "^11.0.0",
-    "firebase-jest-testing": "file:../../../firebase-jest-testing/package",
+    "firebase-jest-testing": "^0.0.5-beta.3",
     "jest": "^28.1.2"
   },
   "//devDependencies": {
-    "firebase-jest-testing": "^0.0.5-beta.3"
+    "firebase-jest-testing": "file:../../../firebase-jest-testing/package"
   },
   "//comments": {
     "engines.node": [
