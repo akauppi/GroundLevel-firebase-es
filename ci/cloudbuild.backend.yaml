@@ -8,9 +8,9 @@
 #   - Common CI builder (not project specific; no deploys!)
 #
 # Uses images:
-#   - node:16-alpine
-#   - firebase-ci-builder   (pushed to Artifact Registry)
-#   - docker/compose
+#   - node:18-alpine      (stock image)
+#   - firebase-emulators  (pushed to Artifact Registry)
+#   - docker/compose      (stock image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -23,6 +23,8 @@
 # Note:
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
 #   to regular users (of other images). This is normally not a concern.
+#
+#   tbd. Moved to 'node:18'. Does the above still hold? #contribute
 #
 
 steps:
@@ -51,7 +53,7 @@ steps:
 #
 #|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
 #|  #args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
-#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'warm-up']
+#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'emul-is-up']
 #|  dir: packages/backend
 #|  env:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
@@ -73,10 +75,10 @@ steps:
 #
 # --- --- --- 📣⚠️🪤🚨
 
-# Launch emul/warm-up in DC, keeps them running in the background.
+# Launch emul in DC, keeps them running in the background.
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', '--rm', 'warmed-up']
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-healthy']
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
@@ -84,12 +86,31 @@ steps:
     - FUNCTIONS_PORT=5002
     - DATABASE_PORT=6800
 
-- name: node:${_NODE_VER}-alpine
+# Warm-up
+#
+# In development, we do warm-up but that's not really needed, in CI. Results are below. Enable the warm-up block if
+# you wish to confirm them.
+#
+#
+# |           | userInfo (fns) | rules |
+# | --------- | -------------- | ----- |
+# | first run | 2894, 3306 ms | 762, 907 ms |    <-- good enough to use (Jul 22)
+# | (2nd run) |  422 ms | 631 ms |
+
+#|- name: node:18-alpine
+#|  entrypoint: npm
+#|  args: ['run', 'ci:test']
+#|  dir: packages/backend
+#|  env:
+#|    - EMUL_HOST=emul
+
+- name: node:18-alpine
   entrypoint: npm
   args: ['run', 'ci:test']
   dir: packages/backend
   env:
     - EMUL_HOST=emul
+    - WARM_UP_TIMEOUT=4000    # extend the timeout; development may use 2s
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: npm
@@ -99,18 +120,12 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - 2:06  (no functions test)
+#   - 2:06
 #
 # OLD:
-#   - 2:17, 2:15, 2:46, 2:38 (no lint)
+#   - 2:06  (no functions test)
 #
 timeout: 300s
-
-# (Old results for reference, before 10-Sep-21; 'node:16' image)
-# Cloud Build
-#   - native, no lint:          1:51, 1:45  # (old results)
-#   - DC/Docker, with lint:     3:13
-#   - DC/native, with lint:     2:35
 
 substitutions:
   _BUILDER_TAG: 11.2.1

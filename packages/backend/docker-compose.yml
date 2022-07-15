@@ -45,8 +45,12 @@ services:
         # Cloud Functions get triggered only for this project; Firebase Emulator UI shows only it.
 
     healthcheck:
-      test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800"
-        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      test: '
+        nc -z localhost 6767 && 
+        nc -z localhost ${FUNCTIONS_PORT} && 
+        nc -z localhost 6800
+        '
+          # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
       start_period: 23s
 
@@ -77,7 +81,7 @@ services:
 
       npm run dc:warm-up &&
       touch .healthy &&
-        sleep infinity
+      sleep infinity
       '
       # Note: Returning from Jest (npm command) is taking ~30s on Windows+WSL2. Reason unknown. Be patient! #83
       #       tbd. test - is this still so?

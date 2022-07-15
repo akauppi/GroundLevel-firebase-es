@@ -12,9 +12,10 @@ Step #1: npm WARN EBADENGINE }
 
 This is ok, and can be ignored.
 
-The reason is that we (`packages/backend/docker-compose.yaml`) install Firebase `functions` stuff using Node 18, which it isn't technically supporting, yet. We also run emulations using Node 18, so...
+The reason is that we (`packages/backend/docker-compose.yaml`) install Firebase `functions` stuff using Node 18, which it isn't technically supporting, yet.
 
 There's no harm. This fades away once Firebase starts supporting Node 18. Any year now? :P
 
 >Node.js 18 was released on April 19th 2022.
 
+>Node.js 18 [is scheduled](https://nodejs.org/en/about/releases/) to enter LTS in Oct 2022.

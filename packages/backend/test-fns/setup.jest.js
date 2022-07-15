@@ -14,20 +14,23 @@ const setup = async _ => {
 
   await prime(projectId, docs).catch( err => {
 
+    // Note: This was attended to also in the library side. May not be needed, any more.
+    //
     // Jest itself gives a too terse report ("reason: fetch failed"), so let's get some detail.
-    console.error("!!!", { err });
-    /*
-    * <<
-    *   cause: Error: connect ECONNREFUSED ::1:6767
-    *   at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1237:16) {
-    *     errno: -61,
-    *     code: 'ECONNREFUSED',
-    *     syscall: 'connect',
-    *     address: '::1',
-    *     port: 6767
-    *   }
-    * <<
-    */
+    //
+    console.error("Priming failed:", { err });
+      /*
+      * <<
+      *   cause: Error: connect ECONNREFUSED ::1:6767
+      *   at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1237:16) {
+      *     errno: -61,
+      *     code: 'ECONNREFUSED',
+      *     syscall: 'connect',
+      *     address: '::1',
+      *     port: 6767
+      *   }
+      * <<
+      */
 
     throw err;
   })
