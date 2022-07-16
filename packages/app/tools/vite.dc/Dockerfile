@@ -14,16 +14,13 @@
 #       -> https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 #
 
-# This image provides a basic 'vite' for development purposes. See 'vite_for_build' (below) for one with extras.
+# This image provides a basic 'vite' for development purposes. See 'vite_extras' (below).
 #
 FROM node:18-alpine AS vite_plain
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
 ARG VITE_VER=3.0.0
-  #
-  # NOTE: IF YOU CHANGE THE VERSION, RUN 'npm run _refresh' TO FORCE A REBUILD. (If You know how to make 'docker compose run'
-  #     automatically notice a build file has changed, please say so!)
 
 WORKDIR /work
 
@@ -32,7 +29,7 @@ RUN npm config set update-notifier false
 
 # Install dependencies
 #
-RUN npm install -g --no-save vite@$VITE_VER
+RUN npm install -g --no-save vite@${VITE_VER}
 
 ENV NODE_PATH=/usr/local/lib/node_modules
 
@@ -48,7 +45,7 @@ CMD \
 #
 #     [1]: https://github.com/btd/rollup-plugin-visualizer
 #
-FROM vite_plain AS vite_for_build
+FROM vite_plain AS vite_extras
 
 RUN npm install -g rollup-plugin-visualizer && \
   (install -d /node_modules && cd /node_modules && ln -s $NODE_PATH/rollup-plugin-visualizer .)

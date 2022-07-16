@@ -1,11 +1,13 @@
 #
 # docker-compose.ci.yml
 #
-# An override for Cloud Build
+# Tools for CI builds (Cloud Build).
+#
+# _Similar_ to 'dc.base.yml' and 'docker-compose.local.yml' but separate. Changes here will not break development
+# experience, and vice versa. However, we still use the same Vite version, defined under 'tools/vite.dc/'.
 #
 # Expects:
 #   - PORT to declare the port to show UI in
-#   - to be launched with '-f' of also 'docker-compose.local.yml' (overlays on it, without 'extends')
 #
 # To debug locally:
 #   - temporarily comment out the 'network_mode' and 'container_name' fields.
@@ -15,19 +17,42 @@
 #     -> https://docs.docker.com/compose/extends/
 #
 services:
+  vite-ci:
+    build:
+      context: tools/vite.dc
+      target: vite_plain        # also builds are done with this; CI does not need visualizations
+    ports:
+      - "$PORT:$PORT"
+    volumes:
+      # --- RO
+      - ./node_modules:/work/node_modules:ro
+      - ./public:/work/public:ro
+      - ./src:/work/src:ro
+      - ./dev:/work/dev:ro
+      - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
+      - ../backend/firebase.js:/work/firebase.js:ro     # use the same ports as backend
+      - ./package.json:/work/package.json:ro              # 'ci:launch' is there
+      #
+      - ./vite.config.js:/work/vite.config.js:ro
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
+      - ../../branding/favicon.png:/branding/favicon.png:ro   # trick to make the 'ln -s' work
 
-  # Note: The implementation is /very/ similar to 'docker-compose.local.yml' (essentially the same, without
-  #     'profiles: ["manual"]'), but decided to keep them unrelated (no chain of three '-f's).
-  #
-  #     Also: no "profile: ['manual']" here, since we run the service up.
-  #
-  # NOTE!!! Trying to use a different port _within_ the DC than that exposed did not work (browser ends up in a
-  #     weird confused state). No harm in keeping them the same.
-  #
-  vite-dev:
+    working_dir: /work
+    command: sh -c
+      'npm config set update-notifier false &&
+
+      npm run ci:launch
+      '
+    environment:
+      - EMUL_HOST=emul-for-app
+      - MODE=local
+      - PORT              # pass through, at least 'vite.config.js' wants it
+      - BUILDER_OUTPUT    # pass through, so 'auth' port gets into the mix. #hack
+        # tbd. !! Move to using 'firebase.ci.js' and 'BUILDER_OUTPUT' is no longer needed.
+
     network_mode: cloudbuild
     container_name: vite
-      # The domain node name (not 'localhost'!) to use for the front end, e.g. 'http://vite:3000'
+      # The domain node name (not 'localhost'!) to use for the front end, e.g. 'http://vite:3002'
 
     healthcheck:
       test: "nc -z localhost $PORT"
@@ -36,10 +61,12 @@ services:
 
   # Make sure Vite is launched.
   #
-  vite-for-ci-launched:
+  vite-ci-launched:
     image: node:16-alpine
     command: sh -c true
     depends_on:
-      vite-dev:
+      vite-ci:
         condition: service_healthy
+
     profiles: ['manual']
+    container_name: vite-ci-launched    # just for logs

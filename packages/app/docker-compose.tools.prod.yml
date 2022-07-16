@@ -16,10 +16,9 @@ services:
   build:
     build:
       context: tools/vite.dc
-      target: vite_for_build
+      target: vite_extras
     volumes:
       # --- RO
-      #- ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro

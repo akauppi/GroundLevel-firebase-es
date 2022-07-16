@@ -34,7 +34,7 @@
     "app:start": "npm run -s _appStart1 && make refresh-emul-for-app && DOT_APP=.app LOGS_PATH=./logs.app FUNCTIONS_PORT=5003 docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\\n\"",
     "_appStart1": "npm run -s _touchEmApp && npm run -s _genFirebaseJsonApp && npm run -s _genDatabaseRulesJson",
     "-- - -": "",
-    "//ci:warm-up": "npm run -s test:fns:all && npm run -s test:rules:all",
+    "ci:warm-up": "npm run -s test:fns:all",
     "ci:test": "npm run -s test:fns:all && npm run -s test:rules:all",
     "-- ---": "",
     "_checkFunctionsNode": "[ ! -f functions/node_modules/* ] || ( >&2 echo \"WARN: Files under 'functions/node_modules' are not being used.\\n\"; false )",

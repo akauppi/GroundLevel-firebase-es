@@ -4,7 +4,9 @@
 # Extends 'docker-compose.ci.yml' so that:
 #   - authentication is included
 #
-# Note: Should be kept relatively close to 'docker-compose.app.yml' (manual development backend).
+# Note: Unlike with dev, we use the same ports as the backend testing does. In development, one might want to run them
+#     at the same time, whereas in CI, it's always either or. So, we can keep things simpler.
+#     Also, we don't need to do '.app' stuff. It's all the same.
 #
 # Expects:
 #   AUTH_PORT
@@ -21,11 +23,9 @@ services:
     ports:
       - "${AUTH_PORT}:${AUTH_PORT}"
 
-    environment:
-      _DOT_APP=.app
-
     # Allows the ports to be seen (as 'emul-for-app:{port}') by Cloud Build steps.
     #
+    network_mode: cloudbuild
     container_name: emul-for-app
 
   emul-for-app-launched:
@@ -34,4 +34,6 @@ services:
     depends_on:
       emul-for-app:
         condition: service_healthy
+
+    container_name: emul-for-app-launched   # just for logs
     profiles: ['manual']

@@ -16,25 +16,20 @@
 *
 * Output to stdout.
 */
-const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || "firebase.app.js";
+const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || "firebase.app.js";    // run within DC, 'firebase.app.js' is mapped
 
 const { emulators } = await import(`../${FIREBASE_APP_JS}`).then( mod => mod.default );
 
-// DEBUG
-console.debug("!!!", { emulators });
+const projectId = (_ => {
+  const [a, b] = process.argv.slice(2);
+  if (!a || b) {
+    process.stderr.write(`\nUsage: gen-vite-env-local --project=demo-...\n\n`);
+    process.exit(1);
+  }
 
-const [a] = process.argv.slice(2);
-const [_,projectId] = /^--project=(.+)$/.exec(a);
-
-// Safety check: no longer using 'FIREBASE_JSON'
-if (process.env['FIREBASE_JSON']) {
-  fail("INTERNAL: not expecting 'FIREBASE_JSON' be defined");
-}
-
-if (!projectId) {
-  process.stderr.write(`\nUsage: gen-vite-env-local --project=demo-...\n`);
-  process.exit(1);
-}
+  const [__,c1] = /^--project=(.+)$/.exec(a);
+  return c1;
+})();
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
@@ -42,7 +37,7 @@ const [firestorePort, authPort, databasePort] = (_ => {   // => [int, int, int]
 
   const arr = ["firestore","auth","database"].map( k => {
     return (emulators && emulators[k] && emulators[k].port)    // cannot use '?.' because of the varying 'k'
-      || fail(`Cannot read 'emulators.${k}.port' from 'firebase.json'`);
+      || fail(`Cannot read 'emulators.${k}.port' from '${FIREBASE_APP_JS}'`);
   });
   return arr;
 })();
@@ -50,7 +45,7 @@ const [firestorePort, authPort, databasePort] = (_ => {   // => [int, int, int]
 const emulHost = process.env["EMUL_HOST"];    // overridden by CI only
 
 const out =
-`# Generated based on 'firebase.json'.
+`# Generated based on '${ FIREBASE_APP_JS }'.
 #
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_AUTH_PORT=${authPort}

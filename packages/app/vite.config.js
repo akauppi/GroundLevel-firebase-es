@@ -19,6 +19,10 @@ import { manualChunks } from './rollup.chunks.js'
 const myPath = dirname(fileURLToPath(import.meta.url))
 const srcPath = pJoin(myPath, 'src');
 
+// CI may skip the visualizer
+//
+const NO_VISUALIZER = process.env["VITE_VISUALIZER"] === "false";
+
 /*
 * For an absolute path 'p', provide the immediate subdirectories within it.
 */
@@ -69,9 +73,17 @@ async function configGen({ command, mode }) {
   const PROD = !DEV_MODE;
 
   /*
-  * Chunk visualizer for production builds.
+  * Chunk visualizer for manually made production builds.
+  *
+  * Note: uses an add-on brought in 'build-extras' Docker target. https://github.com/btd/rollup-plugin-visualizer
   */
-  const visualizer = (BUILD && PROD) && await (import("rollup-plugin-visualizer")).then( mod => mod.visualizer );
+  const visualizer =
+    (BUILD && PROD && !NO_VISUALIZER) ? await (import("rollup-plugin-visualizer")).then( mod => mod.visualizer({    // Provided in the 'tools/vite.dc' Docker image
+      //filename: './stats.html',
+      sourcemap: true,
+      template: 'sunburst',
+      brotliSize: true
+    })) : undefined;
 
   return {
     ...(DEV_MODE ? {    // 'npm run dev:{local|online}'
@@ -130,17 +142,7 @@ async function configGen({ command, mode }) {
 
       rollupOptions: {
         output: {manualChunks},
-
-        plugins: [ ... BUILD ? [
-          // Visualizer is an add-on brought in the 'docker-compose.yml' ('build' target). https://github.com/btd/rollup-plugin-visualizer
-          //
-          visualizer({    // Provided in the 'tools/vite.dc' Docker image
-            //filename: './stats.html',
-            sourcemap: true,
-            template: 'sunburst',
-            brotliSize: true
-          })
-        ] : []]
+        plugins: [ ... visualizer ? [ visualizer ] : [] ]
       },
 
       // Note:

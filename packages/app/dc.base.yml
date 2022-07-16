@@ -1,7 +1,7 @@
 #
 # app/dc.base.yml
 #
-# Base for 'docker-compose.{local|online}.yml (and via 'local' to 'docker-compose.{test|ci}.yml').
+# Base for 'docker-compose.{local|online}.yml.
 #
 # Note:
 #   DC overlays do allow for removal of mounts (e.g. by overriding them to point to '/dev/nul'; mounts are overridable
@@ -74,8 +74,8 @@ services:
       - PORT
         # Pass 'PORT' to inside DC, at least 'vite.config.js'
 
-    # tbd. Should we keep the healthcheck here; 'local' and 'online' don't depend on it.
     #|healthcheck:
     #|  test: "nc -z localhost $PORT"
     #|  interval: 0.9s
     #|  start_period: 25s
+    # tbd. Should we keep the healthcheck here; 'local' and 'online' don't depend on it.

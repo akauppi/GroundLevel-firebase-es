@@ -37,8 +37,6 @@ services:
     command: sh -c
       'echo "Launching Docker... 🐳" &&
       
-      cat firebase.json &&
-
       firebase emulators:start --project=demo-2
         | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI|The Emulator UI is not starting"
       '

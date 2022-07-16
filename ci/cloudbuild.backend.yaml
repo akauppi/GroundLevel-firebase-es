@@ -8,7 +8,7 @@
 #   - Common CI builder (not project specific; no deploys!)
 #
 # Uses images:
-#   - node:18-alpine      (stock image)
+#   - node:{16|18}-alpine (stock image)
 #   - firebase-emulators  (pushed to Artifact Registry)
 #   - docker/compose      (stock image)
 #
@@ -24,7 +24,7 @@
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
 #   to regular users (of other images). This is normally not a concern.
 #
-#   tbd. Moved to 'node:18'. Does the above still hold? #contribute
+#   tbd. Check whether the above holds also for 'node:18'. Does the above still hold? #contribute
 #
 
 steps:
@@ -97,12 +97,14 @@ steps:
 # | first run | 2894, 3306 ms | 762, 907 ms |    <-- good enough to use (Jul 22)
 # | (2nd run) |  422 ms | 631 ms |
 
-#|- name: node:18-alpine
-#|  entrypoint: npm
-#|  args: ['run', 'ci:test']
-#|  dir: packages/backend
-#|  env:
-#|    - EMUL_HOST=emul
+# Do warm-up, just of the functions side, though.
+- name: node:18-alpine
+  entrypoint: npm
+  args: ['run', 'ci:warm-up']
+  dir: packages/backend
+  env:
+    - EMUL_HOST=emul
+    - WARM_UP_TIMEOUT=8000
 
 - name: node:18-alpine
   entrypoint: npm
@@ -110,7 +112,6 @@ steps:
   dir: packages/backend
   env:
     - EMUL_HOST=emul
-    - WARM_UP_TIMEOUT=4000    # extend the timeout; development may use 2s
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: npm

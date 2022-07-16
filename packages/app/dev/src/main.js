@@ -12,6 +12,8 @@ import { getDatabase, connectDatabaseEmulator } from '@firebase/database'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
+function fail(msg) { throw new Error(msg) }
+
 // For the sake of Cypress tests (at least), set up human-readable error messages. This only applies to dev:local.
 //
 // Samples:
@@ -50,7 +52,8 @@ async function initFirebaseLocal() {   // () => Promise of ()
     import.meta.env.VITE_AUTH_PORT,
     import.meta.env.VITE_DATABASE_PORT
   ];
-  assert(firestorePort && authPort && databasePort, "Some Firebase param(s) are missing; problem in build");
+  (firestorePort && authPort && databasePort) ||
+    fail( `[INTERNAL ERROR] Some Firebase param(s) are missing: ${ [firestorePort, authPort, databasePort] }`);
 
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6769
   const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9101"
@@ -80,12 +83,11 @@ async function initFirebaseLocal() {   // () => Promise of ()
 * Running against an online project
 */
 async function initFirebaseOnline() {
-  const [apiKey, appId, authDomain, projectId, locationId, databaseURL] = [
+  const [apiKey, appId, authDomain, projectId, databaseURL] = [
     import.meta.env.VITE_API_KEY,
     import.meta.env.VITE_APP_ID,      // needed only for Firebase Performance Monitoring
     import.meta.env.VITE_AUTH_DOMAIN,
     import.meta.env.VITE_PROJECT_ID,
-    import.meta.env.VITE_LOCATION_ID,
     import.meta.env.VITE_DATABASE_URL
   ];
 

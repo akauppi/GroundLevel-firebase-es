@@ -11,14 +11,14 @@
 *   Cannot 'import' any of the application sources, since they use '/@xxx' path mapping. (This should be fine.)
 */
 import {
-  connectAuthEmulator,
-  debugErrorMap,
-  initializeAuth,
+  //connectAuthEmulator,
+  //debugErrorMap,
+  //initializeAuth,
   signInWithCustomToken,
   updateProfile,
-  getAuth
+  //getAuth
 } from '@firebase/auth'
-import {initializeApp} from '@firebase/app'
+//import {initializeApp} from '@firebase/app'
 
 /*
 * 'cy.clearAuthState'
@@ -96,12 +96,11 @@ function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
 
   cy.visit('/');
 
-  return cy.window().its("Let's test!").then( ([auth]) => {
-    console.log("Saimme:", auth);
-    return auth;
-  });
+  return cy.window().its("Let's test!").then( ([auth]) => auth );
 }
 
+// tbd. Try once more, making sure the port number is correct (9101 for dev)
+//
 // POINTLESS CODE - leave for now...
 //
 // Tried to manufacture (or gain, via 'getApp') the UI code's auth handle, without it collaborating. Didn't work.

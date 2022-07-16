@@ -1,0 +1,32 @@
+#
+# app/docker-compose.tools.ci.yml
+#
+# Building for CI.
+#
+services:
+  build:
+    build:
+      context: tools/vite.dc
+      target: vite_plain      # plain Vite is fine for CI builds, thank you
+    volumes:
+      # --- RO
+      - ./node_modules:/work/node_modules:ro
+      - ./vite.config.js:/work/vite.config.js:ro
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro
+      # --- Sources
+      - ./src:/work/src:ro
+      - ./prod:/work/prod:ro
+      - ./public:/work/public:ro
+      # --- Output
+      - ./dist:/work/dist:delegated
+      # --- other
+      - ../../../branding/favicon.png/:/work/public/favicon.png:ro
+    command: sh -c
+      '
+      echo ''export default {}'' > firebase.config.js &&
+      vite build
+      '
+    environment:
+      - ENV=fake
+      - VITE_VISUALIZER=false
+    profiles: ['manual']
