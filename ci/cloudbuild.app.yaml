@@ -24,6 +24,8 @@
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
 #   to regular users (of other images). This is normally not a concern.
 
+# tbd. Remove use of 'DATABASE_PORT' - we don't need it, for testing.
+
 steps:
 # Install
 #
@@ -35,28 +37,29 @@ steps:
     npm config set update-notifier false &&
 
     npm install &&
-    npm --prefix packages/backend install --omit=optional &&
-    npm --prefix packages/app install --omit=optional
+    npm --prefix packages/backend install &&
+    npm --prefix packages/app install --omit=optional &&
+    
+    (cd packages/backend && 
+      touch firebase-debug.log firestore-debug.log database-debug.log
+    )
   ']
     # Note: '--omit=optional' does not matter, in practise (the idea was to not pull in Vite).
     #
     #   with '--omit=optional':   289 packages added, timing: 18.9, 17.7, 16.9s
     #   without:                  292 packages added, timing: 18.9 s
 
-  env: ['CYPRESS_INSTALL_BINARY=0']
+  env:
+    - CYPRESS_INSTALL_BINARY=0    # avoid downloading a GUI
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800    # tbd. not sure we use it?
+    - AUTH_PORT=9100
 
   # State:
-  #   - 'packages/backend/functions/node_modules' have been populated
-  #   - 'packages/backend/tmp/firebase.json' has been created
-  #   - 'packages/backend/tmp/database.rules.json' has been created
-
-#DEBUG
-#|- name: node:${_NODE_VER}-alpine
-#|  entrypoint: sh
-#|  args: ['-c', '
-#|    cat ehem
-#|  ']
-#|  dir: packages/app
+  #   - packages/backend/functions/node_modules   have been populated
+  #   - packages/backend/tmp/firebase.json        has been created
+  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # DEBUG:
 #
@@ -71,7 +74,7 @@ steps:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 #|    - FIRESTORE_PORT=6767
 #|    - FUNCTIONS_PORT=5002
-#|    - DATABASE_PORT=6800
+#|    #- DATABASE_PORT=6800
 #|    - AUTH_PORT=9100
 
 # --- App
@@ -85,7 +88,6 @@ steps:
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
-    # Note: Using same ports as with backend CI.
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
     - DATABASE_PORT=6800
@@ -97,6 +99,10 @@ steps:
 #|  dir: packages/app
 #|  env:
 #|    - PORT=3002
+#|    - FIRESTORE_PORT=6767
+#|    - FUNCTIONS_PORT=5002
+#|    - DATABASE_PORT=6800
+#|    - AUTH_PORT=9100
 
 # Launches a development build.
 #
@@ -105,6 +111,10 @@ steps:
   dir: packages/app
   env:
     - PORT=3002
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800
+    - AUTH_PORT=9100
 
   # State:
   #   - 'emul-for-app' is running (emulators)
@@ -118,14 +128,8 @@ steps:
     - CYPRESS_defaultCommandTimeout=20000
     #
     # Tests durations:
-    #   1: 10673 ms
-    #   2: 4224 ms
-    #
-    # Test durations (old; different Cypress etc.):
-    #   1: 8555 ms
-    #   2: -
-    #   1: 7541, 7682, 8565 ms
-    #   2: 3980, 4289, 3804 ms
+    #   1: 10673, 9478 ms
+    #   2: 4224, 4920 ms
 
 # Check that a production build passes.
 #
@@ -141,15 +145,15 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - 5:29
+#   - 5:36
 #
 # OLD:
-#   - with tests (no build, had warm-up): 5:54
+#   - 5:29, 5:31
 #
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 11.2.1
+  _BUILDER_TAG: 11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"

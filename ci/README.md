@@ -241,17 +241,24 @@ Next, let's introduce GitHub and Cloud Build to each other.
 
 ## GCP setup
 
+You need to enable quite a few things within the GCP, to have things rolling. 
+
+>Note: These changes *can* be done from command line as well (using `gcloud`) if you need to do them repeatedly.
+
+Some steps are needed for the build project ("CI/CD project", above), some for the deployment projects ("staging project", above), some for both.
+
+
 ### Enable Artifact Registry (build project only)
 
-<font color=red>*tbd. Write actual guide; missing details*</font>
+<!-- tbd. more details / pics? -->
 
 - Enable Artifact Registry
-- Create a `builders`<sup>(*</sup> folders within there
+- Create a `builders`<sup>(*)</sup> folders within there
 
-   <small>*) You can name the folder differently, but then need to change the name where referenced in this doc and in the `cloudbuild.*.yaml` files.</small>
+   <small>`(*)`: You can name the folder differently, but then need to change the name where referenced.</small>
 
 
-### Enable APIs (build project; deployment project)
+### Enable APIs (both build and deployment projects)
 
 - [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
   - `+ Enable APIs and Services`
@@ -271,21 +278,29 @@ Also check that the following are enabled:
 <!-- from: https://cloud.google.com/build/docs/deploying-builds/deploy-firebase#before_you_begin
 -->
 
+### Enable IAM API (deployment project)
+
+- [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
+  - `+ Enable APIs and Services`
+
+      - `Identity and Access Management (IAM) API` > `Enable`
+
+
 ### Deployment project
 
-For the GCP project that handles deployment (the one(s) matching a Firebase project's name), **in addition** to the above, do these steps:
+**In addition** to the above, do these:
 
-
-<details><summary>Grant Firebase IAM roles to the Cloud Build service account</summary>
+<details><summary>Grant roles to the Cloud Build service account</summary>
 
 - Google Cloud console > `Cloud Build` > `Settings`
-- Change `Firebase Admin` to `Enabled`
+  - Change `Firebase Admin` to `Enabled`
+  - Change `Service Account User` to `Enabled`
 
-   >![](.images/firebase-admin-enabled.png)
+   >![](.images/service-account-grants.png)
 
 >Hint: Pick up the `Service account email`. You'll need it, shortly.
 
-<!-- YEEAAH... 
+<!-- (covered above; using GCP Console)
 There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
 
 - Get the number from the "Service account email" (above screenshot).
@@ -298,18 +313,6 @@ There was one more role needed, not covered in the normal documentation. Deployi
    Updated IAM policy for serviceAccount [...]
    ...
    ```
-
->tbd. If re-enabling this section, give the instructions using Cloud Shell (not needing to log into staging/production accounts ever, from one's development machine..) #help
-
-```
-$ gcloud auth logout
-```
-
->Note: Would changing the `Service Account User` in the screenshot have done the same? Likely. (tbd. test) 
-
-<!_-- whisper
-Interestingly, the GUI does not change the state of `Service Account User` to `ENABLED` - maybe it contains more roles than the one we changed at the command line?
---_>
 -->
 </details>
 
@@ -343,6 +346,19 @@ Each deployment project needs to be able to read the builder image. This means g
    Push `SAVE`.
 
 Your deployment project Cloud Build runs should now be able to pull the builder images.
+</details>
+
+
+
+<details><summary>Allow access to secrets</summary>
+
+Within GCP, the Cloud Build service account doesn't by default have access to read the same project's secrets.
+
+>![](.images/add-secret-access.png)
+
+<p />
+
+>![](.images/add-secret-access-save.png)
 </details>
 
 

@@ -39,6 +39,7 @@ if [[ -f $STAGING_JS ]]; then
 fi
 
 echo "Going to:"
+echo "  0. Rebuild a Docker image (maybe)"
 echo "  1. Log you in with Firebase CLI (allows the script to make changes to the Firebase project)"
 echo "     - please visit the URL soon given and click through the authentication"
 echo "  2. Pick the Firebase project"
@@ -55,6 +56,15 @@ echo
 if [[ ! ${CHOICE:-y} =~ ^[Yy]$ ]]; then
   exit 0
 fi
+
+#--- Build
+#
+# Note: Rebuilding the Docker image is needed if its version (held within 'docker-compose.yml') changes. Docker
+#   does NOT do this automatically (it maybe should?).
+#
+#   tbd. If going Makefile, make rebuild reliant on changes both to '../dc/firebase-tools/Dockerfile' and 'docker-compose.yml'.
+#
+docker compose build firebase-cli
 
 #--- Execute
 

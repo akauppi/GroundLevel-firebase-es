@@ -8,8 +8,8 @@
     "-- ": "",
     "dc:launch:test": "npm run -s _genEnvLocal && vite --mode dev_local",
     "-- -": "",
-    "_genEnvLocal": "FIREBASE_APP_JS=firebase.app.js tools/gen-vite-env-local.js --project=demo-main > .env",
-    "_genEnvOnline": "tools/gen-vite-env-online.js > .env"
+    "_genEnvLocal": "FIREBASE_APP_JS=firebase.app.js node tools/gen-vite-env-local.js --project=demo-main > .env",
+    "_genEnvOnline": "node tools/gen-vite-env-online.js > .env"
   },
   "//comments": {
     "": [

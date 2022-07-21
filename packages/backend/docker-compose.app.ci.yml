@@ -10,10 +10,7 @@
 #
 # Expects:
 #   AUTH_PORT
-#   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
-#   FIRESTORE_PORT
-#   DATABASE_PORT
-#   FUNCTIONS_PORT
+#   ..as in 'docker-compose.ci.yml'
 #
 services:
   emul-for-app:

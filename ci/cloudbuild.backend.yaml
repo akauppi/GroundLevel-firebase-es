@@ -38,12 +38,23 @@ steps:
     npm config set update-notifier false &&
 
     npm install &&
-    npm --prefix packages/backend install
+    npm --prefix packages/backend install &&
+
+    (cd packages/backend && 
+      cp tmp/firebase.ci.json ./firebase.json &&
+      touch firebase-debug.log firestore-debug.log database-debug.log
+    )
   ']
+  env:
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    #- DATABASE_PORT=6800
+
   # State:
-  #   - 'packages/backend/functions/node_modules' have been populated
-  #   - 'packages/backend/tmp/firebase.json' has been created
-  #   - 'packages/backend/tmp/database.rules.json' has been created
+  #   - packages/backend/functions/node_modules   have been populated
+  #   - packages/backend/tmp/firebase.ci.json     has been created
+  #   - packages/backend/firebase.json            copy for easy running of tests
+  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # DEBUG:
 #
@@ -52,14 +63,14 @@ steps:
 # Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
 #
 #|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#|  #args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
-#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'emul-is-up']
+#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
+#|  #args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-up']
 #|  dir: packages/backend
 #|  env:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 #|    - FIRESTORE_PORT=6767
 #|    - FUNCTIONS_PORT=5002
-#|    - DATABASE_PORT=6800
+#|    #- DATABASE_PORT=6800
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -84,20 +95,23 @@ steps:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800
+    #- DATABASE_PORT=6800
 
-# Warm-up
+# Observed test times:
 #
-# In development, we do warm-up but that's not really needed, in CI. Results are below. Enable the warm-up block if
-# you wish to confirm them.
+# |              | time
+# | ------------ | -----
+# | fns (cold)   | 2894, 3306, 2946 ms
+# | fns (warm)   | 422, 577 ms
+# | rules (cold) | 631, 705 ms    (already < 2000ms = good)
 #
+# Conclusion: warm-up affects 'fns' tests, but whether we want to run them in CI is a matter of choice.
+#   Doing so allows to check that actual tests (when warmed up) do execute within 2000ms.
+#   On the other side, it delays the overall CI runs a bit.
 #
-# |           | userInfo (fns) | rules |
-# | --------- | -------------- | ----- |
-# | first run | 2894, 3306 ms | 762, 907 ms |    <-- good enough to use (Jul 22)
-# | (2nd run) |  422 ms | 631 ms |
-
-# Do warm-up, just of the functions side, though.
+  # Note: If you disable the warm-up (reduces CI execution times by <not measured>), then enable 'WARM_UP_TIMEOUT' for
+  #       the actual tests.
+  #
 - name: node:18-alpine
   entrypoint: npm
   args: ['run', 'ci:warm-up']
@@ -112,6 +126,7 @@ steps:
   dir: packages/backend
   env:
     - EMUL_HOST=emul
+    #- WARM_UP_TIMEOUT=8000
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: npm
@@ -121,16 +136,14 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - 2:06
-#
-# OLD:
-#   - 2:06  (no functions test)
+#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50
+#   - with --machine-type=n1-highcpu-8:     1:28 (-30%)
 #
 timeout: 300s
 
 substitutions:
-  _BUILDER_TAG: 11.2.1
+  _BUILDER_TAG: 11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
-  _NODE_VER: "16"
+  _NODE_VER: "18"
   _AR_FOLDER: builders
     # You may use any name, or create such a folder in AR.

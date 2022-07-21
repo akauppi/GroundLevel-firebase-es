@@ -21,7 +21,7 @@ set -eu -o pipefail
 #
 # Note: >= 11.2.1 to avoid Artifact Registry API enabling need, by hand.
 #
-_VERSION=11.2.1
+_VERSION=11.3.0
 
 _DOCKERPATH=../dc/firebase-tools
 _IMAGE_NAME=firebase-emulators

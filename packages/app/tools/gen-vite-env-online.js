@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
 * tools/gen-vite-env-online.js
 *

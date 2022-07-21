@@ -106,13 +106,30 @@ Just reboot **the machine**. That helps.
 
 Mounting of files in DC `volumes` is possible, but demands the file system entry to exist, as a file, before the `docker compose` call.
 
+This is the same for both normal (`volume`) mounts and `bind` mounts<sup>DC 2.6.1; Docker Desktop for Mac 4.10.1</sup>. The difference is:
+
+- `volume` mounts quietly create a folder, unless a file exists host-side
+- `bind` mounts print out an error and fail:
+
+   ```
+   invalid mount config for type "bind": bind source path does not exist: ...
+   ```
+
 This causes us to have these preventive measures in `package.json`:
 
 ```
-    "postinstall": "[ -z $BUILDER_OUTPUT ] || npm run -s _touchEm",
+    "postinstall": "npm run -s _touchEm",
     "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
 ```
 
 These are output files, normally created by Firebase Emulator. Now we much make sure they exist, so they won't be mapped as folders, instead.
 
->Syntax suggestion: `:f` as a postfix, concatenable with others (in our case, we'd use `:delegated:f`.
+**Suggestion**
+
+Add a `:f` as a postfix, concatenable with others (in our case, we'd use `:delegated,f`).<sup>[1]</sup>
+
+<small>`[1]`: DC already allows concatenating postfixes by `,`. The author would have preferred `:delegated:f`, otherwise.</small>
+
+**Reference**
+
+- ["How to mount a single file in a volume"](https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume) (SO; Feb 2017)

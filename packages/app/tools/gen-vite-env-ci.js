@@ -1,22 +1,22 @@
 /*
-* tools/gen-vite-env-local.js
+* tools/gen-vite-env-ci.js
 *
 * Usage:
 *   <<
-*     [FIREBASE_APP_JS=...] [SENTRY_DSN=...] gen-vite-env-local --project=demo-...
+*     FIRESTORE_PORT=<num> AUTH_PORT=<num> DATABASE_PORT=<num> \
+*     EMUL_HOST=<port> \
+*     [SENTRY_DSN=...] gen-vite-env-local --project=demo-...
 *   <<
 *
-* Expects:
-*   - top level await to be supported (node 18)
-*
-* Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
-* side to get copies of these build values.
-*
-* Output to stdout.
+* Outputs an '.env' file to be used for CI testing.
 */
+// tbd. Take 'DATABASE_PORT' away; not needed???
+
+/*** disabled
 const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || "firebase.app.js";    // run within DC, 'firebase.app.js' is mapped
 
 const { emulators } = await import(`../${FIREBASE_APP_JS}`).then( mod => mod.default );
+***/
 
 const projectId = (_ => {
   const [a, b] = process.argv.slice(2);
@@ -31,6 +31,7 @@ const projectId = (_ => {
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
+/***
 const [firestorePort, authPort, databasePort] = (_ => {   // => [int, int, int]
 
   const arr = ["firestore","auth","database"].map( k => {
@@ -39,14 +40,22 @@ const [firestorePort, authPort, databasePort] = (_ => {   // => [int, int, int]
   });
   return arr;
 })();
+***/
+
+const emulHost = process.env["EMUL_HOST"];
+
+const firestorePort = process.env["FIRESTORE_PORT"] || fail("Expected 'FIRESTORE_PORT' env.var.");
+const authPort = process.env["AUTH_PORT"] || fail("Expected 'AUTH_PORT' env.var.");
+const databasePort = process.env["DATABASE_PORT"] || fail("Expected 'DATABASE_PORT' env.var.");
 
 const out =
-`# Generated based on '${ FIREBASE_APP_JS }'.
+`# Generated
 #
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_AUTH_PORT=${authPort}
 VITE_DATABASE_PORT=${databasePort}
-VITE_PROJECT_ID=${projectId}${
+VITE_PROJECT_ID=${projectId}
+VITE_EMUL_HOST=${emulHost}${
   SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;

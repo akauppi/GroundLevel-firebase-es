@@ -113,3 +113,27 @@ What is going on here?
 - [ ] [[FR] Make builders available via Artifact Registry](https://github.com/GoogleCloudPlatform/cloud-builders/issues/844)
 
 Once / if they become, we could use them. No special big benefit, though.
+
+>⛔️ Google doesn't give much focus to the builders. For one, the Docker image is huge (see above). For `npm`, they discuss of recommending (practically: they do) the stock images, but this is not clearly mentioned in documentation. Nor is their ancient (Node.js 14) `npm` builder marked as deprecated.
+>
+>These are all signs to "keep out" (not of Google Cloud, but of Cloud Build builders).
+>
+>Not publishing the builders in Artifact Registry is just one sign of the same neglect.
+
+
+## Emulators may fail with 0 RC
+
+- [ ] [When emulators don't launch the return code should always be non-zero](https://github.com/firebase/firebase-tools/issues/4754) (GitHub; Jul 2022)
+
+We live with it. Check anyways, at times..
+
+
+## "Unhandled error cleaning up build images."
+
+- [ ] ["Unhandled error cleaning up build images."](https://github.com/firebase/firebase-tools/issues/4757) (GitHub; Jul 2022)
+
+   Likely something that's caused by the move to Artifact Registry.
+   
+**Work-around:**
+
+Deploy with `first`, for now.

@@ -15,6 +15,14 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
+  firebase-cli:
+    # Note: Can also 'extends:' from the '../dc/firebase-tools/base' definition, but it adds little value, here.
+    build:
+      context: ../dc/firebase-tools/
+      target: firebase-cli
+      args:
+        - FIREBASE_TOOLS_VERSION=11.3.0
+
   # Usage:
   #   <<
   #     $ install -d tmp/configstore     # important on WSL2 (otherwise 'root')
@@ -35,8 +43,7 @@ services:
   #
   deploy-auth:
     extends:
-      file: ../dc/firebase-tools/base.yml
-      service: base
+      service: firebase-cli
     ports:
       - "9005:9005"   # needed by the auth dance
     volumes:
@@ -86,7 +93,7 @@ services:
       'npm config set update-notifier false &&
       echo package-lock=false > .npmrc &&
 
-      npm install --no-optional
+      npm install --omit=optional
       '
     environment:
     - NO_GUARD=1
@@ -99,8 +106,7 @@ services:
   #
   deploy-backend:
     extends:
-      file: ../dc/firebase-tools/base.yml
-      service: base
+      service: firebase-cli
     volumes:
       #-- RO
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
@@ -131,8 +137,7 @@ services:
   #
   deploy-app:
     extends:
-      file: ../dc/firebase-tools/base.yml
-      service: base
+      service: firebase-cli
     volumes:
       #-- RO
       - ../packages/app/dist:/work/dist:ro
