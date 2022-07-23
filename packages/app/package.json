@@ -35,7 +35,7 @@
     "serve": "http-server -p 8080 dist",
     "//serve": "docker compose run --rm --service-ports _serve",
     "--  --": "",
-    "first:echoFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\"",
+    "first:echoFirebaseHostingJson": "npm run -s _echoFirebaseHostingJson",
     "--  --  ": "",
     "_build:dev": "npm run -s _touchDevLocalEnv && make refresh-build && docker compose -f docker-compose.local.yml run --rm build",
     "--  -- ": "",
@@ -44,9 +44,9 @@
     "-- ---": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
     "_postinstall_dev": "(cd node_modules && rm -rf vite rollup esbuild esbuild-*)",
-    "_postinstall_ci": "npm run -s _genFirebaseHostingJson",
+    "_postinstall_ci": "npm run -s _echoFirebaseHostingJson > firebase.json",
     "--    -": "",
-    "_genFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\" > tmp/firebase.hosting.json"
+    "_echoFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\""
   },
   "dependencies": {
     "@sentry/browser": "^7.0.0",

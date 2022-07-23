@@ -4,15 +4,20 @@
 # Building for CI.
 #
 services:
+  #
+  # Expects:
+  #   - RELEASE
+  #
   build:
     build:
       context: tools/vite.dc
-      target: vite_plain      # plain Vite is fine for CI builds, thank you
+      target: vite_plain      # plain Vite is fine for CI builds
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./vite.config.js:/work/vite.config.js:ro
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
+      - ./firebase.server.config.js:/work/firebase.config.js:ro
       # --- Sources
       - ./src:/work/src:ro
       - ./prod:/work/prod:ro
@@ -23,10 +28,12 @@ services:
       - ../../../branding/favicon.png/:/work/public/favicon.png:ro
     command: sh -c
       '
-      echo ''export default {}'' > firebase.config.js &&
+      ([ -z "${RELEASE}" ] || echo "VITE_RELEASE=${RELEASE}" >> .env) &&
+      ([ -z "$$SENTRY_DSN" ] || echo "VITE_SENTRY_DSN=$$SENTRY_DSN" >> .env) &&
+
       vite build
       '
     environment:
-      - ENV=fake
+      - SENTRY_DSN
       - VITE_VISUALIZER=false
     profiles: ['manual']

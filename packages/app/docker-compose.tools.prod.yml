@@ -3,15 +3,12 @@
 #
 services:
   #---
-  # Separate target; build production delivery
+  # Build production delivery (manually)
   #
-  # Note:
-  #   Vite (3.0.0-alpha.1) has difficulties importing the Rollup plugin, if globally installed. Node.js, on the other
-  #   hand, does not provide installation to '/node_modules'.
-  #
-  #   Solved by installing globally ('-g') and then linking to '/node_modules'.
-  #
-  #   See 'TRACK.md'; if 'rollup-plugin-visualizer' were to provide an 'exports' section, one day..
+  # Expects:
+  #   - ENV
+  #   - SENTRY_DSN (optional)
+  #   - SENTRY_SAMPLE_RATE (optional)
   #
   build:
     build:
@@ -36,7 +33,6 @@ services:
     command: sh -c
       '
       ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:---}" >> .env) &&
-      ([ -z "${RELEASE}" ] || echo "VITE_RELEASE=${RELEASE:---}" >> .env) &&
       ([ -z "$ENV" ] || echo "VITE_STAGE=${ENV:---}" >> .env) &&
       ([ -z "${SENTRY_SAMPLE_RATE:-}" ] || echo "VITE_SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE:---}" >> .env) &&
 
@@ -45,7 +41,6 @@ services:
       # Note: '{...:-}' (providing an empty default) avoids warnings; used for optional env.vars.
 
     #|environment:
-    #|  - RELEASE
     #|  - ENV     # e.g. "staging"
     profiles: ['manual']
 
