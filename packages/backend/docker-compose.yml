@@ -106,7 +106,7 @@ services:
         #
         # Measure by:
         #   1. Delete all running DC containers
-        #   2. $ time LOGS_PATH=./logs FUNCTIONS_PORT=5002 docker compose run --rm warmed-up
+        #   2. $ time FUNCTIONS_PORT=5002 docker compose run --rm warmed-up
 
     # Enable manual launch to debug 'emul' launch, only.
     profiles: ['manual']

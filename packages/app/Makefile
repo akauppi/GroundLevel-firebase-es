@@ -7,8 +7,8 @@ all:
 	false
 
 #
-# When 'tools/vite.dc' contents change, *each* DC container using it needs to be separately rebuilt (rebuilding the base
-# does not have an effect; Docker Compose 2.6.1).
+# When 'tools/vite.dc/Dockerfile' changes, *each* DC container using it needs to be separately rebuilt (rebuilding the
+# base does not have an effect; Docker Compose 2.6.1).
 #
 tmp/.stamp.vite-dev: tools/vite.dc/Dockerfile
 	PORT=0 docker compose -f docker-compose.local.yml build vite-dev

@@ -4,7 +4,7 @@
 # A version of the DC definition for front-end development and testing.
 #
 # Expects:
-#   'DOT_APP' env.var. to be ".app"
+#   'FUNCTIONS_PORT'  ! EXPERIMENTAL; still looking which is the best way to pass the port numbers..
 #
 # Note:
 #   Ports exposed at the host are defined so that they do not overlap with those of 'docker-compose.yml'.
@@ -19,6 +19,15 @@ services:
     extends:
       file: docker-compose.base.yml
       service: emul-base
+    volumes:
+      # --- RO
+      - ./tmp/firebase.app.json:/work/firebase.json:ro
+
+      # --- output
+      - ./logs.app/firebase-debug.log:/work/firebase-debug.log:delegated
+      - ./logs.app/firestore-debug.log:/work/firestore-debug.log:delegated
+      - ./logs.app/database-debug.log:/work/database-debug.log:delegated
+      - ./logs.app/ui-debug.log:/work/ui-debug.log:delegated
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "6768:6768"
@@ -31,8 +40,12 @@ services:
       - PROJECT_ID=demo-main    # must match with what's in '../app/' (package[.dc].json, docker-compose.tools.local.yml)
 
     healthcheck:
-      test: "nc -z localhost 6768 && nc -z localhost ${FUNCTIONS_PORT} && nc -z localhost 6801"
-        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      test: '
+        nc -z localhost 6768 && 
+        nc -z localhost ${FUNCTIONS_PORT} && 
+        nc -z localhost 6801
+        '
+          # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 1.0s
       start_period: 25s
 
@@ -40,11 +53,7 @@ services:
 
   emul-for-app-launched:
     image: node:16-alpine
-    command: sh -c
-      '([ ${DOT_APP} == ".app" ] || ( >&2 echo "INTERNAL ERROR. You as the caller *must* set 'DOT_APP=.app'. Just Do it."; false )) &&
-      
-      ([ ! -z ${LOGS_PATH} ] || ( >&2 echo "INTERNAL ERROR. You as the caller *must* set 'LOGS_PATH'."; false ))
-      '
+    command: sh -c true
     depends_on:
       emul-for-app:
         condition: service_healthy

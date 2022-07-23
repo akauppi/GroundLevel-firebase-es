@@ -1,12 +1,7 @@
 #
 # backend/docker-compose.base.yml
 #
-# Base for 'docker-compose[.app].yml (and via them, to 'docker-compose[.app].ci.yml').
-#
-# Expects:
-#   - 'PROJECT_ID' to be given ('demo-2' for backend; 'demo-main' for app).
-#   - 'DOT_APP' to be ".app" (for app) or not given (backend)
-#   - 'LOGS_PATH' can be used for placing (app) logs away from the backend's
+# Base for 'docker-compose[.app].yml'.
 #
 # Note:
 #   DC overlays do allow for removal of mounts (e.g. by overriding them to point to '/dev/nul'; mounts are overridable
@@ -27,9 +22,8 @@
 #
 services:
   #
-  # Expects:
-  #   - 'LOGS_PATH' to be defined (examples: './logs', './logs.app')
-  #   - 'DOT_APP' to be defined as ".app" for App backend
+  # Expects from derived definitions:
+  #   - environment: PROJECT_ID to be defined ('demo-...')
   #
   emul-base:   # used for 'npm run start', 'npm test', 'npm run app:start'
     extends:
@@ -37,17 +31,17 @@ services:
       service: base
     volumes:
       # --- RO
-      - ./tmp/firebase${DOT_APP:-}.json:/work/firebase.json:ro
+      - ./tmp/firebase.json:/work/firebase.json:ro      # emul-for-app overrides this
       # --- cached (may change; watched by the Emulators)
       - ./functions:/work/functions:cached
       - ./firestore.indexes.json:/work/firestore.indexes.json:cached
       - ./firestore.rules:/work/firestore.rules:cached
       - ./tmp/database.rules.json:/work/database.rules.json:cached    # could get recreated on the host (or manually tweaked)
-      # --- output
-      - ${LOGS_PATH}/firebase-debug.log:/work/firebase-debug.log:delegated
-      - ${LOGS_PATH}/firestore-debug.log:/work/firestore-debug.log:delegated
-      - ${LOGS_PATH}/database-debug.log:/work/database-debug.log:delegated
-      - ${LOGS_PATH}/ui-debug.log:/work/ui-debug.log:delegated
+      # --- output (emul-for-app has its own path)
+      - ./logs/firebase-debug.log:/work/firebase-debug.log:delegated
+      - ./logs/firestore-debug.log:/work/firestore-debug.log:delegated
+      - ./logs/database-debug.log:/work/database-debug.log:delegated
+      - ./logs/ui-debug.log:/work/ui-debug.log:delegated
       # --- other
       - ./tmp/functions/node_modules:/work/functions/node_modules:ro
 
@@ -58,7 +52,7 @@ services:
 
     # If we provide ports by Env.vars, could have also health check here.
     #|healthcheck:
-    #|  test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800 && sleep 2"
+    #|  test: "nc -z localhost 6767 && nc -z localhost 5002 && nc -z localhost 6800"
     #|  # Note: 'nc' in that image doesn't handle checking multiple ports at once.
     #|  interval: 0.7s
     #|  start_period: 23s

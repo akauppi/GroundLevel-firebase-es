@@ -27,9 +27,8 @@ services:
     environment:
       - FIRESTORE_PORT=6768
       - AUTH_PORT=9101
-      #- PROJECT=demo-main    tbd. is it needed?
       - NODE_NO_WARNINGS=1
-        # to supress:
+        # to suppress:
         #   <<
         #     (node:1) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time
         #     (Use `node --trace-warnings ...` to show where the warning was created)

@@ -44,7 +44,7 @@ This does not hinder CI runs (which is fortunate).
 -->
 
 
-## `ECONNRESET` failure   
+## Priming fails with: `socket hang up. Error code: ECONNRESET`
 
 <!-- *Still having this, on Windows 10 + WSL (13-Jul-2022)* 
 
@@ -119,3 +119,10 @@ If you encounter this, just retry `npm run dev`.
 The reason is unknown. 
 
 - [ ] Make a GitHub Issue and try to resolve.
+
+
+## Steps to reproduce
+
+- Delete all containers
+- `npm test`
+
