@@ -136,8 +136,9 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50
-#   - with --machine-type=n1-highcpu-8:     1:28 (-30%)
+#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11
+#
+# Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #
 timeout: 300s
 

@@ -7,6 +7,7 @@ services:
   #
   # Expects:
   #   - RELEASE
+  #   - SENTRY_DSN (optional)   # to enable crash monitoring
   #
   build:
     build:
@@ -17,7 +18,7 @@ services:
       - ./node_modules:/work/node_modules:ro
       - ./vite.config.js:/work/vite.config.js:ro
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
-      - ./firebase.server.config.js:/work/firebase.config.js:ro
+      - ${FIREBASE_SERVER_CONFIG_JS:-./firebase.server.config.js}:/work/firebase.config.js:ro
       # --- Sources
       - ./src:/work/src:ro
       - ./prod:/work/prod:ro
@@ -28,7 +29,7 @@ services:
       - ../../../branding/favicon.png/:/work/public/favicon.png:ro
     command: sh -c
       '
-      ([ -z "${RELEASE}" ] || echo "VITE_RELEASE=${RELEASE}" >> .env) &&
+      echo "VITE_RELEASE=${RELEASE}" >> .env &&
       ([ -z "$$SENTRY_DSN" ] || echo "VITE_SENTRY_DSN=$$SENTRY_DSN" >> .env) &&
 
       vite build
