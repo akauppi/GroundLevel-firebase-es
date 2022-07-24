@@ -29,9 +29,16 @@ RUN npm config set update-notifier false
 
 # Install dependencies
 #
-RUN npm install -g --no-save vite@$VITE_VER
+# Make all globally installed libraries visible to the work directory (only binaries would show, without this).
+# Needed for:
+#   - 'vite', imported by '@vite/plugin-vue' (project side)
+#   - 'rollup-plugin-visualizer', in the 'vite_extras' target
+#
+RUN npm install -g --no-save vite@$VITE_VER && \
+  ln -s /usr/local/lib/node_modules /node_modules
 
-ENV NODE_PATH=/usr/local/lib/node_modules
+# Disabled. Not needed
+#ENV NODE_PATH=/usr/local/lib/node_modules
 
 # Override
 CMD \
@@ -47,5 +54,5 @@ CMD \
 #
 FROM vite_plain AS vite_extras
 
-RUN npm install -g rollup-plugin-visualizer && \
-  (install -d /node_modules && cd /node_modules && ln -s $NODE_PATH/rollup-plugin-visualizer .)
+RUN npm install -g rollup-plugin-visualizer   \
+  # Note: visible to project because of the link done in 'vite_plain'

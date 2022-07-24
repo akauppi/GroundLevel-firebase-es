@@ -61,8 +61,7 @@ async function configGen({ command, mode }) {
   //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"dev_online"|"production"
 
   const BUILD = command === "build";
-
-  const SERVE_PORT = BUILD ? null : (process.env["PORT"] || fail("Missing 'PORT' env.var."));
+  const SERVE_PORT = BUILD ? null : process.env["PORT"] || fail("Missing 'PORT' env.var.");
 
   // Note: If you wish to read '.env' files, see -> https://vitejs.dev/config/#environment-variables
   //
@@ -127,6 +126,15 @@ async function configGen({ command, mode }) {
         ...(PROD ? {
           '/@firebase.config.json': `${myPath}/firebase.config.js`   // DC maps this
         }: {})
+
+        // EXP Counteracting this:
+        //  <<
+        //    $ npm run dev
+        //      ...
+        //      Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'vite' imported from /work/node_modules/@vitejs/plugin-vue/dist/index.mjs
+        //  <<
+        //
+        //!!! 'vite': `${ process.env["NODE_PATH"] }/vite`
       }
     },
 
@@ -165,14 +173,11 @@ async function configGen({ command, mode }) {
       })
     ],
 
-    server: {
+    server: SERVE_PORT ? {
       host: true,   // needed for the DC port mapping to work
       strictPort: true,
-
-      ...(SERVE_PORT ? {   // for production, just for debugging
-        port: SERVE_PORT
-      } : {})
-    },
+      port: SERVE_PORT
+    } : undefined,
 
     // Clearing the screen is considered distracting, though one can PgUp to see what was there just prior to Vite launching.
     clearScreen: false
@@ -180,5 +185,38 @@ async function configGen({ command, mode }) {
 }
 
 function fail(msg) { throw new Error(msg) }
+
+// Note: Adding 'optimizeDeps: { disabled: false }' causes the set of manual chunks to change (it was like that in 3.0
+//    alphas and betas):
+//    <<
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_app.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_performance.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/vue.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_auth.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/aside-keys.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@sentry_browser.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@sentry_tracing.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/plausible-tracker.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/vue-router.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_firestore.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_database.js
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-XSOXVSLP.js?v=29a23a98
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-JC4IRQUL.js?v=29a23a98
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-2TWQDNTD.js?v=29a23a98
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-4FQYRAM2.js?v=29a23a98
+//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-LL3PPPOH.js?v=29a23a98
+//    <<
+//
+//    We don't necessarily want that. Revisit if it becomes default in Vite 4.
+/*
+export default a => configGen(a).then( o => ({ ...o,
+
+  // Extras because we don't need CommonJS dependencies.
+  // See -> https://vitejs.dev/guide/migration.html#experimental
+  //
+  optimizeDeps: { disabled: false },
+  build: { ...o.build, commonjsOptions: { include: [] }}
+}))
+*/
 
 export default configGen

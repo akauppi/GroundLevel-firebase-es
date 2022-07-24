@@ -56,7 +56,7 @@ services:
       - ./vite.config.js:/work/vite.config.js:ro    # :cached
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro  # :cached
       #
-      - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
+      - ./tmp/.vite:/work/tmp/.vite:rw    # persistence between runs
       - ../../branding/favicon.png:/branding/favicon.png:ro   # trick to make the 'ln -s' work, also within DC
       #
       # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
@@ -70,12 +70,11 @@ services:
       '
     environment:
       - SENTRY_DSN
-      - MODE=x   # defined in 'docker-compose.{local|online}.yml'
+      #- MODE=x   # defined in 'docker-compose.{local|online}.yml'
       - PORT
         # Pass 'PORT' to inside DC, at least 'vite.config.js'
 
-    #|healthcheck:
-    #|  test: "nc -z localhost $PORT"
-    #|  interval: 0.9s
-    #|  start_period: 25s
-    # tbd. Should we keep the healthcheck here; 'local' and 'online' don't depend on it.
+    healthcheck:
+      test: "nc -z localhost $PORT"
+      interval: 0.9s
+      start_period: 25s

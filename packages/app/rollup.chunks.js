@@ -16,15 +16,15 @@
 function manualChunks(id) {
   let name;
 
+  /*** disabled; still there?
   // Vite 3.0.0-alpha.1 has an '\0' prepended ahead of "vite/preload-helper" (2.9.9 did not have that).
   //
   // Keep this while we check whether that's intentional, or a glitch.
   //
-  //if (id.includes("vite")) { console.log("!!!YAY", id, Array.from(id)) }    // DEBUG (remove #later)
-
   if (id === "\0vite/preload-helper") {
     return manualChunks(id.substring(1))
   }
+  ***/
 
   for (const [k,rr] of Object.entries(chunkTo)) {   // ""|<chunk-name> -> Regex | Array of Regex
     const arr = Array.isArray(rr) ? rr:[rr];
@@ -45,8 +45,6 @@ function manualChunks(id) {
 
 // Regex's for grouping the chunks
 //
-// Note: Vite 3.0.0-alpha.7 (something after 'alpha.2') changed the chunking.
-//
 const chunkTo = {     // Map of string -> (Regex | Array of Regex)
 
   // default chunk; application itself and small stuff
@@ -61,16 +59,14 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //    ...
   //  vite/modulepreload-polyfill
   //  vite/preload-helper
-  //  plugin-vue:export-helper
   //
   "": [
     /^\/work\/prod\//,
     /^\/work\/firebase\.config\.js$/,
     /^\/work\/src\//,
 
-    /^vite\/preload-helper$/,       // Vite runtime (small, ~600b)
+    /^.vite\/preload-helper$/,       // Vite runtime (small, ~600b)
     /^vite\/modulepreload-polyfill$/,
-    /^plugin-vue:export-helper$/,    // very small, ~180b
   ],
 
   // Vue.js
@@ -80,8 +76,12 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //  /work/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
   //  /work/node_modules/@vue/devtools-api/lib/esm/api/api.js
   //  /work/node_modules/vue-router/dist/vue-router.esm-bundler.js
+  //  plugin-vue:export-helper
   //
-  "vue": /\/node_modules\/@?vue\//,
+  "vue": [
+    /\/node_modules\/@?vue\//,
+    /^.plugin-vue:export-helper$/,
+  ],
   "vue-router": /\/node_modules\/vue-router\//,
 
   // Firebase
