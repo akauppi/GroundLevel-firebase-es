@@ -1,0 +1,80 @@
+#
+# app/dc.base.yml
+#
+# Base for 'docker-compose.{local|online}.yml.
+#
+# Note:
+#   DC overlays do allow for removal of mounts (e.g. by overriding them to point to '/dev/nul'; mounts are overridable
+#   by their container side path as a key). But that would be too fine-grained. This file just provides the common
+#   things for both 'local' and 'online' and they add their specific mounts.
+#
+# Note 2:
+#   Docker Compose checks for use of $SOME substitutions in _all_ of the services in the DC files (not the ones used
+#   for starting a task/service). This means it's best to have this separate from tool DC definitions (makes use of
+#   '$PORT' have less side effects).
+#
+# Expects:
+#   PORT with a number to a free port (e.g. 3000)
+#
+# Override:
+#   MODE ("local"|"online")
+#
+# Docker compose of:
+#   - Vite      front end Hot-Module Reloading; hosting
+#
+# Intentions:
+#   Host and hot-module-reload the front end.
+#
+# Docker Compose (v3) note:
+#   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
+#
+# References:
+#   Cypress > Continuous Integration > Introduction
+#     -> https://docs.cypress.io/guides/continuous-integration/introduction#What-is-Continuous-Integration
+#   Overview of Docker Compose (Docker docs)
+#     -> https://docs.docker.com/compose/
+#   Compose file version 3 reference
+#     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+services:
+  vite-base:   # used for 'npm run dev:local', 'npm run dev:online', 'npm test'
+    build:
+      context: tools/vite.dc
+      target: vite_plain
+    ports:
+      - "$PORT:$PORT"
+    volumes:
+      # --- RO
+      - ./package.dc.json:/work/package.json:ro
+      - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
+      # --- cached
+      - ./public:/work/public:cached
+      - ./src:/work/src:cached
+      - ./dev:/work/dev:cached
+      # --- other
+      # Vite needs a restart (ctrl-c; 'npm run dev[:online]') to see config changes.
+      - ./vite.config.js:/work/vite.config.js:ro    # :cached
+      - ./rollup.chunks.js:/work/rollup.chunks.js:ro  # :cached
+      #
+      - ./tmp/.vite:/work/tmp/.vite:rw    # persistence between runs
+      - ../../branding/favicon.png:/branding/favicon.png:ro   # trick to make the 'ln -s' work, also within DC
+      #
+      # HACK. during DEV, have 'file:/~/Git/...' npm link resolve.
+      #- ${HOME}/Git/aside-keys/package:/work/node_modules/aside-keys:ro
+
+    working_dir: /work
+    command: sh -c
+      'npm config set update-notifier false &&
+
+      npm run dc:launch:$$MODE
+      '
+    environment:
+      - SENTRY_DSN
+      #- MODE=x   # defined in 'docker-compose.{local|online}.yml'
+      - PORT
+        # Pass 'PORT' to inside DC, at least 'vite.config.js'
+
+    healthcheck:
+      test: "nc -z localhost $PORT"
+      interval: 0.9s
+      start_period: 25s

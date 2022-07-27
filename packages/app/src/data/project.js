@@ -6,7 +6,7 @@
 * Used by:
 *   - Project page
 */
-import { db } from '/@firebase'
+import { db } from '/@firebase/firestore'
 import { docRef } from '/@tools/listen.ref'
 import { doc, collection } from '@firebase/firestore'
 

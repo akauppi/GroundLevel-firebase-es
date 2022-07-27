@@ -28,7 +28,7 @@ module.exports = {
   },
 
   parserOptions: {
-    ecmaVersion: 2020,  // we use: object spread (2018), dynamic import (2020)
+    ecmaVersion: 2022,  // we use: top-level await (2022), dynamic import (2020)
     sourceType: 'module'
   },
 
@@ -72,8 +72,6 @@ module.exports = {
     {
       files: ["*.js"],
       extends: ['eslint:recommended'],
-      env: {  //?? what here?
-      },
       globals: {
         process: true,
       }
@@ -86,12 +84,11 @@ module.exports = {
       env: {
         node: true
       },
-      globals: {
-        //Buffer: true
-      },
       rules: {
         "no-process-exit": off,
-        "node/no-unpublished-bin": off
+        "node/no-unpublished-bin": off,
+
+        "node/no-unsupported-features/es-syntax": off   // top-level await, without warning
       }
     },
 

@@ -1,0 +1,30 @@
+#
+# dc/firebase-emulators/base.yml
+#
+# Base for using Firebase Emulators, some of which are preloaded.
+#
+services:
+  # Expects:
+  #   - PROJECT_ID  to be a Firebase project id ('demo-...').
+  #
+  #     Such project's data is visible in the emulator UIs. ALSO OTHER PROJECT ID's (or no id) will work, but leaving
+  #     the UI out of the loop.
+  #
+  base:
+    build:
+      context: ../firebase-tools
+      target: firebase-emulators
+
+    # 'ports', 'volumes', 'working_dir' to be provided by downstream
+
+    command: sh -c
+      'echo "Launching Docker... 🐳" &&
+      ([ ! -z $${PROJECT_ID:-} ] || ( >&2 echo "ERROR. Missing ''PROJECT_ID'' env.var. (e.g. ''PROJECT_ID=demo-x'')"; false )) &&
+      
+      firebase emulators:start --project=$${PROJECT_ID:-}
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+      '
+      # Note: Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.
+      #     A single 'grep -v -E' (needs -E) with '|' is fine."
+
+    # 'healthcheck' to be provided by downstream

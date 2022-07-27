@@ -15,22 +15,6 @@ Once there is a way to configure this (instead of code), we might prefer that.
 
 
 <!--
-## ESLint: top level await support pending "stage 4"
-
-We'd like the ESlint error for top level await (e.g. in `local/init.js`) to be configured out, without bringing in Babel parser.
-
-Like here: [Enable Top Level Await](https://github.com/eslint/eslint/issues/13178) (GitHub issues; closed)
-
-- Track: [ECMAscript proposal: Top-level await](https://github.com/tc39/proposal-top-level-await) (GitHub) for reaching stage 4. 
-
-   - [ ] Once there, find an issue at ESLint to track.
-
-In "stage 3" (26 Oct 2020; Jan 2021).
-
-In "stage 4" (Aug 2021). Will be in ESLint 8.0.
--->
-
-<!--
 | This one is for Rollup. We now use Vite for this level.
 
 ## Rollup-plugin-vue for Vue.js 3 (beta) needs an extra plugin for CSS/Sass
@@ -46,21 +30,6 @@ This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs
 
 - [https://github.com/Norserium/vue-advanced-cropper/issues/72](https://github.com/Norserium/vue-advanced-cropper/issues/72)
 -->
-
-
-## Vite and `lang="scss"`
-
-If you use `lang="scss"` in the `style` sections, this occurs:
-
-```
-$ npm run build
-...
-[vite:css] Preprocessor dependency "sass" not found. Did you install it?
-```
-
-- [ ] What is Vite official stand on this? Should `lang="scss"` support be built-in?
-
-> Still there, with Vite 2.9.8. 
 
 
 ## `import` of JSON in browser
@@ -87,4 +56,56 @@ Background:
 We need to install it globally (`-g`), since the `/work/node_modules` is read-only and installing to `/node_modules` is not allowed, by Node.js.
 
 >Tried a work-around of making `/work/2` and then we can use `--prefix ..`, but that's kind of over-complicating things.
+
+
+## Safari: not showing errors within a top-level `await`
+
+Version: Safari 15.5
+
+- [ ] tbd. look for an issue to track / create one?
+
+The Safari 15 browser shows NO ERROR IN CONSOLE OUTPUT if an error happens within a top-level `await` block.
+
+Sample (in a JavaScript file):
+
+```
+await (async function () {
+  no_such_thing;
+})();
+```
+
+**Expected**
+
+An error would be logged in console, when this is executed.
+
+Chrome 102 shows this:
+
+```
+Uncaught ReferenceError: no_such_thing is not defined
+at main.js:109:3
+    at main.js:111:3
+```    
+
+**Actual**
+
+No error. The script silently stops executing at the `await`.
+
+**Outcome**
+
+DO NOT use top-level `await` in browser code, for now. 
+
+
+## CSS standard support for nesting
+
+- [https://drafts.csswg.org/css-nesting/](https://drafts.csswg.org/css-nesting/)
+- [https://caniuse.com/?search=css%20nesting](https://caniuse.com/?search=css%20nesting)
+
+Once/if implemented in browsers, we don't need the `lang="scss"` any more.
+
+Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
+
+
+## Vite
+
+- [ ] [Vite: `You are using a wildcard host. Ports might be overridden.` - how to make it go?](https://stackoverflow.com/questions/72649249/vite-you-are-using-a-wildcard-host-ports-might-be-overridden-how-to-make) (StackOverflow)
 

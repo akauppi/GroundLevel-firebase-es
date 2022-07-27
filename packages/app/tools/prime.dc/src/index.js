@@ -3,8 +3,6 @@
 /*
 * Command line entry point.
 */
-//import { program } from 'commander'
-//import { program } from 'commander/esm.mjs'   // this worked (8.1)
 import { Command } from 'commander/esm.mjs'   // according to instructions (Aug 2021; https://www.npmjs.com/package/commander)
 const program = new Command();
 

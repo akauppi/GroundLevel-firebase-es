@@ -1,5 +1,21 @@
 # Changelog
 
+## 13-Jul-22
+
+- "June 2022" release candidate 
+  - [ ] testing on Windows 10 + WSL2
+  - [ ] CI
+
+
+## 5-Jul-22
+
+- Manual deployment done so that Cloud Functions always deployed to the "default GCP resource location" (aka `locationId`). This is what Cloud Firestore also uses.
+- Wrote a section on regions. <!-- DEVS/Firebase regions.md -->
+
+## 30-Jun-22
+
+- Revising the READMEs.
+
 ## 18-Apr-22
 
 - Rearranged the way `packages/app` uses the backend

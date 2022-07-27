@@ -5,10 +5,15 @@
 #   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**' or root 'package.json'
 #
 # GCP Project:
-#   Same GCP project that carries the Firebase deployment.
+#   Production/staging GCP project (deploys to itself).
 #
 # Responsibility:
 #   - test and deploy backend
+#
+# Uses images:
+#   - node:{16|18}-alpine (stock image)
+#   - firebase-emulators  (pushed to Artifact Registry)   The image also contains Firebase CLI we use for deployment
+#   - docker/compose      (stock image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -23,55 +28,115 @@
 #
 steps:
 # Flight check: don't run deploy off general 'ci-builder'
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c',
-    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
+    '[ $PROJECT_ID != ci-builder ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
   ]
 
 # Install
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
+    npm config set update-notifier false &&
+
+    npm --prefix ../.. install &&
     npm install &&
-    npm --prefix packages/backend install
+    
+    cp tmp/firebase.ci.json ./firebase.json &&
+    cp tmp/database.rules.json . &&
+
+    touch firebase-debug.log firestore-debug.log database-debug.log
   ']
+  dir: packages/backend
+    # Note: Realtime Database config is still prepared, though not used.
+  env:
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    #- DATABASE_PORT=6800
+
+  # State:
+  #   - packages/backend/functions                are installed
+  #   - packages/backend/tmp/firebase.ci.json     generated (for DC)
+  #   - packages/backend/tmp/database.rules.json  generated (for DC)
+  #   - packages/backend/firebase.json            copy for easy running of tests
+  #   - packages/backend/database.rules.json      copy for deployment
+  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # Tests (keep similar to 'cloudbuild.backend.yaml')
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'warmed-up']
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-healthy']
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=$_1
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    #- DATABASE_PORT=6800
 
-- name: node:16-alpine
+#DEBUG
+# Enable this e.g. to see Cloud Function loading logs
+#|- name: node:18-alpine
+#|  entrypoint: sh
+#|  args: ['-c', '
+#|    nc -z emul 5002 && echo "5002 is up" &&
+#|    nc -z emul 6767 && echo "6767 is up" &&
+#|
+#|    echo "----" && cat ./firebase-debug.log &&
+#|    echo "----" && cat ./firestore-debug.log
+#|  ']
+#|  dir: packages/backend
+
+- name: node:18-alpine    # no warm-up, enough that we see tests pass (fns tests take ~2..3s on a cold start)
   entrypoint: npm
   args: ['run', 'ci:test']
   dir: packages/backend
   env:
     - EMUL_HOST=emul
+    - WARM_UP_TIMEOUT=9000
 
 # DEPLOY
 #
 - name: $_1
-  entrypoint: firebase
-  args: ['use', '$PROJECT_ID']
+  entrypoint: sh
+  args: ['-c', '
+    firebase use $PROJECT_ID &&
+
+    LOCATION_ID=$$(firebase apps:sdkconfig | grep -E ''^\s+"locationId":\s.+,'' | cut -d ''"'' -f4) &&
+    [ ! -z $$LOCATION_ID ] || ( >&2 echo "ERROR: No ''locationId'' in Firebase app configuration (needs some tweaks)"; false ) && 
+    echo "Using location id: $${LOCATION_ID}" &&
+    
+    cat functions/regional.js | sed -E "s/import\.meta\.env\.LOCATION_ID/''$${LOCATION_ID}''/" > .a &&
+      mv .a functions/regional.js
+  ']
   dir: packages/backend
+    #
+    # Note: The dance of picking up region id, only to inject it into the Cloud Functions source, so that Firebase can
+    #   again pick it up just feels wrong. Is this really the way?
+    #
+    #   Likely the author misunderstood something?? Study how Cloud Functions are deployed, to a region, and try to
+    #   simplify. PR's are welcome #contribute
+    #
+    # tbd. Test that it deploys to 'us-central1'.
+
+  # State:
+  #   - packages/backend/functions/regional.js    modified so that 'import.meta.env.LOCATION_ID' is replaced by the target region
 
 - name: $_1
   entrypoint: firebase
-  args: ['deploy', '--only', 'functions,firestore']
+  args: ['deploy', '--only', 'functions,firestore,database']
   dir: packages/backend
+
+  # DEBUG hint: If not deploying, add '--debug' to the params.
 
 # --- Timeout
 #
-# Cloud Build: 4:14, 6:40
+# Cloud Build: 3:26, 3:04
 #
 timeout: 400s
 
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
 substitutions:
-  #_BUILDER_TAG: 10.6.0-node16-npm8
-  _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
+  _NODE_VER: "18"

@@ -24,7 +24,7 @@
   - Note: '@keyup:esc=...' does not work on a div. Doing it in code.
   -->
   <div id="modal-background" v-if="isOpen" @click.stop="closeDialog">
-    <SetupDialog @closeMe="closeDialog" />
+    <SettingsDialog @closeMe="closeDialog" />
   </div>
 </template>
 
@@ -89,21 +89,21 @@
 
   import { userRef2 as user } from '/@/user'
 
-  import SetupDialog from './SetupDialog.vue'
+  import SettingsDialog from './SettingsDialog.vue'
 
-  const isOpen = ref(false);
+  const isOpen = ref();
 
   function openDialog() {
-    console.log("Shazam!");
     isOpen.value = true;
   }
 
   function closeDialog() {
-    console.log("BAM!");
     isOpen.value = false;
   }
 
   function setup() {
+    isOpen.value = false;
+
     return {
       isOpen,
       openDialog,
@@ -114,7 +114,7 @@
 
   export default {
     name: 'UserProfile',
-    components: { SetupDialog },
+    components: { SettingsDialog },
     setup
   };
 </script>

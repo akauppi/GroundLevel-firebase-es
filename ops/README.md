@@ -1,76 +1,91 @@
 # Operations
 
-This section is best read once you have completed the rest of the repo (backend, app), and you have deployed your web application.
+![](.images/feedback-loop.png)
+
+<!--
+*Figure 1. Development loop*
+-->
+<!-- source (draw.io):
+href="https://app.diagrams.net/#G1QM56IXBlnFXuJvLmKuDH8QiGTHjfPMkS
+-->
+
+Without feedback, you operate in the blind. You don't know, whether you have any users, and not what their experience might be like. Your users have no voice to express their gratitude or wishes.
+
+Closing the development loop (figure above) is mostly a *cultural* issue. If you *want* to learn from and interact with your user base, we'll show you the tools how.
+
+>Before diving into the details, realize that running the loop depends on *automating* as much as you can - this helps save time for the human-to-human interactions, which collecting feedback and reconsidering the next steps inevitably are. It's in these steps - not in development - where your application really gets baked.
+
+<!-- hidden
+>Note: In test-based development, one writes tests first and the implementation after. Meaning the two ovals about them can be blurred, swapped or merged. It does not matter to this level.
+-->
+
+
+If you haven't deployed your application, yet, please consider doing so first and returning here once its first version is "out there". Without a deployed version you are not going to have an audience to talk with.
+
+Release early and often.
+
+---
+
+## Tools
+
+We've selected some tools for you.
+
+||Used for|
+|---|---|
+|[Plausible Analytics](https://plausible.io)|- aggregated user data|
+|[Sentry.io](https://sentry.io/welcome/)|- web vitals<br/>- ...|
+|[Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon)|- web vitals<br/>- collecting custom code traces (duration, counts)|
+|Proxy to [Cloud Logging](https://cloud.google.com/logging)|- centralized logging|
+
+<!-- tbd. counters -->
+
+<!--
+- A/B testing; add mention of the tool(s), once selected (own config + Sentry filters??)
+-->
+
+>Author's impressions.
+>
+>Firebase Performance Monitoring is included because "why not" - we are using Firebase anyhow. However, it doesn't actually blow my mind as to the usefulness of the charts it generates (May 2022).
+>
+>Sentry, on the other hand, is a tool exclusively made for performance and other monitoring. It's awesome. There is some overlap between the two tools (eg. both collect web vitals). Check what use is comfortable for you.
+>
+>Logging is not covered by Sentry (it collects breadcrumbs that are similar to logging, but those only get sent to the server in case they lead to an error). 
+>
+>There is a use case for centralized logging, even for web applications. The author is not aware of a great browser-to-logging-service product, so the solution is to route logs via Cloud Functions in the Firebase backend.
+>
+>*See [Sentry vs. Logging](https://sentry.io/vs/logging/) for a great (and short) discussion on the relationship of the two.*
 
 
 ## Requirements
 
-- [Sentry.io](https://sentry.io/welcome/) account
+- A [Sentry account](https://sentry.io/welcome/)
+   - free developer tier should be enough
+   - Go through [Setting up Sentry](./Setting up Sentry.md) before continuing.
 
-   A [free developer tier](https://sentry.io/pricing/) should be enough.
-
-
-## Sentry
-
-[Sentry](https://sentry.io/welcome/) is a fun, high quality and affordable way to track how your app (and its users) is doing.
-
-Let's let it present itself:
-
->![](.images/sentry-welcome.png)
-
-We use Sentry for front-end monitoring, but - as the description says - it can be used for backend tracking, as well.
+- A [Plausible account](https://plausible.io) (optional)
+   - 30 day trial; no free tier
+   - Go through [Setting up Plausible](./Setting up Plausible.md)
 
 
-### Creating a project
+## Next steps
 
-Name the project as you like[^1]. You can collect events from multiple stages (`dev[:local]`, `dev:online`, `staging`, ...) under the same Sentry project. 
+- [Operational monitoring](./1-ops.md)
+   - [User analytics](./1.1-analytics.md)
+   - [Error monitoring](./1.2-errors.md)
+   - [Performance monitoring](./1.3-perf.md)
+   - [Logging](./1.4-logging.md)
 
-Once you have the project, visit `Settings` > `Projects` > (project) > `Client Keys (DSN)` and pick up the Data Source Name (DSN) <sub>[more info](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)</sub>. It can look like:
+- <font color=gray>A/B testing
 
-```
-https://66b7...127@o39..58.ingest.sentry.io/52...04
-```
+   tbd. Planning to add material on A/B testing. Likely using configuration and Sentry tagging (not introducing a separate tool).
+   </font>
 
-This is an identifier for your client to be able to talk to the right Sentry project.
+- <font color=gray>Meet your users
 
->Note. The DSN might not be forever. You can re-generate more DNS's if needed, and there may be more than one pointing to your Sentry project, at any one time.
-
-[^1]: The author prefers attaching a creation name to such id's, eg. `groundlevel-110522`.
-
-
-### Using Sentry at development
-
-Just add `SENTRY_DNS` env.var to the launch command:
-
-Within `packages/app`:
-
-```
-$ SENTRY_DNS=... npm run dev
-```
-
-Notice in the browser console:
-
-![](.images/sentry-in-dev.png)
-
-And in the Sentry dashboard:
-
->*tbd. Do something that shows up here...
+   tbd. Planning to add material on setting up and using [Discord](https://discord.com).
+   </font>
 
 ---
 
-You can do exactly the same for `npm run dev:online`.
-
-The environments are selectable in the Sentry dashboard:
-
->![](.images/sentry-choose-env.png)
-
-
-### Using Sentry at production
-
-
-
-
-### What do we collect???
-
-
+<div align=right><a href="1-ops.md">Operational monitoring</a> ≫</div>
 

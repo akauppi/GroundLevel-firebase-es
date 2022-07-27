@@ -8,6 +8,8 @@
 *
 * We do:
 *   - Set up ops monitoring
+*   - Set up authentication UI
+*   - Create the app, and its router
 */
 import { createApp } from 'vue'
 
@@ -20,32 +22,87 @@ import { appTitle } from './config.js'
 import { router } from './router.js'
 
 // Ops monitoring
-import * as Sentry from "@sentry/browser";
-import { BrowserTracing } from "@sentry/tracing";   // after 'import * as Sentry'
+import * as Sentry from "@sentry/browser"
+import { BrowserTracing } from "@sentry/tracing"    // after 'import * as Sentry'
+
+import Plausible from 'plausible-tracker'
 
 import App from '/@App/index.vue'
 
 import './common.css'
+
+import { startupTrace } from "/@/traces"
 
 document.title = appTitle;
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 const DEV = import.meta.env.MODE !== 'production';
 
-// Build values:
-//
-// - 'VERSION' gives the version
-//
-const VERSION = "0.0.0";    // both dev and production
+const SENTRY_DSN= import.meta.env.VITE_SENTRY_DSN;   // undefined | string
+const SENTRY_SAMPLE_RATE= import.meta.env.VITE_SENTRY_SAMPLE_RATE;   // undefined (dev) | 0.0..1.0 (CI production builds)
 
-const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
+const STAGE = import.meta.env.VITE_STAGE;   // undefined (dev) | "staging"|... (production build)
+const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev) | "<git commit checksum>" (CI build) | "0" (local production build)
 
-(_ => {    // () => ()
+const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
+const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;
+
+if (!DEV && !PLAUSIBLE_ENABLED) {   // tbd. such warning in build script (console) would be a better place.
+  //console.info("Plausible Analytics not enabled; add 'PLAUSIBLE_ENABLED=true|false' to mitigate this warning.")
+}
+
+async function init() {    // () => Promise of ()
+
+  // Initialize Plausible Analytics
+  //
+  if (!LOCAL) {
+    let pl;
+
+    if (DEV && PLAUSIBLE_DEV_DOMAIN) {    // dev:online
+      pl = Plausible({
+        domain: PLAUSIBLE_DEV_DOMAIN,   // e.g. "dev-online.{your-id}"
+        trackLocalhost: true
+      });
+
+      console.info("Tracking access to Plausible Analytics:", PLAUSIBLE_DEV_DOMAIN);
+
+    } else if (!DEV && PLAUSIBLE_ENABLED) {  // production stages
+      pl = Plausible({
+        // default domain ('location.hostname')
+      });
+    }
+
+    if (pl) {
+      const {
+        trackEvent,             // "Tracks a custom event. Use it to track your defined goals by providing the goal's name as eventName."
+        //trackPageview,
+        enableAutoPageviews,            // "Tracks the current page and all further pages automatically."
+        //enableAutoOutboundTracking    // "Tracks all outbound link clicks automatically"
+      } = pl;
+
+      enableAutoPageviews();
+
+      // 'trackEvent' calling prototype is pretty complex, but in practice boils down to just providing a name that's
+      // registered as a Goal in the Plausible dashboard. One cannot post arbitrary extra data (which makes sense,
+      // since Plausible is about aggregation, not logging..).
+      //
+      //  <<
+      //    trackEvent( evName: string, EventOptions?, PlausibleOptions? )
+      //  <<
+      //
+      window.plausible = { trackEvent };    // for 'events.js'
+    }
+  }
+
+  // Initialize Firebase Performance monitoring
+
+  const tr = startupTrace();
+
   // Initialize Sentry
 
-  if (SENTRY_DNS) {
+  if (SENTRY_DSN) {
     Sentry.init({
-      dsn: SENTRY_DNS,
+      dsn: SENTRY_DSN,
       integrations: [new BrowserTracing(/*{
         tracingOrigins: [ "localhost" /_*, "your.site.com*_/, /^\// ]     // default: ["localhost", /^\//]
       }*/)],
@@ -57,22 +114,20 @@ const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
       maxBreadCrumbs: 50,	  // default: 100
       debug: DEV,
 
-      //release: "...",   // tbd. from CI
+      release: RELEASE,
 
-      //sampleRate: 1.0,    // Sampling for non-traces (1.0 = default)
+      sampleRate: SENTRY_SAMPLE_RATE ?? 1.0,    // Sampling for non-traces (1.0 = default)
 
-      environment: import.meta.env.MODE   // "production" | "dev-local" | "dev-online"
+      environment: STAGE || import.meta.env.MODE   // "staging" | ... | "dev-local" | "dev-online"
     });
 
     // tbd. Is there a way to know (from Sentry), whether initialization succeeded (i.e. did it gain a connection to
-    //    its backend)?   i.e. don't say "initialized" if the DNS was rejected.
+    //    its backend)?   i.e. don't say "initialized" if the DSN was rejected.
 
     console.debug("Sentry initialized");
-  } else {
-    console.debug("Sentry not configured; launch with 'SENTRY_DNS' to use it.");
+  } else if (DEV) {
+    console.debug("Sentry not configured; build with 'SENTRY_DSN' env.var. defined to use it.");
   }
-
-  //const tr = appInitTrack.start();
 
   /*** disabled / not needed?
   // Set an error handler.
@@ -94,8 +149,12 @@ const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
   // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
   //    the requested persistence (or can we change the persistence once initialized?). #rework
 
+  const aside_t0 = performance.now();
+
   /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
     //tr.lap('aside-keys initialization');    // 499..530ms
+
+    tr.set("aside-keys initialization", performance.now()-aside_t0 );
 
   }).catch(err => {
     console.error("'Aside-keys' did not initialize:", err);   // never seen
@@ -104,15 +163,18 @@ const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
 
   // Initialize Vue App
   //
+  const vue_t0 = performance.now();
   const app = createApp(App);
 
-  //tr.lap('Vue initialization');
+  tr.set("Vue.js initialization", performance.now()-vue_t0);
 
+  const router_t0 = performance.now();
   app.use(router);    // needed for any use of the 'router'
 
   // Let's be curious and see whether there are ever errors from here:
   /*await*/ router.isReady().then( _ => {
-    //tr.lap('Router initialization');
+    tr.set("Router initialization", performance.now()-router_t0);
+
   }).catch( err => {
     console.error("Router did not initialize:", err);   // never seen
     throw err;
@@ -133,15 +195,16 @@ const SENTRY_DNS= import.meta.env.VITE_SENTRY_DNS;   // undefined | string
   // Sample of adding a meta data to the measurement (not sure if we need that)
   //tr.setAttribute('appId', app.id);
 
-  //tr.end();
+  tr.end();
 
   //central.info("App is mounted.");
-})();
+}
+
+/*await*/ init();   // free-running tail
 
 export {
   //initializedProm,
-  LOCAL,
-  VERSION
+  LOCAL
 }
 
 // DID NOT WORK with @exp API ("missing or ... permissions").

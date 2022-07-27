@@ -1,11 +1,12 @@
 # For all the subpackages
 /**/node_modules/
 
-# Firebase hosting caches
-#/.firebase/
+# Comment out if you wish to share the access values via version control.
+/firebase.*.js
 
-# Note: Depending on your team's work habits, you might want to keep it in version control.
-/**/.firebaserc
+# Temporary
+#/first/.captured.sdkconfig
+/first/.state/
 
-# Remove this line if you wish to keep the access values in version control.
-/firebase.staging.js
+# IDEs (these could be in a global exclude)
+/.vscode

@@ -159,3 +159,27 @@ Instead:
 
 This also means that the front end can be hosted on *any* service provider, not just Firebase Hosting.
 
+
+## Docker Compose: to `extend` or not?
+
+At one point, this repo uses multiple `-f` flags (in `package.json`) to tailor Docker Compose definitions from a base and the dev/online/test/prod differences. This works, but is clumsy.
+
+For one, one cannot rename a service (from the one it builds upon), so they cannot have descriptive names.
+
+It turns out, `extends` is a thing in Docker Compose (non-versioned, DD 4.8.2).
+
+However, it's not really documented and there's a [long thread](https://github.com/moby/moby/issues/31101) (2017-) about the need, or not, of `extend`.
+
+Can we trust weight on it?
+
+1. Let's try!
+2. If "they" (DC authors) take it away, let's move to templating outside of DC.
+
+   Can for example have a Node.js script producing the right YAML, from parameters.
+
+<!--
+<font size=8>🤨</font>
+-->
+
+>Maybe this means it's documented: [Compose Spec > `extends`](https://github.com/compose-spec/compose-spec/blob/master/spec.md#extends)
+>

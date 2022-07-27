@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
 * tools/gen-vite-env-online.js
 *
@@ -17,25 +15,29 @@
 */
 const fn = '../firebase.js';
 
-// tbd. Use top-level-await (Node.js 14.8+ and we have 16.x, guaranteed).
+const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
-/*await*/ import(fn).then( (mod) => {
-  const { projectId, appId, apiKey, authDomain } = mod.default;
-  (apiKey && appId && authDomain && projectId) || fail(`Some values missing from: ${fn.replace("../","") }`);
+const { projectId, appId, apiKey, authDomain, locationId, databaseURL } = await import(fn).then(mod => mod.default)
+  .catch(err => {
+    process.stderr.write(`ERROR: ${err.message}\n\n`);
+    process.exit(2);
+  });
 
-  const out = `# Generated based on '${fn}'.
+(apiKey && appId && authDomain && projectId && locationId && databaseURL)
+  || fail(`Some values missing from: ${fn.replace("../","") }`);
+
+const out = `# Generated based on '${fn}'.
 #
 VITE_API_KEY=${apiKey}
 VITE_APP_ID=${appId}
 VITE_AUTH_DOMAIN=${authDomain}
 VITE_PROJECT_ID=${projectId}
+VITE_LOCATION_ID=${locationId}
+VITE_DATABASE_URL=${databaseURL}${
+  SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
+}
 `;
 
-  process.stdout.write(out);
-
-}).catch(err => {
-  process.stderr.write(`ERROR: ${err.message}\n\n`);
-  process.exit(2);
-});
+process.stdout.write(out);
 
 function fail(msg) { throw new Error(msg); }

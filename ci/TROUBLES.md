@@ -1,4 +1,4 @@
-# Troubles hooting
+# Troubles
 
 
 ## Cannot find `package.json` of the root
@@ -33,3 +33,14 @@ API [secretmanager.googleapis.com] not enabled on project
 - ..or you haven't configured secrets for the deployment project.
 
    - See [Working with GCP secrets](Working with GCP Secrets.md) for guidance.
+
+
+## Debugging Cloud Function deployment failures
+
+If a deploy fails, and the local CLI does not give proper details, try:
+
+Firebase Console > project > `Functions` > `Logs`
+
+>![](.images/firebase-console-functions-logs.png)
+
+This was enough detail to fix it.

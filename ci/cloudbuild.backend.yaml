@@ -6,44 +6,71 @@
 #
 # Cloud Build project:
 #   - Common CI builder (not project specific; no deploys!)
-#     https://console.cloud.google.com/cloud-build/triggers?project=ci-builder
 #
 # Uses images:
-#   - node:16-alpine
-#   - firebase-ci-builder   (pushed to Container Registry)
-#   - docker/compose
+#   - node:{16|18}-alpine (stock image)
+#   - firebase-emulators  (pushed to Artifact Registry)
+#   - docker/compose      (stock image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
-#   - env.variables (just some):
+#   - env.variables:
 #     PWD=/workspace
 #     HOME=/builder/home
+#     BUILDER_OUTPUT=/builder/outputs
 #
 # Note:
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
 #   to regular users (of other images). This is normally not a concern.
 #
+#   tbd. Check whether the above holds also for 'node:18'. Does the above still hold? #contribute
+#
 
 steps:
 # Install
 #
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
+    [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+
+    npm config set update-notifier false &&
+
     npm install &&
-    npm --prefix packages/backend install
+    npm --prefix packages/backend install &&
+
+    (cd packages/backend && 
+      cp tmp/firebase.ci.json ./firebase.json &&
+      touch firebase-debug.log firestore-debug.log database-debug.log
+    )
   ']
+  env:
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    #- DATABASE_PORT=6800
+
+  # State:
+  #   - packages/backend/functions/node_modules   have been populated
+  #   - packages/backend/tmp/firebase.ci.json     has been created
+  #   - packages/backend/firebase.json            copy for easy running of tests
+  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # DEBUG:
 #
 # USE THIS TO DEBUG CASES where the emulators don't start (or to see warm-up timings).
 #
-#- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'up', 'warm-up']
-#  dir: packages/backend
-#  env:
-#    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+# Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
+#
+#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
+#|  #args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-up']
+#|  dir: packages/backend
+#|  env:
+#|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+#|    - FIRESTORE_PORT=6767
+#|    - FUNCTIONS_PORT=5002
+#|    #- DATABASE_PORT=6800
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -59,22 +86,49 @@ steps:
 #
 # --- --- --- 📣⚠️🪤🚨
 
-# Launch emul/warm-up in DC, keeps them running in the background.
+# Launch emul in DC, keeps them running in the background.
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', '--rm', 'warmed-up']
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-healthy']
   dir: packages/backend
   env:
-    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    #- DATABASE_PORT=6800
 
-- name: node:16-alpine
+# Observed test times:
+#
+# |              | time
+# | ------------ | -----
+# | fns (cold)   | 2894, 3306, 2946 ms
+# | fns (warm)   | 422, 577 ms
+# | rules (cold) | 631, 705 ms    (already < 2000ms = good)
+#
+# Conclusion: warm-up affects 'fns' tests, but whether we want to run them in CI is a matter of choice.
+#   Doing so allows to check that actual tests (when warmed up) do execute within 2000ms.
+#   On the other side, it delays the overall CI runs a bit.
+#
+  # Note: If you disable the warm-up (reduces CI execution times by <not measured>), then enable 'WARM_UP_TIMEOUT' for
+  #       the actual tests.
+  #
+- name: node:18-alpine
+  entrypoint: npm
+  args: ['run', 'ci:warm-up']
+  dir: packages/backend
+  env:
+    - EMUL_HOST=emul
+    - WARM_UP_TIMEOUT=8000
+
+- name: node:18-alpine
   entrypoint: npm
   args: ['run', 'ci:test']
   dir: packages/backend
   env:
     - EMUL_HOST=emul
+    #- WARM_UP_TIMEOUT=8000
 
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/backend
@@ -82,16 +136,15 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - 2:17, 2:15, 2:46
+#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11
+#
+# Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #
 timeout: 300s
 
-# (Old results for reference, before 10-Sep-21; 'node:16' image)
-# Cloud Build
-#   - native, no lint:          1:51, 1:45  # (old results)
-#   - DC/Docker, with lint:     3:13
-#   - DC/native, with lint:     2:35
-
 substitutions:
-  _BUILDER_TAG: 10.6.0-node16-npm8
+  _BUILDER_TAG: 11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
+  _NODE_VER: "18"
+  _AR_FOLDER: builders
+    # You may use any name, or create such a folder in AR.

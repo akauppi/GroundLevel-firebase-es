@@ -1,19 +1,34 @@
 # Track (backend)
 
-## 🍒 (Jest: native ES module support)
-
-- [Support ESM versions of all pluggable modules](https://github.com/facebook/jest/issues/11167)
-
-  - [ ] `resolver` still unchecked. Why? Jest 28 needs no custom resolver.
-
-
-<!-- Q: Is this still a thing?
+<!--
 ## `@google-cloud/logging` ESM support
+
+*Q: Is this still a thing?*
 
 - [es6 import not able to import Logging](https://github.com/googleapis/nodejs-logging/issues/559)
 
 Note: We won't need it, until `firebase-functions` runs with ESM. And even then, node allows using `require` in `type: "module"` packages.
 -->
+
+## Node 18 support for `firebase-functions`
+
+- [ ] When available, pump up `functions/package.json`.
+
+	<!-- No ticket, as of 6-Jun-22: https://github.com/firebase/firebase-functions/issues?q=is%3Aissue+is%3Aopen+18 -->
+
+   We already run it with Node 18 in DC.
+
+
+## Cloud Functions v2: maturity
+
+- [ ] [Limitations ...](https://firebase.google.com/docs/functions/beta#limitations_during_public_preview) (Firebase docs)
+
+Change `functions/*.js` to use `v2` only once:
+
+- all regions available for Cloud Firestore (see `../../DEVS/Firebase regions.md`) are supported
+  - e.g. `europe-west2` not so
+- Cloud Firestore is supported as triggers
+
 
 ## Pre-heating the Cloud Functions
 
@@ -29,3 +44,28 @@ Closed, but the issue remains.
 This might not apply any more; we are using `type: "module"` in the functions. Once we really log to Google logs, mention that this might no longer be an issue?
 -->
 
+## Impersonation with `firebase-admin` against Realtime Database Emulator does not work
+
+- [ ] [RTDB emulator doesn't work properly with databaseAuthVariableOverride](https://github.com/firebase/firebase-tools/issues/2554)
+
+It seems like something that's simply omitted. The Firebase approach seems to be to do impersonation in the client SDK. 
+
+This approach is ..strange.. since impersonation use case is in tests that can use `firebase-admin`.
+
+- [ ] [Documentation on using impersonation with Realtime Database Emulator](https://github.com/firebase/firebase-admin-node/issues/1777)
+
+<!-- hidden
+
+>Firebase [docs](https://firebase.google.com/docs/database/admin/start?authuser=0#admin-sdk-setup) say:
+>>If you are interested in using the Node.js SDK as a client for end-user access (for example, in a Node.js desktop or IoT application), as opposed to admin access from a privileged environment (like a server), you should instead follow the instructions for setting up the client JavaScript SDK.
+-->
+
+Also:
+
+- ["How to connect Firebase Admin to Emulator Auth"](https://stackoverflow.com/questions/71268856/how-to-connect-firebase-admin-to-emulator-auth) (SO)
+
+- [Add the Firebase Admin SDK to your server](https://firebase.google.com/docs/admin/setup?authuser=0) (Firebase docs)
+
+   No mention of emulators. Could fit nicely, there... (it does mention "When testing the Admin SDK locally").
+   
+   

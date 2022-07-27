@@ -8,119 +8,168 @@
 #   - Common CI builder (not project specific; no deploys!)
 #
 # Uses images:
-#   - node:16-alpine
-#   - firebase-ci-builder   (pushed to Container Registry; used via Docker Compose)
-#   - docker/compose
+#   - node:{16|18}-alpine   (stock image)
+#   - firebase-emulators    (pushed to Artifact Registry)
+#   - docker/compose        (stock image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
 #
-#   - env.variables (just some):
+#   - env.variables:
 #     PWD=/workspace
 #     HOME=/builder/home
+#     BUILDER_OUTPUT=/builder/outputs
 #
 # Note:
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
 #   to regular users (of other images). This is normally not a concern.
 
+# tbd. Remove use of 'DATABASE_PORT' - we don't need it, for testing.
+
 steps:
-
-# Versions (23-May-22):
-#   - default is "19.03.9, build 9d988398e7"
-#   - available: "20.10.14, build a224086"    <-- note: tag 20.10.13 reports this
-#
-#|- name: gcr.io/cloud-builders/docker:20.10.13
-#|  args: ['--version']
-#|- name: gcr.io/cloud-builders/docker:20.10.13
-#|  entrypoint: "docker-compose"
-#|  args: ['--help']
-
 # Install
 #
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
+    [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+
     npm config set update-notifier false &&
-    
-    echo ''export default {}'' > firebase.fake.js &&
-    
+
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/app install --no-optional
+    npm --prefix packages/app install --omit=optional &&
+    
+    (cd packages/backend && 
+      touch firebase-debug.log firestore-debug.log database-debug.log
+    )
   ']
-    # Note: '--no-optional' can make a slight speedup, not installing 'vite', 'rollup' etc. (that then get immediately
-    #   removed). However, have not measured.
+    # Note: '--omit=optional' does not matter, in practise (the idea was to not pull in Vite).
+    #
+    #   with '--omit=optional':   289 packages added, timing: 18.9, 17.7, 16.9s
+    #   without:                  292 packages added, timing: 18.9 s
 
-  env: ['CYPRESS_INSTALL_BINARY=0']
+  env:
+    - CYPRESS_INSTALL_BINARY=0    # avoid downloading a GUI
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800    # tbd. not sure we use it?
+    - AUTH_PORT=9100
+
+  # State:
+  #   - packages/backend/functions/node_modules   have been populated
+  #   - packages/backend/tmp/firebase.json        has been created
+  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
+
+# DEBUG:
+#
+# USE THIS TO DEBUG CASES where the emulators don't start.
+#
+# Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
+#
+#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#|  args: ['-f', 'docker-compose.app.ci.yml', 'up', 'emul-for-app']
+#|  dir: packages/backend
+#|  env:
+#|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+#|    - FIRESTORE_PORT=6767
+#|    - FUNCTIONS_PORT=5002
+#|    #- DATABASE_PORT=6800
+#|    - AUTH_PORT=9100
 
 # --- App
 #
 # Launch emulators and Vite; keeps them running in the background.
 #
-# Note: No priming of data & users is needed. Cypress tests carry their own (we do 'npm test', not dev).
+# Note: No priming of data & users is needed (that's for "dev", we only do "npm test").
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
+  args: ['-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
   dir: packages/backend
   env:
-    - CI_BUILDER_IMAGE=gcr.io/${PROJECT_ID}/firebase-ci-builder:${_BUILDER_TAG}
+    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800
+    - AUTH_PORT=9100
 
+# DEBUG; TERMINAL. Enable if Vite does not launch
+#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#|  args: ['-f', 'docker-compose.ci.yml', 'up', 'vite-ci']
+#|  dir: packages/app
+#|  env:
+#|    - PORT=3002
+#|    - FIRESTORE_PORT=6767
+#|    - FUNCTIONS_PORT=5002
+#|    - DATABASE_PORT=6800
+#|    - AUTH_PORT=9100
+
+# Launches Vite
+#
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-dev-launched']
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'vite-ci-launched']
   dir: packages/app
   env:
     - PORT=3002
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800
+    - AUTH_PORT=9100
 
-# Extra step (DEBUG): make sure 'http://vite:3002' is up
+  # State:
+  #   - 'emul-for-app' is running (emulators)
+  #   - 'vite:3002' is running, and connected to the above backend
+
+- name: cypress/included:${_CYPRESS_TAG}
+  args: ['run', '--headless']
+  dir: packages/app
+  env:
+    - CYPRESS_baseUrl=http://vite:3002
+    - CYPRESS_defaultCommandTimeout=20000
+    #
+    # Tests durations:
+    #   1: 10673, 9478, 9270 ms
+    #   2:  4224, 4920, 4695 ms
+
+- name: node:${_NODE_VER}-alpine
+  entrypoint: sh
+  args: ['-c', '
+    echo "export default {}" > fake.config.js
+  ']
+  dir: packages/app
+
+  # State:
+  #   - 'fake.config.js' contains a dummy
+
+# Check that a production build passes.
 #
-#|- name: node:16-alpine
-#|  entrypoint: sh
-#|  args: ['-c', '
-#|    apk add curl &&
-#|    curl -v http://vite:3002/@fs/work/src/app.js
-#|  ']
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.tools.ci.yml', 'run', 'build']
+  dir: packages/app
+  env:
+    - RELEASE=
+    #- SENTRY_DSN     # not defined
+    - FIREBASE_SERVER_CONFIG_JS=./fake.config.js
 
-# BUG: THIS FAILS WITH:   tbd.
-# <<
-#   Failed to fetch dynamically imported module: http://vite:3002/@fs/work/src/app.js
-# <<
-#     WHY???
-#|- name: cypress/included:${_CYPRESS_TAG}
-#|  args: ['run', '--headless']
-#|  dir: packages/app
-#|  env:
-#|    - CYPRESS_baseUrl=http://vite:3002
-#|    - CYPRESS_defaultCommandTimeout=16000
-#|    #
-#|    # Tests durations:
-#|    #   1: 7541, 7682, 8565 ms
-#|    #   2: 3980, 4289, 3804 ms
-
-- name: node:16-alpine
+- name: node:${_NODE_VER}-alpine
   entrypoint: npm
   args: ['run', 'lint']
   dir: packages/app
 
-# Just check that it builds. Can have a fake Firebase config.
-#
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'build']
-  dir: packages/app
-  env:
-    - ENV=fake
-
 # --- Timeout
 #
-# Cloud Build:
-#   - with tests, and build: 4:54
+# Cloud Build: 5:36, 5:10
 #
-#   - with tests (no build): 5:54 (old)
+# OLD:
+#   - 5:29, 5:31
 #
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 10.6.0-node16-npm8
+  _BUILDER_TAG: 11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
-#|  _CYPRESS_TAG: 9.6.0
+  _NODE_VER: "18"
+  _CYPRESS_TAG: 10.3.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
+  _AR_FOLDER: builders

@@ -3,30 +3,21 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">= 16 < 16.6 || >= 16.6.1"
-  },
-  "scripts": {
-    "first": "first/deploy.sh",
-    "--": "",
-    "preinstall": "[ $BUILDER_OUTPUT ] || sh/npm-version-check.sh"
+    "node": "18"
   },
   "devDependencies": {
-    "eslint": "^8.15.0",
-    "eslint-plugin-node": "^11.1.0"
+    "eslint": "^8.20.0",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "vue-eslint-parser": "^9.0.3"
   },
   "//": {
     "": [
       "This serves for pulling tools used commonly in the subpackages, so that the version choice is in one place."
     ],
     "engines.node": [
-      "Demanding it here provides the developer instant feedback if the Node.js version is not suitable.",
-      "16.6.0 has an issue with Jest that's fixed in 16.6.1."
-    ],
-    "scripts": {
-      "$BUILDER_OUTPUT": [
-        "Indication of Cloud Build - defined both in automated and manually triggered builds.",
-        "Avoid '[[' (bash) since 'node:16-alpine' image (CI) won't have it."
-      ]
-    }
+      "Demanding it here provides the developer instant feedback if the Node.js version is not suitable."
+    ]
   }
 }

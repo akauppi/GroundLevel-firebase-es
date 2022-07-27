@@ -1,36 +1,24 @@
 # Known issues
 
 
-<!-- REMOVE Not seen, lately (15-May-22)
-## `npm outdated`: "Cannot set property 'peer' of null"
+## Cannot see a thing
 
-Happens on Mac, due to the `esbuild` package needing a re-install on the DC side.
+If, after `npm run dev`, there's nothing in the browser and the console shows:
 
-### Steps
+`Unable to load module .. app.js`
 
-- `npm test` (from clean, so DC gets run)
-- `npm outdated` (as any other npm command not wrapped for in `package.json`)
+..or something, nothing's necessarily wrong.
 
-   ```
-   $ npm outdated
-   npm ERR! Cannot set property 'peer' of null
+**Remedy #1**
 
-   npm ERR! A complete log of this run can be found in:
-   npm ERR!     /Users/asko/.npm/_logs/2021-09-25T11_56_51_951Z-debug.log
-   ```
+Clear cache, refresh the browser.
 
-### Cure
+**Remedy #2**
 
-```
-$ npm run _macNudgeEsbuild 
-```
-
-### Better cure?
-
-We can try to map a separate folder (eg. `node_modules/esbuild.linux`) for the DC, copying the original contents there before launching DC.
--->
+Try with multiple browsers. E.g. Chrome may give more debugging information than Safari.
 
 
+<!-- hidden; haven't seen lately
 ## First `npm test` times out
 
 ```
@@ -48,33 +36,57 @@ This happens on the *first* test run (when DC containers are created). Reason is
 
 Docker Desktop for Mac 4.0.1
 
-<!-- tbd. Do we still get it? DD 4.8 -->
-
 **Work-around:**
 
 Run the tests a second time.
 
 This does not hinder CI runs (which is fortunate).
+-->
 
 
-## `ECONNRESET` failure
+## Priming fails with: `socket hang up. Error code: ECONNRESET`
+
+<!-- *Still having this, on Windows 10 + WSL (13-Jul-2022)* 
+
+```
+$ npm test
+
+> test
+> npm run -s _checkNoEsbuild && npm run -s _touchDevLocalEnv && npm run -s _emulPrimed && npm run -s _test1 && npm run -s _test2
+
+make: Nothing to be done for 'refresh-emul-for-app'.
+[+] Running 2/2
+ ⠿ Network backend_default           Created                                                                                                                                                                      0.1s
+ ⠿ Container backend-emul-for-app-1  Created                                                                                                                                                                      0.3s
+[+] Running 1/1
+ ⠿ Container backend-emul-for-app-1  Started                                                                                                                                                                      0.9s
+Firebase Emulators for the web app are running.
+
+make: Nothing to be done for 'refresh-prime'.
+[+] Running 1/1
+ ⠿ Network app_default  Created                                                                                                                                                                                   0.1s
+/work/node_modules/firebase-admin/lib/utils/api-request.js:178
+            throw new error_1.FirebaseAppError(error_1.AppErrorCodes.NETWORK_ERROR, `Error while making request: ${err.message}. Error code: ${err.code}`);
+                  ^
+
+FirebaseAppError: Error while making request: socket hang up. Error code: ECONNRESET
+    at /work/node_modules/firebase-admin/lib/utils/api-request.js:178:19
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async wipeUsers (file:///work/src/createUsers/index.js:50:15)
+    at async Promise.all (index 1)
+    at async main (file:///work/src/main.js:24:3) {
+  errorInfo: {
+    code: 'app/network-error',
+    message: 'Error while making request: socket hang up. Error code: ECONNRESET'
+  },
+  codePrefix: 'app'
+}
+```
+-->
 
 ```
 $ npm run dev
-
-> dev
-> npm run dev:local
-
-
-> dev:local
-> npm run -s _checkNoEsBuild && npm run -s _emulPrimed && npm run -s _genEnvLocal && docker compose down vite-local && docker compose run --rm --service-ports vite-local
-
-WARN[0000] Found orphan containers ([backend-warm-up-1 backend-emul-1]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up. 
-[+] Running 1/1
- ⠿ Container backend-emul-for-app-1  Created                                                                                                                                                                                                             0.1s
-[+] Running 2/2
- ⠿ Container backend-emul-for-app-1  Started                                                                                                                                                                                                             1.0s
- ⠿ Container backend-emul-1          Healthy                                                                                                                                                                                                             0.9s
+...
 Firebase Emulators for the web app are running.
 
 /work/node_modules/firebase-admin/lib/utils/error.js:44
@@ -100,8 +112,17 @@ FirebaseAppError: Error while making request: socket hang up. Error code: ECONNR
 Node.js v18.1.0
 ```
 
+Can also happen with `npm test`.
+
 If you encounter this, just retry `npm run dev`.
 
 The reason is unknown. 
 
 - [ ] Make a GitHub Issue and try to resolve.
+
+
+## Steps to reproduce
+
+- Delete all containers
+- `npm test`
+

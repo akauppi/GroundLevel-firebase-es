@@ -2,17 +2,13 @@
 - src/App/index.vue
 -
 - The frame of the application - same for all pages
--
-- Reference:
--   - "Error tracking with Vue.js" (blog, Aug 2018)
--     -> https://rollbar.com/blog/error-tracking-vue-js/
 -->
 <template>
   <header>
     <AppLogo />
     <div id="mode" v-bind:class="{ devLocal: LOCAL && !TESTING, devTest: TESTING }">
     </div>
-    <UserProfile v-if="user" />    <!-- 'user' is Ref of (undefined | null | { ..Firebase user object }) -->
+    <UserProfile v-if="user" />    <!-- 'user' is Ref of (undefined | null | { ..user object }) -->
   </header>
   <main>
     <router-view />
@@ -95,7 +91,7 @@
 </style>
 
 <script>
-  import { onMounted, getCurrentInstance } from 'vue'
+  import { onMounted } from 'vue'
 
   import AppLogo from './AppLogo.vue'
   import UserProfile from './UserProfile/index.vue'
@@ -106,42 +102,13 @@
   const LOCAL = import.meta.env.MODE === 'dev_local';
   const TESTING = LOCAL && window.Cypress;
 
-  /*** disabled
-  /*
-  * Vue error handler
-  *
-  * Catches errors "during component rendering" (well, and watch callbacks, lifecycle hooks, component event handlers)
-  * - but still only Vue specific code.
-  *
-  *   err:    Error     // eg. "TypeError: Cannot read property ..."
-  *   vm:     Proxy     "component in which error occurred"
-  *   info:   "setup function" |...   // "Vue specific error information such as lifecycle hooks, events etc."
-  *_/
-  const errorHandler = (err, vm, info) => {   // (Error, Proxy, string) => ()
-    console.debug("In Vue error handler:", info);
-    throw err;
-  } ***/
-
   function setup() {
     onMounted(() => {
       console.log("Houston, App is mounted");
     });
 
-    const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
-
-    /*** disabled
-    // Activate the error handler.
-    //
-    // This is called within Vue lifecycle. If we don't tap into it, Vue gives one or two warnings about
-    // "Unhandled error during..." and eventually the error is passed to (console / central catch in ops).
-    //
-    // tbd. It is unclear, whether catching the error here gives added value. (Vue errors were NOT caught by ops,
-    //    which is serious!!!)
-    //
-    if (errorHandler) {
-      assert (appConfig.errorHandler === undefined);    // we're not overwriting anything
-      appConfig.errorHandler = errorHandler;
-    }***/
+    // tbd. just remove this? :?
+    //const appConfig = getCurrentInstance().appContext.config;   // must be within 'setup()'
 
     return {
       user: userRef2,
@@ -151,7 +118,7 @@
   }
 
   export default {
-    name: 'App',     // helps in debugging
+    name: 'App',     // helps in debugging (they say..)
     components: {
       AppLogo, UserProfile, AppFooter
     },

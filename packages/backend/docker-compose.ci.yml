@@ -1,25 +1,74 @@
 #
-# docker-compose.ci.yml
+# backend/docker-compose.ci.yml
 #
-# An override for using 'docker-compose.yml' in Cloud Build
+# Takes the role of both 'docker-compose.base.yml' and 'docker-compose.yml', for CI.
+# Works as a basis for 'docker-compose.app.ci.yml'.
 #
-# Intentions:
-#   Allow the 'docker-compose.yml' file be used, from Cloud Build scripts,
-#   so that the services are available to the following steps (using 'cloudbuild' network).
+# Reasons:
+#   - in CI, we don't need separate emulator instances for backend and front-end (same can handle both)
+#   - in CI, we always run on Linux, so don't need the 'tmp/functions-node_modules' tricks, done in development (simpler)
+#   - !! separating development and CI causes some overlap, but also frees the implementations from breaking each other!!
+#   - uses a pre-built image instead of pointing to '../dc/', as development does.
 #
-# References:
-#   - Share Compose configurations between files and projects (Docker Compose docs)
-#     -> https://docs.docker.com/compose/extends/
+# Expects:
+#   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
+#   FIRESTORE_PORT
+#   FUNCTIONS_PORT
+#   #DATABASE_PORT
 #
 services:
   emul:
+    image: ${CI_BUILDER_IMAGE}
+    ports:
+      - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
+      - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
+      #- "${DATABASE_PORT}:${DATABASE_PORT}"
+        # Keep ports aligned with 'firebase.ci.js'
+
+    volumes:
+      # --- RO
+      - ./tmp/firebase.ci.json:/work/firebase.json:ro
+      #- ./tmp/database.rules.json:/work/database.rules.json:ro
+      - ./firestore.indexes.json:/work/firestore.indexes.json:ro
+      - ./firestore.rules:/work/firestore.rules:ro
+      - ./functions:/work/functions:ro
+      # --- Output
+      # Getting log files to the Cloud Build folder can be used for debugging.
+      #
+      - ./firebase-debug.log:/work/firebase-debug.log:delegated
+      - ./firestore-debug.log:/work/firestore-debug.log:delegated
+      #- ./database-debug.log:/work/database-debug.log:delegated
+
+    working_dir: /work
+    command: sh -c
+      'echo "Launching Docker... 🐳" &&
+      
+      firebase emulators:start --project=demo-2
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI|The Emulator UI is not starting"
+      '
+        # Note: The '--project' parameter must match that used by Cloud Functions (in 'test-fns/setup.jest.js'.
+
+    healthcheck:
+      # Note: For some reason '${DATABASE_PORT}' does not get opened. But we don't need it, either.
+      test: '
+        nc -z localhost ${FIRESTORE_PORT} &&
+        nc -z localhost ${FUNCTIONS_PORT}
+        '
+          # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      interval: 0.5s
+      start_period: 30s
+
+    # Allows the ports to be seen (as 'emul:{port}') by Cloud Build steps.
+    #
     network_mode: cloudbuild
     container_name: emul
 
-  warm-up:
-    network_mode: cloudbuild
-    container_name: warm-up
-    environment:
-      - WARM_UP_TIMEOUT=10000
-      # seen durations of:
-      #   3786 ms (fns:userInfo summary, CloudBuild)
+  emul-is-healthy:
+    image: node:16-alpine
+    command: sh -c true
+    depends_on:
+      emul:
+        condition: service_healthy
+
+    container_name: emul-is-healthy    # just for the logs
+    profiles: ['manual']

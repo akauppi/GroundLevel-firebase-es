@@ -2,6 +2,9 @@
 
 /dist/
 
+# Public (copied from '../../branding'
+/public/favicon.png
+
 # (follow project root's .gitignore on those)
 #/.firebaserc
 
@@ -12,3 +15,7 @@
 /stats.html
 
 /tmp/
+
+# .env.dev_{local|online}
+# .env.{${ENV:-staging}}
+/.env.*

@@ -14,15 +14,15 @@ import { assert } from '/@tools/assert'
 
 import { collection, where } from '@firebase/firestore'
 
-import { getCurrentUserWarm } from "/@/user"
+import { getCurrentUserId_sync } from "/@/user"
 import { collRef } from "/@tools/listen.ref"
-import { db } from '/@firebase'
-import { documentIdSentinel } from '/@firebase/sentinel'
+import { db } from '/@firebase/firestore'
+import { documentIdSentinel } from '/@firebase/firestore-sentinel-exp'
 
 function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <uid> -> { ...projectUserInfoC doc, status: "live"|"recent"|"" }, () => ()]
   assert(projectId);
 
-  const myUid = getCurrentUserWarm().uid;
+  const myUid = getCurrentUserId_sync();
 
   /*
   * Convert the data a bit:

@@ -1,0 +1,12 @@
+#
+# dc/firebase-tools/base.yml
+#
+# Base for using Firebase CLI, via Docker Compose.
+#
+services:
+  base:
+    build:
+      context: .
+      target: firebase-cli
+
+      # 'ports', 'volumes', 'working_dir', 'command', 'profiles' to be provided by downstream

@@ -4,70 +4,84 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "files": [
-    "firebase.json",
-    "firestore.indexes.json",
-    "firestore.rules",
-    "functions/*.js"
-  ],
   "engines": {
-    "node": ">= 16.6.1",
-    "npm": ">= 7.7.0"
+    "node": "18"
   },
   "scripts": {
     "test": "npm run -s start && npm run -s _test1",
     "_test1": "npm run test:fns:all && npm run test:rules:all",
     "-- ": "",
-    "start": "npm run -s _prepDC && docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\n\"",
-    "_prepDC": "npm run -s _touchEm",
+    "start": "npm run -s _start1 && make refresh-emul && FUNCTIONS_PORT=5002 docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\\n\"",
+    "_start1": "npm run -s _touchEm && npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson && npm run -s _checkFunctionsNode",
     "-- -": "",
-    "test:fns:logging": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f logging.test.js --verbose --all",
-    "test:fns:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
-    "test:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
+    "test:fns:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
+    "test:fns:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
     "--  -": "",
-    "test:rules:invites": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f invitesC.test.js --verbose --all",
-    "test:rules:projects": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/index.test.js --verbose --all",
-    "test:rules:projectsSymbols": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/symbolsC.test.js --verbose --all",
-    "test:rules:projectsUserInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --all",
-    "test:rules:userInfo": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js -f userInfoC.test.js --verbose --all",
-    "test:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-rules/jest.config.js --verbose --detectOpenHandles --all",
+    "test:rules:invites": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f invitesC.test.js --verbose --all",
+    "test:rules:projects": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/index.test.js --verbose --all",
+    "test:rules:projectsSymbols": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/symbolsC.test.js --verbose --all",
+    "test:rules:projectsUserInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --all",
+    "test:rules:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f userInfoC.test.js --verbose --all",
+    "test:rules:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
+    "--  - ": "",
+    "test:rules2:logging": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
+    "test:rules2:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
     "-- --": "",
     "lint": "eslint .",
     "--   -": "",
-    "app:start": "npm run -s _prepAppDC && PROJECT_ID=demo-main docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\n\"",
-    "_prepAppDC": "npm run -s _touchEmApp",
+    "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
     "--   - ": "",
-    "dc:warm-up": "npm run test:fns:all && npm run test:rules:all",
+    "app:start": "npm run -s _appStart1 && make refresh-emul-for-app && FUNCTIONS_PORT=5003 docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\\n\"",
+    "_appStart1": "npm run -s _touchEmApp && npm run -s _genFirebaseJsonApp && npm run -s _genDatabaseRulesJson",
     "-- - -": "",
-    "ci:test": "npm run test:fns:all && npm run test:rules:all",
-    "--  --": "",
+    "ci:warm-up": "npm run -s _ci:fns:all",
+    "ci:test": "npm run -s _ci:fns:all && npm run -s _ci:rules:all",
+    "_ci:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --detectOpenHandles --verbose --all",
+    "_ci:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
+    "-- ---": "",
+    "_checkFunctionsNode": "[ ! -f functions/node_modules/* ] || ( >&2 echo \"WARN: Files under 'functions/node_modules' are not being used.\\n\"; false )",
+    "-- --- ": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
-    "_postinstall_local": "docker compose run --rm functions-install",
-    "_postinstall_ci": "npm --prefix functions install && npm run -s _touchEm && npm run -s _touchEmApp",
-    "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
-    "_touchEmApp": "touch firebase-debug.app.log firestore-debug.app.log ui-debug.app.log"
+    "_postinstall_local": "install -d tmp/functions/node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
+    "_postinstall_ci": "npm --prefix functions install && npm run -s _genFirebaseJsonCI && npm run -s _genDatabaseRulesJson",
+    "_genFirebaseJson": "node --input-type=module -e \"import o from './firebase.js'; console.log(JSON.stringify(o));\" > tmp/firebase.json",
+    "_genFirebaseJsonApp": "node --input-type=module -e \"import o from './firebase.app.js'; console.log(JSON.stringify(o));\" > tmp/firebase.app.json",
+    "_genFirebaseJsonCI": "node --input-type=module -e \"import o from './firebase.ci.js'; console.log(JSON.stringify(o));\" > tmp/firebase.ci.json",
+    "_genDatabaseRulesJson": "node --input-type=module -e \"import o from './database.rules.js'; console.log(JSON.stringify(o, null, 2));\" > tmp/database.rules.json",
+    "--    -": "",
+    "_touchEm": "(cd logs && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)",
+    "_touchEmApp": "(cd logs.app && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)"
   },
   "devDependencies": {
-    "eslint-plugin-node": "^11.1.0",
-    "firebase-jest-testing": "^0.0.5-beta.1",
-    "jest": "^28.1.0"
+    "firebase-admin": "^11.0.0",
+    "firebase-jest-testing": "^0.0.5-beta.3",
+    "jest": "^28.1.3"
+  },
+  "//devDependencies": {
+    "firebase-jest-testing": "file:../../../firebase-jest-testing/package"
   },
   "//comments": {
     "engines.node": [
-      "Avoid 16.6.0 - a bad 🍏 -> https://github.com/facebook/jest/issues/11708"
-    ],
-    "engines.npm": [
-      ">= 7.7.0 because of this (only matters for 'npm publish') -> https://github.com/npm/cli/issues/2834"
+      "18 has built-in fetch"
     ],
     "scripts": {
       "[ -z $BUILDER_OUTPUT ]": [
         "Precedes commands only to be run in CI."
       ],
-      "dc:warm-up": [
-        "Since ~ 'firebase-tools' 10.6.0, also Rules seem to need warming up."
+      "ci:{warm-up|test}": [
+        "We welcome these in the same, humble 'package.json'. Running CI is a lot like native development."
       ],
-      "ci:{test|deploy}": [
-        "These are the commands CI will use."
+      "first:prepare": [
+        "For '/first/deploy.sh' - makes sure the configuration files are generated."
+      ],
+      "_postinstall_local": [
+        "Important to create the 'tmp/functions/node_modules' in the host side; otherwise, WSL2 Docker will create one",
+        "with 'root' access (instead of the current user)."
+      ],
+      "_postinstall_ci": [
+        "Prepares things for CI steps:",
+        "- tmp/firebase.ci.json",
+        "- tmp/database.rules.json (not used in CI; stop generating if we know it's not going to be used)"
       ],
       "_touchEm": [
         "Important that files to be mapped as DC volumes exist as files."

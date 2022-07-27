@@ -1,9 +1,12 @@
 # Working with GCP Secrets
 
+<!-- tbd. Not sure if this is needed here?  
+Should be covered in main text.
+-->
+
 *Based on: [Using secrets from Secret Manager](https://cloud.google.com/build/docs/securing-builds/use-secrets) (Cloud Build docs)*
 
-
-The Raygun API KEY we use as an example is not quite a secret, since we need to embed it in the client web app. However, it allows us to show how Cloud Build treats secrets.
+The Sentry API KEY we use as an example is not quite a secret, since we need to embed it in the client web app. However, it allows us to show how Cloud Build treats secrets.
 
 
 ## Requirements
@@ -31,7 +34,13 @@ The *project number* of the GCP project running the Cloud Build.
 	- `Roles` > `Secret Manager` > `Secret Manager Secret Accessor`
 
 
-## Steps
+## Using the secret
 
-The necessary steps are made in the `ci/*.yaml` file, deploying the front-end.
+In the `cloudbuild.app.merged.yaml`:
 
+```
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/SENTRY_DSN/versions/latest
+      env: 'SENTRY_DSN'
+```

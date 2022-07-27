@@ -1,78 +1,71 @@
 {
   "name": "@local/app",
-  "description": "Sample front end",
+  "description": "Sample front end (host)",
   "license": "MIT",
   "private": true,
   "author": "<akauppi@gmail.com>",
   "type": "module",
-  "files": [
-    "dist/*"
-  ],
-  "bin": {
-    "gen-vite-env-local": "./tools/gen-vite-env-local.js",
-    "gen-vite-env-online": "./tools/gen-vite-env-online.js"
-  },
   "engines": {
     "node": ">=16.6.1"
   },
   "scripts": {
     "dev": "npm run dev:local",
     "-- ": "",
-    "test": "npm run -s _emulRunning && npm run -s _testDC && npm run -s _testRun",
-    "_testDC": "docker compose -f docker-compose.test.yml run --rm vite-for-test-launched",
-    "_testRun": "CYPRESS_defaultCommandTimeout=10000 cypress run",
-    "dc:launch:test": "npm run -s _genEnvLocal && vite --mode dev_local",
+    "test": "npm run -s _checkNoEsbuild && npm run -s _touchDevLocalEnv && npm run -s _emulPrimed && npm run -s _test1 && npm run -s _test2",
+    "_test1": "make refresh-vite-dev && PORT=3002 docker compose -f docker-compose.local.yml run --rm vite-dev-launched",
+    "_test2": "CYPRESS_defaultCommandTimeout=10000 CYPRESS_baseUrl=http://localhost:3002 cypress run",
     "-- -": "",
-    "dev:local": "npm run -s _checkNoEsbuild && npm run -s _emulPrimed && docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm --service-ports vite-dev",
+    "dev:local": "npm run -s _checkNoEsbuild && npm run -s _touchDevLocalEnv && npm run -s _emulPrimed && make refresh-vite-dev && PORT=3000 docker compose -f docker-compose.local.yml run --rm --service-ports vite-dev",
+    "_touchDevLocalEnv": "touch .env.dev_local",
     "_emulRunning": "(cd ../backend && npm run app:start)",
     "_emulPrimed": "npm run -s _emulRunning && npm run -s _prime",
-    "_prime": "docker compose run --rm prime",
-    "dc:launch:local": "npm run -s _genEnvLocal && vite --mode dev_local",
-    "_genEnvLocal": "gen-vite-env-local --project=demo-main > .env",
+    "_prime": "make refresh-prime && docker compose -f docker-compose.tools.local.yml run --rm prime",
     "--  -": "",
-    "ci:launch": "vite --mode dev_local",
+    "ci:launch": "npm run -s _genEnvCi && vite --mode dev_local",
+    "_genEnvCi": "node tools/gen-vite-env-ci.js --project=demo-main > .env",
     "-- --": "",
-    "dev:online": "npm run -s _checkStaging && npm run -s _checkNoEsbuild && docker compose -f docker-compose.yml -f docker-compose.online.yml run --rm --service-ports vite-dev",
-    "dc:launch:online": "npm run -s _genEnvOnline && vite --mode dev_online",
-    "_genEnvOnline": "gen-vite-env-online > .env",
+    "dev:online": "npm run -s _checkStaging && npm run -s _checkNoEsbuild && npm run -s _touchDevOnlineEnv && make refresh-vite-online && PORT=3001 docker compose -f docker-compose.online.yml run --rm --service-ports vite-online",
+    "_touchDevOnlineEnv": "touch .env.dev_online",
     "--   -": "",
     "lint": "eslint --ext .js,.vue src || true",
     "-- - -": "",
-    "build": "npm run _checkNoEsbuild && npm run -s _touchStats && docker compose run --rm build",
+    "build": "npm run -s _checkNoEsbuild && npm run -s _checkStaging && npm run -s _touchProdEnv && npm run -s _touchStats && make refresh-build && RELEASE=manual docker compose -f docker-compose.tools.prod.yml run --rm build",
+    "_touchProdEnv": "touch .env.${ENV:-staging}",
     "_touchStats": "touch stats.html",
     "serve": "http-server -p 8080 dist",
     "//serve": "docker compose run --rm --service-ports _serve",
     "--  --": "",
-    "_checkStaging": "[[ -f ../../firebase.${ENV-staging}.js ]] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see 'README.md' on how to create one.\n\"; false)",
-    "_checkNoEsbuild": "[[ ! -d node_modules/esbuild ]] || ( >&2 echo \"INTERNAL ERROR: 'node_modules/esbuild*' shouldn't be there; please remove them. (rm -rf node_modules/esbuild*)\"; false) ",
+    "first:echoFirebaseHostingJson": "npm run -s _echoFirebaseHostingJson",
+    "--  --  ": "",
+    "_build:dev": "npm run -s _touchDevLocalEnv && make refresh-build && docker compose -f docker-compose.local.yml run --rm build",
+    "--  -- ": "",
+    "_checkStaging": "[ -f ../../firebase.${ENV-staging}.js ] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see root 'README.md' on how to create one.\\n\"; false)",
+    "_checkNoEsbuild": "[ ! -d node_modules/esbuild ] || ( >&2 echo \"INTERNAL ERROR: 'node_modules/esbuild*' shouldn't be there; please remove them. (rm -rf node_modules/esbuild*)\"; false) ",
     "-- ---": "",
+    "preinstall": "[ ${npm_config_omit:-_} == optional ] || ( echo >&2 \"***\tPlease install with '--omit=optional'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
-    "_postinstall_dev": "rm -rf node_modules/vite node_modules/rollup node_modules/esbuild node_modules/esbuild-*",
-    "_postinstall_ci": "npm run -s _genEnvCi && touch stats.html",
-    "//_postinstall_ci": "npm install --prefix .. --no-save esbuild && npm run -s _genEnvCi)",
-    "_genEnvCi": "FIREBASE_JSON=../backend/firebase.app.json EMUL_HOST=emul-for-app gen-vite-env-local --project=demo-main > .env"
+    "_postinstall_dev": "(cd node_modules && rm -rf vite rollup esbuild esbuild-*)",
+    "_postinstall_ci": "npm run -s _echoFirebaseHostingJson > firebase.json",
+    "--    -": "",
+    "_echoFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\""
   },
   "dependencies": {
-    "@sentry/browser": "^6.19.7",
-    "@sentry/tracing": "^6.19.7",
+    "@sentry/browser": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
     "aside-keys": "^0.0.3-alpha.1",
-    "firebase": "^9.8.1",
-    "tslib": "^2.4.0",
-    "vue": "^3.2.35",
-    "vue-router": "^4.0.15"
-  },
-  "//dependencies": {
-    "aside-keys": "file:/~/Git/aside-keys/package"
+    "@firebase/app": "^0.7.29",
+    "@firebase/database": "^0.13.3",
+    "@firebase/firestore": "^3.4.13",
+    "@firebase/performance": "^0.5.12",
+    "plausible-tracker": "^0.3.5",
+    "vue": "^3.2.37",
+    "vue-router": "^4.1.2"
   },
   "devDependencies": {
-    "@local/self": "file:.",
-    "@vitejs/plugin-vue": "^2.3.2",
-    "cypress": "9.6.0",
-    "sass": "^1.52.1",
-    "eslint-plugin-cypress": "^2.12.1",
-    "eslint-plugin-vue": "^9.0.1",
-    "prettier": "2.6.2",
-    "vue-eslint-parser": "^9.0.2"
+    "@vitejs/plugin-vue": "^3.0.1",
+    "cypress": "10.3.0",
+    "sass": "^1.53.0",
+    "prettier": "2.7.1"
   },
   "//comments": {
     "devDependencies": {
@@ -93,39 +86,18 @@
       ]
     },
     "engines.node": [
-      "16.6.1+ because of -> https://github.com/facebook/jest/issues/11708"
+      ">= 16.6.1: because of -> https://github.com/facebook/jest/issues/11708"
     ],
     "scripts": {
-      "| grep -v": [
-        "Do *not* chain multiple 'grep -v's. That causes output to be completely hidden, for some reason.",
-        "A single 'grep -v -E' (needs -E) with '|' is fine."
-      ],
-      "test / Cypress timeout": [
-        "When cold-starting DC with 'npm test' on macOS, the 2nd test has been seen to take ~~5s~~ over 8s (default",
-        "timeout is 4s). Thus, 'CYPRESS_defaultCommandTimeout'."
+      "CYPRESS_defaultCommandTimeout": [
+        "When cold-starting DC with 'npm test' on macOS, the 2nd test has been seen to take over 8s (default timeout",
+        "is 4s)."
       ],
       "[ -z $BUILDER_OUTPUT ]": [
-        "Precedes commands only to be run in CI."
+        "Separates commands to be run in CI."
       ],
-      "dev:local": [
-        "Both 'npm test' and 'npm run dev' use the same DC container ('vite-local').",
-        "",
-        "'npm test':",
-        "   - runs without 'SENTRY_DNS' (well, it could use one but we don't set it)",
-        "   - leaves the container running (this is needed for Cypress and makes a subsequent tests faster).",
-        "",
-        "'npm run dev':",
-        "   - uses 'docker compose run' to show the Vite output on the launching terminal",
-        "   - shuts down any previous DC container left running by 'npm test'.",
-        "     This ensures setting 'SENTRY_DNS' gets through, but also that changes to the DC config are always active."
-      ],
-      "dc:launch:{local|online}": [
-        "Installs a Linux version of 'esbuild' to the parent level (so as to not mess up 'node_modules', and also",
-        "to bypass the read-only nature of that folder's sharing. It's a hack, but it works.."
-      ],
-      "ci:test": [
-        "CI calls directly 'docker compose' since it's using a docker image that doesn't have 'npm'. We reflect the",
-        "command here, mostly for just documenting the use."
+      "build": [
+        "Only for manual builds. CI runs DC, directly."
       ],
       "_prime": [
         "The project name used _must_ match that in '../backend/', used for launching the emulators."
@@ -133,12 +105,8 @@
       "_touchEm": [
         "Vital for DC that files to be mapped to the container exist *before* the DC command."
       ],
-      "_genEnv": [
-        "Used by CI. Creates a '.env' file and after that, the mode used by 'dc:launch' ('--mode dev_local') doesn't",
-        "matter, any more.."
-      ],
-      "_checkNoEsbuild": [
-        "This check is a bit paranoid. And also unnecessary, since the DC file has a similar check."
+      "_refresh": [
+        "Run this once you've changed anything in 'tools/*.dc' - i.e. the Vite version."
       ]
     }
   }

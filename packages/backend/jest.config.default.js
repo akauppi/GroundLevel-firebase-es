@@ -1,6 +1,6 @@
 // jest.config.default.js
 //
-// Common values to 'test-fns' and 'test-rules'
+// Common values to 'test-fns' and 'test-firestore-rules'
 
 // Allow more time for the warm-up lap.
 //

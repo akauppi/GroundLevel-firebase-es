@@ -5,21 +5,22 @@
 #   - empty work folder (/work)
 #   - 'vite' installed globally and available as a CLI tool.
 #
+# Note:
+#   The trick of using 'AS' (and corresponding 'target' in a Docker Compose file), is described in:
+#     -> https://stackoverflow.com/a/53289193/14455 (SO answer)
+#
 # References:
 #   - Best practices for writing Dockerfiles
 #       -> https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 #
 
-# Node images -> https://hub.docker.com/_/node
-#   node:18-alpine  171MB
-#   node:16-alpine  110MB
+# This image provides a basic 'vite' for development purposes. See 'vite_extras' (below).
 #
-FROM node:16-alpine
+FROM node:18-alpine AS vite_plain
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
-ARG VITE_VER=3.0.0-alpha.1
-  # 2.9.9
+ARG VITE_VER=3.0.2
 
 WORKDIR /work
 
@@ -28,10 +29,30 @@ RUN npm config set update-notifier false
 
 # Install dependencies
 #
-RUN npm install -g --no-save vite@$VITE_VER
+# Make all globally installed libraries visible to the work directory (only binaries would show, without this).
+# Needed for:
+#   - 'vite', imported by '@vite/plugin-vue' (project side)
+#   - 'rollup-plugin-visualizer', in the 'vite_extras' target
+#
+RUN npm install -g --no-save vite@$VITE_VER && \
+  ln -s /usr/local/lib/node_modules /node_modules
 
-ENV NODE_PATH=/usr/local/lib/node_modules
+# Disabled. Not needed
+#ENV NODE_PATH=/usr/local/lib/node_modules
 
 # Override
 CMD \
   vite --help
+
+#---
+# Version with extras
+#
+# Provides:
+#   - 'rollup-plugin-visualizer' [1] installed, for creating 'stats.html'
+#
+#     [1]: https://github.com/btd/rollup-plugin-visualizer
+#
+FROM vite_plain AS vite_extras
+
+RUN npm install -g rollup-plugin-visualizer   \
+  # Note: visible to project because of the link done in 'vite_plain'

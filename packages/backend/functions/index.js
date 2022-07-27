@@ -1,9 +1,7 @@
 /*
 * functions/index.js
 *
-* Cloud Functions for our app.
-*
-* This level handles the Functions API nuances; individual functions are in their own files.
+* Cloud Functions entry point.
 *
 * References:
 *   - Call functions from your app (Firebase docs)
@@ -11,130 +9,48 @@
 *   - Add the Firebase Admin SDK to your server (Firebase docs)
 *     -> https://firebase.google.com/docs/admin/setup
 */
-import functions from 'firebase-functions'
-const { logger } = functions
 
-import { initializeApp } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
-
-import { cloudLoggingProxy_v0 as clp } from './cloudLoggingProxy.js'
-
-// Some env.vars:
-//
-//  FIREBASE_EMULATORS_PATH: '/root/.cache/firebase/emulators'
-//  IS_FIREBASE_CLI: 'true'
-//  GCLOUD_PROJECT: 'demo-2'
-//  FUNCTIONS_EMULATOR: 'true'
-//  FIRESTORE_EMULATOR_HOST: '0.0.0.0:6767'
-//
-const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // "true"|...
-
-//---
-// tbd. Why does this code get loaded TWICE?
-//
-// On the second time, with below env.vars added. It looks like reading the function, but why wasn't it done on the
-// first round???
-//
-//  <<
-//    FUNCTION_TARGET: 'cloudLoggingProxy_v0',
-//    FUNCTION_SIGNATURE_TYPE: 'http',
-//    K_SERVICE: 'cloudLoggingProxy_v0',
-//    K_REVISION: '1',
-//    PORT: '80',
-//  <<
-//
-//  Asked here: https://github.com/firebase/firebase-admin-node/discussions/1390
-//
-// GUESS: It's likely due to Cloud Functions running functions in their own Node environments. This would mean that
-//    the source gets read:
-//      - once to find out what functions are there
-//      - once per function, to load such function
-//
-//    If there is documentation about this (haven't found), place the URL here.
-//    If there is not, would Firebase folks please make some (or we can reverse engineer and do it here! ⭐️
-//---
-
-initializeApp();
-const db = getFirestore();
-
-// Under emulation, run as the default region (makes testing simpler).
-// In production, the region is brought via Cloud Function configuration.
-//
-const region = EMULATION ? null : functions.config().regions[0];
-const regionalFunctions = region ? functions.region(region) : functions;
-
-export const cloudLoggingProxy_v0 = regionalFunctions.https
-  .onCall(({ les, ignore }, context) => {
-    const uid = context.auth?.uid;
-
-    logger.debug("Logging request from:", uid || "(unknown user)");
-
-    return clp(les, { ignore, uid });
-  });
-
-
-// UserInfo shadowing
-//
-// Track changes to global 'userInfo' table, and update projects where the changed user is participating with their
-// renewed user info.
-//
-// tbd. Needs #rework
-//
-export const userInfoShadow_2 = regionalFunctions.firestore
-  .document('/userInfo/{uid}')
-  .onWrite( async (change, context) => {
-    const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
-    const uid = change.after.id;
-
-    const newValue = after.data();      // { ... } | undefined
-    console.debug(`Global userInfo/${uid} change detected: `, newValue);
-
-    // Removal of userInfo is not propagated. Only tests do it, as 'beforeAll'.
-    //
-    if (newValue !== undefined) {
-
-      // Find the projects where the person is a member.
-      //
-      // tbd. Once we're operational, consider whether having 'userInfo' within the project document is considerably
-      //    cheaper. #rework #monitoring #billing
-      //
-      const qss = await db.collection('projects')
-        .where('members', 'array-contains', uid)
-        .select()   // don't ship the fields, just matching ref
-        .get();
-
-      if (qss.size === 0) {
-        console.debug(`User '${uid}' not found in any of the projects.`);
-
-      } else {
-        const proms = qss.docs.map( qdss => {
-          console.debug(`Updating userInfo for: projects/${qdss.id}/userInfo/${uid} ->`, newValue);
-
-          return qdss.ref.collection("userInfo").doc(uid).set(newValue);    // Promise of WriteResult
-        });
-        await Promise.all(proms);
-      }
-    }
-  });
-
-/** tbd. likely not doing it so. Could track all changes to '.members'. If a uid is removed, remove the data
- *     immediately also from 'userInfo'. Or... the removal of a user can do that. :)
-// UserInfo cleanup
-//
-// Occasionally, see if there are projects where users have left, but their userInfo sticks around.
-//
-exports.userInfoCleanup = regionalFunctions.pubsub.schedule('once a day')   // tbd. syntax?
-  .onRun( async context => {
-
-    /*** tbd. continue:
-     * will likely need to scan through all projects, no 'where' that could do:
-     *
-     * - find projects where
-     *    - /userInfo/{uid} exists
-     *        - where the 'uid' is not within '.admins' or '.collaborators'
-     *
-    await admin.firestore().collection("/projects").where(
-
-     ***_/
-  })
+/*
+* Environment variables
+*
+* Compare with [1]. Output of actually seen env.vars. ('firebase-tools' 11.3.0)
+*
+*   [1]: Runtime environment variables set automatically > Newer runtimes (Cloud Functions docs)
+*     -> https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
+*
+* Note: Cloud Functions loads files multiple times, and the differences in the sets can be partly due to this.
+*   1st load:   study the contents
+*   2nd load:   initiate one function at a time
+*
+* CI ('up emul' output):
+*   <<
+*     GCLOUD_PROJECT: 'demo-2',
+*     K_REVISION: '1',                      **documented**
+*     PORT: '9005',                         **documented**
+*     FUNCTIONS_EMULATOR: 'true',
+*     TZ: 'UTC',
+*     FIREBASE_DEBUG_MODE: 'true',
+*     FIREBASE_DEBUG_FEATURES: '{"skipTokenVerification":true,"enableCors":true}',
+*     FIRESTORE_EMULATOR_HOST: '0.0.0.0:6767',
+*     FIREBASE_DATABASE_EMULATOR_HOST: '0.0.0.0:6800',
+*     FIREBASE_CONFIG: '{"storageBucket":"demo-2.appspot.com","databaseURL":"http://0.0.0.0:6800/?ns=demo-2","projectId":"demo-2"}',
+*     FUNCTIONS_CONTROL_API: 'true',
+*     HOME: '/root',
+*     PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+*   <<
+*
+* dev, in addition to the above (lacks 'FUNCTIONS_CONTROL_API'):
+*   <<
+*     FIREBASE_EMULATORS_PATH: '/root/.cache/firebase/emulators',     // weird, also CI should have that (same Docker image)
+*     IS_FIREBASE_CLI: 'true',
+*     GCLOUD_PROJECT: 'demo-2',
+*     FUNCTION_TARGET: 'userInfoShadow_2',    **documented**
+*     FUNCTION_SIGNATURE_TYPE: 'event',       **documented**
+*     K_SERVICE: 'userInfoShadow_2',          **documented**
+*   <<
+*
+* This is mostly "good to know" but also can be ued in the region detection logic ('regional.js').
 */
+//console.error("!!!", process.env);
+
+export { userInfoShadow_2 } from './userInfoShadow.js'

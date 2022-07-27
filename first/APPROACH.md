@@ -1,30 +1,15 @@
 # Approach (first deployment)
 
-This was hard...
+The aim is to get people to have their first deployment done *fast*. Not needing to learn CI.
 
-The aim was to get people to have a deployment done *fast*. There are multiple hurdles to that.
 
-Tried:
+## Considerations
 
-## Skinned down `cloudbuild.yaml`
+Deployment needs to be done with a certain (deployment) Firebase project. We don't want developers to use these projects on a day-to-day basis - CI/CD takes care of it.
 
-This *almost* works.
+We *could* utilize CI/CD scripts also for the initial deployment.
 
-The idea was to avoid `firebase login` and have the manual deployments done by `gcloud`, pretty much how the actual CI/CD would.
-
-Pros:
-
-- could have worked
-
-Cons:
-
-- needs `gcloud` to be installed and authorized, early in the developer experience (in the root `README`; before having looked at the subpackages, for example)
-
-Problems:
-
-- <strike>Our builds require not only Node 16, but also `bash` (and some other tools). We don't have the `firebase-ci-builder` image available, in Cloud Build.</strike>
-
-   >This is likely no longer a problem. Could use DC without `version`..
+This would mean that the developer needs to have `gcloud` CLI installed. But we'd rather only introduce that in the `/ci/` phase of onboarding.
 
 
 ## Current approach
@@ -35,13 +20,11 @@ Have a Docker Compose file that:
 - uses `firebase-ci-builder`
 - authenticates with `firebase login`
 
-Pros:
-
-- works without changes to the build files
-- allows testing, if we'd like to
-- keeps Firebase credentials safe; each run requires a new authentication
-
-Cons:
-
-- we don't otherwise deal with `firebase login`
+||
+|---|
+|**Pros**|
+|<font color=green>+ keeps Firebase credentials safe; each run requires a new authentication|
+|<font color=green>+ fully separate from the rest of the repo|
+|**Cons**|
+|<font color=red>- we don't otherwise deal with `firebase login`|
 

@@ -10,25 +10,17 @@
 #   - Host the front end files with a cloud backend, according to 'ENV' env.var.
 #
 services:
-  vite-dev:
-    ports:
-      - "3001:3001"     # wasn't able to have "$PORT:$PORT" here, in 'docker-compose.yml'
+  vite-online:
+    extends:
+      file: dc.base.yml
+      service: vite-base
+
     volumes:
       #--- RO
       - ./tools/gen-vite-env-online.js:/work/tools/gen-vite-env-online.js:ro
       - ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
+      - ./.env.dev.${ENV:-staging}:/work/.env.local:ro
     environment:
-      - SENTRY_DNS
-      - PORT=3001
       - MODE=online
-      - ENV
-
-  #REMOVE???
-  # Make sure Vite is launched.
-  #
-  #|vite-3001-launched:
-  #|  image: node:16-alpine
-  #|  command: sh -c true
-  #|  depends_on:
-  #|    vite-3001:
-  #|      condition: service_healthy
+      - ENV=${ENV:-staging}
+    profiles: ['manual']

@@ -8,9 +8,6 @@
 #   - CI
 #     - with 'docker-compose.ci.yml' overrides
 #
-# Environment:
-#   - CI_BUILDER_IMAGE (optional); name of the builder image.
-#
 # Intentions:
 #   Within a Docker universe,
 #     - launch Firebase Emulators using 'firebase.json'
@@ -28,39 +25,32 @@
 services:
   # Launch Firebase Emulators, with certain warning and info messages suppressed.
   #
+  # Expects:
+  #   - 'FUNCTIONS_PORT'
+  #
   emul:
-    image: ${CI_BUILDER_IMAGE:-firebase-ci-builder:10.6.0-node16-npm8}
+    extends:
+      file: docker-compose.base.yml
+      service: emul-base
     ports:
-      - "4000:4000"
-      - "5002:5002"
+      - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "6767:6767"
-      # Keep ports aligned with 'firebase.json'
-    volumes:
-      # --- RO
-      - ./firebase.json:/work/firebase.json:ro
-      # --- cached (may change; watched by the Emulators)
-      - ./functions:/work/functions:cached
-      - ./firestore.indexes.json:/work/firestore.indexes.json:cached
-      - ./firestore.rules:/work/firestore.rules:cached
-      # --- output
-      - ./firebase-debug.log:/work/firebase-debug.log:delegated
-      - ./firestore-debug.log:/work/firestore-debug.log:delegated
-      - ./ui-debug.log:/work/ui-debug.log:delegated
+      - "6800:6800"
+      - "4000:4000"
+        # Keep ports aligned with 'firebase.js'
 
-    working_dir: /work
-    command: bash -o pipefail -c
-      'echo "Launching Docker... 🐳" &&
-      firebase emulators:start --project=demo-2
-        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
-      '
-      # Keep project ID in sync with 'test-fns/setup.jest.js'
     environment:
-      - CHOKIDAR_USEPOLLING=true
-        # Without this, Firebase-tools (9.17.0) don't see changes (Security Rules, Cloud Functions)
+      - PROJECT_ID=demo-2
+        # Project id for 'test-fns'.
+        # Cloud Functions get triggered only for this project; Firebase Emulator UI shows only it.
 
     healthcheck:
-      test: "nc -z localhost 6767 && nc -z localhost 5002 && echo 'healthy!'"
-        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+      test: '
+        nc -z localhost 6767 && 
+        nc -z localhost ${FUNCTIONS_PORT} && 
+        nc -z localhost 6800
+        '
+          # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
       start_period: 23s
 
@@ -69,23 +59,26 @@ services:
   # Firebase Emulators are SLOW to wake. This part runs a minimal set of tests (the results of which are not used),
   # to wake up the necessary subsystems server-side. This results in more dependable test times in the actual tests.
   #
+  # NOTE: Use Node.js 18 to have built-in fetch.
+  #
   warm-up:
-    image: node:16-alpine
+    image: node:18-alpine
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
-      - ./firebase.json:/work/firebase.json:ro
-      - ./package.json:/work/package.json:ro
+      - ./tmp/firebase.json:/work/firebase.json:ro
+      - ./package.dc.json:/work/package.json:ro
+      #- ./test-database:/work/test-database:ro
+      - ./test-firestore-rules:/work/test-firestore-rules:ro
       - ./test-fns:/work/test-fns:ro
-      - ./test-rules:/work/test-rules:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
       #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
     command: sh -c
       'npm config set update-notifier false &&
-      
+
       npm run dc:warm-up &&
       touch .healthy &&
       sleep infinity
@@ -94,24 +87,29 @@ services:
       #       tbd. test - is this still so?
     environment:
       - EMUL_HOST=emul
-      - WARM_UP_TIMEOUT=30000
-          # Seen cold start execution times ('docker compose down; docker up warm-up'):
-          #
-          # 14859, 22591 (macOS Intel, DC 4.6)
-          #
-          # ~~19000 (macOS, DC 4.0); normally ~3500 ms
+      - WARM_UP_TIMEOUT=10000
+        # tbd. document what that steers
 
     depends_on:
       emul:
         condition: service_healthy
 
     healthcheck:
-      test: "[ -f .healthy ] && echo 'HEALTHY!'"
-      interval: 0.7s
-      start_period: 80s
+      test: "[ -f .healthy ]"
+      interval: 0.9s
+      start_period: 240s
+        #
+        # That's long. But Windows 10 + WSL2 cold start times justify it.
+        #
+        #   - Lenovo X230 (ca. 2015), Windows 10, 12MB, DC 4.10.1: 3m11.946 s
+        #   - macOS 12.4 Intel, DC 4.10.1 (3 cores, 2GB): 23.314, 25.263 s 
+        #
+        # Measure by:
+        #   1. Delete all running DC containers
+        #   2. $ time FUNCTIONS_PORT=5002 docker compose run --rm warmed-up
 
     # Enable manual launch to debug 'emul' launch, only.
-    #profiles: ['manual']
+    profiles: ['manual']
 
   # A pass-through target.
   #
@@ -121,29 +119,9 @@ services:
   # output for something like 'npm test' (if launched with a cold DC).
   #
   warmed-up:
-    image: node:16-alpine
+    image: node:18-alpine
     command: sh -c true
     depends_on:
       warm-up:
         condition: service_healthy
-    profiles: ['manual']
-
-  # Separate target for installing 'functions/node_modules', within DC.
-  #
-  # Doing this - instead of installing them on host - avoids the "unsupported (Node.js) version" error, by Firebase
-  # (since we steer strictly the version used in the installation, which should match 'functions/package.json').
-  #
-  functions-install:
-    image: node:16-alpine
-    volumes:
-      # --- RO
-      - ./functions/package.json:/work/functions/package.json:ro
-      # --- output (show installed packages on the host; from where they are shared to running images)
-      - ./functions/node_modules:/work/functions/node_modules:delegated
-
-    working_dir: /work
-    command: sh -c
-      'npm config set update-notifier false &&
-      npm install --prefix functions
-      '
     profiles: ['manual']

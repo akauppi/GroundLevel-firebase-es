@@ -5,10 +5,15 @@
 #   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/app/**' or root 'package.json'.
 #
 # Cloud Build project:
-#   Same GCP project that carries the Firebase deployment.
+#   Production/staging GCP project (deploys to itself).
 #
 # Responsibility:
 #   - (maybe test,) build and deploy front-end
+#
+# Uses images:
+#   - node:{16|18}-alpine (stock image)
+#   - firebase-emulators  (pushed to Artifact Registry)   The image also contains Firebase CLI we use for deployment
+#   - docker/compose      (stock image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -17,103 +22,148 @@
 #     PWD=/workspace
 #     HOME=/builder/home
 #
-# Staging:
-#   While development uses 'firebase.${ENV:-staging}.js' in the project root, here the stage comes from the _GCP
-#   project itself_.
-#
 # References:
 #   - Cloud Build > Substituting variable values
 #     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
-
+#
 steps:
-# Flight check: don't run deploy off general 'ci-builder'
-- name: node:16-alpine
+# Flight check
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
-  args: ['-c',
-    '[ $PROJECT_ID != ci-builder ] || ( >2& echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
+  args: ['-c', '
+    [ $PROJECT_ID != ci-builder ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
+    [ ! -z $$SENTRY_DSN ] || >&2 echo "WARN: ''SENTRY_DSN'' missing; no operational monitoring!"
+    '
   ]
+  secretEnv:
+    - SENTRY_DSN
 
-# Install
-- name: node:16-alpine
+# - Install
+- name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
     npm config set update-notifier false &&
 
     npm install &&
-    npm --prefix packages/app install --no-optional
+    npm --prefix packages/app install --omit=optional
   ']
-  env: ['CYPRESS_INSTALL_BINARY=0']
-     # npm --prefix packages/backend install --no-optional &&     <-- put back if re-enabling emulators
+    # Note: '--omit=optional' does not matter, in practise (the idea was to not pull in Vite).
+  env:
+    - CYPRESS_INSTALL_BINARY=0
+
+  # State:
+  #   - packages/app/firebase.json    has the deployment configuration (based on 'firebase.hosting.js')
+
+# Install backend; only needed if tests are run
+- name: node:${_NODE_VER}-alpine
+  entrypoint: sh
+  args: ['-c', '
+    npm --prefix packages/backend install &&
+    (cd packages/backend && 
+      touch firebase-debug.log firestore-debug.log database-debug.log
+    )
+  ']
+  env:
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800    # tbd. not sure we use it?
+    - AUTH_PORT=9100
+
+# Sign in to Firebase; capture the "access values" for the project.
+#
+- name: $_1
+  entrypoint: sh
+  args: ['-c', '
+    firebase use $PROJECT_ID && 
+
+    firebase apps:sdkconfig | grep -E ''^\s+".+":\s.+,'' | grep -E "projectId|appId|locationId|apiKey|authDomain|databaseURL"
+      > .capture &&
+
+    echo "export default { $$( cat .capture ) }" > ./firebase.config.js
+  ']
+  dir: packages/app
+
+  # State:
+  #   - packages/app/firebase.config.js    has the Firebase server "access values", to be baked into the client
 
 # Test
 #
+# Note: TO BE RETIRED, IF #102 GETS IMPLEMENTED.
+#
 # 1-to-1 from 'cloudbuild.app.yaml'.
 #
-#| TEMPORARILY DISABLED (did not pass; tbd.)
-#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#|  args: ['-f', 'docker-compose.app.yml', '-f', 'docker-compose.app.ci.yml', 'run', '--rm', 'emul-for-app-launched']
-#|  dir: packages/backend
-#|  env:
-#|    - CI_BUILDER_IMAGE=$_1
-#|
-#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#|  args: ['-f', 'docker-compose.yml', '-f', 'docker-compose.ci.yml', 'run', 'vite-local-launched']
-#|  dir: packages/app
-#|  env:
-#|    - CI_BUILDER_IMAGE=$_1
-#|
-#|- name: cypress/included:${_CYPRESS_TAG}
-#|  args: ['run', '--headless']
-#|  dir: packages/app
-#|  env:
-#|    - CYPRESS_baseUrl=http://vite:3000
-#|    - CYPRESS_defaultCommandTimeout=10000
-
-# Build
-#
-
-# Sign in (to Firebase) and create a 'firebase.live.js' that captures the current project's config.
-#
-- name: $_1
-  entrypoint: bash
-  args: ['-c', '
-    firebase use $PROJECT_ID && 
-    CAPTURE=$$( firebase apps:sdkconfig
-      | grep -E ''^\s+".+":\s.+,'' | grep -E "projectId|appId|locationId|apiKey|authDomain"
-    ) &&
-
-    echo "export default { $$CAPTURE }" > ../../firebase.current.js
-  ']
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
   dir: packages/backend
+  env:
+    - CI_BUILDER_IMAGE=$_1
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800
+    - AUTH_PORT=9100
 
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['run', 'build']
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'vite-ci-launched']
   dir: packages/app
   env:
-    - ENV=current
+    - PORT=3002
+    - FIRESTORE_PORT=6767
+    - FUNCTIONS_PORT=5002
+    - DATABASE_PORT=6800
+    - AUTH_PORT=9100
+
+- name: cypress/included:${_CYPRESS_TAG}
+  args: ['run', '--headless']
+  dir: packages/app
+  env:
+    - CYPRESS_baseUrl=http://vite:3002
+    - CYPRESS_defaultCommandTimeout=20000
+
+# BUILD
+
+#DEBUG
+#|- name: $_1
+#|  entrypoint: sh
+#|  args: ['-c', 'cat ./firebase.config.js']
+#|  dir: packages/app
+
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.tools.ci.yml', 'run', 'build']
+  dir: packages/app
+  env:
+    - RELEASE=${SHORT_SHA:-0}
+    #- SENTRY_SAMPLE_RATE=${_SENTRY_SAMPLE_RATE:-}
+    - FIREBASE_SERVER_CONFIG_JS=./firebase.config.js
+  secretEnv:
+    - SENTRY_DSN
 
 # DEPLOY
 #
 - name: $_1
-  entrypoint: bash
+  entrypoint: sh
   args: ['-c', '
-    firebase use $PROJECT_ID &&
     firebase deploy --only hosting
   ']
   dir: packages/app
 
 # --- Timeout
 #
-# Cloud Build (no tests): 2:00, 1:52
-#
-# (old CI; no tests): 2:03
+# Cloud Build (no tests):   1:38, 1:22, 1:57
+# Cloud Build: (w tests):   6:09
 #
 timeout: 400s
 
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
 substitutions:
-  #_BUILDER_TAG: 10.6.0-node16-npm8
-  _1: gcr.io/ci-builder/firebase-ci-builder:10.6.0-node16-npm8
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
-  #_CYPRESS_TAG: 9.6.0
+  _NODE_VER: "18"
+  _CYPRESS_TAG: 10.3.0
+
+# Anything baked into the front end are not really hard secrets, but let's treat them as such.
+#
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/SENTRY_DSN/versions/latest
+      env: 'SENTRY_DSN'

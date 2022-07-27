@@ -21,16 +21,18 @@ function collRef(_C, ...args) {    // (CollectionReference, QueryConstraint?, { 
   const [ref, ssHandler] = mapRefHandlerGen({ conv });
   let unsub;
 
+  function report(err) {    // (FirestoreError) => never
+    throw new Error(`Failed to listen to '${_C.path}'${
+        qc ? ` (constraint '${qc}')`:""
+      }: { code= ${ err.code }, message= ${ err.message } }`
+    );
+  }
+
   if (qc) {
     const q = query(_C,qc);
-    unsub = onSnapshot(q, ssHandler, err => {
-      //tbd. central.error(`Failed to listen to '${_C.path}' with  constraint '${qc}':`, err);
-    });
-
+    unsub = onSnapshot(q, ssHandler, report);
   } else {
-    unsub = onSnapshot(_C, ssHandler, err => {
-      //tbd. central.error(`Failed to listen to '${_C.path}':`, err);
-    });
+    unsub = onSnapshot(_C, ssHandler, report);
   }
 
   return [ref,unsub];
@@ -105,8 +107,8 @@ function docRef(_D) {   // ( DocumentReference ) => [Ref of undefined | null | {
     const data = ss.data();
     ref.value = data ? convTimestamps(data) : null;
 
-  }, (err) => {   // (FirestoreError) => ()
-    //tbd. central.error(`Failure listening to '${_D.path}':`, err);
+  }, err => {   // (FirestoreError) => ()
+    throw new Error(`Failed to listen to '${_D.path}': { code= ${ err.code }, message= ${ err.message } }`);
   });
 
   return [ref, unsub];

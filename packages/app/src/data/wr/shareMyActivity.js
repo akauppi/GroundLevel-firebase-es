@@ -7,9 +7,9 @@
 */
 import { setDoc } from '@firebase/firestore'
 
-import { getCurrentUserWarm } from "/@/user"
-import { dbDoc } from "/@firebase"
-import { serverTimestampSentinel } from "/@firebase/sentinel"
+import { getCurrentUserId_sync } from "/@/user"
+import { dbDoc } from "/@firebase/firestore"
+import { serverTimestampSentinel } from "/@firebase/firestore-sentinel-exp"
 
 let lastActive;   // Date | undefined; when last written
 let lastUid;      // ..for this user
@@ -20,7 +20,7 @@ function projectsUserInfoD(projectId, uid) {
 
 function shareMyActivity(projectId) {
   const longEnoughSecs = 5 * 60;   // 5 min; tbd. take from config?
-  const uid = getCurrentUserWarm().uid;
+  const uid = getCurrentUserId_sync();
 
   function longEnough() {
     if (!lastActive) return true;
@@ -43,9 +43,9 @@ function shareMyActivity(projectId) {
 
       console.debug("Activity posted", { uid, lastActive });
     })
-    .catch( err => {
+    /*** .catch( err => {
       //tbd. central.error("Reporting activity failed:", err);
-    });
+    }); ***/
   }
 }
 

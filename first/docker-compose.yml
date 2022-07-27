@@ -2,13 +2,8 @@
 # docker-compose.yml
 #
 # For:
-#   - manual deployment of backend and front-end
+#   - manual deployment
 #   - getting the access values to 'firebase.${ENV-staging}.js'
-#
-# Usage:
-#   <<
-#     $ CAPTURE_FILE=... docker compose run --service-ports all
-#   <<
 #
 # Docker Compose (v3) note:
 #   BE CAREFUL with use of pipe ('|') or '&&' in the commands! See -> https://stackoverflow.com/a/68590318/14455
@@ -20,32 +15,139 @@
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
 services:
-  deploy:
-    build: ../firebase-ci-builder.sub
+  firebase-cli:
+    # Note: Can also 'extends:' from the '../dc/firebase-tools/base' definition, but it adds little value, here.
+    build:
+      context: ../dc/firebase-tools/
+      target: firebase-cli
+      args:
+        - FIREBASE_TOOLS_VERSION=11.3.0
+
+  # Usage:
+  #   <<
+  #     $ install -d tmp/configstore     # important on WSL2 (otherwise 'root')
+  #     $ touch tmp/.captured.sdkconfig tmp/.firebaserc
+  #     $ docker compose run --service-ports --rm deploy-auth
+  #   <<
+  #
+  # Let the user authenticate (via a host-side browser session) and select the right Firebase deployment project.
+  #
+  # Note:
+  #   This needs to be 'run' (not started as a service): Firebase needs an interactive terminal for project selection.
+  #
+  # Once authenticated, the auth information is stored in: 
+  #   'tmp/configstore/firebase-tools.json'
+  #
+  # 'firebase use --add' demands to have a 'firebase.json' (a dummy will do) and creates '.firebaserc' in the
+  # current folder.
+  #
+  deploy-auth:
+    extends:
+      service: firebase-cli
     ports:
-      - "9005:9005"
-      # 9005 is needed by the auth dance
+      - "9005:9005"   # needed by the auth dance
     volumes:
-      # tbd. Realign the mappings. RULE APP OUT completely from the 'first'.
-      #     Consider user changing to 'first' before running the script.
-
-      #-- RO
-      - ../packages:/proj/packages:ro
       #-- Output
-      - ${CAPTURE_FILE}:/proj/.captured:delegated
+      #
+      # Firebase CLI saves the login information in '/root/.config/configstore/firebase-tools.json'.
+      # It also creates '/root/.config/configstore/update-notifier-firebase-tools.json'.
+      #
+      - ./.state/configstore:/root/.config/configstore:rw
+      - ./.state/.captured.sdkconfig:/work/.captured:delegated
+      - ./.state/.firebaserc:/work/.firebaserc:delegated
 
-    working_dir: /proj
-    command: bash -o pipefail -c
+    working_dir: /work
+    command: sh -c
       'echo "Launching Docker... 🐳" &&
+      
+      echo '{}' > firebase.json &&
       firebase login &&
 
-      (cd packages/backend && firebase use --add) &&
-      (cd packages/app && firebase use $$(cd ../backend && firebase use)) &&
-      (cd packages/backend && firebase apps:sdkconfig) > .captured &&
-
-      (cd packages/backend && npm install && firebase deploy --only functions,firestore)
+      firebase use --add &&
+      ((firebase apps:sdkconfig > .captured) ||
+        (cat >&2 .captured && false)
+      )
       '
-      # Cannot deploy front-end like that; 'npm run build' now needs DC. tbd. Can we live without it??
-      # (cd packages/app &&     npm install && npm run build && firebase deploy --only hosting)
+        # Note: The above acrobatics ('|| (cat ...)') is needed to bring Firebase CLI's error message (11.0.1) to
+        #     the developer's terminal. It writes errors to 'stdout' (why; don't know...).
 
+    profiles: ['manual']
+
+  # Run before 'deploy-backend'. Prepares the Function dependencies.
+  #
+  # Note: Kept separate from 'deploy-backend' because we don't want to eternally rely on the Firebase Emulators
+  #     having 'npm' capability. They are conceptually different.
+  #
+  #     Not done on the host side, because we don't want the 'functions/node_modules' to be visible.
+  #
+  pre-deploy-backend:
+    image: node:16-alpine
+    volumes:
+      #-- RO
+      - ../packages/backend/functions/package.json:/work/functions/package.json:ro
+      #-- output
+      - ./.state/functions/node_modules:/work/functions/node_modules:delegated
+
+    working_dir: /work/functions
+    command: sh -c
+      'npm config set update-notifier false &&
+      echo package-lock=false > .npmrc &&
+
+      npm install --omit=optional
+      '
+    environment:
+    - NO_GUARD=1
+    profiles: ['manual']
+
+  # Usage:
+  #   <<
+  #     docker compose run --rm deploy-backend
+  #   <<
+  #
+  deploy-backend:
+    extends:
+      service: firebase-cli
+    volumes:
+      #-- RO
+      - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
+      - ../packages/backend/firestore.rules:/work/firestore.rules:ro
+      - ../packages/backend/tmp/firebase.json:/work/firebase.json:ro
+      - ../packages/backend/tmp/database.rules.json:/work/database.rules.json:ro
+      #
+      - ./.state/.firebaserc:/work/.firebaserc:ro
+      - ./.state/functions:/work/functions:ro
+
+      #-- other
+      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up (though no changes are anticipated).
+      - ./.state/configstore:/root/.config/configstore:rw
+
+    working_dir: /work
+    command: sh -c
+      'firebase deploy --only functions,firestore,database
+      '
+    profiles: ['manual']
+
+  # Usage:
+  #   <<
+  #     docker compose run --rm deploy-app
+  #   <<
+  #
+  # Context:
+  #   - the app has been recently built (only 'dist' contents are deployed)
+  #
+  deploy-app:
+    extends:
+      service: firebase-cli
+    volumes:
+      #-- RO
+      - ../packages/app/dist:/work/dist:ro
+      - ./.state/firebase.hosting.json:/work/firebase.hosting.json:ro
+      #
+      # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up.
+      - ./.state/configstore:/root/.config/configstore:rw
+      - ./.state/.firebaserc:/work/.firebaserc:ro
+    working_dir: /work
+    command: sh -c
+      'firebase --config firebase.hosting.json deploy --only hosting
+      '
     profiles: ['manual']

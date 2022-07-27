@@ -18,7 +18,7 @@
 
 /.gitmodules
 /ci/
-/firebase-ci-builder.sub/
+/first/
 
 # Global '.gitignore' (of the author); not observed by Cloud Build defaults
 #
@@ -38,27 +38,23 @@
 # #!include:packages/backend/.gitignore
 #   ^-- ERROR: "May only include files in the same directory." (Google Cloud SDK 332.0.0)
 
-.firebase/
-.firebaserc
+#.firebase/
+#.firebaserc
+database-debug.log
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
-firebase-debug.app.log
-firestore-debug.app.log
-ui-debug.app.log
-.lock
-#vitebox/dist/
 .screenshots/
-#roll/out/*
-#vite/out/*
 stats.html
 *.~
 
 packages/backend/tmp/*
-!.gitkeep
 
-packages/app/dist/
-packages/app/tmp/
+packages/app/dist/*
+packages/app/tmp/*
+
+# Development files; not intended for CI
+packages/app/.env*
 
 # v-- Might not be accurate, any more... #cleanup
 # Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
@@ -74,6 +70,7 @@ packages/app/tmp/
 # Documentation-like folders (irrelevant for build)
 #
 /DEVS/
+/docs/
 /**/.images/
 *.md
 .editorconfig
@@ -84,3 +81,6 @@ packages/app/tmp/
 
 # Possible left-overs
 *.tgz
+
+# Final. Keep at the bottom of the list
+!.gitkeep

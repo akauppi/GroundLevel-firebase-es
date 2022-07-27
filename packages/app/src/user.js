@@ -17,9 +17,11 @@ import { computed, ref, watchEffect } from 'vue'
 import { onAuthStateChanged, getAuth } from '@firebase/auth'
 const auth = getAuth();
 
-import * as Sentry from '@sentry/browser'
+import { setUser as sentry_setUser } from '@sentry/browser'
 
-import { assert } from '/@tools/assert'
+import { countLogins } from "/@central/counters"
+
+function fail(msg) { throw new Error(msg) }
 
 // Fed either by Firebase auth changes or the router (LOCAL mode)
 //
@@ -31,22 +33,13 @@ onAuthStateChanged( auth, user => {
 
   authRef.value = user;    // null | { ..Firebase User object }
 
-  /*** disabled
-  // DEBUG: Compare with 'Auth.currentUser'
-  //
-  const currentUser = auth.currentUser;
-  if (user ? !currentUser : currentUser) {
-    console.error("[FIREBASE INTERNAL MISMATCH]:", {user: user?.uid, currentUser: currentUser?.uid})
-  } else {
-    console.info("*** Users in sync:", {user: user?.uid, currentUser: currentUser?.uid})
+  if (user) {
+    countLogins();
   }
-  ***/
-},
-  // Documentation does NOT state what will happen if we don't provide an error handler. So let's provide one. #firebase
+
+  // Inform Sentry client
   //
-  (err) => {
-    //central.error("Auth failed:", err);   // never seen
-    throw err;
+  sentry_setUser(user ? { id: user.uid } : null );
 });
 
 const isReadyProm = new Promise( (resolve /*,reject*/) => {
@@ -72,7 +65,6 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
   if (v) {
     const o = v;
 
-    Sentry.setUser({ id: o.uid })
     return {    // expose a controlled subset (minimalistic)
       uid: o.uid,
       displayName: o.displayName,
@@ -80,19 +72,44 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
       photoURL: o.photoURL
     }
   } else {
-    Sentry.setUser({})
     return v;   // undefined|null
   }
 });
 
 /*
-* Asking the current user, when the caller knows there must be one.
+* Get current user's info.
+*
+* If needed, wait until Firebase Auth has figured it out (using a Promise avoids an "unknown" state).
 */
-function getCurrentUserWarm() {   // () => null | { uid: string, displayName: string, isAnonymous: Boolean, photoURL: string }
+async function getCurrentUser() {   // () => Promise of (null | { uid: string, displayName: string, isAnonymous: Boolean, photoURL: string })
+  await isReadyProm;
+
   const v = userRef2.value;
-  assert(v !== undefined, "Too early! Asked for current user but we don't know them, yet!");  // if this happens, need to rethink code flow
+  (v !== undefined) || fail("INTERNAL ERROR: 'undefined' as user");   // if it happens, it's a bug. Rethink the pending.
 
   return v;
+}
+
+/*
+* Get current user's id. (as above, just simpler)
+*/
+async function getCurrentUserId() {   // () => Promise of (null | string)
+  return (await getCurrentUser())
+    ?.uid;
+}
+
+/*
+* Non-await version of 'getCurrentUserId' when the code *knows* that the Firebase auth dance must have already taken
+* place. E.g. for code that only shows for a logged in user.
+*/
+function getCurrentUserId_sync() {    // () => null | string
+  const tmp = auth.currentUser;
+
+  // Note: The JSDoc states 'auth.currentUser' can only be 'null' or string. It at least used to have 'undefined',
+  //    as well, so look out for that.
+
+  (tmp !== undefined) || fail("'auth.currentUser' is undefined");
+  return tmp?.uid;
 }
 
 /*
@@ -104,7 +121,9 @@ function uidValidator(v) {    // (String) => Boolean
 
 export {
   userRef2,
-  getCurrentUserWarm,
-  isReadyProm,
+  getCurrentUser,
+  getCurrentUserId,
+  //isReadyProm,    // can 'await' 'getCurrentUserId'
+  getCurrentUserId_sync,
   uidValidator
 }

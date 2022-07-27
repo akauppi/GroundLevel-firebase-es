@@ -219,7 +219,7 @@ Overrides to regions can only be done on a function-by-function basis. This lead
 >
 >To a user, it does not really seem that way, having `storageBucket`, `messagingSenderId` etc. How would `functionsDefaultRegion` be any different?
 
-<!-- disabled
+<!_-- disabled
 Note: Having the error message about CORS makes this especially nasty for developers.
 
 See [SO 62042554](https://stackoverflow.com/questions/50278537/firebase-callable-function-cors/61725395#62042554). 
@@ -231,7 +231,7 @@ Also relevant:
 The current complexity is against the aim for simplicity that is the main selling argument of Firebase (you can do back-end without being a wizard class security specialist!).
 
 There may be a need for overriding the region on a function-by-function basis, but there should also be a way to change the default (in configuration). This would be the way most people change their region. Such a change would not break code that currently uses the in-code settings.
--->
+--_>
 
 ---
 

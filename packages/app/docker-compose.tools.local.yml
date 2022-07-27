@@ -1,0 +1,36 @@
+#
+# app/docker-compose.tools.local.yml
+#
+services:
+  #---
+  # Separate target; priming with 'local/{docs|users}.js'
+  #
+  # NOTE:
+  #   How reliable is use of 'host.docker.internal' (works on macOS; Docker 4.7.1)
+  #
+  # References:
+  #   "How to access host port from docker container" (SO)
+  #     -> https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container
+  #
+  # Note:
+  #   'host.docker.internal' likely provides access to _all_ the host ports. It's not ideal, but if it works for us,
+  #   good.
+  #
+  prime:
+    build:
+      context: tools/prime.dc
+    volumes:
+      # --- RO
+      - ./local:/work/data:ro
+    command:
+      firebase-prime --host host.docker.internal --project demo-main data/docs.js data/users.js
+    environment:
+      - FIRESTORE_PORT=6768
+      - AUTH_PORT=9101
+      - NODE_NO_WARNINGS=1
+        # to suppress:
+        #   <<
+        #     (node:1) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time
+        #     (Use `node --trace-warnings ...` to show where the warning was created)
+        #   <<
+    profiles: ['manual']
