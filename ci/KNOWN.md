@@ -14,7 +14,7 @@ This is ok, and can be ignored.
 
 The reason is that we (`packages/backend/docker-compose.yaml`) install Firebase `functions` stuff using Node 18, which it isn't technically supporting, yet.
 
-There's no harm. This fades away once Firebase starts supporting Node 18. Any year now? :P
+There's no harm. This fades away once Firebase starts supporting Node 18.
 
 >Node.js 18 was released on April 19th 2022.
 

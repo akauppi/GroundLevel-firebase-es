@@ -1,6 +1,6 @@
 # CI setup
 
-All command line commands are expected to be run in the `ci` folder.
+>All commands are expected to be run in the `ci` folder.
 
 ## Aiming 🎯
 
@@ -11,7 +11,7 @@ Let's first set the target - what do we want the CI/CD pipeline to do for us?
 |Files changed in...|then...|
 |---|---|
 |`packages/backend` (or `/package.json`)|test `packages/backend`|
-|`packages/app` (or `/package.json`)|test and test-build `packages/app`|
+|`packages/app` (or `/package.json`)|test and dummy build `packages/app`|
 
 
 ### For changes already merged to `master`
@@ -21,19 +21,17 @@ Let's first set the target - what do we want the CI/CD pipeline to do for us?
 |`packages/backend` (or `/package.json`)|test and deploy `packages/backend`|
 |`packages/app` (or `/package.json`)|test, build and deploy `packages/app`|
 
-<!-- hidden; not that relevant
-**With Cloud Build integrated with GitHub, one *cannot restrict* merges to `master` - only be informed after the fact. We can live with this, but needs some discipline.**
+>Note: The `/dc/` folder is not involved in CI. It's only used for development. CI gets the Firebase Emulators and CLI from a pre-built Docker image, to save time.
+
+<!-- tbd.
+Revisit the aim, once/if #102 bears fruit. 🫑🍉🍌🍊
+
+With it, we can:
+- avoid merges to `master` that don't pass tests
+- ..while still executing tests within Cloud Build (because we like its approach to build steps)
+- this removes the merged-to-master runs to only do deployment
 -->
 
->Note: The `/dc/` folder is not involved in CI. It's only used for development; CI gets the Firebase Emulators and CLI from a pre-built Docker image, to save time.
-
-<!-- author's note:
-
-We'd like to:
-- restrict merges to `master` altogether, if they would break the tests
-- have two people approve PRs
-  - [ ] check what options GitHub itself provides
--->
 
 ### Suggested GCP projects layout
 
@@ -42,7 +40,7 @@ The model recommended by the author is such:
 <font size="-3"><pre style="line-height: 11px">
                                     ┌──────────────────────────┐               ┌──────────────────┐
                                     │                      (1) │               │                  │
-                                    │   CI/CD project          │   PR changed  │  GitHub repo     │
+                                    │   CI-builder project     │   PR changed  │  GitHub repo     │
                                     │                          │◄──────────────┤                  │
                                     │   - builder images       │               │                  │
                                     │   - PR CI tasks          │               │                  │
@@ -60,8 +58,8 @@ xx                         x        │                     ├─────�
   xxxxxxxxxxxxxxxxxxxxxxx           └─────────────────────┘  |
                           ▲                                  |
                           |         .---------------------.  |
-                          |         |                     |<-'
-                          '---------|   2nd instance      |
+                          |         |                (2b) |<-'
+                          '---------|   N projects        |
                                     |                     |
                                     '---------------------'
 </pre></font>
@@ -70,29 +68,34 @@ xx                         x        │                     ├─────�
 <!-- Note: If doesn't show nicely on GitHub, take local screen capture and use it, instead.
 -->
 
-#### CI/CD project (1)
+<!-- tbd. revise once/if we get GitHub Actions in the game (#102). Add Cloud Storage, too.
+-->
+
+#### `CI-builder` project (1)
 
 This is a separately created GCP project (has no counterpart in Firebase) that:
 
 - carries the builder Docker image(s)
-- runs any "does this pass the tests?" CI tests (that don't involve access to a Firebase cloud project)
+- runs any "does this pass the tests?" CI tests (they don't involve access to a Firebase cloud project)
 
 #### Staging project (2)
 
 These GCP projects are created automatically by creation of a *Firebase* project.
 
-They are used (by Firebase) and we piggy-back them to also help in CI/CD. They run deployments, if a certain branch changes.
+They are used (by Firebase) and we piggy-back on them to also help in CI/CD. They run deployments, if a certain branch changes.
 
-#### Other projects
+#### N projects (2b)
 
-One can have as many deployment targets as one wants. These each map to a separate Firebase project, and each have their own data stores, users and deployed versions.
+One can have as many deployment targets as one wants, from the same code base. These each map to a separate Firebase project, and each have their own data stores, users, deployed versions and CI/CD setup.
 
-You might e.g. have a `staging` environment and a `production` environment, and/or multiple production environments. The naming of them is completely up to you.
+You might e.g. have `staging` and `production` environments<sup>[1]</sup>, or multiple production environments, say one per customer.
+
+<small>`[1]`: Even, whether you call them "stages", "deployments" or "environments" is up to you.</small>
 
 
-#### Benefits
+#### Pros
 
-There are three main benefits the above layout provides.
+The above layout provides three benefits:
 
 1. **Keeping production keys safe**
 
@@ -102,16 +105,32 @@ There are three main benefits the above layout provides.
 
    Deployments are now guarded by the *version control* access controls, since anyone who can merge to `master` can also deploy (they become the same thing).
 
-3. **Separation of the deployments**
+3. **Independent environments**
 
-   There is no central list of deployment environments. You can stop one simply by deleting such a GCP project and it gets shut at CI/CD, and on the Firebase side, without affecting other deployments.
+   There is no central list of deployment environments. You can remove one simply by deleting such a GCP project. This removes the Firebase resources but also the associated CD triggers, without affecting other environments.
+
+#### Cons
+
+1. **The layout doesn't provide means to handle inter-dependencies** between the front-end and the backend.
+
+   Let's say you are deploying a feature where changes have been made both to the backend and the frontend. In order to work, the frontend needs the latest backend to be deployed.
+
+   Merging these changes (even as a single commit!) gives no guarantee of the order of deployment. Both CD jobs will run individually, and will finish unaware of each other.
+   
+   >Cloud Build does not provide a mechanism for making such synchronizations. We'd need to build that ourselves, complicating the setup.
+
+   The solution is to handle this manually. You can either use two separate merges, or (maybe preferred), deploy the backend manually, using the `first` folder's tools.
+
+>*If you are aware of other cons, please leave a mention.*
+
+#### The central `CI-builder` project
+
+This project can be used not only across the target environments, but also across *web app projects* that a single team, or company, is responsible for.
+
+- It's good to find all (non-deploying) CI tasks in one place
+- Access to it can be provided to all developers (to set up new test runs, or modify existing ones)
 
 ---
-
-The raison d’être of the dedicated CI/CD project is that it centrifies things. 
-
-- It's good to find all (non-deploying) CI/CD tasks in one place
-- Access to it can be provided to all developers (to set up new test runs, or modify existing ones)
 
 This layout seems light enough, yet flexible, to recommend. In the following text we expect you have it in place.
 
@@ -149,6 +168,9 @@ This layout seems light enough, yet flexible, to recommend. In the following tex
 
 - Docker
 
+<!-- tbd. remove "Docker" once/if we build the builder, in GCP
+-->
+
 
 ### Create a "CI Builder" GCP project
 
@@ -172,14 +194,14 @@ Pick the right one, then:
 $ gcloud config set project <project-id>
 ```
 
->Query the current active project by:
+>Hint: To see the current active project:
 >
 >```
 >$ gcloud config get-value project
 >```
 
 <p />
->Note: Unlike the Firebase CLI projects (which we wrap around in the `first` section), `gcloud` project is system-wide. You can change terminals and folders; the same project remains active.
+>Note: If you are familiar with Firebase CLI projects (you won't touch them directly, with this repo), it's good to know one difference. Whereas `firebase use` projects are tied to a folder,  `gcloud` project setting is system-wide. You can change it in any terminal or folders; the affect is global.
 
 ### Deployment GCP project(s)
 
@@ -188,7 +210,7 @@ These are already created, by Firebase.
 
 ### Build and push the builder image
 
-The CI scripts require your `gcloud` builder project to have the `firebase-emulators:11.2.1` image in the Artifact Registry. We'll build such an image, and push it there.
+The CI scripts require your `gcloud` builder project to have the `firebase-emulators:11.3.0` image in the Artifact Registry. Let's build such an image, and push it there.
 
 1. Log into your "CI builder" GCloud project (see steps above).
 2. Build and push the image
@@ -196,25 +218,28 @@ The CI scripts require your `gcloud` builder project to have the `firebase-emula
    ```
    $ ./build
    ...
-   Going to push us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.1
+   Going to push us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
    
    Continue (y/N)?
    ```
 
    If everything seems well, press `y` and you'll have the image stored in `us-central1` Artifact Registry.
 
-<details style="margin-left: 2em"><summary>Why `us-central1`?</summary>
+><details style="margin-left: 2em"><summary>Why `us-central1`?</summary>
+>
+>It's good to have the image in the same region where your Cloud Build (CI) runs.
+>
+>Note that this has no connection to where you deploy your application backend to, nor implications to GDPR and other privacy aspects. The CI runs simply compile and test the sources from your GitHub repo. The CI jobs don't deal with your users, or their data, ever.
+></details>
 
-It's good to have the image in the same region where your Cloud Build (CI) runs.
+<p />
 
-Note that this has no implications to GDPR and other privacy aspects: the CI runs simply compile the sources from your GitHub repo, and deploy the products. The CI jobs don't deal with your users, or their data, ever.
-</details>
-
->**Costs involved (and how to have none)**
+><details style="margin-left: 2em"><summary>**Costs involved (and how to have none)**</summary>
 >
 >Storing Docker images in Artifact Registry has a cost. The free tier provides 1GB of free storage (July 2022). The image is slightly less than 500MB, so you can have two versions without inducing billing.
 >
 >You may want to occasionally visit the [GCP Console](https://console.cloud.google.com/artifacts) and clear away earlier versions.
+></details>
 
 
 ### Update the references to `ci-builder` GCP project
@@ -230,10 +255,7 @@ substitutions:
 
 Replace `ci-builder/builders` with the name of the builder project you created, and the folder you use.
 
-<!-- tbd. Eventually, we'll need to come up with a solution that doesn't require edits to the template. (Public pull rights, or build using Kaniko???)
--->
-
->The `ci-builder` project belongs to the author and doesn't provide public pull access. We need to eventually do something about this (it is not the intention that you need to edit *anything* in the repo, to customize it). Using Kaniko image caching would be a likely solution (but needs testing)... [#94](https://github.com/akauppi/GroundLevel-firebase-es/issues/94)
+>The `ci-builder` project belongs to the author and doesn't provide public pull access. We need to eventually do something about this (it is not the intention that you need to edit *anything* in the repo, to customize it).
 
 
 Next, let's introduce GitHub and Cloud Build to each other.
@@ -245,20 +267,41 @@ You need to enable quite a few things within the GCP, to have things rolling.
 
 >Note: These changes *can* be done from command line as well (using `gcloud`) if you need to do them repeatedly.
 
-Some steps are needed for the build project ("CI/CD project", above), some for the deployment projects ("staging project", above), some for both.
+Some steps are needed for the build project ("CI builder", above), some for the deployment projects ("staging project", above), some for both.
 
 
 ### Enable Artifact Registry (build project only)
 
-<!-- tbd. more details / pics? -->
+- [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `Artifact Registry`
 
-- Enable Artifact Registry
-- Create a `builders`<sup>(*)</sup> folders within there
+  >![](.images/enable-artifact-registry.png)
 
-   <small>`(*)`: You can name the folder differently, but then need to change the name where referenced.</small>
+  - Press `Enable`
+  - Enable billing
+  - `+ CREATE REPOSITORY`
+
+      ><details><summary>Screenshot</summary>
+      >![](.images/ar-create.png)
+      ></details>
+
+      |||
+      |---|---|
+      |Name|`builders`<sup>[1]</sup>|
+      |Format|`Docker`|
+      |Location type|`Region`|
+      |Region|`us-central1`|
+      |Description|free text|
+
+Push `CREATE`. Now, Docker images used by the CI/CD can be stored in this central location.
+
+<!-- the address is
+- `us-central1-docker.pkg.dev/{ project id }/builders/{docker image and tag}`
+-->
+
+>Note: You can name the `builders` folder differently, but then need to change the name where referenced.
 
 
-### Enable APIs (both build and deployment projects)
+### Enable Cloud Build API (both build and deployment projects)
 
 - [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
   - `+ Enable APIs and Services`
@@ -267,17 +310,6 @@ Some steps are needed for the build project ("CI/CD project", above), some for t
 
       - `Cloud Build` > `Enable`
 
-*Without this, you run into problems. Google's instructions did not mention this step, for some reason. (May 2021)*
-
-Also check that the following are enabled:
-
-  - Firebase Management API
-  - Firebase Hosting API
-  - Cloud Resource Manager API
-
-<!-- from: https://cloud.google.com/build/docs/deploying-builds/deploy-firebase#before_you_begin
--->
-
 ### Enable IAM API (deployment project)
 
 - [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
@@ -285,10 +317,19 @@ Also check that the following are enabled:
 
       - `Identity and Access Management (IAM) API` > `Enable`
 
+  >While here, also check that the following are enabled:
+  >
+  >- Firebase Management API
+  >- Firebase Hosting API
+  >- Cloud Resource Manager API
+
+  <!-- hidden note:
+The above need to be enabled, by GCP docs, but since our deployment project already is a Firebase project, they are likely already enabled.
+-->
 
 ### Deployment project
 
-**In addition** to the above, do these:
+In addition to the above, do these:
 
 <details><summary>Grant roles to the Cloud Build service account</summary>
 
@@ -299,21 +340,6 @@ Also check that the following are enabled:
    >![](.images/service-account-grants.png)
 
 >Hint: Pick up the `Service account email`. You'll need it, shortly.
-
-<!-- (covered above; using GCP Console)
-There was one more role needed, not covered in the normal documentation. Deploying Cloud Functions needs this.
-
-- Get the number from the "Service account email" (above screenshot).
-- Using the Firebase project id:
-
-   ```
-   $ MEMBER=serviceAccount:337......369@cloudbuild.gserviceaccount.com
-   $ PROJECT_ID=...
-   $ gcloud iam service-accounts add-iam-policy-binding $PROJECT_ID@appspot.gserviceaccount.com --member=$MEMBER --role=roles/iam.serviceAccountUser
-   Updated IAM policy for serviceAccount [...]
-   ...
-   ```
--->
 </details>
 
 <!-- tbd. needed, in 2022?? -->
@@ -364,10 +390,11 @@ Within GCP, the Cloud Build service account doesn't by default have access to re
 
 ## Enable GitHub / Cloud Build integration
 
+To bridge GitHub with Cloud Build, let's enable the "Cloud Build Github app". This is an integration that Google has prepared that lets Cloud Build get triggered when something (push or merge) happens in the GitHub repo.
+
 - GitHub Marketplace > Apps > [Google Cloud Build](https://github.com/marketplace/google-cloud-build) > `Enable`
 - Add your GitHub repo to the Cloud Build app (covers all GCP projects where Cloud Build is enabled)
 
-You need this, in order to create Cloud Build triggers on GitHub PRs.
 
 >Note: The UI uses the term "purchase", but installing the application is completely free (Jun 2021). The costs - if any - are based on your agreements with GitHub and Cloud Build.
 
@@ -451,7 +478,7 @@ You should see these (under `Checks`):
 
 Create these triggers in the deployment project.
 
-||**`merged-backend`**|
+||**`backend-deploy`**|
 |---|---|
 |Description|Merge to `master` (affects backend)|
 |Event|(●) Push to a branch|
@@ -468,7 +495,7 @@ This takes care of deploying the backend.
 
 For the front-end, create a similar trigger (you can use `duplicate` in the triggers list as a start):
 
-||**`merged-app`**|
+||**`app-deploy`**|
 |---|---|
 |Description|Merge to `master` (affects app)|
 |Event|(●) Push to a branch|
@@ -496,6 +523,7 @@ To make multiple deployments, just dedicate a certain branch to each, create a F
 
 ## Development
 
+<!-- hidden (why mention?)
 ### `cloud-build-local` (does not work!)
 
 There is a `cloud-build-local` tool [documented](https://cloud.google.com/build/docs/build-debug-locally) by Google, but it's practically abandoned.
@@ -511,7 +539,7 @@ As it currently (July 2022) is, Google would do well in removing the documentati
 
 <small>`[1]`: see comments</small>
 
-<!--
+<_!--
 Run in Jul 2022:
 
 <font size="-50"><pre>
@@ -543,8 +571,8 @@ ERROR: build step 0 "node:16-alpine" failed: exit status 126
 2022/07/14 17:50:02 RUNNER failed to kill running process `/usr/local/bin/docker [docker run --name cloudbuild_update_docker_token_15b9e889-<..>-8cc903af3c40 --rm --volume homevol:/builder/home --env HOME=/builder/home --volume /var/run/docker.sock:/var/run/docker.sock --entrypoint bash gcr.io/cloud-builders/docker -c sed -i 's/b2F1dGgy...TFadzAxNzQ=/g' ~/.docker/config.json]`: os: process already finished
 2022/07/14 17:50:04 Build finished with ERROR status
 </pre></font>
+--_>
 -->
-
 
 ### Run CI jobs manually (`gcloud builds submit`)
 
@@ -567,6 +595,8 @@ The author finds the `gcloud builds` workflow great for developing one's CI scri
 
 It makes sense to optimize the "tarball" going out. Not shipping unnecessary files speeds up your debug cycles, and also saves storage space (Cloud Build keeps these around).
 
+>Unfortunately Cloud Build is not quite capable of using `.gitignore` files in various subdirectories. This is why we've prepared a `../.gcloudignore` that tries to duplicate the logic in those files. `#hack`
+
 ```
 $ gcloud meta list-files-for-upload ..
 ```
@@ -585,8 +615,9 @@ This set of files is controlled by `.gcloudignore` in the project root.
 ## References
 
 - [Cloud Build](https://cloud.google.com/build/) (GCP)
-- [Creating GitHub App triggers](https://cloud.google.com/build/docs/automating-builds/create-github-app-triggers) (Cloud Build docs)
-- [Deploying to Firebase](https://cloud.google.com/build/docs/deploying-builds/deploy-firebase) (Cloud Build docs)
-- [Building and debugging locally](https://cloud.google.com/build/docs/build-debug-locally) (Cloud Build docs)
+   - [Creating GitHub App triggers](https://cloud.google.com/build/docs/automating-builds/create-github-app-triggers) (Cloud Build docs)
+   - [Deploying to Firebase](https://cloud.google.com/build/docs/deploying-builds/deploy-firebase) (Cloud Build docs)
+   - [Building and debugging locally](https://cloud.google.com/build/docs/build-debug-locally) (Cloud Build docs)
+   - [Configuring access control](https://cloud.google.com/artifact-registry/docs/access-control) (Artifact Registry docs)
+
 - `gcloud builds submit --help`
-- [Configuring access control](https://cloud.google.com/artifact-registry/docs/access-control) (Artifact Registry docs)

@@ -20,37 +20,23 @@ Cloud Build uses Cloud Storage (of the same project) to store files. During the 
 The `*_cloudbuild` bucket has a `source/` folder with `.tgz` packages.
 
 >Note: These `.tgz` files are not big (~120 kB) but they do add up. You may want to wipe the folder, or set a lifecycle that automatically wipes them, for it.
->
->(Please suggest the steps for adding the lifecycle, eg. retain for 30 days only. `#help`)
 
+There is a lifecycle step defined that moves the contents to "archive" within 50 days of not being touched.
 
-## Troubleshoot locally
+>![](.images/lifecycle-defined.png)
 
->Haven't really used local runs, recently (2022). With proper steps, debugging can be done also on the Cloud Build side.
+You can also define them to be outright removed in - say - 10..30 days.  All you will lose is old build logs (the author thinks). Decide for yourself.
 
-To launch a Docker container, similar to what `gcloud builds submit` does:
+- `ADD A RULE` > `Delete` > `Age` `30` days
 
-```
-$ docker run -it --rm -v `pwd`/..:/workspace firebase-ci-builder:9.16.0-node16-npm7 /bin/bash
-bash-5.0#
-```
-
-You can now execute the build steps and debug, if something doesn't work right. Faster than changing `cloudbuild.yaml`.
-
->Note DIFFERENCES: Whereas Cloud Build copies files and **excludes** certain ones, here you see a mapping of the actual disk contents of your entire repo. If you remove something, it's removed in the host.
 
 ## Viewing builds
 
-See -> [Viewing build results](https://cloud.google.com/build/docs/view-build-results) (Cloud Build docs)
+See GCP Console > Cloud Build for your runs; logs and everything.
 
+`https://console.cloud.google.com/cloud-build/builds?project=ci-builder`
 
-## Build default timeout
-
-Timeout for the builds seems to be 10min (600s), which is rather long. The author has taken a habit of providing an explicit timeout for each CI job, just in case.
-
-<!-- whisper
-seen in `gcloud builds describe <id>`
--->
+>See: [Viewing build results](https://cloud.google.com/build/docs/view-build-results) (Cloud Build docs)
 
 
 ## References
