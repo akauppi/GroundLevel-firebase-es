@@ -13,24 +13,17 @@ Let's first set the target - what do we want the CI/CD pipeline to do for us?
 |`packages/backend` (or `/package.json`)|test `packages/backend`|
 |`packages/app` (or `/package.json`)|test and dummy build `packages/app`|
 
-
 ### For changes already merged to `master`
 
 |Files changed in...|then...|
 |---|---|
-|`packages/backend` (or `/package.json`)|test and deploy `packages/backend`|
-|`packages/app` (or `/package.json`)|test, build and deploy `packages/app`|
+|`packages/backend` (or `/package.json`)|deploy `packages/backend`|
+|`packages/app` (or `/package.json`)|build and deploy `packages/app`|
+
+For passed tests, the test-level CI jobs write a token to the build project's Cloud Storage. The CD jobs can then check this, to know whether a certain code base has (at any earlier time) passed tests. This means deployment doesn't need to re-run tests, but has confidence that the code can be deployed.
+
 
 >Note: The `/dc/` folder is not involved in CI. It's only used for development. CI gets the Firebase Emulators and CLI from a pre-built Docker image, to save time.
-
-<!-- tbd.
-Revisit the aim, once/if #102 bears fruit. 🫑🍉🍌🍊
-
-With it, we can:
-- avoid merges to `master` that don't pass tests
-- ..while still executing tests within Cloud Build (because we like its approach to build steps)
-- this removes the merged-to-master runs to only do deployment
--->
 
 
 ### Suggested GCP projects layout
@@ -46,8 +39,12 @@ The model recommended by the author is such:
                                     │   - PR CI tasks          │               │                  │
                                     │     "does it pass?"      │──────────────►│                  │
                                     │                          │   pass/fail   │                  │
-                                    └────────────────────────┬─┘               └────────┬─────────┘
-                                                             │                          │   ▲
+                                    │    ┌────────────────┐    │               └────────┬─────────┘
+                                    │    │ Cloud Storage  │    │                    ▲   │   ▲
+                                    │    │ - pass token   │ - - - - - - - - - - - - ´   │   │
+                                    │    └────────────────┘    │   tests passed         │   │
+                                    └───────────────── │ ────┬─┘                        │   │
+                                                       ▼     │                          │   │
          xxxxxx                     ┌─────────────────────┐  │ provide image            │   │
     x   x     xxxx         deploy   │                 (2) │◄─┘                          │   │
   xxxxxxx         xxxxxx  ┌─────────┤   Staging project   │  |         merge to master  │   │
@@ -68,15 +65,13 @@ xx                         x        │                     ├─────�
 <!-- Note: If doesn't show nicely on GitHub, take local screen capture and use it, instead.
 -->
 
-<!-- tbd. revise once/if we get GitHub Actions in the game (#102). Add Cloud Storage, too.
--->
-
 #### `CI-builder` project (1)
 
 This is a separately created GCP project (has no counterpart in Firebase) that:
 
 - carries the builder Docker image(s)
 - runs any "does this pass the tests?" CI tests (they don't involve access to a Firebase cloud project)
+- for passed tests, writes their git SHA in the Cloud Storage
 
 #### Staging project (2)
 
@@ -95,9 +90,7 @@ You might e.g. have `staging` and `production` environments<sup>[1]</sup>, or mu
 
 #### Pros
 
-The above layout provides three benefits:
-
-1. **Keeping production keys safe**
+1. **Keeps production keys safe**
 
    The "production keys" don't need to be shared - at all. The GCP projects **deploy onto themselves** and someone in the organization already has admin access to them.
 
@@ -108,6 +101,7 @@ The above layout provides three benefits:
 3. **Independent environments**
 
    There is no central list of deployment environments. You can remove one simply by deleting such a GCP project. This removes the Firebase resources but also the associated CD triggers, without affecting other environments.
+
 
 #### Cons
 
@@ -125,7 +119,7 @@ The above layout provides three benefits:
 
 #### The central `CI-builder` project
 
-This project can be used not only across the target environments, but also across *web app projects* that a single team, or company, is responsible for.
+This project can be used not only across the target environments, but also across all *web app projects* that a single team, or company, is responsible for.
 
 - It's good to find all (non-deploying) CI tasks in one place
 - Access to it can be provided to all developers (to set up new test runs, or modify existing ones)
@@ -301,6 +295,12 @@ Push `CREATE`. Now, Docker images used by the CI/CD can be stored in this centra
 >Note: You can name the `builders` folder differently, but then need to change the name where referenced.
 
 
+<!-- tbd. UNDONE:  
+### Enable write access to Cloud Storage (build project only)
+
+- GCP Console > `IAM & Admin`
+-->
+
 ### Enable Cloud Build API (both build and deployment projects)
 
 - [GCP Console](https://console.cloud.google.com/home/dashboard) > `≡` > `APIs & Services`
@@ -354,7 +354,7 @@ In addition to the above, do these:
 >![](.images/add-api-keys-admin.png)
 </details>
 
-<details><summary>Enable access to CI Builder Artifact Registry</summary>
+<details><summary>Enable access to CI Builder's Artifact Registry</summary>
 
 Each deployment project needs to be able to read the builder image. This means granting them the `roles/artifactregistry.reader` IAM role.
 
@@ -369,11 +369,28 @@ Each deployment project needs to be able to read the builder image. This means g
 
    >![](.images/grant-artifact-registry-reader.png)
 
+   - 
    Push `SAVE`.
 
 Your deployment project Cloud Build runs should now be able to pull the builder images.
 </details>
 
+<details><summary>Enable access to CI Builder's Cloud Storage</summary>
+
+We also grant `storage.objects.list` role so that the deployment project can see, whether tests have successfully passed for a given commit.
+
+- GCP Console > (*builder project*) > IAM & Admin
+
+   - Pick the principal created for the deployment service account (it has `Artifact Registry Reader` access
+
+   - Edit > `+ ADD ANOTHER ROLE` > `Storage Object Viewer`
+
+   >![](.images/storage-object-viewer.png)
+   
+   Push `SAVE`.
+
+Your deployment scripts will not be able to see whether tests have passed for a given git SHA.
+</details>
 
 
 <details><summary>Allow access to secrets</summary>

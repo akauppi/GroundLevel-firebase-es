@@ -8,12 +8,12 @@
 #   Production/staging GCP project (deploys to itself).
 #
 # Responsibility:
-#   - (maybe test,) build and deploy front-end
+#   - build and deploy front-end
 #
 # Uses images:
 #   - node:{16|18}-alpine (stock image)
-#   - firebase-emulators  (pushed to Artifact Registry)   The image also contains Firebase CLI we use for deployment
-#   - docker/compose      (stock image)
+#   - firebase-emulators  (pushed to Artifact Registry)   contains Firebase CLI we use for deployment
+#   - gsutil              (Cloud Build built-in image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -28,17 +28,23 @@
 #
 steps:
 # Flight check
-- name: node:${_NODE_VER}-alpine
+- name: gcr.io/cloud-builders/gsutil
   entrypoint: sh
   args: ['-c', '
-    [ $PROJECT_ID != ci-builder ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
-    [ ! -z $$SENTRY_DSN ] || >&2 echo "WARN: ''SENTRY_DSN'' missing; no operational monitoring!"
-    '
-  ]
+    [ $PROJECT_ID != ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
+    [ ! -z $$SENTRY_DSN ] || >&2 echo "WARN: ''SENTRY_DSN'' missing; no operational monitoring!" &&
+    
+    if [ -z ${SHORT_SHA} ]; then
+      >&2 echo "ERROR: No ''SHORT_SHA'' detected. If this is a manual run, provide one by ''--substitutions=SHORT_SHA=xxx''."; false
+    ; else
+      gsutil cat ${_GS_TOUCH_PATH}/${SHORT_SHA} ||
+        ( >&2 echo "ERROR: No evidence that tests would have passed. ''${_GS_TOUCH_PATH}/${SHORT_SHA}'' does not exist"; false )
+    ; fi
+  ']
   secretEnv:
     - SENTRY_DSN
 
-# - Install
+# Install
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
@@ -54,22 +60,7 @@ steps:
   # State:
   #   - packages/app/firebase.json    has the deployment configuration (based on 'firebase.hosting.js')
 
-# Install backend; only needed if tests are run
-- name: node:${_NODE_VER}-alpine
-  entrypoint: sh
-  args: ['-c', '
-    npm --prefix packages/backend install &&
-    (cd packages/backend && 
-      touch firebase-debug.log firestore-debug.log database-debug.log
-    )
-  ']
-  env:
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800    # tbd. not sure we use it?
-    - AUTH_PORT=9100
-
-# Sign in to Firebase; capture the "access values" for the project.
+# Sign in to Firebase; capture the "access values"
 #
 - name: $_1
   entrypoint: sh
@@ -79,54 +70,14 @@ steps:
     firebase apps:sdkconfig | grep -E ''^\s+".+":\s.+,'' | grep -E "projectId|appId|locationId|apiKey|authDomain|databaseURL"
       > .capture &&
 
-    echo "export default { $$( cat .capture ) }" > ./firebase.config.js
+    echo "export default { $$( cat .capture ) }" > firebase.config.js
   ']
   dir: packages/app
 
   # State:
   #   - packages/app/firebase.config.js    has the Firebase server "access values", to be baked into the client
 
-# Test
-#
-# Note: TO BE RETIRED, IF #102 GETS IMPLEMENTED.
-#
-# 1-to-1 from 'cloudbuild.app.yaml'.
-#
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
-  dir: packages/backend
-  env:
-    - CI_BUILDER_IMAGE=$_1
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800
-    - AUTH_PORT=9100
-
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', 'vite-ci-launched']
-  dir: packages/app
-  env:
-    - PORT=3002
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800
-    - AUTH_PORT=9100
-
-- name: cypress/included:${_CYPRESS_TAG}
-  args: ['run', '--headless']
-  dir: packages/app
-  env:
-    - CYPRESS_baseUrl=http://vite:3002
-    - CYPRESS_defaultCommandTimeout=20000
-
-# BUILD
-
-#DEBUG
-#|- name: $_1
-#|  entrypoint: sh
-#|  args: ['-c', 'cat ./firebase.config.js']
-#|  dir: packages/app
-
+# Build
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
   args: ['-f', 'docker-compose.tools.ci.yml', 'run', 'build']
   dir: packages/app
@@ -148,8 +99,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build (no tests):   1:38, 1:22, 1:57
-# Cloud Build: (w tests):   6:09
+# Cloud Build:  1:30
 #
 timeout: 400s
 
@@ -159,7 +109,8 @@ substitutions:
   _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
   _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "18"
-  _CYPRESS_TAG: 10.3.0
+  _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
+  _MY_BUILDER: ci-builder
 
 # Anything baked into the front end are not really hard secrets, but let's treat them as such.
 #

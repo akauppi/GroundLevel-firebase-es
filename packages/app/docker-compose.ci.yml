@@ -50,7 +50,7 @@ services:
       - AUTH_PORT
       - FIRESTORE_PORT
       - FUNCTIONS_PORT
-      - DATABASE_PORT
+      #- DATABASE_PORT
 
     network_mode: cloudbuild
     container_name: vite

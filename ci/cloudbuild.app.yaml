@@ -11,6 +11,7 @@
 #   - node:{16|18}-alpine   (stock image)
 #   - firebase-emulators    (pushed to Artifact Registry)
 #   - docker/compose        (stock image)
+#   - gsutil                (Cloud Build built-in image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -24,15 +25,14 @@
 #   Using 'node:16' to run 'npm install' means that the packages are installed as root, and 'node_modules' is read-only
 #   to regular users (of other images). This is normally not a concern.
 
-# tbd. Remove use of 'DATABASE_PORT' - we don't need it, for testing.
-
 steps:
 # Install
 #
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
-    [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+    [ ! -z ${SHORT_SHA} ] || ( >&2 echo "!: No ''SHORT_SHA'' detected (this is a manual run). A successful run will NOT open doors to deployment." ) &&
+    [ $PROJECT_ID == ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the ''${_MY_BUILDER}'' project: gcloud config set project ${_MY_BUILDER}"; false ) &&
 
     npm config set update-notifier false &&
 
@@ -53,7 +53,6 @@ steps:
     - CYPRESS_INSTALL_BINARY=0    # avoid downloading a GUI
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800    # tbd. not sure we use it?
     - AUTH_PORT=9100
 
   # State:
@@ -74,7 +73,6 @@ steps:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 #|    - FIRESTORE_PORT=6767
 #|    - FUNCTIONS_PORT=5002
-#|    #- DATABASE_PORT=6800
 #|    - AUTH_PORT=9100
 
 # --- App
@@ -90,7 +88,6 @@ steps:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800
     - AUTH_PORT=9100
 
 # DEBUG; TERMINAL. Enable if Vite does not launch
@@ -101,7 +98,6 @@ steps:
 #|    - PORT=3002
 #|    - FIRESTORE_PORT=6767
 #|    - FUNCTIONS_PORT=5002
-#|    - DATABASE_PORT=6800
 #|    - AUTH_PORT=9100
 
 # Launches Vite
@@ -113,7 +109,6 @@ steps:
     - PORT=3002
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    - DATABASE_PORT=6800
     - AUTH_PORT=9100
 
   # State:
@@ -156,6 +151,19 @@ steps:
   args: ['run', 'lint']
   dir: packages/app
 
+#-- Pass marker
+#
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: sh
+  args: ['-c', '
+    if [ -z ${SHORT_SHA} ]; then
+      ( >&2 echo "Pass NOT MARKED to Cloud Storage since no ''SHORT_SHA'' (manual run)." )
+    ; else
+      touch _
+        && gsutil cp file://_ ${_GS_TOUCH_PATH}/${SHORT_SHA}
+    ; fi
+  ']
+
 # --- Timeout
 #
 # Cloud Build: 5:36, 5:10
@@ -173,3 +181,5 @@ substitutions:
   _CYPRESS_TAG: 10.3.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
+  _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
+  _MY_BUILDER: ci-builder

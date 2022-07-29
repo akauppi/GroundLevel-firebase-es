@@ -56,6 +56,9 @@ packages/app/tmp/*
 # Development files; not intended for CI
 packages/app/.env*
 
+# '/dc/' is for development; CI uses pre-built Docker images
+/dc/
+
 # v-- Might not be accurate, any more... #cleanup
 # Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
 # the folder in the root level (if CI run is involved).
@@ -69,7 +72,7 @@ packages/app/.env*
 
 # Documentation-like folders (irrelevant for build)
 #
-/DEVS/
+DEVS/
 /docs/
 /**/.images/
 *.md

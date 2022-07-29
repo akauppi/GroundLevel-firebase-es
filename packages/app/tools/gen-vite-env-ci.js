@@ -3,7 +3,7 @@
 *
 * Usage:
 *   <<
-*     FIRESTORE_PORT=<num> AUTH_PORT=<num> DATABASE_PORT=<num> \
+*     FIRESTORE_PORT=<num> AUTH_PORT=<num> \
 *     EMUL_HOST=<port> \
 *     [SENTRY_DSN=...] gen-vite-env-local --project=demo-...
 *   <<
@@ -46,14 +46,12 @@ const emulHost = process.env["EMUL_HOST"];
 
 const firestorePort = process.env["FIRESTORE_PORT"] || fail("Expected 'FIRESTORE_PORT' env.var.");
 const authPort = process.env["AUTH_PORT"] || fail("Expected 'AUTH_PORT' env.var.");
-const databasePort = process.env["DATABASE_PORT"] || fail("Expected 'DATABASE_PORT' env.var.");
 
 const out =
 `# Generated
 #
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_AUTH_PORT=${authPort}
-VITE_DATABASE_PORT=${databasePort}
 VITE_PROJECT_ID=${projectId}
 VITE_EMUL_HOST=${emulHost}${
   SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''

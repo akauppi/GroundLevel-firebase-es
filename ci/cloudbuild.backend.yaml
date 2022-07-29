@@ -11,6 +11,7 @@
 #   - node:{16|18}-alpine (stock image)
 #   - firebase-emulators  (pushed to Artifact Registry)
 #   - docker/compose      (stock image)
+#   - gsutil              (Cloud Build built-in image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -30,10 +31,11 @@
 steps:
 # Install
 #
-- name: node:${_NODE_VER}-alpine
+- name: node:${_NODE_VER}-alpine  # 48.8 MB (node:18-alpine) | 38.9 MB (node:16-alpine)
   entrypoint: sh
   args: ['-c', '
-    [ $PROJECT_ID == ci-builder ] || ( >&2 echo "ERROR: Please change to the ''ci-builder'' project: gcloud config set project ci-builder"; false ) &&
+    [ ! -z ${SHORT_SHA} ] || ( >&2 echo "!: No ''SHORT_SHA'' detected (this is a manual run). A successful run will NOT open doors to deployment." ) &&
+    [ $PROJECT_ID == ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the ''${_MY_BUILDER}'' project: gcloud config set project ${_MY_BUILDER}"; false ) &&
 
     npm config set update-notifier false &&
 
@@ -41,7 +43,7 @@ steps:
     npm --prefix packages/backend install &&
 
     (cd packages/backend && 
-      cp tmp/firebase.ci.json ./firebase.json &&
+      ln -s tmp/firebase.ci.json ./firebase.json &&
       touch firebase-debug.log firestore-debug.log database-debug.log
     )
   ']
@@ -53,7 +55,7 @@ steps:
   # State:
   #   - packages/backend/functions/node_modules   have been populated
   #   - packages/backend/tmp/firebase.ci.json     has been created
-  #   - packages/backend/firebase.json            copy for easy running of tests
+  #   - packages/backend/firebase.json            alias for easy running of tests
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # DEBUG:
@@ -133,6 +135,19 @@ steps:
   args: ['run', 'lint']
   dir: packages/backend
 
+#-- Pass marker
+#
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: sh
+  args: ['-c', '
+    if [ -z ${SHORT_SHA} ]; then
+      ( >&2 echo "Pass NOT MARKED to Cloud Storage since no ''SHORT_SHA'' (manual run)." )
+    ; else
+      touch _
+        && gsutil cp file://_ ${_GS_TOUCH_PATH}/${SHORT_SHA}
+    ; fi
+  ']
+
 # --- Timeout
 #
 # Cloud Build:
@@ -148,3 +163,5 @@ substitutions:
   _NODE_VER: "18"
   _AR_FOLDER: builders
     # You may use any name, or create such a folder in AR.
+  _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.backend    # where successful tests are marked
+  _MY_BUILDER: ci-builder

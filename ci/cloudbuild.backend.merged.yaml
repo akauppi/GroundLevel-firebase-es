@@ -8,12 +8,12 @@
 #   Production/staging GCP project (deploys to itself).
 #
 # Responsibility:
-#   - test and deploy backend
+#   - deploy backend
 #
 # Uses images:
 #   - node:{16|18}-alpine (stock image)
-#   - firebase-emulators  (pushed to Artifact Registry)   The image also contains Firebase CLI we use for deployment
-#   - docker/compose      (stock image)
+#   - firebase-emulators  (pushed to Artifact Registry)   contains Firebase CLI we use for deployment
+#   - gsutil              (Cloud Build built-in image)
 #
 # Runtime environment:
 #   - Current directory is '/workspace/...', based on the 'dir' field
@@ -27,12 +27,19 @@
 #     -> https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
 #
 steps:
-# Flight check: don't run deploy off general 'ci-builder'
-- name: node:${_NODE_VER}-alpine
+# Flight check
+- name: gcr.io/cloud-builders/gsutil
   entrypoint: sh
-  args: ['-c',
-    '[ $PROJECT_ID != ci-builder ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false )'
-  ]
+  args: ['-c', '
+    [ $PROJECT_ID != ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
+    
+    if [ -z ${SHORT_SHA} ]; then
+      >&2 echo "ERROR: No ''SHORT_SHA'' detected. If this is a manual run, provide one by ''--substitutions=SHORT_SHA=xxx''."; false
+    ; else
+      gsutil cat ${_GS_TOUCH_PATH}/${SHORT_SHA} ||
+        ( >&2 echo "ERROR: No evidence that tests would have passed. ''${_GS_TOUCH_PATH}/${SHORT_SHA}'' does not exist"; false )
+    ; fi
+  ']
 
 # Install
 - name: node:${_NODE_VER}-alpine
@@ -43,56 +50,20 @@ steps:
     npm --prefix ../.. install &&
     npm install &&
     
-    cp tmp/firebase.ci.json ./firebase.json &&
-    cp tmp/database.rules.json . &&
-
-    touch firebase-debug.log firestore-debug.log database-debug.log
+    ln -s tmp/firebase.ci.json firebase.json &&
+    ln -s tmp/database.rules.json .
   ']
   dir: packages/backend
-    # Note: Realtime Database config is still prepared, though not used.
   env:
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    #- DATABASE_PORT=6800
 
   # State:
   #   - packages/backend/functions                are installed
-  #   - packages/backend/tmp/firebase.ci.json     generated (for DC)
-  #   - packages/backend/tmp/database.rules.json  generated (for DC)
-  #   - packages/backend/firebase.json            copy for easy running of tests
-  #   - packages/backend/database.rules.json      copy for deployment
-  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
-
-# Tests (keep similar to 'cloudbuild.backend.yaml')
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-healthy']
-  dir: packages/backend
-  env:
-    - CI_BUILDER_IMAGE=$_1
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    #- DATABASE_PORT=6800
-
-#DEBUG
-# Enable this e.g. to see Cloud Function loading logs
-#|- name: node:18-alpine
-#|  entrypoint: sh
-#|  args: ['-c', '
-#|    nc -z emul 5002 && echo "5002 is up" &&
-#|    nc -z emul 6767 && echo "6767 is up" &&
-#|
-#|    echo "----" && cat ./firebase-debug.log &&
-#|    echo "----" && cat ./firestore-debug.log
-#|  ']
-#|  dir: packages/backend
-
-- name: node:18-alpine    # no warm-up, enough that we see tests pass (fns tests take ~2..3s on a cold start)
-  entrypoint: npm
-  args: ['run', 'ci:test']
-  dir: packages/backend
-  env:
-    - EMUL_HOST=emul
-    - WARM_UP_TIMEOUT=9000
+  #   - packages/backend/tmp/firebase.ci.json     generated
+  #   - packages/backend/tmp/database.rules.json  generated
+  #   - packages/backend/firebase.json            alias for deployment
+  #   - packages/backend/database.rules.json      alias for deployment
 
 # DEPLOY
 #
@@ -113,9 +84,6 @@ steps:
     # Note: The dance of picking up region id, only to inject it into the Cloud Functions source, so that Firebase can
     #   again pick it up just feels wrong. Is this really the way?
     #
-    #   Likely the author misunderstood something?? Study how Cloud Functions are deployed, to a region, and try to
-    #   simplify. PR's are welcome #contribute
-    #
     # tbd. Test that it deploys to 'us-central1'.
 
   # State:
@@ -130,7 +98,9 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 3:26, 3:04
+# Cloud Build: 2:21
+#
+# OLD: 3:26, 3:04, 3:43
 #
 timeout: 400s
 
@@ -138,5 +108,6 @@ timeout: 400s
 #
 substitutions:
   _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
-  _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "18"
+  _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.backend    # where successful tests are marked
+  _MY_BUILDER: ci-builder
