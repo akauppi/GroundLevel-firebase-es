@@ -34,7 +34,7 @@ steps:
     echo "COMMIT_SHA: ${COMMIT_SHA}" &&
     echo "REVISION_ID: ${REVISION_ID}" &&
     echo "SHORT_SHA: ${SHORT_SHA}" &&
-    echo "REPO_NAME: ${REPO_NAME}" &&
+    echo "REPO_NAME: ${REPO_NAME}"
   ']
 - name: gcr.io/cloud-builders/git
   entrypoint: sh
