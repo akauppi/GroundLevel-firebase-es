@@ -36,9 +36,21 @@ steps:
     echo "SHORT_SHA: ${SHORT_SHA}" &&
     echo "REPO_NAME: ${REPO_NAME}"
   ']
+#
+# We need the commit SHA one past the HEAD.
+#
+# The 'git' checkout is shallow:
+#   <<
+#     Step #1: HEAD:
+#     Step #1: 970015b
+#     Step #1: HEAD~1:
+#     Step #1: fatal: Needed a single revision
+#   <<
 - name: gcr.io/cloud-builders/git
   entrypoint: sh
   args: ['-c', '
+    cat .git/config &&
+    git fetch --depth=2 &&
     echo "HEAD:" &&
       git rev-parse --short HEAD &&
     echo "HEAD~1:" &&
