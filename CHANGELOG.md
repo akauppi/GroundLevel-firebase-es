@@ -1,10 +1,10 @@
 # Changelog
 
-## 13-Jul-22
+## 29-Jul-22
 
-- "June 2022" release candidate 
-  - [ ] testing on Windows 10 + WSL2
-  - [ ] CI
+- CI: Optimized so that tests are *only* run in the test scripts. Deploy scripts check from Cloud Storage whether such tests have passed.
+
+   - Speeds up and simplifies CI/CD.
 
 
 ## 5-Jul-22
