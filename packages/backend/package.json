@@ -53,7 +53,7 @@
     "_touchEmApp": "(cd logs.app && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)"
   },
   "devDependencies": {
-    "firebase-admin": "^11.0.0",
+    "firebase-admin": "^11.0.1",
     "firebase-jest-testing": "^0.0.5-beta.3",
     "jest": "^28.1.3"
   },

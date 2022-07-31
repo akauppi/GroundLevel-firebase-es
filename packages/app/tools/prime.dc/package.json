@@ -16,7 +16,7 @@
   "dependencies": {
     "@_/self": "file:.",
     "commander": "^9.3.0",
-    "firebase-admin": "^11.0.0"
+    "firebase-admin": "^11.0.1"
   },
   "//": {
     "usage": [

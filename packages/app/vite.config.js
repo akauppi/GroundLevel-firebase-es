@@ -138,30 +138,34 @@ async function configGen({ command, mode }) {
       }
     },
 
-    build: PROD ? {
-      minify: false,
-      sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
-      target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
-      //polyfillDynamicImport: false
+    build: {
+      commonjsOptions: {include: []},     // never any CommonJS
 
-      outDir: "../dist",
-      emptyOutDir: true,
-      assetsDir: '.',   // relative to 'outDir'
+      ...(PROD ? {
+        minify: false,
+        sourcemap: true,    // "generate production source maps"    tbd. do we need them for local development (or does Vite always provide them?); does ops create them, anyways?
+        target: 'esnext',   // assumes native dynamic imports (default for Vite 2.3.0+)
+        //polyfillDynamicImport: false
 
-      rollupOptions: {
-        output: {manualChunks},
-        plugins: [ ... visualizer ? [ visualizer ] : [] ]
-      },
+        outDir: "../dist",
+        emptyOutDir: true,
+        assetsDir: '.',   // relative to 'outDir'
 
-      // Note:
-      //    Documentation says 'true' would have: "..CSS imported in async chunks will be inlined into the async chunk
-      //    itself and inserted when the chunk is loaded."
-      //
-      //    This is not so (Vite 2.0.5). Why is 'app.css' there, then? (expecting the CSS to be baked into .js)
-      //
-      //cssCodeSplit: true,   // true: creates 'app.css'
-      cssCodeSplit: false,   // false: creates 'style.css'
-    } : {},
+        rollupOptions: {
+          output: {manualChunks},
+          plugins: [...visualizer ? [visualizer] : []]
+        },
+
+        // Note:
+        //    Documentation says 'true' would have: "..CSS imported in async chunks will be inlined into the async chunk
+        //    itself and inserted when the chunk is loaded."
+        //
+        //    This is not so (Vite 2.0.5). Why is 'app.css' there, then? (expecting the CSS to be baked into .js)
+        //
+        //cssCodeSplit: true,   // true: creates 'app.css'
+        cssCodeSplit: false,   // false: creates 'style.css'
+      } : {})
+    },
 
     plugins: [
       vue({
@@ -208,15 +212,9 @@ function fail(msg) { throw new Error(msg) }
 //    <<
 //
 //    We don't necessarily want that. Revisit if it becomes default in Vite 4.
-/*
+//
 export default a => configGen(a).then( o => ({ ...o,
 
-  // Extras because we don't need CommonJS dependencies.
   // See -> https://vitejs.dev/guide/migration.html#experimental
-  //
-  optimizeDeps: { disabled: false },
-  build: { ...o.build, commonjsOptions: { include: [] }}
+  //optimizeDeps: { disabled: false },
 }))
-*/
-
-export default configGen
