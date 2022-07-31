@@ -13,6 +13,7 @@
 # Uses images:
 #   - node:{16|18}-alpine (stock image)
 #   - firebase-emulators  (pushed to Artifact Registry)   contains Firebase CLI we use for deployment
+#   - git                 (Cloud Build built-in image)
 #   - gsutil              (Cloud Build built-in image)
 #
 # Runtime environment:
@@ -21,6 +22,9 @@
 #   - env.variables (just some):
 #     PWD=/workspace
 #     HOME=/builder/home
+#
+# Manual triggering:
+#   - Provide an SHA of a tested commit by '--substitutions=_TESTED_SHA=...'.
 #
 # References:
 #   - Cloud Build > Substituting variable values
@@ -34,11 +38,24 @@ steps:
     [ $PROJECT_ID != ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
     
     if [ -z ${SHORT_SHA} ]; then
-      >&2 echo "ERROR: No ''SHORT_SHA'' detected. If this is a manual run, provide one by ''--substitutions=SHORT_SHA=xxx''."; false
+      [ ! -z ${_TESTED_SHA} ] || 
+        ( >&2 echo "ERROR: For manual runs, please provide an sha of a commit that has passed the tests. ''--substitutions=_TESTED_SHA=...''"; false ) &&
+
+      >&2 echo "** MANUAL TRIGGER **" &&
+      echo ${_TESTED_SHA} > .TESTED_SHA
     ; else
-      gsutil cat ${_GS_TOUCH_PATH}/${SHORT_SHA} ||
-        ( >&2 echo "ERROR: No evidence that tests would have passed. ''${_GS_TOUCH_PATH}/${SHORT_SHA}'' does not exist"; false )
+      git fetch --depth=2 &&
+      git rev-parse --short HEAD~1 > .TESTED_SHA
     ; fi
+  ']
+
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: sh
+  args: ['-c', '
+    export TESTED_SHA=$$( cat .TESTED_SHA ) &&    
+
+    gsutil cat ${_GS_TOUCH_PATH}/$${TESTED_SHA} ||
+      ( >&2 echo "ERROR: No evidence that tests would have passed. ''${_GS_TOUCH_PATH}/$${TESTED_SHA}'' does not exist"; false )
   ']
 
 # Install
@@ -98,11 +115,9 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 2:21
+# Cloud Build: 2:21, 2:40
 #
-# OLD: 3:26, 3:04, 3:43
-#
-timeout: 400s
+timeout: 300s
 
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
@@ -111,3 +126,4 @@ substitutions:
   _NODE_VER: "18"
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.backend    # where successful tests are marked
   _MY_BUILDER: ci-builder
+  _TESTED_SHA: ""

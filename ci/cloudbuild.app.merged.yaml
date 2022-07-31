@@ -13,6 +13,7 @@
 # Uses images:
 #   - node:{16|18}-alpine (stock image)
 #   - firebase-emulators  (pushed to Artifact Registry)   contains Firebase CLI we use for deployment
+#   - git                 (Cloud Build built-in image)
 #   - gsutil              (Cloud Build built-in image)
 #
 # Runtime environment:
@@ -22,27 +23,46 @@
 #     PWD=/workspace
 #     HOME=/builder/home
 #
+# Manual triggering:
+#   - Provide an SHA of a tested commit by '--substitutions=_TESTED_SHA=...'.
+#
 # References:
 #   - Cloud Build > Substituting variable values
 #     https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values
 #
 steps:
 # Flight check
-- name: gcr.io/cloud-builders/gsutil
+#
+# - Using '${SHORT_SHA}' as an indicator, whether we are manually triggerred (empty) or in production CI (has stuff).
+#
+- name: gcr.io/cloud-builders/git
   entrypoint: sh
   args: ['-c', '
     [ $PROJECT_ID != ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the deployment project: gcloud config set project <project-id>"; false ) &&
     [ ! -z $$SENTRY_DSN ] || >&2 echo "WARN: ''SENTRY_DSN'' missing; no operational monitoring!" &&
-    
+
     if [ -z ${SHORT_SHA} ]; then
-      >&2 echo "ERROR: No ''SHORT_SHA'' detected. If this is a manual run, provide one by ''--substitutions=SHORT_SHA=xxx''."; false
+      [ ! -z ${_TESTED_SHA} ] || 
+        ( >&2 echo "ERROR: For manual runs, please provide an sha of a commit that has passed the tests. ''--substitutions=_TESTED_SHA=...''"; false ) &&
+
+      >&2 echo "** MANUAL TRIGGER **" &&
+      echo ${_TESTED_SHA} > .TESTED_SHA
     ; else
-      gsutil cat ${_GS_TOUCH_PATH}/${SHORT_SHA} ||
-        ( >&2 echo "ERROR: No evidence that tests would have passed. ''${_GS_TOUCH_PATH}/${SHORT_SHA}'' does not exist"; false )
+      git fetch --depth=2 &&
+      git rev-parse --short HEAD~1 > .TESTED_SHA
     ; fi
   ']
   secretEnv:
     - SENTRY_DSN
+
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: sh
+  args: ['-c', '
+    export TESTED_SHA=$$( cat .TESTED_SHA ) &&    
+
+    gsutil cat ${_GS_TOUCH_PATH}/$${TESTED_SHA} ||
+      ( >&2 echo "ERROR: No evidence that tests would have passed. ''${_GS_TOUCH_PATH}/$${TESTED_SHA}'' does not exist"; false )
+  ']
 
 # Install
 - name: node:${_NODE_VER}-alpine
@@ -99,9 +119,9 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build:  1:30
+# Cloud Build:  1:30, 1:38
 #
-timeout: 400s
+timeout: 200s
 
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
@@ -111,6 +131,7 @@ substitutions:
   _NODE_VER: "18"
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
   _MY_BUILDER: ci-builder
+  _TESTED_SHA: ""
 
 # Anything baked into the front end are not really hard secrets, but let's treat them as such.
 #

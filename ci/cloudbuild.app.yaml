@@ -123,8 +123,8 @@ steps:
     - CYPRESS_defaultCommandTimeout=20000
     #
     # Tests durations:
-    #   1: 10673, 9478, 9270 ms
-    #   2:  4224, 4920, 4695 ms
+    #   1: 10673, 9478, 9270, 10987 ms
+    #   2:  4224, 4920, 4695,  5276 ms
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
@@ -166,10 +166,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 5:36, 5:10
-#
-# OLD:
-#   - 5:29, 5:31
+# Cloud Build: 5:36, 5:10, 6:01
 #
 timeout: 500s
 
