@@ -1,107 +1,61 @@
 # Firebase tips
 
+## Thing called Rules Playground
 
-## Use creation date in the project id
+- [Quickly validate Security Rules](https://firebase.google.com/docs/rules/simulator) (Firebase docs)
 
-Firebase automatically appends a uniqueness id to your project id (e.g. `mysome-5342`). You can edit this to your liking, and using `DDMMYY` format may provide extra benefit to a random number:
+After you have deployed your application:
 
-- you know when you created it (how stale it is)
-- if you end up creating multiple projects for the same thing, it helps keep log
+- go to GCP Console > `Firestore` > `Rules` > `Rules Playground`
 
-While you *can* likely get this info from elsewhere, why not just make randomness work for you. :)
+   ![](.images/rules-playground.png)
 
+![](.images/rules-playground-ui.png)
 
-## Firestore: use array/object or a collection?
+This is a tool that allows you to manually test how security rules would behave if you approached them with certain queries or writes.
 
-Firestore works on the document-collection-document-... pattern (see [Cloud Firestore Data model](https://firebase.google.com/docs/firestore/data-model) (Firebase docs)).
+**Pros**
 
-One can express a dataset either within a document, or as a combination of documents and subcollections. Here are the pros/cons of both approaches:
+- It's kind of fun!
+- Provides better output of *why* a certain query would be rejected (or would pass) than other tools do.
 
-### Within a document
+**Cons**
 
-Pros:
+- It doesn't match the emulator-centric (local) development model.
 
-- Simple, traditional
-- May be cheaper: access is charged by documents read, and access to multiple fields of a single document counts as 1 read. This may be the strongest reason to avoid splitting data to sub-collections.
+### Opinion
 
-Cons:
+The Rules Playground is in the wrong location, currently. It is a remnant from the times before Firebase Emulators, when people needed to develop stuff online. We no longer do. Having the Rules Playground available in the local emulator UI would make sense.
 
-- Not native thinking for Firebase
-- Access is all-or-nothing
+Alternatively, it could be replaced with a command line tool that:
 
-### As sub-collections
+- checks whether Rules are valid (and gives proper error messages if not).
+- for a given query/write would show whether it passes, or would fail
 
-Essentially the inverse of the pros/cons above. :)
+If such a tool would be guaranteed to behave 1-to-1 with the online implementation and be available as a Node.js library, it could be used for unit testing Security Rules.
 
-
-### Quotes
-
->Don't add subcollections unless you need it. I only add them when there is a large amount of related data that does not need to be pulled everytime I retrieve root data.<sub>[source](https://www.reddit.com/r/Firebase/comments/bi45dr/firestore_is_there_any_good_reason_to_use/)</sub>
-
-Ability to do [Collection group queries](https://firebase.google.com/docs/firestore/query-data/queries#collection-group-query) (Firebase docs) has likely evened the weigh for using sub-collections (they were launched in 2019). If you read online, consider any experiences *prior* to that as potentially misleading. 🍄
+Currently, Rules Playground is a niche tool, hidden away in the management/operational Firebase console that no longer should have any development tools.
 
 
-## Syntax highlighting of Security Rules on IntelliJ IDEs (kind of...)
+### Bugs
 
->Note: In 2021, there now is a [Firebase Rules Syntax Highlighter](https://plugins.jetbrains.com/plugin/15189-firebase-rules-syntax-highlighter) plugin for IntelliJ IDE's.
+The Rules Playground evaluates rules differently from real Firebase services (at least Firestore).
 
-See [this answer](https://stackoverflow.com/questions/46600491/what-is-the-name-of-the-language-used-for-cloud-firestore-security-rules/60848863#60848863) (StackOverflow) about setting up "file type associations" in IntelliJ IDEA - may also work in WebStorm.
+>![](.images/rules-playground-error.png)
 
-In addition, set to 2 spaces: *content lost*
+These rules pass in emulator and online deployment. The Rules Playground chokes at `resource.data`. 
 
+Earlier on (before emulators were launched, ca. 2019) people compensated for such behaviour by protective coding, specially crafted for the simulator. Such tricks should not be necessary - instead, Firebase could remove deviations between the Rules Playground and the Real Thing.
 
-## Understanding `firebase use`
+Also, Rules Playground is slow.
 
-It defines which Firebase project your command line processes are connected with (e.g. `npm run dev`).
+---
 
-|||
-|---|---|
-|List the current shortcuts|`firebase use`|
-|Make a new shortcut|`firebase use --add`|
+For these reasons, expect Rules Playground to be deprecated at some point. It's good to be aware of it but it doesn't feel "production grade" quality.
 
-The aliases you give don't really matter. `abc` is a good candidate. ;P
+The author wishes it to be shut, but after its unique rule evaluation insight have been brought to be available in the Firebase CLI or emulator UI.
 
-```
-$ more .firebaserc 
-{
-  "projects": {
-    "default": "vue-rollup-example",
-    "prod": "groundlevel-production"
-  }
-}
-```
-
-### Gotcha!
-
-`firebase use --clear` logs you out of the active project, but **only if there are 2 or more aliases**. Otherwise, it silently fails (you are still having an active project).
-
-According to Firebase, the above is **intended behavior**. They could at least print a warning, to let the user know their wish was turned down.
-
-Clearing the project is useful for being able to test the developer experience, and to write right documentation. 
-
-**Work-around:**
-
-Either: 
-
-- Add your project twice, with different aliases. :)
-- Remove `.firebaserc` file (suggested by Firebase; not tried)
-
-
-## Security Rules Online Simulator
-
-The simulator can be very useful, providing detailed information on why a certain rule failed. But you need to know where to look.
-
->Note: Now that Firebase is bringing the development experience more towards the local (with emulation), how about a local tool for this use case so we don't need to copy-paste rules files to the cloud? (27-Aug-20)
-
-### Rule, Evaluated
-
-Scroll to the top right of the window. Here you see how Firebase evaluates your rule:
-
-![](.images/rule-evaluated.png)
-
-You can click each rule fragment open to see what it evaluates to. Any surprises lead you further.
-
-
+<!-- hidden
 ### Entering `FieldValue` values
 
 There is no UI support for building a document with `FieldValue`s (e.g. server time stamp) but maybe we can fool the simulator by:
@@ -113,6 +67,7 @@ There is no UI support for building a document with `FieldValue`s (e.g. server t
 ```
 
 >tbd. tell whether the above worked `#help`
+-->
 
 
 ## You can `debug()` security rules!
@@ -134,12 +89,14 @@ Function not found error: Name: [validUserInfoWrite]. for 'create' @ L334
 ```
 
 
-## Changes are different in server triggers vs. Firestore client
+## Similar but very different API's
+
+>Note: This is not a bug report. Just a heads up that the API approaches differ between the libraries (and execution contexts) used. `firebase-admin` would be yet a third such.
 
 Listening to changes to a document, using Cloud Firestore triggers (`firestore-functions`):
 
 ```
-exports.blah = regionalFunctions.firestore
+export blah = regionalFunctions.firestore
   .document('/userInfo/{uid}')
   .onWrite( async (change, context) => {
     // no change types
@@ -150,7 +107,7 @@ exports.blah = regionalFunctions.firestore
 ```
 
 
-Doing the same in client code (`firebase`):
+Doing the same in client code (`@firebase/firestore`):
 
 ```
 collection(db, "userInfo/{uid}")
@@ -168,11 +125,17 @@ collection(db, "userInfo/{uid}")
 |Previous contents|`change.before.data()`|n/a|
 |New contents|`change.after.data()`|`change.doc.data()`|
 
-These are two wholly separate APIs and there are likely reasons why they are so. Using GroundLevel, you don't really face this difference much since following Firebase collections are converted to Vue.js reactive constructs. But it's good to be aware.
+These are two wholly separate APIs and there are reasons why they are so. Using GroundLevel, you don't really face this difference much since tracking Firebase collections happen via Vue.js reactive constructs. But it's good to be aware.
 
 References:
 
 - [Cloud Firestore function triggers](https://firebase.google.com/docs/functions/firestore-events#function_triggers) (Firebase docs)
 - [View changes between snapshots](https://firebase.google.com/docs/firestore/query-data/listen#view_changes_between_snapshots) (Firebase docs)
 
+
+## Key Visualizer
+
+- [Overview of Key Visualizer](https://cloud.google.com/firestore/docs/key-visualizer) (Cloud Firestore docs)
+
+*The Key Visualizer is a new thing (Jul 2022) and the author hasn't tried it in action, yet.*
 
