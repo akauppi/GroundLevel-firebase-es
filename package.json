@@ -6,7 +6,7 @@
     "node": "18"
   },
   "devDependencies": {
-    "eslint": "^8.20.0",
+    "eslint": "^8.21.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^9.3.0",

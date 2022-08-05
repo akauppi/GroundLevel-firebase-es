@@ -23,7 +23,7 @@ const { projectId, appId, apiKey, authDomain, locationId, databaseURL } = await 
     process.exit(2);
   });
 
-(apiKey && appId && authDomain && projectId && locationId && databaseURL)
+(apiKey && appId && authDomain && projectId && locationId)
   || fail(`Some values missing from: ${fn.replace("../","") }`);
 
 const out = `# Generated based on '${fn}'.
@@ -33,8 +33,11 @@ VITE_APP_ID=${appId}
 VITE_AUTH_DOMAIN=${authDomain}
 VITE_PROJECT_ID=${projectId}
 VITE_LOCATION_ID=${locationId}
-VITE_DATABASE_URL=${databaseURL}${
-  SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
+${
+  databaseURL ? `VITE_DATABASE_URL=${databaseURL}` : ''
+}
+${
+  SENTRY_DSN ? `VITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;
 

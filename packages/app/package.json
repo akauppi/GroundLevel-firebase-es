@@ -64,7 +64,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.1",
     "cypress": "10.3.0",
-    "sass": "^1.54.0",
+    "sass": "^1.54.2",
     "prettier": "2.7.1"
   },
   "//comments": {

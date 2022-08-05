@@ -6,7 +6,7 @@
     "node": "16"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^5.0.2",
+    "@google-cloud/firestore": "^6.0.0",
     "firebase-admin": "^11.0.1",
     "firebase-functions": "^3.22.0"
   },
@@ -30,9 +30,7 @@
         "- manual deployment (first/*; DC)",
         "- CI (deployment)",
         "- Cloud Functions (runtime)",
-        [
-          "Env.vars in runtime:",
-          "",
+        "Env.vars in runtime:", [
           "GOOGLE_RUNTIME=nodejs16",
           "GOOGLE_CONTAINER_MEMORY_HINT_MB=256",
           "X_GOOGLE_TARGET_PLATFORM=gcf",

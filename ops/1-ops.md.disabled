@@ -1,0 +1,48 @@
+## Operational monitoring
+
+Operational monitoring ("ops" for short) is like a sports watch on your app. It lets you know:
+
+- do you have any users?
+   - where are they from?
+   - do they return to the application, and if so, how frequently?
+   - which browsers do they use?
+
+- how is the user experience?
+   - are there any crashes?
+   - is the web app performance at anticipated levels? 
+   - is the network performance at anticipated levels? 
+
+In addition, we can also inject some internal validation (counters, logs) code that helps answer:
+
+- are features we made being used, at all?
+- is performance of some critical front-end code as the developers and project management have anticipated?
+
+Operational monitoring systems normally tie to other services (source code control; alerts) and become more of an *ecosystem* than a single product.
+
+---
+
+Here are some of the questions you can answer, with ops in place. 
+
+>Note: The headlines are intentionally abstracted away from individual products, or even product categories (e.g. "user happiness" vs. "core web vitals", "crash analytics" vs. "Sentry"). One should always keep in mind what the intended target is; tools are just a means to that end.
+
+In the following sections, we'll look more closely into the following questions and show how you can reach and track the data for your application. To get the most out of this, it's good if your application has had a little bit of use so there's real data in the dashboards of the services.
+
+---
+
+<div align=right><a href="1.1-happiness.md">1.1 User happiness</a></div>
+
+<!-- REMOVE?
+- 🚀 [Performance monitoring](./README.1-perf.md)
+
+   [Firebase Performance Monitoring](https://firebase.google.com/docs/perf-mon) collects performance information of your application. The reports are visible within the normal Firebase Console.
+   
+   Some of the performance data is automatically collected; others are sections of code that you want to explicitly monitor.
+
+- 💔 [Error monitoring](./README.2-errors.md)
+
+   [Sentry](http://sentry.io) is an anomaly reporting framework. It's comprehensive, yet easy to use. You should study its documents at your own pace, but to get things started it's enough to follow the steps.
+
+- 📜 [Logging](./README.3-logging.md)
+
+   Central logging is often seen as a backend-kind of thing, but makes sense also for web applications. In lack of a tool that would do this nicely, the template (with some help from its backend) runs a proxy that allows collecting logs in the Google Cloud Logging service.
+-->

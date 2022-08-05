@@ -8,7 +8,6 @@ import { assert } from './assert.js'
 import { initializeApp } from '@firebase/app'
 import { getAuth, connectAuthEmulator, initializeAuth, debugErrorMap } from '@firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
-//import { getDatabase, connectDatabaseEmulator } from '@firebase/database'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
@@ -47,27 +46,22 @@ async function initFirebaseLocal() {   // () => Promise of ()
   //
   // Build has poured the necessary values from 'firebase.json' to us, as VITE_... constants.
   //
-  const [firestorePort, authPort /*, databasePort*/] = [
+  const [firestorePort, authPort] = [
     import.meta.env.VITE_FIRESTORE_PORT,
-    import.meta.env.VITE_AUTH_PORT,
-    //import.meta.env.VITE_DATABASE_PORT
+    import.meta.env.VITE_AUTH_PORT
   ];
   (firestorePort && authPort /*&& databasePort*/) ||
-    fail( `[INTERNAL ERROR] Some Firebase param(s) are missing: ${ [firestorePort, authPort /*, databasePort*/] }`);
+    fail( `[INTERNAL ERROR] Some Firebase param(s) are missing: ${ [firestorePort, authPort] }`);
 
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6769
   const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9101"
-  //const DATABASE_PORT = parseInt(databasePort);             // 6801
 
   const firestore = getFirestore();
 
   const auth = HUMAN_READABLE_AUTH_ERRORS_PLEASE ? initializeAuth(fah, { errorMap: debugErrorMap }) : getAuth();
 
-  //const database = getDatabase();
-
   connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
   connectAuthEmulator(auth, AUTH_URL, { disableWarnings: true });
-  //connectDatabaseEmulator(database, host, DATABASE_PORT);
 
   // Signal to Cypress tests that Firebase can be used (emulation setup is done).
   //
@@ -88,10 +82,10 @@ async function initFirebaseOnline() {
     import.meta.env.VITE_APP_ID,      // needed only for Firebase Performance Monitoring
     import.meta.env.VITE_AUTH_DOMAIN,
     import.meta.env.VITE_PROJECT_ID,
-    import.meta.env.VITE_DATABASE_URL
+    import.meta.env.VITE_DATABASE_URL   // optional; keep
   ];
 
-  assert(apiKey && appId && authDomain && projectId && databaseURL, "Some Firebase param(s) are missing");
+  assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
 
   initializeApp( { apiKey, appId, authDomain, projectId, databaseURL } );
 }

@@ -132,5 +132,5 @@ This may help in optimizing performance, or you might want to see that changes t
 
 ---
 
-⩓ [Ops](README.md)
+⩓ [Ops](0-intro.md)
 

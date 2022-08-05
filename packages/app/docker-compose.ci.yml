@@ -46,11 +46,10 @@ services:
       - EMUL_HOST=emul-for-app
       - MODE=local
       - PORT              # pass through, at least 'vite.config.js' wants it
-      # tbd. Use these only, not 'firebase.js'
+      # tbd. Use 'firebase.js', not these
       - AUTH_PORT
       - FIRESTORE_PORT
       - FUNCTIONS_PORT
-      #- DATABASE_PORT
 
     network_mode: cloudbuild
     container_name: vite

@@ -10,7 +10,6 @@
 *
 * Outputs an '.env' file to be used for CI testing.
 */
-// tbd. Take 'DATABASE_PORT' away; not needed???
 
 /*** disabled
 const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || "firebase.app.js";    // run within DC, 'firebase.app.js' is mapped
@@ -53,8 +52,9 @@ const out =
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_AUTH_PORT=${authPort}
 VITE_PROJECT_ID=${projectId}
-VITE_EMUL_HOST=${emulHost}${
-  SENTRY_DSN ? `\nVITE_SENTRY_DSN=${SENTRY_DSN}` : ''
+VITE_EMUL_HOST=${emulHost}
+${
+  SENTRY_DSN ? `VITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;
 
