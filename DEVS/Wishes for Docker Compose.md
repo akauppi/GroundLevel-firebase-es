@@ -133,3 +133,53 @@ Add a `:f` as a postfix, concatenable with others (in our case, we'd use `:deleg
 **Reference**
 
 - ["How to mount a single file in a volume"](https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume) (SO; Feb 2017)
+
+
+## Automatically rebuild if the definition cascade has changed
+
+Docker Compose declarations allow referring to other declarations by:
+
+- `extends: file: [service:]`   between Docker Compose definitions
+- `build: context: [target:]`   uses a Dockerfile
+
+**Problem**
+
+If one uses the above linkages, then starts a task with `docker compose run`, further changes to the declarations are not taken into effect.
+
+One needs to manually `docker compose build` the topmost service the `run` uses. (Note: not 100% sure if this is enough, or whether also intermediate services must be rebuilt)
+
+This causes confusion for the developer.
+
+**Simple example**
+
+I wanted to update the version of Vite defined in `packages/app/tools/vite.dc/Dockerfile`.
+
+Editing it, and restarting the DC `run` left some earlier version in effect. Luckily, this is obvious in the particular tool's console output.
+
+Dependency tree:
+
+```
+npm run dev
+  --> uses `docker-compose.local.yml` with:
+      extends:
+        file: dc.base.yml
+        service: vite-base
+     --> `dc.base.yml`:
+        build:
+          context: tools/vite.dc
+          target: vite_plain
+         -->
+            ARG VITE_VER=3.0.2    # the line that changes
+```
+
+What makes this example simple is that the dependency chain is linear. It's all about influencing the one definition that the `run` command launches, not *dependencies* that would be other containers. Thus, we don't need to think about bringing existing running containers down. (that's a separate issue, and can be left to the developers to handle manually)
+
+
+**Suggested solution**
+
+When doing `docker compose up` or `docker compose run`, Docker should consider *direct* extension chain, all the way to Dockerfiles. If it *knows* that something in the definitions has changed, it could:
+
+- automatically rebuild what's needed
+- or: warn that something has needed, and suggest using a flag to rebuild
+
+- [ ] *Shorten this to an issue. File such.* `#contribute`
