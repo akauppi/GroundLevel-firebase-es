@@ -74,3 +74,66 @@ Docker Compose allows definition files to be based on others, making a cascade. 
 This would confuse the development experience. We've counteracted it by using Makefiles and time stamps, so that changes to base files automatically cause the necessary rebuilds.
 
 This works, but is error-prone since it duplicates a dependency chain between DC files.
+
+
+## Handling concurrency `depends:on: ... condition:`
+
+- Don't use the `version` entry in your Docker Compose files!
+
+   If you do, you say farewell to `depends_on: ... condition:` feature that allows one container to wait for another, before launching.
+
+This may be the most unintentionally buried feature in the Docker Compose ecosystem. It just works.
+
+The Internet offers discussions where Docker authors seem to argue that depending on a health checked container is not a good idea.
+
+<b>Ignore them!!</b>
+
+The outcome seems to have been that the `version` field is not a good idea, and the modern Docker Compose is no longer requiring it.
+
+What this allows you to do (see the sources for more details):
+
+```
+  emul:
+    healthcheck:
+      test: "nc -z localhost 6767 && nc -z localhost 5002"
+      interval: 0.9s
+      start_period: 25s
+```
+
+```
+  emul-abc:
+    depends_on:
+      emul:
+        condition: service_healthy  
+```
+
+Now, you can `docker compose run --rm emul-abc` and it will automatically wait until `emul` is not only launched, but also fulfills its `healthcheck`.
+
+   
+### Implications
+
+Apart from `npm run {start|dev}`, also `npm test` launches services behind the scenes, using DC.
+
+On a cold start, `npm test` takes somewhat longer (~30s .. 1min) since the Docker images need to be pulled, maybe built and the containers started. Later launches are way faster.
+
+
+## Troubleshooting
+
+If you have problems, a Docker > `Restart` is often sufficient. 
+
+Also check that no unrelated process (browsers?) is hogging your CPUs.
+
+>The author has sometimes experienced Safari taking >50% of CPUs. Restart of Safari brought it back to normal.
+
+
+## Mapping individual files
+
+Docker's `volumes:` mapping is designed for folders.
+
+It can be used for files as well, but such files **must pre-exist before the container is launched**. Otherwise, Docker creates a host-side folder and maps it!
+
+There is no `:f` modifier or similar that would allow us to enforce we're mapping a file.
+
+**Work-around**
+
+We make sure, using Makefiles, that each file-mapping exists.

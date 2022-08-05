@@ -65,3 +65,32 @@ This is conscious, to avoid complexity creep if such files were spread around th
 This also makes it easier to switch the CI/CD provider. In a way, CI/CD is yet another *orthogonal* choice, in addition to **development** ("which web app framework should we use"), and **ops** ("which logging/alerting infrastructure").
 
 <!-- tbd. picture of three axis -->
+
+
+## Why we use Docker Compose so heavily
+
+The repo needs some way of managing concurrency, and DC turned out to be better than the alternative.
+
+- helps keep `package.json` simpler<sup>[1]</sup>
+- is suitable for both development and CI use (and helps keep them apart!)
+- is a standard tool good to gain experience with
+- helps make execution environments more alike between different users, machines and OSes
+- does not require extra terminals to be kept open, yet allows centralized access to the service outputs
+- makes it easy to close down started processes
+
+>Before DC, we used `concurrently`, an `npm` package, and custom scripts for waiting on a port to get opened. This worked, but was a constant stream of problems, and didn't help in the above goals.
+
+<small>`[1]`: If going towards Makefiles, `package.json`s will get yet a lot simpler.</small>
+
+### Some downsides
+
+- dependency on Docker Desktop being installed
+- performance issues to be kept an eye on (nothing major)
+
+   Development of one's application normally involves having services running in the background. Once launched, performance (e.g. in Hot Module Reload) is not noticably different from native.
+
+### File sharing
+
+This repo has placed `:ro`, `:cached` and `:delegated` annotations to the volumes and files shared, and shares only minimum necessary files/folders.
+
+This started off as a way to optimize Docker Desktop for Mac (VirtioFS) performance, but turned out beneficial to control the side effects of containerization. It looks more complex, but actually reduces it!!
