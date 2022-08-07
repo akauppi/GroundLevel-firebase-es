@@ -9,8 +9,6 @@
 // Enable auth only if 'AUTH_PORT' has been provided.
 //
 const AUTH_PORT= process.env["AUTH_PORT"];
-//const DATABASE_PORT = process.env["DATABASE_PORT"];
-
 const FIRESTORE_PORT = process.env["FIRESTORE_PORT"] || fail( `Expecting 'FIRESTORE_PORT' env.var.`);
 const FUNCTIONS_PORT = process.env["FUNCTIONS_PORT"] || fail( `Expecting 'FUNCTIONS_PORT' env.var.`);
 
@@ -19,7 +17,6 @@ export default {
     rules: "./firestore.rules",
     indexes: "./firestore.indexes.json"
   },
-  //... DATABASE_PORT ? { database: { rules: "./database.rules.json" } } : {},
   functions: {
     source: "./functions"
   },
@@ -28,7 +25,6 @@ export default {
       port: FIRESTORE_PORT,   // 6767
       host: "0.0.0.0"
     },
-    //... DATABASE_PORT ? { database: { port: DATABASE_PORT, host: "0.0.0.0" } } : {},
     functions: {
       port: FUNCTIONS_PORT,   // 5002
       host: "0.0.0.0"

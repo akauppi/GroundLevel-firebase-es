@@ -1,5 +1,9 @@
 # Changelog
 
+## 7-Aug-22
+
+- Realtime Database removed; observability will use callables for transport
+
 ## 29-Jul-22
 
 - CI: Optimized so that tests are *only* run in the test scripts. Deploy scripts check from Cloud Storage whether such tests have passed.

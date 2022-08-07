@@ -53,9 +53,8 @@
     "@sentry/browser": "^7.0.0",
     "@sentry/tracing": "^7.0.0",
     "aside-keys": "^0.0.3-alpha.1",
-    "@firebase/app": "^0.7.29",
-    "@firebase/database": "^0.13.3",
-    "@firebase/firestore": "^3.4.13",
+    "@firebase/app": "^0.7.30",
+    "@firebase/firestore": "^3.4.14",
     "@firebase/performance": "^0.5.12",
     "plausible-tracker": "^0.3.5",
     "vue": "^3.2.37",
@@ -64,7 +63,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.1",
     "cypress": "10.3.0",
-    "sass": "^1.54.2",
+    "sass": "^1.54.3",
     "prettier": "2.7.1"
   },
   "//comments": {

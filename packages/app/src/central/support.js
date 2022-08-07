@@ -1,7 +1,7 @@
 /*
 * src/central/support.js
 */
-import {getDatabase, push, ref, set, child, update, increment} from "@firebase/database"
+//import {getDatabase, push, ref, set, child, update, increment} from "@firebase/database"
 
 import {getCurrentUserId} from "../user.js";
 
@@ -13,7 +13,7 @@ function fail(msg) { throw new Error(msg) }
 
 const loggingPath = "logging_v0";
 
-const pushRef = push( ref( getDatabase(), `${loggingPath}${ DEV ? ":dev":"" }`));   // note: '.' not allowed in database key
+//const pushRef = push( ref( getDatabase(), `${loggingPath}${ DEV ? ":dev":"" }`));   // note: '.' not allowed in database key
 
 function createLog(id /*, level = "info"*/) {   // (string, "info"|"warn"|"error"|"fatal") => (msg, ...) => Promise of ()
 
@@ -32,7 +32,7 @@ function createLog(id /*, level = "info"*/) {   // (string, "info"|"warn"|"error
       // tbd. context
     }
 
-    await set(pushRef, entry);
+    //await set(pushRef, entry);
   }
 }
 
@@ -58,10 +58,10 @@ function createCounter(name) {    // (string) => (diff = 1.0, { <tag>: string|nu
 
   const BASE_NAME = "counters_v0";    // "counters_v0[:dev]" / "{_|tag}"
 
-  const countersRef = child(
+  /*const countersRef = child(
     ref( getDatabase(), `${BASE_NAME}${ DEV ? ":dev":"" }`),   // note: '.' not allowed in database key
     name
-  );
+  );*/
 
   return async (diff = 1.0, tags = {}) => {
     (diff >= 0.0) || fail( `Increments only: ${diff}` );
@@ -71,6 +71,7 @@ function createCounter(name) {    // (string) => (diff = 1.0, { <tag>: string|nu
 
     const tmp = Object.entries(tags).map( ([k,v]) => `${k}=${v}` );
 
+    /*
     if (WAY_1) {
       const subPaths = ["_", ...tmp].map( s => `/${s}` );
       const v = increment(diff);
@@ -83,6 +84,7 @@ function createCounter(name) {    // (string) => (diff = 1.0, { <tag>: string|nu
     }
 
     console.debug("!!! Counter incremented")
+    **/
   }
 }
 

@@ -112,7 +112,6 @@ services:
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
       - ../packages/backend/tmp/firebase.json:/work/firebase.json:ro
-      - ../packages/backend/tmp/database.rules.json:/work/database.rules.json:ro
       #
       - ./.state/.firebaserc:/work/.firebaserc:ro
       - ./.state/functions:/work/functions:ro
@@ -123,7 +122,7 @@ services:
 
     working_dir: /work
     command: sh -c
-      'firebase deploy --only functions,firestore,database
+      'firebase deploy --only functions,firestore
       '
     profiles: ['manual']
 

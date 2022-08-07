@@ -20,8 +20,8 @@
 #
 FROM node:16-alpine AS firebase-cli
 
-# CI overrides with a version it prefers.
-ARG FIREBASE_TOOLS_VERSION=11.2.1
+# Different users override this with a version they prefer.
+ARG FIREBASE_TOOLS_VERSION=999.9.9
 
 # Suppress npm update announcements
 RUN npm config set update-notifier false
@@ -61,7 +61,7 @@ FROM firebase-cli AS firebase-emulators
 
 # Note: Adding as separate layers, with least changing first.
 #
-RUN firebase setup:emulators:database
+#RUN firebase setup:emulators:database
 RUN firebase setup:emulators:firestore
 #RUN firebase setup:emulators:storage
 #RUN firebase setup:emulators:pubsub \

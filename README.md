@@ -155,8 +155,8 @@ You'll be instructed about GCP where necessary.
 
 ```
 ├── ci                   # all CI/CD setup
+├── dc                   # some Docker Compose tools (Firebase emulators)
 ├── DEVS                 # notes about developing the repo (optional)
-├── firebase-ci-builder.sub # sub-repo for a Docker image (Firebase CLI/Emulators)
 ├── first                # tools for manual deployment
 ├── ops                  # operational monitoring (documentation)
 └── packages
@@ -166,7 +166,7 @@ You'll be instructed about GCP where necessary.
 
 These are the major folders.
 
-The two `packages`, `ci` and `ops` each contain their own documentation.
+The two `packages`, `ci`, `first` and `ops` each contain their own documentation.
 
 
 ## Getting started

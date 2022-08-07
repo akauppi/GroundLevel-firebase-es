@@ -11,7 +11,6 @@ The commands are to be executed in the `first` folder.
    - it has "Blaze" plan with these enabled:
       - [x] Cloud Firestore
       - [x] Cloud Functions
-      - [x] Realtime Database
       - [x] Hosting
   - it has an "application" created (needed for authentication)
 - Have Docker running

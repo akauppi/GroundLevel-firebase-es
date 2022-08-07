@@ -6,19 +6,12 @@ export default {
     rules: "./firestore.rules",
     indexes: "./firestore.indexes.json"
   },
-  database: {
-    rules: "./database.rules.json"
-  },
   functions: {
     source: "./functions"
   },
   emulators: {
     firestore: {
       port: 6768,
-      host: "0.0.0.0"
-    },
-    database: {
-      port: 6801,
       host: "0.0.0.0"
     },
     functions: {
