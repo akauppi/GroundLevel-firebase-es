@@ -1,131 +1,102 @@
 # Wishes for Cloud Build
 
+Cloud Build is amazing, and the best abstraction for CI work the author has tested. Having said that, its current (Aug 2022) *implementation* leaves things to be wished for.
 
-## Caching Docker Compose builds 🔥🔥🔥
+In addition, its dealing with official vs. community vs. public images is *arbitrary, inconsistent, outdated* and plain just a bad idea. This page tries to show how things can be made faster, while reducing the workload Google needs to put into sheparding the images.
 
-Cloud Build's approach of having each step a Docker image is brilliant.
+---
 
-It's also fast, when the "official" images are used.
+**First, the image categories** (needed for understanding the rest..)
 
-However, one cannot do much real work with the official images alone. And this leads to the *same* images being pulled over and over. They are pulled only once *per CI script execution* but if one tweaks the script, retriggers the build, again most of the 2..5 minutes goes to pulling images.
+- Official images - ["Supported builder images provided by Cloud Build"](https://cloud.google.com/build/docs/cloud-builders#supported_builder_images_provided_by)
 
-This could be cached.
+  These are cool. Example: `gcr.io/cloud-builders/gcloud`
 
-But it's actually multiple slightly different problems together, so let's take them one by one. Also, I will comment why the use of a "Kaniko" builder is not applicable for this, as it now is.
+  >Actually, the Docker image is weird in its own way. Is a full Ubuntu-based image really needed, instead of a slimmer Docker-on-Docker one? (Does Cloud Build run Docker underneath?)
 
-This *feels* like an abandoned yard of Google Cloud Platform. Someone should clean it up.
+   The official images load *instantaneously*, which is their ultimate benefit (in addition to Google presumably auditing their security..).
 
-### This repo's use of Docker images for Cloud Build steps
+- Community images - ["Community contributed builders"](https://cloud.google.com/build/docs/cloud-builders#community-contributed_builders)
 
-|image|category|
-|---|---|
-|`gcr.io/cloud-builders/git`|official|
-|`gcr.io/cloud-builders/gsutil`|official|
-|`node:{16|18}-alpine`|Docker Hub|
-|`us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0`|Prebuilt custom|
-|`docker/compose:1.29.2`|Docker Hub|
-|`cypress/included:10.3.0`|Docker Hub|
-|`./packages/app/tools/prime.dc/Dockerfile`|custom, inside the repo|
-|`./packages/app/tools/vite.dc/Dockerfile`|custom, inside the repo|
+   These should go. They complicate matters, and are not well maintained. The author does not understand which benefit they carry, over Docker Hub images.
+   
+   - [`cloud-builders-community`](https://github.com/GoogleCloudPlatform/cloud-builders-community) has the full list. Last changes are 17 months .. 4 years ago. Stale.
 
-Official images don't pose a problem. They show the target for the rest of the steps...
+   The repo should be **clearly marked as deprecated** and references to it within Google Cloud Platform documentation be removed, or updated accordingly.
 
-### Node.js image
+   >This already seems to have started. [Build Node.js applications](https://cloud.google.com/build/docs/building/build-nodejs) (Cloud Build guides) states:
+   
+   >Cloud Build enables you to use any publicly available container image to execute your tasks. The public node image from Docker Hub comes preinstalled with npm and yarn tools. 
+      
+- Docker Hub images - ["Publicly available images"](https://cloud.google.com/build/docs/cloud-builders#publicly_available_images)
 
-Taking this separately, since it's special.
+   These work great. Their only downside is that **they get pulled again and again** when one triggers the CI jobs. In this repo's routine CI runs, 20..30% of the time is spent pulling Docker images.
+   
+   Cloud Build could cache these, per service account or globally. That would reduce the delays without causing people to change their CI scripts. Why not?
 
-In [one place](...) Cloud Build recommends using the "latest Node.js image". However, in [another place](...) it recommends an official Node.js image that is stuck in Node 14.
+- Private Artifact Registry images - ["Writing your own custom builder"](https://cloud.google.com/build/docs/cloud-builders#writing_your_own_custom_builder)
 
-The documentation is not consistent.
+   These are handy, and could also be cached. But the next category may reduce the need for having them.
 
-The approach on recommending the official Node.js image feels like the right one, only doing so should be brought to the same no-pulling performance level as the official images are.
+- Docker Images built within a CI script
 
-It this optimization is done by *automatically caching* recently used images (meaning `node:{16|18}-alpine` would never be pulled, when this user's CI scripts need it), there is no longer a need for a layer between "official" and Docker Hub images. (Currently, such a layer is called ["Community-contributed images"](https://cloud.google.com/build/docs/configuring-builds/use-community-and-custom-builders#using_community-contributed_builders) (Cloud Build docs).
+   Images that `docker build` or `docker compose` builds, also implicitly.
+   
+   When using Docker Compose, this may be due to `build: context: <path to Dockerfile> ` declarations (Docker Compose referring to a local Dockerfile).
 
-
-### Docker (Compose) image
-
-The list of ["Supported builder images provided by Cloud Build"](https://cloud.google.com/build/docs/cloud-builders#supported_builder_images_provided_by) (Cloud Build docs) contains an image for `docker`.
-
-In May 2022, the `docker compose` (v2) command [was added to the official image](https://github.com/GoogleCloudPlatform/cloud-builders/issues/835).
-
-However, there **must** be something wrong here.
-
-- The official image is based on Ubuntu 20.04, and weighs > 800MB
-- The Docker Hub `docker/compose:1.29.2` is **10 x smaller**
-
-Isn't there a thing called Docker-on-docker. And Cloud Build is running Docker underneath? Could that be used in the official image, instead of shipping a whole OS?
-
->I may be wrong.
->
->All I know is that the *recommended* way (for running `docker compose`) turned out slower **also in practise** than using the (less recommended) `docker/compose:1.29.2`.
->
->Someone at Google who knows about these things could have a look. 🙏
-
-### Docker Hub images
-
-If the caching suggestion for Docker Hub images (see `Node.js image`, above) were implemented, it would speed up use of any Docker Hub images.
-
-This would shave off maybe 40-50% (tbd. measure) of the front-end tests we perform. It would be sweet!!!
-
-### Caching build results
-
-This is a bit extreme example.
-
-Docker Compose allows images to be built on-demand. Like this:
-
-```
-services:
-  vite-base:   # used for 'npm run dev:local', 'npm run dev:online', 'npm test'
-    build:
+   ```
+   build:
       context: tools/vite.dc
       target: vite_plain
-```
+   ```
 
-The Vite image is built, ad hoc, whenever needed.
+   Whichever way these are built, it would be welcome if Cloud Build can cache them, automatically, for say, 2 or 24 hours. This would reduce the need to build and push one's private Docker builders, since those could be declared within the repo.
+   
+   >Note: This repo uses local Docker Compose definitions extensively. Vite and priming are done using such. Study the `packages/app/tools/*.dc` folders to see the details.
 
-If Google were to cache the Docker Hub images - and maybe any pulled images - perhaps it can tap onto such ad hoc builds as well.
-
-Using such ad-hoc images within a repo is surprisingly powerful.
-
-
-### Prebuilt custom image
-
-There's one more step that we use:
-
-```
-us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
-```
-
-If "ad hoc" images were cached, we would deal with the `firebase-emulators` in that way. For now, the developer pre-builds and pushes it to an Artifact Registry.
-
-This is an optimization that trades manual labor for slightly faster CI jobs.
+---
 
 
-### Kaniko caching is not a solution
 
-Cloud Build documentation mentions Kaniko caching, e.g. in [Using Kaniko cache](https://cloud.google.com/build/docs/optimize-builds/kaniko-cache):
+
+## Caching Docker images 🔥🔥🔥
+
+Already described above, under "First the image categories", Cloud Build could cache more.
+
+<!-- tbd. A chart about the below (two pies)
+-->
+
+Here are the CI job timings (with a hand watch) for testing this repo.
+
+||backend tests|front-end tests|
+|---|---|---|
+|Pull `node:18-alpine`|8s|7s|
+|Pull `docker/compose` and adjacent, e.g. `firebase-emulators`|22s|22s|
+|Pull `cypress/included`|--|65s|
+|Building and testing|96s|228s|
+|---|---|---|
+|Whole script length|2m 6s|5m 22s|
+|% spent pulling|24%|29%|
+
+### Kaniko is no help
+
+Google Cloud Platform presents [Kaniko](https://cloud.google.com/build/docs/optimize-builds/kaniko-cache) as a solve-all for the Docker caching problems. It's not. At least the author has not figured how it could help him speed the builds.
+
+Kaniko is (only) for building Docker images, and suitable for speedup when the *end result* of the CI job is a Docker image. With this repo, that's not the case. Since Cloud Build doesn't pull images from Kaniko cache itself, Kaniko remains a separate solution.
+
+This could be clearly mentioned in the Google Cloud Build documentation. Currently, the role of Kaniko is not clearly mentioned.
 
 >Kaniko cache is a Cloud Build feature that caches container build artifacts by storing and indexing intermediate layers within a container image registry, such as Google's own Container Registry, where it is available for use Kaniko.
 
-Note:
+That's a quote from Cloud Build docs.
 
-- It talks only about `Container Registry`, not the more recent `Artifact Registry`
+- It has a weird ending (or typo?)
+- It only mentions Container Registry, not Artifact Registry (is this being maintained?)
+- The limitations are not mentioned
 
-- The typo / badly ending sentence *", where it is available for use Kaniko"???*
+The author would rewrite it as (this may be wrong!!):
 
-Nevertheless, it *seems* to the author that Kaniko is intended for **building Docker images** to be stored in Container Registry. Note that that is nowhere clearly defined by Cloud Platform. They write about it as if it were a generic caching system, but the author thinks it's not.
-
-- How would I use a Kaniko image, as a Cloud Build step?
-
-It looks like a dead end, and one not applicable to Cloud Build builder images.
-
-
-### Business incentives 👺
-
-One could argue that Cloud Build has no incentive to make builds faster.
-
-Builds are charged by CPU seconds.
+>Kaniko cache is a Cloud Build **step** that caches container build artifacts by storing and indexing intermediate layers within a container image registry, such as <strike>Google's own</strike> Container Registry **or Artifact Registry**, where <strike>it is</strike> **they are** available for use **in future** Kaniko **build steps**.
 
 
 ## Recursive substitutions (syntax)
@@ -145,7 +116,7 @@ Not a big thing.
 
 ## Better documentation: interacting between Cloud Build steps, using Docker
 
-This is possible, and *highly* useful, but not clearly documented. It was by persistence and luck that the author finally got it to work.
+This is possible, and *highly useful*, but not clearly documented. It was by persistence and luck that the author finally got it to work.
 
 Things don't deserve to be that way. The pattern is:
 
@@ -200,4 +171,6 @@ Just... *MAKE IT VISIBLE IN SAMPLES*. Thanks.
 
 ## Regional builds
 
-As described in [FR: Select build region](https://issuetracker.google.com/issues/63480105) (Google IssueTracker)
+Described in [FR: Select build region](https://issuetracker.google.com/issues/63480105) (Google IssueTracker)
+
+>Regional builds are actually of little value. It's not unreasonable to build everything in `us-central1` though the operation of the results would be elsewhere.

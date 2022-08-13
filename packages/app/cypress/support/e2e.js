@@ -10,15 +10,7 @@
 * Note:
 *   Cannot 'import' any of the application sources, since they use '/@xxx' path mapping. (This should be fine.)
 */
-import {
-  //connectAuthEmulator,
-  //debugErrorMap,
-  //initializeAuth,
-  signInWithCustomToken,
-  updateProfile,
-  //getAuth
-} from '@firebase/auth'
-//import {initializeApp} from '@firebase/app'
+import { signInWithCustomToken, updateProfile } from '@firebase/auth'
 
 /*
 * 'cy.clearAuthState'
@@ -56,9 +48,9 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 
   cy.log("Signing in as:", { uid } );
 
-  firebaseAuthChainable().then( auth => {
-    cy.wrap(promGen(auth))
-  }).then( user =>
+  firebaseAuthChainable().then( auth =>
+    promGen(auth)   // can return Promise for 'then'
+  ).then( user =>
     cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
   )
 
@@ -85,7 +77,7 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 * This seems to be required, in order to steer its user login/logout behaviour.
 *
 * Note:
-*   Tried also creating our own auth handle, so there wouldn't be any awareness of Cypress in the 'vitebox' code,
+*   Tried also creating our own auth handle, so there wouldn't be any awareness of Cypress in the 'dev' bootup code,
 *   but that's not enough. The auth handle "works", but unrelated to the UI, thus - being pointless.
 *
 * Note:
@@ -98,37 +90,5 @@ function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
 
   return cy.window().its("Let's test!").then( ([auth]) => auth );
 }
-
-// tbd. Try once more, making sure the port number is correct (9101 for dev)
-//
-// POINTLESS CODE - leave for now...
-//
-// Tried to manufacture (or gain, via 'getApp') the UI code's auth handle, without it collaborating. Didn't work.
-//
-/*
-* Access to Firebase auth.
-*
-* Note: Cannot use 'getAuth()' - _even_ if waiting (by 'cy.window().its(...).then) until the browser has certainly
-*   initialized its first copy. Doing 'getAuth' here would still give:
-*
-*   <<
-*     Firebase: No Firebase App '[DEFAULT]' has been created
-*   <<
-*_/
-function firebaseAuth() {    // () => FirebaseAuth
-
-  const [projectId, AUTH_URL] = ["demo-abc", "http://localhost:9100"];   // just know them #hack
-
-  const fah= initializeApp( {
-    projectId,
-    apiKey: "none",
-    authDomain: "no.domain"
-  } );
-
-  const auth = initializeAuth(fah, { errorMap: debugErrorMap });    // provide human readable error messages
-  connectAuthEmulator(auth, AUTH_URL);
-
-  return auth;
-} //**/
 
 function fail(msg) { throw new Error(msg) }

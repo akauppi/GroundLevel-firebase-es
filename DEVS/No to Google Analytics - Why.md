@@ -9,11 +9,9 @@ First, you *can* use Google Analytics with this repo if you want to. We'll go th
 
 Firebase presents you with the above choice when creating a project. It "recommends" enabling Google Analytics.
 
-This recommendation is understandable. Google's business model works around advertising and the more apps enable Google Analytics, the more targeted such advertisement will be, one assumes.
+The question is: does this benefit *you* as a web app author - or your users, in any way?
 
-The question is: does it benefit *you* as a web app author - or your users, in any way?
-
-The dialog doesn't clearly indicate what the pros/cons of toggling the switch are. For example:
+The `(?)` icons provide guidence on what *features* you are missing, but the dialog does not tell:
 
 - what data does Google Analytics collect from your web app's users?
 - where is this data being used?
@@ -22,13 +20,13 @@ Because of this uncertainty -- and reluctance to decide something on behalf of o
 
 Instead:
 
-- Userbase understanding is gathered using [Plausible](https://plausible.io) - who especially underline their dedication to users' freedom to value privacy.
+- Learning about users is done using [Plausible](https://plausible.io) - who especially underline their dedication to users' freedom to value privacy.
 
-- A/B testing is not yet (Jul 2022) implemented in the repo, but can be, using e.g. monitoring tools.
+- A/B testing is not yet (Jul 2022) implemented in the repo, but can be.
 
 - Crash monitoring is implemented by [Sentry](https://sentry.io/welcome/).
 
-   >Note: Firebase Crashlytics would anyways not be available for web apps, only mobile (Jul 2022).
+   >Note: Firebase Crashlytics would anyways not be available for web apps (Jul 2022).
 
 ## When would you use Google Analytics?
 

@@ -137,3 +137,46 @@ There is no `:f` modifier or similar that would allow us to enforce we're mappin
 **Work-around**
 
 We make sure, using Makefiles, that each file-mapping exists.
+
+
+## Missing substitutions - avoid the warnings
+
+```
+$ docker compose up
+WARN[0000] The PROJECT_ID variable is not set. Defaulting to a blank string. 
+WARN[0000] The PROJECT_ID variable is not set. Defaulting to a blank string. 
+WARN[0000] The PROJECT_ID variable is not set. Defaulting to a blank string. 
+...
+```
+
+Docker Compose evaluates substitutions when reading the `.yaml` - before evaluating it.
+
+This means that no matter which subset of targets in the `.yaml` you use, you must provide all the subsets. Or get the warnings, above.
+
+Ways to deal with this.
+
+### 1. Inform Docker Compose (ask them to change behaviour)
+
+They could maybe change the order when substitutions are applied - meaning you'd only get warnings of relevant ones. But this can be more complicated and deep than it seems. 
+
+Hurts Docker Compose developers (at the least, it would add complexity to Docker's source code).
+
+### 2. Split to separate Docker Compose files
+
+This is the meaningful approach (and one taken). Unrelated things should be in unrelated files.
+
+This causes more individual `docker-compose.{this|that}.yml` files to be in the repo. This is both a good thing (separation of concerns) and bad (clutter).
+
+"Hurts" people skimming the repo; many files cause questions and feel complex.
+
+### 3. Always provide all the substitutions
+
+This clutters the Makefile (or `package.json`), instead of Yaml. And it makes manual launching tedious: `A= B= docker compose up target`
+
+### 4. Always provide defaults
+
+```
+${_SOME_SUBST:-}
+```
+
+This eats up the warnings, but what if we'd *like* to have them. I.e. with this approach, we don't benefit from the warnings, any more.
