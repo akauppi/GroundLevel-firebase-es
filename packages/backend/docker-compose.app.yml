@@ -17,7 +17,7 @@
 services:
   emul-for-app:
     extends:
-      file: docker-compose.base.yml
+      file: dc.base.yml
       service: emul-base
     volumes:
       # --- RO

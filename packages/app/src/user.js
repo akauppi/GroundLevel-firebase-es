@@ -37,7 +37,7 @@ onAuthStateChanged( auth, user => {
     countLogins();
   }
 
-  // Inform Sentry client
+  // Inform Sentry client (tbd. make it use 'userIdRef')
   //
   sentry_setUser(user ? { id: user.uid } : null );
 });
@@ -77,6 +77,27 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
 });
 
 /*
+* For subscribers only needing the user id (Sentry, central logging/metrics)
+*/
+const userIdRef = computed( () => {   // ComputedRef of null | string
+  const v = authRef.value;  // undefined | false | { uid: string, ... }
+
+  if (v === undefined) {
+    throw new Error("NO CAN DO. Initialize the auth system before the app, so we don't need to bear with this!");
+      // try. is it fast enough???
+  }
+
+  if (v) {
+    const { uid } = v;
+    uid || fail("Got auth object without 'uid'");
+
+    return uid;
+  } else {
+    return null;
+  }
+});
+
+/*
 * Get current user's info.
 *
 * If needed, wait until Firebase Auth has figured it out (using a Promise avoids an "unknown" state).
@@ -100,7 +121,7 @@ async function getCurrentUserId() {   // () => Promise of (null | string)
 
 /*
 * Non-await version of 'getCurrentUserId' when the code *knows* that the Firebase auth dance must have already taken
-* place. E.g. for code that only shows for a logged in user.
+* place. E.g. UI that only shows for a logged in user; central logging and monitoring.
 */
 function getCurrentUserId_sync() {    // () => null | string
   const tmp = auth.currentUser;
@@ -123,7 +144,7 @@ export {
   userRef2,
   getCurrentUser,
   getCurrentUserId,
-  //isReadyProm,    // can 'await' 'getCurrentUserId'
   getCurrentUserId_sync,
-  uidValidator
+  uidValidator,
+  userIdRef
 }

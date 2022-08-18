@@ -1,7 +1,7 @@
 #
 # backend/docker-compose.ci.yml
 #
-# Takes the role of both 'docker-compose.base.yml' and 'docker-compose.yml', for CI.
+# Takes the role of both 'dc.base.yml' and 'docker-compose.yml', for CI.
 # Works as a basis for 'docker-compose.app.ci.yml'.
 #
 # Reasons:

@@ -1,5 +1,5 @@
 #
-# backend/docker-compose.base.yml
+# backend/dc.base.yml
 #
 # Base for 'docker-compose[.app].yml'.
 #
@@ -24,6 +24,10 @@ services:
   #
   # Expects from derived definitions:
   #   - environment: PROJECT_ID to be defined ('demo-...')
+  #
+  # Note! Running this causes 'functions/node_modules' (an empty folder) to be created, on the host. Would be nice if
+  #     we could avoid that. Perhaps just use that as the DC-side 'node_modules' cache, and disallow 'npm install'
+  #     host-side (like it already is!). #tbd
   #
   emul-base:   # used for 'npm run start', 'npm test', 'npm run app:start'
     extends:

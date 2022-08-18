@@ -30,12 +30,12 @@ services:
   #
   emul:
     extends:
-      file: docker-compose.base.yml
+      file: dc.base.yml
       service: emul-base
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "6767:6767"
-      - "6800:6800"
+      #- "6868:6868"    # no need to expose Realtime Database port, unless we want to test metrics/logging
       - "4000:4000"
         # Keep ports aligned with 'firebase.js'
 
@@ -48,7 +48,7 @@ services:
       test: '
         nc -z localhost 6767 && 
         nc -z localhost ${FUNCTIONS_PORT} && 
-        nc -z localhost 6800
+        nc -z localhost 6868
         '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
@@ -69,7 +69,6 @@ services:
       - ./jest.config.default.js:/work/jest.config.default.js:ro
       - ./tmp/firebase.json:/work/firebase.json:ro
       - ./package.dc.json:/work/package.json:ro
-      #- ./test-database:/work/test-database:ro
       - ./test-firestore-rules:/work/test-firestore-rules:ro
       - ./test-fns:/work/test-fns:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.

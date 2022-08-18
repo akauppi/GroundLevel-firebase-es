@@ -1,9 +1,9 @@
 /*
 * src/central/counters.js
 *
-* Increment central counters.
+* Application specific counter metrics.
 */
-import { createCounter } from './support'
+import { createCounter } from './common'
 
 const countLogins = createCounter("login");
 

@@ -23,9 +23,9 @@ const appTitle = "GroundLevel - sample app"
 //const authPersistenceLevel = 'none';   // 'local'/'session'/'ask'/'none'  (tbd. handle with 'aside-keys', in App/index.vue)
 
 /*
-* Central logging configuration
+* Central configuration
 */
-const logWorker = {
+const metricsAndLogsWorker = {
   maxBatchDelayMs: 2000,    // ship logs with maximum this delay
   maxBatchEntries: 100      // max. payload per shipment
 }
@@ -33,5 +33,5 @@ const logWorker = {
 export {
   //allowAnonymousAuth,
   appTitle,
-  logWorker
+  metricsAndLogsWorker
 }

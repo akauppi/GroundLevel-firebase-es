@@ -1,12 +1,12 @@
 /*
 * src/central/logs.js
 *
-* Client side support for central logs.
+* Application specific logs.
 */
-import { createLog } from './support'
+import { createLog } from './common'
 
-const logHey = createLog("hey!");
+const logHey_INFO = createLog("hey!", "info");
 
 export {
-  logHey
+  logHey_INFO
 }

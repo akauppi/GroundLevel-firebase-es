@@ -177,6 +177,15 @@ async function configGen({ command, mode }) {
       })
     ],
 
+    worker: {
+      // Firefox (v.100; Jun 2022) is not ready for "es", yet. Other major browsers likely are.
+      //
+      //  Firefox gives a console error:
+      //    "import declarations may only appear at top level of a module"
+      //
+      //format: 'es'    // default: 'iife'
+    },
+
     server: SERVE_PORT ? {
       host: true,   // needed for the DC port mapping to work
       strictPort: true,

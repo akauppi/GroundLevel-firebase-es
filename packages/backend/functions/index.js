@@ -8,6 +8,8 @@
 *     -> https://firebase.google.com/docs/functions/callable
 *   - Add the Firebase Admin SDK to your server (Firebase docs)
 *     -> https://firebase.google.com/docs/admin/setup
+*
+* tbd. Advance to 'v2' ONCE FIRESTORE SUPPORT IS THERE.
 */
 
 /*
@@ -18,7 +20,7 @@
 *   [1]: Runtime environment variables set automatically > Newer runtimes (Cloud Functions docs)
 *     -> https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
 *
-* Note: Cloud Functions loads files multiple times, and the differences in the sets can be partly due to this.
+* Note: Cloud Functions (v1) loads files multiple times, and the differences in the sets can be partly due to this.
 *   1st load:   study the contents
 *   2nd load:   initiate one function at a time
 *
@@ -49,8 +51,9 @@
 *     K_SERVICE: 'userInfoShadow_2',          **documented**
 *   <<
 *
-* This is mostly "good to know" but also can be ued in the region detection logic ('regional.js').
+* This is mostly "good to know".
 */
 //console.error("!!!", process.env);
 
+export { metricsAndLoggingProxy_v0 } from './ops/index.js'
 export { userInfoShadow_2 } from './userInfoShadow.js'

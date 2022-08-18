@@ -116,7 +116,7 @@
 
   import { userRef2 as user } from '/@/user'
 
-  import { logHey } from '/@central/logs'
+  import { logHey_INFO } from '/@central/logs'
 
   const LOCAL = import.meta.env.MODE === 'dev_local'
 
@@ -169,7 +169,7 @@
       LOCAL,
       RELEASE,
       gimmeHey: async () => {
-        await logHey();
+        await logHey_INFO();
         console.log("!!! Logged to central; please check?")
       }
     }

@@ -16,7 +16,6 @@
 #
 services:
   firebase-cli:
-    # Note: Can also 'extends:' from the '../dc/firebase-tools/base' definition, but it adds little value, here.
     build:
       context: ../dc/firebase-tools/
       target: firebase-cli

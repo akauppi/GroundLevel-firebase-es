@@ -1,17 +1,12 @@
 /*
 * functions/firebase.js
 *
-* Imported by the modules needing a Firebase (eg. Firestore) handle.
+* Imported by the modules needing Firebase access.
 */
 import { initializeApp } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+export { getFirestore } from 'firebase-admin/firestore'
 
-// Note: 'initializeApp' and 'getFirestore' need to be in the same module, to have their execution order correct
-//    (inner modules would execute first, unless we play with dynamic imports).
+// Note: Once 'initializeApp' is called here, the re-exported 'getDatabase' and 'getFirestore' will "just work"
+//    in upper modules (since they execute after this block).
 //
 /*const app =*/ initializeApp();
-const firestore = getFirestore();
-
-export {
-  firestore
-}

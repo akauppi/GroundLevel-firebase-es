@@ -1,0 +1,55 @@
+#
+#
+services:
+  prom-agent:
+    build:
+      context: .
+    volumes:
+      - ./docker-compose.yaml:/work/self.yaml
+
+    working_dir: /work/
+    #|command: sh -c 'echo ''
+    #|    \|apiVersion: v1
+    #|    \|kind: ConfigMap
+    #|    \|metadata:
+    #|    \|  name: prometheus
+    #|    \|  namespace: monitoring
+    #|    \|data:
+    #|    \|  prometheus.yml: |-
+    #|    \|    #global:
+    #|    \|    #  external_labels:
+    #|    \|    #    x_origin: x
+    #|    \|    remote_write:
+    #|    \|    - url: ${GC_PUSH_URL}
+    #|    \|      basic_auth:
+    #|    \|        username: ${GC_USER}
+    #|    \|        password: ${GC_API_KEY}
+    #|  '' | tr \| \\n > prometheus.yml &&
+    #|
+    #|  prometheus --enable-feature=agent --help
+    #|'
+    command: sh -c '
+        cat self.yaml | grep -e ''^#1\>'' | sed s/^#1\>// |
+          sed s^$$\{GC_PUSH_URL\}^${GC_PUSH_URL}^ |
+          sed s/$$\{GC_USER\}/${GC_USER}/ |
+          sed s/$$\{GC_API_KEY\}/${GC_API_KEY}/
+      '
+
+# "embedded" document template
+#
+#1>apiVersion: v1
+#1>kind: ConfigMap
+#1>metadata:
+#1>  name: prometheus
+#1>  namespace: monitoring
+#1>data:
+#1>  prometheus.yml: |-
+#1>    #global:
+#1>    #  external_labels:
+#1>    #    x_origin: x
+#1>    remote_write:
+#1>    - url: ${GC_PUSH_URL}
+#1>      basic_auth:
+#1>        username: ${GC_USER}
+#1>        password: ${GC_API_KEY}
+

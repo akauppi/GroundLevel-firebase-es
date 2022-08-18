@@ -1,11 +1,11 @@
 /*
 * functions/userInfoShadow.js
 */
-
 import { regionalFunctions_v1 } from './regional.js'
   // 'v2' doesn't have '.firestore', yet (Jul 2022)
 
-import { firestore as db } from './firebase.js'
+import { getFirestore } from './firebase.js'
+const db = getFirestore();
 
 // UserInfo shadowing
 //

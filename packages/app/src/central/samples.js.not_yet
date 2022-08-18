@@ -1,0 +1,12 @@
+/*
+* src/central/samples.js
+*
+* Application specific samples collection.
+*/
+import { createSample } from './common'
+
+const sampleDummy = createSample("dummy");
+
+export {
+  sampleDummy
+}
