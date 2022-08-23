@@ -1,24 +1,54 @@
-# Wishes for Firebase APIs
+# Wishes for Firebase
 
-Dear Firebase. You are awesome. If you ever run out of things to improve, here would be some ideas:
+Dear Firebase. Parts of you are awesome.
 
-Hot list: 🌶
+Google is taking good care of trying to face-lift you (Cloud Functions [v2](https://firebase.google.com/docs/functions/beta), for example).
 
-- ability to have immutable Rules evaluation (evaluation not changing the data set)
-- online Simulator and local Firestore emulator should have 100% same logic
+Having said that, you have some wrinkles...
 
-🙏
-
-Forever list:
-
-- CLI could feel more like a real command line tool (and less Python):
-  - be faster!!!!
-  - feed errors to `stderr` (not `stdout`)
-  - exit with error codes when it fails
+>This file contains feedback on Firebase libraries, APIs and online services. Issues on Firebase CLI (including emulators) are in [another doc](Wishes for Firebase CLI.md).
 
 
-## Cloud Firestore
+## Too many issues makes one look weak.. 🙇
 
+The number of open issues is an indicator of a project's popularity, but also of the expected quality. Firebase repos can do a better work, here.
+
+- `firebase-admin-node`: 73 open issues, oldest created Jun 2017 (5 years) [link](https://github.com/firebase/firebase-admin-node/issues?q=is%3Aissue+is%3Aopen+sort%3Acreated-asc)
+- `firebase-tools`: 329 open issues, oldest created May 2016 (6 years 3 months) [link](https://github.com/firebase/firebase-tools/issues?q=is%3Aissue+is%3Aopen+sort%3Acreated-asc)
+- `firebase-js-sdk`: 383 open issues, oldest created May 2017 (5 years 3 months) [link](https://github.com/firebase/firebase-js-sdk/issues?q=is%3Aissue+is%3Aopen+sort%3Acreated-asc)
+- `firebase-functions`: 30 open issues, oldest created May 2019 (3 years 3 months) [link](https://github.com/firebase/firebase-functions/issues?q=is%3Aissue+is%3Aopen+sort%3Acreated-asc)
+
+Before attending any of the requests below, it would be important that:
+
+- these issue lists (and related PR lists!!!) get full, **weekly** attention by someone
+   - ..grooming them, removing duplicates and
+   - making sure **new issues** are swiftly taken care of
+
+This must be a systematic effort. Make dashboards that show trends (we can do this as a community effort - the data is public) and motivate to counteract the rising tide of issues per repo (except `firebase-functions` which seems ok).
+
+---
+
+Then... we could look at new requests. :)
+
+
+## Online Rules Simulator: Stop maintaining it / move to local???
+
+Since Firebase now (after 2020) has full emulation, maintaining the online Rules Simulator makes little sense. In practice, people can develop without it.
+
+Keeping old products "hanging" without proper deprecation is a bad choice.
+
+- it complicates things (including documentation)
+- it confuses developers
+
+I would simply declare the online Rules Simulator deprecated. There are some unique features it has (ability to closely see how a certain rule gets evaluated), but people might not miss them.
+
+If anything, this functionality **should be in the local Emulator UI** and not in an online tool. Leave online for configuration, deployment and monitoring, only.
+
+## Online Rules Simulator
+
+Feedback about the Online Rules Simulator is striked over. As you can see, maintaining it would need resources.
+
+<strike>
 ### Uniformity between the online Rules Simulator and the local Firestore emulator
 
 This is mentioned widely on the Internet, but it took me a while before it really bit.
@@ -45,17 +75,11 @@ i.e. Target:
 Block comments are allowed by the Security Rules evaluation, but not reflected in the syntax highlighting.
 
 ![](.images/firebase-simulator-block-comments.png)
+</strike>
 
-
-### Ability to insert "current server date" in the Firebase console (and Rules simulator)
+### Ability to insert "current server date" in the Firebase console <strike>(and Rules simulator)</strike>
 
 ![](.images/firebase-wishes-server-date.png)
-
-<!--
-<strike>The dialog could have a "right now" or "server date" button, like the API allows a client to set a field to current date.
-
-This would be even more valued, since it is not obvious to the user (me), whether I should fill in the UTC time, or a time in my local time zone. Having the suggested button would take away this consideration.</strike>
--->
 
 >♨️: With the online simulator, lack of this currently (Mar 2020) prevents testing for rules that expect server side timestamp in a field (e.g. `created`, `removed`).
 
@@ -70,7 +94,21 @@ Adding `FieldValue` to the `Type` drop-down would be more in line with the Fires
 These two are slightly different ideas.
 
 
-### Firebase emulator API
+<strike>
+### Firebase Rules playground (online) 'Build document' dialog (usability suggestion)
+
+For more complex work, ability to copy-paste a JSON as the document would be welcome.
+
+If we go by the dialog, ability to make changes to the previous document would be welcome.
+
+>![](.images/rules-playground-build.png)
+
+Here, the document contents are non-trivial. When I click `Build document`, instead of being able to add or remove fields, I need to start creating it all from scratch.
+</strike>
+
+
+<!-- hidden (not that relevant... haven't used coverage, in 2021-22)
+## Firebase emulator API
 
 See [Generate Test Reports](https://firebase.google.com/docs/firestore/security/test-rules-emulator) (Firebase docs)
 
@@ -87,58 +125,9 @@ This is okay when one uses a small set of stable test ids (and we'll likely go t
 It would, however, be nice to be able to see the available "project id"s from the API. E.g. GET to `http://localhost:6767/emulator/v1/projects/` could list these, as a JSON array.[^1]
 
 [^1]: Currently (Mar 2020), that gives a 404.
-
-#### "Project id's" don't seem to matter??
-
-I can use a query such as `http://localhost:6767/emulator/v1/projects/nosuch:ruleCoverage.html` and still get a valid response (there is no `nosuch` project). This is weird - would expect a 404.
-
-Firebase tools v. 7.16.1.
-
->**Edit:** Instead, this is some kind of a caching problem. At times, the earlier results are available (e.g. changing project id in the URL from `abc` to `abcd`). Other times, one gets a 500.
->
->Someone at Firebase could have a look.
->Tested both with Safari and Chrome.
-
-Also, I was surprised to see the results persist over emulator restarts. Wasn't expecting that, based on documentation.
-
-
-<!-- 8.6.0 has, but it's not ideal (more about it later)
-### 🌶 Firebase emulator to pick up changes to the rules
-
-The emulator could have a "watch" mode to help in development.
-
-<strike>`firebase emulators:exec` takes some seconds to set up the emulator. It makes sense, for rules development, to have an emulator running in the background.
-
-However.. currently (firebase tools 7.16.1) the emulator does not change its behavior when a rules file is changed.</strike>
-
-Could we have a `--watch` mode that would? 🥺
-
----
-
-Edit: If one codes like this:
-
-```
-firebase.loadFirestoreRules({
-  projectId: sessionId,
-  rules: fs.readFileSync("dut.rules", "utf8")   // name must match that in 'firebase.json'
-});
-```
-
-..in the test setup, the rules are forced to the Firestore emulator. Having a watch mode would simply simplify things (for the developer), not needing to have this code.
 -->
 
-### Firebase Rules playground (online) 'Build document' dialog (usability suggestion)
-
-For more complex work, ability to copy-paste a JSON as the document would be welcome.
-
-If we go by the dialog, ability to make changes to the previous document would be welcome.
-
->![](.images/rules-playground-build.png)
-
-Here, the document contents are non-trivial. When I click `Build document`, instead of being able to add or remove fields, I need to start creating it all from scratch.
-
-
-### 🌶 Firestore Security Rules emulator: a "dry run" mode
+## 🌶 Firestore Security Rules emulator: a "dry run" mode
 
 When I first used the rules unit testing library (`@firebase/testing`, now `@firebase/rules-unit-testing`), I somehow supposed the underlying data would not get changed. It does.
 
@@ -149,47 +138,31 @@ If the Firebase emulator provided a "dry run" flag, the library could get rid of
 The flag can also be a configuration for a particular project id, but since configuration at the moment (Aug 2020) is all over the place, I'm not advocating that unless it first gets gathered in a centralized way (e.g. `firebase.json` and emulator command line flags; away from source code!).
 
 
-## Config should be transparent to client code!!!
+## 🍎🍎🍎Testable billing for Security Rules
+
+Asking about how many "reads" a certain security rule causes has been mentioned in community forums (especially newcomers).
+
+Would you be able to add this to the emulator so that we can compare the reported "reads" count automatically to expected ones. I would add this as part of the security rules tests.
+
+This makes the billing testable.
+
+
+
+## JS client (emulation), Cloud Functions: Config should not be in code
 
 The configuration story for Firebase seems unclear (Jul 2020). 
 
-While there is a config file (`firebase.json`), a Firebase employee mentioned that is only for hosting (reference missing). That's not true. It contains entries for `firestore` and `emulation`, but it does not consistently collect all Firebase configuration into itself, as it could.
+While there is a config file (`firebase.json`), it does not consistently collect all Firebase configuration into itself, as it could.
 
->The `firebase-jest-testing` library hides these configuration steps from this application code. But they are still there; would rather have them in `firebase.json`.
+In addition, configuration exists in:
 
-Aim:
+- JS client code, for setting up emulation
+- Cloud Functions code, for setting up regions
 
-- Browser code should be absolutely same, whether running against emulator or cloud deployment
+Obviously, we can live with the current implementation. This is more of a design / philosophical thing. When doing incompatible changes in the future, Firebase people could consider whether configuration can be brought out from code.
 
-Means this block (in `init.vite.js`) should become void:
-
-```
-  const LOCAL = import.meta.env.MODE == "dev_local";
-  if (LOCAL) {
-    console.info("Initializing for LOCAL EMULATION");
-
-    const DEV_FUNCTIONS_URL = "http://localhost:5001";
-    const FIRESTORE_HOST = "localhost:6767";
-
-    // As instructed -> https://firebase.google.com/docs/emulator-suite/connect_functions#web
-    //
-    // Note: source code states "change this [functions] instance". But it seems that another 'firebase.functions()'
-    //    later must return the same instance, since this works. #firebase #docs #unsure
-    //
-    firebase.functions().useFunctionsEmulator(DEV_FUNCTIONS_URL);
-
-    firebase.firestore().settings({   // affects all subsequent use (and can be done only once)
-      host: FIRESTORE_HOST,
-      ssl: false
-    });
-  }
-```
-
-Can we do that?
 
 ## Cloud Functions: ability to configure the default region in one place
-
----
 
 **Edit 16-Feb-2021:**
 
@@ -199,13 +172,11 @@ It seems this boild down to two, separate issues:
 
    There should be a one clear place where one can say "I wish to use location ... for this project". If more complex use cases require more, that is fine, but the poor man's case must be simple!
 
-- having to provide the region **in front end client**.
+- having to provide the region **in front end client** (for callables).
 
-   Surely the Firebase JavaScript library can figure it out? Again, for complex cases there may be other requirements, but the 90% use cases should not need the location to be sprinkled around here and there!
+   Surely the Firebase JavaScript library can figure it out? Again, for complex cases there may be other requirements, but the 90% use cases should not need the location to be sprinkled around here and there.
 
 ---
-
-The current situation on Cloud Functions regions is not completely clear (Aug 2020). There are cases where the code seems to prefer the global default region (e.g. emulation has this).
 
 Overrides to regions can only be done on a function-by-function basis. This leads to the Internet [recommending](https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1#43572246) things like a `regionalFunction` value - the approach taken also in this repo.
 
@@ -213,52 +184,12 @@ Overrides to regions can only be done on a function-by-function basis. This lead
    - this place could be the `firebase.json` file?
 
 2. The client should "just pick up" such a setting.
-   - If needed, this can be done via the `__` URL mechanism
 
 >Firebase says (@puf on Twitter) that the `__` configuration is only for hosting.
 >
 >To a user, it does not really seem that way, having `storageBucket`, `messagingSenderId` etc. How would `functionsDefaultRegion` be any different?
 
-<!_-- disabled
-Note: Having the error message about CORS makes this especially nasty for developers.
-
-See [SO 62042554](https://stackoverflow.com/questions/50278537/firebase-callable-function-cors/61725395#62042554). 
-
-Also relevant: 
-
-- [firebase deploy to custom region (eu-central1)](https://stackoverflow.com/questions/43569595/firebase-deploy-to-custom-region-eu-central1) (StackOverflow)
-
-The current complexity is against the aim for simplicity that is the main selling argument of Firebase (you can do back-end without being a wizard class security specialist!).
-
-There may be a need for overriding the region on a function-by-function basis, but there should also be a way to change the default (in configuration). This would be the way most people change their region. Such a change would not break code that currently uses the in-code settings.
---_>
-
----
-
 The [environment configuration](https://firebase.google.com/docs/functions/config-env) provides a solution to the first problem (not having regions in code). It should just be more clearly communicated in Firebase docs. (instead of recommending to stamp the region in code)
-
-
-## Loading initial data - from JSON
-
->Note: This is already sufficiently handled by `firebase-jest-testing` and doesn't necessarily need support from Firebase emulator commands.
-
-The import/export mechanism ([#1167](https://github.com/firebase/firebase-tools/issues/1167)) works on a binary data format that humans cannot directly read or edit.
-
-That's one use case. Another is to prime an emulator with JSON data, instead of a snapshot. This is useful when one wants to tune the data by hand, and there is not too much of it.
-
-Our current approach uses `local/init.js` to prime such data. It works, but is clumsy in the `package.json` command:
-
-```
-    "dev:local": "concurrently -n emul,dev-local \"firebase emulators:start --only functions,firestore\" \"npm run _dev_local_2\"",
-    "_dev_local_2": "wait-on http://localhost:4000 && node --experimental-json-modules ./local/init.js && npx vite --port 3000 --mode dev_local",
-```
-
-This could be:
-
-```
-    "dev:local": "firebase emulators:exec --ui --only functions,firestore local/init.js \"npm run _dev_local_2\"",
-    "_dev_local_2": "npx vite --port 3000 --mode dev_local",
-```
 
 
 ## Firestore JavaScript client could provide `Date`s?
@@ -290,7 +221,7 @@ Two ways to make such a change:
 ---
 
 
-## Firebase Security Rules: could allow set comparison without `.toSet()`
+## Security Rules: could allow set comparison without `.toSet()`
 
 Sets are great. However, their use is a little verbose, at the moment (8.6.0).
 
@@ -315,19 +246,7 @@ diff().removedKeys() == ["removed"]
 More readable? :)
 
 
-## Firebase functions emulation: please allow region parameter (BUG)
-
-```
-const fns = window.LOCAL ? firebase.app().functions(/*functionsRegion*/) :
-  firebase.app().functions(functionsRegion);
-```
-
-Application code now needs to have the above condition (firebase-tools 8.6.0, JavaScript client 7.16.1).
-
-- With the region parameter, emulated call just disappears (no logging, no invocation)
-
->This seems to have been tested only with default region, in which case identical code can be used.
-
+<!-- hidden; Not really an issue. We also don't use '__' any more - baked in config is fastest (but something Firebase cannot do for us).
 
 ## Firebase emulation: expose in the client, whether it's running against local emulator
 
@@ -340,50 +259,17 @@ This would mean the `window.LOCAL` mode can be taken from the library, instead o
 Suggestion:
 
 - bring all the configuration of the server (emulator) available in one end point (preferably `__`)
-
-
-## 🍎🍎🍎Testable billing for Security Rules
-
-Asking about how many "reads" a certain security rule causes has been mentioned in community forums (especially newcomers).
-
-Would you be able to add this to the emulator / `@firebase/rules-unit-testing` so that we can compare the reported "reads" count automatically to expected ones. I would add this as part of the security rules tests.
-
-This makes the billing attestable.
-
-
-<!-- seems done in 8.8.1; confirmed: 9.12.1
-## Cloud Functions emulator: could watch for changes
-
-Firebase emulator (firebase-tools 8.6.0) does not pick up changes to the functions sources.
-
-Since the Security Rules emulator does watch for changes, this is at the least an inconsistency in the development experience.
-
-Work-around:
-
-- we could architect automatic restart using `npm`, but that adds complexity. Let's see what Firebase people say, first..
 -->
 
-## Firebase Performance Monitoring: the concept of version
+
+## Performance Monitoring: the concept of version
 
 Firebase Performance Monitoring has the concepts of version and build for mobile (iOS, Android) apps, but not for web apps (Sep 2020).
 
 Isn't that a useful concept even when versions presumably update faster? I'd like to be able to tell Firebase the version and build (for production), preferably in `initializeApp` itself.
 
-Firebase Performance Monitoring could then provide parity with the mobile versions. #pun
+Firebase Performance Monitoring could then provide parity with the mobile versions.
 
-
-## Accessing Cloud Functions should be the same, whether there's emulation or not (regions)
-
-It was not.
-
-This code is now removed from the project (since we don't want to directly use Cloud Functions for offline friendly operation), but once it was in, calling a function needed to be different, if one has regions, based on them running in the cloud or emulated.
-
-```
-const fns = (window.LOCAL) ? firebase.app().functions() :
-  firebase.app().functions(functionsRegion);
-
-export { fns }
-```
 
 ## Firebase Auth does not allow data URLs for `.photoURL`
 
@@ -391,10 +277,18 @@ It guards the URL formatting too strictly. [Data URLs](https://developer.mozilla
 
 Also, Firebase error message states the data URLs not to be "valid URLs". But they are. Just not for Firebase.
 
-<!-- things changed
-See [/local/init.js](../local/init.js).
--->
+```
+FirebaseAuthError: The photoURL field must be a valid URL.
+```
 
+**To reproduce:**
+
+- Change the `dev.photoURL` in `packages/app/local/users.js` to a data URL (starting `data:...`).
+
+- `npm run dev` and open in browser.
+
+
+<!-- Have we seen this, recently? 2022
 ## Firebase JS SDK: please update the Changelog *before* publishing ‼️‼️
 
 The current (2020-21) workflow at Firebase seems to be:
@@ -415,6 +309,7 @@ The current (2020-21) workflow at Firebase seems to be:
 Yeah, right. 
 
 Ping for a <strike>day</strike> week or so and eventually 8.2.9 info is out. **No other software package I use suffers from this**. Wouldn't it be nicer to have the release information out promptly, after the release? I'm okay with a 10..20 minute delay but hours. Not cool.
+-->
 
 
 <!-- hidden (need checking whether the option really is visible to developers; if not, remove)
@@ -438,40 +333,31 @@ On the other hand, the author got the feeling that in the `@exp` API's `initiali
 This is LIKELY a BOGUS thing to even ask. Let's presume IndexedDB is the implementation and the developer does not need to care! :)
 -->
 
-## Tiny: Document the default logging level
-
-https://modularfirebase.web.app/reference/firestore_.setloglevel
-
-Documentation should state which is the default level.
-
-Similarly [here](https://modularfirebase.web.app/reference/auth.getauth): 
-
->Initializes an Auth instance with platform specific default dependencies.
-
-[and](https://modularfirebase.web.app/reference/firestore_.getfirestore):
-
->with default settings.
 
 ## API inconsistency: `getFunctions` behaves like `initializeFunctions` (which doesn't exist)
 
-```
-  // Firebase API inconsistency (9.0-beta.1). For some reason, there is no 'initializeFunctions' but the 'getFunctions'
-  // takes parameters (that it doesn't, on other subpackages). #firebase
-```
+The Modular JS [API](https://firebase.google.com/docs/reference/js/functions) is inconsistent.
 
-## API inconsistency: `useAuthEmulator` takes a URL whereas others prefer host + port
-
-API 9.0-beta.1
+For some reason, there is no `initializeFunctions` but the `getFunctions` takes parameters (which it doesn't, on other subpackages).
 
 ```
-useAuthEmulator(auth, AUTH_URL);
-useFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
-useFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
+const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
 ```
 
->Changed to `connectAuthEmulator` but while Firebase could have made this consistency change simultaneously, they didn't.
+>Mentioned in [#5170](https://github.com/firebase/firebase-js-sdk/issues/5170).
+
+## API inconsistency: `connectAuthEmulator` takes a URL whereas others prefer host + port
+
+```
+connectAuthEmulator(auth, AUTH_URL);
+connectFirestoreEmulator(firestore, 'localhost',FIRESTORE_PORT);
+connectFunctionsEmulator(fns, 'localhost',FUNCTIONS_PORT);
+```
 
 Mentioned in [#4781](https://github.com/firebase/firebase-js-sdk/issues/4781).
+
+
+<!-- Not really an issue. Using priming with DC works fine.
 
 ## FR: Ability to cloak as admin, with Firestore emulator (documenting this)
 
@@ -490,32 +376,7 @@ Work-arounds:
 1. Using `firebase-admin` (obviously)
 2. Using import/export
 3. ...looking for the right way...
-
-## Firebase JS SDK 9.0.0-beta.X No `initializeFunctions`?
-
-Firebase 9.0.0-beta.{1..3} API is inconsistent.
-
->For some reason, there is no `initializeFunctions` but the `getFunctions` takes parameters (which it doesn't, on other subpackages).
-
-```
-const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
-```
-
-*This has been raised as some issue. Add the link here if tracking it.*
-
-## Data URL's not supported for auth photo URL
-
-Unfortunately, Firebase auth dislikes data URLs. Using one:
-
-```
-FirebaseAuthError: The photoURL field must be a valid URL.
-```
-
-**To reproduce:**
-
-- Change the `dev.photoURL` in `packages/app/local/users.js` to a data URL (starting `data:...`).
-
-- `npm run dev` and open in browser.
+-->
 
 
 ## References

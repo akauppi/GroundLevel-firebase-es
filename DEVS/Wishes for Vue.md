@@ -10,10 +10,6 @@ Your fan. 🌺🌺
 
 *Edit: After having used Svelte 3, as well, it does these things (below; life span of `Readable`, for example) better. Also, it doesn't suffer from the confusion on the roles of `ref` vs. `reactive`.*
 
-<!-- Editor's note
-This entry is more **messy** than the other wish lists. Maybe the author doesn't really know what is possible / what to ask for.
--->
-
 ---
 
 <!-- disabled (too lazy)
@@ -134,7 +130,7 @@ There is no way, in JavaScript or Vue 3.0 beta, to detect that a `reactive` is g
 
 **Suggested behaviour:**
 
-A hook that allows the creator of a `reactive` to attach a function to be called, prior to garbage collecting the `reactive`. E.g.
+A hook that allows the creator of a `reactive` (or `ref`) to attach a function to be called, prior to garbage collecting the `reactive`. E.g.
 
 ```
 const r = reactive(undefined, () => { ...stop a database subscription... });
@@ -146,70 +142,30 @@ const r = reactive(undefined, () => { ...stop a database subscription... });
 
 Makes application code simpler, and code more robust.
 
-Makes libraries using `reactive` as their delivery method more plausible, since the interface remains simple.
+Makes libraries using `reactive` or `ref` as their delivery method more plausible, since the interface remains simple.
 
 **Problems this may create:**
 
-If the `reactive` is created outside of the `setup` scope, there is no mechanism to stop subscribing.
+*The author doesn't understand this any more... May or may not be true.*
+
+If the `reactive` (or `ref`) is created outside of the `setup` scope, there is no mechanism to stop subscribing.
 
 Maybe there must be a `.stop()` method added to `reactive` for this reason, that would not need to be called when it's created within the `setup` scope?
 
 **Work-arounds:**
 
-Today (Jul 2020), there is no work-around that would allow the creator of the `reactive` to stop feeding it, once the data is no longer needed.
+Today (Jul 2020), there is no work-around that would allow the creator of the `reactive` (or `ref`) to stop feeding it, once the data is no longer needed.
 
-A garbage collection hook in the JavaScript engines would suffice, but is not available / not planned, as far as the author of the suggestion has found out.
+A garbage collection hook in the JavaScript engines would suffice, but is not available / not planned, as far as the author has found out.
 
 **Would also `ref` need this?**
 
-Not really. `reactive` is intended for object-like data and any streamed data that needs to be unsubscribed is likely to be object like. One can always derive `refs` from `reactive`, if need be.
+<strike>Not really. `reactive` is intended for object-like data and any streamed data that needs to be unsubscribed is likely to be object like. One can always derive `refs` from `reactive`, if need be.</strike>
 
-*Edit: That was before I started favouring `ref` with a value of `Map` or object. Not using `reactive`, any more (Mar 2021).*
-
-
-<!-- Left out: this makes sense if we deal with "Promise of `reactive`" or "Promise of `ref`" but with the above take on `undefined`, we wouldn't need to. Therefore, this is not necessarily needed.
-
-## `computed` with an async payload
-
-There is [a plugin](https://github.com/foxbenjaminfox/vue-async-computed) for this for Vue.js 2.
-
-Would be nice to have native support, so that this just works:
-
-```
-const members = computed(async () => {
-
-  // fetches info about users, may take time
-  return ...;
-}	  
-```
-
-Current behavior (Vue 3.0 beta):
-
-- the above code is not valid
-
-Suggested behavior:
-
-- The `members` reactive value should remain uninitialized (same as `ref(undefined)` or `reactive()`, until the Promise has resolved.
-- After that, it would work as a usual `ref`/`reactive`.
-
-**Problems solved:**
-
-Provides a more natural story to using Vue with Promises.
-
-**Current work-around:**
-
-This can be done using `.watch`, and explicitly setting a `ref`/`reactive`:
-
-```
-const members = reactive();
-
-...
-```
--->
+Yes. It's confusing that there are two kinds of reactive structures, in Vue.js 3. The author eventually opted for `ref` - using a "Ref of Map" for objects.
 
 <!--
-*Edit: There used to be a use case for this (initializing the Router), but it was reorganized using async routes. This is no longer a pressing issue.*
-
+- Not sure, whether we have a use case for this.
 ## An `async setup()`?
 
 Vue implementation (3.0.0) requires the `setup` function to be synchronous.

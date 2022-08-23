@@ -22,6 +22,7 @@ service cloud.firestore {
       //
       allow read: if isMember() && (!isRemoved() || isAuthor())
         //&& validProject2()       // optional: enable if you want to guard against bad data instead of letting client cope with it
+        ;
 
       // Creation
       //    - the creating user must list themselves as an author
@@ -33,6 +34,7 @@ service cloud.firestore {
         && after().created == request.time
         && !isRemovedAfter()
         && request.auth.uid in after().authors    // creator added as an author (we could go soft on this..)
+        ;
 
       // Update
       //    | field    | mutability |
@@ -51,13 +53,14 @@ service cloud.firestore {
             : diff().removedKeys() == ["removed"].toSet() ? true
             : false   // update not allowed
           )
+        ;
 
       function removedUnaffected() {
         // Implementation note: if not using '.diff', you must consider the case when there is no '.removed' (it's optional).
         return !( "removed" in diff().affectedKeys() )
       }
 
-      allow delete: if false        // no deletion via web app
+      allow delete: if false;        // no deletion via web app
 
       // Project consistency:
       //  - title (string) may not be empty
@@ -99,20 +102,20 @@ service cloud.firestore {
 
       function isAuthor() {
         return isSignedIn() &&
-          request.auth.uid in prior().authors
+          request.auth.uid in prior().authors;
       }
 
       function isMember() {
         return isSignedIn() &&
-          request.auth.uid in prior().members
+          request.auth.uid in prior().members;
       }
 
       function isRemoved() {
-        return "removed" in resource.data
+        return "removed" in resource.data;
       }
 
       function isRemovedAfter() {
-        return "removed" in request.resource.data
+        return "removed" in request.resource.data;
       }
 
 //--- Projects > Symbols ---
@@ -130,6 +133,7 @@ service cloud.firestore {
         //
         allow read: if EXT_isMember_COST1()
           //&& validSymbol()      // guards against bad data in test setup, manual Firestore edits or from earlier schemas
+          ;
 
         // Creation:
         //	- the creator needs to claim the symbol to themselves, at creation (we can relax this, if needed)
@@ -138,6 +142,7 @@ service cloud.firestore {
           && validSymbolWrite()
           && after().claimed.by == request.auth.uid
           && after().claimed.at == request.time
+          ;
 
         // Updates:
         //  - can claim a non-claimed symbol
@@ -158,12 +163,13 @@ service cloud.firestore {
               !("claimed" in after())                             // ..and it is removed
             ): false
           )
+          ;
 
         // Delete:
         //	- can delete a symbol claimed to themselves
         //
         allow delete: if EXT_isMember_COST1()
-          && isClaimedByMe()
+          && isClaimedByMe();
 
         function validSymbolWrite() {
           let requiredKeys = ['layer','shape','size','fillColor','center'].toSet();
@@ -185,14 +191,15 @@ service cloud.firestore {
                 after().claimed.by is string &&
                 after().claimed.at is timestamp // and <= request.time
             ))
+          ;
         }
 
         function isClaimedByMe() {
-          return isClaimed() && prior().claimed.by == request.auth.uid
+          return isClaimed() && prior().claimed.by == request.auth.uid;
         }
 
         function isClaimed() {
-          return "claimed" in resource.data
+          return "claimed" in resource.data;
         }
       } // symbols
 
@@ -208,7 +215,7 @@ service cloud.firestore {
         // Read:
         //	- all project members can read each other's last visit time
         //
-        allow read: if EXT_isMember_COST1()
+        allow read: if EXT_isMember_COST1();
 
         // Write:
         //	- only the user themselves may write their doc, and only a certain field(s)
@@ -217,8 +224,9 @@ service cloud.firestore {
           && validProjectsUserInfoWrite()
           && userId == request.auth.uid
           && after().lastActive == request.time
+        ;
 
-        allow delete: if false
+        allow delete: if false;
 
         // Consistency:
         //  - 'lastActive' must be a timestamp
@@ -229,6 +237,7 @@ service cloud.firestore {
             && after().lastActive is timestamp
             // tbd. fails if below is enabled. #later #help
             //&& debug( diff().affectedKeys() ) == ["lastActive"].toSet()     // client must change this
+            ;
         }
       }
 
@@ -240,7 +249,7 @@ service cloud.firestore {
       function EXT_isMember_COST1() {
         return isSignedIn() && (
           request.auth.uid in get( /databases/$(database)/documents/projects/$(projectId) ).data.members
-        )
+        );
       }
     }   // project
 
@@ -256,7 +265,7 @@ service cloud.firestore {
     match /invites/{inviteId} {   // inviteId: '<email>:<projectId>'
       // Read:
       //  - only Cloud Functions read invites
-      allow read: if false
+      allow read: if false;
 
       // Create:
       //  - any collaborator or author of a project may invite more people
@@ -268,12 +277,13 @@ service cloud.firestore {
             PROJ_isAuthor_COST1( after().project ) :
             PROJ_isMember_COST1( after().project )      // else anyone in the project can invite
         && validInviteWrite()
+        ;
 
       // tbd. if we want to allow extending existing invite, the 'update' rule needs to be opened (a 'set' for an
       //        existing entry observes it).
-      allow update: if false
+      allow update: if false;
 
-      allow delete: if false
+      allow delete: if false;
 
       function validInviteWrite() {
         let requiredKeys = ['email','project','asAuthor','by','at'];
@@ -286,6 +296,7 @@ service cloud.firestore {
           && after().asAuthor is bool
           && after().by == request.auth.uid
           && after().at == request.time
+        ;
       }
 
       // Checking membership in a project from other collections.
@@ -320,11 +331,12 @@ service cloud.firestore {
     match /userInfo/{userId} {
       // Read:
       //  - only by Cloud Function trigger
-      allow read: if false
+      allow read: if false;
 
       allow write: if true
         && isSignedIn() && request.auth.uid == userId
         && validUserInfoWrite()
+        ;
 
       function validUserInfoWrite() {
         let requiredKeys = ['displayName','photoURL'];
@@ -333,6 +345,7 @@ service cloud.firestore {
           && afterKeysEq(requiredKeys)
           && after().displayName is string
           && after().photoURL is string
+          ;
       }
     }
 
@@ -341,7 +354,7 @@ service cloud.firestore {
 // Collection for various tests. No schema. Used only under emulation.
 
     match /temp {
-      allow read, write: if true
+      allow read, write: if true;
     }
 
 //--- Helpers (visible to all matches) ---
@@ -349,7 +362,7 @@ service cloud.firestore {
     // Aliases
     function prior() { return resource.data; }
     function after() { return request.resource.data; }
-    function diff()  { return request.resource.data.diff(resource.data) }
+    function diff()  { return request.resource.data.diff(resource.data); }
 
     // Compare root level keys with 'arr'; those and only those keys should exist.
     //
