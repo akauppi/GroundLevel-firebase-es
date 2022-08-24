@@ -1,5 +1,6 @@
 # Firebase tips
 
+<!-- disabled
 ## Thing called Rules Playground
 
 - [Quickly validate Security Rules](https://firebase.google.com/docs/rules/simulator) (Firebase docs)
@@ -55,7 +56,7 @@ For these reasons, expect Rules Playground to be deprecated at some point. It's 
 
 The author wishes it to be shut, but after its unique rule evaluation insight have been brought to be available in the Firebase CLI or emulator UI.
 
-<!-- hidden
+<!_-- hidden
 ### Entering `FieldValue` values
 
 There is no UI support for building a document with `FieldValue`s (e.g. server time stamp) but maybe we can fool the simulator by:
@@ -67,8 +68,8 @@ There is no UI support for building a document with `FieldValue`s (e.g. server t
 ```
 
 >tbd. tell whether the above worked `#help`
+--_>
 -->
-
 
 ## You can `debug()` security rules!
 

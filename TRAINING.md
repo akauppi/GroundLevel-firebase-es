@@ -8,4 +8,4 @@ Course material is available in the [project Wiki](https://github.com/akauppi/Gr
 
 - 🇫🇮 [Hacklab Helsinki](https://helsinki.hacklab.fi/in-english/) during spring 2021
 
-Let the author know if you are interested in arranging (remote) training course for your company or club.
+Let the author know if you are interested in arranging a training course for your company or club.
