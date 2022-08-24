@@ -100,6 +100,31 @@ tbd.
 Write once we have something meaningful to say. 😇
 -->
 
+## Tools we trust
+
+As a part of controlling the attack surface (possibility of the development machine getting compromised) is reducing the number of tools that have access to it.
+
+Here's our current - and intended - list.
+
+|tool|source|comments|
+|---|---|---|
+|`make` and command line tools|OS provider|
+|Docker Desktop|Docker|
+|Cypress|Cypress|
+|`npm`|`npmjs.com` + package authors|Planning to sandbox this.|
+|`gcloud`|Google Cloud Platform|Only needed for local runs of CI/CD scripts. You can execute them on another host account, if high security is demanded.|
+
+If we only need to trust `make`, Docker and Cypress (which are native GUI apps, so cannot be sandboxed), the attack surface is way smaller than if build-time tools were to run natively on the developer account (they still do; Aug 2022).
+
+Already sandboxed:
+
+|tool|source|comments|
+|---|---|---|
+|`firebase-tools`|Firebase|
+|`vite`||
+
+In particular, you can notice that we don't require [Homebrew](https://brew.sh) on macOS but rely on the native command line tools.
+
 ---
 
 *Please suggest changes to this text in the GitHub Issues / Discussions if you feel it could be shorter / stronger / better...*
