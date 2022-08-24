@@ -19,7 +19,7 @@ The `this` mentality provides an additional axis of abstraction (a context) that
 
 ## Language over framework
 
-If there are overlapping features with the language (a larger context) and a framework or librari (smaller context), prefer the language.
+If there are overlapping features with the language (a larger context) and a framework or library (smaller context), prefer the language.
 
 >*This would need to have a sample...*
 

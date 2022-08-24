@@ -2,15 +2,15 @@
 
 <small>`[1]`: Also called "locations"</small>
 
-The Firebase regions story is not quite simple, and keeps evolving.
+The Firebase regions story is not quite simple, and has evolved over time.
 
 Originally, it seems, Firebase Realtime Database only "lived" in `us-central1`, one single region.
 
 Cloud Functions and Cloud Firestore, pushing for more cloud scale scalability, introduced more regions.
 
-In 2022, also Realtime Database can be hosted in other regions than `us-central1`, but only a few. 
+In 2022, also Realtime Database can be hosted in other regions than `us-central1`, but [only a few](https://firebase.google.com/docs/projects/locations#rtdb-locations).
 
-When one creates a Firebase project (either Cloud Functions, Cloud Firestore or Realtime Database), one needs to select a location (region) for it. It would be simple if this was a single choice, but it's not quite so..
+When one creates a Firebase project (either Cloud Functions, Cloud Firestore or Realtime Database), one needs to select a location (region) for it. It would be simple if this was a single choice, but it's not.
 
 Thus the need to look into it. We're trying to answer two questions:
 
@@ -24,7 +24,10 @@ Thus the need to look into it. We're trying to answer two questions:
 
 ## Check the Docs
 
-It might be a good idea to first read what Firebase has to say about this. Read the below links *in full!!* and then return here. :)
+Let's first read what Firebase has to say about this. Read the referenced documents (and of page) *in full!!* and then return here. :)
+
+🍿
+---
 
 [Select locations for your project](https://firebase.google.com/docs/projects/locations) states:
 
@@ -32,18 +35,21 @@ It might be a good idea to first read what Firebase has to say about this. Read 
 
    >This location is where your data is stored for GCP services that require a location setting.
 
-   Steers Cloud Firestore, Cloud Storage and Cloud Firestore scheduled functions - but *not* Cloud Firestore regular functions, or Realtime Database!
+  <table>
+  <tr><td>Steers:</td><td>Cloud Firestore, Cloud Storage and Cloud Firestore scheduled functions</td></tr>
+  <tr><td>Does not steer:</td><td>Cloud Firestore regular functions, Realtime Database</td></tr>
+  </table>
 
 
 ## Regional capabilities
 
-Firebase docs list regions per product, but not a good list per region (which is helpful to decide, which one you'd pick). Here we go.
+Firebase docs list regions per product, but don't provide a good list per region (which is helpful for deciding, which one you'd pick). Here we go.
 
 
 |region|GCP resources <sub>[source](https://firebase.google.com/docs/projects/locations#location-r)</sub>|Cloud Functions<sup>[2]</sup> <sub>[source](https://firebase.google.com/docs/functions/locations)</sub>|Realtime Database <sub>[source](https://firebase.google.com/docs/projects/locations#rtdb-locations)</sub>|
 |---|---|---|---|
 |**North America**|
-|&nbsp;&nbsp;`us-west1`|✓|-- <sup>[4]</sup>|
+|&nbsp;&nbsp;`us-west1`|✓||
 |&nbsp;&nbsp;`us-west2`|✓|✓ Tier 2|
 |&nbsp;&nbsp;`us-west3`|✓|✓ Tier 2|
 |&nbsp;&nbsp;`us-west4`|✓|✓ Tier 2|
@@ -77,8 +83,6 @@ Firebase docs list regions per product, but not a good list per region (which is
 
 ><small>`[3]`: `us-central1` (Iowa) and `europe-west1` (Belgium), the locations for hosting Realtime Database, aren't listed as a regional "GCP resources" targets, at all. They are offered as Multi-region services, however.</small>
 
-><small>`[4]`: Whether `us-west1` really doesn't support Cloud Functions, at all, is unknown. It isn't listed in Jul 2022. It could be on the way out.</small>
-
 ## How to select?
 
 Pick something that's close to your users. The Firebase documentation puts names of cities to the regions, to help you decide.
@@ -89,7 +93,7 @@ Regional would suffice fine. Multi-region is for more 9's at the end of the SLA 
 
 **Tier 1 and 2**
 
-That affects pricing, but the difference might not be that noticable. Leaving that decision to You.
+That affects pricing, but the difference might not be that noticable.
 
 **Legislation (GDPR et.al.)**
 
@@ -104,27 +108,26 @@ This leaves only `europe-west3` (Frankfurt) ticking all the boxes.
 
 For Realtime Database (only used for operational monitoring), you can pick `europe-west1` (Belgium).
 
+<!-- hiss
 >It's somewhat worrying that only a single region would tick the boxes, for GDPR. Maybe Google's thought is that if such things matter, the organization also wants to use multi-region (`eur3`).
-
+-->
 
 ## What are we omitting?
 
 Two things.
 
-### Cloud Functions
+### Regional functions
 
-Cloud Functions can be run in multiple regions. There are called "regional functions" and you can read about them in the Firebase documentation.
+Cloud Functions (except for scheduled ones) can be run in multiple regions. These are called "regional functions" and you can read about them in the Firebase documentation.
 
-We choose not to do that, but instead deploy and run Cloud Functions always in the same "default GCP resources" location where also Cloud Firestore is running.
-
-This is mainly just to keep things simple.
-
-If you want to run Cloud Functions in multiple regions, that's fine. You'll just code the functions accordingly, and need to tune the deployment scripts to your liking.
+>Note: This repo doesn't do that, to keep things simple. Instead, Cloud Functions are always deployed in the "default GCP resources" location where also Cloud Firestore is running.
+>
+>If you want to run Cloud Functions in multiple regions, that's fine. You'll just code the functions accordingly, and need to tune the deployment scripts to your liking.
 
 
 ### Multi-region
 
-Multi-region deployments add the service's monthly uptime target from 99.99% (max. 4.3 min downtime) to 99.999% (max. 26s downtime) <sub>[source](https://firebase.google.com/docs/firestore/locations#sla)</sub>.
+Multi-region deployments add the service's **monthly** uptime target from 99.99% (max. 4.3 min downtime) to 99.999% (max. 26s downtime) <sub>[source](https://firebase.google.com/docs/firestore/locations#sla)</sub>.
 
 In reality, the downtimes are likely much less.
 
@@ -133,7 +136,7 @@ In reality, the downtimes are likely much less.
 >There's also `View history` at the bottom, to get an idea about the frequency and duration of historic incidents that affected service availability.
 
 
-## I know what I want - how to set it up?
+## 🙋‍♂️ I know what I want - how to set it up?
 
 Firebase Console asks you to select a location when creating the services (Cloud Firestore / Cloud Functions and separately, Realtime Database).
 

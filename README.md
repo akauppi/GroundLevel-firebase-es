@@ -296,7 +296,7 @@ It's customary for Firebase web apps to read the values from there, but this rep
 
 ### Multiple stages
 
-You can have multiple deployment environments, and you can share the environments with your team by adding the file(s) into git. For more details on this, see [docs/Staging](docs/Staging.md).
+You can have multiple deployment environments, and you can share the environments with your team by adding the file(s) into git. For more details on this, see [make-it-yours](make-it-yours/README.md).
 
 
 <!-- Comes elsewhere...
@@ -318,20 +318,8 @@ Check these subfolders:
 - 🖌📐 Backend: [`packages/backend`](packages/backend/README.md)
 - 💅 Front-end: [`packages/app`](packages/app/README.md)
 - 🌀 CI/CD ([`ci/README`](ci/README.md))
-- 🌀 Operational monitoring ([`ops/README`](ops/README.md))
-
-
-Check this documentation:
-
-- [Living with Docker Compose](docs/Living%20with%20Docker%20Compose.md)
-
-   Information that helps you be more effective with Docker Compose, which we use for running the Firebase Emulators.
-
-<!--
-- [Moving in!](docs/Moving%20in!.md)
-
-   Instructions on what to consider when turning this repo to serve *your* needs. Removing the branding, mainly.
--->
+- 📊🗒 Operational monitoring ([`ops/README`](ops/README.md))
+- 🧬 Make it Yours ([`make-it-yours/README`](make-it-yours/README.md))
 
 We hope you are active also in the development - and giving feedback - of the GroundLevel repo. It doesn't serve its purpose unless it becomes the growing ground, a fertile soil, for many flowerful web apps! 
 

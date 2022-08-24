@@ -45,22 +45,4 @@ describe('Guest visiting the home page', () => {
     //  cy.url().should('include', '/identitytoolkit/v3/relyingparty/')   // (no idea what that is)
     //}
   })
-
-  /*
-  * Anonymous sign in == no need to authenticate, but if you later do, your stored data is not lost.
-  *
-  * Currently not supported in 'aside-keys'...
-  *_/
-  it.skip('Shows an Anonymous sign-in button', () => {
-
-    cy.get('aside-keys')
-      .shadow()
-      .contains("Sign in anonymously")    // aside-keys > #shadow-root > ... span
-
-    // Here, we could click, and..
-    cy.firebase( firebase => {
-      expect( firebase.auth().currentUser?.isAnonymous ).to.equal(true)   // tbd. any way to use should?
-    })
-    cy.contains('anonymous user')   // div.user-name
-  })*/
 })

@@ -42,7 +42,7 @@
     "_checkStaging": "[ -f ../../firebase.${ENV-staging}.js ] || ( >&2 echo \"ERROR: '../../firebase.${ENV-staging}.js' is missing; see root 'README.md' on how to create one.\\n\"; false)",
     "_checkNoEsbuild": "[ ! -d node_modules/esbuild ] || ( >&2 echo \"INTERNAL ERROR: 'node_modules/esbuild*' shouldn't be there; please remove them. (rm -rf node_modules/esbuild*)\"; false) ",
     "-- ---": "",
-    "preinstall": "[ ${npm_config_omit:-_} == optional ] || ( echo >&2 \"***\tPlease install with '--omit=optional'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
+    "preinstall": "[ ${npm_config_omit:-_} = optional ] || ( echo >&2 \"***\tPlease install with '--omit=optional'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
     "_postinstall_dev": "(cd node_modules && rm -rf vite rollup esbuild esbuild-*)",
     "_postinstall_ci": "npm run -s _echoFirebaseHostingJson > firebase.json",
@@ -107,6 +107,9 @@
       ],
       "_refresh": [
         "Run this once you've changed anything in 'tools/*.dc' - i.e. the Vite version."
+      ],
+      "[ x = y ]": [
+        "Use only one '=', for pleasing WSL2. Otherwise it gives 'undefined operator'."
       ]
     }
   }

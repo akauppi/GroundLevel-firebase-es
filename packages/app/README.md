@@ -80,12 +80,12 @@ Development is done with:
 ## Getting started
 
 ```
-$ npm install --omit=optional
+$ npm install
 ```
 
 >Note: This will take *ages* on the first time, since it's loading not only the `npm` dependencies but a ~500MB Cypress binary, as well.
 >
->If you don't need Cypress (yet), `CYPRESS_INSTALL_BINARY=0 npm install --omit=optional` speeds up the install by skipping downloading the binary part.
+>If you don't need Cypress (yet), `CYPRESS_INSTALL_BINARY=0 npm install` speeds up the install by skipping downloading the binary part.
 
 ### Launch the app
 

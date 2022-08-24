@@ -1,6 +1,11 @@
 # Wishes for Cypress
 
-## Befriend `Promise`s
+*Consider removing. `.then()` seems already accepting Promises*
+
+<!-- done
+## `cy.wrap` implicitly
+
+>The [Await-ing Cypress Chains](https://github.com/cypress-io/cypress/issues/1417) chain ;) nicely describes why `Chainable`s are fundamentally different from `Promises`. However, in some cases one needs to combine the two, and the current use of `cy.wrap` is clumsy, readability-wise. As the author shows, the wrapping can be made implicit.
 
 The Cypress `Chainables` are not promises, but they have a `.then`.
 
@@ -50,3 +55,5 @@ Couldn't the same `.then` also handle promises, transparently?
 TRACK:
 
 - [ ] report to Cypress, or find an Issue `#help`
+
+-->

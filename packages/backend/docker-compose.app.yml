@@ -43,7 +43,8 @@ services:
       test: '
         nc -z localhost 6768 && 
         nc -z localhost ${FUNCTIONS_PORT} && 
-        nc -z localhost 6801
+        nc -z localhost 6801 &&
+        nc -z localhost 9101
         '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 1.0s

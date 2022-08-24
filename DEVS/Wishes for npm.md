@@ -1,5 +1,10 @@
 # Wishes for `npm`
 
+*Don't take these seriously. The author sees the future of the repo being such that `Makefile`s and Docker run the show. The developer doesn't even need to have `npm` (or other package managers) installed. This gives us the freedom to change the package manager (to `pnpm`, `yarn` or something really modern, like Bun?) because it's become an implementation detail.*
+
+*Thus, we shouldn't worry about what `npm` offers or doesn't.*
+
+
 ## Workspaces
 
 >This repo started work without workspaces. The subrepos linked to each other using `file:` like this (from `app-deploy-ops/package.json`):
