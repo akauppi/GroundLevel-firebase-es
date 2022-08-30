@@ -1,84 +1,54 @@
 /*
 * src/central/worker.js
 *
-* References:
-*   - Vite > Web Workers
-*     -> https://vitejs.dev/guide/features.html#web-workers
+* Collects metrics and log entries, and occasionally passes them to 'callables.js', for delivery.
 */
-import { initializeApp } from '@firebase/app'
-import {connectFunctionsEmulator, getFunctions, httpsCallable} from '@firebase/functions'
-
 import { metricsAndLogsWorker as myC } from '/@/config.js';
 const { maxBatchDelayMs, maxBatchEntries } = myC;
 
-const LOCAL = import.meta.env.MODE === "dev_local";
-
 function fail(msg) { throw new Error(msg); }
 
-let metricsAndLoggingProxy_v0;
+import { metricsAndLoggingProxy_v0_withGen } from './callables.js'
 
-/*
-* Initialize the worker
-*
-* { ... }: Necessary for Firebase app initialization (since we are not in the main thread)
-*/
-function init({ apiKey, projectId, locationId }) {    // 'locationId' is optional (undefined == default region)
+const pending= [];    // Array of { "":"inc"|"log", ... }
 
-  const fns = (_ => {
-    if (LOCAL) {    // "dev:local"
-      const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
-      const FUNCTIONS_PORT = import.meta.env.VITE_FUNCTIONS_PORT;
+let timer;    // undefined:   nothing's going to happen ('pending' should be empty)
+              // Timer:       shipment is scheduled; some stuff should be in 'pending'
 
-      const fah= initializeApp( {
-        projectId,
-        apiKey: "none"
-      });
+let shipF;    // ({ arr: Array of { "":"inc"|"log", ... }}) => Promise of any    // actual shipping to callables
 
-      const fns = getFunctions(fah /*, regionOrCustomDomain*/ );
-      connectFunctionsEmulator(fns, host,FUNCTIONS_PORT);
-      return fns;
+// Initialization with query parameter
+//
+self.location.search.slice(1).split("&").forEach( kvs => {    // "{key}={value}"
+  const [k,v] = kvs.split("=");
 
-    } else {
-      const fah = initializeApp({
-        apiKey,
-        projectId
-      });
-
-      return getFunctions( fah, locationId );
-    }
-  })();
-
-  metricsAndLoggingProxy_v0 = httpsCallable(fns,"metricsAndLoggingProxy_v0");
-
-  console.log("Worker initialized");
-}
-
-const pending= [];
-let timer = schedule();    // ongoing timer; forces a shipment
-
-function schedule() {   // () => Timer
-  return setTimeout(ship, maxBatchDelayMs);
-}
-
-/*
-* Ship things; don't alter the schedule.
-*/
-function ship() {
-  clearTimeout(timer);
-
-  if (pending.length === 0) {
-    // nada
-  } else {
-    console.debug(`Shipping ${pending.length} ...`);
-
-    // tbd. handle offline
-
-    metricsAndLoggingProxy_v0( {arr: pending} );
-    pending.length = 0;   // clear
+  console.log("Worker param:", {k,v});
+  if (k === "token") {
+    shipF = metricsAndLoggingProxy_v0_withGen(v);
   }
+    //
+  else fail(`Unexpected param: ${k}`);
+});
 
-  // Reschedule after each successful shipment / empty visit.
-  timer = schedule();
+/*
+* Ship things
+*
+* Makes a copy of 'pending' entries (if any), clears 'pending', ships the copy in the background (free-running tail).
+*/
+async function ship() {    // () => ()
+  if (pending.length === 0) return;
+
+  const arr= [...pending];    // JavaScript note: copies the array
+  pending.length = 0;
+
+  console.debug(`Shipping ${arr.length} ...`);
+
+  const t0 = Date.now();
+
+  shipF({ arr }).then( _ => {   // free-running
+    console.debug(`Shipping took: ${ Date.now() - t0 }ms`);
+    // tbd. collect this into the metrics (not right away; put aside and when there's something else to ship, pass it along)
+  })
 }
 
 //--- Functions that feed the queue 🥄
@@ -87,15 +57,12 @@ function ship() {
 * Messages:
 *
 * {
-*   "": "init",
-*   apiKey: string,
-*   projectId: string,
-*   locationId: string
+*   "": "flush"
 * }
-*   Initialize the worker. This gets called before any of the other messages; once.
+*   Ship any pending entries.
 *
 * {
-*   "": "counter,
+*   "": "inc",
 *   id: string,
 *   diff: number,   // >= 0.0
 *
@@ -112,34 +79,60 @@ function ship() {
 *   args: Array of any,
 *
 *   // Context
-*   at: number,
-*   uid: string
+*   at: number
 * }
 *   Push a log entry for delivery. If 'level'==="fatal", the delivery may be done sooner than scheduled.
 */
-onmessage = function(e) {
+self.addEventListener('message', (e) => {
   console.log("Worker received:", e);
 
-  if (e.data[""] !== "init") {    // DEBUG
+  if (e.data["at"]) {    // DEBUG
     const dt_DEBUG = Date.now() - e.data["at"];     // Once we know the delay, consider picking time here.
-    console.debug("Diff when passing to worker:", `${ dt_DEBUG }ms`);
+    console.debug("Diff when passing to worker:", `${ dt_DEBUG }ms`);   // 78ms (Safari 15.6); 152ms (Chrome 102)
   }
 
   const t = e.data[""] || fail("No '' field to indicate msg type.");    // just our convention
   const data = e.data;
 
-  if (t === "init") {
-    init(data);
+  let shipNow;
+
+  if (t === "flush") {
+    shipNow = true;
+
+  } else {
+    pending.push(data);
+
+    // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
+    //
+    if ((pending.length >= maxBatchEntries) || (t === 'log' && data.level === 'fatal')) {
+      shipNow = true;
+    }
+  }
+
+  if (shipNow) {
+    ship();
+
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  } else {
+    // If there's not already a timer ticking, set one up.
+    //
+    if (!timer) {
+      timer = setTimeout(timedShipment, maxBatchDelayMs);
+
+    } else {
+      // we're fine - the timer will ship the new entry
+    }
+  }
+});
+
+function timedShipment() {
+  if (pending.length === 0) {
+    console.warn("Weird. Timed shipment but there are no pending entries. Skipped.");
     return;
   }
 
-  pending.push(data);
-
-  // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
-  //
-  const force = t === 'log' && data.level === 'fatal';
-
-  if (force || pending.length >= maxBatchEntries) {   // always max 'maxBatchEntries' long (==)
-    ship();
-  }
+  ship();
 }

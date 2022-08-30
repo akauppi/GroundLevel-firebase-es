@@ -151,6 +151,8 @@
     });
 
     async function signOut () {
+      // tbd. Call here 'central.flush', to make sure any pending counters/logs are shipped.
+
       await fbSignOut( getAuth() );    // sign out also under emulation (LOCAL)
 
       router.push({ name: 'Home.guest' });

@@ -506,3 +506,22 @@ Current behaviour (9.16.0): if no DNS, no running of emulators, either.
 
 >`emul_1 exited with code 1`
 
+
+## Stingy flushing 
+
+`firebase-tools` 10.3.0
+
+Starting the Firebase Emulators under Docker, the remainder of the launch status often doesn't reach Docker terminal:
+
+![](.images/emulators-stingy-flushing.png)
+
+Notice how the "box" is unfinished. The emulators have already reached a stable state, but the developer might remain confused.
+
+Waiting does not help, here. Only once there's sufficient other output, the remainder of the box gets to be seen:
+
+![](.images/emulators-stingy-flushing-rest.png)
+
+**Suggested solution**
+
+Emulators could do an extra flush operation on the `stdout` output, when the status is ready (after the `Issues? Report ...` line). 
+

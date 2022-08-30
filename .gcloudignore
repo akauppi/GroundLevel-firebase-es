@@ -49,6 +49,7 @@ stats.html
 *.~
 
 packages/backend/tmp/*
+packages/backend/gym/
 
 packages/app/dist/*
 packages/app/tmp/*
@@ -62,6 +63,8 @@ packages/app/.env*
 # v-- Might not be accurate, any more... #cleanup
 # Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
 # the folder in the root level (if CI run is involved).
+
+/ops.sandbox*/
 
 # Branding
 #
@@ -81,6 +84,7 @@ DEVS/
 *.disabled
 *.delme
 /_Scrap/
+node_modules.tmp
 
 # Possible left-overs
 *.tgz

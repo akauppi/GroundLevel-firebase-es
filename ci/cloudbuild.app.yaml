@@ -54,10 +54,12 @@ steps:
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
     - AUTH_PORT=9100
+    - DATABASE_PORT=6868
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
   #   - packages/backend/tmp/firebase.json        has been created
+  #   - packages/backend/tmp/database.rules.json  has been created (just used for metrics/logging)
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # DEBUG:
@@ -166,7 +168,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 5:36, 5:10, 6:01
+# Cloud Build: 5:36, 5:10, 6:01, 4:56   <-- last with Cypress 10.6.0
 #
 timeout: 500s
 
@@ -175,7 +177,7 @@ substitutions:
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"
-  _CYPRESS_TAG: 10.3.0
+  _CYPRESS_TAG: 10.6.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked

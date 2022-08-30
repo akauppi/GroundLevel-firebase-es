@@ -183,7 +183,7 @@ async function configGen({ command, mode }) {
       //  Firefox gives a console error:
       //    "import declarations may only appear at top level of a module"
       //
-      //format: 'es'    // default: 'iife'
+      format: 'es'    // default: 'iife'
     },
 
     server: SERVE_PORT ? {

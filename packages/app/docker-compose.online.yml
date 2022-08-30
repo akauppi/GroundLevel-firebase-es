@@ -1,8 +1,6 @@
 #
 # app/docker-compose.online.yml
 #
-# Overlay, for 'npm run dev:online' specificity.
-#
 # Environment variables:
 #   - ENV (default: 'staging'); the staging environment to work against.
 #
@@ -22,5 +20,5 @@ services:
       - ./.env.dev.${ENV:-staging}:/work/.env.local:ro
     environment:
       - MODE=online
-      - ENV=${ENV:-staging}
+      #- ENV=${ENV:-staging}
     profiles: ['manual']

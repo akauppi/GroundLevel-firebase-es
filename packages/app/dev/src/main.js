@@ -90,28 +90,29 @@ async function initFirebaseOnline() {
   initializeApp( { apiKey, appId, authDomain, projectId, databaseURL } );
 }
 
-// NOTE ABOUT TOP-LEVEL AWAIT:
+// Browser support for top-level await:
 //
-//  Browsers support them, but Safari DOES NOT REPORT ERRORS within a top-level-await block properly. Thus, DO NOT USE
-//  top-level-await until we know which version has it fixed.
+//  Chrome    full support
+//  Safari    15.5 supports, but errors within the Promise were silently eaten.
+//            15.6 full support
+//  Firefox   tbd. NOT TESTED
+//  Edge      tbd. NOT TESTED
 //
-//  Note:         This matters mostly in development, presuming that there's no errors that take place in production.
-//  Work-around:  Possible risks can be managed by adding a manual '.catch' to the block.
 
-/*const tailProm =*/ (async _ => {   // loose-running tail (no top-level await in browsers)
+///*const tailProm =*/ (async _ => {   // loose-running tail (if not wanting to use top-level-await)
   if (LOCAL) {
     await initFirebaseLocal();
   } else {
     await initFirebaseOnline();
   }
 
-  const { initializedProm } = await import('/@/app.js');
-  return initializedProm;
-})();
+  await import('/@/app.js');
+//})();
 
 /***
 // TESTING
 //  Safari 15.5:  nothing in console!! silently stops executing at the error line
+ //        15.6:  ok; reports
 //  Chrome 102:   ok; reports: "Uncaught ReferenceError: init is not defined\n at {snip}:1"
 //
 await (async function () {

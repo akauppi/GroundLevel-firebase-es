@@ -31,9 +31,9 @@ const projectId = (_ => {
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
-const [firestorePort, authPort] = (_ => {   // => [int, int]
+const [firestorePort, authPort, functionsPort] = (_ => {   // => [int, int, int]
 
-  const arr = ["firestore","auth"].map( k => {
+  const arr = ["firestore","auth","functions"].map( k => {
     return (emulators && emulators[k] && emulators[k].port)    // cannot use '?.' because of the varying 'k'
       || fail(`Cannot read 'emulators.${k}.port' from '${FIREBASE_APP_JS}'`);
   });
@@ -45,6 +45,7 @@ const out =
 #
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_AUTH_PORT=${authPort}
+VITE_FUNCTIONS_PORT=${functionsPort}
 VITE_PROJECT_ID=${projectId}
 ${
   SENTRY_DSN ? `VITE_SENTRY_DSN=${SENTRY_DSN}` : ''

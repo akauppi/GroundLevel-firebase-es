@@ -17,9 +17,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { onAuthStateChanged, getAuth } from '@firebase/auth'
 const auth = getAuth();
 
-import { setUser as sentry_setUser } from '@sentry/browser'
-
-import { countLogins } from "/@central/counters"
+import { countLogins } from "/@central/counters.js"
 
 function fail(msg) { throw new Error(msg) }
 
@@ -36,10 +34,6 @@ onAuthStateChanged( auth, user => {
   if (user) {
     countLogins();
   }
-
-  // Inform Sentry client (tbd. make it use 'userIdRef')
-  //
-  sentry_setUser(user ? { id: user.uid } : null );
 });
 
 const isReadyProm = new Promise( (resolve /*,reject*/) => {
@@ -82,14 +76,11 @@ const userRef2 = computed( () => {   // ComputedRef of undefined | null | { uid:
 const userIdRef = computed( () => {   // ComputedRef of null | string
   const v = authRef.value;  // undefined | false | { uid: string, ... }
 
-  if (v === undefined) {
-    throw new Error("NO CAN DO. Initialize the auth system before the app, so we don't need to bear with this!");
-      // try. is it fast enough???
-  }
+  (v !== undefined) || fail("INTERNAL: 😰");
 
   if (v) {
     const { uid } = v;
-    uid || fail("Got auth object without 'uid'");
+    uid || fail("Auth object without '.uid'");
 
     return uid;
   } else {
@@ -140,11 +131,25 @@ function uidValidator(v) {    // (String) => Boolean
   return v.match(/^[a-zA-Z0-9]+$/);    // e.g. "dev", "7wo7MczY0mStZXHQIKnKMuh1V3Y2"
 }
 
+/*
+* Watch the logging in/out.
+*/
+function watchUid(f) {    // ( (string|null) => () ) => ()
+
+  watchEffect( () => {
+    const v = userIdRef.value;
+    if (v === undefined) return;
+
+    f(v);
+  })
+}
+
 export {
   userRef2,
   getCurrentUser,
   getCurrentUserId,
   getCurrentUserId_sync,
   uidValidator,
-  userIdRef
+  userIdRef,
+  watchUid
 }

@@ -50,11 +50,12 @@ steps:
   env:
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    #- DATABASE_PORT=6800
+      # The port values get baked into 'firebase.json' (tbd. ..and should become the only place we need to set them in)
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
   #   - packages/backend/tmp/firebase.ci.json     has been created
+  #   - packages/backend/tmp/database.rules.json  has been created (just used for metrics/logging)
   #   - packages/backend/firebase.json            alias for easy running of tests
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
@@ -72,7 +73,6 @@ steps:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 #|    - FIRESTORE_PORT=6767
 #|    - FUNCTIONS_PORT=5002
-#|    #- DATABASE_PORT=6800
 
 # --- --- --- 📣⚠️🪤🚨
 # WARNING!!!
@@ -97,7 +97,6 @@ steps:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
     - FIRESTORE_PORT=6767
     - FUNCTIONS_PORT=5002
-    #- DATABASE_PORT=6800
 
 # Observed test times:
 #
@@ -151,7 +150,7 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11
+#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11, 2:04
 #
 # Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #

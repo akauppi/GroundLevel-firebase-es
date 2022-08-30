@@ -12,6 +12,8 @@ const AUTH_PORT= process.env["AUTH_PORT"];
 const FIRESTORE_PORT = process.env["FIRESTORE_PORT"] || fail( `Expecting 'FIRESTORE_PORT' env.var.`);
 const FUNCTIONS_PORT = process.env["FUNCTIONS_PORT"] || fail( `Expecting 'FUNCTIONS_PORT' env.var.`);
 
+// Note: Realtime database is not used. Add if CI testing includes testing for metrics/logging delivery.
+
 export default {
   firestore: {
     rules: "./firestore.rules",

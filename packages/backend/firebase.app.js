@@ -9,6 +9,9 @@ export default {
   functions: {
     source: "./functions"
   },
+  database: {
+    rules: "./database.rules.json"
+  },
   emulators: {
     firestore: {
       port: 6768,

@@ -22,7 +22,7 @@ import { appTitle } from './config.js'
 import { router } from './router.js'
 
 // Ops monitoring
-import * as Sentry from "@sentry/browser"
+import { init as Sentry_init, setUser as Sentry_setUser } from '@sentry/browser'
 import { BrowserTracing } from "@sentry/tracing"    // after 'import * as Sentry'
 
 import Plausible from 'plausible-tracker'
@@ -101,7 +101,7 @@ async function init() {    // () => Promise of ()
   // Initialize Sentry
 
   if (SENTRY_DSN) {
-    Sentry.init({
+    Sentry_init({
       dsn: SENTRY_DSN,
       integrations: [new BrowserTracing(/*{
         tracingOrigins: [ "localhost" /_*, "your.site.com*_/, /^\// ]     // default: ["localhost", /^\//]
@@ -124,7 +124,12 @@ async function init() {    // () => Promise of ()
     // tbd. Is there a way to know (from Sentry), whether initialization succeeded (i.e. did it gain a connection to
     //    its backend)?   i.e. don't say "initialized" if the DSN was rejected.
 
+    watchUid( uid => {
+      Sentry_setUser(uid);
+    });
+
     console.debug("Sentry initialized");
+
   } else if (DEV) {
     console.debug("Sentry not configured; build with 'SENTRY_DSN' env.var. defined to use it.");
   }

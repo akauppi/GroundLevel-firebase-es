@@ -246,17 +246,26 @@ Once you're pleased, test the creature using Cypress.
 
 This repo uses Firebase as your cloud presence. It:
 
-- hosts your database
+- hosts your application's database
 - runs server-side functions
-- hosts the client-side files
+- hosts client-side files (HTML, CSS, JavaScript)
+- collects client-side metrics and logs
 - offers you a console to supervise the above
 
 While you can develop a project locally, without having a dedicated Firebase project for it, sooner or later you'll want to deploy to the cloud. Let's make it right away!
 
 Follow the instructions in [Firebase](https://github.com/akauppi/GroundLevel-firebase-es/wiki/EN-0.1-firebase) (GitHub Wiki) to create your Firebase account and a project.
 
+<!-- tbd. Short instructions, with pictures, keeping this repo wholly separate from the Wiki. 
+
++ include Realtime Database
+-->
+
 >You *will* need a credit card for creating the "Blaze" plan (which is needed for deploying the default back-end).
 
+<p />
+
+>Addition: Also enable Realtime Database for your project. We use it as a landing site for central client-side metrics and logs.
 
 
 ## First deployment

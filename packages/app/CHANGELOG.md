@@ -4,6 +4,10 @@
 Release dates are marked; 'latest' shows WIP window.
 -->
 
+## 30-Aug-2022
+
+- Delivery to Cloud Functions for logs and metrics.
+
 ## 11-Jul-2022
 
 - Updated dependencies, esp. `vue-router` to 4.1.2

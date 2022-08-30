@@ -2,69 +2,131 @@
 * src/central/common.js
 *
 * Client side support for sending logs / counter increments to Cloud Functions.
+*
+* APPROACH:
+*   Each user session gets a dedicated worker just for those messages. This is mainly to keep state management simple.
+*   Tried also changing the token of a single worker.
+*
+* References:
+*   - Vite > Web Workers
+*     -> https://vitejs.dev/guide/features.html#web-workers
 */
-import { getApp } from '@firebase/app'
+import {getAuth, onAuthStateChanged} from '@firebase/auth'
+
+let workerProxyProm;  // undefined: no current user
+                      // Promise of { flush, inc, log }: have a way / going to get one "soon" (~<10ms)
+
+const auth = getAuth();
 
 /*
-* To be called _after_ Firebase app is initialized.
+* Create a worker, equipped with a certain token.
+*
+* Note:
+*   The whole worker interface is within this function, keeping it tight.
 */
-const getWorker = (_ => {
-  let w;   // Worker
+function workerGen(token) {   // (string) => { flush(), inc(id: string, diff: number), log(id: string, level: "debug"|"info"|"warn"|"error"|"fatal", msg: string, ...args: Array of any) }
 
-  return () => {
-    if (!w) {
-      // Pick Firebase app information, to be passed to the Worker.
-      //
-      // Note: The values may be available as 'meta.import.env.VITE_...' as well, but reading it like this keeps us
-      //    a bit detached from the way the app is built.
-      //
-      const fah = getApp();
-      const {
-        apiKey,
-        projectId,
-        locationId    // available if 'main.js' has placed it at initialization
-      } = fah.options;
+  // Note: Vite (3.0.9) does not allow string interpolation (`...${some}`) within the worker thread URL:
+  //  <<
+  //    9:36:10 PM [vite] Internal server error: `new URL(url, import.meta.url)` is not supported in dynamic template string.
+  //  <<
+  //
+  //    It is okay with using '"..."+token'. Beats the author. fine with it!
+  //
+  //const w = new Worker(new URL(`./worker.js?token=${token}`, import.meta.url), {type: 'module'});   // FAILS
+  const w = new Worker(new URL('./worker.js?token='+token, import.meta.url), { type: 'module' });
 
-      w = new Worker(new URL('./worker.js', import.meta.url), {
-        type: 'module'    // fails 'npm run build' if this is here    <-- tbd. does it, still?
-      });
+  return {
+    flush(final = false) {   // (boolean) => ()
+      w.postMessage({ "":"flush" })
 
-      w.postMessage({
-        "": "init",
-        apiKey,
-        projectId,
-        locationId
-      });
+      // Trying to help JavaScript GC to release the resource (Q: any better way / pattern?); could also just let be..
+      if (final) {
+        w = null;
+      }
+    },
+
+    inc(id, diff) {   // (string, number) => ()
+      w.postMessage({ "":"inc", id, diff, at: Date.now() });
+    },
+
+    log(id, level, msg, ...args) {   // (string, "debug"|"info"|"warn"|"error"|"fatal", string, Array of any) => ()
+      w.postMessage({ "":"log", id, level, msg, args, at: Date.now() });
     }
-    return w;
-  }
-})();
-
-function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fatal"?) => (msg, ...) => ()
-  const worker = getWorker();
-
-  return (msg, ...args) => {
-    worker.postMessage({ "":"log", id, level, msg, args, at: Date.now() });
-
-    console.debug("Central log:", { id, level, msg, args })
   }
 }
 
+/*
+* Watch the user logging in/out. 'workerProxyProm' provides access to the current user's metrics/logs writes.
+*
+* This prepares 'workerProxyProm' to the task, even before a metric/log write is called. In practise, the first
+* log may come really fast; before the Promise is ready.
+*/
+onAuthStateChanged( auth, user => {
+  console.debug("!!! [CENTRAL]: auth", { uid: user?.uid });    // DEBUG
+
+  if (user === undefined) return;
+
+  if (user) {
+    (!workerProxyProm) || fail("No break between two users.");    // should have been 'null' in between
+
+    const t0 = performance.now();
+
+    console.debug("!!! [CENTRAL]: Fetching token...");
+
+    workerProxyProm = user.getIdToken().then(token => {    // free-running tail
+      console.debug(`Token received in ${performance.now() - t0}ms`);   // 3, 6.2, 7.5 ms
+      return workerGen(token);
+    });
+
+  } else {
+    if (workerProxyProm) {
+      workerProxyProm.then( wp => { wp.flush(true) } );
+    }
+    workerProxyProm = null;
+  }
+});
+
+async function getWorker() {    // () => Promise of { flush, inc, log }
+  return workerProxyProm ||
+    fail("");
+}
+
+/*
+* Flush the outgoing buffers, e.g. if the user is about to log out.
+*/
+function flush() {    // () => ()
+  getWorker().then( x => {
+    x.flush()
+  });
+}
+
 function createCounter(id) {
-  const worker = getWorker();
-
   return (diff = 1.0) => {    // (diff: number = 1.0) => ()
-    diff >= 0.0 || fail(`Bad parameter (< 0.0): ${diff}`)
+    diff >= 0.0 || fail(`Bad parameter: ${diff}`)
 
-    worker.postMessage({ "":"counter", id, diff, at: Date.now() });
+    getWorker().then( x => {
+      x.inc(id, diff);
+      console.debug("Central counter:", { id, diff });
+    });
+  }
+}
 
-    console.debug("Central counter:", { id, diff });
+function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fatal"?) => (msg, ...) => ()
+  return (msg, ...args) => {
+    getWorker().then( x => {
+      x.log(id, level, msg, ...args);
+
+      console.debug("Central log:", {id, level, msg, args});
+    });
   }
 }
 
 function fail(msg) { throw new Error(msg); }
 
 export {
-  createLog,
   createCounter,
+  createLog,
+    //
+  flush
 }

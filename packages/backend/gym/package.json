@@ -1,0 +1,9 @@
+{
+  "name": "backend/gym",
+  "description": "Internal tool for manually excercising the backend.",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^11.0.1"
+  }
+}

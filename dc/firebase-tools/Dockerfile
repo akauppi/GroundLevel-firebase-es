@@ -61,7 +61,7 @@ FROM firebase-cli AS firebase-emulators
 
 # Note: Adding as separate layers, with least changing first.
 #
-#RUN firebase setup:emulators:database
+RUN firebase setup:emulators:database
 RUN firebase setup:emulators:firestore
 #RUN firebase setup:emulators:storage
 #RUN firebase setup:emulators:pubsub \

@@ -31,7 +31,7 @@ services:
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "6768:6768"
-      - "6801:6801"
+      - "6869:6869"     # realtime database, for metrics/logging
       - "9101:9101"
       - "4001:4001"
         # Ports that don't overlap those for backend development.
@@ -43,9 +43,9 @@ services:
       test: '
         nc -z localhost 6768 && 
         nc -z localhost ${FUNCTIONS_PORT} && 
-        nc -z localhost 6801 &&
+        nc -z localhost 6869 &&
         nc -z localhost 9101
-        '
+      '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 1.0s
       start_period: 25s

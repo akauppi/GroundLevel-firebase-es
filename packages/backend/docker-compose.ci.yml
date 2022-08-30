@@ -53,7 +53,7 @@ services:
       test: '
         nc -z localhost ${FIRESTORE_PORT} &&
         nc -z localhost ${FUNCTIONS_PORT}
-        '
+      '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.5s
       start_period: 30s
