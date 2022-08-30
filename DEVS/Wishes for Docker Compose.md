@@ -1,52 +1,29 @@
 # Wishes for Docker Compose
 
+<!-- bygone? I don't understand this need any more (12-Aug-22)
+
 ## Ability to set `--abort-on-container-exit` in the YAML
 
 It would be nice to provide a developer experience where `docker compose up` just launches the "right things".
 
 To do this, and not give up robustness, I would need to be able to defined *in the YAML file* that the CLI option `--abort-on-container-exit` should be applied, if `docker compose up` is launched, without any parameters.
+-->
 
 
-## Unnecessary (and wrong) env.var warnings?
+## Docker Desktop for Mac vs. Windows (user handling on mapped volume writes)
 
-```
-$ docker compose up
-WARN[0000] The PROJECT_ID variable is not set. Defaulting to a blank string. 
-WARN[0000] The PROJECT_ID variable is not set. Defaulting to a blank string. 
-WARN[0000] The PROJECT_ID variable is not set. Defaulting to a blank string. 
-...
-```
-
-This happens when `docker-compose.yml` has lines like this; no other kinds of reference to `PROJECT_ID`:
-
-```
-    command: bash -o pipefail -c
-      'firebase emulators:start --project=${PROJECT_ID:-demo-abc}
-        | grep -v -E "Detected demo project ID|You are not currently authenticated|You are not signed in"'
-```
-
-1. The default is `demo-abc`, not blank string. The warnings seems to be wrong?
-2. The [documentation](https://docs.docker.com/compose/compose-file/compose-file-v3/#variable-substitution) states:
-
-   >`${VARIABLE:-default}` evaluates to default if VARIABLE is unset or empty in the environment.
-   
-   The author expects no warning in the case that the default value is taken. The warning is noisy.
-   
-Docker v.20.10.7 (Docker Desktop for Mac)
-
-
-## Docker Desktop for Mac vs. Windows differ in volume user handling
+>*This is slightly old. Not sure if the situation remains.*
 
 With macOS, the experience is seamless.
 
 One can share local files with `volumes:` and changes made to them within the container's code are seen as if a local user did it.
 
-This is *not* the case with Windows+WSL2.
+This is *not* the case with Windows 10 + WSL2.
 
-Here:
+There:
 
 - writing to shared files fails, since the local user isn't the WSL2 host user. 
-- if running as root, writes need `sudo` on the host side
+- if running as root (*? within the container, one presumes?*), writes need `sudo` on the host side
 
 **Ideally..**
 
@@ -62,47 +39,14 @@ How it works with Linux native Docker hasn't been tried, yet.
 
 Problem with the quick fix is that it adds unnecessary "magic" to the `docker-compose.yml` file. We just "know" that 1000 is the WSL2 user id - and that it doesn't harm macOS. Fragile.
 
-- [ ] Find an issue to **TRACK** / is this reported somewhere? 
+>In practise, the author didn't resort to this. Instead, Docker images run as `root`, not having users within them.
 
 *Applies to Docker v. 20.10.7 on both the platforms.*
 
+- [ ] Find an issue to **TRACK** / is this reported somewhere? 
 
 
-## Show emojies in console output
-
-![](.images/docker-container-logs.png)
-<!--
-Docker Desktop on Mac 3.6.0
--->
-
-Some software, like Firebase console (pictured) do heavy use of non-ASCII characters.
-
-It would be lovely to see them in their glory in the Docker Compose output.
-
-
-## [BUG] Docker daemon state prevents mounting as a file
-
-You end in this state if you haven't created a file before mounting, later remove the directory, create a file with the same name.
-
----
-<!--
-```
-...(didn't capture the error message tbd.)
-```
--->
-
-With Docker Desktop for Mac 4.0.0, the daemon could enter a state where it insists "I want a folder" when you're trying to mount a file.
-
-Don't listen to it.
-
-Just reboot **the machine**. That helps.
-
->It's likely that the daemon has some deep state (beyong Docker > Restart or even Quit and relaunch Docker) where it (thinks it) "knows" a certain volume should be a folder.
->
->By restarting the maching this state is cleaned, and if the file exists before the `docker compose` command, all should be dandy.
-
-
-## Explicit mounting of a file
+## Explicit mounting of a file 🌹
 
 Mounting of files in DC `volumes` is possible, but demands the file system entry to exist, as a file, before the `docker compose` call.
 
@@ -115,21 +59,70 @@ This is the same for both normal (`volume`) mounts and `bind` mounts<sup>DC 2.6.
    invalid mount config for type "bind": bind source path does not exist: ...
    ```
 
-This causes us to have these preventive measures in `package.json`:
+This causes us to have these preventive measures in `package.json` - or `Makefile`:
 
 ```
     "postinstall": "npm run -s _touchEm",
     "_touchEm": "touch firebase-debug.log firestore-debug.log ui-debug.log",
 ```
 
-These are output files, normally created by Firebase Emulator. Now we much make sure they exist, so they won't be mapped as folders, instead.
+These are output files, normally created by Firebase Emulator. Now we must make sure they exist, so they won't be mapped as folders, instead.
 
 **Suggestion**
 
 Add a `:f` as a postfix, concatenable with others (in our case, we'd use `:delegated,f`).<sup>[1]</sup>
 
-<small>`[1]`: DC already allows concatenating postfixes by `,`. The author would have preferred `:delegated:f`, otherwise.</small>
+<small>`[1]`: DC already allows concatenating postfixes by `,`.</small>
 
 **Reference**
 
 - ["How to mount a single file in a volume"](https://stackoverflow.com/questions/42248198/how-to-mount-a-single-file-in-a-volume) (SO; Feb 2017)
+
+
+## Automatically rebuild if the definition cascade has changed
+
+Docker Compose declarations allow referring to other declarations by:
+
+- `extends: file: [service:]`   between Docker Compose definitions
+- `build: context: [target:]`   uses a Dockerfile
+
+**Problem**
+
+If one uses the above linkages, then starts a task with `docker compose run`, further changes to the declarations are not taken into effect.
+
+One needs to manually `docker compose build` the topmost service the `run` uses.
+
+This causes confusion for the developer.
+
+**Example**
+
+I wanted to update the version of Vite defined in `packages/app/tools/vite.dc/Dockerfile`.
+
+Editing it, and restarting the DC `run` left some earlier version in effect. Luckily, this is obvious in the particular tool's console output.
+
+Dependency tree:
+
+```
+npm run dev
+  --> uses `docker-compose.local.yml` with:
+      extends:
+        file: dc.base.yml
+        service: vite-base
+     --> `dc.base.yml`:
+        build:
+          context: tools/vite.dc
+          target: vite_plain
+         -->
+            ARG VITE_VER=3.0.2    # the line that changes
+```
+
+**Suggested solution**
+
+When doing `docker compose up` or `docker compose run`, Docker should consider *direct* extension chain, all the way to Dockerfiles. If it *knows* that something in the definitions has changed, it would:
+
+- automatically rebuild what's needed
+- or: warn that something has needed, and suggest using a flag to rebuild
+
+>Note: This suggestion should be simple to implement (and cause no breaking changes) since no *interim* (and maybe running) image definitions are involved. Just the target the user explicitly states. 
+
+- [ ] *Shorten this to an issue. File such.* `#contribute`

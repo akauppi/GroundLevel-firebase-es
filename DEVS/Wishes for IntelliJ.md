@@ -1,35 +1,24 @@
 # Wishes for IntelliJ
 
-*The plugin has become available in the mean time. Should check it out, some day...*
+## Allow macOS "Look up"
 
----
+The OS-wide "look up" is great for checking one's spelling.
 
-Dear IntelliJ. Your IDEs are the best of the breed. I am happy to pay a yearly fee for using WebStorm.
+![](.images/look-up.png)
 
-However, recently it has become painfully clear to me that your tool is unfit for editing Firebase Security Rules. The rules are hard, and I *truly* need syntax highlighting for being able to manage them.
+Unfortunately, it's not there in IntelliJ's (WebStorm IDE's) context menu:
 
-Would you help?
-
-Maybe you can talk with Google/Firebase to make this happen?
-
-Microsoft has implemented the grammar, but someone with IntelliJ syntax highlighting experience (and time or funding) should bring it to your products.  Please. 🐶
+![](.images/intellij-no-look-up.png)
 
 
-## Syntax highlight for Firebase Security Rules [IDEABKL-7927]
+**Expected**
 
->NOTE: There's a Security Rules plugin now: [Firebase Rules Syntax Highlighter](https://plugins.jetbrains.com/plugin/15189-firebase-rules-syntax-highlighter)
->
->- [ ] is it any good?
->- [ ] having versions be "-SNAPSHOT" is worrying (Jan-21)
->- [x] keeping it disabled, until next time working with Rules
+When right-clicking on a word in a comment (to check its spelling, or meaning), WebStorm IDE should allow macOS "Look Up" functionality, as most other software does.
 
-See [IDEABKL-7927](https://youtrack.jetbrains.com/issue/IDEABKL-7927) (Youtrack).
+**Actual**
 
-- open since 2018
-- 27 votes (only); 58 by 28-Aug-2020
+The menu above shows - there is no escape to OS level features.
 
->VisualStudio has a plugin for this: https://github.com/toba/vsfire - it would be great to have this in intellij as well.
+**Work-around**
 
-
-
- 
+Copy-paste the word to e.g. TextEdit, and use right click there.
