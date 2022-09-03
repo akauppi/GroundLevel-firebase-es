@@ -8,7 +8,7 @@
   "dependencies": {
     "@google-cloud/firestore": "^6.0.0",
     "firebase-admin": "^11.0.1",
-    "firebase-functions": "^3.22.0"
+    "firebase-functions": "^3.23.0"
   },
   "scripts": {
     "preinstall": "npm run -s _checkEnv",

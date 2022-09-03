@@ -40,18 +40,23 @@ function workerGen(token) {   // (string) => { flush(), inc(id: string, diff: nu
     flush(final = false) {   // (boolean) => ()
       w.postMessage({ "":"flush" })
 
+      /**
       // Trying to help JavaScript GC to release the resource (Q: any better way / pattern?); could also just let be..
       if (final) {
         w = null;
-      }
+      }**/
     },
 
-    inc(id, diff) {   // (string, number) => ()
-      w.postMessage({ "":"inc", id, diff, at: Date.now() });
+    inc(id, diff, testOpts) {   // (string, number) => ()
+      w.postMessage({ "":"inc", id, diff, at: testOpts?.forcedAt || Date.now() });
     },
 
-    log(id, level, msg, ...args) {   // (string, "debug"|"info"|"warn"|"error"|"fatal", string, Array of any) => ()
-      w.postMessage({ "":"log", id, level, msg, args, at: Date.now() });
+    log(id, level, msg, args, testOpts) {   // (string, "debug"|"info"|"warn"|"error"|"fatal", string, Array of any) => ()
+      w.postMessage({ "":"log", id, level, msg, args, at: testOpts?.forcedAt || Date.now() });
+    },
+
+    obs(id, v, testOpts) {    // (string, number) => ()
+      w.postMessage({ "":"obs", id, v, at: testOpts?.forcedAt || Date.now() });
     }
   }
 }
@@ -102,22 +107,33 @@ function flush() {    // () => ()
 }
 
 function createCounter(id) {
-  return (diff = 1.0) => {    // (diff: number = 1.0) => ()
+  return (diff = 1.0, testOpts) => {    // (diff: number = 1.0, ?{ forcedAt: number }) => ()
     diff >= 0.0 || fail(`Bad parameter: ${diff}`)
 
     getWorker().then( x => {
-      x.inc(id, diff);
+      x.inc(id, diff, testOpts);
+
       console.debug("Central counter:", { id, diff });
     });
   }
 }
 
-function createLog(id, level = "info") {   // (string, "info"|"warn"|"error"|"fatal"?) => (msg, ...) => ()
+function createLog(id, level = "info", testOpts) {   // (string, ?"info"|"warn"|"error"|"fatal", ?{ forcedAt: number }) => (msg, ...) => ()
   return (msg, ...args) => {
     getWorker().then( x => {
-      x.log(id, level, msg, ...args);
+      x.log(id, level, msg, args, testOpts);
 
       console.debug("Central log:", {id, level, msg, args});
+    });
+  }
+}
+
+function createObs(id) {
+  return (v, testOpts) => {   // (number, ?{ forcedAt: number }) => ()
+    getWorker().then( x => {
+      x.obs(id, v, testOpts);
+
+      console.debug("Central obs:", {id, v});
     });
   }
 }
@@ -127,6 +143,7 @@ function fail(msg) { throw new Error(msg); }
 export {
   createCounter,
   createLog,
+  createObs,
     //
   flush
 }

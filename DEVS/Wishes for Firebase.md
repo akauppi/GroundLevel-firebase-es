@@ -378,6 +378,21 @@ Work-arounds:
 3. ...looking for the right way...
 -->
 
+## Using Firebase from a worker thread (documentation, maybe..)
+
+This didn't seem possible, and the author created a "callables" client themselves, using normal REST API.
+
+What is missing is:
+
+- recognizing that Firebase client can be useful not only in the browser's main thread, but also in its workers
+- creating a mechanism that would tie the client in the worker to that in the main thread
+
+Ideally, calling `getAuth()` in the worker would automatically tie to the main thread, somehow, and no `initializeApp` would be needed, in the threads.
+
+Alternatively, one would be able to initialize `auth` with an auth token, passed to the worker e.g. in its initialization (the source code does this, see [`packages/app/src/central/`](packages/app/src/central/)). The author currently (Aug 2022) found no way that this kind of initialization would be possible.
+
+Yet another way, if Firebase doesn't want to bind the browser threads in any way, is to simply **document that Firebase authentication within a worker thread isn't possible** (or that one needs to do it completely separated from the main thread). Currently (Aug 2022), the author is not aware of any mention of such.
+
 
 ## References
 

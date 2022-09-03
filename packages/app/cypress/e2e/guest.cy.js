@@ -1,5 +1,5 @@
 /*
-* guest.spec.js
+* guest.cy.js
 *
 * Test how a guest (not signed in) sees the app.
 */

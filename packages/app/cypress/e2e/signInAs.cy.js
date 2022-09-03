@@ -1,5 +1,5 @@
 /*
-* signInAs.spec.js
+* signInAs.cy.js
 *
 * Sign in as Joe and see your name on the screen.
 */

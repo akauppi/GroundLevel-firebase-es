@@ -82,6 +82,16 @@ async function ship() {    // () => ()
 *   at: number
 * }
 *   Push a log entry for delivery. If 'level'==="fatal", the delivery may be done sooner than scheduled.
+*
+* {
+*   "": "obs",
+*   id: string,
+*   v: number,
+*
+*   // Context
+*   at: number
+* }
+*   Push a statistical observation for delivery.
 */
 self.addEventListener('message', (e) => {
   console.log("Worker received:", e);

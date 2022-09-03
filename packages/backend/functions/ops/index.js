@@ -59,7 +59,7 @@ const DATABASE_URL = (_ => {
 const db = (!DATABASE_URL) ? null : (_ => {
   // Create our own Firebase handle ("app"), because Realtime Database is only used for operations.
   //
-  const app= DATABASE_URL && initializeApp({
+  const app= initializeApp({
     databaseURL: DATABASE_URL
       // tbd. this would be regional; take the URL from a Firebase Functions config (with no defaults)
   }, "2");
@@ -68,7 +68,7 @@ const db = (!DATABASE_URL) ? null : (_ => {
 })();
 
 /*
-* Store a received counter increment to Realtime Database.
+* Store a counter increment.
 */
 async function inc({ id, diff, at }) {    // => Promise of ()
 
@@ -76,18 +76,14 @@ async function inc({ id, diff, at }) {    // => Promise of ()
   //    restrictions - bring them here.
 
   const refRaw = db.ref("incoming/incs");
-
-  await refRaw.push({
-    id, diff, clientTimestamp: at
-  });
+  await refRaw.push({ id, diff, clientTimestamp: at });
 
   const refAggregate = db.ref(`inc/${id}`);
-
   await refAggregate.set( { "=": ServerValue.increment(diff) })    // Note: Tags can be added by '{k}={v}'
 }
 
 /*
-* Store a received log entry to Realtime Database.
+* Store a log entry.
 */
 async function log({ id, level, msg, args, at, uid }) {   // => Promise of ()
 
@@ -95,6 +91,18 @@ async function log({ id, level, msg, args, at, uid }) {   // => Promise of ()
   await refRaw.push({ id, level, msg, args, clientTimestamp: at, uid });
 
   // Logs have no aggregation
+}
+
+/*
+* Store a statistical sample.
+*/
+async function obs({ id, v, at }) {   // => Promise of ()
+
+  const refRaw = db.ref("incoming/obs");
+  await refRaw.push({ id, v, clientTimestamp: at });
+
+  // Not doing an aggregation. Doing such would need knowledge about bucketing (i.e. rate of incoming observations).
+  // That can vary - better have the visualization tools handle that.
 }
 
 function validateGen(t_OUTPUT, validKeys) {    // ("Inc"|"Log"|..., Array of string) => obj => ()   // may throw 'invalid-argument' or log to 'console.warn'
@@ -121,16 +129,19 @@ function validateGen(t_OUTPUT, validKeys) {    // ("Inc"|"Log"|..., Array of str
 
 const lookup = {
   inc: [validateGen("Inc", ["id","diff","at"]), inc],
-  log: [validateGen("Log", ["id", "level", "msg", "args", "at"]), log]
+  log: [validateGen("Log", ["id", "level", "msg", "args", "at"]), log],
+  obs: [validateGen("Obs", ["id", "v", "at"]), obs]
 }
 
 /*
-* { arr: Array of LogEntry|IncEntry } -> ()
+* { arr: Array of IncEntry|LogEntry|ObsEntry } -> ()
 *
 *   IncEntry:
 *     { "": "inc", id: string, diff: double (>= 0.0), at: number }
 *   LogEntry:
 *     { "": "log", id: string, level: "info"|"warn"|"error"|"fatal", msg: string, args: Array of any, at: number }
+*   ObsEntry:
+*     { "": "obs", id: string, v: double, at: number }
 *
 * NOTE (KEEP!!!):
 *   If you need to signal errors, do it like so. Use codes only from 'FunctionsErrorCode' selection:
@@ -142,10 +153,10 @@ const lookup = {
 export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
   .onCall((bulk, ctx) => {
 
-    // Even during emulation, we get the user information from the token.
+    /*** // Even during emulation, we get the user information from the token.
     //
     console.debug("!!! Auth context:", ctx.auth);
-      /*{
+      /_*{
       *   uid: 'dev',
       *   token: {
       *     name: 'Just Me',
@@ -162,7 +173,7 @@ export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
       *     uid: 'dev'
       *   }
       * }
-      */
+      ***/
 
     const uid = ctx.auth.uid || fail_unauthenticated();
 
@@ -170,7 +181,7 @@ export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
     console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, uid);
 
     const fs = arr.map( (e,i) =>
-      lookup[e[""]] || fail_invalid_argument(`No type ([""]=inc|log|...) for entry ${i}.`)
+      lookup[e[""]] || fail_invalid_argument(`No type ([""]=inc|log|obs|...) for entry ${i}.`)
     );
 
     // Validate all entries, before storing any of them (just because, no harm if doing differently..)
@@ -185,7 +196,7 @@ export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
       fs[i][1]({ ...e, uid });
     });
 
-    return "ok";     // note: we don't need to return anything
+    return;     // note: we don't need to return anything
   });
 
 function fail_invalid_argument(msg) {
