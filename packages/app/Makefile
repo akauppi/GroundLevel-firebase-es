@@ -28,6 +28,10 @@ tmp/.stamp.prime: tools/prime.dc/Dockerfile
 	docker compose -f docker-compose.tools.local.yml build prime
 	touch $@
 
+tmp/.stamp.serve: tools/serve.dc/Dockerfile
+	docker compose -f docker-compose.tools.serve.yml build serve
+	touch $@
+
 # Keyed by their DC container names
 #
 refresh-vite-dev: tmp/.stamp.vite-dev
@@ -37,6 +41,8 @@ refresh-vite-online: tmp/.stamp.vite-online
 refresh-build: tmp/.stamp.build
 
 refresh-prime: tmp/.stamp.prime
+
+refresh-serve: tmp/.stamp.serve
 
 #refresh: refresh-vite-dev refresh-vite-online refresh-build refresh-prime
 

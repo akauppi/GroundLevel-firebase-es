@@ -8,11 +8,6 @@ import {createObs} from './common'
 
 //const randomObs = createObs("random");
 
-const LOCAL = import.meta.env.MODE === "dev_local";
-if (LOCAL) {    // support for testability (tbd. is there a better way to reveal something to Cypress scripts?)
-  window.TEST_obsDummy = createObs("test-dummy");
-}
-
 export {
   //randomObs
 }

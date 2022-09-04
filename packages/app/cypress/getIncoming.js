@@ -34,6 +34,7 @@ const db = (_ => {
   return getDatabase(app);
 })();
 
+// tbd. Refactor by using listening, instead of '.once()': no need for polling, less noice of the console if indexes aren't enabled.
 /*
 * Task for proving that a suitable "incoming/{...}/{generated-key}" document exists.
 *
@@ -60,7 +61,6 @@ async function getIncoming(subPath, expectedTimestamp, timeoutMs) {    // ("{inc
 
       if (ss.exists()) {
         ss.forEach( x => {
-          console.log("!!! x:", {x});   // DEBUG
           arr.push(x);
         });
       }
@@ -70,8 +70,6 @@ async function getIncoming(subPath, expectedTimestamp, timeoutMs) {    // ("{inc
 
   const [doc /*, ...*/] = await tryUntil( Date.now() + timeoutMs, gen);
   doc || fail("INTERNAL: expected a doc object");
-
-  // Got it! (could deal with command line spinner, here)
 
   return doc;
 }

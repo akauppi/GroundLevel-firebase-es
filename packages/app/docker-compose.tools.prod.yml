@@ -43,20 +43,3 @@ services:
     #|environment:
     #|  - ENV     # e.g. "staging"
     profiles: ['manual']
-
-  # DISABLED (using native 'http-server')
-  #|#---
-  #|# Separate target (may be undocumented); serve the contents of 'dist/' (does NOT rebuild from sources!!!).
-  #|#
-  #|_serve:
-  #|  build:
-  #|    context: tools/serve.dc
-  #|  ports:
-  #|    - 8080:8080
-  #|  volumes:
-  #|    # --- RO
-  #|    - ./dist:/work/dist:ro
-  #|  command: sh -c
-  #|    'http-server ./dist -p 8080
-  #|    '
-  #|  profiles: ['manual']

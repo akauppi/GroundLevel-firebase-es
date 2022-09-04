@@ -29,11 +29,34 @@ describe('Central metrics and logs end up in Realtime Database (for signed-in us
       })
   })
 
-  /***it.skip('Have logs passed to Realtime Database', () => {
-    // tbd.
-  })***/
+  it('Have logs passed to Realtime Database', () => {
+    const at = Date.now();
 
-  // tbd. samples (timings)
+    cy.window().its("TEST_logDummy").then( log => {
+      log("hey", { a:1, b:2 }, { forcedAt: at });   // note: to have '{ forcedAt }', second param must be provided
+    } );
+
+    getIncoming("logs", at)
+      .should('include', {
+        clientTimestamp: at,
+        id: 'test-dummy'
+      })
+  })
+
+  it('Have samples passed to Realtime Database', () => {
+    const at = Date.now();
+
+    cy.window().its("TEST_obsDummy").then( obs => {
+      const v = Math.random() * 100;
+      obs( v, { forcedAt: at });
+    } );
+
+    getIncoming("obs", at)
+      .should('include', {
+        clientTimestamp: at,
+        id: 'test-dummy'
+      })
+  })
 })
 
 function getIncoming(subPath, expectedTimestamp) {   // (string, number) => Promise of {...}

@@ -118,12 +118,13 @@ function createCounter(id) {
   }
 }
 
-function createLog(id, level = "info", testOpts) {   // (string, ?"info"|"warn"|"error"|"fatal", ?{ forcedAt: number }) => (msg, ...) => ()
-  return (msg, ...args) => {
-    getWorker().then( x => {
-      x.log(id, level, msg, args, testOpts);
+function createLog(id, level = "info") {
+  return (msg, a, testOpts) => {    // (string, ?any, ?{ forcedAt: number }) => ()
 
-      console.debug("Central log:", {id, level, msg, args});
+    getWorker().then( x => {
+      x.log(id, level, msg, a, testOpts);
+
+      console.debug("Central log:", {id, level, msg, a});
     });
   }
 }
@@ -139,6 +140,15 @@ function createObs(id) {
 }
 
 function fail(msg) { throw new Error(msg); }
+
+// Help Cypress testing by preparing some entries.
+//
+const LOCAL = import.meta.env.MODE === "dev_local";
+if (LOCAL) {
+  window.TEST_countDummy = createCounter("test-dummy");
+  window.TEST_logDummy = createLog("test-dummy", "info");
+  window.TEST_obsDummy = createObs("test-dummy");
+}
 
 export {
   createCounter,
