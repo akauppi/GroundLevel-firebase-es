@@ -24,21 +24,29 @@ const auth = getAuth();
 * Note:
 *   The whole worker interface is within this function, keeping it tight.
 */
-function workerGen(token) {   // (string) => { flush(), inc(id: string, diff: number), log(id: string, level: "debug"|"info"|"warn"|"error"|"fatal", msg: string, ...args: Array of any) }
+async function workerGen(token) {   // (string) => Promise of { flush(), inc(id: string, diff: number), log(id: string, level: "debug"|"info"|"warn"|"error"|"fatal", msg: string, ...args: Array of any) }
 
-  // Note: Vite (3.0.9) does not allow string interpolation (`...${some}`) within the worker thread URL:
-  //  <<
-  //    9:36:10 PM [vite] Internal server error: `new URL(url, import.meta.url)` is not supported in dynamic template string.
-  //  <<
+  // Note: Vite (3.1.0-beta.2) does not allow string interpolation within the worker thread URL.
+  //    <<
+  //      $ npm run build
+  //      ...
+  //      [vite] Internal server error: `new URL(url, import.meta.url)` is not supported in dynamic template string.
+  //    <<
   //
-  //    It is okay with using '"..."+token'. Beats the author. fine with it!
-  //
-  //const w = new Worker(new URL(`./worker.js?token=${token}`, import.meta.url), {type: 'module'});   // FAILS
+  //const w = new Worker(new URL(`./worker.js?token=${token}`, import.meta.url), {type: 'module'});   // FAILS 'npm run build'
   const w = new Worker(new URL('./worker.js?token='+token, import.meta.url), { type: 'module' });
+    //
+    // Works on dev, but not in prod. 'worker.js' is not generated but the browser looks for one (404).
+
+  // Also this fails.
+  /**const w = await import('./worker?worker' + '&url' + '&token='+token).then( mod => {
+    console.error("!!!", mod.default);
+    return new mod.default();
+  });**/
 
   return {
     flush(final = false) {   // (boolean) => ()
-      w.postMessage({ "":"flush" })
+      w.postMessage({ "":"flush" });
 
       /**
       // Trying to help JavaScript GC to release the resource (Q: any better way / pattern?); could also just let be..

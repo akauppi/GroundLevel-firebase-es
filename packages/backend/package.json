@@ -56,7 +56,7 @@
   "devDependencies": {
     "firebase-admin": "^11.0.1",
     "firebase-jest-testing": "^0.0.5-beta.3",
-    "jest": "^29.0.1"
+    "jest": "^29.0.2"
   },
   "//devDependencies": {
     "firebase-jest-testing": "file:../../../firebase-jest-testing/package"

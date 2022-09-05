@@ -16,15 +16,9 @@
 function manualChunks(id) {
   let name;
 
-  /*** disabled; still there?
-  // Vite 3.0.0-alpha.1 has an '\0' prepended ahead of "vite/preload-helper" (2.9.9 did not have that).
-  //
-  // Keep this while we check whether that's intentional, or a glitch.
-  //
-  if (id === "\0vite/preload-helper") {
-    return manualChunks(id.substring(1))
+  if (id.includes('/worker')) {
+    fail("Not handling worker sources!");
   }
-  ***/
 
   for (const [k,rr] of Object.entries(chunkTo)) {   // ""|<chunk-name> -> Regex | Array of Regex
     const arr = Array.isArray(rr) ? rr:[rr];
@@ -58,14 +52,14 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //  /work/src/App/pages/Home.guest.vue?vue&type=style&index=0&scoped=true&lang.css
   //    ...
   //  vite/modulepreload-polyfill
-  //  vite/preload-helper
+  //  \x00vite/preload-helper
   //
   "": [
     /^\/work\/prod\//,
     /^\/work\/firebase\.config\.js$/,
     /^\/work\/src\//,
 
-    /^.vite\/preload-helper$/,       // Vite runtime (small, ~600b)
+    /^.vite\/preload-helper$/,       // note: '.' is for the '\x00'
     /^vite\/modulepreload-polyfill$/,
   ],
 
@@ -106,7 +100,6 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
     /\/node_modules\/@firebase\/webchannel-wrapper\//,    // used by '@firebase/firestore'
   ],
   "firebase-performance": /\/node_modules\/@firebase\/performance\//,
-  //"firebase-functions": /\/node_modules\/@firebase\/functions\//,   // just trying; used in the worker (NOT USED by the worker)
   "firebase": [
     /\/node_modules\/@firebase\/(?:app|util|logger|component|installations)\//,
     /\/node_modules\/idb\//,      // needed by '@firebase/{app|installations|messaging}' (place in same chunk)
@@ -147,4 +140,5 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   // There should not be others. Production builds are banned with 'npm link'ed or 'file://') 'aside-keys'.
 };
 
+function fail(msg) { throw new Error(msg) }
 export { manualChunks };

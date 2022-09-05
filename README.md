@@ -63,7 +63,7 @@ You'll need:
 - **A computer** with the following tools installed:
 
    - `node` 18+
-   - `npm` - 8+
+   - `npm` 8+
    - `bash` and following command line tools: `sed`, `curl`, `grep`, `sort`, `make`
    - Docker Desktop [on Mac](https://docs.docker.com/desktop/mac/install/) or [on Windows](https://docs.docker.com/desktop/windows/install/)
 
