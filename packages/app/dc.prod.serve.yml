@@ -1,0 +1,18 @@
+#
+# app/dc.prod.serve.yml
+#
+services:
+  #---
+  # Serve '/dist/**', separately built.
+  #
+  serve:
+    build:
+      context: tools/serve.dc
+    ports:
+      - 8080:8080
+    environment:
+      - PORT=8080
+    volumes:
+      # --- RO
+      - ./dist:/work/public:ro
+    profiles: ['manual']

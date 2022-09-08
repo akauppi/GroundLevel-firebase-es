@@ -13,7 +13,13 @@
     //
     "incoming": {
       "incs": {
-        ".indexOn": ["clientTimestamp"]
+        ".indexOn": "clientTimestamp"
+      },
+      "logs": {
+        ".indexOn": "clientTimestamp"
+      },
+      "obs": {
+        ".indexOn": "clientTimestamp"
       }
     }
   }

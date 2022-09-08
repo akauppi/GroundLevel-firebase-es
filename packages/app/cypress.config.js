@@ -36,15 +36,10 @@ export default defineConfig({
       on('task', {
         async getIncoming([subPath, expectedTimestamp]) {
           return getIncoming(subPath, expectedTimestamp, taskTimeout - 1000 /*ms*/)
-        },
-
-        dummy([a,b]) {    // TEMP
-          console.log("!!!", {a,b});
-          return a+b
         }
       })
 
-      return config;    // samples have it (might not be needed?)
+      // Note: Samples return 'config' but that doesn't seem to be required. (Cypress 10.7.0)
 
       function fail(msg) { throw new Error(msg) }
     },

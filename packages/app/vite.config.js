@@ -184,6 +184,11 @@ async function configGen({ command, mode }) {
       //    "import declarations may only appear at top level of a module"
       //
       format: 'es'    // default: 'iife'
+
+      // "Worker files smaller than this number (in bytes) will be inlined as base64 strings. Default limit is `4096` (4kb).
+      //  Set to `0` to disable."
+      //
+      //inlineLimit: 4096
     },
 
     server: SERVE_PORT ? {

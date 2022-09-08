@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "type": "module",
-  "devDependencies": {
-    "@google-cloud/monitoring": "^3.0.0"
-  }
-}

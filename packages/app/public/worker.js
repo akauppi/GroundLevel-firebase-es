@@ -1,0 +1,1 @@
+../src/central/worker.js

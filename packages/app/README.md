@@ -6,39 +6,42 @@ Web application sample project.
 
 - `npm`
 - `docker`
-- `make` (GNU make)
 
-   <small>We use the GNU `make` indirectly, but may opt for a greater role for it, in the future.</small>
+>Note: We might opt for a wholly Docker-based development experience in the future, no longer requiring `npm` to be installed on your system.
 
-### Cypress setup
+### Cypress setup (for test based development; optional)
 
-Cypress is brought in via `npm`, but in order to use it as a desktop application (which it is), please take the following steps:
+Cypress is primarily a desktop application. Please follow these steps to install it:
 
 <details><summary><b>macOS</b></summary>
 
-After `npm install`:
+Visit [Direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) and download the latest version.
 
-```
-$ npx cypress open
-```
+- unzip the `cypress.zip`
+- move `Cypress.app` to a destination of your liking <small>The author prefers user specific `Applications` folder.</small>
+- launch `Cypress.app`
+- add the `packages/app` folder as a Cypress project. It will from now on remember this path.
 
-This opens Cypress for the first time. 
-
-Move the icon to your favourite location and right click > `Options` > `Keep in Dock`.
-
-This helps you launch the tool as a desktop application, in the future.
+For easy relaunch, move the Dock icon to a suitable position and right click > `Options` > `Keep in Dock`. 
 </details>
 
 <details><summary><b>Linux</b></summary>
 
-As per the Cypress [installation instructions](https://docs.cypress.io/guides/getting-started/installing-cypress#Linux):
+As per the Cypress [installation instructions](https://docs.cypress.io/guides/getting-started/installing-cypress#Linux-Prerequisites):
 
 ```
 $ sudo apt-get update
 $ sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 ```
 
-That's all. You'll be using the Cypress version installed via `npm`. Launch it with `npx cypress open` after the install.
+Seems there is no desktop download for Linux. You'll need `npm` installed.
+
+Then:
+
+```
+$ npm install -g cypress
+$ npx cypress open
+```
 </details>
 
 <details><summary><b>Windows 10 + WSL2</b></summary>
@@ -70,10 +73,10 @@ This means you should be able to run the Cypress installed within Linux, and use
 <!--
 Development is done with: 
 
-- macOS 12.4
-- node 18.4
-- npm 8.12
-- Docker Desktop 4.10.1 with: 3 CPU cores, 2 GB RAM
+- macOS 12.5
+- node 18.8
+- npm 8.18
+- Docker Desktop 4.12.0 with: 3 CPU cores, 2 GB RAM
   - experimental > Enable VirtioFS
 -->
 
@@ -93,7 +96,7 @@ $ npm install
 $ npm run dev
 ...
 
-  VITE v3.0.0-beta.9  ready in 1341 ms
+  VITE v3.1.0  ready in 1341 ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Network: http://172.20.0.2:3000/

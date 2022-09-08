@@ -21,15 +21,17 @@ https://github.com/leg100/cloud-build-badge
 Great tools selected for you: 
 
 [Firebase](https://firebase.google.com)
-- [Vite](https://github.com/vitejs/vite)
-- [Vue.js](https://vuejs.org)
 - [Jest](https://jestjs.io)
+- [Vite](https://github.com/vitejs/vite)
 - [Cypress](https://www.cypress.io)
 - [Cloud Build](https://cloud.google.com/build)
 - [Plausible](https://plausible.io)
 - [Sentry](https://sentry.io)
+- [Grafana Cloud](https://grafana.com)
 
 <font color=green>&check;</font> Built on 2020's technology (ES2022), aiming to stay up to date and lean.
+
+<font color=green>&check;</font> Allows use of any web app framework.
 
 <font color=green>&check;</font> Covers deployment (CI/CD).
 
@@ -80,12 +82,12 @@ You'll need:
    </details>
 
    <details style="margin-left: 2em;"><summary><b>Linux</b></summary>
-   *The repo is not tested regularly on Linux, as it is on Mac and Windows 10+WSL2. Having said that, it should work (= will be made to work ;).*
+   *The repo is not tested on Linux, as it is on Mac and Windows 10+WSL2. Having said that, it should work (= will be made to work ;).*
    
-   You can either:
+   You can either use:
    
-   - Use [Docker Desktop for Linux](https://docs.docker.com/desktop/linux/install/) which brings a similar developer experience as that on Mac/Windows.
-   - Use Docker CLI with the Docker Compose plugin; see [Install Docker Compose](https://docs.docker.com/compose/install)
+   - [Docker Desktop for Linux](https://docs.docker.com/desktop/linux/install/) which brings a similar developer experience as that on Mac/Windows.
+   - Docker CLI with the Docker Compose plugin; see [Install Docker Compose](https://docs.docker.com/compose/install)
    </details>
    
 - **A capable IDE**
@@ -328,7 +330,7 @@ Check these subfolders:
 - 💅 Front-end: [`packages/app`](packages/app/README.md)
 - 🌀 CI/CD ([`ci/README`](ci/README.md))
 - 📊🗒 Operational monitoring ([`ops/README`](ops/README.md))
-- 🧬 Make it Yours ([`make-it-yours/README`](make-it-yours/README.md))
+- 🧬🤽‍♀️ Make it Yours ([`make-it-yours/README`](make-it-yours/README.md))
 
 We hope you are active also in the development - and giving feedback - of the GroundLevel repo. It doesn't serve its purpose unless it becomes the growing ground, a fertile soil, for many flowerful web apps! 
 

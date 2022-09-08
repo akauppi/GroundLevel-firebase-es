@@ -20,7 +20,7 @@ FROM node:18-alpine AS vite_plain
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
-ARG VITE_VER=3.1.0-beta.2
+ARG VITE_VER=3.1.0
 
 WORKDIR /work
 
@@ -36,9 +36,6 @@ RUN npm config set update-notifier false
 #
 RUN npm install -g --no-save vite@$VITE_VER && \
   ln -s /usr/local/lib/node_modules /node_modules
-
-# Disabled. Not needed
-#ENV NODE_PATH=/usr/local/lib/node_modules
 
 # Override
 CMD \
