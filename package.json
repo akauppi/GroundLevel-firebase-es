@@ -10,7 +10,7 @@
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-vue": "^9.4.0",
-    "vue-eslint-parser": "^9.0.3"
+    "vue-eslint-parser": "^9.1.0"
   },
   "//": {
     "": [

@@ -2,8 +2,10 @@
 # Makefile
 #
 # Expects:
-#	GC_USER		user id, e.g. "252484"
-#	GC_API_KEY	valid API key
+#	LOKI_USER		user id, e.g. "252484"
+#	PROM_USER		user id, e.g. "507028"
+#	MP_API_KEY		valid API key with 'MetricsProvider' role
+#	ADMIN_API_KEY	valid API key with 'Admin' role
 #
 #	NOTE: You'll find the right values by visiting http://grafana.com > `My Account` > `Loki` > `Send Logs`
 #
@@ -45,7 +47,7 @@ ifeq ($(GC_API_KEY),)
   $(error No 'GC_API_KEY' env.var.)
 endif
 
-_LOKI_URL=https://$(LOKI_USER):$(GC_API_KEY)@logs-prod-eu-west-0.grafana.net
+_LOKI_URL=https://logs-prod-eu-west-0.grafana.net
 
 _INFLUX_URL=https://influx-prod-01-eu-west-0.grafana.net
 #!! _PROMETHEUS_URL=https://prometheus-prod-01-eu-west-0.grafana.net
@@ -56,20 +58,22 @@ _NOW_NANO := $(shell node -e 'console.log(Date.now())')000000
 # Sample from Loki HTTP API quote in SO.
 #
 loki-post:
-	curl -v -XPOST -H "Content-Type: application/json" -s "$(_LOKI_URL)/loki/api/v1/push" --data-raw \
+	curl -v -XPOST -u $(LOKI_USER):$(MP_API_KEY) -H "Content-Type: application/json" -s "$(_LOKI_URL)/loki/api/v1/push" --data-raw \
       '{"streams": [{ "stream": { "foo": "bar2" }, "values": [ [ "$(_NOW_NANO)", "fizz buzz" ] ] }]}'
 
 # Gives:
 #	<<
-# 	  {"status":"success","data":[]}
+#	  {"status":"success","data":[{"foo":"bar2"}]}
 #	<<
 #
 loki-get-series:
-	curl -v "$(_LOKI_URL)/loki/api/v1/series"
+	curl -v -u $(LOKI_USER):$(ADMIN_API_KEY) "$(_LOKI_URL)/loki/api/v1/series"
 
-loki-get-query:
-	curl -G -s "$(_LOKI_URL)/loki/api/v1/query" \
-	  --data-urlencode 'query=sum(rate({job="varlogs"}[10m])) by (level)' | jq -C .
+# tbd. A GET that would show content we posted.
+
+#loki-get-query:
+#	curl -G -s -u $(LOKI_USER):$(ADMIN_API_KEY) "$(_LOKI_URL)/loki/api/v1/query" \
+#	  --data-urlencode 'query=sum(rate({job="varlogs"}[10m])) by (level)' | jq -C .
 
 #--- Metrics
 
@@ -83,7 +87,7 @@ loki-get-query:
 #	<<
 #
 metrics-push:
-	curl -v -XPOST -u $(PROM_USER):$(GC_API_KEY) "$(_INFLUX_URL)/api/v1/push/influx/write" -d \
+	curl -v -XPOST -u $(PROM_USER):$(MP_API_KEY) "$(_INFLUX_URL)/api/v1/push/influx/write" -d \
       'ABC,A=1,B=2 def=34 $(_NOW_NANO)'
 	# 204
 
