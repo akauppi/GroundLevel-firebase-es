@@ -1,4 +1,4 @@
-# Tasks
+# Todo
 
 ## !! See the logs
 
@@ -6,8 +6,4 @@
 
 Why do I have `Send Metrics` and `Send Logs` if Grafana Cloud has accepted some data???????
 
-
-## Tail the logs
-
-- [ ] Figure out some command that allows tailing the logs, on a local computer
-
+- This is being addressed.

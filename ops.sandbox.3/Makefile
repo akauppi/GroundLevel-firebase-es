@@ -7,7 +7,11 @@
 #	MP_API_KEY		valid API key with 'MetricsProvider' role
 #	ADMIN_API_KEY	valid API key with 'Admin' role
 #
-#	NOTE: You'll find the right values by visiting http://grafana.com > `My Account` > `Loki` > `Send Logs`
+#	NOTE: You'll find the right values by visiting http://grafana.com > 'My Account' and:
+#	  - LOKI_USER: 	> `Loki` > `Send Logs`
+#	  - PROM_USER: 	> `Prometheus` > `Send Metrics`
+#	  - MP_API_KEY: 	> `API Keys` > create key with role: 'MetricsPublisher'
+#	  - ADMIN_API_KEY: 	> `API Keys` > create key with role: 'Admin'
 #
 #	NOTE: [1] says:
 #		<<
@@ -23,7 +27,8 @@
 #	  -> https://grafana.com/docs/grafana-cloud/data-configuration/metrics/metrics-influxdb/push-from-telegraf/#pushing-from-applications-directly
 #	- InfluxDB Line Protocol
 #	  -> https://docs.influxdata.com/influxdb/cloud/reference/syntax/line-protocol/
-#
+#	- "LogCLI, Grafana Loki's command-line interface" [2]
+#	  -> https://grafana.com/docs/loki/latest/tools/logcli/
 
 # Note: Loki user id is different from that of Prometheus!
 #
@@ -43,17 +48,18 @@ ifeq ($(PROM_USER),)
 endif
   # 507028
 
-ifeq ($(GC_API_KEY),)
-  $(error No 'GC_API_KEY' env.var.)
+ifeq ($(MP_API_KEY),)
+  $(error No 'MP_API_KEY' env.var.)
 endif
 
 _LOKI_URL=https://logs-prod-eu-west-0.grafana.net
-
 _INFLUX_URL=https://influx-prod-01-eu-west-0.grafana.net
 #!! _PROMETHEUS_URL=https://prometheus-prod-01-eu-west-0.grafana.net
 
 #---
 _NOW_NANO := $(shell node -e 'console.log(Date.now())')000000
+
+_LOGCLI_IMAGE = docker.io/grafana/logcli:main-1e22b14-amd64
 
 # Sample from Loki HTTP API quote in SO.
 #
@@ -69,11 +75,17 @@ loki-post:
 loki-get-series:
 	curl -v -u $(LOKI_USER):$(ADMIN_API_KEY) "$(_LOKI_URL)/loki/api/v1/series"
 
-# tbd. A GET that would show content we posted.
+# Follow the tail, using 'logcli' tool
+#
+# Note: Can also use env.vars: 'LOKI_ADDR', 'LOKI_USERNAME', 'LOKI_PASSWORD'.
+#
+loki-tail:
+	docker run -it $(_LOGCLI_IMAGE) --addr=$(_LOKI_URL) --username=$(LOKI_USER) --password=$(ADMIN_API_KEY) -o default query '{foo="bar2"}' --tail
 
-#loki-get-query:
-#	curl -G -s -u $(LOKI_USER):$(ADMIN_API_KEY) "$(_LOKI_URL)/loki/api/v1/query" \
-#	  --data-urlencode 'query=sum(rate({job="varlogs"}[10m])) by (level)' | jq -C .
+# Loki experimentation
+#
+loki-help:
+	docker run -it $(_LOGCLI_IMAGE) --help
 
 #--- Metrics
 

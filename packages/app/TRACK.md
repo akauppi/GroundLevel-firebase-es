@@ -14,24 +14,6 @@ Currently (5.3.0), Cypress does not clear IndexedDB storage and therefore Fireba
 Once there is a way to configure this (instead of code), we might prefer that.
 
 
-<!--
-| This one is for Rollup. We now use Vite for this level.
-
-## Rollup-plugin-vue for Vue.js 3 (beta) needs an extra plugin for CSS/Sass
-
-[https://github.com/vuejs/rollup-plugin-vue/issues/364](https://github.com/vuejs/rollup-plugin-vue/issues/364)
-
-Needed to add the `rollup-plugin-scss` to `package.json` and `rollup.*.js`.
-
-If they react on the issue, we can remove the extra plugin.
-
-<_!--
-This would seemingly help with rollup-plugin-vue [#364](https://github.com/vuejs/rollup-plugin-vue/issues/364) and thus with us not needing to load a plugin.
-
-- [https://github.com/Norserium/vue-advanced-cropper/issues/72](https://github.com/Norserium/vue-advanced-cropper/issues/72)
--->
-
-
 ## `import` of JSON in browser
 
 - Track [proposal-json-modules](https://github.com/tc39/proposal-json-modules) (tc39 proposal)
