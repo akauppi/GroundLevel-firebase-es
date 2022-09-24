@@ -6,7 +6,7 @@
     "node": "16"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^6.0.0",
+    "@google-cloud/firestore": "^6.2.0",
     "firebase-admin": "^11.0.1",
     "firebase-functions": "^3.23.0"
   },

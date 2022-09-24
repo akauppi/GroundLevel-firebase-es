@@ -1,5 +1,5 @@
 #
-# app/dc.prod.build.yml
+# app/docker-compose.tools.prod.yml
 #
 services:
   #---

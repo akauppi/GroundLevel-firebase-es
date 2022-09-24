@@ -1,18 +1,55 @@
 #
 # app/dc.cypress.yml
 #
+# Expects:
+#   - VITE_URL: URL where the app is available, e.g. 'http://vite-dev:3002'
+#
 services:
   #---
-  # Serve '/dist/**', separately built.
+  # Run Cypress tests
   #
-  serve:
+  run_tests:
     build:
-      context: tools/serve.dc
-    ports:
-      - 8080:8080
+      context: tools/cypress.dc
+      target: with_libs
     environment:
-      - PORT=8080
+      - CYPRESS_defaultCommandTimeout=10000
+      - CYPRESS_baseUrl=$VITE_URL
+      - FIREBASE_APP_JS=/work/firebase.app.js
     volumes:
       # --- RO
-      - ./dist:/work/public:ro
+      - ./cypress:/work/cypress:ro
+      - ./cypress.config.js:/work/cypress.config.js:ro
+      - ./package.json:/work/package.json:ro
+      - ./node_modules:/work/node_modules:ro
+        #
+      - ../backend/firebase.app.js:/work/firebase.app.js:ro
+        # ^-- map to /work, so ESM scope covers it
+      # --- output
+      - ./.screenshots:/work/.screenshots:delegated
+    working_dir: /work
+    command: sh -c '
+      cypress run
+      '
     profiles: ['manual']
+
+  # Check version (DEBUG)
+  #
+  check_ver:
+    build:
+      context: tools/cypress.dc
+    command: |
+      cypress version
+    profiles: ['manual']
+
+#|  #DEBUG
+#|  debug:
+#|    build:
+#|      context: tools/cypress.dc
+#|    command: sh -c '
+#|      node --version &&
+#|      npm version &&
+#|      env &&
+#|      node --input-type=module -e "import { defineConfig } from \"cypress\""
+#|      '
+#|    profiles: ['manual']

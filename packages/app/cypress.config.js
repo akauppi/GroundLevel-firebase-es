@@ -2,7 +2,6 @@
 // cypress.config.js
 //
 import { defineConfig } from 'cypress'
-
 import { getIncoming } from './cypress/getIncoming.js'
 
 // Cypress > Configuration
@@ -21,7 +20,8 @@ export default defineConfig({
   modifyObstructiveCode: false,
 
   e2e: {
-    // For test-based development, we use a running 'npm run dev' (port 3000) instance.
+    // Desktop Cypress: run against 'npm run dev' instance
+    // 'make test' Cypress: this gets overridden (
     baseUrl: 'http://localhost:3000',
 
     //specPattern   // default: cypress/e2e/**/*.cy.{js,jsx,ts,tsx}

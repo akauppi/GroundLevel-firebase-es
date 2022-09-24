@@ -8,24 +8,25 @@ services:
     extends:
       file: dc.base.yml
       service: vite-base
+    ports:
+      - "$PORT:$PORT"
 
     volumes:
       # --- RO
-      - ./tools/gen-vite-env-local.js:/work/tools/gen-vite-env-local.js:ro
       - ../backend/firebase.app.js:/work/firebase.app.js:ro
-      - ./.env.dev_local:/work/.env.local:ro
+      - ./tmp/.env.dev_local:/work/.env:ro
     environment:
       - MODE=local
     profiles: ['manual']
 
-  # 'npm test' uses this, to have 'vite-dev' run in the background
-  #
-  vite-dev-launched:
+  # See that we see 'emul-for-app'
+  debug:    # DEBUG
     image: node:16-alpine
-    command: sh -c true
-    depends_on:
-      vite-dev:
-        condition: service_healthy
+    command: sh -c '
+      nc -z emul-for-app 6768 && echo "6768 ok" &&
+      nc -z emul-for-app 6869 && echo "6869 ok" &&
+      nc -z emul-for-app 9101 && echo "9101 ok"
+      '
     profiles: ['manual']
 
   #---

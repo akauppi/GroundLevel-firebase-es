@@ -1,15 +1,14 @@
 {
-  "name": "@local/root",
   "private": true,
   "type": "module",
   "engines": {
     "node": "18"
   },
   "devDependencies": {
-    "eslint": "^8.23.0",
+    "eslint": "^8.23.1",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-vue": "^9.4.0",
+    "eslint-plugin-vue": "^9.5.1",
     "vue-eslint-parser": "^9.1.0"
   },
   "//": {

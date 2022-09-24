@@ -8,6 +8,9 @@ help:
 	@echo "   de-brand     # Removes GroundLevel images from the repo (to be run when you start using it with your own web app)"
 	@echo ""
 
+install:
+	npm install
+
 # List possibly outdated dependencies, in all the subpackages.
 #
 list-new:

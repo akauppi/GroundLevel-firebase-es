@@ -12,12 +12,13 @@ services:
     extends:
       file: dc.base.yml
       service: vite-base
+    ports:
+      - "$PORT:$PORT"
 
     volumes:
       #--- RO
-      - ./tools/gen-vite-env-online.js:/work/tools/gen-vite-env-online.js:ro
       - ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
-      - ./.env.dev.${ENV:-staging}:/work/.env.local:ro
+      - ./tmp/.env.dev.${ENV:-staging}:/work/.env:ro
     environment:
       - MODE=online
       #- ENV=${ENV:-staging}

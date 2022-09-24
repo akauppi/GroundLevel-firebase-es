@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "type": "module",
-  "devDependencies": {
-    "prometheus-remote-write": "^0.1.6"
-  }
-}

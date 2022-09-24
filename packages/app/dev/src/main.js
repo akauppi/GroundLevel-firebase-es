@@ -50,7 +50,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
     import.meta.env.VITE_FIRESTORE_PORT,
     import.meta.env.VITE_AUTH_PORT
   ];
-  (firestorePort && authPort /*&& databasePort*/) ||
+  (firestorePort && authPort) ||
     fail( `[INTERNAL ERROR] Some Firebase param(s) are missing: ${ [firestorePort, authPort] }`);
 
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6769

@@ -6,35 +6,39 @@ Web application sample project.
 
 - `npm`
 - `docker`
+- Cypress desktop app; 10.8.0+ (optional)
 
->Note: We might opt for a wholly Docker-based development experience in the future, no longer requiring `npm` to be installed on your system.
+   >Note: We will opt for a wholly Docker-based development experience in the future, no longer requiring `npm` to be installed on your system.
 
 ### Cypress setup (for test based development; optional)
 
-Cypress is primarily a desktop application. Please follow these steps to install it:
+[Cypress](https://www.cypress.io) is used in this repo for automatically running front-end "end to end" tests. For this, you don't need to do further installs.
+
+If you want to use Cypress as a **desktop application** (which it really is!), for test-based development, you need to separately install it on your system. This use is *recommended* (because it offers a great developer experience!) but optional.
+
+*Note: You may skip this section now; return to it later.*
+
+To install Cypress:
 
 <details><summary><b>macOS</b></summary>
 
-Visit [Direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) and download the latest version.
-
-- unzip the `cypress.zip`
-- move `Cypress.app` to a destination of your liking <small>The author prefers user specific `Applications` folder.</small>
+- Visit `Installing Cypress` > [Direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) 
+   - download `cypress.zip`
+- unzip it
+- move `Cypress.app` to a destination of your liking, e.g. the user specific `Applications` folder.
 - launch `Cypress.app`
-- add the `packages/app` folder as a Cypress project. It will from now on remember this path.
-
-For easy relaunch, move the Dock icon to a suitable position and right click > `Options` > `Keep in Dock`. 
 </details>
 
 <details><summary><b>Linux</b></summary>
 
-As per the Cypress [installation instructions](https://docs.cypress.io/guides/getting-started/installing-cypress#Linux-Prerequisites):
+There is no dedicated desktop download for Linux. Instead, you need `npm` (or some other Node.js package manager) to install it.
+
+Follow instructions at Installing Cypress > [Linux Prerequisites](https://docs.cypress.io/guides/getting-started/installing-cypress#Linux-Prerequisites):
 
 ```
 $ sudo apt-get update
 $ sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 ```
-
-Seems there is no desktop download for Linux. You'll need `npm` installed.
 
 Then:
 
@@ -46,22 +50,27 @@ $ npx cypress open
 
 <details><summary><b>Windows 10 + WSL2</b></summary>
 
-Windows and WSL2 duo is not a supported Cypress platform. This means you will need to do a little bit more than the other OSes. In short, you'll use *one* Cypress via `npm`, within WSL2, for "headless" testing (`npm test`).
+**NOTE: While the installation will work, THE WORKFLOW STILL NEEDS SOME WORK. Opening `\\wsl$\...\packages\app` did not work. Let's make an Issue about this, and find a way!!!**
 
-For test based development, we recommend installing *another* instance, this time on the Windows side.
+- Visit `Installing Cypress` > [Direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) 
+   - download `cypress.zip`
+- unzip its contents (right click > `Extract All`) to a suitable location, e.g. `C:\Users\{username}\bin`
+- launch `Cypress.exe` in that folder
 
-- Within WSL2, follow the above instructions for Linux. This prepares the headless Cypress.
-- Within Windows, follow the [direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) (desktop install) guide
-   - Download `cypress.zip` 
-   - Extract it at a temporary location
-   - Move the resulting folder into a suitable place (eg. under your user's folder), from where you'll launch the application.
+>Note: There's a Firewall confirmation dialog. *tbd. Take a screenshot, mention right options?*
 
-   Note that Cypress does not install as a normal Windows program, and it does not show in the `Start` menu. To uninstall Cypress, just trash the whole folder it's in.
 
-Try launching the `Cypress.exe` app.
+Note that Cypress does not install as a normal Windows program, and it does not show in the `Start` menu. To uninstall Cypress, just trash the whole folder it's in.
+
+<!--
+>Hint: You can use this to have multiple versions of Cypress "installed", simultaneously. Just name their folders accordingly (e.g. `bin/Cypress 10.7.0`).
+-->
 </details>
 
+<!-- disabled; at least until the author has access to Win11
 <details><summary><b>Windows 11</b></summary>
+
+<!_-- tbd. Consider, whether we'd like to take same approach as with Win10+WSL2 (if it turns out smooth). --_>
 
 Windows 11 brings WSLg, allowing one to [run Linux GUI apps](https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps).
 
@@ -69,11 +78,23 @@ This means you should be able to run the Cypress installed within Linux, and use
 
 *The author does not have access to Windows 11, so any guidance on how this works in practice is appreciated. i.e. a PR :)*
 </details>
+-->
+
+**Updating Cypress..**
+
+Once there are more recent versions available, you'll see it in the Cypress GUI:
+
+![](.images/cypress-upgrade.png)
+
+You'll see the changes by clicking `See all releases`, before updating.
+
+This feature does not support the "direct download" route of installing that we took, but requests you to use `npm`, instead. You can, however, use it to be informed of new versions. If you want to upgrade, repeat the installation above.
+
 
 <!--
 Development is done with: 
 
-- macOS 12.5
+- macOS 12.6
 - node 18.8
 - npm 8.18
 - Docker Desktop 4.12.0 with: 3 CPU cores, 2 GB RAM
@@ -327,6 +348,30 @@ $ npm run serve
 -->
 
 
+## Test based development (optional)
+
+You can bind the above steps together, with a Cypress desktop application. This allows you to create features by editing tests, then fulfilling them in the app's implementation.
+
+This is a fun way of working. Cypress provides you with e.g. UI recording features so you can step back/forth on what happens in the browser.
+
+See Cypress documentation for learning more.
+
+### How to do it?
+
+Serve the web app (with Hot Module Reload), by:
+
+```
+$ make dev
+...
+```
+
+Open the `packages/app` folder as a Cypress project. It will from now on remember this path.
+
+
+>Note: **Windows 10 + WSL2 SUPPORT IS CURRENTLY BROKEN**: you can try opening `\\wsl$\{your distro}\{...}\packages\app` but likely, it won't work. This is a network path where Windows + WSL2 expose their file system to Windows applications.
+
+
+<!-- (mentioned above, right..?)
 ## Next steps...
 
 You can now start developing your own application - both backend and front-end.
@@ -341,5 +386,5 @@ When you feel like it, take a look at the following folders that have informatio
 
    Learn about how to see whether your users are there, and how their experience using the app is.
 
-
 This concludes the web app feedback loop. Make great apps, gain users and have a great time!!!
+-->

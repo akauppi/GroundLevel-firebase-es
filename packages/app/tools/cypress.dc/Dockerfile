@@ -22,12 +22,19 @@ FROM cypress/base:18.6.0 as base-chrome
 
 USER root
 
-RUN node --version
+#RUN node --version
 
 # CHANGE: Warning about ARM platform use. See -> https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/node18.6.0-chrome105-ff104/global-profile.sh
 #
 #COPY ./global-profile.sh /tmp/global-profile.sh
 #RUN cat /tmp/global-profile.sh >> /etc/bash.bashrc && rm /tmp/global-profile.sh
+
+# NOTE: 'cypress/base' should have these, but launching Cypress complains!!  DEBUG
+#
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    xvfb \
+  && rm -rf /var/lib/apt/lists/* \
+  && apt-get clean
 
 # Install dependencies
 RUN apt-get update && \
@@ -77,6 +84,7 @@ ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
 
 
 
+
 # versions of local tools
 RUN echo  " node version:    $(node -v) \n" \
   "npm version:     $(npm -v) \n" \
@@ -103,7 +111,7 @@ ENV npm_config_unsafe_perm=true
 # Brings:
 #   - Cypress on top of the OS + Electron + Chrome
 #
-FROM base-chrome
+FROM base-chrome as cypress
   #FROM cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
 
 # Cypress CHANGELOG -> https://docs.cypress.io/guides/references/changelog
@@ -136,7 +144,7 @@ RUN echo "whoami: $(whoami)" \
   # which means the current user is root
   && id \
   && npm install -g typescript \
-  && npm install -g "cypress@$CYPRESS_VER" \
+  && npm install -g cypress@$CYPRESS_VER \
   && (node -p "process.env.CI_XBUILD && process.arch === 'arm64' ? 'Skipping cypress verify on arm64 due to SIGSEGV.' : process.exit(1)" \
     || (cypress verify \
     # Cypress cache and installed version
@@ -169,4 +177,23 @@ RUN echo "whoami: $(whoami)" \
 
 ENTRYPOINT ["cypress", "run"]
 
+#---
+# Our own.
+#
+# Any adjustments above the Cypress provided stuff.
+#
+#   - 'cypress' library usable
+#   - other Node libraries needed by 'cypress.config.js' and the tests
+#
+# Note: We could base this either on the above (customized) Cypress image definitions, or 'cypress/included' stock image.
+#
+FROM cypress as with_libs
 
+ARG FIREBASE_ADMIN_VER=11.0.1
+  # -> https://github.com/firebase/firebase-admin-node/releases
+
+RUN npm install -g firebase-admin@$FIREBASE_ADMIN_VER
+
+# By default, globally installed libraries are not resolved by Node.js (in ESM mode). This makes them visible.
+#
+RUN ln -s $NODE_PATH /node_modules

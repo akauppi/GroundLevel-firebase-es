@@ -59,11 +59,11 @@ developed with:
 Make sure Docker is running (we use it already in the installing phase).
 
 ```
-$ npm install
+$ make install
 ```
 
 ```
-$ npm test
+$ make test
 ```
 
 The tests should pass, or be skipped.
@@ -74,7 +74,7 @@ The tests should pass, or be skipped.
 ## Development workflow
 
 ```
-$ npm start
+$ make start
 ...
 Firebase Emulators are running. Use 'docker compose down' to run them down.
 
@@ -85,7 +85,7 @@ This launches the Firebase emulators, and automatically picks up changes to the 
 You can then run individual tests against it:
 
 ```
-$ npm run test:fns:userInfo
+$ make test:fns:userInfo
 ```
 
 This is useful when working on a certain test. Look in `package.json` for all such commands.
@@ -93,6 +93,7 @@ This is useful when working on a certain test. Look in `package.json` for all su
 >Note: If you now run `npm test`, it will use the existing emulators instead of launching a new set.
 
 
+<!-- no it doesn't
 ## Leaving the scene
 
 ```
@@ -100,6 +101,7 @@ $ docker compose down
 ```
 
 Closes the Firebase Emulators, releasing the ports they needed.
+-->
 
 ## Deploying
 

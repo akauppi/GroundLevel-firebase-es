@@ -14,8 +14,7 @@
 *
 * Output to stdout.
 */
-const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || "firebase.app.js";    // run within DC, 'firebase.app.js' is mapped
-
+const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"] || "../backend/firebase.app.js";
 const { emulators } = await import(`../${FIREBASE_APP_JS}`).then( mod => mod.default );
 
 const projectId = (_ => {
@@ -29,6 +28,8 @@ const projectId = (_ => {
   return c1;
 })();
 
+const emulHost = process.env['EMUL_HOST'] || fail("Expected 'EMUL_HOST' env.var.");
+
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
 const [firestorePort, authPort, functionsPort] = (_ => {   // => [int, int, int]
@@ -41,12 +42,12 @@ const [firestorePort, authPort, functionsPort] = (_ => {   // => [int, int, int]
 })();
 
 const out =
-`# Generated based on '${ FIREBASE_APP_JS }'.
-#
+`#
 VITE_FIRESTORE_PORT=${firestorePort}
 VITE_AUTH_PORT=${authPort}
 VITE_FUNCTIONS_PORT=${functionsPort}
 VITE_PROJECT_ID=${projectId}
+VITE_EMUL_HOST=${emulHost}
 ${
   SENTRY_DSN ? `VITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }

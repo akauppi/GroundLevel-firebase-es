@@ -41,11 +41,8 @@ services:
     build:
       context: tools/vite.dc
       target: vite_plain
-    ports:
-      - "$PORT:$PORT"
     volumes:
       # --- RO
-      - ./package.dc.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       # --- cached
       - ./public:/work/public:cached
@@ -64,10 +61,13 @@ services:
 
     working_dir: /work
     command: sh -c
-      'npm config set update-notifier false &&
-
-      npm run dc:launch:$$MODE
+      'vite --mode dev_$$MODE 
+        && true
       '
+        # Note: The '&& true' above (which is never reached), is needed for Ctrl-C to work, to terminate execution.
+        #   If you know of a 'sh' flag that would do the same (wrap the command instead of executing it straight), let
+        #   the author know.. #hack
+
     environment:
       - SENTRY_DSN
       #- MODE=x   # defined in 'docker-compose.{local|online}.yml'

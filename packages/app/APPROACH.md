@@ -36,6 +36,15 @@ If features are lacking in the web component, let's build them in there.
 >Note: [WebAuthn](https://webauthn.guide) please?
 
 
+## Vite and Cypress via Docker Compose
+
+This helps keep the `package.json` better focused on the application under development/testing, instead of mixing tooling versions within it.
+
+It is not so crucial to keep the versions of Vite and Cypress up-to-date (as it is to follow code dependency changes).
+
+Mostly though, it's a matter of opinion. The author tried this approach vite Vite and liked it.
+
+
 ## Component naming convention
 
 Vue.js normally uses `like-this` naming for its components.
@@ -182,4 +191,40 @@ Can we trust weight on it?
 -->
 
 >Maybe this means it's documented: [Compose Spec > `extends`](https://github.com/compose-spec/compose-spec/blob/master/spec.md#extends)
->
+
+
+## Cypress: why two installs?
+
+Our approach is slightly unconventional.
+
+Normally (in 2022), one would install Cypress via `npm`, locally, and get both the command line tool and a desktop application (yes, installing a desktop binary happens via `npm install cypress`). This installation method collects the different binaries in an OS level folder, and one needs to occasionally remove unused versions.
+
+This has the benefits that:
+
+- version of Cypress is defined by the repo (in `package.json`)
+- just one install
+
+The main reason we **do not follow this** is wanting to get away from dependence on `npm`, sandboxing it to run within Docker. It's a question on what we trust:
+
+|currently|comments|
+|---|---|
+|OS + command line tools (`grep`, `make`, ...)|
+|Docker|
+|`npm` + all npm dependencies and build dependencies|
+|Cypress desktop application|only for test-based development|
+|`gcloud` CLI|only for CI/CD setup and steering|
+
+The author likes to remove `npm` from that trust list.
+
+There are two other slight motivations, as well:
+
+- Installing desktop apps *feels* like something the developer should do (via an app store, or otherwise..); not something we do on a command line level.
+- Windows 10 + WSL2 (supported by this repo) requires two installs, anyhow (one in Windows, one in WSL2). We'd have the complexity anyhow for Windows developers, now their model becomes the one for everyone. 🌞
+
+### What about versions
+
+- We still decide the version used for `npm test` and CI/CD, via the Docker definitions.
+- We don't decide the version the user has installed on desktop. 
+
+   This isn't likely a big thing. If the tests require some specific version, we can check it in the Cypress scripts.
+ 

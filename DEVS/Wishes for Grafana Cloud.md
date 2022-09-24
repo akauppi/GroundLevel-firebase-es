@@ -40,7 +40,21 @@ Currently (Sep-22), the Portal UI provides a warning about `Add Stack` (see belo
 >![](.images/grafana-portal-left.png)
 
 
-<!--
+## Why two user ids?
+
+Within the same Grafana Cloud account, I have separate user id for Prometheus (metrics) and Loki (logs).
+
+- https://grafana.com > `My Account`
+- `Prometheus` > `Send Metrics`
+  - observe the `username: 507028` (for the author)
+- (back) > `Loki` > `Send Logs`
+  - observe `User: 252484` (for the author)
+
+Is this intended?
+
+>Note: Also other services have their own id's, e.g. Graphite and Tempo.
+
+<!-- AGED
 ## Easier collection from Firebase
 
 This likely falls on this repo to do.

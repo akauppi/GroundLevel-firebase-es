@@ -87,6 +87,7 @@ loki-tail:
 loki-help:
 	docker run -it $(_LOGCLI_IMAGE) --help
 
+
 #--- Metrics
 
 # InfluxDB Line Protocol
@@ -96,18 +97,25 @@ loki-help:
 #	Sample:
 #	<<
 #		myMeasurement,tag1=value1,tag2=value2 fieldKey="fieldValue" 1556813561098000000
+#		[...]
 #	<<
+#
+# Value types:
+#	- float
+#	- integer (e.g. 12i)
+#	- unsigned int (e.g. 15u)
+#	- string (e.g. "abc")
+#	- boolean: true|false
+#
+# Note:
+#	This allows multiple values ("key field/value") to be shipped, on one line. In our web app use case, this will not
+#	be necessary.
 #
 metrics-push:
 	curl -v -XPOST -u $(PROM_USER):$(MP_API_KEY) "$(_INFLUX_URL)/api/v1/push/influx/write" -d \
-      'ABC,A=1,B=2 def=34 $(_NOW_NANO)'
+      'TBD,env=EXP count=7,size=17.3 $(_NOW_NANO)'
 	# 204
-
-#mp2:
-#	curl https://$(PROM_USER):$(GC_API_KEY)@influx-prod-01-eu-west-0.grafana.net/api/v1/push/influx/write -d \
-#      'test,test_label=test_label_value direct_metric="22" $(_NOW_NANO)' -i
 
 #---
 echo:
 	@echo $(_NOW_NANO)
-

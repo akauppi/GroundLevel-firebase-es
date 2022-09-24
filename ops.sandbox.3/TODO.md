@@ -1,9 +1,14 @@
 # Todo
 
-## !! See the logs
+## Counters?
 
->![](https://aws1.discourse-cdn.com/business7/uploads/grafana/original/3X/a/5/a52d72699e891f58cc1d2363bb82bc5ee1c51465.png)
+- [ ] How to make a dashboard of something incrementing, in Grafana Cloud?
 
-Why do I have `Send Metrics` and `Send Logs` if Grafana Cloud has accepted some data???????
+   Make loads, add up.
 
-- This is being addressed.
+
+## Statistical?
+
+- [ ] How to make a dashboard of statistical ranges, in Grafana Cloud?
+
+   e.g. sizes of transmissions. Make loads, show variation in the graph.

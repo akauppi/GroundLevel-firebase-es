@@ -8,62 +8,33 @@
     "node": "18"
   },
   "scripts": {
-    "test": "npm run -s start && npm run -s _test1",
-    "_test1": "npm run test:fns:all && npm run test:rules:all",
-    "-- ": "",
-    "start": "npm run -s _start1 && make refresh-emul && FUNCTIONS_PORT=5002 docker compose run --rm warmed-up && echo \"Firebase Emulators are running. Use 'docker compose down' to run them down.\\n\"",
-    "_start1": "npm run -s _touchEm && npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson && npm run -s _checkFunctionsNode",
-    "-- -": "",
-    "test:fns:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all",
-    "test:fns:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --all",
-    "--  -": "",
-    "test:rules:invites": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f invitesC.test.js --verbose --all",
-    "test:rules:projects": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/index.test.js --verbose --all",
-    "test:rules:projectsSymbols": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/symbolsC.test.js --verbose --all",
-    "test:rules:projectsUserInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f projectsC/userInfoC.test.js --verbose --all",
-    "test:rules:userInfo": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js -f userInfoC.test.js --verbose --all",
-    "test:rules:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
-    "--  - ": "",
-    "test:rules2:logging": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all",
-    "test:rules2:all": "FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules jest --config test-database/jest.config.js --verbose --detectOpenHandles --all",
-    "-- --": "",
-    "lint": "eslint .",
-    "--   -": "",
     "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
     "--   - ": "",
-    "app:start": "npm run -s _appStart1 && make refresh-emul-for-app && FUNCTIONS_PORT=5003 docker compose -f docker-compose.app.yml run --rm emul-for-app-launched && echo \"Firebase Emulators for the web app are running.\\n\"",
-    "_appStart1": "npm run -s _touchEmApp && npm run -s _genFirebaseJsonApp && npm run -s _genDatabaseRulesJson",
-    "-- - -": "",
     "ci:warm-up": "npm run -s _ci:fns:all",
     "ci:test": "npm run -s _ci:fns:all && npm run -s _ci:rules:all",
     "_ci:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --detectOpenHandles --verbose --all",
     "_ci:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
     "-- ---": "",
-    "_checkFunctionsNode": "[ ! -d functions/node_modules/@firebase ] || ( >&2 echo \"FAIL: Files under 'functions/node_modules' are not being used. Please remove that folder.\\n\"; false )",
-    "-- --- ": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
     "_postinstall_local": "install -d tmp/functions/node_modules && docker compose -f docker-compose.tools.yml run --rm functions-install",
     "_postinstall_ci": "npm --prefix functions install && npm run -s _genFirebaseJsonCI && npm run -s _genDatabaseRulesJson",
-    "_genFirebaseJson": "node --input-type=module -e \"import o from './firebase.js'; console.log(JSON.stringify(o));\" > tmp/firebase.json",
-    "_genFirebaseJsonApp": "node --input-type=module -e \"import o from './firebase.app.js'; console.log(JSON.stringify(o));\" > tmp/firebase.app.json",
-    "_genFirebaseJsonCI": "node --input-type=module -e \"import o from './firebase.ci.js'; console.log(JSON.stringify(o));\" > tmp/firebase.ci.json",
-    "~~_genDatabaseRulesJson": "node --input-type=module -e \"import o from './database.rules.js'; console.log(JSON.stringify(o, null, 2));\" > tmp/database.rules.json",
-    "_genDatabaseRulesJson": "echo '{ \"rules\": { \".read\": false, \".write\": false, \"incoming\":{ \"incs\": {\".indexOn\": \"clientTimestamp\"}, \"logs\": {\".indexOn\": \"clientTimestamp\"}, \"obs\": {\".indexOn\": \"clientTimestamp\"}} } }' > tmp/database.rules.json",
     "--    -": "",
-    "_touchEm": "(cd logs && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)",
-    "_touchEmApp": "(cd logs.app && touch firebase-debug.log firestore-debug.log database-debug.log ui-debug.log)"
+    "_genFirebaseJson": "make tmp/firebase.json",
+    "~~_genFirebaseJsonApp": "make tmp/firebase.app.json",
+    "_genFirebaseJsonCI": "make tmp/firebase.ci.json",
+    "_genDatabaseRulesJson": "make tmp/database.rules.json"
   },
   "devDependencies": {
     "firebase-admin": "^11.0.1",
     "firebase-jest-testing": "^0.0.5-beta.3",
-    "jest": "^29.0.2"
+    "jest": "^29.0.3"
   },
   "//devDependencies": {
     "firebase-jest-testing": "file:../../../firebase-jest-testing/package"
   },
   "//comments": {
     "engines.node": [
-      "18 has built-in fetch"
+      "Needs: built-in fetch, top-level await"
     ],
     "scripts": {
       "[ -z $BUILDER_OUTPUT ]": [

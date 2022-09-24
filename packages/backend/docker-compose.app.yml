@@ -14,6 +14,7 @@
 #   - Share Compose configurations between files and projects (Docker Compose docs)
 #     -> https://docs.docker.com/compose/extends/
 #
+name: app   # allows us to be used from '../app', in the same network
 services:
   emul-for-app:
     extends:
