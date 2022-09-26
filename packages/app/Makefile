@@ -106,9 +106,9 @@ $(_VITE_ONLINE_DC): tools/vite.dc/Dockerfile
 	PORT=0 $(_DC) -f docker-compose.online.yml build vite-online
 	touch $@
 
-# tbd. Add all 'tools/prime.dc/**' as the triggers
+# Any change to 'tools/prime.dc/**' triggers a build
 #
-$(_PRIME_DC): tools/prime.dc/Dockerfile
+$(_PRIME_DC): tools/prime.dc/Dockerfile $(shell find tools/prime.dc -type f)
 	$(_DC) -f docker-compose.tools.local.yml build prime
 	touch $@
 
@@ -152,8 +152,8 @@ ifneq ($(wildcard node_modules/esbuild),)
 endif
 
 #---
-echo: a b
-	@echo $<
+echo:
+	@echo $(shell find tools/prime.dc -type f)
 
 .PHONY: all echo \
   dev _emulPrimed _emulRunning \

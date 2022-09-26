@@ -29,24 +29,23 @@ services:
       - ./logs.app/firestore-debug.log:/work/firestore-debug.log:delegated
       - ./logs.app/database-debug.log:/work/database-debug.log:delegated
       - ./logs.app/ui-debug.log:/work/ui-debug.log:delegated
+    # Exposing the emulator ports to the host _is_ required, for the Desktop Cypress use case.
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
-      - "6768:6768"
-      - "6869:6869"     # realtime database, for metrics/logging
-      - "9101:9101"
-      - "4001:4001"
-        # Ports that don't overlap those for backend development.
-        # Keep the ports aligned with '../app'.
+      - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
+      - "${DATABASE_PORT}:${DATABASE_PORT}"     # realtime database, for metrics/logging
+      - "${AUTH_PORT}:${AUTH_PORT}"
+      - "${UI_PORT}:${UI_PORT}"
     environment:
       - PROJECT_ID=demo-main    # must match with what's in '../app/' (package[.dc].json, docker-compose.tools.local.yml)
 
     healthcheck:
       test: '
-        nc -z localhost 6768 && 
+        nc -z localhost ${FIRESTORE_PORT} && 
         nc -z localhost ${FUNCTIONS_PORT} && 
-        nc -z localhost 6869 &&
-        nc -z localhost 9101
-      '
+        nc -z localhost ${DATABASE_PORT} &&
+        nc -z localhost ${AUTH_PORT}
+        '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 1.0s
       start_period: 25s

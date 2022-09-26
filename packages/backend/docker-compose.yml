@@ -34,11 +34,9 @@ services:
       service: emul-base
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
-      - "6767:6767"
-      - "6868:6868"    # mapped for gym (manual access); no other need
-      - "4000:4000"
-        # Keep ports aligned with 'firebase.js'
-
+      - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
+      - "${DATABASE_PORT}:${DATABASE_PORT}"    # mapped for gym (manual access); no other need
+      - "${UI_PORT}:${UI_PORT}"
     environment:
       - PROJECT_ID=demo-2
         # Project id for 'test-fns'.
@@ -46,9 +44,9 @@ services:
 
     healthcheck:
       test: '
-        nc -z localhost 6767 && 
+        nc -z localhost ${FIRESTORE_PORT} && 
         nc -z localhost ${FUNCTIONS_PORT} && 
-        nc -z localhost 6868
+        nc -z localhost ${DATABASE_PORT}
         '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s
@@ -61,24 +59,28 @@ services:
   #
   # NOTE: Use Node.js 18 to have built-in fetch.
   #
+  # Note: For Jest, we need a 'package.json' with '"type": "module"'. It doesn't need to be the main 'package.json'
+  #   but that's what we are currently using.
+  #
   warm-up:
     image: node:18-alpine
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
+      - ./package.json:/work/package.json:ro
       - ./tmp/firebase.json:/work/firebase.json:ro
-      - ./package.dc.json:/work/package.json:ro
       - ./test-firestore-rules:/work/test-firestore-rules:ro
       - ./test-fns:/work/test-fns:ro
       # HACK. during DEV, have 'file:~/Git/...' npm link resolve.
       #- ${HOME}/Git/firebase-jest-testing/package:/firebase-jest-testing/package:ro
 
     working_dir: /work
-    command: sh -c
-      'npm config set update-notifier false &&
+    command: sh -c '
+      npm config set update-notifier false &&
 
       npm run dc:warm-up &&
+
       touch .healthy &&
       sleep infinity
       '

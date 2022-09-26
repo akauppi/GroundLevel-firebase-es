@@ -1,14 +1,17 @@
 /*
 * config.js
 */
-//import { existsSync, readFileSync } from 'fs'
-
 let projectId, host;
 
-// tbd. If wanting to read Firestore and auth ports from a file (instead of env.var), import them directly from
-//    '../backend/firebase.app.js'.
-//
-//const firebaseJson = process.env.FIREBASE_JSON || 'firebase.json'
+const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || 'firebase.app.js';
+const [firestorePort, authPort] = await import(FIREBASE_APP_JS).then( mod => {
+  const o = mod.default?.emulators;
+
+  const a = o?.firestore?.port || fail(`No 'emulators.firestore' in ${FIREBASE_APP_JS}`);
+  const b = o?.auth?.port || fail(`No 'emulators.firestore' in ${FIREBASE_APP_JS}`);
+
+  return [a,b]
+});
 
 function init(a, b) {   // (string, string) => ()
   projectId = a;
@@ -32,11 +35,6 @@ const [firestorePort, authPort] = (_ => {
   }
 })();
 ***/
-
-const [firestorePort, authPort] = [
-  process.env.FIRESTORE_PORT || fail("'FIRESTORE_PORT' env.var. missing"),
-  process.env.AUTH_PORT || fail("'AUTH_PORT' env.var. missing")
-]
 
 function fail(msg) {
   console.error(msg);

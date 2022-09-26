@@ -11,9 +11,16 @@
 
 ## Grafana Cloud: Overview should indicate data is in
 
->![](https://aws1.discourse-cdn.com/business7/uploads/grafana/original/3X/a/5/a52d72699e891f58cc1d2363bb82bc5ee1c51465.png)
+>![](.images/gc-overview.png)
 
-Why do I have `Send Metrics` and `Send Logs` if Grafana Cloud has accepted some data???????
+This is after we're feeding the service, and able to read back the data.
+
+Grafana Labs has acknowledged this is an issue. They will eventually fix the UI.
+
+>Part of the problem is us using new ways (at least Influx Line Protocol was a factor in them not showing the data here).
+
+- [ ] highlighted parts should indicate there's data
+- [ ] instead of buttons `Send Metrics`, `Send Logs`, there will be something else
 
 **Expected:**
 
@@ -25,7 +32,7 @@ Why do I have `Send Metrics` and `Send Logs` if Grafana Cloud has accepted some 
 - Prometheus: `Current Active Series: 0` remains, even once data is in.
 - Loki: `Ingest Rate: 0 bytes/hr` remains (and may be correct)
 
-**Tracking**
+**Reported:**
 
 - Sent an email about this to `cloud-success@grafana.com`, as asked by David Dorman in [his comment](https://community.grafana.com/t/how-to-push-prometheus-metrics-in-grafana-cloud/47297/19?u=akauppi).
-
+   

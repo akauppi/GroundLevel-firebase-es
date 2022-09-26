@@ -1,5 +1,5 @@
 /*
-* Generates a 'firebase.json' within Docker.
+* Firebase emulation for backend testing.
 *
 * References:
 *   - Schema

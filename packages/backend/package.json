@@ -10,6 +10,10 @@
   "scripts": {
     "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
     "--   - ": "",
+    "dc:warm-up": "npm run -s _warmup1 && npm run -s _warmup2",
+    "_warmup1": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
+    "_warmup2": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
+    "-- - -": "",
     "ci:warm-up": "npm run -s _ci:fns:all",
     "ci:test": "npm run -s _ci:fns:all && npm run -s _ci:rules:all",
     "_ci:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --detectOpenHandles --verbose --all",
@@ -20,13 +24,12 @@
     "_postinstall_ci": "npm --prefix functions install && npm run -s _genFirebaseJsonCI && npm run -s _genDatabaseRulesJson",
     "--    -": "",
     "_genFirebaseJson": "make tmp/firebase.json",
-    "~~_genFirebaseJsonApp": "make tmp/firebase.app.json",
     "_genFirebaseJsonCI": "make tmp/firebase.ci.json",
     "_genDatabaseRulesJson": "make tmp/database.rules.json"
   },
   "devDependencies": {
     "firebase-admin": "^11.0.1",
-    "firebase-jest-testing": "^0.0.5-beta.3",
+    "firebase-jest-testing": "^0.0.5-beta.4",
     "jest": "^29.0.3"
   },
   "//devDependencies": {
@@ -42,6 +45,9 @@
       ],
       "ci:{warm-up|test}": [
         "We welcome these in the same, humble 'package.json'. Running CI is a lot like native development."
+      ],
+      "dc:warm-up": [
+        "'--detectOpenHandles' is needed in Windows 10+WSL2 (works without it in macOS). Keep it."
       ],
       "first:prepare": [
         "For '/first/deploy.sh' - makes sure the configuration files are generated."
