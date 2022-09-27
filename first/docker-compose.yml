@@ -20,22 +20,15 @@ services:
       context: ../dc/firebase-tools/
       target: firebase-cli
       args:
-        - FIREBASE_TOOLS_VERSION=11.3.0
+        - FIREBASE_TOOLS_VERSION=11.10.0
 
-  # Usage:
-  #   <<
-  #     $ install -d tmp/configstore     # important on WSL2 (otherwise 'root')
-  #     $ touch tmp/.captured.sdkconfig tmp/.firebaserc
-  #     $ docker compose run --service-ports --rm deploy-auth
-  #   <<
-  #
   # Let the user authenticate (via a host-side browser session) and select the right Firebase deployment project.
   #
   # Note:
   #   This needs to be 'run' (not started as a service): Firebase needs an interactive terminal for project selection.
   #
   # Once authenticated, the auth information is stored in: 
-  #   'tmp/configstore/firebase-tools.json'
+  #   '.state/configstore/firebase-tools.json'
   #
   # 'firebase use --add' demands to have a 'firebase.json' (a dummy will do) and creates '.firebaserc' in the
   # current folder.
@@ -56,10 +49,8 @@ services:
       - ./.state/.firebaserc:/work/.firebaserc:delegated
 
     working_dir: /work
-    command: sh -c
-      'echo "Launching Docker... 🐳" &&
-      
-      echo '{}' > firebase.json &&
+    command: sh -c '
+      echo "{}" > firebase.json &&
       firebase login &&
 
       firebase use --add &&
@@ -88,8 +79,8 @@ services:
       - ./.state/functions/node_modules:/work/functions/node_modules:delegated
 
     working_dir: /work/functions
-    command: sh -c
-      'npm config set update-notifier false &&
+    command: sh -c '
+      npm config set update-notifier false &&
       echo package-lock=false > .npmrc &&
 
       npm install --omit=optional

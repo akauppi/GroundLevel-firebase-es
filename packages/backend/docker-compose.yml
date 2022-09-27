@@ -35,7 +35,6 @@ services:
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
-      - "${DATABASE_PORT}:${DATABASE_PORT}"    # mapped for gym (manual access); no other need
       - "${UI_PORT}:${UI_PORT}"
     environment:
       - PROJECT_ID=demo-2
@@ -45,8 +44,7 @@ services:
     healthcheck:
       test: '
         nc -z localhost ${FIRESTORE_PORT} && 
-        nc -z localhost ${FUNCTIONS_PORT} && 
-        nc -z localhost ${DATABASE_PORT}
+        nc -z localhost ${FUNCTIONS_PORT}
         '
           # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.7s

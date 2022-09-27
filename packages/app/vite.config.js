@@ -194,7 +194,17 @@ async function configGen({ command, mode }) {
     server: SERVE_PORT ? {
       host: true,   // needed for the DC port mapping to work
       strictPort: true,
-      port: SERVE_PORT
+      port: SERVE_PORT,
+
+      // Alternatively, could set 'server.fs.strict' to false
+      // See: Vite > Server Options -> https://vitejs.dev/config/server-options.html#server-fs-allow
+      fs: {
+        allow: [
+          '/work/dev',    // bootstrapping code
+          '/work/src'     // app itself
+        ]
+      }
+
     } : undefined,
 
     // Clearing the screen is considered distracting, though one can PgUp to see what was there just prior to Vite launching.

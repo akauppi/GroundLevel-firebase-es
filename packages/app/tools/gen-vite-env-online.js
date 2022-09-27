@@ -2,7 +2,7 @@
 * tools/gen-vite-env-online.js
 *
 * Expects:
-*   ./firebase.js to exist
+*   '../../firebase.${ENV:-staging}.js' to exist
 *
 * Usage:
 *   <<
@@ -13,18 +13,19 @@
 *
 * Output to stdout.
 */
-const fn = '../firebase.js';
+const ENV = process.env["ENV"] || 'staging';
+const fn = `../../firebase.${ENV}.js`;
 
 const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
 
-const { projectId, appId, apiKey, authDomain, locationId, databaseURL } = await import(fn).then(mod => mod.default)
+const { projectId, appId, apiKey, authDomain, locationId, databaseURL } = await import(`../${fn}`).then(mod => mod.default)
   .catch(err => {
     process.stderr.write(`ERROR: ${err.message}\n\n`);
     process.exit(2);
   });
 
 (apiKey && appId && authDomain && projectId && locationId)
-  || fail(`Some values missing from: ${fn.replace("../","") }`);
+  || fail(`Some values missing from: ${fn}`);
 
 const out = `# Generated based on '${fn}'.
 #

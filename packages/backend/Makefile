@@ -29,11 +29,10 @@ _DC=docker compose
 _FIREBASE_JS='firebase.js'
 
 _FIRESTORE_PORT=$(shell node tools/fireport.js $(_FIREBASE_JS) firestore)
-_DATABASE_PORT=$(shell node tools/fireport.js $(_FIREBASE_JS) database)
 _FUNCTIONS_PORT=$(shell node tools/fireport.js $(_FIREBASE_JS) functions)
 _UI_PORT=$(shell node tools/fireport.js $(_FIREBASE_JS) ui)
 
-_DC_PORTS = FIRESTORE_PORT=$(_FIRESTORE_PORT) DATABASE_PORT=$(_DATABASE_PORT) FUNCTIONS_PORT=$(_FUNCTIONS_PORT) UI_PORT=$(_UI_PORT) \
+_DC_PORTS = FIRESTORE_PORT=$(_FIRESTORE_PORT) FUNCTIONS_PORT=$(_FUNCTIONS_PORT) UI_PORT=$(_UI_PORT) \
   $(_DC)
 
 # Also app needs the same treatment, not because of 'make test' but Desktop Cypress use case.
@@ -116,7 +115,7 @@ test\:rules2\:all: tmp/firebase.json
 # Development
 start: _started
 
-_started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json tmp/database.rules.json
+_started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json #tmp/database.rules.json
 	$(_DC_PORTS) run --rm warmed-up
 	@echo "Firebase Emulators are running. Use 'docker compose down' to bring them down.\n"
 
@@ -129,7 +128,7 @@ _started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json tmp/database.rules.json
 # We support it by having a separate configuration (that includes Firebase Auth).
 #
 app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json tmp/database.rules.json
-	$(_DC_APP_PORTS) -f docker-compose.app.yml run --rm emul-for-app-launched
+	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml run --rm emul-for-app-launched
 	@echo "Firebase Emulators for the web app are running.\n"
 
 # CI
@@ -141,11 +140,7 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json tmp/database
 #
 _ALL_PORTS_DUMMY := FIRESTORE_PORT=0 FUNCTIONS_PORT=0 DATABASE_PORT=0 AUTH_PORT=0 UI_PORT=0
 
-# Used for taking 'emul-for-app' down
-app\:down:
-	$(_ALL_PORTS_DUMMY) $(_DC) -f docker-compose.app.yml down
-
-_all-down:
+down-all:
 	docker compose -f dc.base.yml down --remove-orphans
 
 # logs[.app]/{firebase|firestore|database|ui}-debug.log'
@@ -177,10 +172,11 @@ $(_EMUL_APP_DC): $(_DC_PATH)/firebase-tools/Dockerfile
 
 #---
 echo:
-	@echo $(_DATABASE_PORT)
+	@echo aaa
 
 .PHONY: help \
   install prune \
   test \
   start _started \
+  down-all \
   echo

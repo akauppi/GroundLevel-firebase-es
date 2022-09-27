@@ -8,8 +8,6 @@
     "node": "18"
   },
   "scripts": {
-    "first:prepare": "npm run -s _genFirebaseJson && npm run -s _genDatabaseRulesJson",
-    "--   - ": "",
     "dc:warm-up": "npm run -s _warmup1 && npm run -s _warmup2",
     "_warmup1": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --verbose --detectOpenHandles --all",
     "_warmup2": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
@@ -49,9 +47,6 @@
       "dc:warm-up": [
         "'--detectOpenHandles' is needed in Windows 10+WSL2 (works without it in macOS). Keep it."
       ],
-      "first:prepare": [
-        "For '/first/deploy.sh' - makes sure the configuration files are generated."
-      ],
       "_postinstall_local": [
         "Important to create the 'tmp/functions/node_modules' in the host side; otherwise, WSL2 Docker will create one",
         "with 'root' access (instead of the current user)."
@@ -60,9 +55,6 @@
         "Prepares things for CI steps:",
         "- tmp/firebase.ci.json",
         "- tmp/database.rules.json (not used in CI; stop generating if we know it's not going to be used)"
-      ],
-      "_touchEm": [
-        "Important that files to be mapped as DC volumes exist as files."
       ]
     }
   }

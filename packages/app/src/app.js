@@ -21,11 +21,13 @@ import { init as initAside } from 'aside-keys'
 import { appTitle } from './config.js'
 import { router } from './router.js'
 
+/** disabled, for now
 // Ops monitoring
 import { init as Sentry_init, setUser as Sentry_setUser } from '@sentry/browser'
 import { BrowserTracing } from "@sentry/tracing"    // after 'import * as Sentry'
 
 import Plausible from 'plausible-tracker'
+**/
 
 import App from '/@App/index.vue'
 
@@ -58,6 +60,7 @@ async function init() {    // () => Promise of ()
   if (!LOCAL) {
     let pl;
 
+    /*** disabled
     if (DEV && PLAUSIBLE_DEV_DOMAIN) {    // dev:online
       pl = Plausible({
         domain: PLAUSIBLE_DEV_DOMAIN,   // e.g. "dev-online.{your-id}"
@@ -71,6 +74,7 @@ async function init() {    // () => Promise of ()
         // default domain ('location.hostname')
       });
     }
+    ***/
 
     if (pl) {
       const {
@@ -100,12 +104,13 @@ async function init() {    // () => Promise of ()
 
   // Initialize Sentry
 
+  /*** disabled, for now
   if (SENTRY_DSN) {
     Sentry_init({
       dsn: SENTRY_DSN,
-      integrations: [new BrowserTracing(/*{
+      integrations: [new BrowserTracing(/_*{
         tracingOrigins: [ "localhost" /_*, "your.site.com*_/, /^\// ]     // default: ["localhost", /^\//]
-      }*/)],
+      }*_/)],
 
       tracesSampleRate: LOCAL ? 1.0
         : DEV ? 1.0   // tbd. tune 'dev:online' sampling rate
@@ -133,6 +138,7 @@ async function init() {    // () => Promise of ()
   } else if (DEV) {
     console.debug("Sentry not configured; build with 'SENTRY_DSN' env.var. defined to use it.");
   }
+  ***/
 
   /*** disabled / not needed?
   // Set an error handler.

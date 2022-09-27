@@ -31,28 +31,29 @@
     "_echoFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\""
   },
   "dependencies": {
-    "@sentry/browser": "^7.0.0",
-    "@sentry/tracing": "^7.0.0",
     "aside-keys": "^0.0.3-alpha.1",
     "@firebase/app": "^0.7.33",
     "@firebase/firestore": "^3.5.0",
     "@firebase/functions": "^0.8.4",
     "@firebase/performance": "^0.5.12",
-    "plausible-tracker": "^0.3.5",
     "vue": "^3.2.39",
     "vue-router": "^4.1.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.1.0",
-    "sass": "^1.54.5",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-vue": "^9.5.1",
+    "sass": "^1.55.0",
     "prettier": "2.7.1",
     "vue-eslint-parser": "^9.1.0"
   },
+  "//dependencies": {
+    "@sentry/browser": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
+    "plausible-tracker": "^0.3.5"
+  },
   "//comments": {
     "devDependencies": {
-      "cypress": [
-        "Using specific version (not '^') to reduce the number of binaries downloaded (600MB+ each): du -d 1 -h ~/Library/Caches/Cypress/"
-      ],
       "prettier": [
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
         "Thus, following suit."
@@ -70,24 +71,8 @@
       ">= 16.6.1: because of -> https://github.com/facebook/jest/issues/11708"
     ],
     "scripts": {
-      "CYPRESS_defaultCommandTimeout": [
-        "When cold-starting DC with 'npm test' on macOS, the 2nd test has been seen to take over 8s (default timeout",
-        "is 4s)."
-      ],
       "[ -z $BUILDER_OUTPUT ]": [
         "Separates commands to be run in CI."
-      ],
-      "build": [
-        "Only for manual builds. CI runs DC, directly."
-      ],
-      "_prime": [
-        "The project name used _must_ match that in '../backend/', used for launching the emulators."
-      ],
-      "_touchEm": [
-        "Vital for DC that files to be mapped to the container exist *before* the DC command."
-      ],
-      "_refresh": [
-        "Run this once you've changed anything in 'tools/*.dc' - i.e. the Vite version."
       ],
       "[ x = y ]": [
         "Use only one '=', for pleasing WSL2. Otherwise it gives 'undefined operator'."

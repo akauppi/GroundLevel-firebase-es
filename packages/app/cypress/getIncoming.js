@@ -12,14 +12,17 @@ import { getDatabase } from 'firebase-admin/database'
 
 function fail(msg) { throw new Error(msg) }
 
-const PROJECT_ID = "demo-main";   // tbd.
+const PROJECT_ID = "demo-main";   // tbd. from central location
 
 const POLL_INTERVAL_MS = 150;   // getting a result takes ~4..5 s, so too frequent polling is not meaningful
 
 const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: mapped to '/work'
   || '../../backend/firebase.app.js';
 
-// Note: We trust having top level await support
+const EMUL_HOST = process.env["EMUL_HOST"]    // DC: direct access to "emul-for-app"
+  || "localhost";
+
+// Note: top level await
 //
 const DATABASE_URL = await (async () => {
   //    Until then, parsing the 'FIREBASE_DATABASE_EMULATOR_HOST' env.var. (undocumented??) is the best choice
@@ -28,7 +31,7 @@ const DATABASE_URL = await (async () => {
   const databasePort = await import(FIREBASE_APP_JS).then(mod => mod.default.emulators?.database?.port)
       || fail("Unable to read Realtime Database port");
 
-  return `http://localhost:${databasePort}?ns=${PROJECT_ID}`;   // note: '?ns=...' is required!
+  return `http://${ EMUL_HOST }:${databasePort}?ns=${PROJECT_ID}`;   // note: '?ns=...' is required!
 })();
 
 const db = (_ => {

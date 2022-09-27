@@ -1,6 +1,7 @@
 #
 # app/dc.prod.serve.yml
 #
+name: b908391cc
 services:
   #---
   # Serve '/dist/**', separately built.

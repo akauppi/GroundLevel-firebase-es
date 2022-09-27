@@ -25,9 +25,12 @@ Great tools selected for you:
 - [Vite](https://github.com/vitejs/vite)
 - [Cypress](https://www.cypress.io)
 - [Cloud Build](https://cloud.google.com/build)
+- [Grafana Cloud](https://grafana.com)
+
+<!-- later
 - [Plausible](https://plausible.io)
 - [Sentry](https://sentry.io)
-- [Grafana Cloud](https://grafana.com)
+-->
 
 <font color=green>&check;</font> Built on 2020's technology (ES2022), aiming to stay up to date and lean.
 

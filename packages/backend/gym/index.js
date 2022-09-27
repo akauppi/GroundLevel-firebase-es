@@ -3,7 +3,7 @@
 *
 * Usage:
 *   <<
-*     # while backend is running..
+*     # while app backend is running..
 *     $ node index.js
 *   <<
 */
@@ -12,10 +12,10 @@ import { getDatabase, ServerValue } from 'firebase-admin/database'
 
 function fail(msg) { throw new Error(msg) }   // use at loading; not within a callable
 
-import mod from '../firebase.js'
-const databasePort = mod.emulators.database.port;
+import mod from '../firebase.app.js'
+const databasePort = mod?.emulators?.database?.port || fail("Cannot find 'emulator.database.port'");
 
-const PROJECT_ID = "demo-2";    // the way it's launched
+const PROJECT_ID = "demo-main";    // the way it's launched
 const DATABASE_URL = `http://localhost:${databasePort}?ns=${PROJECT_ID}`;   // WORKS!!
 
 // UNFINISHED. For pushing online, you'd need proper authentication as well. (but it seems we reach it :))
@@ -37,32 +37,27 @@ const db = getDatabase(app);
 async function counterGym({ id, diff }) {    // => Promise of ()
   const at = Date.now();
 
-  //console.debug("aaa");
-  const refRaw = db.ref("incoming/counts");
+  const refRaw = db.ref("incoming/incs");
 
   await refRaw.push({
     id, diff, clientTimestamp: at
   });
-  //console.debug("bbb");
 
   const refAggregate = db.ref(`counts/${id}`);    // Note: likely not sharing the doc with other counters would cause less collisions
 
   await refAggregate.set( { "=": ServerValue.increment(diff) })    // Note: Tags can be added by '{k}={v}'
-  //console.debug("ccc");
 }
 
-function logGym({ id, level, msg, args }) {   // => Promise of ()
+/**function logGym({ id, level, msg, args }) {   // => Promise of ()
   const at = Date.now();
   const uid = "jim";
 
   fail("not implemented");
-}
+}*/
 
 //--- Main :)
 
 await counterGym({ id: "gym", diff: 0.01 });
 
-//console.debug("ddd")
 process.exit(0);
   // must explicitly exit; something keeps it running, otherwise
-

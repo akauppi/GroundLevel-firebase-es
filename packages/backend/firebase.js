@@ -10,20 +10,11 @@ export default {
     rules: "./firestore.rules",
     indexes: "./firestore.indexes.json"
   },
-  functions:
-    { source: "./functions" }
-    //[{ "source": "functions",     "codebase": "main" }]
+  functions: { source: "./functions" }
   ,
-  database: {
-    rules: "./database.rules.json"
-  },
   emulators: {
     firestore: {
       port: 6767,
-      host: "0.0.0.0"
-    },
-    database: {
-      port: 6868,
       host: "0.0.0.0"
     },
     functions: {

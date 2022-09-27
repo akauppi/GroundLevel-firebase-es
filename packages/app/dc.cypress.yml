@@ -1,21 +1,45 @@
 #
 # app/dc.cypress.yml
 #
-# Expects:
-#   - VITE_URL: URL where the app is available, e.g. 'http://vite-dev:3002'
+# Everything needed by 'npm test'
 #
+# Expects:
+#   - 'PORT' to be defined. Used internally between Vite and Cypress.
+#
+name: 11567956
 services:
-  #---
-  # Run Cypress tests
+  # Similar to what 'make dev' uses, but forwards the browser to 'emul-for-app' (via the different '.env**' file),
+  # instead of 'localhost'.
+  #
+  # Both of them, however, use the same backend instance (which runs under DC 'app' namespace).
+  #
+  # Note:
+  #   This service remains running after 'make test'. That may be intentional, since it reduces startup times.
+  #
+  #   tbd.
+  #   On the other hand, having 'npm test' not leave trails around would be good, as well.
+  #   IDEALLY, we'd be able to use the same 'vite-dev' for both "localhost" and here.
+  #
+  vite-dev-for-test:
+    extends:
+      file: dc.base.yml
+      service: vite-base
+      # uses 'PORT' parameter
+
+    volumes:
+      # --- RO
+      - ../backend/firebase.app.js:/work/firebase.app.js:ro
+      - ./tmp/.env.dev_test:/work/.env:ro
+    environment:
+      - MODE=local
+    profiles: ['manual']
+
+  # Cypress run
   #
   run_tests:
     build:
       context: tools/cypress.dc
       target: with_libs
-    environment:
-      - CYPRESS_defaultCommandTimeout=10000
-      - CYPRESS_baseUrl=$VITE_URL
-      - FIREBASE_APP_JS=/work/firebase.app.js
     volumes:
       # --- RO
       - ./cypress:/work/cypress:ro
@@ -27,11 +51,24 @@ services:
         # ^-- map to /work, so ESM scope covers it
       # --- output
       - ./.screenshots:/work/.screenshots:delegated
+    environment:
+      - CYPRESS_defaultCommandTimeout=10000
+      - CYPRESS_baseUrl=http://vite-dev-for-test:${PORT}
+      - FIREBASE_APP_JS=/work/firebase.app.js
+      - EMUL_HOST=emul-for-app
     working_dir: /work
     command: sh -c '
       cypress run
       '
     profiles: ['manual']
+
+    networks:
+      - default   # vite-dev-for-test
+      - george    # emul-for-app
+
+    depends_on:
+      vite-dev-for-test:
+        condition: service_healthy
 
   # Check version (DEBUG)
   #
@@ -42,14 +79,7 @@ services:
       cypress version
     profiles: ['manual']
 
-#|  #DEBUG
-#|  debug:
-#|    build:
-#|      context: tools/cypress.dc
-#|    command: sh -c '
-#|      node --version &&
-#|      npm version &&
-#|      env &&
-#|      node --input-type=module -e "import { defineConfig } from \"cypress\""
-#|      '
-#|    profiles: ['manual']
+networks:
+  george:
+    name: app_default
+    external: true

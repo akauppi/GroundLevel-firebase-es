@@ -3,6 +3,7 @@
 #
 # Overlay, for 'npm run dev:local' specificity.
 #
+name: ffd37ba4
 services:
   vite-dev:
     extends:

@@ -19,4 +19,12 @@ describe('Sign In as Joe', () => {
     cy.get('[data-cy=user-name]')
       .contains(joe.displayName)
   })
+
+  // This checks that we can reach the Firestore backend
+  //
+  it('See one\'s data', () => {
+    cy
+      .contains("Jolly Jumper")
+      //.contains("NEW PROJECT")
+  })
 })

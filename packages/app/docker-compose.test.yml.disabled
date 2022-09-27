@@ -3,6 +3,7 @@
 #
 # Like for 'dev[:local]' but pointing the front-end to use 'http://emul-for-app', instead of localhost.
 #
+#name: e80f4bdb
 services:
   vite-dev:
     extends:

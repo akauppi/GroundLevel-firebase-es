@@ -5,6 +5,7 @@
 #
 # Expects:
 #   'FUNCTIONS_PORT'  ! EXPERIMENTAL; still looking which is the best way to pass the port numbers..
+#   'COMPOSE_IGNORE_ORPHANS=true'   to mitigate a warning, since we tie to a project ('app') that might have other running services
 #
 # Note:
 #   Ports exposed at the host are defined so that they do not overlap with those of 'docker-compose.yml'.
@@ -29,7 +30,8 @@ services:
       - ./logs.app/firestore-debug.log:/work/firestore-debug.log:delegated
       - ./logs.app/database-debug.log:/work/database-debug.log:delegated
       - ./logs.app/ui-debug.log:/work/ui-debug.log:delegated
-    # Exposing the emulator ports to the host _is_ required, for the Desktop Cypress use case.
+
+    # Ports need to be exposed to the host for a) Desktop Cypress use case, b) debugging (UI port).
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"

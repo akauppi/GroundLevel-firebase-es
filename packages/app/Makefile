@@ -28,11 +28,9 @@ _ENV_LOCAL=tmp/.env.dev_local
 _ENV_ONLINE=tmp/.env.dev.$(ENV)
 _ENV_TEST=tmp/.env.dev_test
 #_ENV_CI=tmp/.env.ci
-_ENV_PROD=tmp/.env.$(ENV)
 
 # Custom environment additions (not needed for local/CI)
 _CUSTOM_ENV_ONLINE=.env.dev.$(ENV)
-_CUSTOM_ENV_PROD=.env.$(ENV)
 
 _DC=docker compose
 
@@ -54,15 +52,14 @@ dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) $(_FIREBASE_PROD_JS)
 
 #--- Test
 
-# tbd. 'PORT' from a file (make loading the Makefile load those)
 test: $(_VITE_DEV_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulPrimed
-	PORT=3002 $(_DC) -f docker-compose.test.yml run --rm vite-dev-launched
-	VITE_URL=http://vite-dev:3002 $(_DC) -f dc.cypress.yml run --rm run_tests
+	PORT=3005 $(_DC) -f dc.cypress.yml run --rm run_tests
+	@# The port number doesn't really matter (not exposed to the host)
 
 # tbd. 'PORT' from a file (make loading the Makefile load those)
 
 #--- Build
-build: $(_BUILD_DC) $(_ENV_PROD) $(_STATS_HTML) $(_FIREBASE_PROD_JS)
+build: $(_BUILD_DC) $(_STATS_HTML) $(_FIREBASE_PROD_JS)
 	RELEASE=manual ENV=$(ENV) $(_DC) -f docker-compose.tools.prod.yml run --rm build
 
 #--- Serve
@@ -86,10 +83,7 @@ $(_ENV_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.js
 #$(_ENV_CI): tools/gen-vite-env-ci.js
 #	node $< --project=demo-main > $@
 
-$(_ENV_PROD): $(_CUSTOM_ENV_PROD)
-	false
-
-$(_CUSTOM_ENV_ONLINE) $(_CUSTOM_ENV_PROD):
+$(_CUSTOM_ENV_ONLINE) $(_ENV_PROD):
 	@touch $@
 
 #--- Build DC images
@@ -136,9 +130,12 @@ $(_FIREBASE_PROD_JS):
 #--- Maintenance
 
 # Take possibly running DC images down
-_all-down:
+#
+# All services we have share the project name ('app') with the 'dc.base.yml'. Also the backend (which is in '../backend')
+# shares that name. This means '--remove-orphans' brings them down (without needing to list all '.yml' files here).
+#
+down-all:
 	PORT=0 docker compose -f dc.base.yml down --remove-orphans
-	(cd ../backend && make app:down)
 
 prune:
 	npm prune
@@ -160,4 +157,5 @@ echo:
   test \
   build \
   serve \
+  down-all \
   prune

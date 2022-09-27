@@ -11,9 +11,9 @@ The commands are to be executed in the `first` folder.
    - it has "Blaze" plan with these enabled:
       - [x] Cloud Firestore
       - [x] Cloud Functions
+      - [x] Realtime Database
       - [x] Hosting
-  - it has an "application" created (needed for authentication)
-- Have Docker running
+  - it has an "application" created (for authentication)
 
 ## Manual deployment
 
@@ -32,8 +32,6 @@ $ ./deploy.sh
 
 This asks you to log into the Firebase project.
 
->Security note. Authentication is done using Docker containers; your deployment credentials should not get stored on the development machine.
-
 ![](.images/first-1.png)
 
 >Hint: On macOS, press Cmd(⌘) and double click on the URL in the terminal, to open it.
@@ -48,5 +46,4 @@ Visit the stated URL - is there an app?
 
 >Note: Let the author know if there were any problems (by filing a [GitHub Issue](https://github.com/akauppi/GroundLevel-firebase-es/issues)). This stage is important because it's early on in the onboarding. But it's also done "just once" - you'll likely turn to CI/CD if you remain using the template.
 
-Return to [main README](../README.md).
-
+You can now [return to main README](../README.md).

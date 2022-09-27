@@ -1,6 +1,7 @@
 #
 # app/docker-compose.tools.prod.yml
 #
+name: 35bf1944
 services:
   #---
   # Build production delivery (manually)

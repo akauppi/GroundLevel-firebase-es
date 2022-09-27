@@ -7,6 +7,7 @@
 # Intentions:
 #   - Host the front end files with a cloud backend, according to 'ENV' env.var.
 #
+name: 245e80f4
 services:
   vite-online:
     extends:
@@ -17,7 +18,7 @@ services:
 
     volumes:
       #--- RO
-      - ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
+      #- ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
       - ./tmp/.env.dev.${ENV:-staging}:/work/.env:ro
     environment:
       - MODE=online
