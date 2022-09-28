@@ -22,6 +22,9 @@
         <span>Sign-in disabled</span>
       </div>
     </aside-keys>
+
+    <!-- DEBUG/REMOVE -->
+    <button @click="loginAsJoe()">User joe</button>
   </main>
   <footer>
     <AppFooter />
@@ -98,6 +101,8 @@
   import AppFooter from './AppFooter.vue'
 
   import { userRef2 } from '/@/user'
+  import {signInWithCustomToken, updateProfile, getAuth} from "@firebase/auth";   // TEMP
+  import { assert } from '/@tools/assert'
 
   const LOCAL = import.meta.env.MODE === 'dev_local';
   const TESTING = LOCAL && window.Cypress;
@@ -113,8 +118,23 @@
     return {
       user: userRef2,
       LOCAL,
-      TESTING
+      TESTING,
+      loginAsJoe
     }
+  }
+
+  async function loginAsJoe() {   // DEBUG
+    console.log(2);
+
+    const auth = getAuth();
+
+    const { user: /*as*/ currentUser } = await signInWithCustomToken( auth, JSON.stringify({ uid: "joe" }) );
+    assert(currentUser.uid === "joe");
+
+    // Set '.displayName', '.photoURL'; for email and password, other functions exist (not implemented)
+    await updateProfile(currentUser, { displayName: "Avrell D." });
+
+    console.log(4);
   }
 
   export default {

@@ -95,7 +95,7 @@
         central/*.fatal*/ .error("Project removed while open! Leading the user to home page.");
 
         alert("The project is gone!!! Please continue via the home page and be in touch with app authors.");
-        router.push({ name: "Home" });
+        router.push({ name: "Home_" });
       }
     });
 

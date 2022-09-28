@@ -8,8 +8,7 @@
 import { setDoc } from '@firebase/firestore'
 
 import { getCurrentUserId_sync } from "/@/user"
-import { dbDoc } from "/@firebase/firestore"
-import { serverTimestampSentinel } from "/@firebase/firestore-sentinel-exp"
+import { dbDoc, serverTimestampSentinel_EXP } from '../firestore/index.js'
 
 let lastActive;   // Date | undefined; when last written
 let lastUid;      // ..for this user
@@ -32,7 +31,7 @@ function shareMyActivity(projectId) {
   if (uid !== lastUid || longEnough()) {
     const prom = setDoc(
       projectsUserInfoD(projectId, uid),
-      { lastActive: serverTimestampSentinel },
+      { lastActive: serverTimestampSentinel_EXP },
       { merge: true }   // options
     );
 

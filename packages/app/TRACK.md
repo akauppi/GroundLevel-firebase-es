@@ -14,6 +14,7 @@ Currently (5.3.0), Cypress does not clear IndexedDB storage and therefore Fireba
 Once there is a way to configure this (instead of code), we might prefer that.
 
 
+<!-- no longer needed? (config gets built in as .js)
 ## `import` of JSON in browser
 
 - Track [proposal-json-modules](https://github.com/tc39/proposal-json-modules) (tc39 proposal)
@@ -22,10 +23,10 @@ Once there is a way to configure this (instead of code), we might prefer that.
 
 Might take a while. 
 
-Once available on modern browsers, consider movig the Firebase config reading (in prod) to use this???
+Once available on modern browsers, consider moving the Firebase config reading (in prod) to use this???
 
 - [How to import a JSON file ...?](https://stackoverflow.com/a/68593192/14455) (SO)
-
+-->
 
 ## `rollup-plugin-visualizer` to have better ESM support
 
@@ -85,3 +86,19 @@ DO NOT use top-level `await` in browser code, for now.
 Once/if implemented in browsers, we don't need the `lang="scss"` any more.
 
 Note: The ideology of the repo is to work close to what plain browsers offer. Thus, no SASS once we can get nesting without it.
+
+
+## Firestore JS SDK needs "long polling" when run under Cypress
+
+This has tickets open on both Cypress and Firebase side...
+
+- [ ] [Cypress #2374](https://github.com/cypress-io/cypress/issues/2374) (opened Aug 2018) has the story.
+
+	To have Cypress test Firestore JS code, "long polling" option is a must.
+
+	There are instructions in there, which work for Chrome. Don't want to apply them, since a) adds complexity, b) would like a proper workflow with Electron. (There's a [lengthy write about performance](https://github.com/cypress-io/cypress/issues/2374#issuecomment-1095479320) in the issue).
+
+- [ ] [RFC: Usage of experimentalForceLongPolling option](https://github.com/firebase/firebase-js-sdk/issues/1674) (Apr 2019)
+
+   A ticket on the Firebase side.
+   

@@ -45,7 +45,7 @@
 
 <script>
   import { assert } from '/@tools/assert'
-  import { computed, onUnmounted, ref } from 'vue'
+  import { computed, onUnmounted } from 'vue'
   import MemberFace from './MemberFace.vue'
 
   import { memberUserInfos_notMe } from '/@data/memberUserInfos_notMe'

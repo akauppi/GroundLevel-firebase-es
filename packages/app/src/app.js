@@ -49,18 +49,18 @@ const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev) | "<git comm
 const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
 const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;
 
-if (!DEV && !PLAUSIBLE_ENABLED) {   // tbd. such warning in build script (console) would be a better place.
-  //console.info("Plausible Analytics not enabled; add 'PLAUSIBLE_ENABLED=true|false' to mitigate this warning.")
-}
+/*if (!DEV && !PLAUSIBLE_ENABLED) {   // tbd. such warning in build script (console) would be a better place.
+  console.info("Plausible Analytics not enabled; add 'PLAUSIBLE_ENABLED=true|false' to mitigate this warning.")
+}*/
 
 async function init() {    // () => Promise of ()
 
   // Initialize Plausible Analytics
   //
+  /*** disabled
   if (!LOCAL) {
     let pl;
 
-    /*** disabled
     if (DEV && PLAUSIBLE_DEV_DOMAIN) {    // dev:online
       pl = Plausible({
         domain: PLAUSIBLE_DEV_DOMAIN,   // e.g. "dev-online.{your-id}"
@@ -74,7 +74,6 @@ async function init() {    // () => Promise of ()
         // default domain ('location.hostname')
       });
     }
-    ***/
 
     if (pl) {
       const {
@@ -97,6 +96,7 @@ async function init() {    // () => Promise of ()
       window.plausible = { trackEvent };    // for 'events.js'
     }
   }
+  ***/
 
   // Initialize Firebase Performance monitoring
 
@@ -167,10 +167,10 @@ async function init() {    // () => Promise of ()
 
     tr.set("aside-keys initialization", performance.now()-aside_t0 );
 
-  }).catch(err => {
+  }); /** disabled: .catch(err => {
     console.error("'Aside-keys' did not initialize:", err);   // never seen
     throw err;
-  });
+  });*/
 
   // Initialize Vue App
   //

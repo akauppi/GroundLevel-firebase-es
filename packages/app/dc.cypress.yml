@@ -6,7 +6,7 @@
 # Expects:
 #   - 'PORT' to be defined. Used internally between Vite and Cypress.
 #
-name: 11567956
+name: '11567956'
 services:
   # Similar to what 'make dev' uses, but forwards the browser to 'emul-for-app' (via the different '.env**' file),
   # instead of 'localhost'.

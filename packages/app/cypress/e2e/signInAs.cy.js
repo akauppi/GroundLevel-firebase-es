@@ -20,11 +20,15 @@ describe('Sign In as Joe', () => {
       .contains(joe.displayName)
   })
 
+  /*** tbd. eventually add a test (maybe separate from this) to test Firestore connection works.
+  //
   // This checks that we can reach the Firestore backend
   //
-  it('See one\'s data', () => {
+  it.skip ('See one\'s data', () => {
+    cy.signAs({ uid: 'dev' });
     cy
-      .contains("Jolly Jumper")
+      .contains("<project name>");
       //.contains("NEW PROJECT")
   })
+  **/
 })

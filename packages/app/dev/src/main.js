@@ -7,7 +7,8 @@ import { assert } from './assert.js'
 
 import { initializeApp } from '@firebase/app'
 import { getAuth, connectAuthEmulator, initializeAuth, debugErrorMap } from '@firebase/auth'
-import { getFirestore, connectFirestoreEmulator } from '@firebase/firestore'
+import { getFirestore, initializeFirestore, connectFirestoreEmulator,
+  setLogLevel as firestore_setLogLevel } from '@firebase/firestore'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
@@ -24,23 +25,36 @@ function fail(msg) { throw new Error(msg) }
 const HUMAN_READABLE_AUTH_ERRORS_PLEASE = true;
 
 async function initFirebaseLocal() {   // () => Promise of ()
-  const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
+  const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI and running tests (DC) overrides it
 
   assert(LOCAL);
 
-  console.info("Initializing for LOCAL EMULATION");
+  console.info("Initializing for LOCAL EMULATION", { host });
 
   const projectId = import.meta.env.VITE_PROJECT_ID;
 
+  // Cypress needs "long polling" for the Firestore WebChannel interface to work ('firebase-tools' 11.11.0;
+  // '@firebase/firestore' 3.5.0; Cypress 10.8.0).
+  //
+  // Note: Cypress can be used both on the 'make dev' hosted front end (Cypress desktop) _and_ the headless variant
+  //    ('make test'). Therefore, it's best we detect the need here at runtime instead of launch configuration (.env files).
+  //
+  //  References:
+  //    - Comment in 'firebase-js-sdk' #4917 -> https://github.com/firebase/firebase-js-sdk/issues/4917#issuecomment-842481510
+  //    - Comment in cypress-io/cypress #2374 -> https://github.com/cypress-io/cypress/issues/2374
+  //
+  const FORCE_FIRESTORE_LONG_POLLING = !! window.Cypress;
+
   const fah= initializeApp( {
     projectId,
-    apiKey: "none",
-    authDomain: "no.domain"
-      //
-      // Mitigates a browser console error (and another one that would otherwise occur if the user presses
-      // 'Sign in with Google' in local mode). This is uncharted waters; the main means for local mode authentication
-      // is intended to be the '?user=dev' query param.
+    apiKey: "none"    // needed, otherwise 'auth/invalid-api-key' error (browser console)
   } );
+
+  // Enable this if there are difficulties with Firestore connection. [DEBUG]
+  //
+  if (false) {
+    firestore_setLogLevel('debug');
+  }
 
   // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
   //
@@ -56,9 +70,14 @@ async function initFirebaseLocal() {   // () => Promise of ()
   const FIRESTORE_PORT = parseInt(firestorePort);           // 6769
   const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9101"
 
-  const firestore = getFirestore();
+  const firestore = !FORCE_FIRESTORE_LONG_POLLING ? getFirestore() :
+    initializeFirestore(fah, { experimentalForceLongPolling: true });
+    //
+    // Cypress needs Firestore long polling. It can be done either with 'experimentalForceLongPolling' or
+    // 'experimentalAutoDetectLongPolling' setting. For us, we know what to do (unless Firebase or Cypress fixes this).
 
-  const auth = HUMAN_READABLE_AUTH_ERRORS_PLEASE ? initializeAuth(fah, { errorMap: debugErrorMap }) : getAuth();
+  const auth = HUMAN_READABLE_AUTH_ERRORS_PLEASE ? initializeAuth(fah, { errorMap: debugErrorMap }) :
+    getAuth();
 
   connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
   connectAuthEmulator(auth, AUTH_URL, { disableWarnings: true });
@@ -99,15 +118,14 @@ async function initFirebaseOnline() {
 //  Edge      tbd. NOT TESTED
 //
 
-///*const tailProm =*/ (async _ => {   // loose-running tail (if not wanting to use top-level-await)
-  if (LOCAL) {
-    await initFirebaseLocal();
-  } else {
-    await initFirebaseOnline();
-  }
-
-  await import('/@/app.js');
-//})();
+// Note: top level awaits
+//
+if (LOCAL) {
+  await initFirebaseLocal();
+} else {
+  await initFirebaseOnline();
+}
+await import('/@/app.js');
 
 /***
 // TESTING

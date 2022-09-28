@@ -8,7 +8,7 @@
 
   <p>This is a guest page. It can have a presentation of your application.</p>
 
-  <p v-if="LOCAL && !TEST">Provide a <span class="tt">?user=dev</span> parameter to sign in.</p>
+  <p v-if="LOCAL && !LOCAL_TEST">Provide a <span class="tt">?user=dev</span> parameter to sign in.</p>
   <p v-else>To the right, there should be a sign-in panel visible.</p>
 </template>
 
@@ -41,10 +41,7 @@ import { useRouter } from 'vue-router'
 import {userRef2} from "../../user.js";
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
-const TEST = LOCAL && window.Cypress;
-
-// Note: The 'this.$route[r]' approach only works with Vue.js 2 syntax. We use Composition API (v3)
-//  so a little longer route (no pun) is needed.
+const LOCAL_TEST = LOCAL && window.Cypress;
 
 function setup() {
   const router = useRouter();
@@ -57,13 +54,13 @@ function setup() {
   onMounted( _ => {
     const route = router.currentRoute.value;    // note: could also be 'useRoute()'
 
+    // Watch for auth change, and move once/if that happens.
+    //
     const unsub = watchEffect( _ => {
       if (userRef2.value) {
         const final = route.query["final"];
-
-        // Can move to path '/' (instead of '{ name: "Home" }' since signed in page has precedence.
-        //
         router.push( final || '/' );
+          // Note: Can move to path '/' (instead of '{ name: "Home" }') since signed in page has precedence in our routes.
 
         unsub();
       }
@@ -71,7 +68,7 @@ function setup() {
   });
 
   return {
-    LOCAL, TEST
+    LOCAL, LOCAL_TEST
   }
 }
 

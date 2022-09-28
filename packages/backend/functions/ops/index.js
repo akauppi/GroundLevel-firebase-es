@@ -6,7 +6,7 @@
 *
 * Expects (under emulation):
 *   - FUNCTIONS_EMULATOR  to be defined to non-empty value
-*   - DATABASE_PORT     <number>  where Realtime Database is configured; 0 for none (CI might have it so)
+*   - DATABASE_PORT       where Realtime Database is configured   (note: did not work!!)
 *
 * Callable for collecting front-end metrics and logs.
 */
@@ -42,7 +42,8 @@ const DATABASE_URL = (_ => {
     //
     const tmp = process.env["FIREBASE_DATABASE_EMULATOR_HOST"];   // "0.0.0.0:6868" | undefined
     if (!tmp) {
-      console.warn("'FIREBASE_DATABASE_EMULATOR_HOST' env.var. not defined - metrics and logging to Realtime Database is disabled.");
+      // Only using Realtime Database on the 'emul-for-app' backend; not plain backend. no need to warn.
+      //console.warn("'FIREBASE_DATABASE_EMULATOR_HOST' env.var. not defined - metrics and logging to Realtime Database is disabled.");
       return null;
     }
 

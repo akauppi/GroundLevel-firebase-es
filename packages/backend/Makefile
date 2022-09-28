@@ -138,7 +138,7 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json tmp/database
 
 # Maintenance
 #
-_ALL_PORTS_DUMMY := FIRESTORE_PORT=0 FUNCTIONS_PORT=0 DATABASE_PORT=0 AUTH_PORT=0 UI_PORT=0
+_ALL_PORTS_DUMMY := FIRESTORE_PORT=10001 FUNCTIONS_PORT=10002 DATABASE_PORT=10003 AUTH_PORT=10004 UI_PORT=10005
 
 down-all:
 	docker compose -f dc.base.yml down --remove-orphans
@@ -162,21 +162,22 @@ tmp/database.rules.json:
 
 # DC rebuild
 #
-$(_EMUL_DC): $(_DC_PATH)/firebase-tools/Dockerfile
+$(_EMUL_DC): $(_DC_PATH)/firebase-tools/Dockerfile $(shell find $(_DC_PATH)/firebase-emulators/* -type f)
 	$(_ALL_PORTS_DUMMY) $(_DC) build emul
 	touch $@
 
-$(_EMUL_APP_DC): $(_DC_PATH)/firebase-tools/Dockerfile
+$(_EMUL_APP_DC): $(_DC_PATH)/firebase-tools/Dockerfile $(shell find $(_DC_PATH)/firebase-emulators/* -type f)
 	$(_ALL_PORTS_DUMMY) $(_DC) -f docker-compose.app.yml build emul-for-app
 	touch $@
 
 #---
 echo:
-	@echo aaa
+	@echo $(_DC_PATH)
 
 .PHONY: help \
   install prune \
   test \
   start _started \
+  app\:start \
   down-all \
   echo

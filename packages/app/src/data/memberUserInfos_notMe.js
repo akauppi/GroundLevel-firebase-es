@@ -12,12 +12,9 @@
 */
 import { assert } from '/@tools/assert'
 
-import { collection, where } from '@firebase/firestore'
-
 import { getCurrentUserId_sync } from "/@/user"
-import { collRef } from "/@tools/listen.ref"
-import { db } from '/@firebase/firestore'
-import { documentIdSentinel } from '/@firebase/firestore-sentinel-exp'
+import { collRef, where } from "./firestore/listen.ref"
+import { documentIdSentinel_EXP } from './firestore/index.js'
 
 function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <uid> -> { ...projectUserInfoC doc, status: "live"|"recent"|"" }, () => ()]
   assert(projectId);
@@ -49,7 +46,7 @@ function memberUserInfos_notMe(projectId) {    // (string) => [Ref of Map of <ui
     }
   }
 
-  const [ref, unsub] = collRef( collection(db, `projects/${projectId}/userInfo/`), where(documentIdSentinel, '!=', myUid), {
+  const [ref, unsub] = collRef( `projects/${projectId}/userInfo/`, where(documentIdSentinel_EXP, '!=', myUid), {
     conv
   } );
 

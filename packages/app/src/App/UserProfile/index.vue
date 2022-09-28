@@ -87,6 +87,7 @@
 <script>
   import { ref } from 'vue'
 
+  // Get the whole user object (name, photo). Props (due to our router) only provide a uid.
   import { userRef2 as user } from '/@/user'
 
   import SettingsDialog from './SettingsDialog.vue'

@@ -43,7 +43,7 @@ function fail(msg) { throw new Error(msg) }
 function lockedProps(r) {   // (Route) => { uid: string, ..params from path }
   let uid;
   if (LOCAL && r.query.user) {
-    uid = r.query.user;   // 'dev:local' (not tests)
+    uid = r.query.user;   // 'dev:local' (and tests)
   } else {
     uid = getCurrentUserId_sync();
   }

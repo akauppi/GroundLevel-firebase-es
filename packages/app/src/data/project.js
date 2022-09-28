@@ -6,13 +6,10 @@
 * Used by:
 *   - Project page
 */
-import { db } from '/@firebase/firestore'
-import { docRef } from '/@tools/listen.ref'
-import { doc, collection } from '@firebase/firestore'
+import { docRef } from './firestore/listen.ref'
 
 function projectPair(projectId) {    // (string) => [Ref of { ..projectsC doc }, () => ()]
-  const projectD = doc( collection(db, 'projects/'), projectId);
-  return docRef( projectD );
+  return docRef( 'projects/', projectId );
 }
 
 export {

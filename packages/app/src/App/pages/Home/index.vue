@@ -85,18 +85,6 @@
 
     console.debug("HOME created...");
 
-    onMounted( () => {
-      console.debug("HOME MOUNTED:", { uid });
-    })
-
-    onUpdated( () => {
-      console.debug("HOME UPDATED:", { uid });
-    })
-
-    onUnmounted( () => {
-      console.debug("HOME UNMOUNTED");
-    })
-
     // NOTE: Not sure, if the below needs to be within 'onMounted' tbd.
     //onMounted( () => {
       //const uid = uidRef.value;

@@ -1,20 +1,22 @@
 /*
-* src/data/listen.ref.js
+* src/tools/listen.ref.js
 *
 * Tools to turn Firebase doc, collection and query subscription into the UI framework's reference model.
 */
-import { query, onSnapshot, QueryConstraint, Timestamp } from '@firebase/firestore'
-  //
-  // Firebase @exp note: 'onSnapshot' brings in following both for references, and queries
+import {query, onSnapshot, QueryConstraint, Timestamp, collection, doc, where, getFirestore} from '@firebase/firestore'
 
 import {shallowRef, triggerRef} from 'vue'
 
-import { assert } from './assert'
+import { assert } from '/@tools/assert'
+
+const db = getFirestore();
 
 /*
 * Follow a certain collection, or query, as a 'Ref of Map'.
 */
-function collRef(_C, ...args) {    // (CollectionReference, QueryConstraint?, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+function collRef(collectionPath, ...args) {    // (String, QueryConstraint?, { conv?: obj => obj? }?) => [Ref of Map of string -> string|bool|number|..., () => ()]
+  const c = collection( db, collectionPath );
+
   const [qc,opts] = (args.length >= 1 && args[0] instanceof QueryConstraint) ? [...args] : [undefined,...args];
   const { conv } = opts;
 
@@ -22,17 +24,17 @@ function collRef(_C, ...args) {    // (CollectionReference, QueryConstraint?, { 
   let unsub;
 
   function report(err) {    // (FirestoreError) => never
-    throw new Error(`Failed to listen to '${_C.path}'${
+    throw new Error(`Failed to listen to '${c.path}'${
         qc ? ` (constraint '${qc}')`:""
       }: { code= ${ err.code }, message= ${ err.message } }`
     );
   }
 
   if (qc) {
-    const q = query(_C,qc);
+    const q = query(c,qc);
     unsub = onSnapshot(q, ssHandler, report);
   } else {
-    unsub = onSnapshot(_C, ssHandler, report);
+    unsub = onSnapshot(c, ssHandler, report);
   }
 
   return [ref,unsub];
@@ -80,7 +82,6 @@ function mapRefHandlerGen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref
 
     // Need to manually trigger the change; our efforts didn't assign to 'ref.value'.
     //
-    console.debug("!!! triggering")   // DEBUG
     triggerRef(ref);
   }
 
@@ -100,15 +101,16 @@ function mapRefHandlerGen({ conv }) {   // ({ conv: (obj) => obj|null }) => [Ref
 *   [0]: Ref that updates as the document does; 'undefined' until database connection established; 'null' for no document
 *   [1]: unsub function
 */
-function docRef(_D) {   // ( DocumentReference ) => [Ref of undefined | null | { ..document fields }, () => ()]
+function docRef(docPath, docId) {   // (string, string) => [Ref of undefined | null | { ..document fields }, () => ()]
+  const d = doc( collection(db,docPath), docId);
   const ref = shallowRef();
 
-  const unsub = onSnapshot( _D, (ss) => {
+  const unsub = onSnapshot( d, (ss) => {
     const data = ss.data();
     ref.value = data ? convTimestamps(data) : null;
 
   }, err => {   // (FirestoreError) => ()
-    throw new Error(`Failed to listen to '${_D.path}': { code= ${ err.code }, message= ${ err.message } }`);
+    throw new Error(`Failed to listen to '${d.path}': { code= ${ err.code }, message= ${ err.message } }`);
   });
 
   return [ref, unsub];
@@ -151,5 +153,6 @@ function oMap(o,vf) {
 
 export {
   collRef,
-  docRef
+  docRef,
+  where     // pass-through export from '@firebase/firestore'
 }
