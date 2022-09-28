@@ -15,6 +15,9 @@
 #---
 # Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/node18.6.0-chrome105-ff104/Dockerfile
 #
+# Note:
+#   NOT the image Cypress themselves use for 'included' (they have Node 16; we use Node 18).
+#
 # Changes:
 #   - not bringing in Firefox
 #
@@ -107,6 +110,7 @@ ENV npm_config_unsafe_perm=true
 
 #---
 # Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/included/10.8.0/Dockerfile
+#   - [x] checked against 10.9.0
 #
 # Brings:
 #   - Cypress on top of the OS + Electron + Chrome
@@ -116,7 +120,7 @@ FROM base-chrome as cypress
 
 # Cypress CHANGELOG -> https://docs.cypress.io/guides/references/changelog
 #
-ARG CYPRESS_VER=10.8.0
+ARG CYPRESS_VER=10.9.0
 
 # avoid too many progress messages
 # https://github.com/cypress-io/cypress/issues/1243

@@ -1,7 +1,7 @@
 /*
-* cypress/getIncomingEntry.js
+* cypress/e2e/getIncoming.task.js
 *
-* Task for awaiting an "incoming/{logs|incs|obs}" entry in the Realtime Database.
+* Task for awaiting an "incoming/{incs|logs|obs}" entries to show up in the Realtime Database.
 *
 * Reference:
 *   - "Incredibly Powerful cy.task" (blog, Jun 2018)
@@ -14,10 +14,8 @@ function fail(msg) { throw new Error(msg) }
 
 const PROJECT_ID = "demo-main";   // tbd. from central location
 
-const POLL_INTERVAL_MS = 150;   // getting a result takes ~4..5 s, so too frequent polling is not meaningful
-
 const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: mapped to '/work'
-  || '../../backend/firebase.app.js';
+  || '../../../backend/firebase.app.js';
 
 const EMUL_HOST = process.env["EMUL_HOST"]    // DC: direct access to "emul-for-app"
   || "localhost";
@@ -39,8 +37,65 @@ const db = (_ => {
   return getDatabase(app);
 })();
 
-// tbd. Refactor by using listening, instead of '.once()': no need for polling, less noice of the console if indexes aren't enabled.
 /*
+* Task for proving that a suitable "incoming/{...}/{generated-key}" document (will) exist(s).
+*
+* Note:
+*   We do expect the document to exist; thus, there should not be a need for timing out the promise.
+*
+* Resolves with a document that matches 'expectedTimestamp'.
+*
+* NOTE: Cannot use any 'cy.*' features, within a function like this.
+*
+* NOTE 2: For debugging, throw exceptions or use 'console.{debug|log}'. Console logs are NOT available when running
+*     desktop Cypress(*) but are seen when launched via 'make test'.
+*
+*     (*) The author doesn't know, how to see them.
+*/
+async function getIncoming(subPath, expectedTimestamp) {    // ("{incs|logs|obs}", number) => [Promise of { ... }, cancel()]
+
+  const ref = db.ref(`incoming/${subPath}`);
+  const at = expectedTimestamp;
+
+  const prom = new Promise(res => {   // Promise of ...{matching Realtime Database object}
+    let seen=0;
+
+    // "'child_added' is triggered once for each existing child and then again, every time a new child is added".
+    //
+    /***
+    ref.orderByChild('clientTimestamp').equalTo(at)      // tbd. enabling this gives "unspecified index" warnings in 'make test' output. Not sure, why. (works without, just not as elegant)
+      .on('child_added', snapshot /_*DataSnapshot*_/ => {
+        const o = snapshot.val();
+
+        console.log('!!! YAY - found the ONE', o);    // visible in 'make test' output
+
+        res(o);
+        ref.off('child_added');   // give up all listening of that path (#hack but works)
+      }, (errorObject) => {
+        console.error('Listen failed: ' + errorObject.name);
+      });
+    ***/
+    ref
+      .on('child_added', snapshot /*DataSnapshot*/ => {
+      const o = snapshot.val();
+
+      if (o.clientTimestamp === expectedTimestamp) {
+        console.log(`!!! YAY - found the ONE (${seen} skipped)`, o);    // visible in 'make test' output
+
+        res(o);
+        ref.off('child_added');   // give up all listening of that path (#hack but works)
+      }
+      seen++;
+      // ...carry on listening
+    }, (errorObject) => {
+      console.error('Listen failed: ' + errorObject.name);
+    });
+  });
+
+  return prom;
+}
+
+/***
 * Task for proving that a suitable "incoming/{...}/{generated-key}" document exists.
 *
 * Resolves with the document, if it arises within 'timeoutMs'.
@@ -48,12 +103,10 @@ const db = (_ => {
 *
 * NOTE: Cannot use any 'cy.*' features, within a function like this.
 *
-* NOTE 2: This code is part of Cypress config. It means WHEN MAKING CHANGES, RESTART CYPRESS!!!
-*
 * NOTE 3: For debugging, throw exceptions or use 'console.{debug|log}'. Console logs are NOT available when running
-*     Cypress GUI but are seen when launched via 'npm test'.
-*/
-async function getIncoming(subPath, expectedTimestamp, timeoutMs) {    // ("{incs|logs|obs}", number, int) => Promise of { ... }
+*     Cypress GUI but are seen when launched via 'make test'.
+*_/
+async function getIncoming_polling(subPath, expectedTimestamp, timeoutMs) {    // ("{incs|logs|obs}", number, int) => Promise of { ... }
 
   const ref = db.ref(`incoming/${subPath}`);
   const at = expectedTimestamp;
@@ -73,15 +126,15 @@ async function getIncoming(subPath, expectedTimestamp, timeoutMs) {    // ("{inc
     });
   });
 
-  const [doc /*, ...*/] = await tryUntil( Date.now() + timeoutMs, gen);
+  const [doc /_*, ...*_/] = await tryUntil( Date.now() + timeoutMs, gen);
   doc || fail("INTERNAL: expected a doc object");
 
   return doc;
 }
 
-/*
+/_*
 * Perform a duty, with steady interval, until it succeeds or we time out.
-*/
+*_/
 async function tryUntil(tUntil, promGen) {   // (number, () => Promise of Array of FirebaseUser => Promise of Array of FirebaseUser (non-empty)
   const t0 = Date.now();
 
@@ -102,6 +155,8 @@ function sleep(ms) {    // (int) => Promise of ()
 
   return new Promise(res => setTimeout(res, ms) );
 }
+const getIncoming = getIncoming_polling;
+**/
 
 export {
   getIncoming

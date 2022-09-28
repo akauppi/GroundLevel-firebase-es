@@ -14,7 +14,7 @@
 //    - EMUL_HOST         defaults to 'localhost'
 //
 import { defineConfig } from 'cypress'
-import { getIncoming } from './cypress/getIncoming.js'
+import { getIncoming } from './cypress/e2e/getIncoming.task.js'
 
 // tbd. Could see if we can pass custom config via this file, gathering all env.var. use here ('FIREBASE_APP_JS', 'EMUL_HOST').
 

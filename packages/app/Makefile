@@ -115,7 +115,7 @@ $(_SERVE_DC): tools/serve.dc/Dockerfile
 	@touch $@
 
 $(_CYPRESS_DC): tools/cypress.dc/Dockerfile #tools/cypress.dc/package.json
-	VITE_URL="" $(_DC) -f dc.cypress.yml build run_tests
+	VITE_URL="" PORT=0 $(_DC) -f dc.cypress.yml build run_tests
 	@touch $@
 
 #---

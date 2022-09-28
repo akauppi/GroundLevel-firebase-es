@@ -1,7 +1,7 @@
 /*
 * metrics.cy.js
 *
-* Delivering counts, logs to Realtime Database (and from there, beyond), via Cloud Functions.
+* Delivering counts, logs and samples to Realtime Database (and from there, beyond), via Cloud Functions.
 */
 import { joe } from '../users'
 
@@ -9,11 +9,15 @@ before( () => {
   cy.clearAuthState()
 })
 
-describe('Central metrics and logs end up in Realtime Database (for signed-in user)', () => {
+describe('Central metrics, logs and samples end up in Realtime Database (for signed-in user)', () => {
 
   beforeEach( () => {
     cy.signAs(joe);
   })
+
+  function getIncoming(subPath, expectedTimestamp) {   // (string, number) => Promise of {...}
+    return cy.task('getIncoming', [subPath, expectedTimestamp]);
+  }
 
   it('Have metrics passed to Realtime Database', () => {
     const at = Date.now();
@@ -58,7 +62,3 @@ describe('Central metrics and logs end up in Realtime Database (for signed-in us
       })
   })
 })
-
-function getIncoming(subPath, expectedTimestamp) {   // (string, number) => Promise of {...}
-  return cy.task('getIncoming', [subPath, expectedTimestamp]);
-}
