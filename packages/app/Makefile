@@ -6,9 +6,6 @@
 #	[ENV=...] make build
 #	make serve
 #
-all:
-	false
-
 ENV ?= staging
 
 _FIREBASE_PROD_JS=../../firebase.$(ENV).js
@@ -33,6 +30,12 @@ _ENV_TEST=tmp/.env.dev_test
 _CUSTOM_ENV_ONLINE=.env.dev.$(ENV)
 
 _DC=docker compose
+
+all:
+	false
+
+install:
+	npm install
 
 #--- Dev:local
 dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed

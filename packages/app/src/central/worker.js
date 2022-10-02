@@ -8,15 +8,15 @@ const { maxBatchDelayMs, maxBatchEntries } = myC;
 
 function fail(msg) { throw new Error(msg); }
 
-import { metricsAndLoggingProxy_v0_withGen } from './callables.js'
+import { metricsAndLoggingProxy_v0, setToken } from './callables.worker.js'
 
-const pending= [];    // Array of { "":"inc"|"log", ... }
+const pending= [];    // Array of {...}
 
-let timer;    // undefined:   nothing's going to happen ('pending' should be empty)
-              // Timer:       shipment is scheduled; some stuff should be in 'pending'
+let timer;
+  // undefined: 'pending' collects guest entries
+  // Timer:     shipment is scheduled; some stuff in 'pending'
 
-let shipF;    // ({ arr: Array of { "":"inc"|"log", ... }}) => Promise of any    // actual shipping to callables
-
+/***
 // Initialization with query parameter
 //
 self.location.search.slice(1).split("&").forEach( kvs => {    // "{key}={value}"
@@ -29,13 +29,14 @@ self.location.search.slice(1).split("&").forEach( kvs => {    // "{key}={value}"
     //
   else fail(`Unexpected param: ${k}`);
 });
+***/
 
 /*
 * Ship things
 *
-* Makes a copy of 'pending' entries (if any), clears 'pending', ships the copy in the background (free-running tail).
+* Makes a copy of 'pending' entries (if any), clears 'pending', ships the copy.
 */
-async function ship() {    // () => ()
+async function ship() {    // () => Promise of ()
   if (pending.length === 0) return;
 
   const arr= [...pending];    // JavaScript note: copies the array
@@ -45,10 +46,10 @@ async function ship() {    // () => ()
 
   const t0 = Date.now();
 
-  shipF({ arr }).then( _ => {   // free-running
-    console.debug(`Shipping took: ${ Date.now() - t0 }ms`);
+  await metricsAndLoggingProxy_v0({ arr });
+
+  console.debug(`Shipping took: ${ Date.now() - t0 }ms`);
     // tbd. collect this into the metrics (not right away; put aside and when there's something else to ship, pass it along)
-  })
 }
 
 //--- Functions that feed the queue 🥄
@@ -62,65 +63,83 @@ async function ship() {    // () => ()
 *   Ship any pending entries.
 *
 * {
-*   "": "inc",
-*   id: string,
-*   diff: number,   // >= 0.0
+*   "": "login"
+*   token: string
+* }
+*   A user has been authenticated; start shipping entries (including possibly stored guest entries).
 *
-*   // Context
-*   at: number
+* {
+*   "": "ship",
+*   id: string,
+*   inc: number,   // >= 0.0
+*   ctx: {
+*     clientTimestamp: number,
+*     uid: string?
+*   }
 * }
 *   Push a counter entry for delivery.
 *
 * {
-*   "": "log",
+*   "": "ship",
 *   id: string,
 *   level: "info"|"warn"|"error"|"fatal"
 *   msg: string,
 *   args: Array of any,
-*
-*   // Context
-*   at: number
+*   ctx: {
+*     clientTimestamp: number,
+*     uid: string?
+*   }
 * }
 *   Push a log entry for delivery. If 'level'==="fatal", the delivery may be done sooner than scheduled.
 *
 * {
-*   "": "obs",
+*   "": "ship",
 *   id: string,
-*   v: number,
-*
-*   // Context
-*   at: number
+*   obs: number,
+*   ctx: {
+*     clientTimestamp: number,
+*     uid: string?
+*   }
 * }
 *   Push a statistical observation for delivery.
 */
 self.addEventListener('message', (e) => {
   console.log("Worker received:", e);
 
-  if (e.data["at"]) {    // DEBUG
-    const dt_DEBUG = Date.now() - e.data["at"];     // Once we know the delay, consider picking time here.
-    console.debug("Diff when passing to worker:", `${ dt_DEBUG }ms`);   // 78ms (Safari 15.6); 152ms (Chrome 102)
-  }
-
-  const t = e.data[""] || fail("No '' field to indicate msg type.");    // just our convention
   const data = e.data;
 
-  let shipNow;
-
-  if (t === "flush") {
-    shipNow = true;
-
-  } else {
-    pending.push(data);
-
-    // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
-    //
-    if ((pending.length >= maxBatchEntries) || (t === 'log' && data.level === 'fatal')) {
-      shipNow = true;
+  if (true) {   // DEBUG
+    const at = data?.ctx?.clientTimestamp;
+    if (at) {
+      const dt_DEBUG = Date.now() - at;
+      console.debug("Diff when passing to worker:", `${ dt_DEBUG }ms`);   // 78ms (Safari 15.6); 152ms (Chrome 102)
     }
   }
 
+  let shipNow;
+
+  const t = data[""] || fail("No type in '.[\"\"]'");
+  if (t === 'flush') {
+    shipNow = true;
+
+  } else if (t === 'login') {
+    const token = data.token || fail("No '.token' field");
+    setToken(token);    // allows 'metricsAndLoggingProxy_v0' to reach the server
+
+  } else if (t === 'ship') {
+    pending.push({ ...data, [""]: undefined });   // "" field not needed
+
+    // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
+    //
+    if (pending.length >= maxBatchEntries || data.level === 'fatal') {
+      shipNow = true;
+    }
+  } else {
+    fail(`Unexpected type: ${t}`);
+  }
+
   if (shipNow) {
-    ship();
+    ship();   // free-running tail
 
     if (timer) {
       clearTimeout(timer);
@@ -130,19 +149,10 @@ self.addEventListener('message', (e) => {
     // If there's not already a timer ticking, set one up.
     //
     if (!timer) {
-      timer = setTimeout(timedShipment, maxBatchDelayMs);
+      timer = setTimeout(ship, maxBatchDelayMs);
 
     } else {
       // we're fine - the timer will ship the new entry
     }
   }
 });
-
-function timedShipment() {
-  if (pending.length === 0) {
-    console.warn("Weird. Timed shipment but there are no pending entries. Skipped.");
-    return;
-  }
-
-  ship();
-}

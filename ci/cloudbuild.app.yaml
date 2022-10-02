@@ -38,7 +38,8 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/app install --omit=optional &&
+    npm --prefix packages/backend/functions install &&
+    npm --prefix packages/app install &&
     
     (cd packages/backend && 
       touch firebase-debug.log firestore-debug.log database-debug.log

@@ -71,25 +71,27 @@ const db = (!DATABASE_URL) ? null : (_ => {
 /*
 * Store a counter increment.
 */
-async function inc({ id, diff, at }) {    // => Promise of ()
+async function inc({ id, inc, ctx }) {    // => Promise of ()
+  const { clientTimestamp } = ctx;
 
   // tbd. Is this layout fine?  Consider multiple clients simultaneously incrementing. What are the Realtime Database
   //    restrictions - bring them here.
 
   const refRaw = db.ref("incoming/incs");
-  await refRaw.push({ id, diff, clientTimestamp: at });
+  await refRaw.push({ id, inc, clientTimestamp });
 
   const refAggregate = db.ref(`inc/${id}`);
-  await refAggregate.set( { "=": ServerValue.increment(diff) })    // Note: Tags can be added by '{k}={v}'
+  await refAggregate.set( { "=": ServerValue.increment(inc) })    // Note: Tags can be added by '{k}={v}'
 }
 
 /*
 * Store a log entry.
 */
-async function log({ id, level, msg, args, at, uid }) {   // => Promise of ()
+async function log({ id, level, msg, args, ctx }) {   // => Promise of ()
+  const { clientTimestamp, uid } = ctx;
 
   const refRaw = db.ref("incoming/logs");
-  await refRaw.push({ id, level, msg, args, clientTimestamp: at, uid });
+  await refRaw.push({ id, level, msg, args, clientTimestamp, uid });
 
   // Logs have no aggregation
 }
@@ -97,10 +99,11 @@ async function log({ id, level, msg, args, at, uid }) {   // => Promise of ()
 /*
 * Store a statistical sample.
 */
-async function obs({ id, v, at }) {   // => Promise of ()
+async function obs({ id, obs, ctx }) {   // => Promise of ()
+  const { clientTimestamp } = ctx;
 
   const refRaw = db.ref("incoming/obs");
-  await refRaw.push({ id, v, clientTimestamp: at });
+  await refRaw.push({ id, obs, clientTimestamp });
 
   // Not doing an aggregation. Doing such would need knowledge about bucketing (i.e. rate of incoming observations).
   // That can vary - better have the visualization tools handle that.
@@ -114,7 +117,7 @@ function validateGen(t_OUTPUT, validKeys) {    // ("Inc"|"Log"|..., Array of str
   const validKeysSet = new Set(validKeys);
 
   return o => {
-    const ks = Object.keys(o) .filter( x => x !== '' );   // Note: Cannot remove the key by '{ ...o, [""]: undefined }'
+    const ks = Object.keys(o);
     const ksSet = new Set(ks);
 
     const missing = validKeys.filter( x => !ksSet.has(x) );
@@ -128,21 +131,55 @@ function validateGen(t_OUTPUT, validKeys) {    // ("Inc"|"Log"|..., Array of str
   }
 }
 
-const lookup = {
-  inc: [validateGen("Inc", ["id","diff","at"]), inc],
-  log: [validateGen("Log", ["id", "level", "msg", "args", "at"]), log],
-  obs: [validateGen("Obs", ["id", "v", "at"]), obs]
+const incValidate = validateGen("Inc", ["id","inc","ctx"]);
+const logValidate = validateGen("Log", ["id","level","msg","args","ctx"]);
+const obsValidate = validateGen("Obs", ["id","obs","ctx"]);
+
+/*
+* Create a validator to check:
+*   - 'o' are of one expected type
+*   - 'ctx.uid' (if provided) matches with the user authenticated with (impersonation would be malign)
+*
+*   If all is well, the validator provides a function for storing the entry.
+*/
+function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
+
+  return (o,i) => {   // ({...}, integer) => (uid) => ()
+
+    // Context is the same for all types
+    //
+    const claimedUid = o.ctx.uid;   // undefined | string
+    if (claimedUid && claimedUid !== realUid) {
+      fail_invalid_argument(`Claimed uid (in the data) and the one used in the call clash: ${claimedUid} !== ${realUid}`);
+    }
+
+    const stripUser = (o2) => (
+      {...o2, ctx: { ...o2.ctx, uid: undefined }}
+    );
+
+    if (o.inc) {
+      incValidate( stripUser(o) );
+      return _ => inc(o);
+    } else if (o.level) {
+      logValidate(o);
+      return uid => log(o);   // keep user
+    } else if (o.obs) {
+      obsValidate(o);
+      return _ => obs( stripUser(o) );
+    } else {
+      fail_invalid_argument(`Unexpected entry #${i}: ${o}`);
+    }
+  }
 }
 
 /*
 * { arr: Array of IncEntry|LogEntry|ObsEntry } -> ()
 *
-*   IncEntry:
-*     { "": "inc", id: string, diff: double (>= 0.0), at: number }
-*   LogEntry:
-*     { "": "log", id: string, level: "info"|"warn"|"error"|"fatal", msg: string, args: Array of any, at: number }
-*   ObsEntry:
-*     { "": "obs", id: string, v: double, at: number }
+*   IncEntry: { id: string, inc: double (>= 0.0), ctx: Ctx }
+*   LogEntry: { id: string, level: "info"|"warn"|"error"|"fatal", msg: string, args: Array of any, ctx: Ctx }
+*   ObsEntry: { id: string, obs: double, ctx: Ctx }
+*
+*        Ctx: { clientTimestamp: number, stage?: string, release?: string, ... }
 *
 * NOTE (KEEP!!!):
 *   If you need to signal errors, do it like so. Use codes only from 'FunctionsErrorCode' selection:
@@ -154,58 +191,24 @@ const lookup = {
 export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
   .onCall((bulk, ctx) => {
 
-    /*** // Even during emulation, we get the user information from the token.
-    //
-    console.debug("!!! Auth context:", ctx.auth);
-      /_*{
-      *   uid: 'dev',
-      *   token: {
-      *     name: 'Just Me',
-      *     picture: 'https://no.such.domain',
-      *     email_verified: false,
-      *     auth_time: 1661716983,
-      *     user_id: 'dev',
-      *     firebase: [Object],
-      *     iat: 1661716983,
-      *     exp: 1661720583,
-      *     aud: 'demo-main',
-      *     iss: 'https://securetoken.google.com/demo-main',
-      *     sub: 'dev',
-      *     uid: 'dev'
-      *   }
-      * }
-      ***/
-
     const uid = ctx.auth.uid || fail_unauthenticated();
 
     const { arr } = bulk;
     console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, uid);
 
-    const fs = arr.map( (e,i) =>
-      lookup[e[""]] || fail_invalid_argument(`No type ([""]=inc|log|obs|...) for entry ${i}.`)
-    );
+    // Validate all entries, get functions for storing them.
+    arr.map( pickTypeGen(uid) )
+      .forEach( f => f() );
 
-    // Validate all entries, before storing any of them (just because, no harm if doing differently..)
-    //
-    arr.forEach( (e,i) => {
-      console.debug(`!!! Validating entry:`, { e });
-      fs[i][0](e);  // throws if keys not as expected
-    });
-
-    arr.forEach( (e,i) => {
-      console.debug("!!! Storing entry:", { e });
-      fs[i][1]({ ...e, uid });
-    });
-
-    return;     // note: we don't need to return anything
+    //return;   // note: we don't need to return anything
   });
 
 function fail_invalid_argument(msg) {
   throw new https_v1.HttpsError('invalid-argument', msg);
 }
-function fail_unimplemented() {
+/*function fail_unimplemented() {
   throw new https_v1.HttpsError('unimplemented');
-}
+}*/
 function fail_unauthenticated() {
   throw new https_v1.HttpsError('unauthenticated');
 }

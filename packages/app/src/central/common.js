@@ -1,11 +1,12 @@
 /*
 * src/central/common.js
 *
-* Client side support for sending logs / counter increments to Cloud Functions.
+* Client side support for sending increments, logs and samples to Cloud Functions.
 *
 * APPROACH:
 *   Each user session gets a dedicated worker just for those messages. This is mainly to keep state management simple.
-*   Tried also changing the token of a single worker.
+*   Such a worker is created already during non-authenticated time; entries queued during non-authenticated time are
+*   sent once/if the user authenticates. This is necessary for example for the initialization measurements.
 *
 * References:
 *   - Vite > Web Workers
@@ -13,137 +14,115 @@
 */
 import {getAuth, onAuthStateChanged} from '@firebase/auth'
 
-let workerProxyProm;  // undefined: no current user
-                      // Promise of { flush, inc, log }: have a way / going to get one "soon" (~<10ms)
+const LOCAL = import.meta.env.MODE === "dev_local";
 
 const auth = getAuth();
 
 /*
-* Create a worker, equipped with a certain token.
+* Create a worker, for current guest and upcoming user.
 *
 * Note:
 *   The whole worker interface is within this function, keeping it tight.
 */
-async function workerGen(token) {   // (string) => Promise of { flush(), inc(id: string, diff: number), log(id: string, level: "debug"|"info"|"warn"|"error"|"fatal", msg: string, ...args: Array of any) }
+function workerGen() {   // () => { flush, login, inc, log, obs }
 
-  // Note: Vite (3.1.0-beta.2) does not allow string interpolation within the worker thread URL.
-  //    <<
-  //      $ npm run build
-  //      ...
-  //      [vite] Internal server error: `new URL(url, import.meta.url)` is not supported in dynamic template string.
-  //    <<
+  // Note: If passing dynamically created query parameters to the worker, use '+' instead of string interpolation
+  //    (but we don't need query params).
   //
-  //const w = new Worker(new URL(`./worker.js?token=${token}`, import.meta.url), {type: 'module'});   // FAILS 'npm run build'
-  const w = new Worker(new URL('./worker.js?token='+token, import.meta.url), { type: 'module' });
-    //
-    // Works on dev, but not in prod. 'worker.js' is not generated but the browser looks for one (404).
+  const w = new Worker(new URL("./worker.js", import.meta.url), { type: 'module' });
 
-  // Also this fails.
-  /**const w = await import('./worker?worker' + '&url' + '&token='+token).then( mod => {
-    console.error("!!!", mod.default);
-    return new mod.default();
-  });**/
+  function ctxGen(forcedAt) {   // (number?) => { uid: string, clientTimestamp: number }
+    const at = forcedAt || Date.now();
+
+    return {
+      uid: auth.currentUser?.uid,
+      clientTimestamp: at
+
+      // tbd. Other context: release, ...
+    }
+  }
 
   return {
-    flush(final = false) {   // (boolean) => ()
+    flush() {   // () => ()
       w.postMessage({ "":"flush" });
-
-      /**
-      // Trying to help JavaScript GC to release the resource (Q: any better way / pattern?); could also just let be..
-      if (final) {
-        w = null;
-      }**/
+    },
+    login(token) {  // (string) => ()
+      w.postMessage( { "": "login", token })
     },
 
-    inc(id, diff, testOpts) {   // (string, number) => ()
-      w.postMessage({ "":"inc", id, diff, at: testOpts?.forcedAt || Date.now() });
+    inc(id, inc, testOpts) {   // (string, number) => ()
+      w.postMessage({ "":"ship", id, inc, ctx: ctxGen(testOpts?.forcedAt) });
     },
 
     log(id, level, msg, args, testOpts) {   // (string, "debug"|"info"|"warn"|"error"|"fatal", string, Array of any) => ()
-      w.postMessage({ "":"log", id, level, msg, args, at: testOpts?.forcedAt || Date.now() });
+      w.postMessage({ "":"ship", id, level, msg, args, ctx: ctxGen(testOpts?.forcedAt) });
     },
 
-    obs(id, v, testOpts) {    // (string, number) => ()
-      w.postMessage({ "":"obs", id, v, at: testOpts?.forcedAt || Date.now() });
+    obs(id, obs, testOpts) {    // (string, number) => ()
+      w.postMessage({ "":"ship", id, obs, ctx: ctxGen(testOpts?.forcedAt) });
     }
   }
 }
 
+let currentWorker = workerGen();    // { login, flush, inc, log, obs }
+
 /*
-* Watch the user logging in/out. 'workerProxyProm' provides access to the current user's metrics/logs writes.
-*
-* This prepares 'workerProxyProm' to the task, even before a metric/log write is called. In practise, the first
-* log may come really fast; before the Promise is ready.
+* Watch the user logging in/out.
 */
-onAuthStateChanged( auth, user => {
-  console.debug("!!! [CENTRAL]: auth", { uid: user?.uid });    // DEBUG
+onAuthStateChanged( auth, async user => {
+  //console.debug("!!! [CENTRAL]: auth", { uid: user?.uid });    // DEBUG
 
-  if (user === undefined) return;
+  if (user === undefined) {
+    // nada
 
-  if (user) {
-    (!workerProxyProm) || fail("No break between two users.");    // should have been 'null' in between
+  } else if (user) {
+    // Existing worker is without a user: provide one (will deliver pending guest-data and new one)
 
     const t0 = performance.now();
 
-    console.debug("!!! [CENTRAL]: Fetching token...");
+    const token = await user.getIdToken();
+    console.debug(`Token received in ${performance.now() - t0}ms`);   // (old code: 3, 6.2, 7.5 ms)
 
-    workerProxyProm = user.getIdToken().then(token => {    // free-running tail
-      console.debug(`Token received in ${performance.now() - t0}ms`);   // 3, 6.2, 7.5 ms
-      return workerGen(token);
-    });
+    currentWorker.login(token);
 
   } else {
-    if (workerProxyProm) {
-      workerProxyProm.then( wp => { wp.flush(true) } );
-    }
-    workerProxyProm = null;
+    // End of session: send earlier entries; new worker for the next user
+
+    currentWorker.flush();
+    currentWorker = workerGen();    // new worker for the next user (and collecting guest entries, until then)
   }
 });
 
-async function getWorker() {    // () => Promise of { flush, inc, log }
-  return workerProxyProm ||
-    fail("");
-}
-
 /*
 * Flush the outgoing buffers, e.g. if the user is about to log out.
-*/
+*_/
 function flush() {    // () => ()
-  getWorker().then( x => {
-    x.flush()
-  });
-}
+  currentWorker.flush();
+}*/
 
 function createCounter(id) {
-  return (diff = 1.0, testOpts) => {    // (diff: number = 1.0, ?{ forcedAt: number }) => ()
-    diff >= 0.0 || fail(`Bad parameter: ${diff}`)
+  return (step = 1.0, testOpts) => {    // (step: number = 1.0, ?{ forcedAt: number }) => ()
+    step >= 0.0 || fail(`Bad parameter: ${step}`)
 
-    getWorker().then( x => {
-      x.inc(id, diff, testOpts);
+    currentWorker.inc(id, step, testOpts);
 
-      console.debug("Central counter:", { id, diff });
-    });
+    console.debug("Central counter:", { id, step });
   }
 }
 
 function createLog(id, level = "info") {
   return (msg, a, testOpts) => {    // (string, ?any, ?{ forcedAt: number }) => ()
+    currentWorker.log(id, level, msg, a, testOpts);
 
-    getWorker().then( x => {
-      x.log(id, level, msg, a, testOpts);
-
-      console.debug("Central log:", {id, level, msg, a});
-    });
+    console.debug("Central log:", {id, level, msg, a});
   }
 }
 
 function createObs(id) {
   return (v, testOpts) => {   // (number, ?{ forcedAt: number }) => ()
-    getWorker().then( x => {
-      x.obs(id, v, testOpts);
+    currentWorker.obs(id, v, testOpts);
 
-      console.debug("Central obs:", {id, v});
-    });
+    console.debug("Central obs:", {id, v});
   }
 }
 
@@ -151,8 +130,7 @@ function fail(msg) { throw new Error(msg); }
 
 // Help Cypress testing by preparing some entries.
 //
-const LOCAL = import.meta.env.MODE === "dev_local";
-if (LOCAL) {
+if (LOCAL && window.Cypress) {
   window.TEST_countDummy = createCounter("test-dummy");
   window.TEST_logDummy = createLog("test-dummy", "info");
   window.TEST_obsDummy = createObs("test-dummy");
@@ -163,5 +141,5 @@ export {
   createLog,
   createObs,
     //
-  flush
+  //flush
 }

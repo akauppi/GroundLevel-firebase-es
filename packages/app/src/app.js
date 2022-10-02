@@ -21,6 +21,9 @@ import { init as initAside } from 'aside-keys'
 import { appTitle } from './config.js'
 import { router } from './router.js'
 
+import { perfHook } from './central/commonPerf'
+
+function fail(msg) { throw new Error(msg) }
 /** disabled, for now
 // Ops monitoring
 import { init as Sentry_init, setUser as Sentry_setUser } from '@sentry/browser'
@@ -33,27 +36,29 @@ import App from '/@App/index.vue'
 
 import './common.css'
 
-import { startupTrace } from "/@/traces"
+import { initPerfStart, initAsidePerfStart, initRouterPerfStart } from "/@central/perfs"
 
 document.title = appTitle;
 
 const LOCAL = import.meta.env.MODE === 'dev_local';
 const DEV = import.meta.env.MODE !== 'production';
 
-const SENTRY_DSN= import.meta.env.VITE_SENTRY_DSN;   // undefined | string
-const SENTRY_SAMPLE_RATE= import.meta.env.VITE_SENTRY_SAMPLE_RATE;   // undefined (dev) | 0.0..1.0 (CI production builds)
+//const SENTRY_DSN= import.meta.env.VITE_SENTRY_DSN;   // undefined | string
+//const SENTRY_SAMPLE_RATE= import.meta.env.VITE_SENTRY_SAMPLE_RATE;   // undefined (dev) | 0.0..1.0 (CI production builds)
 
 const STAGE = import.meta.env.VITE_STAGE;   // undefined (dev) | "staging"|... (production build)
 const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev) | "<git commit checksum>" (CI build) | "0" (local production build)
 
-const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
-const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;
+//const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
+//const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;
 
 /*if (!DEV && !PLAUSIBLE_ENABLED) {   // tbd. such warning in build script (console) would be a better place.
   console.info("Plausible Analytics not enabled; add 'PLAUSIBLE_ENABLED=true|false' to mitigate this warning.")
 }*/
 
 async function init() {    // () => Promise of ()
+
+  const initPerf = initPerfStart();
 
   // Initialize Plausible Analytics
   //
@@ -99,8 +104,48 @@ async function init() {    // () => Promise of ()
   ***/
 
   // Initialize Firebase Performance monitoring
+  //
+  // Note:
+  //    Importing '@firebase/performance' requires the 'appId' to be defined, in initialization. We don't do that for
+  //    'dev:local' since there's no benefit (is there?) for using Firebase Performance against the emulators.
+  //
+  //    If you wish so, add 'appId'. Otherwise, this dynamic initialization should suffice.
+  //
+  // Reference:
+  //    - "Add custom monitoring for specific app code" (Firebase docs)
+  //      -> https://firebase.google.com/docs/perf-mon/custom-code-traces?platform=web
+  //
+  if (!LOCAL) {
+    const { getPerformance, trace } = await import("@firebase/performance").then(mod => mod.default);
+    const perf = getPerformance();
 
-  const tr = startupTrace();
+    perfHook( (s,durationMs) => {
+      const t = trace(perf, s);
+
+      const startTime = performance.now() - durationMs;   // #hack, but good enough
+
+      t.record( startTime, durationMs, {
+        // metrics: { <key>: <number> }
+        // attributes: { <key>: <string> }
+      });
+    });
+
+    // tbd. is there a way to feed also 'incs' and 'obs' to be visible in Firebase Performance dashboard?
+    //
+    const tIncs = trace(perf, "incs");
+
+    incHook( (s,diff) => {
+      tIncs.incrementMetric(s,diff);    // note: Firebase floors numbers given to it
+    });
+
+    /* No way, right???
+    const tObs = trace(perf, "obs");
+    obsHook( (s,v) => {
+      tObs.xxxMetric(s,v);
+    }); */
+  }
+
+  initPerf.lap("Firebase Performance initialized");
 
   // Initialize Sentry
 
@@ -160,32 +205,23 @@ async function init() {    // () => Promise of ()
   // tbd. We'll likely need to change the way 'initAside' works so that *it* can initialize Firebase auth with
   //    the requested persistence (or can we change the persistence once initialized?). #rework
 
-  const aside_t0 = performance.now();
+  const aPerf = initAsidePerfStart();
 
   /*await*/ initAside(auth).then( _ => {    // tbd. do we need 'await' or can we do it in parallel?
-    //tr.lap('aside-keys initialization');    // 499..530ms
-
-    tr.set("aside-keys initialization", performance.now()-aside_t0 );
-
-  }); /** disabled: .catch(err => {
-    console.error("'Aside-keys' did not initialize:", err);   // never seen
-    throw err;
-  });*/
+    aPerf.end();    // xxx ms
+  });
 
   // Initialize Vue App
   //
-  const vue_t0 = performance.now();
   const app = createApp(App);
+  initPerf.lap("Vue.js initialization");
 
-  tr.set("Vue.js initialization", performance.now()-vue_t0);
-
-  const router_t0 = performance.now();
+  const rPerf = initRouterPerfStart();
   app.use(router);    // needed for any use of the 'router'
 
   // Let's be curious and see whether there are ever errors from here:
   /*await*/ router.isReady().then( _ => {
-    tr.set("Router initialization", performance.now()-router_t0);
-
+    rPerf.end();
   }).catch( err => {
     console.error("Router did not initialize:", err);   // never seen
     throw err;
@@ -203,12 +239,9 @@ async function init() {    // () => Promise of ()
 
   app.mount('#app');
 
-  // Sample of adding a meta data to the measurement (not sure if we need that)
-  //tr.setAttribute('appId', app.id);
+  initPerf.lap("Vue.js application mounted");
 
-  tr.end();
-
-  //central.info("App is mounted.");
+  initPerf.end();
 }
 
 /*await*/ init();   // free-running tail

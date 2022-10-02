@@ -73,6 +73,20 @@ install:
 prune:
 	npm prune
 
+# Local dev: Important to create 'tmp/functions/node_modules' in the host side; otherwise, WSL2 Docker will create one
+#	with 'root' access (instead of the current user).
+#
+functions-install-local:
+	install -d tmp/functions/node_modules
+	docker compose -f docker-compose.tools.yml run --rm functions-install
+
+# CI: Prepares things for CI steps:
+#	- tmp/firebase.ci.json
+#	- tmp/database.rules.json (not used in CI; stop generating if we know it's not going to be used)
+#
+# Note: CI step itself is expected to install 'functions' packages.
+#
+functions-install-ci: tmp/firebase.ci.json tmp/database.rules.json
 
 # Tests
 test: _started

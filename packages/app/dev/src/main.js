@@ -3,8 +3,6 @@
 *
 * Entry point for Vite. Development mode harness that is *not* part of the application's production builds.
 */
-import { assert } from './assert.js'
-
 import { initializeApp } from '@firebase/app'
 import { getAuth, connectAuthEmulator, initializeAuth, debugErrorMap } from '@firebase/auth'
 import { getFirestore, initializeFirestore, connectFirestoreEmulator,
@@ -13,6 +11,7 @@ import { getFirestore, initializeFirestore, connectFirestoreEmulator,
 const LOCAL = import.meta.env.MODE === "dev_local";
 
 function fail(msg) { throw new Error(msg) }
+function assert(cond) { cond || fail("Assert failed" ); }
 
 // For the sake of Cypress tests (at least), set up human-readable error messages. This only applies to dev:local.
 //
@@ -52,9 +51,9 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   // Enable this if there are difficulties with Firestore connection. [DEBUG]
   //
-  if (false) {
+  /* if(true){
     firestore_setLogLevel('debug');
-  }
+  }*/
 
   // Set up local emulation. Needs to be before any 'firebase.firestore()' use.
   //

@@ -66,7 +66,6 @@ services:
       # --- RO
       - ./node_modules:/work/node_modules:ro
       - ./jest.config.default.js:/work/jest.config.default.js:ro
-      - ./package.json:/work/package.json:ro
       - ./tmp/firebase.json:/work/firebase.json:ro
       - ./test-firestore-rules:/work/test-firestore-rules:ro
       - ./test-fns:/work/test-fns:ro
@@ -76,8 +75,12 @@ services:
     working_dir: /work
     command: sh -c '
       npm config set update-notifier false &&
+      echo "{ \"type\":\"module\" }" > package.json &&
 
-      npm run dc:warm-up &&
+      export JEST=node_modules/.bin/jest &&
+      export NODE_OPTIONS=--experimental-vm-modules &&
+      $$JEST --config test-fns/jest.config.js --verbose --detectOpenHandles --all &&
+      $$JEST --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all &&
 
       touch .healthy &&
       sleep infinity

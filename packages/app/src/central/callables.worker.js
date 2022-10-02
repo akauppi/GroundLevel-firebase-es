@@ -1,5 +1,5 @@
 /*
-* src/central/callables.js
+* src/central/callables.worker.js
 *
 * Background:
 *   Tried using 'firebase-functions' and '@firebase/auth' from the worker thread, but didn't learn how to sync the
@@ -36,13 +36,21 @@ const functionsBaseURL= (_ => {
 
 function fail(msg) { throw new Error(msg); }
 
+let token;
+
+function setToken(s) {
+  token = s;
+}
+
 /*
 * Call a Cloud Functions callable.
 *
 * For the return value, we follow the same '{ data, error }' schema as the 'firebase-functions' API. HOWEVER, errors not
 * thrown as 'HttpsError' in the server cause an exception.
+*
+* Uses the token provided by 'setToken' for authentication.
 */
-function httpsCallableWithGen(name) {    // (string) => (token: string) => ((data) => Promise of { data: any|undefined, error: object|undefined ))
+function httpsCallableGen(name) {    // (string) => (data) => Promise of { data: any|undefined, error: object|undefined })
 
   const uri = `${functionsBaseURL}/${name}`;
 
@@ -54,13 +62,13 @@ function httpsCallableWithGen(name) {    // (string) => (token: string) => ((dat
   //
   const method = 'POST';
 
-  return (token) =>
-    async (dataIn) => {    // (any) => Promise of X
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {})
+  }
+
+  return async dataIn => {    // (any) => Promise of X
       const body = JSON.stringify({ data: dataIn });
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { "Authorization": `Bearer ${token}` } : {})
-      }
 
       //console.debug( "!!!", { uri, method, headers, body } )    // DEBUG
 
@@ -115,8 +123,9 @@ function httpsCallableWithGen(name) {    // (string) => (token: string) => ((dat
     }
 }
 
-const metricsAndLoggingProxy_v0_withGen = httpsCallableWithGen("metricsAndLoggingProxy_v0");
+const metricsAndLoggingProxy_v0 = httpsCallableGen("metricsAndLoggingProxy_v0");
 
 export {
-  metricsAndLoggingProxy_v0_withGen
+  setToken,
+  metricsAndLoggingProxy_v0
 }
