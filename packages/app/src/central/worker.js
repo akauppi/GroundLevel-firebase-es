@@ -7,14 +7,17 @@ import { metricsAndLogsWorker as myC } from '/@/config.js';
 const { maxBatchDelayMs, maxBatchEntries } = myC;
 
 function fail(msg) { throw new Error(msg); }
+function assert(cond) { if (!cond) fail("assert failed"); }
 
-import { metricsAndLoggingProxy_v0, setToken } from './callables.worker.js'
+import { metricsAndLoggingProxy_v0_Gen } from './callables.worker.js'
 
 const pending= [];    // Array of {...}
 
 let timer;
   // undefined: 'pending' collects guest entries
   // Timer:     shipment is scheduled; some stuff in 'pending'
+
+let metricsAndLoggingProxy_v0;    // turns to function once we have a token
 
 /***
 // Initialization with query parameter
@@ -38,6 +41,7 @@ self.location.search.slice(1).split("&").forEach( kvs => {    // "{key}={value}"
 */
 async function ship() {    // () => Promise of ()
   if (pending.length === 0) return;
+  assert(metricsAndLoggingProxy_v0);
 
   const arr= [...pending];    // JavaScript note: copies the array
   pending.length = 0;
@@ -104,17 +108,19 @@ async function ship() {    // () => Promise of ()
 *   Push a statistical observation for delivery.
 */
 self.addEventListener('message', (e) => {
-  console.log("Worker received:", e);
+  console.log("Worker received:", e.data);
 
   const data = e.data;
 
+  /* Just a little code checking the duration of passing messages to the worker. It varies. Best to time stamp at the main thread.
+  *
   if (true) {   // DEBUG
     const at = data?.ctx?.clientTimestamp;
     if (at) {
       const dt_DEBUG = Date.now() - at;
-      console.debug("Diff when passing to worker:", `${ dt_DEBUG }ms`);   // 78ms (Safari 15.6); 152ms (Chrome 102)
+      console.debug("Diff when passing to worker:", `${ dt_DEBUG }ms`);   // 0..4ms (Safari 16); 152..247ms (Chrome 105)
     }
-  }
+  }*/
 
   let shipNow;
 
@@ -123,22 +129,26 @@ self.addEventListener('message', (e) => {
     shipNow = true;
 
   } else if (t === 'login') {
+    assert(!metricsAndLoggingProxy_v0);
+
     const token = data.token || fail("No '.token' field");
-    setToken(token);    // allows 'metricsAndLoggingProxy_v0' to reach the server
+    metricsAndLoggingProxy_v0 = metricsAndLoggingProxy_v0_Gen(token);
 
   } else if (t === 'ship') {
     pending.push({ ...data, [""]: undefined });   // "" field not needed
 
-    // If it's fatal, we might want to try shipping right away (so the user won't close the window and we lose the info).
-    //
-    if (pending.length >= maxBatchEntries || data.level === 'fatal') {
+    if (data.level === 'fatal') {   // if it's fatal, try shipping right away (less chance of getting lost)
       shipNow = true;
     }
+
   } else {
     fail(`Unexpected type: ${t}`);
   }
 
-  if (shipNow) {
+  if (!metricsAndLoggingProxy_v0) {
+    // need authentication before shipping anything; just collecting
+
+  } else if (shipNow || pending.length >= maxBatchEntries) {
     ship();   // free-running tail
 
     if (timer) {

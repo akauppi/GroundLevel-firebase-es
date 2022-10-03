@@ -16,6 +16,10 @@ import {getAuth, onAuthStateChanged} from '@firebase/auth'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
+const stage = LOCAL ? "dev"
+  : import.meta.env.MODE === "dev_online" ? `dev.${ import.meta.env.VITE_STAGE }`
+  : import.meta.env.VITE_STAGE || fail("[INTERNAL] no stage");
+
 const auth = getAuth();
 
 /*
@@ -36,9 +40,11 @@ function workerGen() {   // () => { flush, login, inc, log, obs }
 
     return {
       uid: auth.currentUser?.uid,
-      clientTimestamp: at
+      clientTimestamp: at,
 
-      // tbd. Other context: release, ...
+      stage
+
+      // tbd. Other context: release version, ...
     }
   }
 
@@ -81,7 +87,7 @@ onAuthStateChanged( auth, async user => {
     const t0 = performance.now();
 
     const token = await user.getIdToken();
-    console.debug(`Token received in ${performance.now() - t0}ms`);   // (old code: 3, 6.2, 7.5 ms)
+    console.debug(`Token received in ${performance.now() - t0}ms`);   // 2..14ms (old code: 3, 6.2, 7.5 ms)
 
     currentWorker.login(token);
 

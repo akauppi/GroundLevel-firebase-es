@@ -24,9 +24,9 @@ const functionsBaseURL= (_ => {
   if (LOCAL) {
     const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
     const port = import.meta.env.VITE_FUNCTIONS_PORT || fail("no 'VITE_FUNCTIONS_PORT'");
-    const region = "us-central1";   // tbd. is this right? (matches what we have in Emulator launch?)
+    const REGION = "us-central1";
+    return `http://${host}:${port}/${PROJECT_ID}/${REGION}`;
 
-    return `http://${host}:${port}/${PROJECT_ID}/${region}`;
   } else {
     const region = import.meta.env.VITE_LOCATION_ID || fail("no 'VITE_LOCATION_ID'");
 
@@ -36,21 +36,13 @@ const functionsBaseURL= (_ => {
 
 function fail(msg) { throw new Error(msg); }
 
-let token;
-
-function setToken(s) {
-  token = s;
-}
-
 /*
 * Call a Cloud Functions callable.
 *
 * For the return value, we follow the same '{ data, error }' schema as the 'firebase-functions' API. HOWEVER, errors not
 * thrown as 'HttpsError' in the server cause an exception.
-*
-* Uses the token provided by 'setToken' for authentication.
 */
-function httpsCallableGen(name) {    // (string) => (data) => Promise of { data: any|undefined, error: object|undefined })
+function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise of { data?: any, error?: object })
 
   const uri = `${functionsBaseURL}/${name}`;
 
@@ -62,12 +54,13 @@ function httpsCallableGen(name) {    // (string) => (data) => Promise of { data:
   //
   const method = 'POST';
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {})
-  }
+  return token => {
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    }
 
-  return async dataIn => {    // (any) => Promise of X
+    return async dataIn => {    // (any) => Promise of { data?, error? }
       const body = JSON.stringify({ data: dataIn });
 
       //console.debug( "!!!", { uri, method, headers, body } )    // DEBUG
@@ -121,11 +114,11 @@ function httpsCallableGen(name) {    // (string) => (data) => Promise of { data:
       //
       return { data: result, error };
     }
+  }
 }
 
-const metricsAndLoggingProxy_v0 = httpsCallableGen("metricsAndLoggingProxy_v0");
+const metricsAndLoggingProxy_v0_Gen = httpsCallableGen("metricsAndLoggingProxy_v0");
 
 export {
-  setToken,
-  metricsAndLoggingProxy_v0
+  metricsAndLoggingProxy_v0_Gen
 }
