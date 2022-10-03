@@ -14,7 +14,6 @@
 #   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
 #   FIRESTORE_PORT
 #   FUNCTIONS_PORT
-#   #DATABASE_PORT
 #
 services:
   emul:
@@ -22,13 +21,11 @@ services:
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
-      #- "${DATABASE_PORT}:${DATABASE_PORT}"
         # Keep ports aligned with 'firebase.ci.js'
 
     volumes:
       # --- RO
       - ./tmp/firebase.ci.json:/work/firebase.json:ro
-      #- ./tmp/database.rules.json:/work/database.rules.json:ro
       - ./firestore.indexes.json:/work/firestore.indexes.json:ro
       - ./firestore.rules:/work/firestore.rules:ro
       - ./functions:/work/functions:ro
@@ -37,7 +34,6 @@ services:
       #
       - ./firebase-debug.log:/work/firebase-debug.log:delegated
       - ./firestore-debug.log:/work/firestore-debug.log:delegated
-      #- ./database-debug.log:/work/database-debug.log:delegated
 
     working_dir: /work
     command: sh -c
@@ -49,7 +45,6 @@ services:
         # Note: The '--project' parameter must match that used by Cloud Functions (in 'test-fns/setup.jest.js'.
 
     healthcheck:
-      # Note: For some reason '${DATABASE_PORT}' does not get opened. But we don't need it, either.
       test: '
         nc -z localhost ${FIRESTORE_PORT} &&
         nc -z localhost ${FUNCTIONS_PORT}

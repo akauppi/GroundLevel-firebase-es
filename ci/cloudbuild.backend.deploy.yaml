@@ -1,5 +1,5 @@
 #
-# ci/cloudbuild.backend.merged.yaml
+# ci/cloudbuild.backend.deploy.yaml
 #
 # Triggers:
 #   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/backend/**' or root 'package.json'
@@ -59,28 +59,29 @@ steps:
   ']
 
 # Install
+#
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
+    apk add --update make &&
     npm config set update-notifier false &&
 
-    npm --prefix ../.. install &&
     npm install &&
-    
-    ln -s tmp/firebase.ci.json firebase.json &&
-    ln -s tmp/database.rules.json .
+    npm --prefix packages/backend install &&
+    npm --prefix packages/backend/functions install &&
+
+    (cd packages/backend &&
+      make tmp/database.rules.json &&
+      ln -s tmp/database.rules.json . &&
+
+      make ci:firebase.json
+    )
   ']
-  dir: packages/backend
-  env:
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
 
   # State:
   #   - packages/backend/functions                are installed
-  #   - packages/backend/tmp/firebase.ci.json     generated
-  #   - packages/backend/tmp/database.rules.json  generated
-  #   - packages/backend/firebase.json            alias for deployment
-  #   - packages/backend/database.rules.json      alias for deployment
+  #   - packages/backend/firebase.json            generated ('firebase.app.js' without the emulators)
+  #   - packages/backend/database.rules.json      generated
 
 # DEPLOY
 #
@@ -96,6 +97,7 @@ steps:
     cat functions/regional.js | sed -E "s/import\.meta\.env\.LOCATION_ID/''$${LOCATION_ID}''/" > .a &&
       mv .a functions/regional.js
   ']
+    # ^-- #hack: would rather replace any occurrence of '${LOCATION_ID}' within 'functions/**.js'.
   dir: packages/backend
     #
     # Note: The dance of picking up region id, only to inject it into the Cloud Functions source, so that Firebase can
@@ -115,14 +117,14 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 2:21, 2:40
+# Cloud Build: 2:21, 2:40, 3:03
 #
 timeout: 300s
 
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
 substitutions:
-  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.13.0
   _NODE_VER: "18"
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.backend    # where successful tests are marked
   _MY_BUILDER: ci-builder

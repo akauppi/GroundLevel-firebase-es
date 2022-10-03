@@ -22,8 +22,7 @@ Let's first set the target - what do we want the CI/CD pipeline to do for us?
 
 For passed tests, the test-level CI jobs write a token to the build project's Cloud Storage. The CD jobs can then check this, to know whether a certain code base has (at any earlier time) passed tests. This means deployment doesn't need to re-run tests, but has confidence that the code can be deployed.
 
-
->Note: The `/dc/` folder is not involved in CI. It's only used for development. CI gets the Firebase Emulators and CLI from a pre-built Docker image, to save time.
+>Note: The `/dc/` folder is not directly used in CI. The Firebase emulator within it is prebuilt and pushed into the `ci-builder` project, which saves time.
 
 
 ### Suggested GCP projects layout
@@ -204,7 +203,10 @@ These are already created, by Firebase.
 
 ### Build and push the builder image
 
-The CI scripts require your `gcloud` builder project to have the `firebase-emulators:11.3.0` image in the Artifact Registry. Let's build such an image, and push it there.
+The CI scripts require your `gcloud` builder project to have the `firebase-emulators` image in the Artifact Registry. Let's build such an image, and push it there.
+
+<!-- tbd. Changing this so that we use `gcloud` itself to build and push the image.
+-->
 
 1. Log into your "CI builder" GCloud project (see steps above).
 2. Build and push the image
@@ -230,7 +232,7 @@ The CI scripts require your `gcloud` builder project to have the `firebase-emula
 
 ><details style="margin-left: 2em"><summary>**Costs involved (and how to have none)**</summary>
 >
->Storing Docker images in Artifact Registry has a cost. The free tier provides 1GB of free storage (July 2022). The image is slightly less than 500MB, so you can have two versions without inducing billing.
+>Storing Docker images in Artifact Registry has a cost. The free tier provides 0.5GB of free storage (Oct 2022). <sub>source: [Artifact Registry pricing](https://cloud.google.com/artifact-registry/pricing)</sub> The image's "virtual size" is around 186MB, so you can have two versions without inducing billing.
 >
 >You may want to occasionally visit the [GCP Console](https://console.cloud.google.com/artifacts) and clear away earlier versions.
 ></details>
@@ -238,13 +240,13 @@ The CI scripts require your `gcloud` builder project to have the `firebase-emula
 
 ### Update the references to `ci-builder` GCP project
 
-The `cloudbuild.merged.*.yaml` scripts are run under your *deployment* GCP project, not the builder. 
+The `cloudbuild.*.deploy.yaml` scripts are run under your *deployment* GCP project, not the builder. 
 
 They reference the builder image as such:
 
 ```
 substitutions:
-  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.2.1
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.13.0
 ```
 
 Replace `ci-builder/builders` with the name of the builder project you created, and the folder you use.
@@ -365,7 +367,7 @@ Each deployment project needs to be able to read the builder image. This means g
 
 - GCP Console > (*builder project*) > IAM & Admin
 
-   - `+👤 ADD`
+   - `+👤 GRANT ACCESS`
 
    >![](.images/grant-artifact-registry-reader.png)
 
@@ -397,6 +399,8 @@ Your deployment scripts will not be able to see whether tests have passed for a 
 
 Within GCP, the Cloud Build service account doesn't by default have access to read the same project's secrets.
 
+- Change to *deployment project* > IAM:
+
 >![](.images/add-secret-access.png)
 
 <p />
@@ -405,7 +409,7 @@ Within GCP, the Cloud Build service account doesn't by default have access to re
 </details>
 
 
-## Enable GitHub / Cloud Build integration
+## Enable GitHub / Cloud Build integration (one time only)
 
 To bridge GitHub with Cloud Build, let's enable the "Cloud Build Github app". This is an integration that Google has prepared that lets Cloud Build get triggered when something (push or merge) happens in the GitHub repo.
 
@@ -420,7 +424,7 @@ To bridge GitHub with Cloud Build, let's enable the "Cloud Build Github app". Th
 
 Finally, we can create the triggers we want to run in CI.
 
-GCP Console > (project) > `Cloud Build` > `Triggers` > `+ Create Trigger`
+GCP Console > (project) > `Cloud Build` > `Triggers` > `CREATE TRIGGER`
 
 >Note: These settings are *not* in the version control. The workflow relies on you to have set them up, appropriately. The suggested initial settings are below, to get you started.
 
@@ -433,7 +437,7 @@ For the GCP project responsible of running tests.
 |Description|PR that affects `packages/backend`|
 |Event|(●) Pull Request (GitHub App only)|
 |**Source**|
-|Repository|*pick (\*)*|
+|Repository|*Pick one.* On the first visit for this GCP project, you will need to connect to the GitHub App. <p />*Note for Safari users: see below how to enable popups.* |
 |Base branch|`^master$`|
 |Comment control|(●) Required except for owners and collaborators|
 |Included files filter (glob)|`packages/backend/**`, `package.json`|
@@ -446,21 +450,18 @@ It makes sense to keep the name of the CI entry and the respective `yaml` file t
 
 <p />
 
->![](.images/ci-connect.png)
->
->*(\*): The `Connect New Repository` uses a popup to connect GitHub Cloud Build Application and the Cloud Build project, to access a certain repo. THIS DOES NOT WORK ON SAFARI (unless popups are enabled). Follow setup below or use eg. Chrome for connecting a repo.*
->
-><details><summary>Allow popups on Safari for `console.cloud.google.com`</summary>
->![](.images/safari-enable-popup.png)
-><ul>
->  <li>`Preferences` > `Websites` > `Pop-up Windows` (lowest in left pane)</li>
->  <li>`console.cloud.google.com`: `Allow`</li>
-></ul> 
-></details>
+<details><summary>Enabling popups for Safari browser</summary>
 
-Screenshot of the actual dialog:
+![](.images/safari-enable-popup.png)
+<ul>
+  <li>`Preferences` > `Websites` > `Pop-up Windows` (lowest in left pane)</li>
+  <li>`console.cloud.google.com`: `Allow`</li>
+</ul> 
+</details>
 
->![](.images/edit-trigger.png)
+Screenshot of the actual form:
+
+![](.images/edit-trigger.png)
 
 ||`master-pr-app`|
 |---|---|
@@ -506,11 +507,11 @@ Create these triggers in the deployment project.
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
-|Location|(●) Repository: `ci/cloudbuild.backend.merged.yaml`|
+|Location|(●) Repository: `ci/cloudbuild.backend.deploy.yaml`|
 
 This takes care of deploying the backend.
 
-For the front-end, create a similar trigger (you can use `duplicate` in the triggers list as a start):
+For the front-end, create a similar trigger:
 
 ||**`app-deploy`**|
 |---|---|
@@ -523,7 +524,7 @@ For the front-end, create a similar trigger (you can use `duplicate` in the trig
 |Ignored files filter (glob)|`*.md`, `.images/*`|
 |**Configuration**|
 |Type|(●) Cloud Build configuration file (yaml or json)|
-|Location|(●) Repository: `ci/cloudbuild.app.merged.yaml`|
+|Location|(●) Repository: `ci/cloudbuild.app.deploy.yaml`|
 
 With these two jobs in place, your deployments will track the contents of the `master` branch.
 
@@ -600,7 +601,7 @@ $ gcloud builds submit --config=cloudbuild.{app|backend}.yaml ..
 ```
 
 ```
-$ gcloud builds submit --config=cloudbuild.{app|backend}.merged.yaml ..
+$ gcloud builds submit --config=cloudbuild.{app|backend}.deploy.yaml ..
 ```
 
 When using these, make sure you are logged into the correct GCP project.

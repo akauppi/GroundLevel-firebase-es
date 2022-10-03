@@ -37,16 +37,14 @@ steps:
     [ ! -z ${SHORT_SHA} ] || ( >&2 echo "!: No ''SHORT_SHA'' detected (this is a manual run). A successful run will NOT open doors to deployment." ) &&
     [ $PROJECT_ID == ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the ''${_MY_BUILDER}'' project: gcloud config set project ${_MY_BUILDER}"; false ) &&
 
+    apk add --update make &&
     npm config set update-notifier false &&
 
     npm install &&
     npm --prefix packages/backend install &&
-      npm --prefix packages/backend/functions install &&
-
-    (cd packages/backend && 
-      ln -s tmp/firebase.ci.json ./firebase.json &&
-      touch firebase-debug.log firestore-debug.log database-debug.log
-    )
+    npm --prefix packages/backend/functions install &&
+    
+    npm --prefix packages/backend run -s ci:pr:setup
   ']
   env:
     - FIRESTORE_PORT=6767
@@ -55,9 +53,7 @@ steps:
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/tmp/firebase.ci.json     has been created
-  #   - packages/backend/tmp/database.rules.json  has been created (just used for metrics/logging)
-  #   - packages/backend/firebase.json            alias for easy running of tests
+  #   - packages/backend/firebase.json            has been created
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
 
 # DEBUG:
@@ -132,7 +128,7 @@ steps:
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: npm
-  args: ['run', 'lint']
+  args: ['run', 'ci:lint']
   dir: packages/backend
 
 #-- Pass marker
@@ -151,14 +147,14 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11, 2:04
+#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59
 #
 # Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #
 timeout: 300s
 
 substitutions:
-  _BUILDER_TAG: 11.3.0
+  _BUILDER_TAG: 11.13.0
   _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "18"
   _AR_FOLDER: builders

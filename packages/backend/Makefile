@@ -9,8 +9,10 @@ _EMUL_APP_DC=tmp/.stamp.emul-for-app
 JEST := node_modules/.bin/jest
 
 # Sanity checks
-
-ifneq ($(wildcard functions/node_modules/@firebase),)
+#
+ifdef BUILDER_OUTPUT
+  # CI - has stuff under functions/node_modules
+else ifneq ($(wildcard functions/node_modules/*),)
   $(error FAIL: Files under 'functions/node_modules' are not being used. Please remove that folder.)
 endif
 
@@ -80,14 +82,6 @@ functions-install-local:
 	install -d tmp/functions/node_modules
 	docker compose -f docker-compose.tools.yml run --rm functions-install
 
-# CI: Prepares things for CI steps:
-#	- tmp/firebase.ci.json
-#	- tmp/database.rules.json (not used in CI; stop generating if we know it's not going to be used)
-#
-# Note: CI step itself is expected to install 'functions' packages.
-#
-functions-install-ci: tmp/firebase.ci.json tmp/database.rules.json
-
 # Tests
 test: _started
 	$(MAKE) test:fns:all
@@ -147,6 +141,8 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json tmp/database
 
 # CI
 #
+ci\:firebase.json: firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify({...o, emulators: undefined}));" > firebase.json
 
 # Misc
 
@@ -186,7 +182,7 @@ $(_EMUL_APP_DC): $(_DC_PATH)/firebase-tools/Dockerfile $(shell find $(_DC_PATH)/
 
 #---
 echo:
-	@echo $(_DC_PATH)
+	@echo $(wildcard functions/node_modules/*)
 
 .PHONY: help \
   install prune \

@@ -12,16 +12,13 @@ set -eu -o pipefail
 #       $ gcloud auth configure-docker us-central1-docker.pkg.dev
 #     <<
 #
-# References:
-#   - 'firebase-tools' releases
-#     -> https://github.com/firebase/firebase-tools/releases
 
-# Note: We can use a different version than the default in the Dockerfile. This is the one CI scripts expect (can change
-#   less frequently; if you change, remove earlier images from Artifact Registry).
+# Note: We can update this version less frequently than the one used for development. Once you do change it, remove
+#     earlier images from Artifact Registry.
 #
 # Note: >= 11.2.1 to avoid Artifact Registry API enabling need, by hand.
 #
-_VERSION=11.3.0
+_VERSION=11.13.0
 
 _DOCKERPATH=../dc/firebase-tools
 _IMAGE_NAME=firebase-emulators
@@ -37,7 +34,6 @@ docker build --pull --build-arg FIREBASE_TOOLS_VERSION=${_VERSION} --target fire
 # Requires:
 #	  - docker
 #   - gcloud
-#   - sed, grep
 #
 _GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
 _AR_FOLDER=builders

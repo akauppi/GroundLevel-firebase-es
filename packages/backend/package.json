@@ -10,12 +10,19 @@
   "scripts": {
     "ci:warm-up": "npm run -s _ci:fns:all",
     "ci:test": "npm run -s _ci:fns:all && npm run -s _ci:rules:all",
+    "ci:lint": "eslint .",
     "_ci:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --detectOpenHandles --verbose --all",
     "_ci:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
-    "-- ---": "",
+    "-- -": "",
+    "ci:pr:setup":"npm run -s _ci_prep1 && npm run -s _ci_prep2",
+    "ci:pr:setup_app":"npm run -s ci:pr:setup && npm run -s _ci_prep3",
+    "_ci_prep1": "make tmp/firebase.ci.json && ln -s tmp/firebase.ci.json ./firebase.json",
+    "_ci_prep2": "touch firebase-debug.log firestore-debug.log database-debug.log",
+    "_ci_prep3": "make tmp/database.rules.json && ln -s tmp/database.rules.json .",
+    "-- --": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
     "_postinstall_local": "make functions-install-local",
-    "_postinstall_ci": "make functions-install-ci"
+    "_postinstall_ci": "true"
   },
   "devDependencies": {
     "firebase-admin": "^11.0.1",
@@ -35,6 +42,9 @@
       ],
       "ci:{warm-up|test}": [
         "We welcome these in the same, humble 'package.json'. Running CI is a lot like native development."
+      ],
+      "ci:pr:setup": [
+        "Steps needed for the CI test (PR) runs, not deployment."
       ]
     }
   }

@@ -6,9 +6,10 @@
 *     -> https://github.com/firebase/firebase-tools/blob/master/schema/firebase-config.json
 */
 
-// Enable auth only if 'AUTH_PORT' has been provided.
+// Enable auth and Realtime Database only if their ports have been provided.
 //
 const AUTH_PORT= process.env["AUTH_PORT"];
+const DATABASE_PORT= process.env["DATABASE_PORT"];
 const FIRESTORE_PORT = process.env["FIRESTORE_PORT"] || fail( `Expecting 'FIRESTORE_PORT' env.var.`);
 const FUNCTIONS_PORT = process.env["FUNCTIONS_PORT"] || fail( `Expecting 'FUNCTIONS_PORT' env.var.`);
 
@@ -22,6 +23,7 @@ export default {
   functions: {
     source: "./functions"
   },
+  ...DATABASE_PORT ? { database: { rules: "./database.rules.json" } } : {},
   emulators: {
     firestore: {
       port: FIRESTORE_PORT,   // 6767
@@ -31,7 +33,8 @@ export default {
       port: FUNCTIONS_PORT,   // 5002
       host: "0.0.0.0"
     },
-    ... AUTH_PORT ? { auth: { port: AUTH_PORT, host: "0.0.0.0" } } : {},
+    ...DATABASE_PORT ? { database: { port: DATABASE_PORT, host: "0.0.0.0" } } : {},
+    ...AUTH_PORT ? { auth: { port: AUTH_PORT, host: "0.0.0.0" } } : {},
     ui: {   // no need for UI in CI
       enabled: false
     }

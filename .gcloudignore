@@ -57,8 +57,9 @@ packages/app/tmp/*
 # Development files; not intended for CI
 packages/app/.env*
 
-# '/dc/' is for development; CI uses pre-built Docker images
-/dc/
+# CI runs use pre-built Docker images, but having '/dc/' ignored a) creates warnings from Makefile, b) disallows
+# using Cloud Build for building that pre-built image. Thus, let it in.
+#/dc/
 
 # v-- Might not be accurate, any more... #cleanup
 # Unfortunately, 'roll/out/*' also wipes out the '.gitkeep' (and thus the folder). We compensate this by creating
