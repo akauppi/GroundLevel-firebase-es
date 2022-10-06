@@ -3,11 +3,8 @@
 *
 * Usage:
 *   <<
-*     [FIREBASE_APP_JS=...] [SENTRY_DSN=...] gen-vite-env-local --project=demo-...
+*     [FIREBASE_APP_JS=...] EMUL_HOST=... gen-vite-env-local --project=demo-...
 *   <<
-*
-* Expects:
-*   - top level await to be supported (node 18)
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
 * side to get copies of these build values.
@@ -30,11 +27,9 @@ const projectId = (_ => {
 
 const emulHost = process.env['EMUL_HOST'] || fail("Expected 'EMUL_HOST' env.var.");
 
-const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
+const [firestorePort, functionsPort, authPort, databasePort] = (_ => {   // => [int, int, int, int]
 
-const [firestorePort, authPort, functionsPort] = (_ => {   // => [int, int, int]
-
-  const arr = ["firestore","auth","functions"].map( k => {
+  const arr = ["firestore","functions","auth","database"].map( k => {
     return (emulators && emulators[k] && emulators[k].port)    // cannot use '?.' because of the varying 'k'
       || fail(`Cannot read 'emulators.${k}.port' from '${FIREBASE_APP_JS}'`);
   });
@@ -44,13 +39,11 @@ const [firestorePort, authPort, functionsPort] = (_ => {   // => [int, int, int]
 const out =
 `#
 VITE_FIRESTORE_PORT=${firestorePort}
-VITE_AUTH_PORT=${authPort}
 VITE_FUNCTIONS_PORT=${functionsPort}
+VITE_AUTH_PORT=${authPort}
+VITE_DATABASE_PORT=${databasePort}
 VITE_PROJECT_ID=${projectId}
 VITE_EMUL_HOST=${emulHost}
-${
-  SENTRY_DSN ? `VITE_SENTRY_DSN=${SENTRY_DSN}` : ''
-}
 `;
 
 process.stdout.write(out);

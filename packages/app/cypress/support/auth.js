@@ -10,7 +10,7 @@
 * Note:
 *   Cannot 'import' any of the application sources, since they use '/@xxx' path mapping. (This should be fine.)
 */
-import { signInWithCustomToken, updateProfile } from '@firebase/auth'
+import { signInWithCustomToken, updateProfile, getAuth } from '@firebase/auth'
 
 /*
 * 'cy.clearAuthState'
@@ -86,6 +86,14 @@ function firebaseAuthChainable() {    // () => Chainable<FirebaseAuth>
 
   cy.visit('/');
 
+  // Wait until browser side's initialized Firebase, then claim the handle within here. DOES NOT WORK!!!
+  //  <<
+  //    Firebase: No Firebase App '[DEFAULT]' has been created - call Firebase App.initializeApp() (app/no-app).
+  //  <<
+  //
+  //return cy.window().its("Let's test!").then( _ => getAuth() );
+
+  // works (Firebase auth handle from browser side):
   return cy.window().its("Let's test!").then( ([auth]) => auth );
 }
 

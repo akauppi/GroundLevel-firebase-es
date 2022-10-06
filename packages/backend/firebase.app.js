@@ -17,16 +17,16 @@ export default {
       port: 6768,
       host: "0.0.0.0"
     },
-    database: {
-      port: 6869,
-      host: "0.0.0.0"
-    },
     functions: {
       port: 5003,
       host: "0.0.0.0"
     },
     auth: {
       port: 9101,
+      host: "0.0.0.0"
+    },
+    database: {
+      port: 6869,
       host: "0.0.0.0"
     },
     ui: {

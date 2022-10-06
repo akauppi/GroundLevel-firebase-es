@@ -32,6 +32,11 @@ services:
     extends:
       file: dc.base.yml
       service: emul-base
+    volumes:
+      # --- output
+      - ./logs/firebase-debug.log:/work/firebase-debug.log:delegated
+      - ./logs/firestore-debug.log:/work/firestore-debug.log:delegated
+      - ./logs/ui-debug.log:/work/ui-debug.log:delegated
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"

@@ -29,7 +29,7 @@ const DEPLOYMENT_REGION = !EMULATION && import.meta.env.LOCATION_ID;    // Fireb
 // NOTE: Unlike Firebase, we give NO SPECIAL ROLE to 'us-central1'.
 //
 const regionalFunctions_v1 =
-  EMULATION ? functions_v1 /*.runWith({ minInstances: 1 })*/   // trying whether this would reduce the need for warm-up
+  EMULATION ? functions_v1 /*.runWith({ minInstances: 1 })*/   // does not seem to remove the need for warm-up
   : DEPLOYMENT_REGION ? f1_region( DEPLOYMENT_REGION )
   : functions_v1;
 

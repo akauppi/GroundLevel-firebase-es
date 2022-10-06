@@ -16,8 +16,6 @@
 const ENV = process.env["ENV"] || 'staging';
 const fn = `../../firebase.${ENV}.js`;
 
-const SENTRY_DSN = process.env['SENTRY_DSN'];     // optional
-
 const { projectId, appId, apiKey, authDomain, locationId, databaseURL } = await import(`../${fn}`).then(mod => mod.default)
   .catch(err => {
     process.stderr.write(`ERROR: ${err.message}\n\n`);
@@ -34,11 +32,9 @@ VITE_APP_ID=${appId}
 VITE_AUTH_DOMAIN=${authDomain}
 VITE_PROJECT_ID=${projectId}
 VITE_LOCATION_ID=${locationId}
+VITE_STAGE=dev.${ENV}
 ${
   databaseURL ? `VITE_DATABASE_URL=${databaseURL}` : ''
-}
-${
-  SENTRY_DSN ? `VITE_SENTRY_DSN=${SENTRY_DSN}` : ''
 }
 `;
 

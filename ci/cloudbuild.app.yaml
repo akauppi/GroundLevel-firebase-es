@@ -34,36 +34,29 @@ steps:
     [ ! -z ${SHORT_SHA} ] || ( >&2 echo "!: No ''SHORT_SHA'' detected (this is a manual run). A successful run will NOT open doors to deployment." ) &&
     [ $PROJECT_ID == ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the ''${_MY_BUILDER}'' project: gcloud config set project ${_MY_BUILDER}"; false ) &&
 
+    apk add --update make &&
     npm config set update-notifier false &&
 
     npm install &&
     npm --prefix packages/backend install &&
     npm --prefix packages/backend/functions install &&
-    npm --prefix packages/app install &&
-    
-    (cd packages/backend && 
-      touch firebase-debug.log firestore-debug.log database-debug.log
-    )
-  ']
-    # Note: '--omit=optional' does not matter, in practise (the idea was to not pull in Vite).
-    #
-    #   with '--omit=optional':   289 packages added, timing: 18.9, 17.7, 16.9s
-    #   without:                  292 packages added, timing: 18.9 s
+    npm --prefix packages/app install --omit=optional &&
 
+    (cd packages/app && make tmp/.env.ci_test)
+  ']
   env:
-    - CYPRESS_INSTALL_BINARY=0    # avoid downloading a GUI
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    - AUTH_PORT=9100
-    - DATABASE_PORT=6868
+    - EMUL_HOST=emul-for-app
+    - CI_APP=true
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/tmp/firebase.json        has been created
-  #   - packages/backend/tmp/database.rules.json  has been created (just used for metrics/logging)
+  #   - packages/backend/tmp/firebase.ci.json     has been created
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
+  #   - packages/app/tmp/.env.ci_test             has been created
+  #
+  #     Note: Ports are in two places: 'tmp/firebase.ci.json' for the emulators; '.env.ci_test' for Vite.
 
-# DEBUG:
+# DEBUG, TERMINAL:
 #
 # USE THIS TO DEBUG CASES where the emulators don't start.
 #
@@ -74,9 +67,6 @@ steps:
 #|  dir: packages/backend
 #|  env:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
-#|    - FIRESTORE_PORT=6767
-#|    - FUNCTIONS_PORT=5002
-#|    - AUTH_PORT=9100
 
 # --- App
 #
@@ -89,9 +79,19 @@ steps:
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    - AUTH_PORT=9100
+
+  # DEBUG: Check we see stuff
+  #
+- name: node:${_NODE_VER}-alpine
+  entrypoint: sh
+  args: ['-c', '
+    nc -z $$EMUL_HOST 6767 && echo "I see $$EMUL_HOST:firestore" &&
+    nc -z $$EMUL_HOST 5002 && echo "I see $$EMUL_HOST:functions" &&
+    nc -z $$EMUL_HOST 9100 && echo "I see $$EMUL_HOST:auth" &&
+    nc -z $$EMUL_HOST 6868 && echo "I see $$EMUL_HOST:database"
+  ']
+  env:
+    - EMUL_HOST=emul-for-app
 
 # DEBUG; TERMINAL. Enable if Vite does not launch
 #|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
@@ -99,9 +99,6 @@ steps:
 #|  dir: packages/app
 #|  env:
 #|    - PORT=3002
-#|    - FIRESTORE_PORT=6767
-#|    - FUNCTIONS_PORT=5002
-#|    - AUTH_PORT=9100
 
 # Launches Vite
 #
@@ -110,24 +107,62 @@ steps:
   dir: packages/app
   env:
     - PORT=3002
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-    - AUTH_PORT=9100
 
   # State:
   #   - 'emul-for-app' is running (emulators)
   #   - 'vite:3002' is running, and connected to the above backend
 
+# DEBUG: Check we see stuff
+#
+- name: node:${_NODE_VER}-alpine
+  entrypoint: sh
+  args: ['-c', '
+    nc -z vite 3002 && echo "I see Vite" &&
+    nc -z $$EMUL_HOST 6767 && echo "I see $$EMUL_HOST:firestore" &&
+    nc -z $$EMUL_HOST 5002 && echo "I see $$EMUL_HOST:functions" &&
+    nc -z $$EMUL_HOST 9100 && echo "I see $$EMUL_HOST:auth" &&
+    nc -z $$EMUL_HOST 6868 && echo "I see $$EMUL_HOST:database" &&
+    
+    cat packages/app/tmp/.env.ci_test
+  ']
+  env:
+    - EMUL_HOST=emul-for-app
+
+  # NOTE!
+  #   Below is slightly different than running 'make test' within dev.
+  #     - dev uses a '../tools/cypress.dc' custom Cypress image-look-alike;
+  #       we want to rely on stock images, as possible
+  #
+  #       Customizations (from the '../tools/cypress.dc') are done here, so that the 'cypress.config.js' would work.
+  #
 - name: cypress/included:${_CYPRESS_TAG}
-  args: ['run', '--headless']
+  entrypoint: sh
+  args: ['-c', '
+    npm config set update-notifier false &&
+
+    npm install -g firebase-admin@$_FIREBASE_ADMIN_VER &&
+    ln -s $$NODE_PATH /node_modules &&
+    
+    cypress run --headless    
+  ']
+    # By default, globally installed libraries are not resolved by Node.js (in ESM mode). That's what the 'ln -s' is for.
+    #
   dir: packages/app
   env:
     - CYPRESS_baseUrl=http://vite:3002
     - CYPRESS_defaultCommandTimeout=20000
+    #- CYPRESS_taskTimeout=30000
+    - EMUL_HOST=emul-for-app    # so firebase-admin can read the Realtime Database
     #
-    # Tests durations:
+    # Test durations:
+    #   1: 9253, 7429 ms
+    #   2:
+    #   3:
+    #
+    # Tests durations (old):
     #   1: 10673, 9478, 9270, 10987 ms
-    #   2:  4224, 4920, 4695,  5276 ms
+    #   2: na
+    #   3:  4224, 4920, 4695,  5276 ms
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
@@ -146,12 +181,13 @@ steps:
   dir: packages/app
   env:
     - RELEASE=
-    #- SENTRY_DSN     # not defined
     - FIREBASE_SERVER_CONFIG_JS=./fake.config.js
 
 - name: node:${_NODE_VER}-alpine
-  entrypoint: npm
-  args: ['run', 'lint']
+  entrypoint: sh
+  args: ['-c', '
+    npm run ci:lint
+  ']
   dir: packages/app
 
 #-- Pass marker
@@ -174,12 +210,13 @@ steps:
 timeout: 500s
 
 substitutions:
-  _BUILDER_TAG: 11.3.0
+  _BUILDER_TAG: 11.13.0
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"
-  _CYPRESS_TAG: 10.6.0
+  _CYPRESS_TAG: 10.9.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
   _MY_BUILDER: ci-builder
+  _FIREBASE_ADMIN_VER: 11.0.1

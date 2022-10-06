@@ -40,12 +40,6 @@ services:
       - ./functions:/work/functions:cached
       - ./firestore.indexes.json:/work/firestore.indexes.json:cached
       - ./firestore.rules:/work/firestore.rules:cached
-      - ./tmp/database.rules.json:/work/database.rules.json:cached    # could get recreated on the host (or manually tweaked)
-      # --- output (emul-for-app has its own path)
-      - ./logs/firebase-debug.log:/work/firebase-debug.log:delegated
-      - ./logs/firestore-debug.log:/work/firestore-debug.log:delegated
-      - ./logs/database-debug.log:/work/database-debug.log:delegated
-      - ./logs/ui-debug.log:/work/ui-debug.log:delegated
       # --- other
       - ./tmp/functions/node_modules:/work/functions/node_modules:ro
 

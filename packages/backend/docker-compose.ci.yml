@@ -12,16 +12,11 @@
 #
 # Expects:
 #   CI_BUILDER_IMAGE  to provide the name of the Docker image to use
-#   FIRESTORE_PORT
-#   FUNCTIONS_PORT
 #
 services:
   emul:
     image: ${CI_BUILDER_IMAGE}
-    ports:
-      - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
-      - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
-        # Keep ports aligned with 'firebase.ci.js'
+    # Ports not needed; tests will run directly against 'emul' (or 'emul-for-app') hostname.
 
     volumes:
       # --- RO
@@ -34,22 +29,26 @@ services:
       #
       - ./firebase-debug.log:/work/firebase-debug.log:delegated
       - ./firestore-debug.log:/work/firestore-debug.log:delegated
+    environment:
+      - PROJECT_ID=demo-2
 
     working_dir: /work
-    command: sh -c
-      'echo "Launching Docker... 🐳" &&
+    command: sh -c '
+      echo "Launching Docker... 🐳" &&
       
-      firebase emulators:start --project=demo-2
+      firebase emulators:start --project=$$PROJECT_ID
         | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI|The Emulator UI is not starting"
       '
-        # Note: The '--project' parameter must match that used by Cloud Functions (in 'test-fns/setup.jest.js'.
+      # Note: The project id must match that used by Cloud Functions ('test-fns/setup.jest.js').
 
     healthcheck:
       test: '
-        nc -z localhost ${FIRESTORE_PORT} &&
-        nc -z localhost ${FUNCTIONS_PORT}
+        nc -z localhost 6767 &&
+        nc -z localhost 5002
       '
-          # Note: 'nc' in that image doesn't handle checking multiple ports at once.
+        # tbd. read ports (and whether auth is enabled) from 'tmp/firebase.ci.json'; enable app & database check
+        #
+        # Note: 'nc' in that image doesn't handle checking multiple ports at once.
       interval: 0.5s
       start_period: 30s
 

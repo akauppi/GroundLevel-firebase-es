@@ -72,13 +72,12 @@ const db = (!DATABASE_URL) ? null : (_ => {
 * Store a counter increment.
 */
 async function inc({ id, inc, ctx }) {    // => Promise of ()
-  const { clientTimestamp } = ctx;
 
   // tbd. Is this layout fine?  Consider multiple clients simultaneously incrementing. What are the Realtime Database
   //    restrictions - bring them here.
 
   const refRaw = db.ref("incoming/incs");
-  await refRaw.push({ id, inc, clientTimestamp });
+  await refRaw.push({ id, inc, ctx });
 
   const refAggregate = db.ref(`inc/${id}`);
   await refAggregate.set( { "=": ServerValue.increment(inc) })    // Note: Tags can be added by '{k}={v}'
@@ -88,10 +87,8 @@ async function inc({ id, inc, ctx }) {    // => Promise of ()
 * Store a log entry.
 */
 async function log({ id, level, msg, args, ctx }) {   // => Promise of ()
-  const { clientTimestamp, uid } = ctx;
-
   const refRaw = db.ref("incoming/logs");
-  await refRaw.push({ id, level, msg, args, clientTimestamp, uid });
+  await refRaw.push({ id, level, msg, args, ctx });
 
   // Logs have no aggregation
 }
@@ -100,10 +97,8 @@ async function log({ id, level, msg, args, ctx }) {   // => Promise of ()
 * Store a statistical sample.
 */
 async function obs({ id, obs, ctx }) {   // => Promise of ()
-  const { clientTimestamp } = ctx;
-
   const refRaw = db.ref("incoming/obs");
-  await refRaw.push({ id, obs, clientTimestamp });
+  await refRaw.push({ id, obs, ctx });
 
   // Not doing an aggregation. Doing such would need knowledge about bucketing (i.e. rate of incoming observations).
   // That can vary - better have the visualization tools handle that.
@@ -144,7 +139,7 @@ const obsValidate = validateGen("Obs", ["id","obs","ctx"]);
 */
 function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 
-  return (o,i) => {   // ({...}, integer) => (uid) => ()
+  return (o,i) => {   // ({...}, integer) => () => ()
 
     // Context is the same for all types
     //
@@ -153,22 +148,42 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
       fail_invalid_argument(`Claimed uid (in the data) and the one used in the call clash: ${claimedUid} !== ${realUid}`);
     }
 
-    const stripUser = (o2) => (
-      {...o2, ctx: { ...o2.ctx, uid: undefined }}
-    );
-
     if (o.inc) {
-      incValidate( stripUser(o) );
-      return _ => inc(o);
+      incValidate(o);
+      return _ => inc( conv_blurUid(o) );
     } else if (o.level) {
       logValidate(o);
-      return uid => log(o);   // keep user
+      return _ => log( conv(o) );
     } else if (o.obs) {
       obsValidate(o);
-      return _ => obs( stripUser(o) );
+      return _ => obs( conv_blurUid(o) );
     } else {
       fail_invalid_argument(`Unexpected entry #${i}: ${o}`);
     }
+  }
+
+  /*
+  * Blur '.ctx.uid' for operations we don't think need user-by-user storage.
+  *
+  * Still keeping the knowledge whether a user was logged in; this allows filtering guests (no uid).
+  *
+  * Also does what the plain 'conv' does.
+  */
+  function conv_blurUid(o) {
+    return conv({ ...o, ctx: { ...o.ctx, uid: o.ctx.uid ? true : undefined } });
+  }
+
+  /*
+  * Remove entries with 'undefined' value, e.g. 'ctx.uid'. They are not tolerated by Realtime Database.
+  *
+  * Note: Alternatively, we could use nulls.
+  */
+  function conv(o) {
+    const tmp = Object.entries(o)
+      .filter( ([_,v]) => v !== undefined )
+      .map(([k,v]) => [k, (typeof v === "object") ? conv(v) : v] );
+
+    return Object.fromEntries(tmp);
   }
 }
 
@@ -179,7 +194,7 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 *   LogEntry: { id: string, level: "info"|"warn"|"error"|"fatal", msg: string, args: Array of any, ctx: Ctx }
 *   ObsEntry: { id: string, obs: double, ctx: Ctx }
 *
-*        Ctx: { clientTimestamp: number, stage?: string, release?: string, ... }
+*        Ctx: { clientTimestamp: number, stage?: string, release?: string, uid?: string, ... }
 *
 * NOTE (KEEP!!!):
 *   If you need to signal errors, do it like so. Use codes only from 'FunctionsErrorCode' selection:
@@ -191,13 +206,13 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
   .onCall((bulk, ctx) => {
 
-    const uid = ctx.auth.uid || fail_unauthenticated();
+    const realUid = ctx.auth.uid || fail_unauthenticated();
 
     const { arr } = bulk;
-    console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, uid);
+    console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, realUid);
 
     // Validate all entries, get functions for storing them.
-    arr.map( pickTypeGen(uid) )
+    arr.map( pickTypeGen(realUid) )
       .forEach( f => f() );
 
     //return;   // note: we don't need to return anything

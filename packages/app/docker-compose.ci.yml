@@ -1,7 +1,7 @@
 #
 # docker-compose.ci.yml
 #
-# Tools for CI builds (Cloud Build).
+# Tools for CI test runs (Cloud Build).
 #
 # _Similar_ to 'dc.base.yml' and 'docker-compose.local.yml' but separate. Changes here will not break development
 # experience, and vice versa. However, we still use the same Vite version, defined under 'tools/vite.dc/'.
@@ -29,27 +29,22 @@ services:
       - ./public:/work/public:ro
       - ./src:/work/src:ro
       - ./dev:/work/dev:ro
-      - ./tools/gen-vite-env-ci.js:/work/tools/gen-vite-env-ci.js:ro
       - ./package.json:/work/package.json:ro              # 'ci:launch' is there
+      - ./tmp/.env.ci_test:/work/.env:ro
       #
       - ./vite.config.js:/work/vite.config.js:ro
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
       - ../../branding/favicon.png:/branding/favicon.png:ro   # trick to make the 'ln -s' work
 
     working_dir: /work
-    command: sh -c
-      'npm config set update-notifier false &&
-
+    command: sh -c '
+      npm config set update-notifier false &&
+  
       npm run ci:launch
       '
     environment:
-      - EMUL_HOST=emul-for-app
-      - MODE=local
+      - MODE=local    # tbd. is this needed??
       - PORT              # pass through, at least 'vite.config.js' wants it
-      # tbd. Use 'firebase.js', not these
-      - AUTH_PORT
-      - FIRESTORE_PORT
-      - FUNCTIONS_PORT
 
     network_mode: cloudbuild
     container_name: vite

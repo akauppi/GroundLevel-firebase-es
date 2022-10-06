@@ -124,6 +124,10 @@ self.addEventListener('message', (e) => {
 
   let shipNow;
 
+  function dropType(o) {
+    return Object.fromEntries(Object.entries(o).filter( ([k]) => k !== "" ));
+  }
+
   const t = data[""] || fail("No type in '.[\"\"]'");
   if (t === 'flush') {
     shipNow = true;
@@ -135,7 +139,7 @@ self.addEventListener('message', (e) => {
     metricsAndLoggingProxy_v0 = metricsAndLoggingProxy_v0_Gen(token);
 
   } else if (t === 'ship') {
-    pending.push({ ...data, [""]: undefined });   // "" field not needed
+    pending.push( dropType(data) );   // "" field not needed
 
     if (data.level === 'fatal') {   // if it's fatal, try shipping right away (less chance of getting lost)
       shipNow = true;

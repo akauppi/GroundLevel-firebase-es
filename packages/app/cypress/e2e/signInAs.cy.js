@@ -11,7 +11,7 @@ before( () => {
 
 describe('Sign In as Joe', () => {
 
-  beforeEach( () => {
+  before( () => {
     cy.signAs(joe);
   })
 

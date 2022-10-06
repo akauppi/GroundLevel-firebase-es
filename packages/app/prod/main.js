@@ -10,7 +10,8 @@
 import { initializeApp } from '@firebase/app'
 import config from '/@firebase.config.json'
 
-import { /*getPerformance*/ initializePerformance } from '@firebase/performance'
+// DISABLED
+//import { /*getPerformance*/ initializePerformance } from '@firebase/performance'
 
 // Others can use 'getApp()' to get a handle
 //
@@ -19,6 +20,7 @@ import { /*getPerformance*/ initializePerformance } from '@firebase/performance'
 //
 const app = initializeApp(config);
 
+/** DISABLED
 // EXPERIMENT: Let's see whether early import here causes "first paint" to be reported in Firebase dashboard.
 //
 // NOTE: Firebase Performance Monitoring API docs should state, what 'getPerformance' uses for the parameters.
@@ -26,7 +28,7 @@ const app = initializeApp(config);
 initializePerformance(app, {
   dataCollectionEnabled: true,    // "whether to collect custom events"
   instrumentationEnabled: true    // "whether to collect out of box events"  <-- tbd. check, what that means?
-})
+})**/
 
 // Using dynamic import so that 'app.js' (and its imports) can rely on Firebase app already having been created.
 //

@@ -4,12 +4,16 @@
 name: 35bf1944
 services:
   #---
-  # Build production delivery (manually)
+  # Build production variant (manually)
+  #
+  # Note: This build is intended for trial purposes (e.g. testing ops changes). Actual production builds should use CI/CD runs.
+  #
+  # Note 2:
+  #   Makefile level (in the host) may concat temporary env values into the 'tmp/.env.${ENV:staging}' that we read in.
+  #   This may include 'VITE_...' values for allowing access e.g. to Sentry.
   #
   # Expects:
   #   - ENV
-  #   - SENTRY_DSN (optional)
-  #   - SENTRY_SAMPLE_RATE (optional)
   #
   build:
     build:
@@ -21,6 +25,7 @@ services:
       - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
       - ../../firebase.${ENV:-staging}.js:/work/firebase.config.js:ro
+      - ./tmp/.env.${ENV:-staging}:/work/.env:ro
       # --- RO (since we're a task)
       - ./src:/work/src:ro
       - ./prod:/work/prod:ro
@@ -31,16 +36,12 @@ services:
       # --- other
       - ../../../branding/favicon.png/:/work/public/favicon.png:ro
       - ./tmp/.vite:/work/tmp/.vite:delegated    # persistence between runs
-    command: sh -c
-      '
-      ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:---}" >> .env) &&
-      ([ -z "$ENV" ] || echo "VITE_STAGE=${ENV:---}" >> .env) &&
-      ([ -z "${SENTRY_SAMPLE_RATE:-}" ] || echo "VITE_SENTRY_SAMPLE_RATE=${SENTRY_SAMPLE_RATE:---}" >> .env) &&
-
+    command: sh -c '
       vite build
       '
-      # Note: '{...:-}' (providing an empty default) avoids warnings; used for optional env.vars.
 
-    #|environment:
-    #|  - ENV     # e.g. "staging"
+    #environment:
+      #- ENV     # e.g. "staging"
+      #- SENTRY_DSN
+      #- SENTRY_SAMPLE_RATE
     profiles: ['manual']

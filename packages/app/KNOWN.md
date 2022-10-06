@@ -57,3 +57,25 @@ FirebaseAppError: Error while making request: socket hang up. Error code: ECONNR
 If you encounter this, just retry.
 
 The reason is unknown. 
+
+
+## `ERROR:gpu_memory_buffer_support_x11.cc [...] dri3 extension not supported`
+
+..when running `make test`.
+
+```
+[192:1004/121659.646969:ERROR:gpu_memory_buffer_support_x11.cc(44)] dri3 extension not supported.
+```
+
+You can ignore this line. It's likely connected with Chrome (and headed mode, not headless). Does not affect us.
+
+
+## Warnings in `make test` output
+
+```
+[2022-10-05T15:07:25.368Z]  @firebase/database: FIREBASE WARNING: Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding ".indexOn": "ctx/clientTimestamp" at /incoming/incs to your security rules for better performance. 
+```
+
+The `../backend/database.rules.app.json` file should have appropriate indexing, but emulators don't seem to load it.
+
+**This warning can be ignored.**

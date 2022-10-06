@@ -3,9 +3,9 @@
 *
 * Application specific counter metrics.
 */
-import {createCounter} from './common'
+import {createInc} from './common'
 
-const countLogins = createCounter("login");
+const countLogins = createInc("login");
 
 export {
   countLogins

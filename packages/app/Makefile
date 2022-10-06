@@ -24,7 +24,8 @@ _CYPRESS_DC=tmp/.stamp.cypress
 _ENV_LOCAL=tmp/.env.dev_local
 _ENV_ONLINE=tmp/.env.dev.$(ENV)
 _ENV_TEST=tmp/.env.dev_test
-#_ENV_CI=tmp/.env.ci
+_ENV_PROD=tmp/.env.$(ENV)
+_ENV_CI_TEST=tmp/.env.ci_test
 
 # Custom environment additions (not needed for local/CI)
 _CUSTOM_ENV_ONLINE=.env.dev.$(ENV)
@@ -55,11 +56,19 @@ dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) $(_FIREBASE_PROD_JS)
 
 #--- Test
 
-test: $(_VITE_DEV_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulPrimed
+# Note: 'make test' doesn't need priming; that's for 'make dev'.
+#
+test: $(_VITE_DEV_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulRunning
 	PORT=3005 $(_DC) -f dc.cypress.yml run --rm run_tests
 	@# The port number doesn't really matter (not exposed to the host)
 
 # tbd. 'PORT' from a file (make loading the Makefile load those)
+
+#--- Lint
+
+dev\:lint: ../../node_modules/.bin/eslint
+	@../../node_modules/.bin/eslint --ext .js,.vue src || true
+	# tbd. eventually, run via DC (and keep separate native target for CI, in 'package.json')
 
 #--- Build
 build: $(_BUILD_DC) $(_STATS_HTML) $(_FIREBASE_PROD_JS)
@@ -75,19 +84,26 @@ $(_ENV_LOCAL): tools/gen-vite-env-local.js ../backend/firebase.app.js
 	EMUL_HOST=localhost node $< --project=demo-main > $@
 	@# no override needed
 
-$(_ENV_ONLINE): tools/gen-vite-env-online.js $(_CUSTOM_ENV_ONLINE)
-	node $< > $@
+$(_ENV_ONLINE): tools/gen-vite-env-online.js $(_CUSTOM_ENV_ONLINE) ../../firebase.$(ENV).js
+	ENV=$(ENV) node $< > $@
 	cat $(_CUSTOM_ENV_ONLINE) >> $@
 
 $(_ENV_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.js
 	EMUL_HOST=emul-for-app node $< --project=demo-main > $@
 	@# no override needed
 
-#$(_ENV_CI): tools/gen-vite-env-ci.js
-#	node $< --project=demo-main > $@
+$(_ENV_PROD): tools/gen-vite-env-prod.js $(_CUSTOM_ENV)
+	ENV=$(ENV) node $< > $@
+	cat $(_CUSTOM_ENV) >> $@
 
-$(_CUSTOM_ENV_ONLINE) $(_ENV_PROD):
-	@touch $@
+$(_ENV_CI_TEST): tools/gen-vite-env-ci.js ../backend/firebase.ci.js
+	EMUL_HOST=emul-for-app node $< --project=demo-main > $@
+	@# no override needed
+
+# If no custom env file, use a template.
+#
+$(_CUSTOM_ENV_ONLINE) $(_CUSTOM_ENV): optional.env.txt
+	@cp $< $@
 
 #--- Build DC images
 #

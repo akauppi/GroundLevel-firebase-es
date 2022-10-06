@@ -69,7 +69,6 @@ services:
         #   the author know.. #hack
 
     environment:
-      - SENTRY_DSN
       #- MODE=x   # defined in 'docker-compose.{local|online}.yml'
       - PORT
         # Pass 'PORT' to inside DC, at least 'vite.config.js'

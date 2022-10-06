@@ -15,9 +15,8 @@
     "-- ": "",
     "test": "make test",
     "--  -": "",
-    "ci:launch": "make tmp/ci.env && cp tmp/ci.env .env && vite --mode dev_local",
-    "-- --": "",
-    "lint": "eslint --ext .js,.vue src || true",
+    "ci:lint": "eslint --ext .js,.vue src || true",
+    "ci:launch": "vite --mode dev_local",
     "-- - -": "",
     "first:echoFirebaseHostingJson": "npm run -s _echoFirebaseHostingJson",
     "--  --  ": "",
@@ -26,7 +25,10 @@
     "preinstall": "[ ${npm_config_omit:-_} = optional ] || ( echo >&2 \"***\tPlease install with '--omit=optional'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
     "_postinstall_dev": "(cd node_modules && rm -rf vite rollup esbuild esbuild-*)",
-    "_postinstall_ci": "npm run -s _echoFirebaseHostingJson > firebase.json",
+    "_postinstall_ci": "npm run -s _pic1 && npm run -s _pic2",
+    "_pic1": "npm run -s _echoFirebaseHostingJson > firebase.json",
+    "_pic2": "npm run -s _postinstall_dev",
+    "_tbd.": "^-- above needs some cleanup, once app CI works",
     "--    -": "",
     "_echoFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\""
   },
@@ -45,9 +47,9 @@
     "plausible-tracker": "^0.3.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^3.1.0",
+    "@vitejs/plugin-vue": "^3.2.0-beta.0",
     "eslint-plugin-cypress": "^2.12.1",
-    "eslint-plugin-vue": "^9.5.1",
+    "eslint-plugin-vue": "^9.6.0",
     "sass": "^1.55.0",
     "prettier": "2.7.1",
     "vue-eslint-parser": "^9.1.0"

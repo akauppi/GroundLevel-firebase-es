@@ -1,0 +1,12 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "incoming": {
+      "incs": { ".indexOn": "ctx/clientTimestamp" },
+      "logs": { ".indexOn": "ctx/clientTimestamp" },
+      "obs": { ".indexOn": "ctx/clientTimestamp" }
+    }
+  }
+}

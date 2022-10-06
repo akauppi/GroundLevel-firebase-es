@@ -81,6 +81,8 @@ Add a `:f` as a postfix, concatenable with others (in our case, we'd use `:deleg
 
 ## Automatically rebuild if the definition cascade has changed
 
+>*We have counter-acted this by use of Makefiles.*
+
 Docker Compose declarations allow referring to other declarations by:
 
 - `extends: file: [service:]`   between Docker Compose definitions
@@ -126,3 +128,124 @@ When doing `docker compose up` or `docker compose run`, Docker should consider *
 >Note: This suggestion should be simple to implement (and cause no breaking changes) since no *interim* (and maybe running) image definitions are involved. Just the target the user explicitly states. 
 
 - [ ] *Shorten this to an issue. File such.* `#contribute`
+
+
+## Substitutions, within YAML
+
+Docker Compose definitions handle environment variables in two levels:
+
+||substitutions|environment|
+|---|---|---|
+|steers|Parsing the declaration|Commands run within DC|
+|syntax|`$SOME`|`$$SOME`|
+|comes from|Launching environment: `SOME=abc docker compose ...`|`environments:` section|
+
+Docker Compose definitions lack a feature that e.g. Cloud Build definitions (unrelated, of course, but similar) have: [Substituting variable values](https://cloud.google.com/build/docs/configuring-builds/substitute-variable-values) (Cloud Build docs).
+
+These can be used for:
+- providing constant values in one place
+- steering things build-time when the base declaration is extended
+
+### Example
+
+We use `/dc/firebase-emulators/base.yml` as a base definition for any use of Firebase emulators. It defines the version and launch command, but the project id comes from "above" (in practise, it's either `demo-2` or `demo-main`).
+
+**What we currently do:**
+
+```
+  # Expects:
+  #   - Derived declaration to provide 'PROJECT_ID' env.var. ('demo-...').
+  #
+  #     Such project's data is visible in the emulator UIs. ALSO OTHER PROJECT ID's (or no id) will work, but leaving
+  #     the UI out of the loop.
+  #
+  base:
+    build:
+      context: ../firebase-tools
+      target: firebase-emulators
+      args:
+        - FIREBASE_TOOLS_VERSION=11.13.0
+
+    # 'ports', 'volumes', 'working_dir' to be provided by downstream
+
+    command: sh -c
+      'echo "Launching Docker... 🐳" &&
+      ([ ! -z $${PROJECT_ID:-} ] || ( >&2 echo "ERROR. Missing ''PROJECT_ID'' env.var. (e.g. ''PROJECT_ID=demo-x'')"; false )) &&
+      
+      firebase emulators:start --project=$${PROJECT_ID:-}
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+      '
+```
+
+**What we could do:**
+
+```
+  # Expects:
+  #   - Derived declaration to provide 'PROJECT_ID' substitution ('demo-...').
+  #
+  #     Such project's data is visible in the emulator UIs. ALSO OTHER PROJECT ID's (or no id) will work, but leaving
+  #     the UI out of the loop.
+  #
+  base:
+    build:
+      context: ../firebase-tools
+      target: firebase-emulators
+      args:
+        - FIREBASE_TOOLS_VERSION=11.13.0
+
+    # 'ports', 'volumes', 'working_dir' to be provided by downstream
+
+    command: sh -c
+      'echo "Launching Docker... 🐳" &&
+      
+      firebase emulators:start --project=${PROJECT_ID}
+        | grep -v -E "You are not currently authenticated|Detected demo project ID|You are not signed in to the Firebase CLI"
+      '
+```
+
+Benefits:
+
+- no need to check for `PROJECT_ID` to exist: Docker Compose will err if it's omitted
+- better suits the intention; this is a *build time* parameter
+
+
+**Work-arounds:**
+
+- Use env.vars at the build command
+
+   We can use substitutions, as long as *each* build command does `PROJECT_ID=demo-main docker compose ...` when building.
+   
+   Having the substitution in the deriving definition would simply be a more appropriate place. 
+
+
+**Implementation suggestions**
+
+- 1. Adding `extends: substitutions` (or similar)
+
+   This would be akin to how - when refering from Docker Compose definitions to Dockerfile's - we can already use `build: args` (see above for an example).
+
+   ```
+   emul-for-app:
+     extends:
+       file: dc.base.yml
+       service: emul-base
+       substitutions:          # SUGGESTION; NOT CURRENTLY POSSIBLE
+         - PROJECT_ID=demo-main
+   ```
+
+   This would cater for the extension use case, but not allow "constants" to be used, within a single Docker Compose definition file.
+
+- 2. Adding `substitutions` (or similar)
+
+   Any Docker Compose file in the chain (or a single one) could have:
+   
+   ```
+   substitutions:
+     - PROJECT_ID=demo-main
+   ```
+   
+   These should not affect "downstream" (if B extends A, defining a substitution Z in A would not have it defined in B. Defininf it in B would set Z in A).   
+   
+   This mechanism would be akin `substitutions` in Cloud Build definitions, as mentioned earlier.
+
+

@@ -1,36 +1,40 @@
 /*
-* Generates a 'firebase.json' for CI; both backend and app.
+* Generates a 'firebase.json' for CI tests; both backend and app.
+*
+* Expects:
+*   CI_APP (optional)   non-empty string indicated building for CI app run; enables auth and database emulation
+*
+* Note:
+*   We base this on 'firebase.app.js' (which is used for CI deployments); only emulation ports are overrun and UI
+*   emulation turned off.
 *
 * References:
 *   - Schema
 *     -> https://github.com/firebase/firebase-tools/blob/master/schema/firebase-config.json
 */
+const { firestore, functions, database } = await import('./firebase.app.js').then(mod => mod.default);
+firestore && functions && database || fail();
 
-// Enable auth and Realtime Database only if their ports have been provided.
+//const CI_APP = true;  // #hack: always launch auth & database
+const CI_APP = !! process.env["CI_APP"];
+
+// Fix ports here, any ports would be fine.
 //
-const AUTH_PORT= process.env["AUTH_PORT"];
-const DATABASE_PORT= process.env["DATABASE_PORT"];
-const FIRESTORE_PORT = process.env["FIRESTORE_PORT"] || fail( `Expecting 'FIRESTORE_PORT' env.var.`);
-const FUNCTIONS_PORT = process.env["FUNCTIONS_PORT"] || fail( `Expecting 'FUNCTIONS_PORT' env.var.`);
+const [FIRESTORE_PORT, FUNCTIONS_PORT, AUTH_PORT, DATABASE_PORT] = [6767, 5002, CI_APP && 9100, CI_APP && 6868];
 
-// Note: Realtime database is not used. Add if CI testing includes testing for metrics/logging delivery.
+function fail(msg) { throw new Error(msg) }
 
 export default {
-  firestore: {
-    rules: "./firestore.rules",
-    indexes: "./firestore.indexes.json"
-  },
-  functions: {
-    source: "./functions"
-  },
-  ...DATABASE_PORT ? { database: { rules: "./database.rules.json" } } : {},
+  firestore,
+  functions,
+  ...DATABASE_PORT ? { database } : {},
   emulators: {
     firestore: {
-      port: FIRESTORE_PORT,   // 6767
+      port: FIRESTORE_PORT,
       host: "0.0.0.0"
     },
     functions: {
-      port: FUNCTIONS_PORT,   // 5002
+      port: FUNCTIONS_PORT,
       host: "0.0.0.0"
     },
     ...DATABASE_PORT ? { database: { port: DATABASE_PORT, host: "0.0.0.0" } } : {},
@@ -40,5 +44,3 @@ export default {
     }
   }
 }
-
-function fail(msg) { throw new Error(msg) }

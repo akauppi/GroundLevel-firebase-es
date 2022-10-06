@@ -1,10 +1,13 @@
 /*
-* tools/gen-vite-env-prod-serve.js
+* tools/gen-vite-env-prod.js
 *
-* Prepare content for '.env' file for a local production build.
+* Prepare content for '.env' file for a production build.
 *
-* NOTE: This DOES NOT AFFECT PRODUCTION itself (CI/CD does that), but only the 'make serve' variant usable locally.
-*   To separate such (in metrics and logging) from actual deployments, the 'release' attribute is empty.
+* NOTE:
+*   For local ('make build; make serve') production builds, environment can be tweaked (e.g. optional keys) via
+*   '.env.${ENV}'. THIS IS ONLY FOR THE LOCAL BUILDS.
+*
+*   For actual deployment, CI/CD takes care of the env.vars. (they might come from CI/CD system's properties).
 *
 * Output to stdout.
 */

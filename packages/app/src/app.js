@@ -130,6 +130,7 @@ async function init() {    // () => Promise of ()
       });
     });
 
+    /*** undone
     // tbd. is there a way to feed also 'incs' and 'obs' to be visible in Firebase Performance dashboard?
     //
     const tIncs = trace(perf, "incs");
@@ -137,6 +138,7 @@ async function init() {    // () => Promise of ()
     incHook( (s,diff) => {
       tIncs.incrementMetric(s,diff);    // note: Firebase floors numbers given to it
     });
+     ***/
 
     /* No way, right???
     const tObs = trace(perf, "obs");

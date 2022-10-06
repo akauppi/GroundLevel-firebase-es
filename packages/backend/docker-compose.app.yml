@@ -25,6 +25,9 @@ services:
       # --- RO
       - ./tmp/firebase.app.json:/work/firebase.json:ro
 
+      # --- follow
+      - ./database.rules.app.json:/work/database.rules.json:cached    # can get modified on the host
+
       # --- output
       - ./logs.app/firebase-debug.log:/work/firebase-debug.log:delegated
       - ./logs.app/firestore-debug.log:/work/firestore-debug.log:delegated
@@ -35,11 +38,12 @@ services:
     ports:
       - "${FUNCTIONS_PORT}:${FUNCTIONS_PORT}"
       - "${FIRESTORE_PORT}:${FIRESTORE_PORT}"
-      - "${DATABASE_PORT}:${DATABASE_PORT}"     # realtime database, for metrics/logging
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
       - "${AUTH_PORT}:${AUTH_PORT}"
       - "${UI_PORT}:${UI_PORT}"
     environment:
-      - PROJECT_ID=demo-main    # must match with what's in '../app/' (package[.dc].json, docker-compose.tools.local.yml)
+      - PROJECT_ID=demo-main
+        # must match with what's in '../app/' (Makefile, docker-compose.tools.local.yml)
 
     healthcheck:
       test: '

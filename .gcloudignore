@@ -57,6 +57,31 @@ packages/app/tmp/*
 # Development files; not intended for CI
 packages/app/.env*
 
+packages/app/dc.base.yml
+packages/app/dc.cypress.yml
+packages/app/dc.prod.serve.yml
+packages/app/docker-compose.local.yml
+packages/app/docker-compose.online.yml
+packages/app/docker-compose.tools.local.yml
+
+packages/app/tools/gen-vite-env-online.js
+packages/app/tools/gen-vite-env-local.js
+packages/app/tools/gen-vite-env-prod.js
+packages/app/tools/cypress.dc/Dockerfile
+packages/app/tools/serve.dc/Dockerfile
+
+packages/app/local/*.js
+  # {docs|users}.js,
+packages/app/dev/
+
+packages/backend/firebase.js
+packages/backend/dc.base.yml
+packages/backend/docker-compose.yml
+packages/backend/docker-compose.app.yml
+packages/backend/docker-compose.tools.yml
+
+packages/backend/tools/fireport.js
+
 # CI runs use pre-built Docker images, but having '/dc/' ignored a) creates warnings from Makefile, b) disallows
 # using Cloud Build for building that pre-built image. Thus, let it in.
 #/dc/
@@ -92,3 +117,5 @@ node_modules.tmp
 
 # Final. Keep at the bottom of the list
 !.gitkeep
+packages/backend/logs/
+packages/backend/logs.app/

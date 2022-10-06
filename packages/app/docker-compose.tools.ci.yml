@@ -30,11 +30,10 @@ services:
     command: sh -c
       '
       echo "VITE_RELEASE=${RELEASE}" >> .env &&
-      ([ -z "$$SENTRY_DSN" ] || echo "VITE_SENTRY_DSN=$$SENTRY_DSN" >> .env) &&
+      ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:-}" >> .env) &&
 
       vite build
       '
     environment:
-      - SENTRY_DSN
       - VITE_VISUALIZER=false
     profiles: ['manual']

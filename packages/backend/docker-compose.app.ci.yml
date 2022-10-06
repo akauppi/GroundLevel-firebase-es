@@ -3,22 +3,28 @@
 #
 # Extends 'docker-compose.ci.yml' so that:
 #   - authentication is included
+#   - Realtime Database (for metrics & logs) is included
 #
 # Note: Unlike with dev, we use the same ports as the backend testing does. In development, one might want to run them
 #     at the same time, whereas in CI, it's always either or. So, we can keep things simpler.
 #     Also, we don't need to do '.app' stuff. It's all the same.
 #
 # Expects:
-#   AUTH_PORT
-#   ..as in 'docker-compose.ci.yml'
+#   - (same as 'docker-compose.ci.yml')
 #
 services:
   emul-for-app:
     extends:
       file: docker-compose.ci.yml
       service: emul
-    ports:
-      - "${AUTH_PORT}:${AUTH_PORT}"
+    #ports:
+    # Ports not needed; tests will run directly against 'emul-for-app' hostname.
+    environment:
+      - PROJECT_ID=demo-main
+    volumes:
+      - ./database.rules.app.json:/work/database.rules.json:ro
+      #--- Output
+      - ./database-debug.log:/work/database-debug.log:delegated
 
     # Allows the ports to be seen (as 'emul-for-app:{port}') by Cloud Build steps.
     #

@@ -123,7 +123,7 @@ test\:rules2\:all: tmp/firebase.json
 # Development
 start: _started
 
-_started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json #tmp/database.rules.json
+_started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
 	$(_DC_PORTS) run --rm warmed-up
 	@echo "Firebase Emulators are running. Use 'docker compose down' to bring them down.\n"
 
@@ -135,7 +135,7 @@ _started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json #tmp/database.rules.json
 #
 # We support it by having a separate configuration (that includes Firebase Auth).
 #
-app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json tmp/database.rules.json
+app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rules.app.json
 	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml run --rm emul-for-app-launched
 	@echo "Firebase Emulators for the web app are running.\n"
 
@@ -166,9 +166,6 @@ tmp/firebase.app.json: ./firebase.app.js
 
 tmp/firebase.ci.json: ./firebase.ci.js
 	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
-
-tmp/database.rules.json:
-	@echo '{ "rules": { ".read": false, ".write": false, "incoming":{ "incs": {".indexOn": "clientTimestamp"}, "logs": {".indexOn": "clientTimestamp"}, "obs": {".indexOn": "clientTimestamp"}} } }' > $@
 
 # DC rebuild
 #

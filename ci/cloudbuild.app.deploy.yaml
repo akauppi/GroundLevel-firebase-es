@@ -1,5 +1,5 @@
 #
-# ci/cloudbuild.app.merged.yaml
+# ci/cloudbuild.app.deploy.yaml
 #
 # Triggers:
 #   - new stuff is merged to a branch ('$BRANCH_NAME'); changes either in 'packages/app/**' or root 'package.json'.

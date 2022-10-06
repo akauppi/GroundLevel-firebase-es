@@ -42,19 +42,13 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/backend/functions install &&
-    
-    npm --prefix packages/backend run -s ci:pr:setup
+    npm --prefix packages/backend/functions install
   ']
-  env:
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
-      # The port values get baked into 'firebase.json' (tbd. ..and should become the only place we need to set them in)
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/firebase.json            has been created
-  #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
+  #   - packages/backend/tmp/firebase.ci.json     has been created
+  #   - packages/backend/{firebase|firestore}-debug.log      created, so DC can map them
 
 # DEBUG:
 #
@@ -92,16 +86,14 @@ steps:
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
-    - FIRESTORE_PORT=6767
-    - FUNCTIONS_PORT=5002
 
 # Observed test times:
 #
 # |              | time
 # | ------------ | -----
-# | fns (cold)   | 2894, 3306, 2946 ms
-# | fns (warm)   | 422, 577 ms
-# | rules (cold) | 631, 705 ms    (already < 2000ms = good)
+# | fns (cold)   | 2363, 2894, 3306, 2946 ms
+# | fns (warm)   | 479, 422, 577 ms
+# | rules (cold) | 304, 631, 705 ms    (already < 2000ms = good)
 #
 # Conclusion: warm-up affects 'fns' tests, but whether we want to run them in CI is a matter of choice.
 #   Doing so allows to check that actual tests (when warmed up) do execute within 2000ms.
@@ -116,6 +108,7 @@ steps:
   dir: packages/backend
   env:
     - EMUL_HOST=emul
+    - FIREBASE_JSON=tmp/firebase.ci.json
     - WARM_UP_TIMEOUT=8000
 
 - name: node:18-alpine
@@ -124,6 +117,7 @@ steps:
   dir: packages/backend
   env:
     - EMUL_HOST=emul
+    - FIREBASE_JSON=tmp/firebase.ci.json
     #- WARM_UP_TIMEOUT=8000
 
 - name: node:${_NODE_VER}-alpine
@@ -147,7 +141,7 @@ steps:
 # --- Timeout
 #
 # Cloud Build:
-#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59
+#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59, 1:33
 #
 # Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #

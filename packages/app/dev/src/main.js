@@ -81,14 +81,32 @@ async function initFirebaseLocal() {   // () => Promise of ()
   connectFirestoreEmulator(firestore, host,FIRESTORE_PORT);
   connectAuthEmulator(auth, AUTH_URL, { disableWarnings: true });
 
-  // Signal to Cypress tests that Firebase can be used (emulation setup is done).
+  // Helpers for Cypress tests.
   //
   // Note: Was NOT able to do 'getAuth()' on the Cypress side so we pass the auth handle (and whatever else is necessary?)
-  //    from here. Not sure why this is so. (likely Cypress code runs before this has?)
+  //    from here. Not sure why this is so.
   //
-  // Importing anything from the app side must be done dynamically.
+  //    tbd. Try again, by first waiting this is visible.
   //
-  window["Let's test!"] = [auth];   // [FirebaseAuth]
+  // Note: import 'common' dynamically: it expects Firebase to have been initialized.
+  //
+  if (window.Cypress) {
+    const {createInc_TEST, createLog_TEST, createObs_TEST, flush} = await import('/@central/common');
+    const {signOut: /*as*/ fbSignOut} = await import('@firebase/auth');
+
+    window["Let's test!"] = [auth];   // [FirebaseAuth]
+
+    // Help Cypress by having test-only features
+    //
+    window.TEST_portal = {
+      incDummy: createInc_TEST("test-dummy"),
+      logDummy: createLog_TEST("test-dummy", "info"),
+      obsDummy: createObs_TEST("test-dummy"),
+      flush,
+
+      signOut: fbSignOut    // returns a Promise; hoping it gets properly turned into Cypress 'Chainable'...??
+    };
+  }
 }
 
 /*

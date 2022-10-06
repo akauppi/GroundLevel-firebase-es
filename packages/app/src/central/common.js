@@ -16,9 +16,10 @@ import {getAuth, onAuthStateChanged} from '@firebase/auth'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-const stage = LOCAL ? "dev"
-  : import.meta.env.MODE === "dev_online" ? `dev.${ import.meta.env.VITE_STAGE }`
+const STAGE = LOCAL ? (!window.Cypress ? "dev":"dev:test")
   : import.meta.env.VITE_STAGE || fail("[INTERNAL] no stage");
+
+const RELEASE = import.meta.env.MODE .startsWith("dev_") ? null : import.meta.env.VITE_RELEASE;    // falsy | "<commit sha>"
 
 const auth = getAuth();
 
@@ -35,16 +36,15 @@ function workerGen() {   // () => { flush, login, inc, log, obs }
   //
   const w = new Worker(new URL("./worker.js", import.meta.url), { type: 'module' });
 
-  function ctxGen(forcedAt) {   // (number?) => { uid: string, clientTimestamp: number }
-    const at = forcedAt || Date.now();
-
+  function ctxGen(at) {   // (number) => { uid: string, clientTimestamp: number }
     return {
-      uid: auth.currentUser?.uid,
+      uid: auth.currentUser?.uid || null,
       clientTimestamp: at,
 
-      stage
+      stage: STAGE,
+      ...RELEASE ? { release: RELEASE } : {}
 
-      // tbd. Other context: release version, ...
+      // tbd. browser type, ...
     }
   }
 
@@ -56,16 +56,16 @@ function workerGen() {   // () => { flush, login, inc, log, obs }
       w.postMessage( { "": "login", token })
     },
 
-    inc(id, inc, testOpts) {   // (string, number) => ()
-      w.postMessage({ "":"ship", id, inc, ctx: ctxGen(testOpts?.forcedAt) });
+    inc(id, inc, at = Date.now()) {   // (string, number, number) => ()
+      w.postMessage({ "":"ship", id, inc, ctx: ctxGen(at) });
     },
 
-    log(id, level, msg, args, testOpts) {   // (string, "debug"|"info"|"warn"|"error"|"fatal", string, Array of any) => ()
-      w.postMessage({ "":"ship", id, level, msg, args, ctx: ctxGen(testOpts?.forcedAt) });
+    log(id, level, msg, args, at = Date.now()) {   // (string, "debug"|"info"|"warn"|"error"|"fatal", string, Array of any, number) => ()
+      w.postMessage({ "":"ship", id, level, msg, args, ctx: ctxGen(at) });
     },
 
-    obs(id, obs, testOpts) {    // (string, number) => ()
-      w.postMessage({ "":"ship", id, obs, ctx: ctxGen(testOpts?.forcedAt) });
+    obs(id, obs, at = Date.now()) {    // (string, number, number) => ()
+      w.postMessage({ "":"ship", id, obs, ctx: ctxGen(at) });
     }
   }
 }
@@ -99,53 +99,65 @@ onAuthStateChanged( auth, async user => {
   }
 });
 
-/*
-* Flush the outgoing buffers, e.g. if the user is about to log out.
-*_/
 function flush() {    // () => ()
   currentWorker.flush();
-}*/
+}
 
-function createCounter(id) {
-  return (step = 1.0, testOpts) => {    // (step: number = 1.0, ?{ forcedAt: number }) => ()
+function createInc(id) {
+  return (step = 1.0) => {    // (step: number = 1.0) => ()
     step >= 0.0 || fail(`Bad parameter: ${step}`)
 
-    currentWorker.inc(id, step, testOpts);
+    currentWorker.inc(id, step);
 
     console.debug("Central counter:", { id, step });
   }
 }
 
 function createLog(id, level = "info") {
-  return (msg, a, testOpts) => {    // (string, ?any, ?{ forcedAt: number }) => ()
-    currentWorker.log(id, level, msg, a, testOpts);
+  return (msg, a) => {    // (string, ?any) => ()
+    currentWorker.log(id, level, msg, a);
 
     console.debug("Central log:", {id, level, msg, a});
   }
 }
 
 function createObs(id) {
-  return (v, testOpts) => {   // (number, ?{ forcedAt: number }) => ()
-    currentWorker.obs(id, v, testOpts);
+  return (v) => {   // (number) => ()
+    currentWorker.obs(id, v);
 
     console.debug("Central obs:", {id, v});
   }
 }
 
+const createInc_TEST = /*window.Cypress &&*/ ((id) => {
+  return (step = 1.0, forcedAt) => {    // (step: number = 1.0, number) => ()
+    step >= 0.0 || fail(`Bad parameter: ${step}`)
+    currentWorker.inc(id, step, forcedAt || fail());
+  }
+});
+
+const createLog_TEST = window.Cypress && ((id, level = "info") => {
+  return (msg, a, forcedAt) => {    // (string, ?any, number) => ()
+    currentWorker.log(id, level, msg, a, forcedAt || fail());
+  }
+});
+
+const createObs_TEST = window.Cypress && ((id) => {
+  return (v, forcedAt) => {   // (number) => ()
+    currentWorker.obs(id, v, forcedAt || fail());
+  }
+});
+
 function fail(msg) { throw new Error(msg); }
 
-// Help Cypress testing by preparing some entries.
-//
-if (LOCAL && window.Cypress) {
-  window.TEST_countDummy = createCounter("test-dummy");
-  window.TEST_logDummy = createLog("test-dummy", "info");
-  window.TEST_obsDummy = createObs("test-dummy");
-}
-
 export {
-  createCounter,
+  createInc,
   createLog,
   createObs,
-    //
-  //flush
+
+  // Cypress helpers:
+  createInc_TEST,
+  createLog_TEST,
+  createObs_TEST,
+  flush
 }
