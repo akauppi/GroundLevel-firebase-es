@@ -64,21 +64,19 @@ make
   lint		Runs 'eslint' (very noisy, still)
 
   --- maintenance
-  prune		Clear Node dependendies
 endef
 export help
 
 # Node.js
-install:
+install: _uses_docker
 	npm install
 
-prune:
-	npm prune
-
-# Local dev: Important to create 'tmp/functions/node_modules' in the host side; otherwise, WSL2 Docker will create one
-#	with 'root' access (instead of the current user).
+# Postinstall step, called by 'npm install'.
 #
-functions-install-local:
+# Note: Important to create 'tmp/functions/node_modules' in the host side. Otherwise, WSL2 Docker will create one
+# 		with 'root' access (instead of the current user).
+#
+postinstall-local: _uses_docker
 	install -d tmp/functions/node_modules
 	docker compose -f docker-compose.tools.yml run --rm functions-install
 
@@ -141,7 +139,7 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rul
 
 # CI
 #
-ci\:firebase.json: firebase.app.js
+ci\:deploy\:firebase.json: firebase.app.js
 	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify({...o, emulators: undefined}));" > firebase.json
 
 # Misc
@@ -177,14 +175,21 @@ $(_EMUL_APP_DC): $(_DC_PATH)/firebase-tools/Dockerfile $(shell find $(_DC_PATH)/
 	$(_ALL_PORTS_DUMMY) $(_DC) -f docker-compose.app.yml build emul-for-app
 	touch $@
 
+# Give nicer error message if Docker is not running.
+#
+_uses_docker:
+	@docker --version > /dev/null || ( >&2 echo "PROBLEM: 🐋 Not seeing Docker around, please launch it.\n"; false )
+
 #---
 echo:
 	@echo $(wildcard functions/node_modules/*)
 
 .PHONY: help \
-  install prune \
+  install postinstall-local \
   test \
   start _started \
   app\:start \
+  ci\:deploy\:firebase.json \
   down-all \
+  _uses_docker \
   echo
