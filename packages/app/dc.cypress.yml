@@ -39,7 +39,7 @@ services:
   run_tests:
     build:
       context: tools/cypress.dc
-      target: with_libs
+      target: cypress-custom
     volumes:
       # --- RO
       - ./cypress:/work/cypress:ro

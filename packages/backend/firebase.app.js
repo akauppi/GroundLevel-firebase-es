@@ -1,16 +1,18 @@
 /*
-* Firebase emulation for front-end development
+* Firebase emulation for front-end development.
+*
+* Also used for eventual deployment (sans 'emulators', of course).
 */
 export default {
   firestore: {
-    rules: "./firestore.rules",
-    indexes: "./firestore.indexes.json"
+    rules: "firestore.rules",
+    indexes: "firestore.indexes.json"
   },
   functions: {
-    source: "./functions"
+    source: "functions"
   },
   database: {
-    rules: "./database.rules.json"
+    rules: "database.rules.json"
   },
   emulators: {
     firestore: {

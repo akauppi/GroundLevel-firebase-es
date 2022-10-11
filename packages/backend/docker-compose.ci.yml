@@ -15,12 +15,19 @@
 #
 services:
   emul:
+    # Note: Could use the repo's '/dc' folder. In this case, no prior push to 'ci-builder' is needed.
+    #
+    #extends:
+    #  file: ../../dc/firebase-emulators/base.yml
+    #  service: base
     image: ${CI_BUILDER_IMAGE}
+
     # Ports not needed; tests will run directly against 'emul' (or 'emul-for-app') hostname.
 
     volumes:
       # --- RO
-      - ./tmp/firebase.ci.json:/work/firebase.json:ro
+      - ./tmp/firebase.ci.js:/work/firebase.js:ro
+      - ./tmp/firebase.ci.json:/work/firebase.json:ro   # tbd. eventually focus on using either '.js' or '.json'?
       - ./firestore.indexes.json:/work/firestore.indexes.json:ro
       - ./firestore.rules:/work/firestore.rules:ro
       - ./functions:/work/functions:ro
@@ -44,13 +51,23 @@ services:
     healthcheck:
       test: '
         nc -z localhost 6767 &&
-        nc -z localhost 5002
+        nc -z localhost 5002 &&
+        ([ $$PROJECT_ID != demo-main ] || (
+          nc -z localhost 9100 &&
+          nc -z localhost 6868
+        ))
       '
         # tbd. read ports (and whether auth is enabled) from 'tmp/firebase.ci.json'; enable app & database check
+        #     using project id should go.
         #
         # Note: 'nc' in that image doesn't handle checking multiple ports at once.
-      interval: 0.5s
-      start_period: 30s
+      interval: 1.2s
+      start_period: 40s
+        #
+        # 🦤 Fluctuations observed: ABOVE HEALTH CHECK OCCASIONALLY FAILS (was with interval: 0.5s, start_period: 30s)
+        #   Keep an eye on it... and retry; don't start punching the code!!! ❌🔧🥊
+        #
+        #   Note: Also, don't add a 'sleep' to the health check. They are retried, until successful.
 
     # Allows the ports to be seen (as 'emul:{port}') by Cloud Build steps.
     #
@@ -58,7 +75,7 @@ services:
     container_name: emul
 
   emul-is-healthy:
-    image: node:16-alpine
+    image: node:18-alpine
     command: sh -c true
     depends_on:
       emul:

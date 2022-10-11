@@ -21,14 +21,15 @@ services:
     profiles: ['manual']
 
   # See that we see 'emul-for-app'
-  debug:    # DEBUG
-    image: node:16-alpine
-    command: sh -c '
-      nc -z emul-for-app 6768 && echo "6768 ok" &&
-      nc -z emul-for-app 6869 && echo "6869 ok" &&
-      nc -z emul-for-app 9101 && echo "9101 ok"
-      '
-    profiles: ['manual']
+  #|debug:    # DEBUG
+  #|  image: node:16-alpine
+  #|  command: sh -c '
+  #|    nc -z emul-for-app 6768 && echo "6768 ok" &&
+  #|    nc -z emul-for-app 5003 && echo "5003 ok" &&
+  #|    nc -z emul-for-app 6869 && echo "6869 ok" &&
+  #|    nc -z emul-for-app 9101 && echo "9101 ok"
+  #|    '
+  #|  profiles: ['manual']
 
   #---
   # This is normally not needed, but CAN BECOME USEFUL if 'main.js' doesn't launch 'app.js' properly, to debug.

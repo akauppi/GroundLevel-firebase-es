@@ -16,32 +16,25 @@
     "test": "make test",
     "--  -": "",
     "ci:lint": "eslint --ext .js,.vue src || true",
-    "ci:launch": "vite --mode dev_local",
     "-- - -": "",
-    "first:echoFirebaseHostingJson": "npm run -s _echoFirebaseHostingJson",
-    "--  --  ": "",
     "_build:dev": "npm run -s _touchDevLocalEnv && make refresh-build && docker compose -f docker-compose.local.yml run --rm build",
     "--  -- ": "",
-    "preinstall": "[ ${npm_config_omit:-_} = optional ] || ( echo >&2 \"***\tPlease install with '--omit=optional'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
+    "preinstall": "(echo \"${npm_config_omit}\" | grep -q peer) || ( echo >&2 \"***\tPlease install with '--omit=peer'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
-    "_postinstall_dev": "(cd node_modules && rm -rf vite rollup esbuild esbuild-*)",
-    "_postinstall_ci": "npm run -s _pic1 && npm run -s _pic2",
-    "_pic1": "npm run -s _echoFirebaseHostingJson > firebase.json",
-    "_pic2": "npm run -s _postinstall_dev",
-    "_tbd.": "^-- above needs some cleanup, once app CI works",
-    "--    -": "",
-    "_echoFirebaseHostingJson": "node --input-type=module -e \"import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));\""
+    "_postinstall_dev": "true",
+    "_postinstall_ci": "make firebase.json"
   },
   "dependencies": {
-    "aside-keys": "^0.0.3-alpha.1",
-    "@firebase/app": "^0.7.33",
-    "@firebase/firestore": "^3.5.0",
-    "@firebase/functions": "^0.8.4",
-    "@firebase/performance": "^0.5.12",
+    "aside-keys": "^0.0.3-alpha.2",
+    "@firebase/app": "^0.8.0",
+    "@firebase/auth": "^0.20.8",
+    "@firebase/firestore": "^3.6.0",
+    "@firebase/functions": "^0.8.5",
     "vue": "^3.2.40",
     "vue-router": "^4.1.5"
   },
   "//dependencies": {
+    "@firebase/performance": "^0.5.12",
     "@sentry/browser": "^7.0.0",
     "@sentry/tracing": "^7.0.0",
     "plausible-tracker": "^0.3.5"
@@ -78,6 +71,11 @@
       ],
       "[ x = y ]": [
         "Use only one '=', for pleasing WSL2. Otherwise it gives 'undefined operator'."
+      ],
+      "preinstall": [
+        "In a normal install, the '@vitejs/plugin-vue' dependency would bring in vite (and esbuild, rollup) as peer dependencies.",
+        "We don't want that, since Vite already comes via a Docker image. On the other hand, '@vitejs/plugin-vue' deserves",
+        "to be right here, since it is specific to the front-end framework used (Vue 3)."
       ]
     }
   }

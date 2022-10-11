@@ -11,6 +11,7 @@
 #   - node:{16|18}-alpine   (stock image)
 #   - firebase-emulators    (pushed to Artifact Registry)
 #   - docker/compose        (stock image)
+#   - cypress/included      (stock image)
 #   - gsutil                (Cloud Build built-in image)
 #
 # Runtime environment:
@@ -54,7 +55,7 @@ steps:
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
   #   - packages/app/tmp/.env.ci_test             has been created
   #
-  #     Note: Ports are in two places: 'tmp/firebase.ci.json' for the emulators; '.env.ci_test' for Vite.
+  #     Note: Ports are in two places: 'tmp/firebase.ci.json' for the emulators, '.env.ci_test' for the front-end.
 
 # DEBUG, TERMINAL:
 #
@@ -68,7 +69,8 @@ steps:
 #|  env:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
 
-# --- App
+
+# --- Tests
 #
 # Launch emulators and Vite; keeps them running in the background.
 #
@@ -82,88 +84,75 @@ steps:
 
   # DEBUG: Check we see stuff
   #
-- name: node:${_NODE_VER}-alpine
-  entrypoint: sh
-  args: ['-c', '
-    nc -z $$EMUL_HOST 6767 && echo "I see $$EMUL_HOST:firestore" &&
-    nc -z $$EMUL_HOST 5002 && echo "I see $$EMUL_HOST:functions" &&
-    nc -z $$EMUL_HOST 9100 && echo "I see $$EMUL_HOST:auth" &&
-    nc -z $$EMUL_HOST 6868 && echo "I see $$EMUL_HOST:database"
-  ']
-  env:
-    - EMUL_HOST=emul-for-app
+#|- name: node:${_NODE_VER}-alpine
+#|  entrypoint: sh
+#|  args: ['-c', '
+#|    echo "--- firebase-debug.log" && cat packages/backend/firebase-debug.log &&
+#|    echo "--- database-debug.log" && cat packages/backend/database-debug.log &&
+#|
+#|    nc -z $$EMUL_HOST 6767 && echo "I see $$EMUL_HOST:firestore" &&
+#|    nc -z $$EMUL_HOST 5002 && echo "I see $$EMUL_HOST:functions" &&
+#|    nc -z $$EMUL_HOST 9100 && echo "I see $$EMUL_HOST:auth" &&
+#|    nc -z $$EMUL_HOST 6868 && echo "I see $$EMUL_HOST:database"
+#|  ']
+#|  env:
+#|    - EMUL_HOST=emul-for-app
 
-# DEBUG; TERMINAL. Enable if Vite does not launch
+# DEBUG, TERMINAL: enable to see Vite launches
+#
+# 'vite-ci' is normally just a dependency of 'cypress', but this launches it on its own (and shows console output):
+#
 #|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
 #|  args: ['-f', 'docker-compose.ci.yml', 'up', 'vite-ci']
 #|  dir: packages/app
 #|  env:
-#|    - PORT=3002
+#|    - VITE_PORT=3002
 
-# Launches Vite
+# DEBUG: see the stuff within DC?
+#
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'see-them']
+  dir: packages/app
+  env:
+    - VITE_PORT=3002
+
+# Launch Vite (optional; provides better debugging and earlier fail, having this as a separate step).
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
   args: ['-f', 'docker-compose.ci.yml', 'run', 'vite-ci-launched']
   dir: packages/app
   env:
-    - PORT=3002
+    - VITE_PORT=3002
 
-  # State:
-  #   - 'emul-for-app' is running (emulators)
-  #   - 'vite:3002' is running, and connected to the above backend
-
-# DEBUG: Check we see stuff
+# DEBUG: Check we see Vite and Realtime Database
 #
-- name: node:${_NODE_VER}-alpine
-  entrypoint: sh
-  args: ['-c', '
-    nc -z vite 3002 && echo "I see Vite" &&
-    nc -z $$EMUL_HOST 6767 && echo "I see $$EMUL_HOST:firestore" &&
-    nc -z $$EMUL_HOST 5002 && echo "I see $$EMUL_HOST:functions" &&
-    nc -z $$EMUL_HOST 9100 && echo "I see $$EMUL_HOST:auth" &&
-    nc -z $$EMUL_HOST 6868 && echo "I see $$EMUL_HOST:database" &&
-    
-    cat packages/app/tmp/.env.ci_test
-  ']
-  env:
-    - EMUL_HOST=emul-for-app
+#|- name: node:${_NODE_VER}-alpine
+#|  entrypoint: sh
+#|  args: ['-c', '
+#|    nc -z vite 3002 && echo "I see Vite" &&
+#|    nc -z emul-for-app 6868 && echo "I see Realtime Database"
+#|  ']
 
-  # NOTE!
-  #   Below is slightly different than running 'make test' within dev.
-  #     - dev uses a '../tools/cypress.dc' custom Cypress image-look-alike;
-  #       we want to rely on stock images, as possible
-  #
-  #       Customizations (from the '../tools/cypress.dc') are done here, so that the 'cypress.config.js' would work.
-  #
-- name: cypress/included:${_CYPRESS_TAG}
-  entrypoint: sh
-  args: ['-c', '
-    npm config set update-notifier false &&
-
-    npm install -g firebase-admin@$_FIREBASE_ADMIN_VER &&
-    ln -s $$NODE_PATH /node_modules &&
-    
-    cypress run --headless    
-  ']
-    # By default, globally installed libraries are not resolved by Node.js (in ESM mode). That's what the 'ln -s' is for.
-    #
+# Running Cypress
+#
+# This automatically launched 'vite-ci', unless it's already done, above.
+#
+# Running via DC (opposed to directly using a stock image) allows us to:
+#   - integrate launching Vite and running Cypress
+#   - do file mapping/sandboxing
+#   - handle networks correctly (differs from the dev environment)
+#
+- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+  args: ['-f', 'docker-compose.ci.yml', 'run', 'cypress']
   dir: packages/app
   env:
-    - CYPRESS_baseUrl=http://vite:3002
-    - CYPRESS_defaultCommandTimeout=20000
-    #- CYPRESS_taskTimeout=30000
-    - EMUL_HOST=emul-for-app    # so firebase-admin can read the Realtime Database
-    #
-    # Test durations:
-    #   1: 9253, 7429 ms
-    #   2:
-    #   3:
-    #
-    # Tests durations (old):
-    #   1: 10673, 9478, 9270, 10987 ms
-    #   2: na
-    #   3:  4224, 4920, 4695,  5276 ms
+    - VITE_PORT=3002
+        # precise port does not matter; helps us keep it in one place.
+    - CYPRESS_IMAGE=cypress/included:${_CYPRESS_TAG}
+    - FIREBASE_ADMIN_VER=${_FIREBASE_ADMIN_VER}
 
+#--- Build (fake; just trying it does..)
+#
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
   args: ['-c', '
@@ -192,6 +181,12 @@ steps:
 
 #-- Pass marker
 #
+# NOTE: The 'cloud-builders/gsutil' image is intended to be deprecated by GCP, in favor of 'google/cloud-sdk[:alpine]'
+#   See -> https://github.com/GoogleCloudPlatform/cloud-builders/issues/638#issuecomment-625331280
+#
+#   gcr.io/cloud-builders/gsutil    420 MB
+#   google/cloud-sdk:alpine         205 MB    <-- tbd. use this
+#
 - name: gcr.io/cloud-builders/gsutil
   entrypoint: sh
   args: ['-c', '
@@ -207,7 +202,7 @@ steps:
 #
 # Cloud Build: 5:36, 5:10, 6:01, 4:56   <-- last with Cypress 10.6.0
 #
-timeout: 500s
+timeout: 600s
 
 substitutions:
   _BUILDER_TAG: 11.13.0
@@ -217,6 +212,8 @@ substitutions:
   _CYPRESS_TAG: 10.9.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
+  _FIREBASE_ADMIN_VER: 11.0.1
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
   _MY_BUILDER: ci-builder
-  _FIREBASE_ADMIN_VER: 11.0.1
+  #_FIREBASE_EMULATORS: firebase-emulators
+  #_CYPRESS_CUSTOM: cypress-custom

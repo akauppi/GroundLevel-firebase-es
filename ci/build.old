@@ -16,8 +16,6 @@ set -eu -o pipefail
 # Note: We can update this version less frequently than the one used for development. Once you do change it, remove
 #     earlier images from Artifact Registry.
 #
-# Note: >= 11.2.1 to avoid Artifact Registry API enabling need, by hand.
-#
 _VERSION=11.13.0
 
 _DOCKERPATH=../dc/firebase-tools

@@ -132,7 +132,9 @@ docker compose run --rm deploy-backend
 
 (cd ../packages/app && npm install && ENV=${ENV-staging} make build)
 
-(cd ../packages/app && npm run -s first:echoFirebaseHostingJson) > .state/firebase.hosting.json
+(cd ../packages/app &&
+  node --input-type=module -e "import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));"
+) > .state/firebase.hosting.json
 
 docker compose run --rm deploy-app
 

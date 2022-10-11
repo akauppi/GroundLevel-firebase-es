@@ -65,14 +65,16 @@ packages/app/docker-compose.online.yml
 packages/app/docker-compose.tools.local.yml
 
 packages/app/tools/gen-vite-env-online.js
-packages/app/tools/gen-vite-env-local.js
+#packages/app/tools/gen-vite-env-local.js       # used in CI tests
 packages/app/tools/gen-vite-env-prod.js
-packages/app/tools/cypress.dc/Dockerfile
+# Case B (not using stock 'cypress/included' image) in CI needs:
+#packages/app/tools/cypress.dc/Dockerfile
 packages/app/tools/serve.dc/Dockerfile
 
 packages/app/local/*.js
   # {docs|users}.js,
-packages/app/dev/
+
+# Note: 'packages/app/dev' is needed for CI tests
 
 packages/backend/firebase.js
 packages/backend/dc.base.yml

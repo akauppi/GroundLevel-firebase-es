@@ -79,3 +79,22 @@ You can ignore this line. It's likely connected with Chrome (and headed mode, no
 The `../backend/database.rules.app.json` file should have appropriate indexing, but emulators don't seem to load it.
 
 **This warning can be ignored.**
+
+
+## First `make test` fails
+
+```
+$ make test
+...
+  Central metrics, logs and samples end up in Realtime Database (when a user has signed in)
+[2022-10-11T09:38:19.365Z]  @firebase/database: FIREBASE WARNING: Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding ".indexOn": "ctx/clientTimestamp" at /incoming/incs to your security rules for better performance. 
+    1) Have metrics passed to Realtime Database
+[2022-10-11T09:38:35.218Z]  @firebase/database: FIREBASE WARNING: Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding ".indexOn": "ctx/clientTimestamp" at /incoming/logs to your security rules for better performance. 
+    2) Have logs passed to Realtime Database
+[2022-10-11T09:38:51.194Z]  @firebase/database: FIREBASE WARNING: Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding ".indexOn": "ctx/clientTimestamp" at /incoming/obs to your security rules for better performance. 
+    3) Have samples passed to Realtime Database
+```
+
+Not sure, why.
+
+Just retry, and they should pass.

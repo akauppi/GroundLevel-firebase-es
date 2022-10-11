@@ -5,13 +5,11 @@
 *   - Schema
 *     -> https://github.com/firebase/firebase-tools/blob/master/schema/firebase-config.json
 */
+const { firestore, functions } = await import('./firebase.app.js').then(mod => mod.default);
+
 export default {
-  firestore: {
-    rules: "./firestore.rules",
-    indexes: "./firestore.indexes.json"
-  },
-  functions: { source: "./functions" }
-  ,
+  firestore,
+  functions,
   emulators: {
     firestore: {
       port: 6767,

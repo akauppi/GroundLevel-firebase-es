@@ -17,18 +17,29 @@ services:
     extends:
       file: docker-compose.ci.yml
       service: emul
-    #ports:
-    # Ports not needed; tests will run directly against 'emul-for-app' hostname.
-    environment:
-      - PROJECT_ID=demo-main
     volumes:
       - ./database.rules.app.json:/work/database.rules.json:ro
       #--- Output
       - ./database-debug.log:/work/database-debug.log:delegated
 
+    # Ports not needed; tests will run directly against 'emul-for-app' hostname.
+    environment:
+      - PROJECT_ID=demo-main
+
+    #|healthcheck:
+    #|  test: '
+    #|    nc -z localhost 6767 &&
+    #|    nc -z localhost 5002
+    #|  '
+    #|    #nc -z localhost 9100 &&
+    #|    #nc -z localhost 6868
+    #|  interval: 0.5s
+    #|  start_period: 30s
+    #|  # Cannot merge with base (backend, sans auth and database) easily; duplicating all services here.
+
     # Allows the ports to be seen (as 'emul-for-app:{port}') by Cloud Build steps.
     #
-    network_mode: cloudbuild
+    #network_mode: cloudbuild
     container_name: emul-for-app
 
   emul-for-app-launched:

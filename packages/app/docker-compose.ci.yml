@@ -6,23 +6,22 @@
 # _Similar_ to 'dc.base.yml' and 'docker-compose.local.yml' but separate. Changes here will not break development
 # experience, and vice versa. However, we still use the same Vite version, defined under 'tools/vite.dc/'.
 #
+# Also Cypress tests are within this same file.
+#
 # Expects:
 #   - PORT to declare the port to show UI in
-#
-# To debug locally:
-#   - temporarily comment out the 'network_mode' and 'container_name' fields.
+#   - CYPRESS_IMAGE if using 'cypress'
 #
 # References:
 #   - Share Compose configurations between files and projects (Docker Compose docs)
 #     -> https://docs.docker.com/compose/extends/
 #
 services:
+  # Also builds are done with this; CI does not need visualizations
   vite-ci:
     build:
       context: tools/vite.dc
-      target: vite_plain        # also builds are done with this; CI does not need visualizations
-    ports:
-      - "$PORT:$PORT"
+      target: vite_plain
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro
@@ -39,30 +38,106 @@ services:
     working_dir: /work
     command: sh -c '
       npm config set update-notifier false &&
-  
-      npm run ci:launch
+      
+      vite --mode dev_local
       '
     environment:
-      - MODE=local    # tbd. is this needed??
-      - PORT              # pass through, at least 'vite.config.js' wants it
+      - PORT=$VITE_PORT    # at least 'vite.config.js' wants it
 
     network_mode: cloudbuild
     container_name: vite
       # The domain node name (not 'localhost'!) to use for the front end, e.g. 'http://vite:3002'
 
     healthcheck:
-      test: "nc -z localhost $PORT"
+      test: "nc -z localhost ${VITE_PORT}"
       interval: 0.9s
       start_period: 20s
 
-  # Make sure Vite is launched.
+  # Semi-debug step.
+  #
+  # This can be used from the Cloud Build definition, to check 'vite-ci' is actually up and healthy (before proceeding
+  # to time-taking 'cypress/included' download.
+  #
+  # Note: Not only wakes 'vite' but also checks we have network level access to it.
   #
   vite-ci-launched:
-    image: node:16-alpine
-    command: sh -c true
+    image: node:18-alpine
+    command: sh -c '
+      nc -z vite $VITE_PORT
+      '
+    network_mode: cloudbuild
     depends_on:
       vite-ci:
         condition: service_healthy
 
+    container_name: vite-ci-launched    # just for the logs
     profiles: ['manual']
-    container_name: vite-ci-launched    # just for logs
+
+  # Cypress run
+  #
+  cypress:
+    # A: 'cypress-custom' image has been pre-built
+    image: ${CYPRESS_IMAGE}
+
+    # B: use from repo; rebuilds every time (around 4 mins)
+    #build:
+    #  context: tools/cypress.dc
+    #  target: cypress-custom
+
+    volumes:
+      # --- RO
+      - ./cypress:/work/cypress:ro
+      - ./cypress.config.js:/work/cypress.config.js:ro
+      - ./package.json:/work/package.json:ro
+      - ./node_modules:/work/node_modules:ro
+      #
+      - ./tmp/firebase.ci.js:/work/firebase.json
+      # --- output
+      - ./.screenshots:/work/.screenshots:delegated
+    environment:
+      - CYPRESS_defaultCommandTimeout=20000
+      - CYPRESS_baseUrl=http://vite:${VITE_PORT}
+      - EMUL_HOST=emul-for-app
+      - FIREBASE_APP_JS=tmp/firebase.ci.js
+    working_dir: /work
+    entrypoint: []    # clear the 'entrypoint' of the stock image ('["cypress", "run"]')
+    command: sh -c '
+        cypress run
+      ']
+    profiles: ['manual']
+
+    # allows Cypress to see 'vite' and 'emul-for-app' hosts
+    network_mode: cloudbuild
+    container_name: cypress   # for console output, only
+
+    depends_on:
+      vite-ci:
+        condition: service_healthy
+
+    #
+    # Test durations:
+    #   1: 9253, 7429 ms
+    #   2:
+    #   3:
+    #
+    # Tests durations (old):
+    #   1: 10673, 9478, 9270, 10987 ms
+    #   2: na
+    #   3:  4224, 4920, 4695,  5276 ms
+
+  # DEBUG
+  #
+  # Prove we can see 'vite' and 'emul-for-app', from within DC.
+  see-them:
+    image: node:18-alpine
+    command: sh -c '
+      nc -z vite $VITE_PORT && echo "I see Vite" &&
+      nc -z emul-for-app 6868 && echo "I see Realtime Database"
+      '
+    network_mode: cloudbuild
+    depends_on:
+      vite-ci:
+        condition: service_healthy
+    profiles: ['manual']
+
+# tbd. If we had a way to provide YAML-level substitutions, 'VITE_PORT' could be handled that way. Its only used internally.

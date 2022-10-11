@@ -1,0 +1,62 @@
+#
+# ci/cloudbuild.pre2.yaml
+#
+# Manually run, within Cloud Build, for building and pushing the 'cypress-custom' image to the Artifact Registry.
+#
+# Usage:
+#   <<
+#     $ gcloud builds submit --config=cloudbuild.pre2.yaml ../packages/app/tools/cypress.dc
+#   <<
+#
+# Cloud Build project:
+#   - Common CI builder (user specific; not project specific)
+#
+# Uses images:
+#   - gcr.io/cloud-builders/docker      (Cloud Build built-in)
+#
+# Runtime environment:
+#   - Current directory is '/workspace/...', based on the 'dir' field
+#
+#   - env.variables:
+#     PWD=/workspace
+#     HOME=/builder/home
+#     BUILDER_OUTPUT=/builder/outputs
+#
+
+steps:
+# Docker build
+#
+- name: gcr.io/cloud-builders/docker
+  entrypoint: sh
+  args: ['-c', '
+    [ $PROJECT_ID = ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the ''${_MY_BUILDER}'' project: gcloud config set project ${_MY_BUILDER}"; false ) &&
+
+    docker build --pull --build-arg CYPRESS_VER=${_CYPRESS_VER} --target cypress-custom . -t cypress-custom:$$TAG
+  ']
+    # Note: This image needs '[ nah = dah ]' syntax (not '==')
+  env:
+    - TAG=${_CYPRESS_VER}
+
+# Push to Artifact Registry
+#
+- name: gcr.io/cloud-builders/docker
+  entrypoint: sh
+  args: ['-c', '
+    docker tag cypress-custom:$$TAG $${AR_IMG} &&
+    docker push $${AR_IMG}
+  ']
+  env:
+    - AR_IMG=us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_FOLDER}/cypress-custom:${_CYPRESS_VER}
+    - TAG=${_CYPRESS_VER}
+
+# --- Timeout
+#
+# Cloud Build:  3:58
+#
+timeout: 500s
+
+substitutions:
+  _CYPRESS_VER: 10.9.0
+  _AR_FOLDER: builders
+    # You may use any name, or create such a folder in AR.
+  _MY_BUILDER: ci-builder

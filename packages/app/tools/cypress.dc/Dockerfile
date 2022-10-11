@@ -1,8 +1,9 @@
 #
-# Dockerfile for running Cypress tests, on the command line
+# Dockerfile for running Cypress tests both on command line, and in CI.
 #
-# Based on Cypress official images, but:
-#   - only provide one (Chrome) browser; Cypress brings in Firefox as well
+# - Based on Cypress official 'cypress/included' image definition (needs to be manually kept in sync!), but:
+#   - using more recent Node.js (18 over 16)
+#   - skipping both Chrome and Firefox installs (using Electron only), to keep the image smaller
 #
 # Provides:
 #   - 'cypress' CLI command
@@ -13,7 +14,9 @@
 #
 
 #---
-# Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/node18.6.0-chrome105-ff104/Dockerfile
+# 'cypress/base' customized
+#
+# Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/ (18.6.0-chrome105-ff104)
 #
 # Note:
 #   NOT the image Cypress themselves use for 'included' (they have Node 16; we use Node 18).
@@ -21,7 +24,7 @@
 # Changes:
 #   - not bringing in Firefox
 #
-FROM cypress/base:18.6.0 as base-chrome
+FROM cypress/base:18.6.0 as base
 
 USER root
 
@@ -31,13 +34,6 @@ USER root
 #
 #COPY ./global-profile.sh /tmp/global-profile.sh
 #RUN cat /tmp/global-profile.sh >> /etc/bash.bashrc && rm /tmp/global-profile.sh
-
-# NOTE: 'cypress/base' should have these, but launching Cypress complains!!  DEBUG
-#
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    xvfb \
-  && rm -rf /var/lib/apt/lists/* \
-  && apt-get clean
 
 # Install dependencies
 RUN apt-get update && \
@@ -66,16 +62,17 @@ RUN wget --no-verbose /usr/src/libappindicator3-1_0.4.92-7_amd64.deb "http://ftp
   apt-get install -f -y && \
   rm -f /usr/src/libappindicator3-1_0.4.92-7_amd64.deb
 
+# CHANGE: disabled
 # install Chrome browser
-RUN node -p "process.arch === 'arm64' ? 'Not downloading Chrome since we are on arm64: https://crbug.com/677140' : process.exit(1)" || \
-  (wget --no-verbose -O /usr/src/google-chrome-stable_current_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_105.0.5195.102-1_amd64.deb" && \
-  dpkg -i /usr/src/google-chrome-stable_current_amd64.deb ; \
-  apt-get install -f -y && \
-  rm -f /usr/src/google-chrome-stable_current_amd64.deb)
+#RUN node -p "process.arch === 'arm64' ? 'Not downloading Chrome since we are on arm64: https://crbug.com/677140' : process.exit(1)" || \
+#  (wget --no-verbose -O /usr/src/google-chrome-stable_current_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_105.0.5195.102-1_amd64.deb" && \
+#  dpkg -i /usr/src/google-chrome-stable_current_amd64.deb ; \
+#  apt-get install -f -y && \
+#  rm -f /usr/src/google-chrome-stable_current_amd64.deb)
 
 # "fake" dbus address to prevent errors
 # https://github.com/SeleniumHQ/docker-selenium/issues/87
-ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
+#ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
 
 # CHANGE: disabled
 ## install Firefox browser
@@ -93,7 +90,7 @@ RUN echo  " node version:    $(node -v) \n" \
   "npm version:     $(npm -v) \n" \
   "yarn version:    $(yarn -v) \n" \
   "debian version:  $(cat /etc/debian_version) \n" \
-  "Chrome version:  $(google-chrome --version) \n" \
+  #"Chrome version:  $(google-chrome --version) \n" \
   #"Firefox version: $(firefox --version) \n" \
   #"Edge version:    n/a \n" \
   #"git version:     $(git --version) \n" \
@@ -115,7 +112,7 @@ ENV npm_config_unsafe_perm=true
 # Brings:
 #   - Cypress on top of the OS + Electron + Chrome
 #
-FROM base-chrome as cypress
+FROM base as cypress
   #FROM cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
 
 # Cypress CHANGELOG -> https://docs.cypress.io/guides/references/changelog
@@ -176,7 +173,7 @@ RUN echo "whoami: $(whoami)" \
     "typescript version:  $(tsc -v) \n" \
     "debian version:  $(cat /etc/debian_version) \n" \
     "user:            $(whoami) \n" \
-    "chrome:          $(google-chrome --version || true) \n" #\
+    #"chrome:          $(google-chrome --version || true) \n" #\
     #"firefox:         $(firefox --version || true) \n"
 
 ENTRYPOINT ["cypress", "run"]
@@ -189,9 +186,14 @@ ENTRYPOINT ["cypress", "run"]
 #   - 'cypress' library usable
 #   - other Node libraries needed by 'cypress.config.js' and the tests
 #
-# Note: We could base this either on the above (customized) Cypress image definitions, or 'cypress/included' stock image.
+FROM cypress as cypress-custom
+
+# NOTE: 'cypress/base' should have these, but launching Cypress complains!!  DEBUG
 #
-FROM cypress as with_libs
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    xvfb \
+  && rm -rf /var/lib/apt/lists/* \
+  && apt-get clean
 
 ARG FIREBASE_ADMIN_VER=11.0.1
   # -> https://github.com/firebase/firebase-admin-node/releases
