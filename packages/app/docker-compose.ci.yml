@@ -37,8 +37,6 @@ services:
 
     working_dir: /work
     command: sh -c '
-      npm config set update-notifier false &&
-      
       vite --mode dev_local
       '
     environment:
@@ -75,9 +73,11 @@ services:
 
   # Cypress run
   #
+  # Note: Two alternatives. You can either use pre-built image (A) or what the repo has right now (B).
+  #
   cypress:
     # A: 'cypress-custom' image has been pre-built
-    image: ${CYPRESS_IMAGE}
+    image: ${CYPRESS_IMAGE:-}
 
     # B: use from repo; rebuilds every time (around 4 mins)
     #build:
@@ -97,6 +97,7 @@ services:
     environment:
       - CYPRESS_defaultCommandTimeout=20000
       - CYPRESS_baseUrl=http://vite:${VITE_PORT}
+      - CYPRESS_CI=tru
       - EMUL_HOST=emul-for-app
       - FIREBASE_APP_JS=firebase.ci.js
     working_dir: /work
@@ -125,19 +126,26 @@ services:
     #   2: na
     #   3:  4224, 4920, 4695,  5276 ms
 
-  # DEBUG
+  #---
+  # DEBUG; TERMINAL
   #
   # Prove we can see 'vite' and 'emul-for-app', from within DC.
   see-them:
     image: node:18-alpine
     command: sh -c '
-      nc -z vite $VITE_PORT && echo "I see Vite" &&
-      nc -z emul-for-app 6868 && echo "I see Realtime Database"
+      apk add --update curl &&
+      echo "THIS IS DEBUG OUTPUT:" &&
+      
+      nc -z vite 3002 && echo "I see Vite" &&
+      nc -z emul-for-app 6868 && echo "I see Realtime Database" &&
+
+      curl -Iv http://vite:3002 &&      
+      (curl -Iv http://vite:3002/@fs/work/src/app.js > /dev/null) &&
+      echo "--- SAW EVERYTHING ---" && false
       '
+      # The '/@fs/work/src/app.js' link is what will be needed by Cypress, later.
     network_mode: cloudbuild
-    depends_on:
-      vite-ci:
-        condition: service_healthy
     profiles: ['manual']
+      # No 'depends_on:' on purpose: this is a debugging stage
 
 # tbd. If we had a way to provide YAML-level substitutions, 'VITE_PORT' could be handled that way. Its only used internally.

@@ -18,7 +18,7 @@ import config from '/@firebase.config.json'
 // Note: 'locationId' is not needed (or recognized!) by Firebase itself, but is anyways passed to 'httpsCallables'
 //      (eg. adapters), via 'getApp()'.
 //
-const app = initializeApp(config);
+/*const app =*/ initializeApp(config);
 
 /** DISABLED
 // EXPERIMENT: Let's see whether early import here causes "first paint" to be reported in Firebase dashboard.

@@ -110,14 +110,6 @@ steps:
 #|  env:
 #|    - VITE_PORT=3002
 
-# DEBUG: see the stuff within DC?
-#
-- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', 'see-them']
-  dir: packages/app
-  env:
-    - VITE_PORT=3002
-
 # Launch Vite (optional; provides better debugging and earlier fail, having this as a separate step).
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
@@ -131,9 +123,20 @@ steps:
 #|- name: node:${_NODE_VER}-alpine
 #|  entrypoint: sh
 #|  args: ['-c', '
+#|    apk add --update curl &&
 #|    nc -z vite 3002 && echo "I see Vite" &&
-#|    nc -z emul-for-app 6868 && echo "I see Realtime Database"
+#|    nc -z emul-for-app 6868 && echo "I see Realtime Database" &&
+#|
+#|    (curl -Iv http://vite:3002/@fs/work/src/app.js > /dev/null)
 #|  ']
+
+# DEBUG; TEMP
+#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
+#|  args: ['-f', 'docker-compose.ci.yml', 'run', 'see-them']
+#|  dir: packages/app
+#|  env:
+#|    - VITE_PORT=3002
+
 
 # Running Cypress
 #
@@ -149,8 +152,7 @@ steps:
   dir: packages/app
   env:
     - VITE_PORT=3002
-        # precise port does not matter; helps us keep it in one place.
-    #- FIREBASE_ADMIN_VER=${_FIREBASE_ADMIN_VER}
+      # precise port does not matter; helps us keep it in one place. #rework
     - CYPRESS_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/cypress-custom:${_CYPRESS_TAG}
 
 #--- Build (fake; just trying it does..)
@@ -202,7 +204,8 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 5:36, 5:10, 6:01, 4:56   <-- last with Cypress 10.6.0
+# Cloud Build: 5:46
+#   (earlier): 5:36, 5:10, 6:01, 4:56
 #
 timeout: 600s
 
@@ -211,7 +214,7 @@ substitutions:
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"
-  _CYPRESS_TAG: 10.9.0
+  _CYPRESS_TAG: 10.10.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
   #_FIREBASE_ADMIN_VER: 11.0.1

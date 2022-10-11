@@ -23,7 +23,7 @@ import { router } from './router.js'
 
 import { perfHook } from './central/commonPerf'
 
-function fail(msg) { throw new Error(msg) }
+//function fail(msg) { throw new Error(msg) }
 /** disabled, for now
 // Ops monitoring
 import { init as Sentry_init, setUser as Sentry_setUser } from '@sentry/browser'
@@ -103,6 +103,8 @@ async function init() {    // () => Promise of ()
   }
   ***/
 
+  /*** disabled; '@firebase/performance' left out from Sep'22
+   *
   // Initialize Firebase Performance monitoring
   //
   // Note:
@@ -130,7 +132,7 @@ async function init() {    // () => Promise of ()
       });
     });
 
-    /*** undone
+    /_*** undone
     // tbd. is there a way to feed also 'incs' and 'obs' to be visible in Firebase Performance dashboard?
     //
     const tIncs = trace(perf, "incs");
@@ -138,14 +140,14 @@ async function init() {    // () => Promise of ()
     incHook( (s,diff) => {
       tIncs.incrementMetric(s,diff);    // note: Firebase floors numbers given to it
     });
-     ***/
+     ***_/
 
-    /* No way, right???
+    /_* No way, right???
     const tObs = trace(perf, "obs");
     obsHook( (s,v) => {
       tObs.xxxMetric(s,v);
-    }); */
-  }
+    }); *_/
+  }***/
 
   initPerf.lap("Firebase Performance initialized");
 

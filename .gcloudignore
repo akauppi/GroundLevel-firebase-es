@@ -71,6 +71,7 @@ packages/app/tools/gen-vite-env-prod.js
 #packages/app/tools/cypress.dc/Dockerfile
 packages/app/tools/serve.dc/Dockerfile
 
+# Docs & users needed for dev experience
 packages/app/local/*.js
   # {docs|users}.js,
 

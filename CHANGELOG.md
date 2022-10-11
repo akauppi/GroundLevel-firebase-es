@@ -1,5 +1,11 @@
 # Changelog
 
+## 12-Oct-22
+
+- Rework around how CI is structured and implemented.
+
+   Now using more Docker Compose, also within CI (e.g. Cypress).
+
 ## 7-Aug-22
 
 - Realtime Database removed; observability will use callables for transport

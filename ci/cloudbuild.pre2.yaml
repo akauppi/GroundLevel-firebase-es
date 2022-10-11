@@ -31,23 +31,22 @@ steps:
   args: ['-c', '
     [ $PROJECT_ID = ${_MY_BUILDER} ] || ( >&2 echo "ERROR: Please change to the ''${_MY_BUILDER}'' project: gcloud config set project ${_MY_BUILDER}"; false ) &&
 
-    docker build --pull --build-arg CYPRESS_VER=${_CYPRESS_VER} --target cypress-custom . -t cypress-custom:$$TAG
+    docker build --pull --target cypress-custom . -t cypress-custom:${_CYPRESS_TAG}
   ']
     # Note: This image needs '[ nah = dah ]' syntax (not '==')
   env:
-    - TAG=${_CYPRESS_VER}
+    - TAG=${_CYPRESS_TAG}
 
 # Push to Artifact Registry
 #
 - name: gcr.io/cloud-builders/docker
   entrypoint: sh
   args: ['-c', '
-    docker tag cypress-custom:$$TAG $${AR_IMG} &&
+    docker tag cypress-custom:${_CYPRESS_TAG} $${AR_IMG} &&
     docker push $${AR_IMG}
   ']
   env:
-    - AR_IMG=us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_FOLDER}/cypress-custom:${_CYPRESS_VER}
-    - TAG=${_CYPRESS_VER}
+    - AR_IMG=us-central1-docker.pkg.dev/$PROJECT_ID/${_AR_FOLDER}/cypress-custom:${_CYPRESS_TAG}
 
 # --- Timeout
 #
@@ -56,7 +55,8 @@ steps:
 timeout: 500s
 
 substitutions:
-  _CYPRESS_VER: 10.9.0
+  _CYPRESS_TAG: 10.10.0
+    # Just a convention to match the Cypress version in the tag. Actual version comes from within the Dockerfile.
   _AR_FOLDER: builders
     # You may use any name, or create such a folder in AR.
   _MY_BUILDER: ci-builder

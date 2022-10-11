@@ -108,6 +108,7 @@ ENV npm_config_unsafe_perm=true
 #---
 # Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/included/10.8.0/Dockerfile
 #   - [x] checked against 10.9.0
+#   - [x] checked against 10.10.0
 #
 # Brings:
 #   - Cypress on top of the OS + Electron + Chrome
@@ -117,7 +118,7 @@ FROM base as cypress
 
 # Cypress CHANGELOG -> https://docs.cypress.io/guides/references/changelog
 #
-ARG CYPRESS_VER=10.9.0
+ARG CYPRESS_VER=10.10.0
 
 # avoid too many progress messages
 # https://github.com/cypress-io/cypress/issues/1243
