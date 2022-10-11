@@ -41,21 +41,23 @@ steps:
     npm install &&
     npm --prefix packages/backend install &&
     npm --prefix packages/backend/functions install &&
-    npm --prefix packages/app install --omit=optional &&
+    npm --prefix packages/app install --omit=optional --omit=peer &&
 
-    (cd packages/app && make tmp/.env.ci_test)
+    (cd packages/app && 
+      make tmp/.env.ci_test &&
+	  node --input-type=module -e "import o from ''../backend/firebase.app.ci.js''; console.log(''export default ''+ JSON.stringify(o));" > tmp/firebase.ci.js &&
+      node --input-type=module -e "import o from ''../backend/firebase.app.ci.js''; console.log(                   JSON.stringify(o));" > tmp/firebase.ci.json
+    )
   ']
-  env:
-    - EMUL_HOST=emul-for-app
-    - CI_APP=true
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/tmp/firebase.ci.json     has been created
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
   #   - packages/app/tmp/.env.ci_test             has been created
+  #   - packages/app/tmp/firebase.ci.js           has been created
+  #   - packages/app/tmp/firebase.ci.json         has been created (alternative to .ci.js; let's get rid of this..)
   #
-  #     Note: Ports are in two places: 'tmp/firebase.ci.json' for the emulators, '.env.ci_test' for the front-end.
+  #     Note: Ports are in two places: 'tmp/firebase.js[on]' for Cypress, 'tmp/.env.ci_test' for the front-end.
 
 # DEBUG, TERMINAL:
 #
@@ -135,9 +137,9 @@ steps:
 
 # Running Cypress
 #
-# This automatically launched 'vite-ci', unless it's already done, above.
+# This automatically launches 'vite-ci', unless it's already done (above).
 #
-# Running via DC (opposed to directly using a stock image) allows us to:
+# Running via DC (opposed to directly using a Cypress image) so that we can:
 #   - integrate launching Vite and running Cypress
 #   - do file mapping/sandboxing
 #   - handle networks correctly (differs from the dev environment)
@@ -148,8 +150,8 @@ steps:
   env:
     - VITE_PORT=3002
         # precise port does not matter; helps us keep it in one place.
-    - CYPRESS_IMAGE=cypress/included:${_CYPRESS_TAG}
-    - FIREBASE_ADMIN_VER=${_FIREBASE_ADMIN_VER}
+    #- FIREBASE_ADMIN_VER=${_FIREBASE_ADMIN_VER}
+    - CYPRESS_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/cypress-custom:${_CYPRESS_TAG}
 
 #--- Build (fake; just trying it does..)
 #
@@ -212,7 +214,7 @@ substitutions:
   _CYPRESS_TAG: 10.9.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
-  _FIREBASE_ADMIN_VER: 11.0.1
+  #_FIREBASE_ADMIN_VER: 11.0.1
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
   _MY_BUILDER: ci-builder
   #_FIREBASE_EMULATORS: firebase-emulators

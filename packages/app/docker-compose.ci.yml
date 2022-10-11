@@ -91,14 +91,14 @@ services:
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro
       #
-      - ./tmp/firebase.ci.js:/work/firebase.json
+      - ./tmp/firebase.ci.js:/work/firebase.ci.js
       # --- output
       - ./.screenshots:/work/.screenshots:delegated
     environment:
       - CYPRESS_defaultCommandTimeout=20000
       - CYPRESS_baseUrl=http://vite:${VITE_PORT}
       - EMUL_HOST=emul-for-app
-      - FIREBASE_APP_JS=tmp/firebase.ci.js
+      - FIREBASE_APP_JS=firebase.ci.js
     working_dir: /work
     entrypoint: []    # clear the 'entrypoint' of the stock image ('["cypress", "run"]')
     command: sh -c '

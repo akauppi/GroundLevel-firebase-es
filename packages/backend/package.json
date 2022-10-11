@@ -15,9 +15,9 @@
     "_ci:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
     "-- -": "",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
-    "_postinstall_local": "make functions-install-local",
+    "_postinstall_local": "make npm:functions-install-local",
     "_postinstall_ci": "npm run -s _pic1 && npm run -s _pic2",
-    "_pic1": "make tmp/firebase.ci.json",
+    "_pic1": "make tmp/firebase.ci.json tmp/firebase.app.ci.json",
     "_pic2": "touch firebase-debug.log firestore-debug.log database-debug.log"
   },
   "devDependencies": {
@@ -40,7 +40,7 @@
         "We welcome these in the same, humble 'package.json'. Running CI is a lot like native development."
       ],
       "_postinstall_ci": [
-        "Creating 'database-debug.log' is only needed for app backend, but it's simplest to do it always."
+        "Preparing for either backend or app CI tests. We'll only need one, but it's simplest this way (instead of CI_APP=1)."
       ]
     }
   }

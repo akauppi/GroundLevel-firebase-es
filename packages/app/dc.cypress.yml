@@ -54,7 +54,7 @@ services:
     environment:
       - CYPRESS_defaultCommandTimeout=10000
       - CYPRESS_baseUrl=http://vite-dev-for-test:${PORT}
-      - FIREBASE_APP_JS=/work/firebase.app.js
+      - FIREBASE_APP_JS=firebase.app.js
       - EMUL_HOST=emul-for-app
     working_dir: /work
     command: sh -c '

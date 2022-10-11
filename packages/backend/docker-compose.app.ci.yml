@@ -18,6 +18,10 @@ services:
       file: docker-compose.ci.yml
       service: emul
     volumes:
+      #--- RO
+      # '/work/firebase.js[on]' entries override those in 'docker-compose.ci.yml'
+      - ./tmp/firebase.app.ci.js:/work/firebase.js:ro
+      - ./tmp/firebase.app.ci.json:/work/firebase.json:ro
       - ./database.rules.app.json:/work/database.rules.json:ro
       #--- Output
       - ./database-debug.log:/work/database-debug.log:delegated

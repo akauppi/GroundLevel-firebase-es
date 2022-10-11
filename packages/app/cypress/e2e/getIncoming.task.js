@@ -14,15 +14,15 @@ function fail(msg) { throw new Error(msg) }
 
 const PROJECT_ID = "demo-main";   // tbd. from central location
 
-const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: mapped to '/work'
-  || '../../../backend/firebase.app.js';
+const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: 'firebase.ci.js' (CI) / 'firebase.js' (both mapped in DC)
+  || '../backend/firebase.app.js';            // Desktop Cypress
 
 const EMUL_HOST = process.env["EMUL_HOST"]    // DC ('make test'): direct to "emul-for-app"
   || "localhost";                             // Desktop Cypress
 
 // Note: top level await
 //
-const DATABASE_URL = await import(FIREBASE_APP_JS).then( mod => mod.default.emulators?.database?.port )
+const DATABASE_URL = await import("../../"+ FIREBASE_APP_JS).then( mod => mod.default.emulators?.database?.port )
   .then( databasePort => {
   databasePort || fail("Unable to read Realtime Database port");
 

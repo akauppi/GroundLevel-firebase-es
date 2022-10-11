@@ -74,7 +74,7 @@ steps:
       make tmp/database.rules.json &&
       ln -s tmp/database.rules.json . &&
 
-      make ci:firebase.json
+      make ci:deploy:firebase.json
     )
   ']
 

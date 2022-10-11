@@ -42,12 +42,17 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/backend/functions install
+    npm --prefix packages/backend/functions install &&
+    
+    (cd packages/backend &&
+	  node --input-type=module -e "import o from ''./firebase.ci.js''; console.log(''export default ''+ JSON.stringify(o));" > tmp/firebase.ci.js &&
+      node --input-type=module -e "import o from ''./firebase.ci.js''; console.log(                     JSON.stringify(o));" > tmp/firebase.ci.json
+    )
   ']
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/tmp/firebase.ci.json     has been created
+  #   - packages/backend/tmp/firebase.ci.js       has been created    (tbd. do we want to use one??)
   #   - packages/backend/{firebase|firestore}-debug.log      created, so DC can map them
 
 # DEBUG:

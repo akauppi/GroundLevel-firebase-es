@@ -36,7 +36,7 @@ all:
 	false
 
 install:
-	npm install
+	npm install --omit=optional --omit=peer
 
 #--- Dev:local
 dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
@@ -96,8 +96,8 @@ $(_ENV_PROD): tools/gen-vite-env-prod.js $(_CUSTOM_ENV)
 	ENV=$(ENV) node $< > $@
 	cat $(_CUSTOM_ENV) >> $@
 
-$(_ENV_CI_TEST): tools/gen-vite-env-ci.js ../backend/firebase.ci.js
-	EMUL_HOST=emul-for-app node $< --project=demo-main > $@
+$(_ENV_CI_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
+	FIREBASE_APP_JS=../backend/firebase.app.ci.js EMUL_HOST=emul-for-app node $< --project=demo-main > $@
 	@# no override needed
 
 # If no custom env file, use a template.
@@ -146,6 +146,10 @@ $(_STATS_HTML):
 $(_FIREBASE_PROD_JS):
 	$(error '$(_FIREBASE_PROD_JS)' is missing; see root 'README.md' on how to create one)
 
+#--- Misc
+firebase.json: firebase.hosting.js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o, null, 2));" > $@
+
 #--- Maintenance
 
 # Take possibly running DC images down
@@ -155,10 +159,6 @@ $(_FIREBASE_PROD_JS):
 #
 down-all:
 	PORT=0 docker compose -f dc.base.yml down --remove-orphans
-
-prune:
-	npm prune
-	rm -rf node_modules/esbuild node_modules/vite
 
 #--- Global checks
 
