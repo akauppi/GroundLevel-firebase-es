@@ -116,7 +116,8 @@ async function configGen({ command, mode }) {
       devSourceMap: true    // experimental feature of Vite 2.9
     },
 
-    esbuild: false,   // "set to 'false' to disable esbuild transforms."    // (then, why do we have 'esbuild', at all?? tbd.)
+    // "By default, esbuild is applied to ts, jsx and tsx files." - and we don't have those.
+    esbuild: false,   // "set to 'false' to disable esbuild transforms."
 
     resolve: {
       alias: {
@@ -126,15 +127,6 @@ async function configGen({ command, mode }) {
         ...(PROD ? {
           '/@firebase.config.json': `${myPath}/firebase.config.js`   // DC maps this
         }: {})
-
-        // EXP Counteracting this:
-        //  <<
-        //    $ npm run dev
-        //      ...
-        //      Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'vite' imported from /work/node_modules/@vitejs/plugin-vue/dist/index.mjs
-        //  <<
-        //
-        //!!! 'vite': `${ process.env["NODE_PATH"] }/vite`
       }
     },
 

@@ -31,8 +31,8 @@
   </footer>
 </template>
 
-<style lang="scss" scoped>
-  #mode {
+<style scoped>  /* lang="scss" */
+#mode {
     position: fixed;
     top: 40px;
     left: 0;
@@ -44,16 +44,22 @@
   #mode.devLocal {
     display: block;
     background-color: #ffc800;
-    &:after {
-      content: 'LOCAL MODE';
-    }
+    /* SCSS, didn't work with postcss-nesting; check also WebStorm IDE syntax highlighting for CSS nesting. #tbd.
+    & :after { content: 'LOCAL MODE'; }
+    */
+  }
+  #mode.devLocal:after {
+    content: 'LOCAL MODE';
   }
   #mode.devTest {
     display: block;
     background-color: steelblue;
-    &:after {
-      content: 'TEST MODE';
-    }
+    /* SCSS, didn't work with postcss-nesting; check also WebStorm IDE syntax highlighting for CSS nesting. #tbd.
+    & :after { content: 'TEST MODE'; }
+    */
+  }
+  #mode.devTest:after {
+    content: 'TEST MODE';
   }
 
   /* Theming the side panel

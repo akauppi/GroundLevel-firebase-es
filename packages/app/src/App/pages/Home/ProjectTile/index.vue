@@ -27,14 +27,12 @@
   </router-link>
 </template>
 
-<style lang="scss" scoped>
-  @import '../shared.css';   // .project-tile
+<style scoped>  /* lang="scss" */
+  @import '../shared.css';
 
-  .project-tile {
-    .title {
-      font-weight: bold;
-      margin-bottom: 1.5em;
-    }
+  .project-tile .title {
+    font-weight: bold;
+    margin-bottom: 1.5em;
   }
 
   /* 'role=link' is accessibility stuff. We use it for providing the mouse hand. */

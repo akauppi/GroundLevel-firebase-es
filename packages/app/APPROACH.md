@@ -227,4 +227,29 @@ There are two other slight motivations, as well:
 - We don't decide the version the user has installed on desktop. 
 
    This isn't likely a big thing. If the tests require some specific version, we can check it in the Cypress scripts.
- 
+
+
+## Vite & CSS: CSS nesting over `sass|scss`
+
+This is based on what Vite itself [states about CSS preprocessors](https://vitejs.dev/guide/features.html#css-pre-processors):
+
+>Because Vite targets modern browsers only, it is recommended to use native CSS variables with PostCSS plugins that implement CSSWG drafts (e.g. postcss-nesting) and author plain, future-standards-compliant CSS.
+
+This author agrees. However, the CSS nesting standard syntax is slightly more bothersome than the SASS/SCSS one.
+
+**Pros:**
+
+- Standards are good, right
+- Aligned with Vite itself
+- No dependency on third-party [`sass`](https://www.npmjs.com/package/sass) npm package
+
+   The author especially likes the last one! Tracking it-just-needs-to-be-there version bumps is numbing, and at least there's the hope that eventually CSS nesting is going to be built-in in the browsers.
+
+**Cons:**
+
+- Still needs `postcss-nesting` to be in `devDependencies`
+- CSS nesting [*not* supported natively](https://caniuse.com/css-nesting) (caniuse) by any browser (Oct 2022):
+- WebStorm IDE (2022.2.3) syntax highlighting doesn't show it correctly
+
+However, since it's a *standard* now, these are eventually going to be fixed.
+
