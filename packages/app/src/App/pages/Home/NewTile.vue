@@ -10,21 +10,17 @@
   </div>
 </template>
 
-<style scoped>  /* lang="scss" */
+<style scoped>
 @import './shared.css';
 
 .new-tile {
   background-color: palegreen;
 
-  /*** tbd. CSS nesting didn't work, yet (Oct 2022)
   & button {
+    /*color: red;*/ /*indicator*/
     margin-top: 0.5em;
     font-size: 0.8em;
-  }***/
-}
-.new-tile button {
-  margin-top: 0.5em;
-  font-size: 0.8em;
+  }
 }
 </style>
 

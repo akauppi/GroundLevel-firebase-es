@@ -248,8 +248,11 @@ This author agrees. However, the CSS nesting standard syntax is slightly more bo
 **Cons:**
 
 - Still needs `postcss-nesting` to be in `devDependencies`
-- CSS nesting [*not* supported natively](https://caniuse.com/css-nesting) (caniuse) by any browser (Oct 2022):
-- WebStorm IDE (2022.2.3) syntax highlighting doesn't show it correctly
+- CSS nesting [*not* supported natively](https://caniuse.com/css-nesting) (caniuse) by any browser (Oct 2022), but Vite transpiles the CSS appropriately.
+
+- <strike>WebStorm IDE (2022.2.3) syntax highlighting doesn't show it correctly</strike>
+
+   You need to enable `Plugins` > `PostCSS` for syntax higlighting to work.
 
 However, since it's a *standard* now, these are eventually going to be fixed.
 

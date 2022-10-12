@@ -11,6 +11,7 @@
 import path, { dirname, join as pJoin } from 'path'
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
+import postcssNesting from 'postcss-nesting'
 
 import vue from '@vitejs/plugin-vue'
 
@@ -113,6 +114,10 @@ async function configGen({ command, mode }) {
     }),
 
     css: {
+      // From -> https://stackoverflow.com/a/71803365/14455
+      postcss: {
+        plugins: [postcssNesting]
+      },
       devSourceMap: true    // experimental feature of Vite 2.9
     },
 
@@ -206,29 +211,6 @@ async function configGen({ command, mode }) {
 
 function fail(msg) { throw new Error(msg) }
 
-// Note: Adding 'optimizeDeps: { disabled: false }' causes the set of manual chunks to change (it was like that in 3.0
-//    alphas and betas):
-//    <<
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_app.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_performance.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/vue.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_auth.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/aside-keys.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@sentry_browser.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@sentry_tracing.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/plausible-tracker.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/vue-router.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_firestore.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/@firebase_database.js
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-XSOXVSLP.js?v=29a23a98
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-JC4IRQUL.js?v=29a23a98
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-2TWQDNTD.js?v=29a23a98
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-4FQYRAM2.js?v=29a23a98
-//      Unexpected dependency found (not mapped in 'manualChunks'): /work/tmp/.vite/deps_build-645163e3/chunk-LL3PPPOH.js?v=29a23a98
-//    <<
-//
-//    We don't necessarily want that. Revisit if it becomes default in Vite 4.
-//
 export default a => configGen(a).then( o => ({ ...o,
 
   // See -> https://vitejs.dev/guide/migration.html#experimental

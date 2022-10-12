@@ -27,7 +27,7 @@
   </router-link>
 </template>
 
-<style scoped>  /* lang="scss" */
+<style scoped>
   @import '../shared.css';
 
   .project-tile .title {
