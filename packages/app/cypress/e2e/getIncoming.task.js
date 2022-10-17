@@ -20,8 +20,6 @@ const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: 'firebase.ci.js' 
 const EMUL_HOST = process.env["EMUL_HOST"]    // DC ('make test'): direct to "emul-for-app"
   || "localhost";                             // Desktop Cypress
 
-// Note: top level await
-//
 const DATABASE_URL = await import("../../"+ FIREBASE_APP_JS).then( mod => mod.default.emulators?.database?.port )
   .then( databasePort => {
   databasePort || fail("Unable to read Realtime Database port");
@@ -55,6 +53,8 @@ async function getIncoming(subPath, expectedTimestamp) {    // ("{incs|logs|obs}
   const ref = db.ref(`incoming/${subPath}`);    // incoming/{incs|logs|obs}/{..automatic index}/
 
   const prom = new Promise(res => {   // Promise of ...{matching Realtime Database object}
+
+    console.log('\t>>> LOOKING FOR:', expectedTimestamp);
 
     // "... 'child_added' is triggered once for each existing child and then again, every time a new child is added".
     //

@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "aside-keys": "^0.0.3-alpha.2",
-    "@firebase/app": "^0.8.0",
-    "@firebase/auth": "^0.20.8",
-    "@firebase/firestore": "^3.6.0",
-    "@firebase/functions": "^0.8.5",
+    "@firebase/app": "^0.8.2",
+    "@firebase/auth": "^0.20.10",
+    "@firebase/firestore": "^3.7.1",
+    "@firebase/functions": "^0.8.7",
     "vue": "^3.2.40",
     "vue-router": "^4.1.5"
   },

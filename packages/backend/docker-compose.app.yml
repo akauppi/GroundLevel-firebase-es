@@ -26,7 +26,7 @@ services:
       - ./tmp/firebase.app.json:/work/firebase.json:ro
 
       # --- follow
-      - ./database.rules.app.json:/work/database.rules.json:cached    # can get modified on the host
+      - ./database.rules.app.json:/work/database.rules.app.json:cached    # can get modified on the host
 
       # --- output
       - ./logs.app/firebase-debug.log:/work/firebase-debug.log:delegated
@@ -56,12 +56,33 @@ services:
       interval: 1.0s
       start_period: 25s
 
-  # No warm-up (as with the backend)
+  # Warm-up
+  #
+  # In addition to launching 'emul-for-app', its Callable interfaces need "priming" before they can be used, with
+  # reliability (no 404's) and repeatable responsiveness (ms's, not seconds).
+  #
+  # Since the execution time is utterly fast (~0.2s) for an already warmed up service, we can simply run this every
+  # time e.g. 'make test' is performed (instead of having an intermediate, stateful service that does the warm-up).
+  #
+  # Note: Likewise, we *could* have the warmup already in the 'emul-for-app' steps. That would work, too.
+  #       If, however, we place it in the 'healthcheck' of that service, there won't be console output to help debug.
+  #
+  emul-for-app-warmed-up:
+    image: node:18-alpine
+    volumes:
+      # --- RO
+      - ./dc/waky-waky:/work/waky-waky:ro
+      - ./firebase.app.js:/work/firebase.app.js:ro
 
-  emul-for-app-launched:
-    image: node:16-alpine
-    command: sh -c true
+    working_dir: /work
+    command: sh -c '
+      echo "{ \"type\":\"module\" }" > package.json &&
+      
+      node waky-waky/index.js metricsAndLoggingProxy_v0
+      '
+    environment:
+      - EMUL_HOST=emul-for-app
+      - PROJECT_ID=demo-main
     depends_on:
       emul-for-app:
         condition: service_healthy
-    profiles: ['manual']

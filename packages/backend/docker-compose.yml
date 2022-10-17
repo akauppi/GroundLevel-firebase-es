@@ -62,8 +62,10 @@ services:
   #
   # NOTE: Use Node.js 18 to have built-in fetch.
   #
-  # Note: For Jest, we need a 'package.json' with '"type": "module"'. It doesn't need to be the main 'package.json'
-  #   but that's what we are currently using.
+  # Note: We run this as a service ('up', not 'run') so that the knowledge of the service having already been warmed up
+  #     remains.
+  #
+  # Note: For Jest, we need a 'package.json' with '"type": "module"'.
   #
   warm-up:
     image: node:18-alpine

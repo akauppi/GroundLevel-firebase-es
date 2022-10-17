@@ -73,11 +73,11 @@ RUN firebase setup:emulators:ui \
   && rm -rf /root/.cache/firebase/emulators/ui-v*.zip
 
   # $ ls /root/.cache/firebase/emulators/
-  #   cloud-firestore-emulator-v1.14.4.jar    (58.2 MB)
+  #   cloud-firestore-emulator-v1.15.1.jar    (58.6 MB)
   #   cloud-storage-rules-runtime-v1.0.2.jar  (34.1 MB)   <-- old version
-  #   firebase-database-emulator-v4.9.0.jar   (32.6 MB)
+  #   firebase-database-emulator-v4.10.0.jar  (32.6 MB)
   #   pubsub-emulator-0.1.0                   (37.9 MB)   <-- old version
-  #   ui-v1.9.0                               (12.4 MB)
+  #   ui-v1.11.1                              (12.4 MB)
 
 # Setting the env.var so 'firebase-tools' finds the images.
 #

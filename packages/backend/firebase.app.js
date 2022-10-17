@@ -12,7 +12,7 @@ export default {
     source: "functions"
   },
   database: {
-    rules: "database.rules.json"
+    rules: "database.rules.app.json"
   },
   emulators: {
     firestore: {

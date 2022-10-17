@@ -158,7 +158,8 @@ firebase.json: firebase.hosting.js
 # shares that name. This means '--remove-orphans' brings them down (without needing to list all '.yml' files here).
 #
 down-all:
-	PORT=0 docker compose -f dc.base.yml down --remove-orphans
+	PORT=0 $(_DC) -f dc.base.yml down --remove-orphans
+	PORT=0 $(_DC) -f dc.cypress.yml down --remove-orphans
 
 #--- Global checks
 

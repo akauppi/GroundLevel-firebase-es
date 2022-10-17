@@ -69,7 +69,7 @@ export help
 
 # Node.js
 install: _uses_docker
-	npm install --omit=optional
+	npm install
 
 # Note: Important to create 'tmp/functions/node_modules' in the host side. Otherwise, WSL2 Docker will create one
 # 		with 'root' access (instead of the current user).
@@ -132,7 +132,7 @@ _started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
 # We support it by having a separate configuration (that includes Firebase Auth).
 #
 app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rules.app.json
-	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml run --rm emul-for-app-launched
+	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml run --rm emul-for-app-warmed-up
 	@echo "Firebase Emulators for the web app are running.\n"
 
 # CI

@@ -1,8 +1,8 @@
 # Firebase hosting caches
 #/.firebase/
 
-/logs/*-debug.log
-/logs.app/*-debug.log
+/logs/
+/logs.app/
 
 # This shouldn't get created
 !functions/node_modules/

@@ -17,11 +17,11 @@ import { regionalFunctions_v1 } from '../regional.js'
 
 import { https as https_v1 } from 'firebase-functions/v1'
 
-function fail(msg) { throw new Error(msg) }   // use at loading; not within a callable
+function fail_at_load(msg) { throw new Error(msg) }   // use at loading; NOT within a callable!!
 
 const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // set to "true" by Firebase Emulators
 
-const PROJECT_ID = process.env["GCLOUD_PROJECT"] || fail("No 'GCLOUD_PROJECT' env.var.");
+const PROJECT_ID = process.env["GCLOUD_PROJECT"] || fail_at_load("No 'GCLOUD_PROJECT' env.var.");
 
 /*** disabled
 // Read from '../firebase.json' (within DC!), whether Realtime Database is set up, and what its port is.
@@ -48,7 +48,7 @@ const DATABASE_URL = (_ => {
     }
 
     const [_,c1] = /.+:(\d+)$/ .exec(tmp) || [];
-    const databasePort = c1 ? parseInt(c1) : fail(`Unable to parse 'FIREBASE_DATABASE_EMULATOR_HOST': ${tmp}`);
+    const databasePort = c1 ? parseInt(c1) : fail_at_load(`Unable to parse 'FIREBASE_DATABASE_EMULATOR_HOST': ${tmp}`);
 
     return `http://localhost:${databasePort}?ns=${PROJECT_ID}`;   // note: '?ns=...' is required!
 
@@ -202,14 +202,29 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 *   <<
 *     throw new functions.https.HttpsError('unimplemented',"message",[...details]);
 *   <<
+*
+* Curl sample:
+*   <<
+*     $ export TOKEN=eyJhb....319fQ.
+*     $ curl -X POST -v -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+*       http://localhost:5003/demo-main/us-central1/metricsAndLoggingProxy_v0 -d '{ "data": {"arr": [{ "id": "a", "inc": 0.1, "ctx": { "clientTimeStamp": 123, "uid": "goofy" }}]} }'
+*   <<
 */
 export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
   .onCall((bulk, ctx) => {
 
+    if (EMULATION) {    // Use a special value for just waking up (no logs created)
+      if (bulk === "wakeup") {
+        return;
+      }
+    }
+
     const realUid = ctx.auth.uid || fail_unauthenticated();
 
     const { arr } = bulk;
-    console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, realUid);
+    arr || fail_invalid_argument("Missing 'arr': Array of { id, inc|level|obs, ... }");
+
+    //console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, realUid);
 
     // Validate all entries, get functions for storing them.
     arr.map( pickTypeGen(realUid) )
