@@ -173,7 +173,7 @@ RUN echo "whoami: $(whoami)" \
     "yarn version:    $(yarn -v) \n" \
     "typescript version:  $(tsc -v) \n" \
     "debian version:  $(cat /etc/debian_version) \n" \
-    "user:            $(whoami) \n" \
+    "user:            $(whoami) \n" #\
     #"chrome:          $(google-chrome --version || true) \n" #\
     #"firefox:         $(firefox --version || true) \n"
 
@@ -196,7 +196,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   && rm -rf /var/lib/apt/lists/* \
   && apt-get clean
 
-ARG FIREBASE_ADMIN_VER=11.0.1
+ARG FIREBASE_ADMIN_VER=11.1.0
   # -> https://github.com/firebase/firebase-admin-node/releases
 
 RUN npm install -g firebase-admin@$FIREBASE_ADMIN_VER

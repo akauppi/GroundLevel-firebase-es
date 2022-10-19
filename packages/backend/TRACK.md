@@ -21,7 +21,8 @@ Note: We won't need it, until `firebase-functions` runs with ESM. And even then,
 
 ## Cloud Functions v2: maturity
 
-- [ ] [Limitations ...](https://firebase.google.com/docs/functions/beta#limitations_during_public_preview) (Firebase docs)
+- [ ] ["Limitations during public preview"](https://firebase.google.com/docs/functions/beta#limitations_during_public_preview) (Firebase docs)
+- [ ] ["Cloud Firestore triggers for v2 functions"](https://github.com/firebase/firebase-functions/issues/1213) <sub>`firebase-functions`</sub>
 
 Change `functions/*.js` to use `v2` only once:
 

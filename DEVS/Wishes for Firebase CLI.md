@@ -180,9 +180,8 @@ This seems like a left-behind from the time before local emulation. Time to Depr
 Separate project, splitting current `firebase-tools` in half. CLI means cloud, emulators mean local. Full separation!
 
 
+<!-- not needed, any more..
 ## `firebase use` to detect whether there's an active project
-
->Don't need this any more.
 
 Current situation (`firebase-tools` 8.11.1):
 
@@ -203,7 +202,7 @@ Return code is 0, even when there's no active project. This is the problem and c
 `firebase use` could return with a non-zero exit code, if there is no current project.
 
 This is a breaking change.
-
+-->
 
 ## `firebase apps:sdkconfig` prints errors to `stdout` (and causes us to do extra dance to bring them to the user)
 
@@ -538,3 +537,51 @@ Waiting does not help, here. Only once there's sufficient other output, the rema
 
 Emulators could do an extra flush operation on the `stdout` output, when the status is ready (after the `Issues? Report ...` line). 
 
+
+## New warnings about IPv6
+
+Since ~11.14.2, this becomes a thing.
+
+In the emulator output:
+
+```
+Step #2: [warn] ⚠  eventarc: Error when trying to check port 9299 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9299 {"metadata":{"emulator":{"name":"eventarc"},"message":"Error when trying to check port 9299 on ::1: Error: listen EADDRNOTAVAIL: address not available ::1:9299"}}
+```
+
+This happens on an Alpine-based Docker image, where:
+
+```
+$ cat /sys/module/ipv6/parameters/disable
+0
+```
+
+```
+$ cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+1
+```
+
+```
+$ ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02  
+          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:17 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:1462 (1.4 KiB)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+ 
+```
+
+Notice how the IPv6 isn't disabled in one way, but is disabled in another. Also, there are no IPv6 devices available (no `inet6` lines in the `ifconfig` output).
+
+Firebase emulators could check the `ifconfig` output (if the command is available) and not try anything IPv6 unless there's indication that such devices actually exist.
+
+This would remove the unnecessary logging.

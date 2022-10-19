@@ -150,6 +150,10 @@ $(_FIREBASE_PROD_JS):
 firebase.json: firebase.hosting.js
 	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o, null, 2));" > $@
 
+#--- CI
+tmp/firebase.app.ci.js: ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log('export default '+ JSON.stringify(o));" > $@
+
 #--- Maintenance
 
 # Take possibly running DC images down

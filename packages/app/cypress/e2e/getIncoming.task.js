@@ -14,7 +14,7 @@ function fail(msg) { throw new Error(msg) }
 
 const PROJECT_ID = "demo-main";   // tbd. from central location
 
-const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: 'firebase.ci.js' (CI) / 'firebase.js' (both mapped in DC)
+const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: 'firebase[.app].ci.js' (CI) / 'firebase.js' (both mapped in DC)
   || '../backend/firebase.app.js';            // Desktop Cypress
 
 const EMUL_HOST = process.env["EMUL_HOST"]    // DC ('make test'): direct to "emul-for-app"

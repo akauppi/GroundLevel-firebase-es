@@ -71,9 +71,6 @@ steps:
     npm --prefix packages/backend/functions install &&
 
     (cd packages/backend &&
-      make tmp/database.rules.json &&
-      ln -s tmp/database.rules.json . &&
-
       make ci:deploy:firebase.json
     )
   ']
@@ -81,7 +78,6 @@ steps:
   # State:
   #   - packages/backend/functions                are installed
   #   - packages/backend/firebase.json            generated ('firebase.app.js' without the emulators)
-  #   - packages/backend/database.rules.json      generated
 
 # DEPLOY
 #
@@ -124,7 +120,7 @@ timeout: 300s
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
 substitutions:
-  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.13.0
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.14.4
   _NODE_VER: "18"
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.backend    # where successful tests are marked
   _MY_BUILDER: ci-builder

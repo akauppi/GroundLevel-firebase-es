@@ -1,15 +1,13 @@
 #
-# docker-compose.ci.yml
+# dc.cypress.ci.yml
 #
 # Tools for CI test runs (Cloud Build).
 #
-# _Similar_ to 'dc.base.yml' and 'docker-compose.local.yml' but separate. Changes here will not break development
-# experience, and vice versa. However, we still use the same Vite version, defined under 'tools/vite.dc/'.
-#
-# Also Cypress tests are within this same file.
+# _Similar_ to 'dc.base.yml', 'docker-compose.local.yml' and 'dc.cypress.yml', but separate. Changes here will not break
+# development experience, and vice versa.
 #
 # Expects:
-#   - PORT to declare the port to show UI in
+#   - VITE_PORT to declare the port between Vite and Cypress (exact value does not matter)
 #   - CYPRESS_IMAGE if using 'cypress'
 #
 # References:
@@ -17,8 +15,7 @@
 #     -> https://docs.docker.com/compose/extends/
 #
 services:
-  # Also builds are done with this; CI does not need visualizations
-  vite-ci:
+  vite-dev-ci:
     build:
       context: tools/vite.dc
       target: vite_plain
@@ -28,7 +25,7 @@ services:
       - ./public:/work/public:ro
       - ./src:/work/src:ro
       - ./dev:/work/dev:ro
-      - ./package.json:/work/package.json:ro              # 'ci:launch' is there
+      #- ./package.json:/work/package.json:ro              # 'ci:launch' is there
       - ./tmp/.env.ci_test:/work/.env:ro
       #
       - ./vite.config.js:/work/vite.config.js:ro
@@ -41,6 +38,7 @@ services:
       '
     environment:
       - PORT=$VITE_PORT    # at least 'vite.config.js' wants it
+      #- MODE=local        # tbd. is this needed??
 
     network_mode: cloudbuild
     container_name: vite
@@ -53,27 +51,23 @@ services:
 
   # Semi-debug step.
   #
-  # This can be used from the Cloud Build definition, to check 'vite-ci' is actually up and healthy (before proceeding
+  # This can be used from the Cloud Build definition, to check 'vite-dev-ci' is actually up and healthy (before proceeding
   # to time-taking 'cypress/included' download.
   #
-  # Note: Not only wakes 'vite' but also checks we have network level access to it.
-  #
-  vite-ci-launched:
+  vite-dev-ci-launched:
     image: node:18-alpine
     command: sh -c '
-      nc -z vite $VITE_PORT
+      true
       '
     network_mode: cloudbuild
     depends_on:
-      vite-ci:
+      vite-dev-ci:
         condition: service_healthy
 
-    container_name: vite-ci-launched    # just for the logs
+    container_name: vite-dev-ci-launched    # just for the logs
     profiles: ['manual']
 
   # Cypress run
-  #
-  # Note: Two alternatives. You can either use pre-built image (A) or what the repo has right now (B).
   #
   cypress:
     # A: 'cypress-custom' image has been pre-built
@@ -91,17 +85,15 @@ services:
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro
       #
-      - ./tmp/firebase.ci.js:/work/firebase.ci.js
+      - ./tmp/firebase.app.ci.js:/work/firebase.app.js
       # --- output
-      - ./.screenshots:/work/.screenshots:delegated
+      #- ./.screenshots:/work/.screenshots:delegated
     environment:
       - CYPRESS_defaultCommandTimeout=20000
       - CYPRESS_baseUrl=http://vite:${VITE_PORT}
-      - CYPRESS_CI=tru
-      - EMUL_HOST=emul-for-app
-      - FIREBASE_APP_JS=firebase.ci.js
+      - FIREBASE_APP_JS=firebase.app.js
+      - EMUL_HOST   # pass-through
     working_dir: /work
-    entrypoint: []    # clear the 'entrypoint' of the stock image ('["cypress", "run"]')
     command: sh -c '
         cypress run
       ']
@@ -112,7 +104,7 @@ services:
     container_name: cypress   # for console output, only
 
     depends_on:
-      vite-ci:
+      vite-dev-ci:
         condition: service_healthy
 
     #
@@ -140,10 +132,8 @@ services:
       nc -z emul-for-app 6868 && echo "I see Realtime Database" &&
 
       curl -Iv http://vite:3002 &&      
-      (curl -Iv http://vite:3002/@fs/work/src/app.js > /dev/null) &&
       echo "--- SAW EVERYTHING ---" && false
       '
-      # The '/@fs/work/src/app.js' link is what will be needed by Cypress, later.
     network_mode: cloudbuild
     profiles: ['manual']
       # No 'depends_on:' on purpose: this is a debugging stage

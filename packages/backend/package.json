@@ -21,10 +21,10 @@
     "_pic2": "touch firebase-debug.log firestore-debug.log database-debug.log"
   },
   "devDependencies": {
-    "@google-cloud/firestore": "^6.3.0",
-    "firebase-admin": "^11.1.0",
+    "@google-cloud/firestore": "^6.4.0",
+    "firebase-admin": "^11.2.0",
     "firebase-jest-testing": "^0.0.5-beta.4",
-    "jest": "^29.1.2"
+    "jest": "^29.2.0"
   },
   "//devDependencies": {
     "firebase-jest-testing": "file:../../../firebase-jest-testing/package"

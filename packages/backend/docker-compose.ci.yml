@@ -26,8 +26,7 @@ services:
 
     volumes:
       # --- RO
-      - ./tmp/firebase.ci.js:/work/firebase.js:ro
-      - ./tmp/firebase.ci.json:/work/firebase.json:ro   # tbd. eventually focus on using either '.js' or '.json'?
+      - ./tmp/firebase.ci.json:/work/firebase.json:ro
       - ./firestore.indexes.json:/work/firestore.indexes.json:ro
       - ./firestore.rules:/work/firestore.rules:ro
       - ./functions:/work/functions:ro
@@ -57,7 +56,7 @@ services:
           nc -z localhost 6868
         ))
       '
-        # tbd. read ports (and whether auth is enabled) from 'tmp/firebase.ci.json'; enable app & database check
+        # tbd. read ports (and whether auth is enabled) from 'tmp/firebase.ci.js'; enable app & database check
         #     using project id should go.
         #
         # Note: 'nc' in that image doesn't handle checking multiple ports at once.

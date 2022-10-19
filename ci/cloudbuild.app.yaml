@@ -44,9 +44,8 @@ steps:
     npm --prefix packages/app install --omit=optional --omit=peer &&
 
     (cd packages/app && 
-      make tmp/.env.ci_test &&
-	  node --input-type=module -e "import o from ''../backend/firebase.app.ci.js''; console.log(''export default ''+ JSON.stringify(o));" > tmp/firebase.ci.js &&
-      node --input-type=module -e "import o from ''../backend/firebase.app.ci.js''; console.log(                   JSON.stringify(o));" > tmp/firebase.ci.json
+      make tmp/.env.ci_test tmp/firebase.app.ci.js &&
+      node --input-type=module -e "import o from ''./tmp/firebase.app.ci.js''; console.log(JSON.stringify(o));" > tmp/firebase.app.ci.json
     )
   ']
 
@@ -54,10 +53,10 @@ steps:
   #   - packages/backend/functions/node_modules   have been populated
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
   #   - packages/app/tmp/.env.ci_test             has been created
-  #   - packages/app/tmp/firebase.ci.js           has been created
-  #   - packages/app/tmp/firebase.ci.json         has been created (alternative to .ci.js; let's get rid of this..)
+  #   - packages/app/tmp/firebase.app.ci.js[on]   have been created   (JSON only used by Firebase emulators)
   #
-  #     Note: Ports are in two places: 'tmp/firebase.js[on]' for Cypress, 'tmp/.env.ci_test' for the front-end.
+  #     Note: Ports are in three places: 'tmp/firebase.ci.js' for Cypress, 'tmp/firebase.ci.json' for Firebase Emulators,
+  #           and 'tmp/.env.ci_test' for the front-end.
 
 # DEBUG, TERMINAL:
 #
@@ -73,8 +72,8 @@ steps:
 
 
 # --- Tests
-#
-# Launch emulators and Vite; keeps them running in the background.
+
+# Launch emulators; keep them running in the background.
 #
 # Note: No priming of data & users is needed (that's for "dev", we only do "npm test").
 #
@@ -100,10 +99,10 @@ steps:
 #|  env:
 #|    - EMUL_HOST=emul-for-app
 
-# DEBUG, TERMINAL: enable to see Vite launches
-#
-# 'vite-ci' is normally just a dependency of 'cypress', but this launches it on its own (and shows console output):
-#
+  # DEBUG, TERMINAL: enable to see Vite launches
+  #
+  # 'vite-ci' is normally just a dependency of 'cypress', but this launches it on its own (and shows console output):
+  #
 #|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
 #|  args: ['-f', 'docker-compose.ci.yml', 'up', 'vite-ci']
 #|  dir: packages/app
@@ -113,34 +112,24 @@ steps:
 # Launch Vite (optional; provides better debugging and earlier fail, having this as a separate step).
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', 'vite-ci-launched']
+  args: ['-f', 'dc.cypress.ci.yml', 'run', 'vite-dev-ci-launched']
   dir: packages/app
   env:
     - VITE_PORT=3002
 
-# DEBUG: Check we see Vite and Realtime Database
-#
+  # DEBUG: Check we see Vite and Realtime Database
+  #
 #|- name: node:${_NODE_VER}-alpine
 #|  entrypoint: sh
 #|  args: ['-c', '
 #|    apk add --update curl &&
 #|    nc -z vite 3002 && echo "I see Vite" &&
-#|    nc -z emul-for-app 6868 && echo "I see Realtime Database" &&
-#|
-#|    (curl -Iv http://vite:3002/@fs/work/src/app.js > /dev/null)
+#|    nc -z emul-for-app 6868 && echo "I see Realtime Database"
 #|  ']
-
-# DEBUG; TEMP
-#|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
-#|  args: ['-f', 'docker-compose.ci.yml', 'run', 'see-them']
-#|  dir: packages/app
-#|  env:
-#|    - VITE_PORT=3002
-
 
 # Running Cypress
 #
-# This automatically launches 'vite-ci', unless it's already done (above).
+# This automatically launches 'vite-ci', unless it's already done, above.
 #
 # Running via DC (opposed to directly using a Cypress image) so that we can:
 #   - integrate launching Vite and running Cypress
@@ -148,12 +137,13 @@ steps:
 #   - handle networks correctly (differs from the dev environment)
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.ci.yml', 'run', 'cypress']
+  args: ['-f', 'dc.cypress.ci.yml', 'run', 'cypress']
   dir: packages/app
   env:
     - VITE_PORT=3002
       # precise port does not matter; helps us keep it in one place. #rework
     - CYPRESS_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/cypress-custom:${_CYPRESS_TAG}
+    - EMUL_HOST=emul-for-app
 
 #--- Build (fake; just trying it does..)
 #
@@ -210,14 +200,14 @@ steps:
 timeout: 600s
 
 substitutions:
-  _BUILDER_TAG: 11.13.0
+  _BUILDER_TAG: 11.14.4
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"
   _CYPRESS_TAG: 10.10.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
-  #_FIREBASE_ADMIN_VER: 11.0.1
+  #_FIREBASE_ADMIN_VER: 11.1.0
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
   _MY_BUILDER: ci-builder
   #_FIREBASE_EMULATORS: firebase-emulators

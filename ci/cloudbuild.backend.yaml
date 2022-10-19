@@ -45,25 +45,22 @@ steps:
     npm --prefix packages/backend/functions install &&
     
     (cd packages/backend &&
-	  node --input-type=module -e "import o from ''./firebase.ci.js''; console.log(''export default ''+ JSON.stringify(o));" > tmp/firebase.ci.js &&
-      node --input-type=module -e "import o from ''./firebase.ci.js''; console.log(                     JSON.stringify(o));" > tmp/firebase.ci.json
+      make tmp/firebase.ci.js &&
+      node --input-type=module -e "import o from ''./tmp/firebase.ci.js''; console.log(JSON.stringify(o));" > tmp/firebase.ci.json
     )
   ']
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/tmp/firebase.ci.js       has been created    (tbd. do we want to use one??)
+  #   - packages/backend/tmp/firebase.ci.js[on]   have been created    (JSON used only by 'firebase-tools')
   #   - packages/backend/{firebase|firestore}-debug.log      created, so DC can map them
 
-# DEBUG:
+# DEBUG, TERMINAL:
 #
 # USE THIS TO DEBUG CASES where the emulators don't start (or to see warm-up timings).
 #
-# Note: 'docker compose up' never returns, so if this is enabled, it's eventually a timeout.
-#
 #|- name: docker/compose:${_DOCKER_COMPOSE_TAG}
 #|  args: ['-f', 'docker-compose.ci.yml', 'up', 'emul']
-#|  #args: ['-f', 'docker-compose.ci.yml', 'run', 'emul-is-up']
 #|  dir: packages/backend
 #|  env:
 #|    - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
@@ -155,7 +152,7 @@ steps:
 timeout: 300s
 
 substitutions:
-  _BUILDER_TAG: 11.13.0
+  _BUILDER_TAG: 11.14.4
   _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "18"
   _AR_FOLDER: builders

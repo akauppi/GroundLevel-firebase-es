@@ -19,10 +19,9 @@ services:
       service: emul
     volumes:
       #--- RO
-      # '/work/firebase.js[on]' entries override those in 'docker-compose.ci.yml'
-      - ./tmp/firebase.app.ci.js:/work/firebase.js:ro
+      # '/work/firebase.json' overrides that in 'docker-compose.ci.yml'
       - ./tmp/firebase.app.ci.json:/work/firebase.json:ro
-      - ./database.rules.app.json:/work/database.rules.json:ro
+      - ./database.rules.app.json:/work/database.rules.app.json:ro
       #--- Output
       - ./database-debug.log:/work/database-debug.log:delegated
 
@@ -43,7 +42,7 @@ services:
 
     # Allows the ports to be seen (as 'emul-for-app:{port}') by Cloud Build steps.
     #
-    #network_mode: cloudbuild
+    network_mode: cloudbuild
     container_name: emul-for-app
 
   emul-for-app-launched:
