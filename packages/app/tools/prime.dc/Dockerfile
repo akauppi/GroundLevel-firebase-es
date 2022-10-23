@@ -10,7 +10,7 @@
 #
 # Expects:
 #   - host having Firebase Firestore and auth ports open
-#     - '${FIRESTORE_PORT}' and '${AUTH_PORT}' pointing to them
+#     - 'firebase.app.js' (or override by 'FIREBASE_APP_JS' env.var.) that provides the above emulator ports
 #   - /work/users.js
 #   - /work/docs.js
 #

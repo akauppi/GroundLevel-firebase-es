@@ -109,7 +109,7 @@ LOCATION_ID=$( cat .state/.captured.sdkconfig | grep "\"locationId\":" | cut -d 
 
 # Note: Running this 'make' does not require dependencies to have been installed. Works on a virgin repo.
 #
-(cd ../packages/backend && make -q tmp/firebase.json tmp/database.rules.json)
+(cd ../packages/backend && make -q tmp/firebase.json)
 
 # Note: Need to copy 'backend/functions' contents to our temporary mirror. This is so that no 'functions/node_modules'
 #   needs to be created where the developer would see it. Maybe overkill.

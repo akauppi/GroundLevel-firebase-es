@@ -101,8 +101,8 @@ services:
       #-- RO
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
+      - ../packages/backend/database.rules.app.json:/work/database.rules.app.json:ro
       - ../packages/backend/tmp/firebase.json:/work/firebase.json:ro
-      - ../packages/backend/tmp/database.rules.json:/work/database.rules.json:ro
       #
       - ./.state/.firebaserc:/work/.firebaserc:ro
       - ./.state/functions:/work/functions:ro
