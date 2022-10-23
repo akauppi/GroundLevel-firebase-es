@@ -21,6 +21,7 @@ FROM node:18-alpine AS vite_plain
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
 ARG VITE_VER=3.2.0-beta.2
+  # 3.2.0-beta.3 is BAD: treats dynamic 'import' in 'vite.config.js' too eagerly
 
 WORKDIR /work
 
