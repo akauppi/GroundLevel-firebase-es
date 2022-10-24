@@ -14,8 +14,10 @@
     "_ci:fns:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js --detectOpenHandles --verbose --all",
     "_ci:rules:all": "NODE_OPTIONS=--experimental-vm-modules jest --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all",
     "-- -": "",
-    "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
-    "_postinstall_local": "make npm:functions-install-local",
+    "postinstall": "npm run -s _pi0 && npm run -s _pi1",
+    "_pi0": "npm --prefix functions install --omit=optional",
+    "_pi1": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
+    "_postinstall_local": "true",
     "_postinstall_ci": "npm run -s _pic1 && npm run -s _pic2",
     "_pic1": "make tmp/firebase.ci.json tmp/firebase.app.ci.json",
     "_pic2": "touch firebase-debug.log firestore-debug.log database-debug.log"

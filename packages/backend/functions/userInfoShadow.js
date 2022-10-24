@@ -1,11 +1,12 @@
 /*
 * functions/userInfoShadow.js
+*
+* Note: This module is reusing the Firestore handle from Cloud Functions. This is fine (and simplifies initialization).
+*     If you, however, want to manually control the version of that library, call 'initializeApp', 'getFirestore'.
+*     This means you need to add '@google-cloud/firestore' to the dependencies.
 */
-import { regionalFunctions_v1 } from './regional.js'
-  // 'v2' doesn't have '.firestore', yet (Jul 2022)
-
-import { getFirestore } from './firebase.js'
-const db = getFirestore();
+import { regionalFunctions_v1 } from './common.js'
+  // 'v2' doesn't have '.firestore', yet (Oct, Jul 2022)
 
 // UserInfo shadowing
 //
@@ -17,6 +18,8 @@ const userInfoShadow_2 = regionalFunctions_v1.firestore
   .onWrite( async (change, context) => {
     const [before,after] = [change.before, change.after];   // [QueryDocumentSnapshot, QueryDocumentSnapshot]
     const uid = change.after.id;
+
+    const db = change.before.ref.firestore;   // borrow a Firestore handle we can use
 
     const newValue = after.data();      // { ... } | undefined
     console.debug(`Global userInfo/${uid} change detected: `, newValue);

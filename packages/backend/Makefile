@@ -8,14 +8,6 @@ _EMUL_APP_DC=tmp/.stamp.emul-for-app
 
 JEST := node_modules/.bin/jest
 
-# Sanity checks
-#
-ifdef BUILDER_OUTPUT
-  # CI - has stuff under functions/node_modules
-else ifneq ($(wildcard functions/node_modules/*),)
-  $(error FAIL: Files under 'functions/node_modules' are not being used. Please remove that folder.)
-endif
-
 _L := firebase-debug.log firestore-debug.log database-debug.log ui-debug.log
 _EMUL_LOGS := $(addprefix logs/,$(_L))
 _EMUL_APP_LOGS := $(addprefix logs.app/,$(_L))
@@ -71,13 +63,6 @@ export help
 install: _uses_docker
 	npm install
 
-# Note: Important to create 'tmp/functions/node_modules' in the host side. Otherwise, WSL2 Docker will create one
-# 		with 'root' access (instead of the current user).
-#
-npm\:functions-install-local: _uses_docker
-	install -d tmp/functions/node_modules
-	docker compose -f docker-compose.tools.yml run --rm functions-install
-
 # Tests
 test: _started
 	$(MAKE) test:fns:all
@@ -123,6 +108,10 @@ _started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
 	$(_DC_PORTS) run --rm warmed-up
 	@echo "Firebase Emulators are running. Use 'docker compose down' to bring them down.\n"
 
+# DEBUG
+\:up: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
+	$(_DC_PORTS) up warm-up
+
 #|lint:
 #|	@npm run lint
 #|	# tbd. eventually, run via DC
@@ -134,6 +123,10 @@ _started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
 app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rules.app.json
 	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml run --rm emul-for-app-warmed-up
 	@echo "Firebase Emulators for the web app are running.\n"
+
+# DEBUG
+\:app\:up: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rules.app.json
+	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml up emul-for-app
 
 # CI
 #

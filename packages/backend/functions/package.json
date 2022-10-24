@@ -10,26 +10,15 @@
     "firebase-admin": "^11.2.0",
     "firebase-functions": "^4.0.1"
   },
-  "scripts": {
-    "preinstall": "npm run -s _checkEnv",
-    "_checkEnv": "[ ! -z $BUILDER_OUTPUT$NO_GUARD ] || ( >&2 echo \"You don't need to do 'npm install' in this folder.\"; false )"
-  },
   "//": {
     "engines.node": [
-      "Firebase emulators require the field to be plain '16'. We run it under DC, using Node 18. This causes a warning,",
-      "but doesn't seem harmful."
+      "Firebase emulators require the field to be plain '16' (not e.g. '>= 16'). In development, testing and CI, we run",
+      "it under DC, using Node 18 (causes a warning but works)."
     ],
     "dependencies": {
       "@google-cloud/firestore": [
-        "Optional dep of 'firebase-admin'. Need to include it since we use Firestore."
-      ]
-    },
-    "scripts": {
-      "_checkEnv": [
-        "Guards again the developer locally running 'npm install'. Actual use cases:",
-        "- manual deployment (first/*; DC)",
-        "- CI (deployment)",
-        "- Cloud Functions (runtime)"
+        "Optional dependency of 'firebase-admin' (and 'firebase-functions'), needed EVEN THOUGH we would use the",
+        "Firestore handle from Cloud Functions, themselves."
       ]
     }
   }

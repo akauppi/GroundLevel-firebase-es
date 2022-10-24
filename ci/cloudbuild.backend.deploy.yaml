@@ -68,7 +68,6 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/backend/functions install &&
 
     (cd packages/backend &&
       make ci:deploy:firebase.json
@@ -90,8 +89,8 @@ steps:
     [ ! -z $$LOCATION_ID ] || ( >&2 echo "ERROR: No ''locationId'' in Firebase app configuration (needs some tweaks)"; false ) && 
     echo "Using location id: $${LOCATION_ID}" &&
     
-    cat functions/regional.js | sed -E "s/import\.meta\.env\.LOCATION_ID/''$${LOCATION_ID}''/" > .a &&
-      mv .a functions/regional.js
+    cat functions/config.js | sed -E "s/import\.meta\.env\.LOCATION_ID/''$${LOCATION_ID}''/" > .a &&
+      mv .a functions/config.js
   ']
     # ^-- #hack: would rather replace any occurrence of '${LOCATION_ID}' within 'functions/**.js'.
   dir: packages/backend
@@ -102,7 +101,7 @@ steps:
     # tbd. Test that it deploys to 'us-central1'.
 
   # State:
-  #   - packages/backend/functions/regional.js    modified so that 'import.meta.env.LOCATION_ID' is replaced by the target region
+  #   - packages/backend/functions/config.js    modified so that 'import.meta.env.LOCATION_ID' is replaced by the target region
 
 - name: $_1
   entrypoint: firebase

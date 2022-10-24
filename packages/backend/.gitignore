@@ -4,14 +4,10 @@
 /logs/
 /logs.app/
 
-# This shouldn't get created
-!functions/node_modules/
+/functions/package-lock.json
 
 # Temporary files
 #
 # Note: You can also just mark '/tmp/'. Being explicit shows what files the current version intends to create, there.
 #
 /tmp/
-
-# Cruft
-#/old-logs/

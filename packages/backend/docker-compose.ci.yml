@@ -5,8 +5,6 @@
 # Works as a basis for 'docker-compose.app.ci.yml'.
 #
 # Reasons:
-#   - in CI, we don't need separate emulator instances for backend and front-end (same can handle both)
-#   - in CI, we always run on Linux, so don't need the 'tmp/functions-node_modules' tricks, done in development (simpler)
 #   - !! separating development and CI causes some overlap, but also frees the implementations from breaking each other!!
 #   - uses a pre-built image instead of pointing to '../dc/', as development does.
 #

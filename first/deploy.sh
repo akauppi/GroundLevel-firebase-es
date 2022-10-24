@@ -122,8 +122,8 @@ install -d .state/functions/node_modules && \
 #
 # tbd. Make this generic so any 'import.meta.env.LOCATION_ID' within '.state/functions/**.js' gets replaced.
 #
-cat .state/functions/regional.js | sed -E 's/import\.meta\.env\.LOCATION_ID/"'"${LOCATION_ID}"'"/' > .state/functions/tmp
-mv .state/functions/tmp .state/functions/regional.js
+cat .state/functions/config.js | sed -E 's/import\.meta\.env\.LOCATION_ID/"'"${LOCATION_ID}"'"/' > .state/functions/tmp
+mv .state/functions/tmp .state/functions/config.js
 
 docker compose run --rm deploy-backend
 

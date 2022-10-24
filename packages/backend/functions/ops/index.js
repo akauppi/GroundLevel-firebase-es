@@ -13,13 +13,12 @@
 import { initializeApp } from 'firebase-admin/app'    // don't want to use the './firebase.js' - keep that for app
 import { getDatabase, ServerValue } from 'firebase-admin/database'
 
-import { regionalFunctions_v1 } from '../regional.js'
+import { EMULATION } from '../config.js'
+import { regionalFunctions_v1 } from '../common.js'
 
 import { https as https_v1 } from 'firebase-functions/v1'
 
 function fail_at_load(msg) { throw new Error(msg) }   // use at loading; NOT within a callable!!
-
-const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // set to "true" by Firebase Emulators
 
 const PROJECT_ID = process.env["GCLOUD_PROJECT"] || fail_at_load("No 'GCLOUD_PROJECT' env.var.");
 
@@ -39,6 +38,8 @@ const DATABASE_URL = (_ => {
     //
     //    Until then, parsing the 'FIREBASE_DATABASE_EMULATOR_HOST' env.var. (undocumented??) is the best choice
     //    (was unable to pass DC 'environment: DATABASE_PORT=...' here, for some reason).
+    //
+    //    tbd. Rather, use the import 'firebase-functions/params' but it doesn't currently (4.0.1) work.
     //
     const tmp = process.env["FIREBASE_DATABASE_EMULATOR_HOST"];   // "0.0.0.0:6868" | undefined
     if (!tmp) {

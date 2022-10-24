@@ -65,7 +65,8 @@ services:
   # time e.g. 'make test' is performed (instead of having an intermediate, stateful service that does the warm-up).
   #
   # Note: Likewise, we *could* have the warmup already in the 'emul-for-app' steps. That would work, too.
-  #       If, however, we place it in the 'healthcheck' of that service, there won't be console output to help debug.
+  #       If, however, we place it in the 'healthcheck' of that service, there won't be console output to help debug
+  #       (also consider that the health check would take ~4s or more, which might - or not - be an issue).
   #
   emul-for-app-warmed-up:
     image: node:18-alpine

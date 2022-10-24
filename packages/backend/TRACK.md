@@ -69,4 +69,15 @@ Also:
 
    No mention of emulators. Could fit nicely, there... (it does mention "When testing the Admin SDK locally").
    
+
+## `firebase-functions` availability as an ESM
+
+- [https://github.com/firebase/firebase-functions/issues/1276](https://github.com/firebase/firebase-functions/issues/1276)
+
+
+<!-- Not sure if this touches us..
+## `firebase-functions` 4.x.x Secrets functioning
+
    
+- [ ] ["Environment Secrets have no value"](https://github.com/firebase/firebase-functions/issues/1264)
+-->

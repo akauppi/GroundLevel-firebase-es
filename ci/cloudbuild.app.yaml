@@ -40,7 +40,6 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/backend/functions install &&
     npm --prefix packages/app install --omit=optional --omit=peer &&
 
     (cd packages/app && 

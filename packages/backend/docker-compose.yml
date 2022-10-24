@@ -63,9 +63,7 @@ services:
   # NOTE: Use Node.js 18 to have built-in fetch.
   #
   # Note: We run this as a service ('up', not 'run') so that the knowledge of the service having already been warmed up
-  #     remains.
-  #
-  # Note: For Jest, we need a 'package.json' with '"type": "module"'.
+  #     remains. (Running 'warm-up' on already warm engine would take ~)
   #
   warm-up:
     image: node:18-alpine
@@ -84,10 +82,12 @@ services:
       npm config set update-notifier false &&
       echo "{ \"type\":\"module\" }" > package.json &&
 
-      export JEST=node_modules/.bin/jest &&
-      export NODE_OPTIONS=--experimental-vm-modules &&
-      $$JEST --config test-fns/jest.config.js --verbose --detectOpenHandles --all &&
-      $$JEST --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all &&
+      (
+        export J=node_modules/.bin/jest &&
+        export NODE_OPTIONS=--experimental-vm-modules &&
+        $$J --config test-fns/jest.config.js --verbose --detectOpenHandles --all &&
+        $$J --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all 
+      ) &&
 
       touch .healthy &&
       sleep infinity

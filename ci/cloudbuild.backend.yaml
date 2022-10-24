@@ -42,7 +42,6 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/backend/functions install &&
     
     (cd packages/backend &&
       make tmp/firebase.ci.js &&

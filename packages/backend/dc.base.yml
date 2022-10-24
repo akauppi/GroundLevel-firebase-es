@@ -40,8 +40,6 @@ services:
       - ./functions:/work/functions:cached
       - ./firestore.indexes.json:/work/firestore.indexes.json:cached
       - ./firestore.rules:/work/firestore.rules:cached
-      # --- other
-      - ./tmp/functions/node_modules:/work/functions/node_modules:ro
 
     working_dir: /work
     environment:
