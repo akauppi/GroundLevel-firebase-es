@@ -6,7 +6,7 @@ _DC_PATH := ../../dc
 _EMUL_DC=tmp/.stamp.emul
 _EMUL_APP_DC=tmp/.stamp.emul-for-app
 
-JEST := node_modules/.bin/jest
+_JEST:=node_modules/.bin/jest
 
 _L := firebase-debug.log firestore-debug.log database-debug.log ui-debug.log
 _EMUL_LOGS := $(addprefix logs/,$(_L))
@@ -60,20 +60,20 @@ endef
 export help
 
 # Node.js
-install: _uses_docker
+install:
 	npm install
 
 # Tests
-test: _started
+test: _needs_docker _started
 	$(MAKE) test:fns:all
 	$(MAKE) test:rules:all
 
 test\:fns\:userInfo: tmp/firebase.json
 	FIREBASE_JSON=tmp/firebase.json \
-	  NODE_OPTIONS=--experimental-vm-modules jest --config test-fns/jest.config.js -f userInfo.test.js --verbose --all
+	  NODE_OPTIONS=--experimental-vm-modules $(_JEST) --config test-fns/jest.config.js -f userInfo.test.js --verbose --all
 
 test\:fns\:all: tmp/firebase.json
-	FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules $(JEST) --config test-fns/jest.config.js --verbose --all
+	FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules $(_JEST) --config test-fns/jest.config.js --verbose --all
 
 test\:rules\:invites:
 	@$(MAKE) SOME=invitesC.test.js _testRulesSome
@@ -87,19 +87,11 @@ test\:rules\:userInfo:
 	@$(MAKE) SOME=userInfoC.test.js _testRulesSome
 _testRulesSome:	tmp/firebase.json
 	FIREBASE_JSON=tmp/firebase.json \
-	  NODE_OPTIONS=--experimental-vm-modules $(JEST) --config test-firestore-rules/jest.config.js -f $(SOME) --verbose --all
+	  NODE_OPTIONS=--experimental-vm-modules $(_JEST) --config test-firestore-rules/jest.config.js -f $(SOME) --verbose --all
 
 test\:rules\:all: tmp/firebase.json
 	FIREBASE_JSON=tmp/firebase.json \
-	  NODE_OPTIONS=--experimental-vm-modules $(JEST) --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all
-
-# Database
-test\:rules2\:logging: tmp/firebase.json
-	FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules $(JEST) --config test-database/jest.config.js -f logging.test.js --verbose --detectOpenHandles --all
-
-test\:rules2\:all: tmp/firebase.json
-	FIREBASE_JSON=tmp/firebase.json NODE_OPTIONS=--experimental-vm-modules $(JEST) --config test-database/jest.config.js --verbose --detectOpenHandles --all
-
+	  NODE_OPTIONS=--experimental-vm-modules $(_JEST) --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all
 
 # Development
 start: _started
@@ -110,11 +102,10 @@ _started: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
 
 # DEBUG
 \:up: $(_EMUL_DC) $(_EMUL_LOGS) tmp/firebase.json
-	$(_DC_PORTS) up warm-up
+	$(_DC_PORTS) up emul
 
-#|lint:
-#|	@npm run lint
-#|	# tbd. eventually, run via DC
+dev\:lint: ../../node_modules/.bin/eslint
+	@$< . || true
 
 # App development
 #
@@ -126,7 +117,7 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rul
 
 # DEBUG
 \:app\:up: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rules.app.json
-	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml up emul-for-app
+	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml up emul-for-app-warmed-up
 
 # CI
 #
@@ -176,7 +167,7 @@ $(_EMUL_APP_DC): $(_DC_PATH)/firebase-tools/Dockerfile $(shell find $(_DC_PATH)/
 
 # Give nicer error message if Docker is not running.
 #
-_uses_docker:
+_needs_docker:
 	@docker --version > /dev/null || ( >&2 echo "PROBLEM: 🐋 Not seeing Docker around, please launch it.\n"; false )
 
 #---

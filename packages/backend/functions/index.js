@@ -17,5 +17,25 @@
 */
 import './config.js'  // to print any debug output
 
-export { metricsAndLoggingProxy_v0 } from './ops/index.js'
+const malp_v0 = await import('./ops/index.js').then( mod => mod.default["metrics-and-logging-proxy-v0"] );    // function?
+//export { metricsAndLoggingProxy_v0 } from './ops/index.js'
+
 export { userInfoShadow_2 } from './userInfoShadow.js'
+
+// No way to export a function with dashes in the name directly (is there?), but we can do it via "groups".
+//
+// Note: 'export default {...}' would itself just be seen as a group, by Cloud Functions, leading to "default" in the
+//    callable's URL.
+//
+
+/*
+export const metrics = {
+  ["and-logging-proxy-v0"]: malp_v0
+}
+// Gives (in client):
+//  <<
+//    functions: Error: Failed to find function metrics.and.logging.proxy.v0 in the loaded module
+//  <<
+*/
+
+export const metrics = { and: { logging: { proxy: { v0: malp_v0 } } } }   // works (but UGLY!! 🧟‍)

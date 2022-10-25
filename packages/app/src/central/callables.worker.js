@@ -117,7 +117,7 @@ function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise
   }
 }
 
-const metricsAndLoggingProxy_v0_Gen = httpsCallableGen("metricsAndLoggingProxy_v0");
+const metricsAndLoggingProxy_v0_Gen = httpsCallableGen("metrics-and-logging-proxy-v0");
 
 export {
   metricsAndLoggingProxy_v0_Gen

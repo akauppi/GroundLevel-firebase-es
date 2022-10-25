@@ -6,7 +6,7 @@
 *     This means you need to add '@google-cloud/firestore' to the dependencies.
 */
 import { regionalFunctions_v1 } from './common.js'
-  // 'v2' doesn't have '.firestore', yet (Oct, Jul 2022)
+  // 'v2' doesn't have '.firestore', yet (Oct, Jul 2022) #track
 
 // UserInfo shadowing
 //

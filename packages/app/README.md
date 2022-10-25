@@ -5,10 +5,9 @@ Web application sample project.
 ## Requirements
 
 - `npm`
+- GNU `make`
 - `docker`
 - Cypress desktop app; 10.8.0+ (optional)
-
-   >Note: We will opt for a wholly Docker-based development experience in the future, no longer requiring `npm` to be installed on your system.
 
 ### Cypress setup (for test based development; optional)
 
@@ -104,20 +103,16 @@ Development is done with:
 ## Getting started
 
 ```
-$ npm install
+$ make install
 ```
-
->Note: This will take *ages* on the first time, since it's loading not only the `npm` dependencies but a ~500MB Cypress binary, as well.
->
->If you don't need Cypress (yet), `CYPRESS_INSTALL_BINARY=0 npm install` speeds up the install by skipping downloading the binary part.
 
 ### Launch the app
 
 ```
-$ npm run dev
+$ make dev
 ...
 
-  VITE v3.1.0  ready in 1341 ms
+  VITE v3.2.0-beta.2  ready in 690 ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Network: http://172.20.0.2:3000/
@@ -147,21 +142,23 @@ tbd. Use color-preserving piping (with `socat`) within the DC, taking the `Netwo
 
 ## Two development workflows
 
-The above command started a local, emulated version of Firebase. You can also start it with `npm run dev:local`.
+The above command started a local, emulated version of Firebase.
 
-The other way is `npm run dev:online`. This works against your cloud Firebase project. We'll come to it shortly.
+The other way is `make dev:online`. This works against your cloud Firebase project. We'll come to it shortly.
 
 Differences of these modes:
 
 ||Back-end|Data|Users|Authentication|Central logging|
 |---|---|---|---|---|---|
-|`local`|emulated|primed from `local/docs.js`, at each launch|primed from `local/users.js`|with `&user=<id>`|Realtime Database being emulated|
-|`online`|in the cloud|in the cloud; changes are persistent|←|against real accounts|Realtime Database in the cloud|
+|`local`|emulated|primed from `local/docs.js`|primed from `local/users.js`|with `&user=<id>`|To emulated Realtime Database only|
+|`online`|in the cloud|in the cloud; changes are persistent|←|against real accounts|Via online Realtime Database to Grafana Cloud; stage `"{stage-id}"`, release `""`|
 
->**Note:** Tests (`npm test`) also use local mode but bring their own data and users. You can keep `npm run dev` running, and use it both for browser development and running Cypress tests. The two use different Firebase project id's so their data and users won't overlap.
+For local mode, the priming happens anew at each Docker Compose launch.
+
+>Note: Tests (`make test`) use the same Docker Compose service as local mode, but bring their own data and users. You can use both `make dev` and `make test` at the same time. The two use different Firebase project id's so their data and users won't overlap.
 
 
-### `dev:local`
+### `dev[:local]`
 
 Use this mode when:
 
@@ -170,7 +167,7 @@ Use this mode when:
 - you want to skip the sign-in dialog, to speed up development a few clicks
 - you don't have a Firebase account, yet
 
-With local mode, you can test back-end features while developing them, and only deploy working stuff.
+With local mode, you can test back-end features while developing them, and only commit stuff that works.
 
 
 ### `dev:online`
@@ -185,24 +182,24 @@ Use this when:
 - you have a Firebase account
 - you want to sign in as a real user
 
-The mode needs `firebase.staging.js` in the project's root, to find the staging project. This should have been created during your first deployment (see root `README.md`).
+The mode needs `firebase.staging.js` in the project's root, to find the staging project. This will be created during your first deployment.
 
->Note: You can choose another project by `ENV=abc npm run dev:online`.
+>Note: You can choose another project by `ENV=abc make dev:online`.
 
 #### Launch! 🚀
 
 Launch the server:
 
 ```
-$ npm run dev:online
+$ make dev:online
 ...
 ```
 
 Point your browser to `http://localhost:3001`.
 
-Changes to your front-end files are still reflected in the browser, but back-end services are now run in the cloud. Changes you do to the data will persist. So will your logs. Traffic you create will be using your [quotas](https://firebase.google.com/docs/functions/quotas).
+Changes to your front-end files are still reflected in the browser, but back-end services are now run in the cloud. Changes you do to the data will persist. Metrics and logs are proxied to Grafana Cloud (if you have set it up). Traffic you create will be using your [Firebase quotas](https://firebase.google.com/docs/functions/quotas).
 
-The two development modes are completely orthogonal - you can run them side by side, in different terminals. By default, local uses port 3000 and online port 3001.
+The two development modes are completely orthogonal - you can run them side by side, in different terminals. <!--By default, local uses port 3000 and online port 3001.-->
 
 
 ## Linting
@@ -210,49 +207,43 @@ The two development modes are completely orthogonal - you can run them side by s
 Before we look at tests, a brief mention on linting.
 
 ```
-$ npm run lint
+$ make dev:lint
 ...
 ```
 
 This gives you warnings that you may or may not wish to fix. Steer them at `.eslintrc.cjs`.
 
->Note: At the moment (<strike>Apr 2021</strike> Jul 2022) we're not focused on reducing the number of lint warnings.
+>Note: At the moment (<strike>Apr 2021</strike> Oct 2022) we're not focused on reducing the number of lint warnings.
 
+<!--
 With the sample app, there may be warnings but there should not be errors.
+-->
 
 ## Testing
 
-You can use Cypress for test based development as well as running all the tests, from command line.
+You can use Cypress for running all the tests at once from the command line, or run them one by one, in a desktop Cypress installation.
 
-- Make sure you have followed the instructions in the "Requirements" section, concerning Cypress desktop application.
+For running from command line, Cypress is brought in via Docker Compose and you don't need to do any installs. For test based development, a desktop application is used. Instructions for setting it up are above ("Requirements" section).
 
 
 ### Running all the tests
 
 ```
-$ npm test
+$ make test
 ```
 
 This runs all the front-end tests and returns you back to the OS prompt.
 
->Note: `npm test` launches a DC environment in the background. This reduces the startup time, in case you were to run `npm test` multiple times.
+>Note: `make test` runs things within Docker Compose. Building the Cypress image takes some time, the first time the command is launched.
 
 
 ### Test based development
 
-The other way is to keep `npm run dev` running, and edit both one's code and tests (and Security Rules) while keeping an eye on the test results.
+The other way is to keep `make dev` running, and edit both one's code, tests and potentially backend Security Rules, while keeping an eye on the test results. Every time you do a change to the app sources or Cypress tests, Cypress automatically refreshes the test output.
 
-Have `npm run dev` running in a terminal.
-
-Visit `http://localhost:3000` with a browser, at least once. The first load warms up Vite.
-
-<!-- tbd.
-Could do a `curl` within DC, to warm up automatically.
--->
+Have `make dev` running in a terminal.
 
 Launch Cypress and pick the `packages/app` subfolder.
-
-><sub>There are two ways to launch Cypress, either from its Desktop icon (recommended) or by `npx cypress open --e2e` in the `packages/app` folder.</sub>
 
 - Choose `E2E testing`
 
@@ -266,7 +257,7 @@ Try to run the tests.
 
 As you can see in the image, always keep the developer tools open while running Cypress tests. It helps.
 
->Note: It seems, with Cypress 10 there is no longer a "Run all tests" option in the dashboard. That's a shame (so you'll end up `npm test`ing for seeing what fails, and drilling into it here).
+>Note: It seems, with Cypress 10 there is no longer a "Run all tests" option in the dashboard. That's a shame (so you'll end up `make test`ing for seeing what fails, and drilling into it here).
 
 Now edit some test in the IDE (they are under `cypress/e2e`).
 
@@ -287,16 +278,10 @@ In short, you can:
 
 ## Manual testing on other devices
 
-Both `npm run dev` and `npm run dev:online` expose their ports to all network interfaces, within your computer.
+Both `make dev` and `make dev:online` expose their ports to all network interfaces, within your computer.
 
 This means, the web app is browsable also from a phone, tablet etc. in the same network. All you need is to find out the outwards-facing IP number of your computer (let's say it's `192.168.1.62`), and open `http://192.168.1.62:3000` (or 3001) from your other device.
 
-<!-- hidden
-
->Note: There's a LOT more to developing with another device. You can tie both the Safari and Chrome browsers with a desktop browser, seeing the debugging information within the desktop.
->
->This is beyond the purpose of a `README`, though.
--->
 
 ### Finding your IP number
 
@@ -305,6 +290,8 @@ This means, the web app is browsable also from a phone, tablet etc. in the same 
 |macOS|`Preferences` > `Network` > (adapter) > `IP address`|
 |macOS (terminal)|`ifconfig`|
 |Windows 10 + WSL2|...tbd.|
+
+>Hint: For WLAN on macOS, you can also `Alt`-click the WLAN icon in the toolbar.
 
 <!-- tbd. #contribute
 |Windows 11|...|
@@ -318,7 +305,7 @@ Make a nice helper (`make show-ip`) to cover the OS differences.
 ## Production build
 
 ```
-$ npm run build
+$ make build
 ...
 vite v3.0.0-beta.9 building for production...
 ✓ 197 modules transformed.
@@ -347,31 +334,13 @@ $ npm run serve
 >Note: `serve` simply serves what's in the `dist/` folder. It does not rebuild the application.
 -->
 
+## First deployment
 
-## Test based development (optional)
+Next, you should take your project to the cloud. While regular updates are intended to be done using CI/CD, you can do your first deployment more manually. Head to `/first/README.md` for instructions.
 
-You can bind the above steps together, with a Cypress desktop application. This allows you to create features by editing tests, then fulfilling them in the app's implementation.
-
-This is a fun way of working. Cypress provides you with e.g. UI recording features so you can step back/forth on what happens in the browser.
-
-See Cypress documentation for learning more.
-
-### How to do it?
-
-Serve the web app (with Hot Module Reload), by:
-
-```
-$ make dev
-...
-```
-
-Open the `packages/app` folder as a Cypress project. It will from now on remember this path.
+After you have completed that, `make dev:online` will work.
 
 
->Note: **Windows 10 + WSL2 SUPPORT IS CURRENTLY BROKEN**: you can try opening `\\wsl$\{your distro}\{...}\packages\app` but likely, it won't work. This is a network path where Windows + WSL2 expose their file system to Windows applications.
-
-
-<!-- (mentioned above, right..?)
 ## Next steps...
 
 You can now start developing your own application - both backend and front-end.
@@ -382,9 +351,11 @@ When you feel like it, take a look at the following folders that have informatio
 
    You set up the cloud to track changes to your version control, so that code changes get automatically tested and deployed.
    
-- [`/ops`](../../ops/README.md) - Operational monitoring, using [Sentry](https://sentry.io/for/javascript/)
+- [`/ops`](../../ops/README.md) - Operational monitoring, using [Grafana Cloud](https://grafana.com)
 
-   Learn about how to see whether your users are there, and how their experience using the app is.
+   Learn about how to see metrics and logs of your web application, so you can fine tune it - and the users' experience.
+   
+- **UPCOMING**: [/momentum](../../momentum/README.md) - How to gain users and form a community to support your web app.
 
-This concludes the web app feedback loop. Make great apps, gain users and have a great time!!!
--->
+
+This concludes the web app feedback loop. Be your bugs be few, and users delighted!

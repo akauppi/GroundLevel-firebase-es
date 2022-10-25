@@ -42,6 +42,10 @@ install:
 dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
 	PORT=3000 $(_DC) -f docker-compose.local.yml run --rm --service-ports vite-dev
 
+# DEBUG
+\:up: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
+	PORT=3000 $(_DC) -f docker-compose.local.yml up vite-dev
+
 # Make sure emulators are running, with data primed for 'dev' and 'test'
 _emulPrimed: $(_PRIME_DC) _emulRunning
 	$(_DC) -f docker-compose.tools.local.yml run --rm prime

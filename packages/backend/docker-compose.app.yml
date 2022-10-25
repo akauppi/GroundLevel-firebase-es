@@ -79,7 +79,7 @@ services:
     command: sh -c '
       echo "{ \"type\":\"module\" }" > package.json &&
       
-      node waky-waky/index.js metricsAndLoggingProxy_v0
+      node waky-waky/index.js metrics-and-logging-proxy-v0
       '
     environment:
       - EMUL_HOST=emul-for-app

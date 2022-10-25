@@ -1,38 +1,33 @@
 /*
 * functions/ops/index.js
 *
-* Expects:
-*   - GCLOUD_PROJECT    project id
-*
 * Expects (under emulation):
-*   - FUNCTIONS_EMULATOR  to be defined to non-empty value
-*   - DATABASE_PORT       where Realtime Database is configured   (note: did not work!!)
+*   - FIREBASE_CONFIG     where Realtime Database is configured
 *
 * Callable for collecting front-end metrics and logs.
+*
+* References:
+*   - "Call functions from your app [v2 beta]"
+*     -> https://firebase.google.com/docs/functions/beta/callable
 */
 import { initializeApp } from 'firebase-admin/app'    // don't want to use the './firebase.js' - keep that for app
 import { getDatabase, ServerValue } from 'firebase-admin/database'
 
 import { EMULATION } from '../config.js'
-import { regionalFunctions_v1 } from '../common.js'
 
-import { https as https_v1 } from 'firebase-functions/v1'
+import https, { HttpsError } from 'firebase-functions/v2/https'
 
 function fail_at_load(msg) { throw new Error(msg) }   // use at loading; NOT within a callable!!
 
-const PROJECT_ID = process.env["GCLOUD_PROJECT"] || fail_at_load("No 'GCLOUD_PROJECT' env.var.");
-
-/*** disabled
-// Read from '../firebase.json' (within DC!), whether Realtime Database is set up, and what its port is.
-//
-const databasePort_EMUL = EMULATION &&
-  await import("firebase.json").then(
-    mod => mod.emulators.database?.port    // 6868 | undefined
-  );
-***/
-
 const DATABASE_URL = (_ => {
   if (EMULATION) {
+    const tmp = process.env["FIREBASE_CONFIG"] || fail_at_load("No 'FIREBASE_CONFIG' env.var.");
+      // {"storageBucket":"demo-main.appspot.com","databaseURL":"http://127.0.0.1:6869/?ns=demo-main","projectId":"demo-main"}
+
+    const { databaseURL } = JSON.parse(tmp);
+    return databaseURL || fail_at_load(`No 'databaseURL' in 'FIREBASE_CONFIG': ${tmp}`);
+
+    /*** OLD; may be removed
     // NOTE: Once Node.js 18 is supported by Cloud Functions, use 'import' (top-level await, importing a JSON..)
     //    to sniff the Realtime Database port (and whether it's enabled).
     //
@@ -52,11 +47,15 @@ const DATABASE_URL = (_ => {
     const databasePort = c1 ? parseInt(c1) : fail_at_load(`Unable to parse 'FIREBASE_DATABASE_EMULATOR_HOST': ${tmp}`);
 
     return `http://localhost:${databasePort}?ns=${PROJECT_ID}`;   // note: '?ns=...' is required!
-
+    ***/
   } else {
-    return `https://${ PROJECT_ID }.firebaseio.com`
+    const PROJECT_ID = process.env["GCLOUD_PROJECT"] || fail_at_load("No 'GCLOUD_PROJECT' env.var.");
+
+    return `https://${ PROJECT_ID }.firebaseio.com`;
   }
 })();
+  // tbd. replace with (once works):
+  //import { projectId, databaseUrl } from 'firebase-functions/params'
 
 const db = (!DATABASE_URL) ? null : (_ => {
   // Create our own Firebase handle ("app"), because Realtime Database is only used for operations.
@@ -211,35 +210,41 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 *       http://localhost:5003/demo-main/us-central1/metricsAndLoggingProxy_v0 -d '{ "data": {"arr": [{ "id": "a", "inc": 0.1, "ctx": { "clientTimeStamp": 123, "uid": "goofy" }}]} }'
 *   <<
 */
-export const metricsAndLoggingProxy_v0 = regionalFunctions_v1.https
-  .onCall((bulk, ctx) => {
+const metricsAndLoggingProxy_v0 = https.onCall(callableRequest => {
+  const { data, auth /*,app, instanceToken*/ } = callableRequest;
 
-    if (EMULATION) {    // Use a special value for just waking up (no logs created)
-      if (bulk === "wakeup") {
-        return;
-      }
+  if (EMULATION) {    // Use a special value for just waking up (no logs created)
+    if (data === "wakeup") {
+      return;
     }
+  }
 
-    const realUid = ctx.auth.uid || fail_unauthenticated();
+  const realUid = auth.uid || fail_unauthenticated();
 
-    const { arr } = bulk;
-    arr || fail_invalid_argument("Missing 'arr': Array of { id, inc|level|obs, ... }");
+  const { arr } = data;
+  arr || fail_invalid_argument("Missing 'arr': Array of { id, inc|level|obs, ... }");
 
-    //console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, realUid);
+  //console.debug(`!!! Auth passed; taking cargo (${ arr.length } entries) from:`, realUid);
 
-    // Validate all entries, get functions for storing them.
-    arr.map( pickTypeGen(realUid) )
-      .forEach( f => f() );
+  // Validate all entries, get functions for storing them.
+  arr.map( pickTypeGen(realUid) )
+    .forEach( f => f() );
 
-    //return;   // note: we don't need to return anything
-  });
+  //return;   // note: we don't need to return anything
+});
 
 function fail_invalid_argument(msg) {
-  throw new https_v1.HttpsError('invalid-argument', msg);
+  throw new HttpsError('invalid-argument', msg);
 }
 /*function fail_unimplemented() {
-  throw new https_v1.HttpsError('unimplemented');
+  throw new HttpsError('unimplemented', "");
 }*/
 function fail_unauthenticated() {
-  throw new https_v1.HttpsError('unauthenticated');
+  throw new HttpsError('unauthenticated', "");
+}
+
+// Cloud Functions v2 only allow "lower case, numbers and hyphens" in function names.
+//
+export default {
+  ["metrics-and-logging-proxy-v0"]: db ? metricsAndLoggingProxy_v0 : null
 }

@@ -18,10 +18,9 @@
 *     $ PROJECT_ID=demo-main EMUL_HOST=... node dc/waky-waky/index.js {metricsAndLoggingProxy_v0|...}
 *   <<
 */
-//import { createUnsecuredJwt } from './createToken.js'
 import { projectId, emulHost, functionsPort } from './config.js'
 
-function fail(msg) { throw new Error(msg) }
+//function fail(msg) { throw new Error(msg) }
 
 const [functionName] = process.argv.slice(2);
 

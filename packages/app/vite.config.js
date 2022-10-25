@@ -61,6 +61,9 @@ const forcedVueComponents = new Set([
 async function configGen({ command, mode }) {
   //console.log("!!!", {command, mode});    // "serve"|"build", "dev_local"|"dev_online"|"production"
 
+  // Test for Vite 3.2.0-beta.{3|4} bug:
+  false ? await import("no-such-thing") : undefined;    // should NEVER cause a problem??
+
   const BUILD = command === "build";
   const SERVE_PORT = BUILD ? null : process.env["PORT"] || fail("Missing 'PORT' env.var.");
 
