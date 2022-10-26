@@ -149,6 +149,9 @@ tmp/firebase.json: ./firebase.js
 tmp/firebase.app.json: ./firebase.app.js
 	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
 
+tmp/firebase.app.prod.json: ./firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify( {...o, emulators: undefined } ));" > $@
+
 tmp/firebase.app.ci.json: ./firebase.app.ci.js ./firebase.ci.js ./firebase.app.js
 	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
 

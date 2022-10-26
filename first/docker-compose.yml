@@ -14,13 +14,14 @@
 #   Compose file version 3 reference
 #     -> https://docs.docker.com/compose/compose-file/compose-file-v3/
 #
+name: 8788e9af
 services:
   firebase-cli:
     build:
       context: ../dc/firebase-tools/
       target: firebase-cli
       args:
-        - FIREBASE_TOOLS_VERSION=11.10.0
+        - FIREBASE_TOOLS_VERSION=11.15.0
 
   # Let the user authenticate (via a host-side browser session) and select the right Firebase deployment project.
   #
@@ -59,39 +60,16 @@ services:
       )
       '
         # Note: The above acrobatics ('|| (cat ...)') is needed to bring Firebase CLI's error message (11.0.1) to
-        #     the developer's terminal. It writes errors to 'stdout' (why; don't know...).
+        #     the developer's terminal. It writes errors to 'stdout'.
+        #
+        #     Note 2: In https://github.com/firebase/firebase-tools/issues/3227 @samstern writes:
+        #             "Without [the '--json'] flag the CLI output is not part of our API and you can change it at will, parsing it is not something we explicitly guarantee."
 
-    profiles: ['manual']
-
-  # Run before 'deploy-backend'. Prepares the Function dependencies.
-  #
-  # Note: Kept separate from 'deploy-backend' because we don't want to eternally rely on the Firebase Emulators
-  #     having 'npm' capability. They are conceptually different.
-  #
-  #     Not done on the host side, because we don't want the 'functions/node_modules' to be visible.
-  #
-  pre-deploy-backend:
-    image: node:16-alpine
-    volumes:
-      #-- RO
-      - ../packages/backend/functions/package.json:/work/functions/package.json:ro
-      #-- output
-      - ./.state/functions/node_modules:/work/functions/node_modules:delegated
-
-    working_dir: /work/functions
-    command: sh -c '
-      npm config set update-notifier false &&
-      echo package-lock=false > .npmrc &&
-
-      npm install --omit=optional
-      '
-    environment:
-    - NO_GUARD=1
     profiles: ['manual']
 
   # Usage:
   #   <<
-  #     docker compose run --rm deploy-backend
+  #     $ docker compose run --rm deploy-backend
   #   <<
   #
   deploy-backend:
@@ -102,24 +80,35 @@ services:
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
       - ../packages/backend/database.rules.app.json:/work/database.rules.app.json:ro
-      - ../packages/backend/tmp/firebase.json:/work/firebase.json:ro
-      #
-      - ./.state/.firebaserc:/work/.firebaserc:ro
-      - ./.state/functions:/work/functions:ro
-
+      - ../packages/backend/tmp/firebase.app.prod.json:/work/firebase.json:ro
+      - ../packages/backend/functions:/work/functions:ro
       #-- other
+      - ./.state/.firebaserc:/work/.firebaserc:ro
       # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up (though no changes are anticipated).
       - ./.state/configstore:/root/.config/configstore:rw
 
+      #-- debugging help
+      # In case things go: "Error: An unexpected error has occurred."   (so verbose!)
+      #
+      # NOTE! Enabling this line causes an ERROR at the end of the deployment (Firebase CLI 11.15.0):
+      #   <<
+      #     Error: EBUSY: resource busy or locked, unlink '/work/firebase-debug.log'
+      #   <<
+      #   Nothing to be done about it. If some later CLI were to work fine with Docker Compose mapping, we can keep
+      #   the line enabled.
+      #
+      #- ./tmp/firebase-debug.log:/work/firebase-debug.log:delegated
+
     working_dir: /work
-    command: sh -c
-      'firebase deploy --only functions,firestore,database
+    command: sh -c '
+      firebase deploy --only functions,firestore,database
       '
     profiles: ['manual']
 
+
   # Usage:
   #   <<
-  #     docker compose run --rm deploy-app
+  #     $ docker compose run --rm deploy-app
   #   <<
   #
   # Context:
@@ -131,13 +120,13 @@ services:
     volumes:
       #-- RO
       - ../packages/app/dist:/work/dist:ro
-      - ./.state/firebase.hosting.json:/work/firebase.hosting.json:ro
+      - ./tmp/firebase.hosting.json:/work/firebase.hosting.json:ro
       #
       # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up.
       - ./.state/configstore:/root/.config/configstore:rw
       - ./.state/.firebaserc:/work/.firebaserc:ro
     working_dir: /work
-    command: sh -c
-      'firebase --config firebase.hosting.json deploy --only hosting
+    command: sh -c '
+      firebase --config firebase.hosting.json deploy --only hosting
       '
     profiles: ['manual']

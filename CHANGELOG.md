@@ -1,7 +1,10 @@
 # Changelog
 
-## 12-Oct-22
+## Sep'22 release (26-Oct-22)
 
+- Using Cloud Functions v2 where possible (other than Firestore triggers)
+- Reviews:
+  - `first`
 - Rework around how CI is structured and implemented.
 
    Now using more Docker Compose, also within CI (e.g. Cypress).

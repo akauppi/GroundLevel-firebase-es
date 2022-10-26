@@ -22,16 +22,3 @@ This repo provides those:
 - `package.json`: `app:start`
 
 This is a small burden. Since these are backend services, it feels best to declare them here rather than in the `app` folder.
-
-
-## Installing `functions/` packages
-
-This is now done only within DC; there is no `functions/node_modules` on the host filesystem, at all.
-
->In practise, it's kept at `tmp/functions-node_modules`, to carry it across DC steps.
-
-The intention is to avoid confusion because `functions/node_modules` can be seen as a Cloud Functions implementation detail.
-
-<!-- hint
-If you need the files in the host, you can: `cd functions; NO_GUARD=1 npm install`
--->

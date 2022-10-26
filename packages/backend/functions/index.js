@@ -15,10 +15,12 @@
 *   a) we can use a supported region (e.g. 'europe-north-1')
 *   b) Firestore triggers are supported
 */
-import './config.js'  // to print any debug output
+import { INITIAL_LOAD } from "./config.js";   // to print any debug output
+
+// tbd. Add logging to Grafana Cloud to see, how often cold starts happen (could even measure their time, by logging
+//    also in function execution itself). Maybe writing a tmp file in load cycle, resolving it in actual function.
 
 const malp_v0 = await import('./ops/index.js').then( mod => mod.default["metrics-and-logging-proxy-v0"] );    // function?
-//export { metricsAndLoggingProxy_v0 } from './ops/index.js'
 
 export { userInfoShadow_2 } from './userInfoShadow.js'
 

@@ -40,6 +40,23 @@ const EMULATION = !! process.env.FUNCTIONS_EMULATOR;    // set to "true" by Fire
 
 const INITIAL_LOAD = process.env.FUNCTIONS_CONTROL_API === "true";
 
+const firebaseConfig = JSON.parse(
+  process.env.FIREBASE_CONFIG || fail_at_load("No 'FIREBASE_CONFIG' env.var.")
+);
+
+/*
+* Firebase "Default GCP Resource location", used for:
+*   - Cloud Firestore
+*   - Cloud Storage
+*
+* See:
+*   - "Default GCP resource location" (Cloud Firestore docs)
+*     -> https://firebase.google.com/docs/firestore/locations#default-cloud-location
+*/
+const LOCATION_ID = (!EMULATION) && (firebaseConfig?.locationId || fail_at_load("No '.locationId' in 'FIREBASE_CONFIG' env.var."));
+const projectId = firebaseConfig?.projectId || fail_at_load("No '.projectId' in 'FIREBASE_CONFIG' env.var.");
+const databaseURL = firebaseConfig?.databaseURL || fail_at_load("No '.databaseURL' in 'FIREBASE_CONFIG' env.var.");
+
 /*
 * Environment variables
 *
@@ -53,24 +70,31 @@ const INITIAL_LOAD = process.env.FUNCTIONS_CONTROL_API === "true";
 *
 * Initial load:
 *   <<
-*     CI  dev
-*     --- ---
-*     x   x   GCLOUD_PROJECT: 'demo-main'
-*     x   x   K_REVISION: '1'                       **documented**
-*     x   x   PORT: '9005'                          **documented**
-*     x   x   FUNCTIONS_EMULATOR: 'true'
-*     x   x   TZ: 'UTC'
-*     x   x   FIREBASE_DEBUG_MODE: 'true'
-*     x   x   FIREBASE_DEBUG_FEATURES: '{"skipTokenVerification":true,"enableCors":true}'
-*     x   x   FIREBASE_DATABASE_EMULATOR_HOST: '127.0.0.1:6869'
-*     x   x   FIRESTORE_EMULATOR_HOST: '127.0.0.1:6768'
-*     ?   x   FIREBASE_FIRESTORE_EMULATOR_ADDRESS: '127.0.0.1:6768'
-*     ?   x   FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9101'
-*     ?   x   FIREBASE_EMULATOR_HUB: '127.0.0.1:4400'
-*     ?   x   CLOUD_EVENTARC_EMULATOR_HOST: '127.0.0.1:9299'
-*     x   x   FIREBASE_CONFIG: '{"storageBucket":"demo-main.appspot.com","databaseURL":"http://127.0.0.1:6869/?ns=demo-main","projectId":"demo-main"}'
-*     x   x   FUNCTIONS_CONTROL_API: 'true'
+*     CI  dev deploy
+*     --- --- ---
+*     x   x   x   GCLOUD_PROJECT: 'demo-main'           (actual project id in deployment)
+*     x   x   -   K_REVISION: '1'                       **documented**
+*     x   x   x   PORT: '9005'                          **documented**
+*     x   x   -   FUNCTIONS_EMULATOR: 'true'
+*     x   x   -   TZ: 'UTC'
+*     x   x   -   FIREBASE_DEBUG_MODE: 'true'
+*     x   x   -   FIREBASE_DEBUG_FEATURES: '{"skipTokenVerification":true,"enableCors":true}'
+*     x   x   -   FIREBASE_DATABASE_EMULATOR_HOST: '127.0.0.1:6869'
+*     x   x   -   FIRESTORE_EMULATOR_HOST: '127.0.0.1:6768'
+*     ?   x   -   FIREBASE_FIRESTORE_EMULATOR_ADDRESS: '127.0.0.1:6768'
+*     ?   x   -   FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9101'
+*     ?   x   -   FIREBASE_EMULATOR_HUB: '127.0.0.1:4400'
+*     ?   x   -   CLOUD_EVENTARC_EMULATOR_HOST: '127.0.0.1:9299'
+*     x   x   x   FIREBASE_CONFIG:                      **documented**
+*     ^---^------   '{"storageBucket":"demo-main.appspot.com","databaseURL":"http://127.0.0.1:6869/?ns=demo-main","projectId":"demo-main"}'
+*             ^--   '{"projectId":"groundlevel-sep22","databaseURL":"https://groundlevel-sep22-default-rtdb.europe-west1.firebasedatabase.app","storageBucket":"groundlevel-sep22.appspot.com","locationId":"europe-central2"}'
+*     x   x   x   FUNCTIONS_CONTROL_API: 'true'
+*     -   -   x   CLOUD_RUNTIME_CONFIG: '{"firebase":{"projectId":"groundlevel-sep22","databaseURL":"https://groundlevel-sep22-default-rtdb.europe-west1.firebasedatabase.app","storageBucket":"groundlevel-sep22.appspot.com","locationId":"europe-central2"}}'
 *   <<
+*
+*     'FIREBASE_CONFIG' is important. It carries 'locationId' when there's an active Firebase project (deployment, cloud,
+*         not emulation). This makes sense, since 'locationId' is about "Default GCP resource location", and thus comes
+*         from the cloud.
 *
 * Actual load (for Callables, Firestore triggers, ...):
 *   ... same as above, except:
@@ -105,10 +129,11 @@ if (true) {   // DEBUG
 // NOTE: 'firebase-functions' 4.0.x brings a new way [3] to get also "built in parameters". Only, it remains unusable for
 //    us.
 //
-//    tbd. DEBUG, REPORT TO FIREBASE, and EVENTUALLY USE THIS?
-//
 //  - "Built-in parameters" (Firebase docs) [3]
 //    -> https://firebase.google.com/docs/functions/beta/config-env#built-in_parameters
+//
+//    This is "nice, but unnecessary", since we can reach the same information in the 'FIREBASE_CONFIG' env.var.
+//    with hardly any clutter.
 //
 // Below gives:
 //  <<
@@ -122,12 +147,8 @@ if (true) {   // DEBUG
 //const { projectID, databaseURL } = await import('firebase-functions/params').then( mod => mod.default );    //
 //console.error("!!!", { projectID: projectID, databaseURL });   // prints getters
 
-// tbd. ABOVE, so we can use this for taking in Database URL (instead of env.vars)
-
 //!const { projectId, databaseUrl } = require('firebase-functions/params');
 //!console.error("!!!", { projectId, databaseUrl } );
-
-const projectId = process.env["GCLOUD_PROJECT"] || fail_at_load("No 'GCLOUD_PROJECT' env.var.");
 
 function fail_at_load(msg) { throw new Error(msg) }
 
@@ -135,23 +156,38 @@ function fail_at_load(msg) { throw new Error(msg) }
 // Region.
 //
 // Cloud Function callables (in production) need to be married to their region, IN CODE (not in config). This is a bit
-// ..weird, and maybe due to Firebase having been a regionless platform in its early life? Who knows...
+// ..weird, and maybe due to Firebase having been a regionless platform in its early life. Who knows...
 //
-// We require this information to come from "outside" (configuration), one way or the other.
+// We use the "Default GCP resource location" for the overall region as well. On its own, it caters to the Cloud Functions
+// and Cloud Storage, and is given online, when creating the Firebase project. THIS KEEPS THE CONFIGURATION "OUTSIDE"
+// OF THE CODE.
+
+// NOTE!!!
+//    - For now (Oct 2022), support for Cloud Functions v2 is limited to certain regions. If the location ID is not
+//      among them, we crudely use some other region. This is intended to be a temporary measure.
 //
-// The current way is that production build _WRITES IT STRAIGHT HERE_, replacing 'import.meta.env.LOCATION_ID' with
-// the location id that it knows will be used. #hack
+//    "Currently available Cloud Functions (v2) locations"
+//      -> https://firebase.google.com/docs/functions/beta#currently_available_locations
 //
-// Note: Tried using '.env' file for passing the location but they don't seem to kick in at the initial load.
-//
-const region = !EMULATION && import.meta.env.LOCATION_ID;
-  // Firebase Emulators shouldn't get to 'import.meta...' - only for production
+const goodForV2 = new Set([
+  "asia-northeast1",    // not in docs, but is in source code (firebase-functions 4.0.1)
+  "europe-north1",
+  "europe-west1",
+  "europe-west4",
+  "us-central1",
+  "us-east1",
+  "us-west1"
+]);
+
+const region_v2 = !EMULATION && goodForV2.has(LOCATION_ID) ? LOCATION_ID : "europe-north1" /*goodForV2[0]*/;
+const region_v1 = !EMULATION && LOCATION_ID;
 
 export {
   EMULATION,
   INITIAL_LOAD,
     //
   projectId,
-  //databaseUrl
-  region
+  databaseURL,
+  region_v1,
+  region_v2
 }

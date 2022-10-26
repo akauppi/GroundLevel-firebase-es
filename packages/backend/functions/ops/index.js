@@ -13,11 +13,13 @@
 import { initializeApp } from 'firebase-admin/app'    // don't want to use the './firebase.js' - keep that for app
 import { getDatabase, ServerValue } from 'firebase-admin/database'
 
-import { EMULATION } from '../config.js'
+import { EMULATION, region_v2 as region } from '../config.js'
 
 import https, { HttpsError } from 'firebase-functions/v2/https'
 
 function fail_at_load(msg) { throw new Error(msg) }   // use at loading; NOT within a callable!!
+
+const https_onCall_regional = !region ? https.onCall : (opts,f) => https.onCall({ ...opts, region }, f);
 
 const DATABASE_URL = (_ => {
   if (EMULATION) {
@@ -207,11 +209,29 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 *   <<
 *     $ export TOKEN=eyJhb....319fQ.
 *     $ curl -X POST -v -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-*       http://localhost:5003/demo-main/us-central1/metricsAndLoggingProxy_v0 -d '{ "data": {"arr": [{ "id": "a", "inc": 0.1, "ctx": { "clientTimeStamp": 123, "uid": "goofy" }}]} }'
+*       http://localhost:5003/demo-main/us-central1/metrics-and-logging-proxy-v0 -d '{ "data": {"arr": [{ "id": "a", "inc": 0.1, "ctx": { "clientTimeStamp": 123, "uid": "goofy" }}]} }'
 *   <<
 */
-const metricsAndLoggingProxy_v0 = https.onCall(callableRequest => {
-  const { data, auth /*,app, instanceToken*/ } = callableRequest;
+const metricsAndLoggingProxy_v0 = https_onCall_regional({
+  minInstances: EMULATION ? 1 : 0,    // let it go down, completely
+  maxInstances: 10,     // default: 100 (Oct 2022; public preview)
+
+  // "128MiB" | "256MiB" | "512MiB" | "1GiB" | "2GiB" | "4GiB" | ...
+  //
+  // tbd. What is the default memory? (2GiB?)
+  //
+  memory: "512MiB",
+
+  // "Fractional number of CPUs to allocate to a function."
+  // Default: "1 for functions with = 2GB RAM and increases for larger memory sizes."
+  // 'gcf_gen1' reverts to Cloud Functions v1 behaviour.
+  //
+  cpu: 0.5,   // is this accepted?
+
+  // Concurrency (default: 80 if cpu >= 1, otherwise 1)
+  //concurrency: 1
+}, ev => {
+  const { data, auth /*,app, instanceToken*/ } = ev;
 
   if (EMULATION) {    // Use a special value for just waking up (no logs created)
     if (data === "wakeup") {

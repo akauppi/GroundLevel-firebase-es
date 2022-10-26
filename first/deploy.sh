@@ -15,14 +15,15 @@ set -euf -o pipefail
 #   If 'firebase.${ENV-staging}.js' already exists, the user is asked to confirm its overwriting. If no overwriting,
 #   deployment *still* proceeds (this allows using the script for multiple manual deployments).
 #
+# Note: 'make -q' seems to make also subsequent commands quiet (macOS, make 3.81). Not cool..!
+#     Enclose in parantheses if there's '&&'.
+#
 # Requires:
 #   - read (bash built-in)
 #   - docker compose
 #   - grep
 #   - sed
 #   - make
-#
-# tbd. Move this into a 'Makefile', eventually.
 #
 STAGING_JS="../firebase.${ENV-staging}.js"
 OVERWRITE=1
@@ -63,12 +64,10 @@ fi
 #
 make -q refresh-dc
 
-#--- Execute
-
+#---
 # Create the state
 #
-# Note: Important that we create also the mapped folders at host side; otherwise Docker Compose creates them with
-#       'root' access. (WSL2)
+# Note: Important that we create the mapped folders at host side; otherwise DC creates them with 'root' access. (WSL2)
 #
 install -d .state/configstore && \
   touch .state/.captured.sdkconfig && \
@@ -101,40 +100,50 @@ export default config;
 EOF
 fi
 
-LOCATION_ID=$( cat .state/.captured.sdkconfig | grep "\"locationId\":" | cut -d '"' -f4 )
-[ ! -z $LOCATION_ID ] || ( >&2 echo "WARN: Did not find 'locationId' in Firebase app configuration." )    # if we get this warning, no guarantee how deployment will succeed
-
-# Backend
+#---
+# Backend deploy
+#
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
-# Note: Running this 'make' does not require dependencies to have been installed. Works on a virgin repo.
+# Note: Creating 'tmp/firebase.prod.json' does not require dependencies to have been installed. Works on a virgin repo.
 #
-(cd ../packages/backend && make -q tmp/firebase.json)
+(cd ../packages/backend &&
+  (make -q tmp/firebase.app.prod.json) &&
 
-# Note: Need to copy 'backend/functions' contents to our temporary mirror. This is so that no 'functions/node_modules'
-#   needs to be created where the developer would see it. Maybe overkill.
+  npm --prefix functions -s install --omit=optional
+)
+
+#REMOVE
+#R# Make a copy of '../packages/backend/function' that we can modify:
+#R# - inject the required region to 'config.js'
+#R#
+#R# 'node_modules' is not copied over, since it's handled in DC mapping. This shortens the deploy duration.
+#R#
+#R# NOTE: Do NOT empty 'tmp/functions' before copying, in attempt to keep the shadow of 'node_modules' (those installed
+#R#   on earlier DC round) in place. Then again, could also just wipe the whole 'tmp/functions' after deployment.
+#R#
+#Rtar -C ../packages/backend --exclude=node_modules --exclude=package-lock.json -c functions | tar -C ./tmp -x
+#R
+#R[[ -f tmp/functions/index.js ]] || ( >&2 echo "ERROR: Didn't properly mirror 'backend/functions'."; false )
+#R
+#Rcat tmp/functions/config.js | sed -E 's/import\.meta\.env\.DEPLOY_REGION/"'"${DEPLOY_REGION_v2}"'"/' > tmp/functions/x &&
+#R  mv tmp/functions/x tmp/functions/config.js
+#R  #
+#R  # Note: in-place edits with 'sed' are difficult to get right, across OSes. That's why.
+
+touch tmp/firebase-debug.log &&
+  docker compose run --rm deploy-backend
+
+#---
+# App deploy
 #
-install -d .state/functions/node_modules && \
-  cp -r ../packages/backend/functions .state/ && \
-  docker compose run --rm pre-deploy-backend
-
-# Inject the location id to the right source file.
-#
-# tbd. Make this generic so any 'import.meta.env.LOCATION_ID' within '.state/functions/**.js' gets replaced.
-#
-cat .state/functions/config.js | sed -E 's/import\.meta\.env\.LOCATION_ID/"'"${LOCATION_ID}"'"/' > .state/functions/tmp
-mv .state/functions/tmp .state/functions/config.js
-
-docker compose run --rm deploy-backend
-
-# App
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
 (cd ../packages/app && npm install && ENV=${ENV-staging} make build)
 
 (cd ../packages/app &&
   node --input-type=module -e "import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));"
-) > .state/firebase.hosting.json
+) > tmp/firebase.hosting.json
 
 docker compose run --rm deploy-app
 
