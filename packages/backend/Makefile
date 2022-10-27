@@ -116,8 +116,12 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rul
 	@echo "Firebase Emulators for the web app are running.\n"
 
 # DEBUG
+\:app\:down-all:
+	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml down --remove-orphans
+
+# DEBUG
 \:app\:up: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rules.app.json
-	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml up emul-for-app-warmed-up
+	COMPOSE_IGNORE_ORPHANS=true $(_DC_APP_PORTS) -f docker-compose.app.yml up emul-for-app
 
 # CI
 #

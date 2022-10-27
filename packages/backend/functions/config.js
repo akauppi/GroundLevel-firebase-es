@@ -68,7 +68,7 @@ const databaseURL = firebaseConfig?.databaseURL || fail_at_load("No '.databaseUR
 * CI run ('up emul' output; 'firebase-tools' 11.3.0):
 * dev ('make app:start') ('firebase-tools' 11.15.0):
 *
-* Initial load:
+* Initial load: (**)
 *   <<
 *     CI  dev deploy
 *     --- --- ---
@@ -96,32 +96,53 @@ const databaseURL = firebaseConfig?.databaseURL || fail_at_load("No '.databaseUR
 *         not emulation). This makes sense, since 'locationId' is about "Default GCP resource location", and thus comes
 *         from the cloud.
 *
-* Actual load (for Callables, Firestore triggers, ...):
-*   ... same as above, except:
-*    - no FIREBASE_CONFIG for callables; for Firestore trigger it's there..
-*    - no FUNCTIONS_CONTROL_API
+*     Note: 'FIREBASE_CONFIG' contains (under emulation, at least) 'databaseURL' and 'storageBucket' even if the
+*         those emulators were not enabled.
 *
-*   ..with these:
+*     (**): Firebase calls this "deploy", it's a cycle where the exports are listed, in order to set them up. Since
+*         it also happens under emulation, we use the term "initial load".
+*
+* Runtime load (for Callables, Firestore triggers, ...):
 *   <<
->    FIREBASE_EMULATORS_PATH: '/root/.cache/firebase/emulators'
->    PROJECT_ID: 'demo-main'
->    IS_FIREBASE_CLI: 'true'
->    FUNCTIONS_EMULATOR_TIMEOUT_SECONDS: '60'
->    FUNCTION_TARGET: 'metricsAndLoggingProxy_v0'     // or 'userInfoShadow_2' (name of callable/trigger function)
->    FUNCTION_SIGNATURE_TYPE: 'http'
->    K_SERVICE: 'metricsAndLoggingProxy_v0'
+*     callable invocation (emul)
+*      |  Firestore trigger (emul)
+*      |   |   callable invocation (prod)
+*     --- --- ---
+*     x           FIREBASE_EMULATORS_PATH: '/root/.cache/firebase/emulators'
+*     x           IS_FIREBASE_CLI: 'true'
+*     x           GCLOUD_PROJECT: 'demo-main'
+*     x           K_REVISION: '1'
+*     x           PORT: '/tmp/fire_emu_3b738218f4cec97e.sock'
+*     x           FUNCTIONS_EMULATOR_TIMEOUT_SECONDS: '60'
+*     x           FUNCTION_TARGET: 'metrics.and.logging.proxy.v0'
+*     x           FUNCTION_SIGNATURE_TYPE: 'http'
+*     x           K_SERVICE: 'metrics-and-logging-proxy-v0'
+*     x           FUNCTIONS_EMULATOR: 'true'
+*     x           TZ: 'UTC'
+*     x           FIREBASE_DEBUG_MODE: 'true'
+*     x           FIREBASE_DEBUG_FEATURES: '{"skipTokenVerification":true,"enableCors":true}'
+*     x           FIREBASE_DATABASE_EMULATOR_HOST: '127.0.0.1:6869'
+*     x           FIRESTORE_EMULATOR_HOST: '127.0.0.1:6768'
+*     x           FIREBASE_FIRESTORE_EMULATOR_ADDRESS: '127.0.0.1:6768'
+*     x           FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9101'
+*     x           FIREBASE_EMULATOR_HUB: '127.0.0.1:4400'
+*     x           CLOUD_EVENTARC_EMULATOR_HOST: 'http://127.0.0.1:9299'
+*     x           FIREBASE_CONFIG: '{"storageBucket":"demo-main.appspot.com","databaseURL":"http://127.0.0.1:6869/?ns=demo-main","projectId":"demo-main"}'
 *   <<
+*
+*   In particular, note the absence of 'FUNCTIONS_CONTROL_API' (which seems to indicate deploy vs. runtime load).
 *
 * This is mostly "good to know".
 */
 if (true) {   // DEBUG
-  if (process.env["FIREBASE_CONFIG"]) {   // Initial load
+  if (process.env["FUNCTIONS_CONTROL_API"]) {   // Initial load
     console.debug("Initial load:", process.env);    // visible in Docker Desktop
 
   } else {
     const callableName = process.env["FUNCTIONS_TARGET"];
 
-    console.debug(`Loading callable '${ callableName }:`, process.env );    // NOT visible in Docker Desktop; Q: Where does this end up??
+    console.debug( callableName ? `Loading callable '${callableName}:` : 'Other:', process.env);
+      // NOT visible in Docker Desktop; Q: Where does this end up??
   }
 }
 
@@ -179,7 +200,7 @@ const goodForV2 = new Set([
   "us-west1"
 ]);
 
-const region_v2 = !EMULATION && goodForV2.has(LOCATION_ID) ? LOCATION_ID : "europe-north1" /*goodForV2[0]*/;
+const region_v2 = !EMULATION && (goodForV2.has(LOCATION_ID) ? LOCATION_ID : "europe-north1" /*goodForV2[0]*/);
 const region_v1 = !EMULATION && LOCATION_ID;
 
 export {

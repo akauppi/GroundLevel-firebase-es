@@ -18,8 +18,9 @@
 
 const PROJECT_ID = import.meta.env.VITE_PROJECT_ID || fail("no 'VITE_PROJECT_ID'");
 
+const LOCAL = import.meta.env.MODE === "dev_local";
+
 const functionsBaseURL= (_ => {
-  const LOCAL = import.meta.env.MODE === "dev_local";
 
   if (LOCAL) {
     const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
@@ -36,6 +37,15 @@ const functionsBaseURL= (_ => {
 
 function fail(msg) { throw new Error(msg); }
 
+// "Currently, function URLs in Cloud Functions (2nd gen) use a non-deterministic format, meaning you cannot predict
+// your function URL before deployment [...]" https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
+//
+// tbd. remove once v2 again supports "cloudfunctions.net" URLs.
+//
+const v2Lookup_TEMP = new Map([
+  ["metrics-and-logging-proxy-v0", "https://metrics-and-logging-proxy-v0-lhnzrejgbq-lz.a.run.app"]
+]);
+
 /*
 * Call a Cloud Functions callable.
 *
@@ -44,7 +54,8 @@ function fail(msg) { throw new Error(msg); }
 */
 function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise of { data?: any, error?: object })
 
-  const uri = `${functionsBaseURL}/${name}`;
+  const uri = !LOCAL ? v2Lookup_TEMP.get(name) || fail(`No deployment URL for callable '${name}'`)
+    : `${functionsBaseURL}/${name}`;
 
   // POST
   //    Content-Type: application/json

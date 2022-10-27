@@ -6,6 +6,9 @@
 *
 * Callable for collecting front-end metrics and logs.
 *
+* Note:
+*   This only gets loaded if Realtime Database access is actually available (app emulation/production).
+*
 * References:
 *   - "Call functions from your app [v2 beta]"
 *     -> https://firebase.google.com/docs/functions/beta/callable
@@ -16,57 +19,21 @@ import { getDatabase, ServerValue } from 'firebase-admin/database'
 import { EMULATION, region_v2 as region } from '../config.js'
 
 import https, { HttpsError } from 'firebase-functions/v2/https'
+import process from "node:process";
 
 function fail_at_load(msg) { throw new Error(msg) }   // use at loading; NOT within a callable!!
 
 const https_onCall_regional = !region ? https.onCall : (opts,f) => https.onCall({ ...opts, region }, f);
 
-const DATABASE_URL = (_ => {
-  if (EMULATION) {
-    const tmp = process.env["FIREBASE_CONFIG"] || fail_at_load("No 'FIREBASE_CONFIG' env.var.");
-      // {"storageBucket":"demo-main.appspot.com","databaseURL":"http://127.0.0.1:6869/?ns=demo-main","projectId":"demo-main"}
+const { databaseURL } = JSON.parse(
+  process.env.FIREBASE_CONFIG || fail_at_load("No 'FIREBASE_CONFIG' env.var.")
+);
+databaseURL || fail_at_load(`No '.databaseURL' in 'FIREBASE_CONFIG'`);
 
-    const { databaseURL } = JSON.parse(tmp);
-    return databaseURL || fail_at_load(`No 'databaseURL' in 'FIREBASE_CONFIG': ${tmp}`);
-
-    /*** OLD; may be removed
-    // NOTE: Once Node.js 18 is supported by Cloud Functions, use 'import' (top-level await, importing a JSON..)
-    //    to sniff the Realtime Database port (and whether it's enabled).
-    //
-    //    Until then, parsing the 'FIREBASE_DATABASE_EMULATOR_HOST' env.var. (undocumented??) is the best choice
-    //    (was unable to pass DC 'environment: DATABASE_PORT=...' here, for some reason).
-    //
-    //    tbd. Rather, use the import 'firebase-functions/params' but it doesn't currently (4.0.1) work.
-    //
-    const tmp = process.env["FIREBASE_DATABASE_EMULATOR_HOST"];   // "0.0.0.0:6868" | undefined
-    if (!tmp) {
-      // Only using Realtime Database on the 'emul-for-app' backend; not plain backend. no need to warn.
-      //console.warn("'FIREBASE_DATABASE_EMULATOR_HOST' env.var. not defined - metrics and logging to Realtime Database is disabled.");
-      return null;
-    }
-
-    const [_,c1] = /.+:(\d+)$/ .exec(tmp) || [];
-    const databasePort = c1 ? parseInt(c1) : fail_at_load(`Unable to parse 'FIREBASE_DATABASE_EMULATOR_HOST': ${tmp}`);
-
-    return `http://localhost:${databasePort}?ns=${PROJECT_ID}`;   // note: '?ns=...' is required!
-    ***/
-  } else {
-    const PROJECT_ID = process.env["GCLOUD_PROJECT"] || fail_at_load("No 'GCLOUD_PROJECT' env.var.");
-
-    return `https://${ PROJECT_ID }.firebaseio.com`;
-  }
-})();
-  // tbd. replace with (once works):
-  //import { projectId, databaseUrl } from 'firebase-functions/params'
-
-const db = (!DATABASE_URL) ? null : (_ => {
-  // Create our own Firebase handle ("app"), because Realtime Database is only used for operations.
+const db = (_ => {
+  // Create our own Firebase handle ("app"), because Realtime Database is only used for ops.
   //
-  const app= initializeApp({
-    databaseURL: DATABASE_URL
-      // tbd. this would be regional; take the URL from a Firebase Functions config (with no defaults)
-  }, "2");
-
+  const app= initializeApp({ databaseURL }, "2");
   return getDatabase(app);
 })();
 
@@ -263,8 +230,6 @@ function fail_unauthenticated() {
   throw new HttpsError('unauthenticated', "");
 }
 
-// Cloud Functions v2 only allow "lower case, numbers and hyphens" in function names.
-//
-export default {
-  ["metrics-and-logging-proxy-v0"]: db ? metricsAndLoggingProxy_v0 : null
+export {
+  metricsAndLoggingProxy_v0
 }

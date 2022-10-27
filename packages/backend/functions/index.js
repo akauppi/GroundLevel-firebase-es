@@ -15,29 +15,56 @@
 *   a) we can use a supported region (e.g. 'europe-north-1')
 *   b) Firestore triggers are supported
 */
-import { INITIAL_LOAD } from "./config.js";   // to print any debug output
+import { EMULATION, databaseURL } from "./config.js";    // string?
+
+// 'firebase-tools' (4.0.1) provides 'databaseURL' under emulation, regardless whether it's actually usable or not.
+// We counteract that.
+//
+const reallyHaveDatabaseURL = (!EMULATION || process.env["FIREBASE_DATABASE_EMULATOR_HOST"]) && databaseURL;
 
 // tbd. Add logging to Grafana Cloud to see, how often cold starts happen (could even measure their time, by logging
 //    also in function execution itself). Maybe writing a tmp file in load cycle, resolving it in actual function.
 
-const malp_v0 = await import('./ops/index.js').then( mod => mod.default["metrics-and-logging-proxy-v0"] );    // function?
-
+//---
+// Always
+//
 export { userInfoShadow_2 } from './userInfoShadow.js'
 
-// No way to export a function with dashes in the name directly (is there?), but we can do it via "groups".
+//---
+// metricsAndLoggingProxy
 //
-// Note: 'export default {...}' would itself just be seen as a group, by Cloud Functions, leading to "default" in the
-//    callable's URL.
+// Needed for: app/production (not backend testing)
+//
+const metricsAndLoggingProxy_v0 = reallyHaveDatabaseURL &&
+  await import("./ops/index.js").then( mod => mod.metricsAndLoggingProxy_v0 );
+
+//---
+// onceADay
+//
+// Scheduled function; only needed for production (if loaded under emulation, needs Pub/Sub emulator enabled)
+//
+const onceADay = !EMULATION &&
+  await import("./ops/proxyToGrafana.js").then( mod => mod.onceADay );
+
+// NOTE:
+//    Cloud Functions v2 does not _yet_ ('firebase-functions' 4.0.1) support upper case letters, but it should,
+//    eventually. [1] Underscores might never be supported.
+//
+//    [1]: "Coming soon in Cloud Functions (2nd gen)"
+//          -> https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
+//
+// A little hack used to have functions-names-with-dashes exported, from ES module. Works, but a bit ugly.
 //
 
-/*
-export const metrics = {
-  ["and-logging-proxy-v0"]: malp_v0
-}
-// Gives (in client):
-//  <<
-//    functions: Error: Failed to find function metrics.and.logging.proxy.v0 in the loaded module
-//  <<
-*/
+// A) Below _declares_ the functions correctly, but they are not found at runtime:
+//    <<
+//      Error: Failed to find function metrics.and.logging.proxy.v0 in the loaded module
+//    <<
+//
+//export const metrics = { ...metricsAndLoggingProxy_v0 ? {  ["and-logging-proxy-v0"]: metricsAndLoggingProxy_v0 } : {} }   // metrics-and-logging-proxy-v0
+//export const once = { ...onceADay ? {  ["a-day"]: onceADay } : {} }   // once-a-day
 
-export const metrics = { and: { logging: { proxy: { v0: malp_v0 } } } }   // works (but UGLY!! 🧟‍)
+// 🧟‍) Utterly ugly - but works.
+//
+export const metrics = metricsAndLoggingProxy_v0 ? { and: { logging: { proxy: { v0: metricsAndLoggingProxy_v0 }}}} : {};   // metrics-and-logging-proxy-v0
+export const once = onceADay ? {  a: { day: onceADay }} : {};   // once-a-day

@@ -585,3 +585,20 @@ Notice how the IPv6 isn't disabled in one way, but is disabled in another. Also,
 Firebase emulators could check the `ifconfig` output (if the command is available) and not try anything IPv6 unless there's indication that such devices actually exist.
 
 This would remove the unnecessary logging.
+
+
+## Refinements to `FIREBASE_CONFIG`, under emulation
+
+The `FIREBASE_CONFIG` env.var. was introduced in `firebase-tools` 4.0 (may be incorrect).
+
+Under emulation, it provides the following:
+
+```
+{"storageBucket":"demo-main.appspot.com","databaseURL":"http://127.0.0.1:6869/?ns=demo-main","projectId":"demo-main"}'
+```
+
+This happens regardless, whether storage and database emulators are enabled.
+
+Ideally, the values would turn up *only if* the corresponding emulator is actually running. This would be more logical, and reduce detection logic for applications.
+
+`firebase-tools` 4.0.1

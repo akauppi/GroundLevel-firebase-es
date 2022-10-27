@@ -24,11 +24,21 @@ Note: We won't need it, until `firebase-functions` runs with ESM. And even then,
 - [ ] ["Limitations during public preview"](https://firebase.google.com/docs/functions/beta#limitations_during_public_preview) (Firebase docs)
 - [ ] ["Cloud Firestore triggers for v2 functions"](https://github.com/firebase/firebase-functions/issues/1213) <sub>`firebase-functions`</sub>
 
-Change `functions/*.js` to use `v2` only once:
+### Cloud Firestore triggers 
 
-- all regions available for Cloud Firestore (see `../../DEVS/Firebase regions.md`) are supported
-  - e.g. `europe-west2` not so
-- Cloud Firestore is supported as triggers
+>Support for native Cloud Firestore events (row level change triggers) in 2nd gen and Eventarc. <sub>[source](https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen)</sub>
+
+### Capital letters in function names
+
+>Support for using capital letters in function names. <sub>[source](https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen)</sub>
+
+- [ ] Change `metrics-and-logging-proxy-v0` back to (almost) `metricsAndLoggingProxy-v0`.
+
+### Cloudfunctions.net URLs
+
+>Currently, function URLs in Cloud Functions (2nd gen) use a non-deterministic format, meaning you cannot predict your function URL before deployment (though the URL remains stable after deployment). In a future release, 2nd gen function URLs will be updated to be both stable and deterministic. <sub>[source](https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen)</sub>
+
+- [ ] Until this, the client (`app`: `src/central/*.js`) likely needs to be fixed to the URL: `https://metrics-and-logging-proxy-v0-lhnzrejgbq-lz.a.run.app`
 
 
 ## Pre-heating the Cloud Functions
@@ -45,6 +55,7 @@ Closed, but the issue remains.
 This might not apply any more; we are using `type: "module"` in the functions. Once we really log to Google logs, mention that this might no longer be an issue?
 -->
 
+<!-- nah? not needed by us
 ## Impersonation with `firebase-admin` against Realtime Database Emulator does not work
 
 - [ ] [RTDB emulator doesn't work properly with databaseAuthVariableOverride](https://github.com/firebase/firebase-tools/issues/2554)
@@ -55,11 +66,11 @@ This approach is ..strange.. since impersonation use case is in tests that can u
 
 - [ ] [Documentation on using impersonation with Realtime Database Emulator](https://github.com/firebase/firebase-admin-node/issues/1777)
 
-<!-- hidden
+<!_-- hidden
 
 >Firebase [docs](https://firebase.google.com/docs/database/admin/start?authuser=0#admin-sdk-setup) say:
 >>If you are interested in using the Node.js SDK as a client for end-user access (for example, in a Node.js desktop or IoT application), as opposed to admin access from a privileged environment (like a server), you should instead follow the instructions for setting up the client JavaScript SDK.
--->
+--_>
 
 Also:
 
@@ -68,16 +79,4 @@ Also:
 - [Add the Firebase Admin SDK to your server](https://firebase.google.com/docs/admin/setup?authuser=0) (Firebase docs)
 
    No mention of emulators. Could fit nicely, there... (it does mention "When testing the Admin SDK locally").
-   
-
-## `firebase-functions` availability as an ESM
-
-- [https://github.com/firebase/firebase-functions/issues/1276](https://github.com/firebase/firebase-functions/issues/1276)
-
-
-<!-- Not sure if this touches us..
-## `firebase-functions` 4.x.x Secrets functioning
-
-   
-- [ ] ["Environment Secrets have no value"](https://github.com/firebase/firebase-functions/issues/1264)
 -->
