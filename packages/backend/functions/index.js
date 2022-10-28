@@ -39,12 +39,11 @@ const metricsAndLoggingProxy_v0 = reallyHaveDatabaseURL &&
   await import("./ops/index.js").then( mod => mod.metricsAndLoggingProxy_v0 );
 
 //---
-// onceADay
+// {prom|loki}Bridge
 //
-// Scheduled function; only needed for production (if loaded under emulation, needs Pub/Sub emulator enabled)
+// Scheduled functions; only needed for production (if loaded under emulation, needs Pub/Sub emulator enabled)
 //
-const onceADay = !EMULATION &&
-  await import("./ops/proxyToGrafana.js").then( mod => mod.onceADay );
+//const promBridge = !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge() );
 
 // NOTE:
 //    Cloud Functions v2 does not _yet_ ('firebase-functions' 4.0.1) support upper case letters, but it should,
@@ -67,4 +66,8 @@ const onceADay = !EMULATION &&
 // 🧟‍) Utterly ugly - but works.
 //
 export const metrics = metricsAndLoggingProxy_v0 ? { and: { logging: { proxy: { v0: metricsAndLoggingProxy_v0 }}}} : {};   // metrics-and-logging-proxy-v0
-export const once = onceADay ? {  a: { day: onceADay }} : {};   // once-a-day
+
+//export const prom = promBridge ? { bridge: promBridge } : {};   // prom-bridge
+/*export {
+  promBridge
+};*/

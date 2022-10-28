@@ -90,6 +90,11 @@ services:
       #-- debugging help
       # In case things go: "Error: An unexpected error has occurred."   (so verbose!)
       #
+      #   1st: Check online (Firebase Console > 'Functions'), whether any of the functions are in a bad state (red).
+      #       If so, remove and retry.
+      #
+      #   2nd: If the above doesn't help, enable the line below to get into the contents.
+      #
       # NOTE! Enabling this line causes an ERROR at the end of the deployment (Firebase CLI 11.15.0):
       #   <<
       #     Error: EBUSY: resource busy or locked, unlink '/work/firebase-debug.log'

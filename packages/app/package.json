@@ -45,6 +45,7 @@
     "eslint-plugin-vue": "^9.6.0",
     "prettier": "2.7.1",
     "postcss-nesting": "^10.2.0",
+    "rollup-plugin-visualizer": "^5.8.3",
     "vue-eslint-parser": "^9.1.0"
   },
   "//comments": {
@@ -53,13 +54,11 @@
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
         "Thus, following suit."
       ],
-      "sass": [
-        "Needed for 'lang=scss' to work, in Vue.",
-        "",
-        "Note: Vue docs [1] display 'sass-loader' and 'node-sass', but the latter's npm page [2] says it's deprecated. (Aug 2022)",
-        "",
-        "[1]: https://vue-loader.vuejs.org/guide/pre-processors.html#sass",
-        "[2]: https://www.npmjs.com/package/node-sass"
+      "postcss-nesting": [
+        "Allows CSS nesting to be used; transpiles such CSS to code browsers understand."
+      ],
+      "rollup-plugin-visualizer": [
+        "Optional extra, produces graphical analyses ('stats.html') on builds."
       ]
     },
     "engines.node": [

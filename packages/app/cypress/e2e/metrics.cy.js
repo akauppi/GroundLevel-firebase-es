@@ -67,7 +67,7 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
 
   const cy_auth = _ => cy.window().its["Let's test!"].then( ([auth]) => auth );
 
-  function getIncoming(subPath, expectedTimestamp) {   // (string, number) => Promise of {...}
+  function _getIncoming(subPath, expectedTimestamp) {   // (string, number) => Promise of {...}
     // Make sure our stuff doesn't stick in the queue. Note: this has to happen within browser code, not in the
     // 'cy.task' (which is OS level environment).
     //
@@ -77,6 +77,8 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
       timeout: 15000      // default timeout of 60s is unnecessary long; speeds up debugging
     });
   }
+  function getIncomingProm(at) { return _getIncoming("prom", at); }
+  function getIncomingLoki(at) { return _getIncoming("loki", at); }
 
   // !: Flakyness in these tests shows on first test run (also in dev). For CI, it basically kills them, so disabled
   //    there, until the reason is known. #115
@@ -91,7 +93,7 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
     //  data fields but just the fact that our entry got to the database.
 
     cy_portal_incDummy(0.01, at).then( _ => {
-      getIncoming("incs", at)
+      getIncomingProm(at)
         /*.should( o => {    // WORKS
           expect(o.ctx.clientTimestamp) .to.equal(at);
           expect(o.ctx.uid) .to.be.true;   // blurred the user id away
@@ -129,7 +131,7 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
     const at = Date.now();
 
     cy_portal_logDummy("hey", { a:1, b:2 }, at).then(_ => {
-      getIncoming("logs", at)
+      getIncomingLoki(at)
         .should( o => {
           expect(o.ctx.clientTimestamp) .to.equal(at);
           expect(o.ctx.uid) .to.equal('joe');     // user affected
@@ -144,7 +146,7 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
     const at = Date.now();
 
     cy_portal_obsDummy(56.7, at).then(_ => {
-      getIncoming("obs", at)
+      getIncomingProm(at)
         .should( o => {
           expect(o.ctx.clientTimestamp) .to.equal(at);
           expect(o.ctx.uid) .to.be.true;    // blurred

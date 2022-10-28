@@ -20,8 +20,7 @@ FROM node:18-alpine AS vite_plain
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
-ARG VITE_VER=3.2.0-beta.2
-  # 3.2.0-beta.{3..4} are BAD: treats dynamic 'import' in 'vite.config.js' too eagerly
+ARG VITE_VER=3.2.1
 
 WORKDIR /work
 
@@ -42,6 +41,7 @@ RUN npm install -g --no-save vite@$VITE_VER && \
 CMD \
   vite --help
 
+# DISABLED since from Vite 3.2.0-beta.3 onwards, we cannot use a dynamic import within Vite config.
 #---
 # Version with extras
 #
@@ -50,7 +50,7 @@ CMD \
 #
 #     [1]: https://github.com/btd/rollup-plugin-visualizer
 #
-FROM vite_plain AS vite_extras
-
-RUN npm install -g rollup-plugin-visualizer   \
-  # Note: visible to project because of the link done in 'vite_plain'
+#|FROM vite_plain AS vite_extras
+#|
+#|RUN npm install -g rollup-plugin-visualizer   \
+#|  # Note: visible to project because of the link done in 'vite_plain'

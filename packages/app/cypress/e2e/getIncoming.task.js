@@ -1,7 +1,7 @@
 /*
 * cypress/e2e/getIncoming.task.js
 *
-* Task for awaiting an "incoming/{incs|logs|obs}" entries to show up in the Realtime Database.
+* Task for awaiting "bridge/{prom|loki}" entries to show up in the Realtime Database.
 *
 * Reference:
 *   - "Incredibly Powerful cy.task" (blog, Jun 2018)
@@ -33,7 +33,7 @@ const db = (_ => {
 })();
 
 /*
-* Task for proving that a suitable "incoming/{...}/{generated-key}" document (will) exist(s).
+* Task for proving that a suitable "bridge/{prom|loki}/{generated-key}" document (will) exist(s).
 *
 * Note:
 *   We do expect the document to exist; thus, there should not be a need for timing out the promise.
@@ -47,14 +47,14 @@ const db = (_ => {
 *
 *     (*) The author doesn't know, how to see them.
 */
-async function getIncoming(subPath, expectedTimestamp) {    // ("{incs|logs|obs}", number) => Promise of { ... }
+async function getIncoming(subPath, expectedTimestamp) {    // ("{prom|loki}", number) => Promise of { ... }
   typeof expectedTimestamp === 'number' || fail(`bad param: ${expectedTimestamp}`);    // counter-act accidentially calling with "2022-10-04T16:06:19.102Z" (happened)
 
-  const ref = db.ref(`incoming/${subPath}`);    // incoming/{incs|logs|obs}/{..automatic index}/
+  const ref = db.ref(`bridge/${subPath}`);    // bridge/{prom|loki}/{..automatic index}/
 
   const prom = new Promise(res => {   // Promise of ...{matching Realtime Database object}
 
-    console.log('\t>>> LOOKING FOR:', expectedTimestamp);
+    //console.log('\t>>> LOOKING FOR:', expectedTimestamp);
 
     // "... 'child_added' is triggered once for each existing child and then again, every time a new child is added".
     //

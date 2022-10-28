@@ -394,6 +394,24 @@ Alternatively, one would be able to initialize `auth` with an auth token, passed
 Yet another way, if Firebase doesn't want to bind the browser threads in any way, is to simply **document that Firebase authentication within a worker thread isn't possible** (or that one needs to do it completely separated from the main thread). Currently (Aug 2022), the author is not aware of any mention of such.
 
 
+## Cloud Functions: relationship of "task functions" vs. "scheduled functions"?
+
+These are described below each other at:
+
+- ["Enque functions with Cloud Tasks"](https://firebase.google.com/docs/functions/task-functions)
+- ["Run functions on a schedule"](https://firebase.google.com/docs/functions/schedule-functions)
+
+- [x] What is the difference between them? (except different backends, first runs on Google Cloud Tasks, the second on Google PubSub)
+
+   A: Obviously (in hindsight!) "Cloud tasks" tasks are not scheduled, but one-timers. They need to be separately triggered (see [Enqueue the function](https://firebase.google.com/docs/functions/beta/task-functions#enqueue_the_function)). This was NOT IMMEDIATELY CLEAR to this author, only realized it on the third time reading these pages.
+   
+   A gentle introduction on where to use Cloud tasks (and separately, for the scheduled functions) would set the reader's context right. There are so many similarities between the two, this crucial difference seems easy to miss.
+
+- [x] When should I opt for one, over the other? 
+
+   A: You run one-off tasks (backup can be; though it can also be a scheduled one!!), use Cloud Tasks. You want a Cloud Function by a schedule, use "scheduled functions".
+
+
 ## References
 
 - [Firebase Support Form](https://firebase.google.com/support/troubleshooter/contact)

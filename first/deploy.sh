@@ -105,31 +105,13 @@ fi
 #
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
-# Note: Creating 'tmp/firebase.prod.json' does not require dependencies to have been installed. Works on a virgin repo.
+# Note: Creating 'tmp/firebase.app.prod.json' does not require dependencies to have been installed.
 #
 (cd ../packages/backend &&
   (make -q tmp/firebase.app.prod.json) &&
 
   npm --prefix functions -s install --omit=optional
 )
-
-#REMOVE
-#R# Make a copy of '../packages/backend/function' that we can modify:
-#R# - inject the required region to 'config.js'
-#R#
-#R# 'node_modules' is not copied over, since it's handled in DC mapping. This shortens the deploy duration.
-#R#
-#R# NOTE: Do NOT empty 'tmp/functions' before copying, in attempt to keep the shadow of 'node_modules' (those installed
-#R#   on earlier DC round) in place. Then again, could also just wipe the whole 'tmp/functions' after deployment.
-#R#
-#Rtar -C ../packages/backend --exclude=node_modules --exclude=package-lock.json -c functions | tar -C ./tmp -x
-#R
-#R[[ -f tmp/functions/index.js ]] || ( >&2 echo "ERROR: Didn't properly mirror 'backend/functions'."; false )
-#R
-#Rcat tmp/functions/config.js | sed -E 's/import\.meta\.env\.DEPLOY_REGION/"'"${DEPLOY_REGION_v2}"'"/' > tmp/functions/x &&
-#R  mv tmp/functions/x tmp/functions/config.js
-#R  #
-#R  # Note: in-place edits with 'sed' are difficult to get right, across OSes. That's why.
 
 touch tmp/firebase-debug.log &&
   docker compose run --rm deploy-backend

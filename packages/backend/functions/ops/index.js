@@ -45,7 +45,7 @@ async function inc({ id, inc, ctx }) {    // => Promise of ()
   // tbd. Is this layout fine?  Consider multiple clients simultaneously incrementing. What are the Realtime Database
   //    restrictions - bring them here.
 
-  const refRaw = db.ref("incoming/incs");
+  const refRaw = db.ref("bridge/prom");
   await refRaw.push({ id, inc, ctx });
 
   const refAggregate = db.ref(`inc/${id}`);
@@ -56,7 +56,7 @@ async function inc({ id, inc, ctx }) {    // => Promise of ()
 * Store a log entry.
 */
 async function log({ id, level, msg, args, ctx }) {   // => Promise of ()
-  const refRaw = db.ref("incoming/logs");
+  const refRaw = db.ref("bridge/loki");
   await refRaw.push({ id, level, msg, args, ctx });
 
   // Logs have no aggregation
@@ -66,7 +66,7 @@ async function log({ id, level, msg, args, ctx }) {   // => Promise of ()
 * Store a statistical sample.
 */
 async function obs({ id, obs, ctx }) {   // => Promise of ()
-  const refRaw = db.ref("incoming/obs");
+  const refRaw = db.ref("bridge/prom");
   await refRaw.push({ id, obs, ctx });
 
   // Not doing an aggregation. Doing such would need knowledge about bucketing (i.e. rate of incoming observations).
@@ -193,10 +193,16 @@ const metricsAndLoggingProxy_v0 = https_onCall_regional({
   // Default: "1 for functions with = 2GB RAM and increases for larger memory sizes."
   // 'gcf_gen1' reverts to Cloud Functions v1 behaviour.
   //
-  cpu: 0.5,   // is this accepted?
-
-  // Concurrency (default: 80 if cpu >= 1, otherwise 1)
-  //concurrency: 1
+  // POSSIBLE FIREBASE BUG:
+  //  Setting 'cpu: 0.5' doesn't seem to be tolerated. Even with 'concurrency: 1', deployment says:
+  //    <<
+  //      ⚠  functions: HTTP Error: 400, Could not update Cloud Run service metrics-and-logging-proxy-v0. spec.template.spec.containers[0].resources.limits.cpu: Invalid value specified for cpu. cpu < 1 is not supported with concurrency > 1.
+  //    <<
+  //
+  //! cpu: 0.5,   // is this accepted? (documentation doesn't state)
+  //!
+  //! // Concurrency (default: 80 if cpu >= 1, otherwise 1)   <-- not true: not having a value with 'cpu: 0.5' gave an error (Oct 2022; firebase-functions 4.0.1)
+  //! concurrency: 1
 }, ev => {
   const { data, auth /*,app, instanceToken*/ } = ev;
 

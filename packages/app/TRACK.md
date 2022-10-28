@@ -102,3 +102,14 @@ This has tickets open on both Cypress and Firebase side...
 
    A ticket on the Firebase side.
    
+## Vite 3.2.0 eagerly evaluates dynamic imports in `vite.config.js`
+
+We used to provide the `rollup-plugin-visualizer` only for production builds, but now list it in main `package.json`.
+
+This may be okay. It can be treated as an application specific extra instead of the "framework".
+
+- [ ] Provide a minimal reproduction, to improve Vite's quality
+
+   They have good guidelines on how such needs to be done. `vite init` something.
+   
+   
