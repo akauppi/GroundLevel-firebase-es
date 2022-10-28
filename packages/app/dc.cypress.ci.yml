@@ -18,7 +18,6 @@ services:
   vite-dev-ci:
     build:
       context: tools/vite.dc
-      target: vite_plain
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro

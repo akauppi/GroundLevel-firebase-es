@@ -29,22 +29,24 @@ const confMetricsApiKey = defineSecret('METRICS_API_KEY');    // no description 
 *
 * v2 'onSchedule' (as of 27-Oct-22) lacks these options (that Cloud Task options has):
 *   <<
+*     // Mayyyybe... Cloud Run by itself limits concurrency to 1. "Maximum concurrency must be set to 1." implies so.
+*     //
 *     maxInstances: 1,    // make sure that tasks should never run in parallel: important for moving the "marker"
 *     concurrency: 1,
 *
 *     cpu: 0.5,   // (what would be the default, here???)
-*     memory: '512MiB',
+*                 // "for less than 1 CPU, specify a value from 0.08 to less than 1.00, in increments of 0.01" [2]
+*
+*     memory: '512MiB',   // "A minimum of 0.5 CPU is needed to set a memory limit greater than 512MiB."
+*                         // "A minimum of 1 CPU is needed to set a memory limit greater than 1GiB."
 *
 *     region: region_v2,
 *
 *     secrets: ["METRICS_API_KEY"]      // tbd. when would we use a secret like so?  Where is it placed?????
 *   <<
 *
-*   This page [2] states that "scheduled functions" is not yet available for v2, but the code itself (firebase-functions
-*   4.0.1) has the package. Maybe it's half baked??
-*
-*     "Currently available Cloud Functions triggers" [2]
-*       -> [https://firebase.google.com/docs/functions/beta#currently_available_triggers] states
+*   [2]: Cloud Run documentation (linked to by 'firebase deploy' output):
+*     -> https://cloud.google.com/run/docs/configuring/cpu
 */
 
 /*

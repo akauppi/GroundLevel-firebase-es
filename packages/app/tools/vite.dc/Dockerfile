@@ -13,10 +13,7 @@
 #   - Best practices for writing Dockerfiles
 #       -> https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 #
-
-# This image provides a basic 'vite' for development purposes. See 'vite_extras' (below).
-#
-FROM node:18-alpine AS vite_plain
+FROM node:18-alpine
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
@@ -32,7 +29,6 @@ RUN npm config set update-notifier false
 # Make all globally installed libraries visible to the work directory (only binaries would show, without this).
 # Needed for:
 #   - 'vite', imported by '@vite/plugin-vue' (project side)
-#   - 'rollup-plugin-visualizer', in the 'vite_extras' target
 #
 RUN npm install -g --no-save vite@$VITE_VER && \
   ln -s /usr/local/lib/node_modules /node_modules
@@ -40,17 +36,3 @@ RUN npm install -g --no-save vite@$VITE_VER && \
 # Override
 CMD \
   vite --help
-
-# DISABLED since from Vite 3.2.0-beta.3 onwards, we cannot use a dynamic import within Vite config.
-#---
-# Version with extras
-#
-# Provides:
-#   - 'rollup-plugin-visualizer' [1] installed, for creating 'stats.html'
-#
-#     [1]: https://github.com/btd/rollup-plugin-visualizer
-#
-#|FROM vite_plain AS vite_extras
-#|
-#|RUN npm install -g rollup-plugin-visualizer   \
-#|  # Note: visible to project because of the link done in 'vite_plain'

@@ -12,7 +12,6 @@ services:
   build:
     build:
       context: tools/vite.dc
-      target: vite_plain      # plain Vite is fine for CI builds
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro

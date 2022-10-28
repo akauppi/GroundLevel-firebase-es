@@ -18,7 +18,6 @@ services:
   build:
     build:
       context: tools/vite.dc
-      target: vite_extras
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it

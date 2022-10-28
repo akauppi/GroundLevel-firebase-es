@@ -121,7 +121,7 @@ touch tmp/firebase-debug.log &&
 #
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
-(cd ../packages/app && npm install && ENV=${ENV-staging} make build)
+(cd ../packages/app && make install && ENV=${ENV-staging} make build)
 
 (cd ../packages/app &&
   node --input-type=module -e "import o from './firebase.hosting.js'; console.log(JSON.stringify(o, null, 2));"

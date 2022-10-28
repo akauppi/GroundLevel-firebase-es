@@ -40,7 +40,6 @@ services:
   vite-base:   # used for 'npm run dev:local', 'npm run dev:online', 'npm test'
     build:
       context: tools/vite.dc
-      target: vite_plain
     volumes:
       # --- RO
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it

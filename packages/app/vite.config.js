@@ -75,10 +75,8 @@ async function configGen({ command, mode }) {
   /*
   * Chunk visualizer for manually made production builds.
   *
-  * Note: uses an add-on brought in 'vite_extras' Docker target. https://github.com/btd/rollup-plugin-visualizer
-  *
-  * VITE BUG: Since 3.2.0-beta.3 (including 3.2.0), Vite _eagerly_ evaluates dynamic imports. It should not.
-  *     In effect, we placed 'rollup-plugin-visualizer' in the main 'package.json', to be able to update to 3.2.0.
+  * Note: Visualizer used to come from Dockerfile, up until Vite 3.2.0. It now eagerly evaluates dynamic imports within
+  *     'vite.config.js' (which it ... shouldn't?).  Did not report. Just placed 'rollup-plugin-visualizer' in the 'package.json'.
   */
   const visualizer =
     (BUILD && PROD && !NO_VISUALIZER) ? await import("rollup-plugin-visualizer").then( mod => mod.visualizer({    // Provided in the 'tools/vite.dc' Docker image

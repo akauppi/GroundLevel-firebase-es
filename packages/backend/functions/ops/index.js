@@ -172,16 +172,20 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 *     throw new functions.https.HttpsError('unimplemented',"message",[...details]);
 *   <<
 *
-* Curl sample:
-*   <<
-*     $ export TOKEN=eyJhb....319fQ.
-*     $ curl -X POST -v -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-*       http://localhost:5003/demo-main/us-central1/metrics-and-logging-proxy-v0 -d '{ "data": {"arr": [{ "id": "a", "inc": 0.1, "ctx": { "clientTimeStamp": 123, "uid": "goofy" }}]} }'
-*   <<
+* Performance / Scaling / Billing note:
+*   This function is called from web apps with signed-in users. One should monitor the number of invocations and adjust
+*   the parameters, accordingly!!!
+*
+*     - maxInstances
+*     - memory
+*     - cpu
+*     - concurrency
+*
+*   It's too early for the author to give good insight about these. Needs experimenting.
 */
 const metricsAndLoggingProxy_v0 = https_onCall_regional({
-  minInstances: EMULATION ? 1 : 0,    // let it go down, completely
-  maxInstances: 10,     // default: 100 (Oct 2022; public preview)
+  ...EMULATION ? { minInstances: 1 } : {},   // deployed functions may cool down, completely
+  maxInstances: 2,     // default: 100 (Oct 2022; public preview)
 
   // "128MiB" | "256MiB" | "512MiB" | "1GiB" | "2GiB" | "4GiB" | ...
   //
@@ -189,20 +193,23 @@ const metricsAndLoggingProxy_v0 = https_onCall_regional({
   //
   memory: "512MiB",
 
+  // NOTE!!!
+  // Using a fractional CPU *sometimes* fails. It's a bit weird, and may be due to **WHAT'S ALREADY DEPLOYED** (earlier
+  // version)??
+  //
+  // If you have problems, and want to deploy:
+  //    - remove the setting, or set to 1
+  //    - manually delete the function, in the online console
+  //    - retry deploying
+
   // "Fractional number of CPUs to allocate to a function."
   // Default: "1 for functions with = 2GB RAM and increases for larger memory sizes."
   // 'gcf_gen1' reverts to Cloud Functions v1 behaviour.
   //
-  // POSSIBLE FIREBASE BUG:
-  //  Setting 'cpu: 0.5' doesn't seem to be tolerated. Even with 'concurrency: 1', deployment says:
-  //    <<
-  //      ⚠  functions: HTTP Error: 400, Could not update Cloud Run service metrics-and-logging-proxy-v0. spec.template.spec.containers[0].resources.limits.cpu: Invalid value specified for cpu. cpu < 1 is not supported with concurrency > 1.
-  //    <<
-  //
-  //! cpu: 0.5,   // is this accepted? (documentation doesn't state)
-  //!
-  //! // Concurrency (default: 80 if cpu >= 1, otherwise 1)   <-- not true: not having a value with 'cpu: 0.5' gave an error (Oct 2022; firebase-functions 4.0.1)
-  //! concurrency: 1
+  //cpu: 0.5,
+
+  // Concurrency (default: 80 if cpu >= 1, otherwise 1)   <-- not true: not having a value with 'cpu: 0.5' gave an error (Oct 2022; firebase-functions 4.0.1)
+  //concurrency: 1
 }, ev => {
   const { data, auth /*,app, instanceToken*/ } = ev;
 

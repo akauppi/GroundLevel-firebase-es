@@ -130,7 +130,7 @@ $(_PRIME_DC): tools/prime.dc/Dockerfile $(shell find tools/prime.dc -type f)
 	touch $@
 
 $(_BUILD_DC): tools/vite.dc/Dockerfile
-	RELEASE=abc ENV=def $(_DC) -f docker-compose.tools.prod.yml build build
+	@RELEASE=abc ENV=def $(_DC) -f docker-compose.tools.prod.yml build build
 	@touch $@
 
 $(_SERVE_DC): tools/serve.dc/Dockerfile

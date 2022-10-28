@@ -80,3 +80,14 @@ Also:
 
    No mention of emulators. Could fit nicely, there... (it does mention "When testing the Admin SDK locally").
 -->
+
+
+## CFv2 Beta issues
+
+Grouped together; unrelated (but all having to do with Cloud Functions v2):
+
+- [ ] ["[Beta] Region, CPU, memory, secrets options not available for scheduled functions (v2)"](https://github.com/firebase/firebase-functions/issues/1285)
+- [ ] ["[Beta] CPU control of httpsCallable's doesn't seem to work (CPU < 1)"](https://github.com/firebase/firebase-functions/issues/1288)
+- [ ] ["[Beta] Cannot read properties of undefined (reading 'headers') (v2)"](https://github.com/firebase/firebase-functions/issues/1289)
+- [ ] .. +1 about `firebase deploy` not allowing `firebase-debug.log` to be DC mapped
+

@@ -39,11 +39,11 @@ const metricsAndLoggingProxy_v0 = reallyHaveDatabaseURL &&
   await import("./ops/index.js").then( mod => mod.metricsAndLoggingProxy_v0 );
 
 //---
-// {prom|loki}Bridge
+// {prom|loki|clean}Bridge
 //
 // Scheduled functions; only needed for production (if loaded under emulation, needs Pub/Sub emulator enabled)
 //
-//const promBridge = !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge() );
+const promBridge = !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge() );
 
 // NOTE:
 //    Cloud Functions v2 does not _yet_ ('firebase-functions' 4.0.1) support upper case letters, but it should,
@@ -68,6 +68,6 @@ const metricsAndLoggingProxy_v0 = reallyHaveDatabaseURL &&
 export const metrics = metricsAndLoggingProxy_v0 ? { and: { logging: { proxy: { v0: metricsAndLoggingProxy_v0 }}}} : {};   // metrics-and-logging-proxy-v0
 
 //export const prom = promBridge ? { bridge: promBridge } : {};   // prom-bridge
-/*export {
+export {
   promBridge
-};*/
+};
