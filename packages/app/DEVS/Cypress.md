@@ -14,7 +14,7 @@ $ du -d 1 -h ~/Library/Caches/Cypress/
 3,0G	/Users/x/Library/Caches/Cypress/
 ```
 
->That's the macOS directory. For Windows and Linux, see [here](https://docs.cypress.io/guides/getting-started/installing-cypress#Binary-cache) (Cypress docs).
+>That's the macOS directory. For Windows and Linux, see [here](https://docs.cypress.io/guides/references/advanced-installation#Binary-cache) (Cypress docs).
 
 When new versions come available, they pile up here.
 

@@ -158,6 +158,13 @@ firebase.json: firebase.hosting.js
 tmp/firebase.app.ci.js: ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
 	@node --input-type=module -e "import o from './$<'; console.log('export default '+ JSON.stringify(o));" > $@
 
+#---
+# Cypress on Windows + WSL2: Prepare the visibility of Node modules so that 'cypress open' process can see them.
+#
+prep-cy-open:
+	ln -s -f /usr/lib/node_modules/cypress node_modules/
+	ln -s -f $(PWD)/../backend/node_modules/firebase-admin node_modules/
+
 #--- Maintenance
 
 # Take possibly running DC images down

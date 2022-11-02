@@ -4,18 +4,18 @@ Web application sample project.
 
 ## Requirements
 
-- `npm`
 - GNU `make`
 - `docker`
+- `npm`
 - Cypress desktop app; 10.8.0+ (optional)
 
-### Cypress setup (for test based development; optional)
+### Cypress setup (optional; for test based development)
 
-[Cypress](https://www.cypress.io) is used in this repo for automatically running front-end "end to end" tests. For this, you don't need to do further installs.
+If you want to use Cypress as a **desktop application** (which it really is!), you need to separately install it on your system. This use is recommended, in the longer term, because it offers a great developer experience.
 
-If you want to use Cypress as a **desktop application** (which it really is!), for test-based development, you need to separately install it on your system. This use is *recommended* (because it offers a great developer experience!) but optional.
+For now, you can skip these installation instructions and return back here, once/if you wish to give Desktop Cypress a go!
 
-*Note: You may skip this section now; return to it later.*
+>Note: Cypress is also used in this repo for automatically running front-end tests. For this, you don't need to do further installs.
 
 To install Cypress:
 
@@ -49,21 +49,8 @@ $ npx cypress open
 
 <details><summary><b>Windows 10 + WSL2</b></summary>
 
-**NOTE: While the installation will work, THE WORKFLOW STILL NEEDS SOME WORK. Opening `\\wsl$\...\packages\app` did not work. Let's make an Issue about this, and find a way!!!**
+See [DEVS/Interactive Cypress with X410](./DEVS/Interactive%20Cypress%20with%20X410.md) for details.
 
-- Visit `Installing Cypress` > [Direct download](https://docs.cypress.io/guides/getting-started/installing-cypress#Direct-download) 
-   - download `cypress.zip`
-- unzip its contents (right click > `Extract All`) to a suitable location, e.g. `C:\Users\{username}\bin`
-- launch `Cypress.exe` in that folder
-
->Note: There's a Firewall confirmation dialog. *tbd. Take a screenshot, mention right options?*
-
-
-Note that Cypress does not install as a normal Windows program, and it does not show in the `Start` menu. To uninstall Cypress, just trash the whole folder it's in.
-
-<!--
->Hint: You can use this to have multiple versions of Cypress "installed", simultaneously. Just name their folders accordingly (e.g. `bin/Cypress 10.7.0`).
--->
 </details>
 
 <!-- disabled; at least until the author has access to Win11
@@ -282,25 +269,26 @@ Both `make dev` and `make dev:online` expose their ports to all network interfac
 
 This means, the web app is browsable also from a phone, tablet etc. in the same network. All you need is to find out the outwards-facing IP number of your computer (let's say it's `192.168.1.62`), and open `http://192.168.1.62:3000` (or 3001) from your other device.
 
-
 ### Finding your IP number
 
 |OS|Steps|
 |---|---|
 |macOS|`Preferences` > `Network` > (adapter) > `IP address`|
 |macOS (terminal)|`ifconfig`|
-|Windows 10 + WSL2|...tbd.|
+|Windows 10 + WSL2|`ip route \| grep default`|
 
 >Hint: For WLAN on macOS, you can also `Alt`-click the WLAN icon in the toolbar.
-
-<!-- tbd. #contribute
-|Windows 11|...|
-|Linux|`ipconfig` ??|
--->
 
 <!-- tbd.
 Make a nice helper (`make show-ip`) to cover the OS differences.
 -->
+
+>### Not quite enough!! Windows 10 + WSL2
+>
+>The above is not sufficient for WSL2. You'll need to dig a bit deeper, starting e.g. with [Running a public server from WSL 2](https://www.williamjbowman.com/blog/2020/04/25/running-a-public-server-from-wsl-2/) (blog, Apr 2020).
+>
+>This author didn't get the sharing to work, but didn't try very hard, since it's not his use case. **Please chime in** if you get it to work!!
+
 
 ## Production build
 
