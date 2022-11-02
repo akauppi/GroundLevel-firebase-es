@@ -59,6 +59,7 @@ services:
     command: sh -c '
       cypress run
       '
+      #cypress run --spec cypress/e2e/metrics.cy.js   # for limiting to just a certain test
     profiles: ['manual']
 
     networks:

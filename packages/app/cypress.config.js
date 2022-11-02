@@ -14,7 +14,7 @@
 //    - EMUL_HOST         defaults to 'localhost'
 //
 import { defineConfig } from 'cypress'
-import { getIncoming } from './cypress/e2e/getIncoming.task.js'
+import { task_getIncoming } from './cypress/e2e/getIncoming.task.js'
 
 // tbd. Could see if we can pass custom config via this file, gathering all env.var. use here ('FIREBASE_APP_JS', 'EMUL_HOST').
 
@@ -42,19 +42,15 @@ export default defineConfig({
 
     // Set up Cypress plugins (enables admin/OS level tasks)
     //
-    setupNodeEvents(on, config) {
-      const { taskTimeout } = config;
-      taskTimeout || fail("No 'taskTimeout' in configuration!");
+    setupNodeEvents(on /*, config*/) {
+      //const { taskTimeout } = config;
+      //taskTimeout || fail("No 'taskTimeout' in configuration!");
 
       on('task', {
-        async getIncoming([subPath, expectedTimestamp]) {
-          return getIncoming(subPath, expectedTimestamp, taskTimeout - 1000 /*ms*/)
-        }
+        getIncoming: task_getIncoming
       })
 
       // Note: Samples return 'config' but that doesn't seem to be required. (Cypress 10.7.0)
-
-      function fail(msg) { throw new Error(msg) }
     },
 
     // If tests take longer, the color they are reported in turns yellow (otherwise gray). (default: 10000)

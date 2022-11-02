@@ -40,50 +40,54 @@ const db = (_ => {
 *
 * Resolves with a document that matches 'expectedTimestamp'.
 *
-* NOTE: Cannot use any 'cy.*' features, within a function like this.
-*
-* NOTE 2: For debugging, throw exceptions or use 'console.{debug|log}'. Console logs are NOT available when running
+* NOTE: For debugging, throw exceptions or use 'console.{debug|log}'. Console logs are NOT available when running
 *     desktop Cypress(*) but are seen when launched via 'make test'.
 *
 *     (*) The author doesn't know, how to see them.
 */
-async function getIncoming(subPath, expectedTimestamp) {    // ("{prom|loki}", number) => Promise of { ... }
-  typeof expectedTimestamp === 'number' || fail(`bad param: ${expectedTimestamp}`);    // counter-act accidentially calling with "2022-10-04T16:06:19.102Z" (happened)
+async function task_getIncoming([subPath, expectedTimestamp, filterSource]) {    // (["{prom|loki}", number, string?]) => Promise of { ... }
+  typeof expectedTimestamp === 'number' || fail(`Unexpected 'expectedTimestamp' (not a number): ${ expectedTimestamp }`);    // counter-act passing a date object (happened)
+
+  // Cannot pass a function from browser -> Node.js, but can pass a function source.
+  //
+  const filter = filterSource && eval(filterSource);    // object => boolean
 
   const ref = db.ref(`bridge/${subPath}`);    // bridge/{prom|loki}/{..automatic index}/
 
   const prom = new Promise(res => {   // Promise of ...{matching Realtime Database object}
 
-    //console.log('\t>>> LOOKING FOR:', expectedTimestamp);
+    console.log('\t>>> LOOKING FOR:', filterSource);
 
     // "... 'child_added' is triggered once for each existing child and then again, every time a new child is added".
     //
-    if (true) {
-      ref.orderByChild('ctx/clientTimestamp').equalTo(expectedTimestamp)      // tbd. enabling this gives "unspecified index" warnings in 'make test' output. Not sure, why. (works without, just not as elegant)
-        .on('child_added', snapshot /*DataSnapshot*/ => {
+    /*if (true) {*/
+      ref.orderByChild('ctx/clientTimestamp').equalTo(expectedTimestamp)      // tbd. enabling this gives "unspecified index" warnings in 'make test' output. Not sure, why.
+        .on('child_added', (snapshot /*DataSnapshot*/) => {
           const o = snapshot.val();
 
-          //console.log('!!! YAY - found the ONE', o);    // visible in 'make test' output
+          if (!filter || filter(o)) {
+            console.log('!!! YAY - found the ONE', o);    // visible in 'make test' output
 
-          res(o);
-          ref.off('child_added');   // give up all listening of that path (#hack but works)
+            res(o);
+            ref.off('child_added');   // give up all listening of that path (#hack but works)
+          }
         }, (errorObject) => {
           console.error('Listen failed: ' + errorObject.name);
         });
 
-    } else {
+    /*}*/ /*** else {
       // Alternate, dummer solution (until the one above works flawless..). Does not sort 'ctx/clientTimestamp'
       // on server-side.
       //
       let seen=0;
       ref.orderByValue().limitToLast(10)    // limiting to last values helps debugging (auto-indices are based on their creation times)
-        .on('child_added', snapshot /*DataSnapshot*/ => {
+        .on('child_added', snapshot /_*DataSnapshot*_/ => {
         const o = snapshot.val();
 
         console.debug("Seen:", o);   // DEBUG
 
-        if (o.ctx.clientTimestamp === expectedTimestamp) {
-          console.log(`!!! YAY - found the ONE (${seen} skipped)`, o);    // visible in 'make test' output
+        if (filter(o)) {
+          console.debug(`!!! YAY - found the ONE (${seen} skipped)`, o);    // visible in 'make test' output
 
           res(o);
           ref.off('child_added');   // give up all listening of that path (#hack but works)
@@ -93,12 +97,12 @@ async function getIncoming(subPath, expectedTimestamp) {    // ("{prom|loki}", n
       }, (errorObject) => {
         console.error('Listen failed: ' + errorObject.name);
       });
-    }
+    } ***/
   });
 
   return prom;
 }
 
 export {
-  getIncoming
+  task_getIncoming
 }

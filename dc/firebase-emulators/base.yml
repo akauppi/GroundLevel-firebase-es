@@ -16,7 +16,7 @@ services:
       context: ../firebase-tools
       target: firebase-emulators
       args:
-        - FIREBASE_TOOLS_VERSION=11.15.0
+        - FIREBASE_TOOLS_VERSION=11.16.0
 
     # 'ports', 'volumes', 'working_dir' to be provided by downstream
 

@@ -210,8 +210,8 @@ const metricsAndLoggingProxy_v0 = https.onCall({
   //
   cpu: 0.5,
 
-  // Concurrency (default: 80 if cpu >= 1, otherwise 1)   <-- not true: not having a value with 'cpu: 0.5' gave an error (Oct 2022; firebase-functions 4.0.1)
-  concurrency: 1
+  // Concurrency (default: 80 if cpu >= 1, otherwise 1)
+  //concurrency: 1
 
 }, ev => {
   const { data, auth /*,app, instanceToken*/ } = ev;

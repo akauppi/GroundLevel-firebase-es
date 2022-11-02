@@ -72,7 +72,7 @@ function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise
     }
 
     return async dataIn => {    // (any) => Promise of any    // rejects if shipment failed
-      const body = JSON.stringify({ data: dataIn });
+      const body = JSON_stringify_precision_2({ data: dataIn });
 
       //console.debug( "!!!", { uri, method, headers, body } )    // DEBUG
 
@@ -130,6 +130,19 @@ function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise
       return result;
     }
   }
+}
+
+/*
+* A JSONifier where numbers get max. 2 digits.
+*
+* Avoids values like '22.69999999552965', otherwise seen. Mainly to ease debugging (but of course also for minimizing
+* wire transfers).
+*/
+function JSON_stringify_precision_2(o) {
+
+  return JSON.stringify(o, (_key, x) => (
+    typeof x === 'number' ? parseFloat( x.toFixed(2) ) : x
+  ));
 }
 
 const metricsAndLoggingProxy_v0_Gen = httpsCallableGen("metrics-and-logging-proxy-v0");

@@ -118,7 +118,7 @@ FROM base as cypress
 
 # Cypress CHANGELOG -> https://docs.cypress.io/guides/references/changelog
 #
-ARG CYPRESS_VER=10.10.0
+ARG CYPRESS_VER=10.11.0
 
 # avoid too many progress messages
 # https://github.com/cypress-io/cypress/issues/1243

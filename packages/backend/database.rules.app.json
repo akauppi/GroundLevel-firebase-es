@@ -3,10 +3,9 @@
     ".read": false,
     ".write": false,
 
-    "incoming": {
-      "incs": { ".indexOn": "ctx/clientTimestamp" },
-      "logs": { ".indexOn": "ctx/clientTimestamp" },
-      "obs": { ".indexOn": "ctx/clientTimestamp" }
+    "bridge": {
+      "prom": { ".indexOn": "ctx/clientTimestamp" },
+      "loki": { ".indexOn": "ctx/clientTimestamp" }
     }
   }
 }

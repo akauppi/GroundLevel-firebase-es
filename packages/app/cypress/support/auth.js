@@ -48,9 +48,9 @@ Cypress.Commands.add('signAs', ({ uid, displayName, photoURL }) => {
 
   firebaseAuthChainable().then( auth =>
     promGen(auth)   // can return Promise for 'then'
-  ).then( user => undefined
-    //cy.log(`Signed as: ${ JSON.stringify(user) }` )   // DEBUG
-  )
+  ) /*.then( user =>
+    cy.log(`Signed as: ${ JSON.stringify(user) }` );   // DEBUG
+  )*/
 
   // The auth logic.
   //

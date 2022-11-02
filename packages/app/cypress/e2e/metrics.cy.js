@@ -65,27 +65,21 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
   const cy_portal_obsDummy = cy_portalGen("obsDummy");   // Chainable of (number, number) => ()
   const cy_portal_flush = cy_portalGen("flush");   // Chainable of () => ()
 
-  const cy_auth = _ => cy.window().its["Let's test!"].then( ([auth]) => auth );
-
   function _getIncoming(subPath, expectedTimestamp) {   // (string, number) => Promise of {...}
+
     // Make sure our stuff doesn't stick in the queue. Note: this has to happen within browser code, not in the
     // 'cy.task' (which is OS level environment).
     //
     cy_portal_flush();
 
-    return cy.task('getIncoming', [subPath, expectedTimestamp], {
+    return cy.task('getIncoming', [subPath, expectedTimestamp, `o => true`], {
       timeout: 15000      // default timeout of 60s is unnecessary long; speeds up debugging
     });
   }
   function getIncomingProm(at) { return _getIncoming("prom", at); }
   function getIncomingLoki(at) { return _getIncoming("loki", at); }
 
-  // !: Flakyness in these tests shows on first test run (also in dev). For CI, it basically kills them, so disabled
-  //    there, until the reason is known. #115
-  //
-  const IT_MAYBE = it;  //Cypress.env('CI') ? it.skip : it;
-
-  IT_MAYBE ('Have metrics passed to Realtime Database', () => {
+  it('Have metrics passed to Realtime Database', () => {
     const at = Date.now();    // differentiates from possible earlier runs
 
     // NOTE:
@@ -127,7 +121,7 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
     })
   })
 
-  IT_MAYBE ('Have logs passed to Realtime Database', () => {
+  it('Have logs passed to Realtime Database', () => {
     const at = Date.now();
 
     cy_portal_logDummy("hey", { a:1, b:2 }, at).then(_ => {
@@ -142,7 +136,7 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
 
   // tbd. Why logs and metrics pass, samples never.
   //
-  it.skip ('Have samples passed to Realtime Database', () => {
+  it('Have samples passed to Realtime Database', () => {
     const at = Date.now();
 
     cy_portal_obsDummy(56.7, at).then(_ => {
@@ -158,56 +152,50 @@ describe('Central metrics, logs and samples end up in Realtime Database (when a 
   it .skip('Have guest metrics and logs passed to Realtime Database, _once_ a user authenticates', () => {
     const at = Date.now();
 
-    // Note: Cypress 'Chainable's can make pretty long .. chains. Is nice if they come up with a solution to this.
+    // Note: Cypress 'Chainable's can make pretty long chains.
 
-    const steps_G = [
-      _ => cy.clearAuthState()     // sign out
+    cy.clearAuthState().then( _ => (
+      cy.visit('/')
+    )).then( _ => (
+      cy.window().its("Let's test!").then( ([auth]) => auth.currentUser )
+        .should('be.null')
+    ))
 
-      //_ => cy_portal_signout()
-      , _ => cy_auth().then( auth => auth.currentUser ).should.be.null
+    // Note: these could be in parallel
+    //
+    .then( _ => cy_portal_incDummy(0.1, at)
+      .then( _ => cy_portal_logDummy("hey", {}, at) )
+      .then( _ => cy_portal_obsDummy(12.3, at+1) )    // Tilt the time for 'obs' slightly, since that and inc end up in the same pile.
+    )
 
-      // Can use the same time for all three, since fetching from different paths.
-      //
-      , _ => cy_portal_incDummy(0.1, at)
-      , _ => cy_portal_logDummy("hey", {}, at)
-      , _ => cy_portal_obsDummy(12.3, at)
+    // At this moment, messages are just queued, waiting for an authorized user.
 
-      , _ => cy.signAs(joe)
+    // Sign in should ship the pending messages
+    .then( _ => cy.signAs(joe) )
 
-      , _ => getIncoming("incs", at)
+    // Could test these in parallel
+    .then( _ => (
+      getIncomingProm(at)
         .should( o => {
           expect(o.ctx.clientTimestamp) .to.equal(at);
           expect(o.ctx.uid) .to.be.null;    // guest
         })
+      /*** TBD: open
+      .then(_ => (
+        getIncomingLoki(at)
+          .should( o => {
+            expect(o.ctx.clientTimestamp) .to.equal(at);
+            expect(o.ctx.uid) .to.be.null;    // guest
+          })
+      ))
 
-      /**, _ => getIncoming("logs", at)
-        .should( o => {
-          expect(o.ctx.clientTimestamp) .to.equal(at);
-          expect(o.ctx.uid) .to.be.null;    // guest
-        })
-
-      , _ => getIncoming("obs", at)
-        .should( o => {
-          expect(o.ctx.clientTimestamp) .to.equal(at);
-          expect(o.ctx.uid) .to.be.null;    // guest
-        })**/
-    ];
-
-    function drill(gs) {
-      const [gen1, ...tail_Gs] = gs;
-      if (gen1) {
-        const n = steps_G.length - tail_Gs.length;    // offset of 'gen1' + 1 within all steps (1..)
-
-        if (false) {   // if the steps can be separated
-          gen1()
-            .then( _ => { console.log(`STEP ${n} finished`)} );
-
-          drill(tail_Gs);
-        } else {      // it they need to be chained
-          gen1().then(_ => drill(tail_Gs));
-        }
-      }
-    }
-    drill(steps_G);
+      .then(_ => (
+        getIncomingProm(at+1)
+          .should( o => {
+            expect(o.ctx.clientTimestamp) .to.equal(at);
+            expect(o.ctx.uid) .to.be.null;    // guest
+          })
+      ))***/
+    ))
   })
 })

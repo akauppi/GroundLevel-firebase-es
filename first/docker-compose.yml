@@ -104,10 +104,23 @@ services:
       #
       #- ./tmp/firebase-debug.log:/work/firebase-debug.log:delegated
 
+      # WORK_AROUND for the above:
+      #
+      # Map the same file, but append 'firebase-debug.log' to it only *outside* the 'firebase deploy' (whether it succeeded
+      # or not).
+      #
+      #|- ./tmp/firebase-debug.log:/work/firebase-debug.host.log:delegated
+
     working_dir: /work
     command: sh -c '
       firebase deploy --only functions,firestore,database
       '
+    #|# Note: Could have used 'trap' for this, but that takes some studying, on Busybox/Alpine sh. It's essentially
+    #|#     a work-around, so not worth it.
+    #|command: sh -c '
+    #|  (firebase deploy --only functions,firestore,database || (cat firebase-debug.log >> firebase-debug.host.log; false)) &&
+    #|  ([ -f firebase-debug.log ] && cat firebase-debug.log >> firebase-debug.host.log)
+    #|  '
     profiles: ['manual']
 
 
