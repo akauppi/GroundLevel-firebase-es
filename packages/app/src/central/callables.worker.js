@@ -71,7 +71,7 @@ function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise
       ...(token ? { "Authorization": `Bearer ${token}` } : {})
     }
 
-    return async dataIn => {    // (any) => Promise of { data?, error? }
+    return async dataIn => {    // (any) => Promise of any    // rejects if shipment failed
       const body = JSON.stringify({ data: dataIn });
 
       //console.debug( "!!!", { uri, method, headers, body } )    // DEBUG
@@ -111,7 +111,7 @@ function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise
       // "If [the error] field is present, then the request is considered failed, regardless of the HTTP status code or
       // whether data is also present."
       //
-      // We ignore the 'status' completely - because so does the official client. Just pass '{ data, error }' to the caller.
+      // We ignore the 'status' completely in the case of error - because so does the official client.
       //
       // Note: The Firebase documentation mentions that certain types (e.g. Long) may be represented as specific objects.
       //    We don't check for them - they are likely rare in action.
@@ -119,11 +119,15 @@ function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise
       //    "The client SDKs automatically decode these [fields of 'data' output] into native types according to the
       //    serialization format [...]."
       //
-      //console.log("!!!", { status, data, error, result, resJson });
-
-      // The Firebase JS SDK client provides '{ data, error }' (it converts wire 'result' to the 'data' field).
+      // If error exists, it's '{ message: string, status: "INVALID_ARGUMENT|..." }'.
       //
-      return { data: result, error };
+      //console.log("!!!", { status, error, result, resJson });
+
+      if (error) {
+        throw new Error(`Shipment failed: ${ JSON.stringify(error) }`);
+      }
+
+      return result;
     }
   }
 }

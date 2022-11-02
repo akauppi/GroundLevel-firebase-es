@@ -17,7 +17,7 @@ FROM node:18-alpine
 
 # Vite CHANGELOG -> https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md
 #
-ARG VITE_VER=3.2.1
+ARG VITE_VER=3.2.2
 
 WORKDIR /work
 

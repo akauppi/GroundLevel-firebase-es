@@ -10,6 +10,7 @@ services:
   #     Such project's data is visible in the emulator UIs. ALSO OTHER PROJECT ID's (or no id) will work, but leaving
   #     the UI out of the loop.
   #
+  # NOTE: For interactive emulation (not CI), define 'CHOKIDAR_USEPOLLING=true' in the derived images.
   base:
     build:
       context: ../firebase-tools

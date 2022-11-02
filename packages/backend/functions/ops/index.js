@@ -23,7 +23,7 @@ import process from "node:process";
 
 function fail_at_load(msg) { throw new Error(msg) }   // use at loading; NOT within a callable!!
 
-const https_onCall_regional = !region ? https.onCall : (opts,f) => https.onCall({ ...opts, region }, f);
+//const https_onCall_regional = !region ? https.onCall : (opts,f) => https.onCall({ ...opts, region }, f);
 
 const { databaseURL } = JSON.parse(
   process.env.FIREBASE_CONFIG || fail_at_load("No 'FIREBASE_CONFIG' env.var.")
@@ -123,11 +123,11 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
     } else if (o.level) {
       logValidate(o);
       return _ => log( conv(o) );
-    } else if (o.obs) {
+    } else if (o.obs !== undefined) {   // note: 'obs: 0' is valid
       obsValidate(o);
       return _ => obs( conv_blurUid(o) );
     } else {
-      fail_invalid_argument(`Unexpected entry #${i}: ${o}`);
+      fail_invalid_argument(`Unexpected entry #${i}: ${ JSON.stringify(o) }`);
     }
   }
 
@@ -183,7 +183,9 @@ function pickTypeGen(realUid) {   // (string) => ({...}, integer) => () => ()
 *
 *   It's too early for the author to give good insight about these. Needs experimenting.
 */
-const metricsAndLoggingProxy_v0 = https_onCall_regional({
+const metricsAndLoggingProxy_v0 = https.onCall({
+  ...region ? { region } : {},
+
   ...EMULATION ? { minInstances: 1 } : {},   // deployed functions may cool down, completely
   maxInstances: 2,     // default: 100 (Oct 2022; public preview)
 
@@ -206,12 +208,15 @@ const metricsAndLoggingProxy_v0 = https_onCall_regional({
   // Default: "1 for functions with = 2GB RAM and increases for larger memory sizes."
   // 'gcf_gen1' reverts to Cloud Functions v1 behaviour.
   //
-  //cpu: 0.5,
+  cpu: 0.5,
 
   // Concurrency (default: 80 if cpu >= 1, otherwise 1)   <-- not true: not having a value with 'cpu: 0.5' gave an error (Oct 2022; firebase-functions 4.0.1)
-  //concurrency: 1
+  concurrency: 1
+
 }, ev => {
   const { data, auth /*,app, instanceToken*/ } = ev;
+
+  console.debug("Called with:", ev);    // DEBUG, online
 
   if (EMULATION) {    // Use a special value for just waking up (no logs created)
     if (data === "wakeup") {

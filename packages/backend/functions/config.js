@@ -177,31 +177,38 @@ function fail_at_load(msg) { throw new Error(msg) }
 // Region.
 //
 // Cloud Function callables (in production) need to be married to their region, IN CODE (not in config). This is a bit
-// ..weird, and maybe due to Firebase having been a regionless platform in its early life. Who knows...
+// ..weird (this author thinks).
 //
-// We use the "Default GCP resource location" for the overall region as well. On its own, it caters to the Cloud Functions
-// and Cloud Storage, and is given online, when creating the Firebase project. THIS KEEPS THE CONFIGURATION "OUTSIDE"
-// OF THE CODE.
+// We use the "Default GCP resource location" for the overall region as well. On its own, it caters to Cloud Firestore,
+// Cloud Functions and Cloud Storage, and is given online, when creating the Firebase project. THIS KEEPS THE
+// CONFIGURATION "OUTSIDE" OF THE CODE.
 
-// NOTE!!!
-//    - For now (Oct 2022), support for Cloud Functions v2 is limited to certain regions. If the location ID is not
-//      among them, we crudely use some other region. This is intended to be a temporary measure.
+// Note:
+//    According to [4], _all regions already support "v2"_ (Oct 2022).
 //
-//    "Currently available Cloud Functions (v2) locations"
-//      -> https://firebase.google.com/docs/functions/beta#currently_available_locations
+//    - "Cloud Functions Locations" [4]
+//      -> https://cloud.google.com/functions/docs/locations
 //
-const goodForV2 = new Set([
-  "asia-northeast1",    // not in docs, but is in source code (firebase-functions 4.0.1)
-  "europe-north1",
-  "europe-west1",
-  "europe-west4",
-  "us-central1",
-  "us-east1",
-  "us-west1"
-]);
+//    However, the author noticed "europe-north1" and "europe-west4" misbehaving, thus don't use them, at the moment.
+//
+const region_v2 = !EMULATION && LOCATION_ID;
+const region_v1 = !EMULATION && LOCATION_ID;    // just for Firestore
 
-const region_v2 = !EMULATION && (goodForV2.has(LOCATION_ID) ? LOCATION_ID : "europe-north1" /*goodForV2[0]*/);
-const region_v1 = !EMULATION && LOCATION_ID;
+//---
+// Application specific config (and/or secrets)
+//
+// Note: 'firebase-functions/params' offers an API to these, but - apart from type checking - it doesn't seem to offer
+//    any added value over reading the environment, directly. One middle man less.
+//
+//import { defineString } from 'firebase-functions/params'
+//
+//const confPromUserId = defineString('PROM_USER_ID', { description: 'Prometheus user id'});
+//const confLokiUserId = defineString('LOKI_USER_ID', { description: 'Loki user id'});
+//const confMetricsApiKey = defineSecret('METRICS_API_KEY');    // no description for secrets?? tbd.
+//
+const promUserId = process.env["PROM_USER_ID"];
+const lokiUserId = process.env["LOKI_USER_ID"];
+const metricsApiKey = process.env["METRICS_API_KEY"];
 
 export {
   EMULATION,
@@ -210,5 +217,9 @@ export {
   projectId,
   databaseURL,
   region_v1,
-  region_v2
+  region_v2,
+
+  promUserId,
+  lokiUserId,
+  metricsApiKey
 }

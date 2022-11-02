@@ -9,47 +9,19 @@
 */
 import { onSchedule } from 'firebase-functions/v2/scheduler'
 
-import { defineString, defineSecret } from 'firebase-functions/params'
+import { region_v2, promUserId, metricsApiKey } from '../config.js'
 
-// These are set at (first) deployment; need '.value()' to be accessed within runtime load.
-//
-const confPromUserId = defineString('PROM_USER_ID', { description: 'Prometheus user id'});
-const confMetricsApiKey = defineSecret('METRICS_API_KEY');    // no description for secrets?? tbd.
-
-//import { region_v2 } from '../config.js'
-
-// Note: At the time of writing (Oct 2022; firebase-functions 4.0.1), "task functions" offers region, secrets, cpu and
-// memory parameters whereas "scheduled functions" doesn't.
-//
-// According to [1], "scheduled functions" are already supported in v2 public preview.
-//
-//    [1]: https://groups.google.com/g/firebase-talk/c/vopgpPCphog
-/*
-* NOTE!!!
-*
-* v2 'onSchedule' (as of 27-Oct-22) lacks these options (that Cloud Task options has):
-*   <<
-*     // Mayyyybe... Cloud Run by itself limits concurrency to 1. "Maximum concurrency must be set to 1." implies so.
-*     //
-*     maxInstances: 1,    // make sure that tasks should never run in parallel: important for moving the "marker"
-*     concurrency: 1,
-*
-*     cpu: 0.5,   // (what would be the default, here???)
-*                 // "for less than 1 CPU, specify a value from 0.08 to less than 1.00, in increments of 0.01" [2]
-*
-*     memory: '512MiB',   // "A minimum of 0.5 CPU is needed to set a memory limit greater than 512MiB."
-*                         // "A minimum of 1 CPU is needed to set a memory limit greater than 1GiB."
-*
-*     region: region_v2,
-*
-*     secrets: ["METRICS_API_KEY"]      // tbd. when would we use a secret like so?  Where is it placed?????
-*   <<
-*
-*   [2]: Cloud Run documentation (linked to by 'firebase deploy' output):
-*     -> https://cloud.google.com/run/docs/configuring/cpu
-*/
+// NOTE: This module is only imported, if the 'METRICS_API_KEY' secret is given, and non-empty.
 
 /*
+* Metrics (Prometheus) bridge.
+*
+* Shovel 'inc' and 'obs' metrics, fed in via web front ends, to Grafana Cloud.
+*
+* Note: These are hardly mission critical, so running the job e.g. every 10 minutes should be fine.
+*
+*     tbd. Make an observable itself about how long running the job took (can be done using Grafana Cloud logs).
+*
 * EXP:
 *   - Access secrets
 *   - Access non-secrets
@@ -59,20 +31,31 @@ const confMetricsApiKey = defineSecret('METRICS_API_KEY');    // no description 
 */
 const promBridge = onSchedule({
   schedule: "every 5 minutes",
+  region: region_v2,
 
-  retryCount: 1,    // "number of retry attempts for a failed run"
+  secrets: ["METRICS_API_KEY"],     // tbd. HOW TO USE SUCH A SECRET??
 
-  //maxRetrySeconds: 60,    // "time limit for retrying" (does it mean: don't retry after this??) (default: ???)
+  // Note: you can define 'cpu: "gcf_gen1"' and get the "Cloud Functions generation 1" behaviour (no parallelism,
+  //    fractional CPU). Or we can be more specific.
+  //
+  cpu: 0.5,   // "for less than 1 CPU, specify a value from 0.08 to less than 1.00, in increments of 0.01" [2]
+
+  memory: '512MiB',   // "A minimum of 0.5 CPU is needed to set a memory limit greater than 512MiB."
+                      // "A minimum of 1 CPU is needed to set a memory limit greater than 1GiB."
+
+  maxInstances: 1,
+  concurrency: 1
+
+  //retryCount: 1,    // "number of retry attempts for a failed run"    Q: what does that mean? what do we want?
+
+  // [2]: Cloud Run documentation (linked to by 'firebase deploy' output):
+  //    -> https://cloud.google.com/run/docs/configuring/cpu
 
   }, async data => {
 
-  // Q: How to read the requested secret??
-
-  console.log("!!! RUNTIME:", process.env);
-
   console.log("!!!", {
-    promUserId: confPromUserId.value(),
-    metricsApiKey: confMetricsApiKey.value() .slice(0,15)
+    promUserId,
+    metricsApiKey
   })
 });
 

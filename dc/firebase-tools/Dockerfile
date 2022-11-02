@@ -91,6 +91,3 @@ RUN firebase setup:emulators:ui \
 #   so it might seize to work, one day... #good-enough
 #
 ENV FIREBASE_EMULATORS_PATH '/root/.cache/firebase/emulators'
-
-# Allows emulators to see changes to (host side, volume mapped) Security Rules, Cloud Functions
-#ENV CHOKIDAR_USEPOLLING true

@@ -62,7 +62,9 @@ fi
 
 # Docker Compose doesn't automatically rebuild a container if its source 'Dockerfile' changes.
 #
-make -q refresh-dc
+# NOTE: 'make -q' is problematic. Sometimes balked without any obvious error!!
+#
+make refresh-dc > /dev/null
 
 #---
 # Create the state
@@ -108,7 +110,7 @@ fi
 # Note: Creating 'tmp/firebase.app.prod.json' does not require dependencies to have been installed.
 #
 (cd ../packages/backend &&
-  (make -q tmp/firebase.app.prod.json) &&
+  (make tmp/firebase.app.prod.json > /dev/null) &&
 
   npm --prefix functions -s install --omit=optional
 )

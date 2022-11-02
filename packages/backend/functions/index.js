@@ -10,14 +10,10 @@
 *     -> https://firebase.google.com/docs/admin/setup
 *   - Cloud Functions v2 public preview
 *     -> https://firebase.google.com/docs/functions/beta
-*
-* tbd. Move to 'v2' once:
-*   a) we can use a supported region (e.g. 'europe-north-1')
-*   b) Firestore triggers are supported
 */
-import { EMULATION, databaseURL } from "./config.js";    // string?
+import { EMULATION, databaseURL } from "./config.js";
 
-// 'firebase-tools' (4.0.1) provides 'databaseURL' under emulation, regardless whether it's actually usable or not.
+// 'firebase-tools' (11.15.0) provides 'databaseURL' under emulation, regardless whether it's actually usable or not.
 // We counteract that.
 //
 const reallyHaveDatabaseURL = (!EMULATION || process.env["FIREBASE_DATABASE_EMULATOR_HOST"]) && databaseURL;
@@ -43,19 +39,19 @@ const metricsAndLoggingProxy_v0 = reallyHaveDatabaseURL &&
 //
 // Scheduled functions; only needed for production (if loaded under emulation, needs Pub/Sub emulator enabled)
 //
-const promBridge = !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge() );
+// tbd. TEST ALSO IN PRODUCTION, WHETHER THE 'METRICS_API_KEY' SECRET IS PROVIDED (non-empty), and import only then! :)
+//
+const promBridge = false; /*tbd.*/   // !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge );
 
 // NOTE:
 //    Cloud Functions v2 does not _yet_ ('firebase-functions' 4.0.1) support upper case letters, but it should,
 //    eventually. [1] Underscores might never be supported.
 //
-//    [1]: "Coming soon in Cloud Functions (2nd gen)"
-//          -> https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
-//
-// A little hack used to have functions-names-with-dashes exported, from ES module. Works, but a bit ugly.
+//    - "Coming soon in Cloud Functions (2nd gen)" [1]
+//      -> https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
 //
 
-// A) Below _declares_ the functions correctly, but they are not found at runtime:
+// A) Below _declares_ the functions, but they are not found at runtime:
 //    <<
 //      Error: Failed to find function metrics.and.logging.proxy.v0 in the loaded module
 //    <<
@@ -67,7 +63,4 @@ const promBridge = !EMULATION && await import("./ops/promBridge.js").then( mod =
 //
 export const metrics = metricsAndLoggingProxy_v0 ? { and: { logging: { proxy: { v0: metricsAndLoggingProxy_v0 }}}} : {};   // metrics-and-logging-proxy-v0
 
-//export const prom = promBridge ? { bridge: promBridge } : {};   // prom-bridge
-export {
-  promBridge
-};
+export const prom = promBridge ? { bridge: promBridge } : {};   // prom-bridge
