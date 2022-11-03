@@ -1,5 +1,5 @@
 #
-# app/docker-compose.tools.ci.yml
+# app/docker-compose.prod.build.ci.yml
 #
 # Building for CI.
 #

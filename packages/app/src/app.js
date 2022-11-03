@@ -21,9 +21,8 @@ import { init as initAside } from 'aside-keys'
 import { appTitle } from './config.js'
 import { router } from './router.js'
 
-import { perfHook } from './central/commonPerf'
+function fail(msg) { throw new Error(msg) }
 
-//function fail(msg) { throw new Error(msg) }
 /** disabled, for now
 // Ops monitoring
 import { init as Sentry_init, setUser as Sentry_setUser } from '@sentry/browser'
@@ -46,8 +45,8 @@ const DEV = import.meta.env.MODE !== 'production';
 //const SENTRY_DSN= import.meta.env.VITE_SENTRY_DSN;   // undefined | string
 //const SENTRY_SAMPLE_RATE= import.meta.env.VITE_SENTRY_SAMPLE_RATE;   // undefined (dev) | 0.0..1.0 (CI production builds)
 
-const STAGE = import.meta.env.VITE_STAGE;   // undefined (dev) | "staging"|... (production build)
-const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev) | "<git commit checksum>" (CI build) | "0" (local production build)
+const STAGE = import.meta.env.VITE_STAGE;   // undefined (dev; manual build) | "staging"|... ('first' or CI production build)
+const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev; manual build) | "<git commit checksum>" (CI build) | "0" ('first' production build)
 
 //const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
 //const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;

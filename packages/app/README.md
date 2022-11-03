@@ -310,16 +310,17 @@ This builds your front end application in `dist/` folder.
 >Hint. We also use [rollup-plugin-visualizer](https://github.com/btd/rollup-plugin-visualizer) to provide a browsable report of the modules. Check it out by opening `stats.html`.
 
 
-<!-- Hidden; didn't get the DC solution to work.  Needs `npm install -g http-server`
+<!-- Hidden; the make target is prefixed with ':', showing it's undocumented. You can use it - if you found about it. :)
+
 ### Serve the `dist` (optional)
 
 Just to peek that the build results are useful, you can run:
 
 ```
-$ npm run serve
+$ make :serve
 ```
 
->Note: `serve` simply serves what's in the `dist/` folder. It does not rebuild the application.
+>Note: `:serve` simply serves what's in the `dist/` folder. It does not rebuild the application.
 -->
 
 ## First deployment

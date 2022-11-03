@@ -1,16 +1,10 @@
 #
-# app/docker-compose.tools.prod.yml
+# app/docker-compose.prod.build.yml
 #
 name: 35bf1944
 services:
   #---
-  # Build production variant (manually)
-  #
-  # Note: This build is intended for trial purposes (e.g. testing ops changes). Actual production builds should use CI/CD runs.
-  #
-  # Note 2:
-  #   Makefile level (in the host) may concat temporary env values into the 'tmp/.env.${ENV:staging}' that we read in.
-  #   This may include 'VITE_...' values for allowing access e.g. to Sentry.
+  # Build production variant (manually, or 'first'; CI has a separate definition)
   #
   # Expects:
   #   - ENV
@@ -23,12 +17,12 @@ services:
       - ./node_modules:/work/node_modules:ro         # note: should not have 'esbuild' in it
       - ./vite.config.js:/work/vite.config.js:ro     # Vite needs a restart to see config changes, thus 'ro'.
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
-      - ../../firebase.${ENV:-staging}.js:/work/firebase.config.js:ro
-      - ./tmp/.env.${ENV:-staging}:/work/.env:ro
-      # --- RO (since we're a task)
       - ./src:/work/src:ro
       - ./prod:/work/prod:ro
       - ./public:/work/public:ro
+      #R- ../../firebase.${ENV:-staging}.js:/work/firebase.config.js:ro
+      - ./tmp/firebase.${ENV:-staging}.config.json:/work/firebase.config.json:ro
+      - ./tmp/.env.${ENV:-staging}:/work/.env:ro
       # --- Output
       - ./dist:/work/dist:delegated
       - ./stats.html:/work/stats.html:delegated
@@ -41,6 +35,4 @@ services:
 
     #environment:
       #- ENV     # e.g. "staging"
-      #- SENTRY_DSN
-      #- SENTRY_SAMPLE_RATE
     profiles: ['manual']

@@ -16,35 +16,46 @@
 *     -> https://firebase.google.com/docs/functions/callable-reference
 */
 
-const PROJECT_ID = import.meta.env.VITE_PROJECT_ID || fail("no 'VITE_PROJECT_ID'");
-
 const LOCAL = import.meta.env.MODE === "dev_local";
 
+// Doesn't work (no import)
+//const projectId = LOCAL ? import.meta.env.VITE_PROJECT_ID
+//  : await import("/@firebase.config.json").then( mod => mod.projectId );
+
+// "[...], function URLs in Cloud Functions (2nd gen) use a non-deterministic format, meaning you cannot predict
+// your function URL before deployment [...]" https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
+//
+// !!! UNTIL v2 again supports predictable "cloudfunctions.net" URLs, THE URL NEEDS TO BE CHANGED, AFTER EACH BACKEND
+//    DEPLOYMENT !!!
+//
+const realCloudFunction = new Map([
+  ["metrics-and-logging-proxy-v0", "https://metrics-and-logging-proxy-v0-lhnzrejgbq-lm.a.run.app"]
+]);
+
 const functionsBaseURL= (_ => {
+  // QUICK FIX since we currently don't need project id in production code. Eventually, make a system where the worker
+  // knows the project id, at load time.
+  //
+  //const projectId = self.PROJECT_ID || fail("Missing 'projectId'!");
+  const projectId = import.meta.env.VITE_PROJECT_ID;
 
   if (LOCAL) {
     const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
     const port = import.meta.env.VITE_FUNCTIONS_PORT || fail("no 'VITE_FUNCTIONS_PORT'");
     const REGION = "us-central1";
-    return `http://${host}:${port}/${PROJECT_ID}/${REGION}`;
+
+    return `http://${host}:${port}/${projectId}/${REGION}`;
 
   } else {
-    const region = import.meta.env.VITE_LOCATION_ID || fail("no 'VITE_LOCATION_ID'");
+    //const region = import.meta.env.VITE_LOCATION_ID || fail("no 'VITE_LOCATION_ID'");
+    //return `https://${region}-${projectId}.cloudfunctions.net`;
 
-    return `https://${region}-${PROJECT_ID}.cloudfunctions.net`;
+    console.warn("Currently, no CloudFunction URL's for v2 functions!");
+    return null;
   }
 })();
 
 function fail(msg) { throw new Error(msg); }
-
-// "Currently, function URLs in Cloud Functions (2nd gen) use a non-deterministic format, meaning you cannot predict
-// your function URL before deployment [...]" https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
-//
-// tbd. remove once v2 again supports "cloudfunctions.net" URLs.
-//
-const v2Lookup_TEMP = new Map([
-  ["metrics-and-logging-proxy-v0", "https://metrics-and-logging-proxy-v0-lhnzrejgbq-lz.a.run.app"]
-]);
 
 /*
 * Call a Cloud Functions callable.
@@ -54,7 +65,7 @@ const v2Lookup_TEMP = new Map([
 */
 function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise of { data?: any, error?: object })
 
-  const uri = !LOCAL ? v2Lookup_TEMP.get(name) || fail(`No deployment URL for callable '${name}'`)
+  const uri = !LOCAL ? realCloudFunction.get(name) || fail(`No deployment URL for callable '${name}'`)
     : `${functionsBaseURL}/${name}`;
 
   // POST

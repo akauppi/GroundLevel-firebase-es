@@ -4,11 +4,9 @@
 #	make dev
 #	make dev:online
 #	[ENV=...] make build
-#	make serve
 #
 ENV ?= staging
 
-_FIREBASE_PROD_JS=../../firebase.$(ENV).js
 _STATS_HTML=stats.html
   # output from a build
 
@@ -55,7 +53,7 @@ _emulRunning:
 	(cd ../backend && $(MAKE) app:start)
 
 #--- Dev:online
-dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) $(_FIREBASE_PROD_JS)
+dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) ../../firebase.$(ENV).js
 	PORT=3001 $(_DC) -f docker-compose.online.yml run --rm --service-ports vite-online
 
 #--- Test
@@ -75,11 +73,14 @@ dev\:lint: ../../node_modules/.bin/eslint
 	# tbd. eventually, run via DC (and keep separate native target for CI, in 'package.json')
 
 #--- Build
-build: $(_BUILD_DC) $(_STATS_HTML) $(_FIREBASE_PROD_JS)
-	RELEASE=manual ENV=$(ENV) $(_DC) -f docker-compose.tools.prod.yml run --rm build
+build: $(_BUILD_DC) $(_STATS_HTML) tmp/firebase.$(ENV).config.json
+	ENV=$(ENV) $(_DC) -f docker-compose.prod.build.yml run --rm build
+
+tmp/firebase.$(ENV).config.json: ../../firebase.$(ENV).js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
 
 #--- Serve
-serve: $(_SERVE_DC)
+\:serve: $(_SERVE_DC)
 	$(_DC) -f dc.prod.serve.yml run --rm --service-ports serve
 
 #--- Vite environments
@@ -130,7 +131,7 @@ $(_PRIME_DC): tools/prime.dc/Dockerfile $(shell find tools/prime.dc -type f)
 	touch $@
 
 $(_BUILD_DC): tools/vite.dc/Dockerfile
-	@RELEASE=abc ENV=def $(_DC) -f docker-compose.tools.prod.yml build build
+	@ENV=abc $(_DC) -f docker-compose.prod.build.yml build build
 	@touch $@
 
 $(_SERVE_DC): tools/serve.dc/Dockerfile
@@ -147,8 +148,8 @@ $(_CYPRESS_DC): tools/cypress.dc/Dockerfile #tools/cypress.dc/package.json
 $(_STATS_HTML):
 	@touch $@
 
-$(_FIREBASE_PROD_JS):
-	$(error '$(_FIREBASE_PROD_JS)' is missing; see root 'README.md' on how to create one)
+../../firebase.$(ENV).js:
+	$(error '$@' is missing; see root 'README.md' on how to create one)
 
 #--- Misc
 firebase.json: firebase.hosting.js
@@ -185,7 +186,7 @@ endif
 
 #---
 echo:
-	@echo $(shell find tools/prime.dc -type f)
+	@echo $(ENV)
 
 .PHONY: all echo \
   dev _emulPrimed _emulRunning \

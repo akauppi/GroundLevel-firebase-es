@@ -19,20 +19,24 @@ let timer;
 
 let metricsAndLoggingProxy_v0;    // turns to function once we have a token
 
-/***
 // Initialization with query parameter
+//
+// Project id is given from above. Reason: we can read 'import.meta.env.PROJECT_ID' within a worker, but not import
+// '/@firebase.config.json' (could solve this many ways).
 //
 self.location.search.slice(1).split("&").forEach( kvs => {    // "{key}={value}"
   const [k,v] = kvs.split("=");
 
-  console.log("Worker param:", {k,v});
-  if (k === "token") {
-    shipF = metricsAndLoggingProxy_v0_withGen(v);
+  if (k === "project") {
+    self.PROJECT_ID = v;    // JavaScript worker note: global variable
   }
-    //
-  else fail(`Unexpected param: ${k}`);
+
+  else {
+    fail(`Unexpected param: ${k}`);
+  }
 });
-***/
+
+self.PROJECT_ID || fail("[INTERNAL] No project id!");
 
 /*
 * Ship things

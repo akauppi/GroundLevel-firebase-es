@@ -130,9 +130,8 @@ async function configGen({ command, mode }) {
         ...subAliases,
         '/@': srcPath,
 
-        ...(PROD ? {
-          '/@firebase.config.json': `${myPath}/firebase.config.js`   // DC maps this
-        }: {})
+        '/@firebase.config.json': PROD ? `${myPath}/firebase.config.json`   // DC maps this
+          : '/dev/null'
       }
     },
 

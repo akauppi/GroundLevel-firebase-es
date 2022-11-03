@@ -46,7 +46,7 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //  /work/prod/index.html
   //  /work/prod/index.html?html-proxy&index=0.js
   //  /work/prod/main.js
-  //  /work/firebase.config.js
+  //  /work/firebase.config.json
   //  /work/src/app.js
   //    ...
   //  /work/src/App/pages/Home.guest.vue?vue&type=style&index=0&scoped=true&lang.css
@@ -56,7 +56,7 @@ const chunkTo = {     // Map of string -> (Regex | Array of Regex)
   //
   "": [
     /^\/work\/prod\//,
-    /^\/work\/firebase\.config\.js$/,
+    /^\/work\/firebase\.config\.json$/,
     /^\/work\/src\//,
 
     /^.vite\/preload-helper$/,       // note: '.' is for the '\x00'

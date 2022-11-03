@@ -16,10 +16,20 @@ import {getAuth, onAuthStateChanged} from '@firebase/auth'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-const STAGE = LOCAL ? (!window.Cypress ? "dev":"dev:test")
-  : import.meta.env.VITE_STAGE || fail("[INTERNAL] no stage");
+// CI deployment:             stage matches the ENV (defaults to 'staging')
+// Manual deployment (first): -''-
+// Manual 'make build && make serve': no stage
+// Development and testing: no stage
+//
+const STAGE = LOCAL ? undefined   //was: (!window.Cypress ? "dev":"dev:test")
+  : import.meta.env.VITE_STAGE;   // falsy | e.g. "staging"
 
 const RELEASE = import.meta.env.MODE .startsWith("dev_") ? null : import.meta.env.VITE_RELEASE;    // falsy | "<commit sha>"
+
+// Can do the import here, cannot in a worker. Note: let's make this a static import and get rid of 'import.meta.env.PROJECT_ID'. tbd.
+//
+const projectId = LOCAL ? import.meta.env.VITE_PROJECT_ID :
+  await import("/@firebase.config.json").then( mod => mod.projectId );
 
 const auth = getAuth();
 
@@ -34,14 +44,14 @@ function workerGen() {   // () => { flush, login, inc, log, obs }
   // Note: If passing dynamically created query parameters to the worker, use '+' instead of string interpolation
   //    (but we don't need query params).
   //
-  const w = new Worker(new URL("./worker.js", import.meta.url), { type: 'module' });
+  const w = new Worker(new URL("./worker.js?project=" + projectId, import.meta.url), { type: 'module' });
 
   function ctxGen(at) {   // (number) => { uid: string, clientTimestamp: number }
     return {
       uid: auth.currentUser?.uid || null,
       clientTimestamp: at,
 
-      stage: STAGE,
+      ...STAGE ? { stage: STAGE } : {},
       ...RELEASE ? { release: RELEASE } : {}
 
       // tbd. browser type, ...
