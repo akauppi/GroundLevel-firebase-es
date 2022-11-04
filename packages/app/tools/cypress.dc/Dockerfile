@@ -16,7 +16,7 @@
 #---
 # 'cypress/base' customized
 #
-# Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/ (18.6.0-chrome105-ff104)
+# Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/browsers/ (18.12.0-chrome106-ff106)
 #
 # Note:
 #   NOT the image Cypress themselves use for 'included' (they have Node 16; we use Node 18).
@@ -24,7 +24,7 @@
 # Changes:
 #   - not bringing in Firefox
 #
-FROM cypress/base:18.6.0 as base
+FROM cypress/base:18.12.0 as custom-browsers
 
 USER root
 
@@ -62,19 +62,17 @@ RUN wget --no-verbose /usr/src/libappindicator3-1_0.4.92-7_amd64.deb "http://ftp
   apt-get install -f -y && \
   rm -f /usr/src/libappindicator3-1_0.4.92-7_amd64.deb
 
-# CHANGE: disabled
-# install Chrome browser
+## install Chrome browser
 #RUN node -p "process.arch === 'arm64' ? 'Not downloading Chrome since we are on arm64: https://crbug.com/677140' : process.exit(1)" || \
 #  (wget --no-verbose -O /usr/src/google-chrome-stable_current_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_105.0.5195.102-1_amd64.deb" && \
 #  dpkg -i /usr/src/google-chrome-stable_current_amd64.deb ; \
 #  apt-get install -f -y && \
 #  rm -f /usr/src/google-chrome-stable_current_amd64.deb)
 
-# "fake" dbus address to prevent errors
-# https://github.com/SeleniumHQ/docker-selenium/issues/87
+## "fake" dbus address to prevent errors
+## https://github.com/SeleniumHQ/docker-selenium/issues/87
 #ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
 
-# CHANGE: disabled
 ## install Firefox browser
 #RUN node -p "process.arch === 'arm64' ? 'Not downloading Firefox since we are on arm64: https://bugzilla.mozilla.org/show_bug.cgi?id=1678342' : process.exit(1)" || \
 #  (wget --no-verbose -O /tmp/firefox.tar.bz2 https://download-installer.cdn.mozilla.net/pub/firefox/releases/104.0.1/linux-x86_64/en-US/firefox-104.0.1.tar.bz2 && \
@@ -109,12 +107,14 @@ ENV npm_config_unsafe_perm=true
 # Adopted from -> https://github.com/cypress-io/cypress-docker-images/blob/master/included/10.8.0/Dockerfile
 #   - [x] checked against 10.9.0
 #   - [x] checked against 10.10.0
+#   - [x] checked against 10.11.0
 #
 # Brings:
-#   - Cypress on top of the OS + Electron + Chrome
+#   - Cypress on top of the OS + Electron (in as tight an image as possible!)
+#   - running on top of Node.js 18
 #
-FROM base as cypress
-  #FROM cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+FROM custom-browsers as custom-included
+  #FROM cypress/browsers:node16.16.0-chrome105-ff104-edge
 
 # Cypress CHANGELOG -> https://docs.cypress.io/guides/references/changelog
 #
@@ -180,23 +180,21 @@ RUN echo "whoami: $(whoami)" \
 ENTRYPOINT ["cypress", "run"]
 
 #---
-# Our own.
-#
-# Any adjustments above the Cypress provided stuff.
+# Customizations above what Cypress provides:
 #
 #   - 'cypress' library usable
-#   - other Node libraries needed by 'cypress.config.js' and the tests
+#   - 'firebase-admin' installed globally
 #
-FROM cypress as cypress-custom
+FROM custom-included as cypress-custom
 
-# NOTE: 'cypress/base' should have these, but launching Cypress complains!!  DEBUG
+# NOTE: 'cypress/base' has 'xvfb', but launching Cypress complains!!    <-- tbd. check, is it still true?
 #
 RUN apt-get update && apt-get install --no-install-recommends -y \
     xvfb \
   && rm -rf /var/lib/apt/lists/* \
   && apt-get clean
 
-ARG FIREBASE_ADMIN_VER=11.1.0
+ARG FIREBASE_ADMIN_VER=11.2.0
   # -> https://github.com/firebase/firebase-admin-node/releases
 
 RUN npm install -g firebase-admin@$FIREBASE_ADMIN_VER

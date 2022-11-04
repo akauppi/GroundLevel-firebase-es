@@ -159,11 +159,6 @@ This layout seems light enough, yet flexible, to recommend. In the following tex
    To update: `sudo apt-get upgrade google-cloud-sdk`
 	</details>      
 
-- Docker
-
-<!-- tbd. remove "Docker" once/if we build the builder, in GCP
--->
-
 
 ### Create a "CI Builder" GCP project
 
@@ -201,25 +196,48 @@ $ gcloud config set project <project-id>
 These are already created, by Firebase.
 
 
-### Build and push the builder image
+### Prepare builder images
 
-The CI scripts require your `gcloud` builder project to have the `firebase-emulators` image in the Artifact Registry. Let's build such an image, and push it there.
-
-<!-- tbd. Changing this so that we use `gcloud` itself to build and push the image.
--->
+The CI scripts require your builder project to have the `firebase-emulators` and `cypress-custom` Docker images prepared in the Artifact Registry. The building (and pushing) itself is done in the Google cloud. Let's get to it!
 
 1. Log into your "CI builder" GCloud project (see steps above).
-2. Build and push the image
+2. Build and push the images to Artifact Registry
 
    ```
-   $ ./build
+   $ make pre
    ...
-   Going to push us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.3.0
-   
-   Continue (y/N)?
+   042aa377-[...]  2022-11-04T08:07:31+00:00  1M10S     gs://ci-builder_cloudbuild/source/1667549250.010852-205fcd55a4ee413888e23ff17b8f8edf.tgz  -       SUCCESS
+	...
+   485b8a09-[...]  2022-11-04T08:08:46+00:00  2M37S     gs://ci-builder_cloudbuild/source/1667549325.462326-8997b1bcf2eb404baef28445d1dbeda0.tgz  -       SUCCESS
    ```
 
-   If everything seems well, press `y` and you'll have the image stored in `us-central1` Artifact Registry.
+   This can take 4..5 mins.
+   
+3. Check the images
+
+   ```
+   $ gcloud artifacts docker images list --include-tags us-central1-docker.pkg.dev/ci-builder/builders
+
+   Listing items under project ci-builder, location us-central1, repository builders.
+
+   IMAGE                                                              DIGEST  TAGS     CREATE_TIME          UPDATE_TIME
+   us-central1-docker.pkg.dev/ci-builder/builders/cypress-custom      [...]   10.10.0  2022-11-04T10:11:23  2022-11-04T10:11:23
+   us-central1-docker.pkg.dev/ci-builder/builders/cypress-custom      [...]   10.11.0  2022-11-04T10:20:38  2022-11-04T10:20:38
+   us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators  [...]   11.16.0  2022-11-04T10:17:54  2022-11-04T10:17:54
+   us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators  [...]   11.14.4  2022-11-04T10:08:41  2022-11-04T10:08:41
+   ```
+
+	>Note: `ci-builder` is the GCP builder project and `builders` the repository within it. You'll use your own names.
+
+   There are two versions of both the images. You'll only need one.
+   
+   You can remove the unneeded images in the GCP Console (online), or with:
+   
+   ```
+   $ gcloud artifacts docker images delete us-central1-docker.pkg.dev/{project}/{repository}/{image}:{tag}
+   ```
+   
+   >Note: Untagged images are something you've built earlier, with a tag that has since been moved to another image. You can safely remove such.
 
 ><details style="margin-left: 2em"><summary>Why `us-central1`?</summary>
 >
@@ -228,14 +246,20 @@ The CI scripts require your `gcloud` builder project to have the `firebase-emula
 >Note that this has no connection to where you deploy your application backend to, nor implications to GDPR and other privacy aspects. The CI runs simply compile and test the sources from your GitHub repo. The CI jobs don't deal with your users, or their data, ever.
 ></details>
 
-<p />
 
-><details style="margin-left: 2em"><summary>**Costs involved (and how to have none)**</summary>
->
->Storing Docker images in Artifact Registry has a cost. The free tier provides 0.5GB of free storage (Oct 2022). <sub>source: [Artifact Registry pricing](https://cloud.google.com/artifact-registry/pricing)</sub> The image's "virtual size" is around 186MB, so you can have two versions without inducing billing.
->
->You may want to occasionally visit the [GCP Console](https://console.cloud.google.com/artifacts) and clear away earlier versions.
-></details>
+#### Costs involved
+
+Storing Docker images in Artifact Registry has a cost. The free tier provides 0.5GB of free storage (Oct 2022). <sub>source: [Artifact Registry pricing](https://cloud.google.com/artifact-registry/pricing)</sub> The Firebase Emulators image (186MB "virtual size") fits this budget, but the Cypress image (550MB) breaks the free tier.
+
+You'll be charged \$0.10 per month. Hope this is acceptable...
+
+>Note: What you get for this money is a 1..2 min reduction for each front-end CI test run.
+
+<!-- whisper
+>Note: It's technically possible (and even easy!) to use Cypress from the sources, not prebuilt. This takes away the charge, but makes each front-end CI testing job rebuild Cypress. Not worth it.
+
+A better solution could be using a stock Cypress Docker image, but the author is not necessarily pleased with those (there's not one with *just one browser*, optimized for headless operation and small image size). If there one day is, it's a no-brainer to switch to that.
+-->
 
 
 ### Update the references to `ci-builder` GCP project
@@ -249,9 +273,9 @@ substitutions:
   _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.13.0
 ```
 
-Replace `ci-builder/builders` with the name of the builder project you created, and the folder you use.
+Replace `ci-builder/builders` with the name of the builder project you created, and the repository you use.
 
->The `ci-builder` project belongs to the author and doesn't provide public pull access. We need to eventually do something about this (it is not the intention that you need to edit *anything* in the repo, to customize it).
+>The `ci-builder` project belongs to the author and doesn't provide public pull access. We need to eventually do something about this (it is not the intention that you need to edit *anything* in the repo, to use it on your projects).
 
 
 Next, let's introduce GitHub and Cloud Build to each other.
@@ -264,6 +288,8 @@ You need to enable quite a few things within the GCP, to have things rolling.
 >Note: These changes *can* be done from command line as well (using `gcloud`) if you need to do them repeatedly.
 
 Some steps are needed for the build project ("CI builder", above), some for the deployment projects ("staging project", above), some for both.
+
+>Note to future: It would be fair, to have a script / `gcloud` job that does these things.
 
 
 ### Enable Artifact Registry (build project only)

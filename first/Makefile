@@ -18,6 +18,12 @@ $(_FIREBASE_TOOLS_DC): _needs_dc ../dc/firebase-tools/Dockerfile
 	$(_DC) build deploy-auth deploy-backend deploy-app
 	touch $@
 
+tmp/functions/.env: ./Makefile
+	echo "PROM_USER_ID=0\nLOKI_USER_ID=0" > $@
+
+tmp/firebase.app.prod.json: ../packages/backend/firebase.app.js
+	@node --input-type=module -e "import o from '$<'; console.log(JSON.stringify( {...o, emulators: undefined } ));" > $@
+
 refresh-dc: $(_FIREBASE_TOOLS_DC)
 
 _needs_dc:
@@ -25,7 +31,7 @@ _needs_dc:
 
 #---
 echo:
-	@echo A
+	@echo "PROM_USER_ID=0\nLOKI_USER_ID=0"
 
 .PHONY: all \
   refresh-dc \

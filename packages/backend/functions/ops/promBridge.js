@@ -9,9 +9,24 @@
 */
 import { onSchedule } from 'firebase-functions/v2/scheduler'
 
-import { region_v2, promUserId, metricsApiKey } from '../config.js'
+import { region_v2 } from '../config.js'
+import process from "node:process";
 
-// NOTE: This module is only imported, if the 'METRICS_API_KEY' secret is given, and non-empty.
+//---
+// Application specific config (and/or secrets)
+//
+// Note: 'firebase-functions/params' offers an API to these, but - apart from type checking - it doesn't seem to offer
+//    any added value over reading the environment, directly. One middle man less.
+//
+//import { defineString } from 'firebase-functions/params'
+//
+//const confPromUserId = defineString('PROM_USER_ID', { description: 'Prometheus user id'});
+//const confLokiUserId = defineString('LOKI_USER_ID', { description: 'Loki user id'});
+//const confMetricsApiKey = defineSecret('METRICS_API_KEY');    // no description for secrets?? tbd.
+//
+const promUserId = process.env["PROM_USER_ID"];
+const lokiUserId = process.env["LOKI_USER_ID"];
+const metricsApiKey = process.env["METRICS_API_KEY"];
 
 /*
 * Metrics (Prometheus) bridge.
@@ -45,8 +60,6 @@ const promBridge = onSchedule({
 
   maxInstances: 1,
   concurrency: 1
-
-  //retryCount: 1,    // "number of retry attempts for a failed run"    Q: what does that mean? what do we want?
 
   // [2]: Cloud Run documentation (linked to by 'firebase deploy' output):
   //    -> https://cloud.google.com/run/docs/configuring/cpu

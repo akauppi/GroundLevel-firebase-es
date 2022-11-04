@@ -126,7 +126,7 @@ timeout: 200s
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
 substitutions:
-  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.14.4
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.16.0
   _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "18"
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked

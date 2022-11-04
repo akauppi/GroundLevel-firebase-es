@@ -199,11 +199,11 @@ steps:
 timeout: 600s
 
 substitutions:
-  _BUILDER_TAG: 11.14.4
+  _BUILDER_TAG: 11.16.0
   _DOCKER_COMPOSE_TAG: 1.29.2
     # https://hub.docker.com/r/docker/compose/tags?page=1&ordering=last_updated
   _NODE_VER: "18"
-  _CYPRESS_TAG: 10.10.0
+  _CYPRESS_TAG: 10.11.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
   #_FIREBASE_ADMIN_VER: 11.1.0

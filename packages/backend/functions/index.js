@@ -39,9 +39,7 @@ const metricsAndLoggingProxy_v0 = reallyHaveDatabaseURL &&
 //
 // Scheduled functions; only needed for production (if loaded under emulation, needs Pub/Sub emulator enabled)
 //
-// tbd. TEST ALSO IN PRODUCTION, WHETHER THE 'METRICS_API_KEY' SECRET IS PROVIDED (non-empty), and import only then! :)
-//
-const promBridge = false; /*tbd.*/   // !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge );
+const promBridge = !EMULATION && await import("./ops/promBridge.js").then( mod => mod.promBridge );
 
 // NOTE:
 //    Cloud Functions v2 does not _yet_ ('firebase-functions' 4.0.1) support upper case letters, but it should,

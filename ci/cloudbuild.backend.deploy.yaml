@@ -104,8 +104,12 @@ steps:
   #   - packages/backend/functions/config.js    modified so that 'import.meta.env.LOCATION_ID' is replaced by the target region
 
 - name: $_1
-  entrypoint: firebase
-  args: ['deploy', '--only', 'functions,firestore,database']
+  entrypoint: sh
+  args: ['-c', '
+    echo "LOKI_USER_ID=${_LOKI_USER_ID}\nPROM_USER_ID=${_PROM_USER_ID}" > functions/.env &&
+
+    firebase deploy --only functions,firestore,database
+  ']
   dir: packages/backend
 
   # DEBUG hint: If not deploying, add '--debug' to the params.
@@ -119,8 +123,11 @@ timeout: 300s
 # Note: Substitutions don't seem to get parsed recursively (would like to use '$_BUILDER_TAG' to define the image)
 #
 substitutions:
-  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.14.4
+  _1: us-central1-docker.pkg.dev/ci-builder/builders/firebase-emulators:11.16.0
   _NODE_VER: "18"
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.backend    # where successful tests are marked
   _MY_BUILDER: ci-builder
   _TESTED_SHA: ""
+  # Grafana Cloud user id's (override in Cloud Build definition)
+  _LOKI_USER_ID: 0
+  _PROM_USER_ID: 0

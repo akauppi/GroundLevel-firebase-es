@@ -18,4 +18,4 @@ There's no harm. This fades away once Firebase starts supporting Node 18.
 
 >Node.js 18 was released on April 19th 2022.
 
->Node.js 18 [is scheduled](https://nodejs.org/en/about/releases/) to enter LTS in Oct 2022.
+>Node.js 18 [is LTS](https://nodejs.org/en/about/releases/) since 25-Oct-22.

@@ -21,7 +21,7 @@ services:
       context: ../dc/firebase-tools/
       target: firebase-cli
       args:
-        - FIREBASE_TOOLS_VERSION=11.15.0
+        - FIREBASE_TOOLS_VERSION=11.16.0
 
   # Let the user authenticate (via a host-side browser session) and select the right Firebase deployment project.
   #
@@ -80,8 +80,8 @@ services:
       - ../packages/backend/firestore.indexes.json:/work/firestore.indexes.json:ro
       - ../packages/backend/firestore.rules:/work/firestore.rules:ro
       - ../packages/backend/database.rules.app.json:/work/database.rules.app.json:ro
-      - ../packages/backend/tmp/firebase.app.prod.json:/work/firebase.json:ro
-      - ../packages/backend/functions:/work/functions:ro
+      - ./tmp/firebase.app.prod.json:/work/firebase.json:ro
+      - ./tmp/functions:/work/functions:ro
       #-- other
       - ./.state/.firebaserc:/work/.firebaserc:ro
       # Note: 'configstore' needs to be writable for 'firebase deploy' to not hick up (though no changes are anticipated).

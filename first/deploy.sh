@@ -24,6 +24,7 @@ set -euf -o pipefail
 #   - grep
 #   - sed
 #   - make
+#   - tar
 #
 STAGING_JS="../firebase.${ENV-staging}.js"
 OVERWRITE=1
@@ -107,13 +108,14 @@ fi
 #
 [[ -d .state/configstore && -f .state/.firebaserc ]] || ( >&2 echo "INTERNAL ERROR: Missing '.state'"; false )
 
-# Note: Creating 'tmp/firebase.app.prod.json' does not require dependencies to have been installed.
+# Note: Make a copy into 'tmp/functions' because DC will write an '.env' file in there (impossible if we map ':ro'
+#   to '../backend/functions'), but this also allows us to do our installs locally, which is nice.
 #
-(cd ../packages/backend &&
-  (make tmp/firebase.app.prod.json > /dev/null) &&
+tar -C ../packages/backend --exclude=node_modules -zc functions | tar -C ./tmp -x
 
-  npm --prefix functions -s install --omit=optional
-)
+npm --prefix tmp/functions -s install --omit=optional
+
+make tmp/functions/.env tmp/firebase.app.prod.json
 
 touch tmp/firebase-debug.log &&
   docker compose run --rm deploy-backend

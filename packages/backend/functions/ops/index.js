@@ -204,14 +204,13 @@ const metricsAndLoggingProxy_v0 = https.onCall({
   //    - manually delete the function, in the online console
   //    - retry deploying
 
-  // "Fractional number of CPUs to allocate to a function."
-  // Default: "1 for functions with = 2GB RAM and increases for larger memory sizes."
-  // 'gcf_gen1' reverts to Cloud Functions v1 behaviour.
+  // CPU: "Fractional number of CPUs to allocate to a function."
+  //      Default: "1 for functions with = 2GB RAM and increases for larger memory sizes."
+  // Concurrency:
+  //      Limit to 1 (moving the consumption marker needs non-parallel runs)
   //
   cpu: 0.5,
-
-  // Concurrency (default: 80 if cpu >= 1, otherwise 1)
-  //concurrency: 1
+  concurrency: 1
 
 }, ev => {
   const { data, auth /*,app, instanceToken*/ } = ev;

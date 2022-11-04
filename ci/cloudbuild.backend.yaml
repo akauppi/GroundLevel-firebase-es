@@ -90,10 +90,10 @@ steps:
 #
 # |              | time
 # | ------------ | -----
-# | fns (cold)   | 3364, 2363, 2894, 3306, 2946 ms
+# | fns (cold)   | 3425, 3364, 2363, 2894, 3306, 2946 ms
 # |
-# | fns (warm)   | 714, 479, 422, 577 ms
-# | rules (cold) | 771, 304, 631, 705 ms    (already < 2000ms = good)
+# | fns (warm)   | 740, 714, 479, 422, 577 ms
+# | rules (cold) | 474, 771, 304, 631, 705 ms    (already < 2000ms = good)
 #
 # Conclusion: warm-up affects 'fns' tests, but whether we want to run them in CI is a matter of choice.
 #   Doing so allows to check that actual tests (when warmed up) do execute within 2000ms.
@@ -141,17 +141,14 @@ steps:
 # --- Timeout
 #
 # Pre-built 'ci-builder':
-#   - warm-up of functions (default CPU):   2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59, 1:33
-#
-# No 'ci-builder' image, building on each run:
-#   - warm-up of functions (default CPU):
+#   - warm-up of functions (default CPU):   2:01, 2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59, 1:33
 #
 # Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #
 timeout: 300s
 
 substitutions:
-  _BUILDER_TAG: 11.14.4
+  _BUILDER_TAG: 11.16.0
   _DOCKER_COMPOSE_TAG: 1.29.2
   _NODE_VER: "18"
   _AR_FOLDER: builders

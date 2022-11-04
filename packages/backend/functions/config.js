@@ -194,22 +194,6 @@ function fail_at_load(msg) { throw new Error(msg) }
 const region_v2 = !EMULATION && LOCATION_ID;
 const region_v1 = !EMULATION && LOCATION_ID;    // just for Firestore
 
-//---
-// Application specific config (and/or secrets)
-//
-// Note: 'firebase-functions/params' offers an API to these, but - apart from type checking - it doesn't seem to offer
-//    any added value over reading the environment, directly. One middle man less.
-//
-//import { defineString } from 'firebase-functions/params'
-//
-//const confPromUserId = defineString('PROM_USER_ID', { description: 'Prometheus user id'});
-//const confLokiUserId = defineString('LOKI_USER_ID', { description: 'Loki user id'});
-//const confMetricsApiKey = defineSecret('METRICS_API_KEY');    // no description for secrets?? tbd.
-//
-const promUserId = process.env["PROM_USER_ID"];
-const lokiUserId = process.env["LOKI_USER_ID"];
-const metricsApiKey = process.env["METRICS_API_KEY"];
-
 export {
   EMULATION,
   INITIAL_LOAD,
@@ -217,9 +201,5 @@ export {
   projectId,
   databaseURL,
   region_v1,
-  region_v2,
-
-  promUserId,
-  lokiUserId,
-  metricsApiKey
+  region_v2
 }

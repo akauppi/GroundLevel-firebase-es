@@ -46,4 +46,19 @@ Visit the stated URL - is there an app?
 
 >Note: Let the author know if there were any problems (by filing a [GitHub Issue](https://github.com/akauppi/GroundLevel-firebase-es/issues)). This stage is important because it's early on in the onboarding. But it's also done "just once" - you'll likely turn to CI/CD if you remain using the template.
 
-You can now [return to main README](../README.md).
+---
+
+## Limitations (optional)
+
+The point of the `first` deployment is to get you up and running, fast.
+
+We've left out Grafana Cloud configuration, with the idea that you'll set it up in the CI/CD phase.
+
+However, if you wish to only run manual deployments, this is what you'd do:
+
+- Create a `METRICS_API_KEY` secret in Google Cloud > Secrets Manager
+- Provide the `PROM_USER_ID` and `LOKI_USER_ID` values via `tmp/functions/.env` to the Cloud Function needing them
+
+Without this, metrics and central logs are stored in the Realtime Database. With this, they are shipped further to Grafana Cloud UI.
+
+The CI/CD documentation shows where you can find the said values.
