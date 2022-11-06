@@ -18,7 +18,7 @@ services:
 
     volumes:
       # --- RO
-      - ../backend/firebase.app.js:/work/firebase.app.js:ro
+      #- ../backend/firebase.app.js:/work/firebase.app.js:ro
       - ./tmp/.env.dev_local:/work/.env:ro
     command: sh -c '
       echo "{ \"projectId\":\"$PROJECT_ID\" }" > firebase.config.json &&

@@ -12,6 +12,7 @@ _STATS_HTML=stats.html
 
 _VITE_DEV_DC=tmp/.stamp.vite-dev
 _VITE_ONLINE_DC=tmp/.stamp.vite-online
+_VITE_TEST_DC=tmp/.stamp.vite-devtest
 _PRIME_DC=tmp/.stamp.prime
 _BUILD_DC=tmp/.stamp.build
 _SERVE_DC=tmp/.stamp.serve
@@ -57,7 +58,7 @@ dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) tmp/firebase.$(ENV).config.json
 
 # Note: 'make test' doesn't need priming; that's for 'make dev'.
 #
-test: $(_VITE_DEV_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulRunning
+test: $(_VITE_TEST_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulRunning
 	PORT=3005 PROJECT_ID=demo-main $(_DC) -f dc.cypress.yml run --rm run_tests
 	@# The port number doesn't really matter (not exposed to the host)
 
@@ -65,10 +66,10 @@ test: $(_VITE_DEV_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulRunning
 
 #--- Lint
 
+# Note: This is for manual linting. CI does it on its own.
+#
 \:lint: ../../node_modules/.bin/eslint
 	@../../node_modules/.bin/eslint --ext .js,.vue dev prod src || true
-	@# tbd. eventually, run via DC (and keep separate native target for CI, in 'package.json')
-	@# Note: 'dev' and 'prod' mixed in one; deal with it #later
 
 #--- Build
 build: $(_BUILD_DC) $(_STATS_HTML) tmp/firebase.$(ENV).config.json
@@ -100,7 +101,7 @@ $(_ENV_PROD):
 	@echo "VITE_STAGE=$(ENV)" > $@
 
 $(_ENV_CI_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
-	FIREBASE_APP_JS=../backend/firebase.app.ci.js EMUL_HOST=emul-for-app node $< --project=demo-main > $@
+	FIREBASE_APP_JS=../backend/firebase.app.ci.js EMUL_HOST=emul-for-app node $< > $@
 	@# no override needed
 
 #--- Build DC images
@@ -117,6 +118,10 @@ $(_VITE_ONLINE_DC): tools/vite.dc/Dockerfile
 	PORT=0 $(_DC) -f docker-compose.online.yml build vite-online
 	touch $@
 
+$(_VITE_TEST_DC): tools/vite.dc/Dockerfile
+	PORT=0 $(_DC) -f dc.cypress.yml build vite-dev-for-test
+	touch $@
+
 # Any change to 'tools/prime.dc/**' triggers a build
 #
 $(_PRIME_DC): tools/prime.dc/Dockerfile $(shell find tools/prime.dc -type f)
@@ -131,7 +136,7 @@ $(_SERVE_DC): tools/serve.dc/Dockerfile
 	$(_DC) -f docker-compose.tools.serve.yml build serve
 	@touch $@
 
-$(_CYPRESS_DC): tools/cypress.dc/Dockerfile #tools/cypress.dc/package.json
+$(_CYPRESS_DC): tools/cypress.dc/Dockerfile
 	VITE_URL="" PORT=0 $(_DC) -f dc.cypress.yml build run_tests
 	@touch $@
 

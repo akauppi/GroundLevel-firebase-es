@@ -1,5 +1,5 @@
 #
-# app/docker-compose.tools.local.yml
+# app/docker-compose.local.prime.yml
 #
 name: 2d3b9083
 services:

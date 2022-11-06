@@ -27,10 +27,15 @@ services:
 
     volumes:
       # --- RO
-      - ../backend/firebase.app.js:/work/firebase.app.js:ro
+      #- ../backend/firebase.app.js:/work/firebase.app.js:ro
       - ./tmp/.env.dev_test:/work/.env:ro
     environment:
       - MODE=local
+    command: sh -c '
+      echo "{ \"projectId\":\"$PROJECT_ID\" }" > firebase.config.json &&
+
+      vite --mode dev_local
+      '
     profiles: ['manual']
 
   # Cypress run
