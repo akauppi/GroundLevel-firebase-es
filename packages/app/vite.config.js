@@ -130,8 +130,7 @@ async function configGen({ command, mode }) {
         ...subAliases,
         '/@': srcPath,
 
-        '/@firebase.config.json': PROD ? `${myPath}/firebase.config.json`   // DC maps this
-          : '/dev/null'
+        '/@firebase.config.json': `${myPath}/firebase.config.json`   // DC maps this
       }
     },
 
@@ -198,7 +197,8 @@ async function configGen({ command, mode }) {
       fs: {
         allow: [
           '/work/dev',    // bootstrapping code
-          '/work/src'     // app itself
+          '/work/src',    // app itself
+          '/work/firebase.config.json'    // Firebase server configuration
         ]
       }
 

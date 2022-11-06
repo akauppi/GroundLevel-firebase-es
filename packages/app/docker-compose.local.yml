@@ -1,6 +1,10 @@
 #
 # app/docker-compose.local.yml
 #
+# Expects:
+#   PORT
+#   PROJECT_ID
+#
 # Overlay, for 'npm run dev:local' specificity.
 #
 name: ffd37ba4
@@ -16,8 +20,13 @@ services:
       # --- RO
       - ../backend/firebase.app.js:/work/firebase.app.js:ro
       - ./tmp/.env.dev_local:/work/.env:ro
-    environment:
-      - MODE=local
+    command: sh -c '
+      echo "{ \"projectId\":\"$PROJECT_ID\" }" > firebase.config.json &&
+
+      vite --mode dev_local &&
+        true
+      '
+      # Note: '&& true' somehow makes Ctrl-C work; keep it
     profiles: ['manual']
 
   # See that we see 'emul-for-app'

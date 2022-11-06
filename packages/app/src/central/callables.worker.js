@@ -18,9 +18,9 @@
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-// Doesn't work (no import)
-//const projectId = LOCAL ? import.meta.env.VITE_PROJECT_ID
-//  : await import("/@firebase.config.json").then( mod => mod.projectId );
+import { projectId } from '/@firebase.config.json'
+  //
+  // Works on: Safari (16.1), Chrome (107)
 
 // "[...], function URLs in Cloud Functions (2nd gen) use a non-deterministic format, meaning you cannot predict
 // your function URL before deployment [...]" https://cloud.google.com/functions/docs/concepts/version-comparison#coming_soon_in_2nd_gen
@@ -33,12 +33,6 @@ const realCloudFunction = new Map([
 ]);
 
 const functionsBaseURL= (_ => {
-  // QUICK FIX since we currently don't need project id in production code. Eventually, make a system where the worker
-  // knows the project id, at load time.
-  //
-  //const projectId = self.PROJECT_ID || fail("Missing 'projectId'!");
-  const projectId = import.meta.env.VITE_PROJECT_ID;
-
   if (LOCAL) {
     const host = import.meta.env.VITE_EMUL_HOST || 'localhost';    // CI overrides it
     const port = import.meta.env.VITE_FUNCTIONS_PORT || fail("no 'VITE_FUNCTIONS_PORT'");
@@ -66,7 +60,7 @@ function fail(msg) { throw new Error(msg); }
 function httpsCallableGen(name) {    // (string) => (string) => (any) => Promise of { data?: any, error?: object })
 
   const uri = !LOCAL ? realCloudFunction.get(name) || fail(`No deployment URL for callable '${name}'`)
-    : `${functionsBaseURL}/${name}`;
+    : `${ functionsBaseURL }/${name}`;
 
   // POST
   //    Content-Type: application/json

@@ -16,20 +16,15 @@ import {getAuth, onAuthStateChanged} from '@firebase/auth'
 
 const LOCAL = import.meta.env.MODE === "dev_local";
 
-// CI deployment:             stage matches the ENV (defaults to 'staging')
-// Manual deployment (first): -''-
-// Manual 'make build && make serve': no stage
-// Development and testing: no stage
-//
-const STAGE = LOCAL ? undefined   //was: (!window.Cypress ? "dev":"dev:test")
-  : import.meta.env.VITE_STAGE;   // falsy | e.g. "staging"
+const STAGE = LOCAL ? undefined : import.meta.env.VITE_STAGE;
+  // undefined:           local dev or test
+  // e.g. "dev.staging":  'make dev:online'
+  // e.g. "staging":      production build
 
-const RELEASE = import.meta.env.MODE .startsWith("dev_") ? null : import.meta.env.VITE_RELEASE;    // falsy | "<commit sha>"
-
-// Can do the import here, cannot in a worker. Note: let's make this a static import and get rid of 'import.meta.env.PROJECT_ID'. tbd.
-//
-const projectId = LOCAL ? import.meta.env.VITE_PROJECT_ID :
-  await import("/@firebase.config.json").then( mod => mod.projectId );
+const RELEASE = import.meta.env.MODE .startsWith("dev_") ? null : import.meta.env.VITE_RELEASE;
+  // null:          local dev, test or 'dev:online'
+  // "0":           manual release (no track to sources)
+  // "<commit sha>" automated release (can be tracked to sources)
 
 const auth = getAuth();
 
@@ -41,10 +36,10 @@ const auth = getAuth();
 */
 function workerGen() {   // () => { flush, login, inc, log, obs }
 
-  // Note: If passing dynamically created query parameters to the worker, use '+' instead of string interpolation
-  //    (but we don't need query params).
-  //
-  const w = new Worker(new URL("./worker.js?project=" + projectId, import.meta.url), { type: 'module' });
+  const w = new Worker(new URL("./worker.js", import.meta.url), { type: 'module' });
+    //
+    // Note: If passing dynamically created query parameters (which we don't need) to the worker, use '+' instead of
+    //    string interpolation.
 
   function ctxGen(at) {   // (number) => { uid: string, clientTimestamp: number }
     return {

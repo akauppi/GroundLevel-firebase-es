@@ -3,7 +3,7 @@
 *
 * Usage:
 *   <<
-*     [FIREBASE_APP_JS=...] EMUL_HOST=... gen-vite-env-local --project=demo-...
+*     [FIREBASE_APP_JS=...] EMUL_HOST=... gen-vite-env-local
 *   <<
 *
 * Reads the node side Firebase configuration and produces Vite environment config out of it. This allows the browser
@@ -14,6 +14,7 @@
 const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"] || "../backend/firebase.app.js";
 const { emulators } = await import(`../${FIREBASE_APP_JS}`).then( mod => mod.default );
 
+/*** R
 const projectId = (_ => {
   const [a, b] = process.argv.slice(2);
   if (!a || b) {
@@ -23,7 +24,7 @@ const projectId = (_ => {
 
   const [__,c1] = /^--project=(.+)$/.exec(a);
   return c1;
-})();
+})(); ***/
 
 const emulHost = process.env['EMUL_HOST'] || fail("Expected 'EMUL_HOST' env.var.");
 
@@ -42,7 +43,6 @@ VITE_FIRESTORE_PORT=${firestorePort}
 VITE_FUNCTIONS_PORT=${functionsPort}
 VITE_AUTH_PORT=${authPort}
 VITE_DATABASE_PORT=${databasePort}
-VITE_PROJECT_ID=${projectId}
 VITE_EMUL_HOST=${emulHost}
 `;
 

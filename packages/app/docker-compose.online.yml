@@ -18,8 +18,16 @@ services:
 
     volumes:
       #--- RO
-      #- ../../firebase.${ENV:-staging}.js:/work/firebase.js:ro
+      - ./tmp/firebase.${ENV:-staging}.config.json:/work/firebase.config.json:ro
       - ./tmp/.env.dev.${ENV:-staging}:/work/.env:ro
+    command: sh -c '
+      vite --mode dev_online
+      && true
+      '
+      # Note: The '&& true' above (which is never reached), is needed for Ctrl-C to work, to terminate execution.
+      #   If you know of a 'sh' flag that would do the same (wrap the command instead of executing it straight), let
+      #   the author know.. #hack
+
     environment:
       - MODE=online
       #- ENV=${ENV:-staging}

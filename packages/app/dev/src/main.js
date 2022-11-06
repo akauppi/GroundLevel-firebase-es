@@ -8,6 +8,8 @@ import { getAuth, connectAuthEmulator, initializeAuth, debugErrorMap } from '@fi
 import { getFirestore, initializeFirestore, connectFirestoreEmulator,
   setLogLevel as firestore_setLogLevel } from '@firebase/firestore'
 
+import { projectId } from '/@firebase.config.json'
+
 const LOCAL = import.meta.env.MODE === "dev_local";
 
 function fail(msg) { throw new Error(msg) }
@@ -28,15 +30,13 @@ async function initFirebaseLocal() {   // () => Promise of ()
 
   assert(LOCAL);
 
-  console.info("Initializing for LOCAL EMULATION", { host });
-
-  const projectId = import.meta.env.VITE_PROJECT_ID;
+  console.info("Initializing for LOCAL EMULATION", { host, projectId });
 
   // Cypress needs "long polling" for the Firestore WebChannel interface to work ('firebase-tools' 11.11.0;
   // '@firebase/firestore' 3.5.0; Cypress 10.8.0).
   //
-  // Note: Cypress can be used both on the 'make dev' hosted front end (Cypress desktop) _and_ the headless variant
-  //    ('make test'). Therefore, it's best we detect the need here at runtime instead of launch configuration (.env files).
+  // Note: Cypress can be used both on the 'make dev' hosted front end (Cypress desktop), and the headless variant
+  //    ('make test'). Which means we should check this at runtime.
   //
   //  References:
   //    - Comment in 'firebase-js-sdk' #4917 -> https://github.com/firebase/firebase-js-sdk/issues/4917#issuecomment-842481510
@@ -66,7 +66,7 @@ async function initFirebaseLocal() {   // () => Promise of ()
   (firestorePort && authPort) ||
     fail( `[INTERNAL ERROR] Some Firebase param(s) are missing: ${ [firestorePort, authPort] }`);
 
-  const FIRESTORE_PORT = parseInt(firestorePort);           // 6769
+  const FIRESTORE_PORT = parseInt(firestorePort);           // 6768
   const AUTH_URL = `http://${host}:${authPort}`;            // "http://emul:9101"
 
   const firestore = !FORCE_FIRESTORE_LONG_POLLING ? getFirestore() :
@@ -113,15 +113,10 @@ async function initFirebaseLocal() {   // () => Promise of ()
 * Running against an online project
 */
 async function initFirebaseOnline() {
-  const [apiKey, appId, authDomain, projectId, databaseURL] = [
-    import.meta.env.VITE_API_KEY,
-    import.meta.env.VITE_APP_ID,      // needed only for Firebase Performance Monitoring
-    import.meta.env.VITE_AUTH_DOMAIN,
-    import.meta.env.VITE_PROJECT_ID,
-    import.meta.env.VITE_DATABASE_URL   // optional; keep
-  ];
+  const {apiKey, appId, authDomain, databaseURL} = await import("/@firebase.config.json");
 
-  assert(apiKey && appId && authDomain && projectId, "Some Firebase param(s) are missing");
+  (apiKey && appId && authDomain && projectId && databaseURL) || (_ => { debugger })();
+    // tbd.: disable the IDE lint warning (these are only for development; neat to get right into debugger)
 
   initializeApp( { apiKey, appId, authDomain, projectId, databaseURL } );
 }
@@ -130,13 +125,12 @@ async function initFirebaseOnline() {
 //
 //  Chrome    full support
 //  Safari    15.5 supports, but errors within the Promise were silently eaten.
-//            15.6 full support
+//            15.6 full support (claimed)
+//            16.1 errors not raised if a worker had a problem. CHROME SHOWS SUCH ERRORS MORE RELIABLY
 //  Firefox   tbd. NOT TESTED
 //  Edge      tbd. NOT TESTED
 //
 
-// Note: top level awaits
-//
 if (LOCAL) {
   await initFirebaseLocal();
 } else {

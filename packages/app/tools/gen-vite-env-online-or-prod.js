@@ -1,5 +1,5 @@
 /*
-* tools/gen-vite-env-prod.js
+* tools/gen-vite-env-online-or-prod.js
 *
 * Prepare content for '.env' file for a production build.
 *

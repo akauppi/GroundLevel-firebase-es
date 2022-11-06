@@ -20,7 +20,6 @@ services:
       - ./src:/work/src:ro
       - ./prod:/work/prod:ro
       - ./public:/work/public:ro
-      #R- ../../firebase.${ENV:-staging}.js:/work/firebase.config.js:ro
       - ./tmp/firebase.${ENV:-staging}.config.json:/work/firebase.config.json:ro
       - ./tmp/.env.${ENV:-staging}:/work/.env:ro
       # --- Output

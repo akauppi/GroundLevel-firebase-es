@@ -42,11 +42,15 @@ document.title = appTitle;
 const LOCAL = import.meta.env.MODE === 'dev_local';
 const DEV = import.meta.env.MODE !== 'production';
 
-//const SENTRY_DSN= import.meta.env.VITE_SENTRY_DSN;   // undefined | string
-//const SENTRY_SAMPLE_RATE= import.meta.env.VITE_SENTRY_SAMPLE_RATE;   // undefined (dev) | 0.0..1.0 (CI production builds)
+const STAGE = import.meta.env.VITE_STAGE;
+  // undefined      dev
+  // "dev.<stage>"  dev:online
+  // "<stage>"      production
 
-const STAGE = import.meta.env.VITE_STAGE;   // undefined (dev; manual build) | "staging"|... ('first' or CI production build)
-const RELEASE = import.meta.env.VITE_RELEASE;    // undefined (dev; manual build) | "<git commit checksum>" (CI build) | "0" ('first' production build)
+const RELEASE = import.meta.env.VITE_RELEASE;
+  // undefined                dev; manual build
+  // "0"                      manual production build (no track to sources)
+  // "<git commit checksum>"  automated build
 
 //const PLAUSIBLE_DEV_DOMAIN = import.meta.env.VITE_PLAUSIBLE_DEV_DOMAIN;   // Place this in '.env' to enable Plausible Analytics collection on 'dev:online'.
 //const PLAUSIBLE_ENABLED = import.meta.env.VITE_PLAUSIBLE_ENABLED;
@@ -149,44 +153,6 @@ async function init() {    // () => Promise of ()
   }***/
 
   initPerf.lap("Firebase Performance initialized");
-
-  // Initialize Sentry
-
-  /*** disabled, for now
-  if (SENTRY_DSN) {
-    Sentry_init({
-      dsn: SENTRY_DSN,
-      integrations: [new BrowserTracing(/_*{
-        tracingOrigins: [ "localhost" /_*, "your.site.com*_/, /^\// ]     // default: ["localhost", /^\//]
-      }*_/)],
-
-      tracesSampleRate: LOCAL ? 1.0
-        : DEV ? 1.0   // tbd. tune 'dev:online' sampling rate
-        : 0.8,        // tbd. tune production sampling rate (from config)
-
-      maxBreadCrumbs: 50,	  // default: 100
-      debug: DEV,
-
-      release: RELEASE,
-
-      sampleRate: SENTRY_SAMPLE_RATE ?? 1.0,    // Sampling for non-traces (1.0 = default)
-
-      environment: STAGE || import.meta.env.MODE   // "staging" | ... | "dev-local" | "dev-online"
-    });
-
-    // tbd. Is there a way to know (from Sentry), whether initialization succeeded (i.e. did it gain a connection to
-    //    its backend)?   i.e. don't say "initialized" if the DSN was rejected.
-
-    watchUid( uid => {
-      Sentry_setUser(uid);
-    });
-
-    console.debug("Sentry initialized");
-
-  } else if (DEV) {
-    console.debug("Sentry not configured; build with 'SENTRY_DSN' env.var. defined to use it.");
-  }
-  ***/
 
   /*** disabled / not needed?
   // Set an error handler.

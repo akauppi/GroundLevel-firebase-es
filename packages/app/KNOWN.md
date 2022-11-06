@@ -94,3 +94,32 @@ $ make test
 Not sure, why.
 
 Just retry, and they should pass.
+
+
+## Firefox: warning with `make dev`
+
+Firefox 107-108 don't support ES modules from a worker constructed with `Worker()`.
+
+Vite (3.2.2) docs say this:
+
+>The worker script can also use `import` statements instead of `importScripts()` - note during dev this relies on browser native support and currently only works in Chrome, but for the production build it is compiled away. <sub>[source](https://vitejs.dev/guide/features.html#web-workers)</sub>
+
+
+**Situation in Nov'22** (Vite 3.2.2.)
+
+||console output|workers&nbsp;ship|
+|---|---|---|
+|Chrome&nbsp;107|(nothing)|yes &check;|
+|Safari&nbsp;16.1|(nothing)|yes &check;|
+|Firefox&nbsp;106|`SyntaxError: import declarations may only appear at top level of a module`|no|
+|Edge|not tried|
+
+This could be fixed by using traditional (non-ES) web workers, but the author's not taking that route, unless the severity of this is shown..
+
+- We might not need workers, after all? (depends on Grafana Cloud)
+- This might (likely does?) only affect development, not production?
+  - [ ] check the above (load deployed site with Firefox)
+
+Here's the [caniuse](https://caniuse.com/mdn-api_worker_worker_ecmascript_modules).
+
+>Note: Vite may compile this out, in production builds. In that case, we just don't support using Firefox in development.

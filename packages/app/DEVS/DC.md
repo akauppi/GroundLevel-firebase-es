@@ -33,7 +33,6 @@ To counter these, consider splitting the DC file, providing defaults: `${PORT:-}
 service:
   xyz:
     environment:
-    - SENTRY_DSN
     - MODE=abc
 ```
 

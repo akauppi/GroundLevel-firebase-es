@@ -25,9 +25,6 @@ _ENV_TEST=tmp/.env.dev_test
 _ENV_PROD=tmp/.env.$(ENV)
 _ENV_CI_TEST=tmp/.env.ci_test
 
-# Custom environment additions (not needed for local/CI)
-_CUSTOM_ENV_ONLINE=.env.dev.$(ENV)
-
 _DC=docker compose
 
 all:
@@ -38,7 +35,7 @@ install:
 
 #--- Dev:local
 dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
-	PORT=3000 $(_DC) -f docker-compose.local.yml run --rm --service-ports vite-dev
+	PORT=3000 PROJECT_ID=demo-main $(_DC) -f docker-compose.local.yml run --rm --service-ports vite-dev
 
 # DEBUG
 \:up: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
@@ -53,7 +50,7 @@ _emulRunning:
 	(cd ../backend && $(MAKE) app:start)
 
 #--- Dev:online
-dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) ../../firebase.$(ENV).js
+dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) tmp/firebase.$(ENV).config.json
 	PORT=3001 $(_DC) -f docker-compose.online.yml run --rm --service-ports vite-online
 
 #--- Test
@@ -61,54 +58,50 @@ dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) ../../firebase.$(ENV).js
 # Note: 'make test' doesn't need priming; that's for 'make dev'.
 #
 test: $(_VITE_DEV_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulRunning
-	PORT=3005 $(_DC) -f dc.cypress.yml run --rm run_tests
+	PORT=3005 PROJECT_ID=demo-main $(_DC) -f dc.cypress.yml run --rm run_tests
 	@# The port number doesn't really matter (not exposed to the host)
 
 # tbd. 'PORT' from a file (make loading the Makefile load those)
 
 #--- Lint
 
-dev\:lint: ../../node_modules/.bin/eslint
-	@../../node_modules/.bin/eslint --ext .js,.vue src || true
-	# tbd. eventually, run via DC (and keep separate native target for CI, in 'package.json')
+\:lint: ../../node_modules/.bin/eslint
+	@../../node_modules/.bin/eslint --ext .js,.vue dev prod src || true
+	@# tbd. eventually, run via DC (and keep separate native target for CI, in 'package.json')
+	@# Note: 'dev' and 'prod' mixed in one; deal with it #later
 
 #--- Build
 build: $(_BUILD_DC) $(_STATS_HTML) tmp/firebase.$(ENV).config.json
 	ENV=$(ENV) $(_DC) -f docker-compose.prod.build.yml run --rm build
 
-tmp/firebase.$(ENV).config.json: ../../firebase.$(ENV).js
-	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
-
 #--- Serve
 \:serve: $(_SERVE_DC)
 	$(_DC) -f dc.prod.serve.yml run --rm --service-ports serve
 
+#--- Vite configurations
+#
+tmp/firebase.$(ENV).config.json: ../../firebase.$(ENV).js
+	@STAGE=$(ENV) node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
+
 #--- Vite environments
 #
 $(_ENV_LOCAL): tools/gen-vite-env-local.js ../backend/firebase.app.js
-	EMUL_HOST=localhost node $< --project=demo-main > $@
+	EMUL_HOST=localhost node $< > $@
 	@# no override needed
 
-$(_ENV_ONLINE): tools/gen-vite-env-online.js $(_CUSTOM_ENV_ONLINE) ../../firebase.$(ENV).js
-	ENV=$(ENV) node $< > $@
-	cat $(_CUSTOM_ENV_ONLINE) >> $@
+$(_ENV_ONLINE): tools/gen-vite-env-online-or-prod.js
+	ENV=dev.$(ENV) node $< > $@
 
 $(_ENV_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.js
-	EMUL_HOST=emul-for-app node $< --project=demo-main > $@
+	EMUL_HOST=emul-for-app node $< > $@
 	@# no override needed
 
-$(_ENV_PROD): tools/gen-vite-env-prod.js $(_CUSTOM_ENV)
+$(_ENV_PROD): tools/gen-vite-env-online-or-prod.js
 	ENV=$(ENV) node $< > $@
-	cat $(_CUSTOM_ENV) >> $@
 
 $(_ENV_CI_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
 	FIREBASE_APP_JS=../backend/firebase.app.ci.js EMUL_HOST=emul-for-app node $< --project=demo-main > $@
 	@# no override needed
-
-# If no custom env file, use a template.
-#
-$(_CUSTOM_ENV_ONLINE) $(_CUSTOM_ENV): optional.env.txt
-	@cp $< $@
 
 #--- Build DC images
 #
@@ -188,10 +181,14 @@ endif
 echo:
 	@echo $(ENV)
 
-.PHONY: all echo \
+.PHONY: all install \
   dev _emulPrimed _emulRunning \
+  dev\:online \
   test \
   build \
-  serve \
+  \:lint \
+  \:serve \
+  prep-cy-open \
   down-all \
-  prune
+  prune \
+  echo

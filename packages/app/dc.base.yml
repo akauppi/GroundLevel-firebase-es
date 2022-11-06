@@ -59,16 +59,7 @@ services:
       #- ${HOME}/Git/aside-keys/package:/work/node_modules/aside-keys:ro
 
     working_dir: /work
-    command: sh -c
-      'vite --mode dev_$$MODE 
-        && true
-      '
-        # Note: The '&& true' above (which is never reached), is needed for Ctrl-C to work, to terminate execution.
-        #   If you know of a 'sh' flag that would do the same (wrap the command instead of executing it straight), let
-        #   the author know.. #hack
-
     environment:
-      #- MODE=x   # defined in 'docker-compose.{local|online}.yml'
       - PORT
         # Pass 'PORT' to inside DC, at least 'vite.config.js'
 
