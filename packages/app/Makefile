@@ -89,15 +89,15 @@ $(_ENV_LOCAL): tools/gen-vite-env-local.js ../backend/firebase.app.js
 	EMUL_HOST=localhost node $< > $@
 	@# no override needed
 
-$(_ENV_ONLINE): tools/gen-vite-env-online-or-prod.js
-	ENV=dev.$(ENV) node $< > $@
+$(_ENV_ONLINE):
+	@echo "VITE_STAGE=dev.$(ENV)" > $@
 
 $(_ENV_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.js
 	EMUL_HOST=emul-for-app node $< > $@
 	@# no override needed
 
-$(_ENV_PROD): tools/gen-vite-env-online-or-prod.js
-	ENV=$(ENV) node $< > $@
+$(_ENV_PROD):
+	@echo "VITE_STAGE=$(ENV)" > $@
 
 $(_ENV_CI_TEST): tools/gen-vite-env-local.js ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
 	FIREBASE_APP_JS=../backend/firebase.app.ci.js EMUL_HOST=emul-for-app node $< --project=demo-main > $@
