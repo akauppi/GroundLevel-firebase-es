@@ -51,8 +51,7 @@ services:
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro
         #
-      - ../backend/firebase.app.js:/work/firebase.app.js:ro
-        # ^-- map to /work, so ESM scope covers it
+      - ./tmp/firebase.app.js:/work/firebase.app.js:ro
       # --- output
       - ./.screenshots:/work/.screenshots:delegated
     environment:

@@ -42,9 +42,9 @@ dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
 \:up: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
 	PORT=3000 $(_DC) -f docker-compose.local.yml up vite-dev
 
-# Make sure emulators are running, with data primed for 'dev' and 'test'
-_emulPrimed: $(_PRIME_DC) _emulRunning
-	$(_DC) -f docker-compose.tools.local.yml run --rm prime
+# Make sure emulators are running, with data primed for 'dev'
+_emulPrimed: $(_PRIME_DC) tmp/firebase.app.js _emulRunning
+	$(_DC) -f docker-compose.local.prime.yml run --rm prime
 
 # Make sure emulators are running
 _emulRunning:
@@ -58,7 +58,7 @@ dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) tmp/firebase.$(ENV).config.json
 
 # Note: 'make test' doesn't need priming; that's for 'make dev'.
 #
-test: $(_VITE_TEST_DC) $(_CYPRESS_DC) $(_ENV_TEST) _emulRunning
+test: $(_VITE_TEST_DC) $(_CYPRESS_DC) $(_ENV_TEST) tmp/firebase.app.js _emulRunning
 	PORT=3005 PROJECT_ID=demo-main $(_DC) -f dc.cypress.yml run --rm run_tests
 	@# The port number doesn't really matter (not exposed to the host)
 
@@ -125,7 +125,7 @@ $(_VITE_TEST_DC): tools/vite.dc/Dockerfile
 # Any change to 'tools/prime.dc/**' triggers a build
 #
 $(_PRIME_DC): tools/prime.dc/Dockerfile $(shell find tools/prime.dc -type f)
-	$(_DC) -f docker-compose.tools.local.yml build prime
+	$(_DC) -f docker-compose.local.prime.yml build prime
 	touch $@
 
 $(_BUILD_DC): tools/vite.dc/Dockerfile
@@ -152,6 +152,12 @@ $(_STATS_HTML):
 #--- Misc
 firebase.json: firebase.hosting.js
 	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o, null, 2));" > $@
+
+# Note: DC can map to '../backend/firebase.app.js' directly, but implies that it doesn't import any other files. This
+#		makes a "flat" copy of its contents.
+#
+tmp/firebase.app.js: ../backend/firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log('export default '+ JSON.stringify(o));" > $@
 
 #--- CI
 tmp/firebase.app.ci.js: ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
