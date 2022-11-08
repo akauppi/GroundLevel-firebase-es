@@ -12,7 +12,7 @@ Note: We won't need it, until `firebase-functions` runs with ESM. And even then,
 
 ## Node 18 support for `firebase-functions`
 
-- [ ] When available, pump up `functions/package.json`.
+- [ ] When available, pump up `functions/package.json`.
 
 	<!-- No ticket, as of 6-Jun-22: https://github.com/firebase/firebase-functions/issues?q=is%3Aissue+is%3Aopen+18 -->
 
@@ -88,3 +88,12 @@ Grouped together; unrelated (but all having to do with Cloud Functions v2):
 
 - [ ] ["[Beta] Region, CPU, memory, secrets options not available for scheduled functions (v2)"](https://github.com/firebase/firebase-functions/issues/1285)
 - [ ] ["[Beta] CPU control of httpsCallable's doesn't seem to work (CPU < 1)"](https://github.com/firebase/firebase-functions/issues/1288)
+
+
+## ESLint support for importing JSON
+
+- [ ] ["Support of `assert {type: "json"}`"](https://github.com/eslint/eslint/discussions/15305)
+
+	ESLint only supports "stage 4" features. Import assertions are (Nov'22) [on stage 3](https://github.com/tc39/proposal-import-assertions). 
+	
+	- [ ] Once implemented in ESLint, remove `.eslintignore`

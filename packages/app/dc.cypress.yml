@@ -27,13 +27,11 @@ services:
 
     volumes:
       # --- RO
-      #- ../backend/firebase.app.js:/work/firebase.app.js:ro
       - ./tmp/.env.dev_test:/work/.env:ro
+      - ./tmp/local.config.json:/work/firebase.config.json:ro   # for web app
     environment:
       - MODE=local
     command: sh -c '
-      echo "{ \"projectId\":\"$PROJECT_ID\" }" > firebase.config.json &&
-
       vite --mode dev_local
       '
     profiles: ['manual']
@@ -51,14 +49,14 @@ services:
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro
         #
-      - ./tmp/firebase.app.js:/work/firebase.app.js:ro
+      #- ./tmp/firebase.app.json:/work/firebase.app.json:ro
+      - ./tmp/local.config.json:/work/tmp/local.config.json:ro    # for Cypress; needs to be same relative path as for Desktop Cypress
       # --- output
       - ./.screenshots:/work/.screenshots:delegated
     environment:
       - CYPRESS_defaultCommandTimeout=10000
       - CYPRESS_baseUrl=http://vite-dev-for-test:${PORT}
-      - FIREBASE_APP_JS=firebase.app.js
-      - EMUL_HOST=emul-for-app
+      #- EMUL_HOST=emul-for-app
     working_dir: /work
     command: sh -c '
       cypress run

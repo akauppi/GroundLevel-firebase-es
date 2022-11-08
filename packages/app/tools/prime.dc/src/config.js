@@ -3,7 +3,7 @@
 */
 let projectId, host;
 
-const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || 'firebase.app.js';
+const FIREBASE_APP_JS = process.env['FIREBASE_APP_JS'] || '../firebase.app.js';
 const [firestorePort, authPort] = await import(FIREBASE_APP_JS).then( mod => {
   const o = mod.default?.emulators;
 

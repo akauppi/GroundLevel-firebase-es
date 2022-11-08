@@ -19,7 +19,6 @@ services:
       service: emul
     volumes:
       #--- RO
-      # '/work/firebase.json' overrides that in 'docker-compose.ci.yml'
       - ./tmp/firebase.app.ci.json:/work/firebase.json:ro
       - ./database.rules.app.json:/work/database.rules.app.json:ro
       #--- Output
@@ -45,12 +44,26 @@ services:
     network_mode: cloudbuild
     container_name: emul-for-app
 
-  emul-for-app-launched:
-    image: node:16-alpine
-    command: sh -c true
+  emul-for-app-warmed-up:
+    image: node:18-alpine
+    volumes:
+      # --- RO
+      - ./dc/waky-waky:/work/waky-waky:ro
+      - ./tmp/firebase.app.ci.json:/work/firebase.app.json:ro
+
+    working_dir: /work
+    command: sh -c '
+      echo "{ \"type\":\"module\" }" > package.json &&
+      
+      node waky-waky/index.js metrics-and-logging-proxy-v0
+      '
+    environment:
+      - EMUL_HOST=emul-for-app
+      - PROJECT_ID=demo-main
     depends_on:
       emul-for-app:
         condition: service_healthy
 
-    container_name: emul-for-app-launched   # just for logs
+    network_mode: cloudbuild                  # so 'emul-for-app' is seen
+    container_name: emul-for-app-warmed-up    # just for logs
     profiles: ['manual']

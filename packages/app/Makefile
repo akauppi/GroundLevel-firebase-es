@@ -35,7 +35,7 @@ install:
 	npm install --omit=optional --omit=peer
 
 #--- Dev:local
-dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
+dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) tmp/local.config.json _emulPrimed
 	PORT=3000 PROJECT_ID=demo-main $(_DC) -f docker-compose.local.yml run --rm --service-ports vite-dev
 
 # DEBUG
@@ -43,7 +43,7 @@ dev: $(_VITE_DEV_DC) $(_ENV_LOCAL) _emulPrimed
 	PORT=3000 $(_DC) -f docker-compose.local.yml up vite-dev
 
 # Make sure emulators are running, with data primed for 'dev'
-_emulPrimed: $(_PRIME_DC) tmp/firebase.app.js _emulRunning
+_emulPrimed: $(_PRIME_DC) tmp/firebase.app.json _emulRunning
 	$(_DC) -f docker-compose.local.prime.yml run --rm prime
 
 # Make sure emulators are running
@@ -58,8 +58,8 @@ dev\:online: $(_VITE_ONLINE_DC) $(_ENV_ONLINE) tmp/firebase.$(ENV).config.json
 
 # Note: 'make test' doesn't need priming; that's for 'make dev'.
 #
-test: $(_VITE_TEST_DC) $(_CYPRESS_DC) $(_ENV_TEST) tmp/firebase.app.js _emulRunning
-	PORT=3005 PROJECT_ID=demo-main $(_DC) -f dc.cypress.yml run --rm run_tests
+test: $(_VITE_TEST_DC) $(_CYPRESS_DC) $(_ENV_TEST) tmp/local.config.json _emulRunning
+	PORT=3005 COMPOSE_IGNORE_ORPHANS=true $(_DC) -f dc.cypress.yml run --rm run_tests
 	@# The port number doesn't really matter (not exposed to the host)
 
 # tbd. 'PORT' from a file (make loading the Makefile load those)
@@ -81,6 +81,14 @@ build: $(_BUILD_DC) $(_STATS_HTML) tmp/firebase.$(ENV).config.json
 
 #--- Vite configurations
 #
+
+# Like 'firebase.{stage}.config.json' but only carries: { projectId, databaseURL }
+tmp/local.config.json: tools/gen-config-local.js ../backend/firebase.app.js
+	@PROJECT_ID=demo-main EMUL_HOST=emul-for-app node $< > $@
+
+tmp/local.config.ci.json: tools/gen-config-local.js ../backend/firebase.app.ci.js
+	@FIREBASE_APP_JS=../backend/firebase.app.ci.js PROJECT_ID=demo-main EMUL_HOST=emul-for-app node $< > $@
+
 tmp/firebase.$(ENV).config.json: ../../firebase.$(ENV).js
 	@STAGE=$(ENV) node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
 
@@ -156,12 +164,17 @@ firebase.json: firebase.hosting.js
 # Note: DC can map to '../backend/firebase.app.js' directly, but implies that it doesn't import any other files. This
 #		makes a "flat" copy of its contents.
 #
-tmp/firebase.app.js: ../backend/firebase.app.js
-	@node --input-type=module -e "import o from './$<'; console.log('export default '+ JSON.stringify(o));" > $@
+tmp/firebase.app.json: ../backend/firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
 
 #--- CI
-tmp/firebase.app.ci.js: ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
-	@node --input-type=module -e "import o from './$<'; console.log('export default '+ JSON.stringify(o));" > $@
+tmp/firebase.app.ci.json: ../backend/firebase.app.ci.js ../backend/firebase.ci.js ../backend/firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify(o));" > $@
+
+# Fake config, used in CI build.
+#
+fake.config.json:
+	@echo "{ \"projectId\": \"\" }" > $@
 
 #---
 # Cypress on Windows + WSL2: Prepare the visibility of Node modules so that 'cypress open' process can see them.

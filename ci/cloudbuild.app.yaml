@@ -43,19 +43,19 @@ steps:
     npm --prefix packages/app install --omit=optional --omit=peer &&
 
     (cd packages/app && 
-      make tmp/.env.ci_test tmp/firebase.app.ci.js &&
-      node --input-type=module -e "import o from ''./tmp/firebase.app.ci.js''; console.log(JSON.stringify(o));" > tmp/firebase.app.ci.json
+      make tmp/.env.ci_test tmp/firebase.app.ci.json tmp/local.config.ci.json fake.config.json
     )
   ']
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
-  #   - packages/app/tmp/.env.ci_test             has been created
-  #   - packages/app/tmp/firebase.app.ci.js[on]   have been created   (JSON only used by Firebase emulators)
+  #   - packages/app/tmp/.env.ci_test             has been created    (for front end)
+  #   - packages/app/tmp/firebase.app.ci.json     has been created    (for Firebase Emulators, Cypress, 'waky-waky')
+  #   - packages/app/tmp/local.config.js.json     has been created    (for front end; Cypress)
+  #   - packages/app/fake.config.json             has been created    (for build test)
   #
-  #     Note: Ports are in three places: 'tmp/firebase.ci.js' for Cypress, 'tmp/firebase.ci.json' for Firebase Emulators,
-  #           and 'tmp/.env.ci_test' for the front-end.
+  #     Note: Ports are in two places: 'tmp/firebase.app.ci.json' and 'tmp/.env.ci_test' (for front end).
 
 # DEBUG, TERMINAL:
 #
@@ -77,7 +77,7 @@ steps:
 # Note: No priming of data & users is needed (that's for "dev", we only do "npm test").
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-launched']
+  args: ['-f', 'docker-compose.app.ci.yml', 'run', 'emul-for-app-warmed-up']
   dir: packages/backend
   env:
     - CI_BUILDER_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/firebase-emulators:${_BUILDER_TAG}
@@ -108,7 +108,7 @@ steps:
 #|  env:
 #|    - VITE_PORT=3002
 
-# Launch Vite (optional; provides better debugging and earlier fail, having this as a separate step).
+# Launch Vite (optional, but provides better debugging info and earlier fail, if something's wrong with Vite.js).
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
   args: ['-f', 'dc.cypress.ci.yml', 'run', 'vite-dev-ci-launched']
@@ -142,28 +142,16 @@ steps:
     - VITE_PORT=3002
       # precise port does not matter; helps us keep it in one place. #rework
     - CYPRESS_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/cypress-custom:${_CYPRESS_TAG}
-    - EMUL_HOST=emul-for-app
+    #- EMUL_HOST=emul-for-app
 
-#--- Build (fake; just trying it does..)
-#
-- name: node:${_NODE_VER}-alpine
-  entrypoint: sh
-  args: ['-c', '
-    echo "export default {}" > fake.config.js
-  ']
-  dir: packages/app
-
-  # State:
-  #   - 'fake.config.js' contains a dummy
-
-# Check that a production build passes.
+#--- Build (fake; just trying it does)
 #
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.tools.ci.yml', 'run', 'build']
+  args: ['-f', 'docker-compose.prod.build.ci.yml', 'run', 'build']
   dir: packages/app
   env:
     - RELEASE=
-    - FIREBASE_SERVER_CONFIG_JS=./fake.config.js
+    - FIREBASE_CONFIG_JSON=fake.config.json
 
 - name: node:${_NODE_VER}-alpine
   entrypoint: sh
@@ -193,7 +181,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 5:46
+# Cloud Build: 5:03, 5:46
 #   (earlier): 5:36, 5:10, 6:01, 4:56
 #
 timeout: 600s
@@ -206,7 +194,6 @@ substitutions:
   _CYPRESS_TAG: 10.11.0
     # https://hub.docker.com/r/cypress/included/tags?page=1&ordering=last_updated
   _AR_FOLDER: builders
-  #_FIREBASE_ADMIN_VER: 11.1.0
   _GS_TOUCH_PATH: gs://ci-builder_cloudbuild/.passed.app    # where successful tests are marked
   _MY_BUILDER: ci-builder
   #_FIREBASE_EMULATORS: firebase-emulators

@@ -10,25 +10,19 @@
 import { initializeApp } from 'firebase-admin/app'
 import { getDatabase } from 'firebase-admin/database'
 
+//import { databaseURL } from '../../tmp/local.config.json' assert { type: 'json' }   // does NOT WORK (ES import of JSON doesn't seem to support this)
+  // available both in Desktop Cypress and DC ('make test')
+
+import o from '../../tmp/local.config.json' assert { type: 'json' };
+const { databaseURL } = o;
+  // available both in Desktop Cypress and DC ('make test')
+
+  // tbd. How come Desktop Cypress sees 'emul-for-app' (but it does)
+
 function fail(msg) { throw new Error(msg) }
 
-const PROJECT_ID = "demo-main";   // tbd. from central location
-
-const FIREBASE_APP_JS = process.env["FIREBASE_APP_JS"]  // DC: 'firebase[.app].ci.js' (CI) / 'firebase.js' (both mapped in DC)
-  || '../backend/firebase.app.js';            // Desktop Cypress
-
-const EMUL_HOST = process.env["EMUL_HOST"]    // DC ('make test'): direct to "emul-for-app"
-  || "localhost";                             // Desktop Cypress
-
-const DATABASE_URL = await import("../../"+ FIREBASE_APP_JS).then( mod => mod.default.emulators?.database?.port )
-  .then( databasePort => {
-  databasePort || fail("Unable to read Realtime Database port");
-
-  return `http://${ EMUL_HOST }:${databasePort}?ns=${PROJECT_ID}`;   // note: '?ns=...' is required!
-});
-
 const db = (_ => {
-  const app = initializeApp({ databaseURL: DATABASE_URL });
+  const app = initializeApp({ databaseURL });
   return getDatabase(app);
 })();
 

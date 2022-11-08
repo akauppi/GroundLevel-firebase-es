@@ -41,17 +41,12 @@ steps:
     npm config set update-notifier false &&
 
     npm install &&
-    npm --prefix packages/backend install &&
-    
-    (cd packages/backend &&
-      make tmp/firebase.ci.js &&
-      node --input-type=module -e "import o from ''./tmp/firebase.ci.js''; console.log(JSON.stringify(o));" > tmp/firebase.ci.json
-    )
+    npm --prefix packages/backend install
   ']
 
   # State:
   #   - packages/backend/functions/node_modules   have been populated
-  #   - packages/backend/tmp/firebase.ci.js[on]   have been created    (JSON used only by 'firebase-tools')
+  #   - packages/backend/tmp/firebase.ci.json     has been created
   #   - packages/backend/{firebase|firestore}-debug.log      created, so DC can map them
 
 # DEBUG, TERMINAL:
@@ -141,7 +136,7 @@ steps:
 # --- Timeout
 #
 # Pre-built 'ci-builder':
-#   - warm-up of functions (default CPU):   2:01, 2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59, 1:33
+#   - warm-up of functions (default CPU):   1:55, 2:01, 2:06, 1:43, 1:54, 1:50, 2:11, 2:04, 1:59, 1:33
 #
 # Note: Using '--machine-type=n1-highcpu-8' speeds up the runs by ~-30%:  1:28
 #

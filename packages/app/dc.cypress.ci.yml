@@ -26,6 +26,7 @@ services:
       - ./dev:/work/dev:ro
       #- ./package.json:/work/package.json:ro              # 'ci:launch' is there
       - ./tmp/.env.ci_test:/work/.env:ro
+      - ./tmp/local.config.ci.json:/work/firebase.config.json:ro   # for web app
       #
       - ./vite.config.js:/work/vite.config.js:ro
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
@@ -84,14 +85,14 @@ services:
       - ./package.json:/work/package.json:ro
       - ./node_modules:/work/node_modules:ro
       #
-      - ./tmp/firebase.app.ci.js:/work/firebase.app.js
+      #- ./tmp/firebase.app.ci.json:/work/firebase.app.json
+      - ./tmp/local.config.ci.json:/work/tmp/local.config.json:ro   # needs to be in the same relative path as for Desktop Cypress
       # --- output
       #- ./.screenshots:/work/.screenshots:delegated
     environment:
       - CYPRESS_defaultCommandTimeout=20000
       - CYPRESS_baseUrl=http://vite:${VITE_PORT}
-      - FIREBASE_APP_JS=firebase.app.js
-      - EMUL_HOST   # pass-through
+      #- EMUL_HOST   # pass-through
     working_dir: /work
     command: sh -c '
         cypress run

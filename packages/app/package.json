@@ -22,7 +22,7 @@
     "preinstall": "(echo \"${npm_config_omit}\" | grep -q peer) || ( echo >&2 \"***\tPlease install with '--omit=peer'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
     "_postinstall_dev": "true",
-    "_postinstall_ci": "make firebase.json"
+    "_postinstall_ci": "make tmp/.env.ci_test tmp/firebase.app.ci.json tmp/local.config.js.json fake.config.json firebase.json"
   },
   "dependencies": {
     "aside-keys": "^0.0.3-alpha.2",
@@ -35,11 +35,10 @@
   },
   "//dependencies": {
     "@firebase/performance": "^0.5.12",
-    "@sentry/browser": "^7.0.0",
-    "@sentry/tracing": "^7.0.0",
     "plausible-tracker": "^0.3.5"
   },
   "devDependencies": {
+    "@types/node": "^18.11.9",
     "@vitejs/plugin-vue": "^3.2.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-vue": "^9.7.0",
@@ -75,6 +74,9 @@
         "In a normal install, the '@vitejs/plugin-vue' dependency would bring in vite (and esbuild, rollup) as peer dependencies.",
         "We don't want that, since Vite already comes via a Docker image. On the other hand, '@vitejs/plugin-vue' deserves",
         "to be right here, since it is specific to the front-end framework used (Vue 3)."
+      ],
+      "postinstall": [
+        "CI: Prepares files for both the testing and the deployment runs, each time."
       ]
     }
   }

@@ -26,7 +26,7 @@
     "@google-cloud/firestore": "^6.4.1",
     "firebase-admin": "^11.2.0",
     "firebase-jest-testing": "^0.0.5-beta.4",
-    "jest": "^29.2.2"
+    "jest": "^29.3.0"
   },
   "//devDependencies": {
     "firebase-jest-testing": "file:../../../firebase-jest-testing/package"
@@ -43,7 +43,7 @@
         "We welcome these in the same, humble 'package.json'. Running CI is a lot like native development."
       ],
       "_postinstall_ci": [
-        "Preparing for either backend or app CI tests. We'll only need one, but it's simplest this way (instead of CI_APP=1)."
+        "Preparing for either backend or app CI tests. We'll only need one, but it's simplest this way."
       ]
     }
   }

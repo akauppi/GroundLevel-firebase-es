@@ -10,13 +10,13 @@
 //  - CYPRESS_baseUrl=$VITE_URL
 //
 // Environment variables (employed for the headless runs; Desktop Cypress uses defaults):
-//    - FIREBASE_APP_JS   defaults to '../backend/firebase.app.js'
 //    - EMUL_HOST         defaults to 'localhost'
 //
 import { defineConfig } from 'cypress'
 import { task_getIncoming } from './cypress/e2e/getIncoming.task.js'
 
-// tbd. Could see if we can pass custom config via this file, gathering all env.var. use here ('FIREBASE_APP_JS', 'EMUL_HOST').
+// tbd. Could see if we can pass Database URL (the one config differing between 'make test' and Desktop Cypress) as a
+//    custom config via this file, instead of reading env.vars. deeper down.
 
 // Cypress > Configuration
 //  -> https://docs.cypress.io/guides/references/configuration#Configuration-File

@@ -23,11 +23,10 @@ services:
     volumes:
       # --- RO
       - ./local:/work/data:ro
-      - ./tmp/firebase.app.js:/work/firebase.app.js:ro
+      - ../backend/firebase.app.js:/work/firebase.app.js:ro
     command:
       firebase-prime --host host.docker.internal --project demo-main data/docs.js data/users.js
     environment:
-      - FIREBASE_APP_JS=/work/firebase.app.js
       - NODE_NO_WARNINGS=1
         # to suppress:
         #   <<

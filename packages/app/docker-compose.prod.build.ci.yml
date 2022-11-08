@@ -17,7 +17,7 @@ services:
       - ./node_modules:/work/node_modules:ro
       - ./vite.config.js:/work/vite.config.js:ro
       - ./rollup.chunks.js:/work/rollup.chunks.js:ro
-      - ${FIREBASE_SERVER_CONFIG_JS:-./firebase.server.config.js}:/work/firebase.config.js:ro
+      - ./${FIREBASE_CONFIG_JSON:-firebase.config.json}:/work/firebase.config.json:ro
       # --- Sources
       - ./src:/work/src:ro
       - ./prod:/work/prod:ro
@@ -26,8 +26,7 @@ services:
       - ./dist:/work/dist:delegated
       # --- other
       - ../../../branding/favicon.png/:/work/public/favicon.png:ro
-    command: sh -c
-      '
+    command: sh -c '
       echo "VITE_RELEASE=${RELEASE}" >> .env &&
       ([ -z "${SENTRY_DSN:-}" ] || echo "VITE_SENTRY_DSN=${SENTRY_DSN:-}" >> .env) &&
 

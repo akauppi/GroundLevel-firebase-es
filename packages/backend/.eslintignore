@@ -1,0 +1,4 @@
+#
+# TEMPORARY solution, until import assertsions are supported by ESLint (stage 3 in Nov'22).
+#
+/dc/waky-waky/config.js

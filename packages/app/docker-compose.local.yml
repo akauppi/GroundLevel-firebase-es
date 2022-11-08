@@ -3,7 +3,6 @@
 #
 # Expects:
 #   PORT
-#   PROJECT_ID
 #
 # Overlay, for 'npm run dev:local' specificity.
 #
@@ -18,11 +17,9 @@ services:
 
     volumes:
       # --- RO
-      #- ../backend/firebase.app.js:/work/firebase.app.js:ro
       - ./tmp/.env.dev_local:/work/.env:ro
+      - ./tmp/local.config.json:/work/firebase.config.json:ro   # for web app
     command: sh -c '
-      echo "{ \"projectId\":\"$PROJECT_ID\" }" > firebase.config.json &&
-
       vite --mode dev_local &&
         true
       '
