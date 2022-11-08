@@ -22,7 +22,7 @@
     "preinstall": "(echo \"${npm_config_omit}\" | grep -q peer) || ( echo >&2 \"***\tPlease install with '--omit=peer'. We want to avoid local copies of 'vite', 'esbuild*' and 'rollup').\n\tThis has to do with use of Docker Compose to run Vite.\n\"; false )",
     "postinstall": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_dev ; else npm run -s _postinstall_ci ; fi",
     "_postinstall_dev": "true",
-    "_postinstall_ci": "make tmp/.env.ci_test tmp/firebase.app.ci.json tmp/local.config.js.json fake.config.json firebase.json"
+    "_postinstall_ci": "make tmp/.env.ci_test tmp/firebase.app.ci.json tmp/local.config.ci.json fake.config.json firebase.json"
   },
   "dependencies": {
     "aside-keys": "^0.0.3-alpha.2",

@@ -40,11 +40,7 @@ steps:
 
     npm install &&
     npm --prefix packages/backend install &&
-    npm --prefix packages/app install --omit=optional --omit=peer &&
-
-    (cd packages/app && 
-      make tmp/.env.ci_test tmp/firebase.app.ci.json tmp/local.config.ci.json fake.config.json
-    )
+    npm --prefix packages/app install --omit=optional --omit=peer
   ']
 
   # State:
@@ -52,7 +48,7 @@ steps:
   #   - packages/backend/{firebase|firestore|database}-debug.log      created, so DC can map them
   #   - packages/app/tmp/.env.ci_test             has been created    (for front end)
   #   - packages/app/tmp/firebase.app.ci.json     has been created    (for Firebase Emulators, Cypress, 'waky-waky')
-  #   - packages/app/tmp/local.config.js.json     has been created    (for front end; Cypress)
+  #   - packages/app/tmp/local.config.ci.json     has been created    (for front end; Cypress)
   #   - packages/app/fake.config.json             has been created    (for build test)
   #
   #     Note: Ports are in two places: 'tmp/firebase.app.ci.json' and 'tmp/.env.ci_test' (for front end).
@@ -142,7 +138,6 @@ steps:
     - VITE_PORT=3002
       # precise port does not matter; helps us keep it in one place. #rework
     - CYPRESS_IMAGE=us-central1-docker.pkg.dev/${PROJECT_ID}/${_AR_FOLDER}/cypress-custom:${_CYPRESS_TAG}
-    #- EMUL_HOST=emul-for-app
 
 #--- Build (fake; just trying it does)
 #
