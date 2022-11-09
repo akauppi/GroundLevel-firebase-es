@@ -125,8 +125,8 @@ app\:start: $(_EMUL_APP_DC) $(_EMUL_APP_LOGS) tmp/firebase.app.json database.rul
 
 # CI
 #
-ci\:deploy\:firebase.json: firebase.app.js
-	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify({...o, emulators: undefined}));" > firebase.json
+firebase.json: firebase.app.js
+	@node --input-type=module -e "import o from './$<'; console.log(JSON.stringify({...o, emulators: undefined}));" > $@
 
 # Flatten 'firebase.ci.js' so that its dependencies are no longer needed in DC mapping
 #
@@ -186,7 +186,6 @@ echo:
   test \
   start _started \
   app\:start \
-  ci\:deploy\:firebase.json \
   down-all \
   _uses_docker \
   echo

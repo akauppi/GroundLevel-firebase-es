@@ -19,7 +19,7 @@
     "_pi1": "if [ -z $BUILDER_OUTPUT ]; then npm run -s _postinstall_local; else npm run -s _postinstall_ci; fi",
     "_postinstall_local": "true",
     "_postinstall_ci": "npm run -s _pic1 && npm run -s _pic2",
-    "_pic1": "make tmp/firebase.ci.json tmp/firebase.app.ci.json",
+    "_pic1": "make tmp/firebase.ci.json tmp/firebase.app.ci.json firebase.json",
     "_pic2": "touch firebase-debug.log firestore-debug.log database-debug.log"
   },
   "devDependencies": {

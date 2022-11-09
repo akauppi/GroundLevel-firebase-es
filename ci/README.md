@@ -367,6 +367,9 @@ In addition to the above, do these:
 
    >![](.images/service-account-grants.png)
 
+<!-- tbd. If 'Secret Manager Secret Accessor' is needed, edit the picture and mention it above.
+-->
+
 >Hint: Pick up the `Service account email`. You'll need it, shortly.
 </details>
 
@@ -381,6 +384,20 @@ In addition to the above, do these:
 
 >![](.images/add-api-keys-admin.png)
 </details>
+
+<details><summary>Enable `secretmanager.versions.get` role to the Cloud Build service account</summary>
+
+This is needed if your Cloud Functions use `secrets:`. 
+
+Do as above, enabling `Secret Manager Viewer`.
+</details>
+
+<details><summary>Enable `cloudscheduler.jobs.update` role to the Cloud Build service account</summary>
+
+Do as above, enabling `Cloud Scheduler Admin`.
+</details>
+
+>Note: Technical roles (e.g. `cloudscheduler.jobs.update`) don't match 1-to-1 with Console UI roles. The latter are umbrellas that may open multiple technical roles.
 
 <details><summary>Enable access to CI Builder's Artifact Registry</summary>
 
@@ -421,6 +438,7 @@ Your deployment scripts will not be able to see whether tests have passed for a 
 </details>
 
 
+<!-- REMOVE?  If needed, mention in 1st entry
 <details><summary>Allow access to secrets</summary>
 
 Within GCP, the Cloud Build service account doesn't by default have access to read the same project's secrets.
@@ -433,7 +451,7 @@ Within GCP, the Cloud Build service account doesn't by default have access to re
 
 >![](.images/add-secret-access-save.png)
 </details>
-
+-->
 
 ## Enable GitHub / Cloud Build integration (one time only)
 

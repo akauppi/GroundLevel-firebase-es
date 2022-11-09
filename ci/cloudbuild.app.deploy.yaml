@@ -66,12 +66,11 @@ steps:
   entrypoint: sh
   args: ['-c', '
     npm config set update-notifier false &&
+    apk add --update make &&
 
     npm install &&
-    npm --prefix packages/app install --omit=optional --omit=peer &&
-    ls -al && false
+    npm --prefix packages/app install --omit=optional --omit=peer
   ']
-    # Note: '--omit=optional' does not matter, in practise (the idea was to not pull in Vite).
 
   # State:
   #   - packages/app/firebase.json    has the deployment configuration (based on 'firebase.hosting.js')
@@ -81,25 +80,23 @@ steps:
 - name: $_1
   entrypoint: sh
   args: ['-c', '
+    apk add jq &&
     firebase use $PROJECT_ID && 
 
-    firebase apps:sdkconfig | grep -E ''^\s+".+":\s.+,'' | grep -E "projectId|appId|locationId|apiKey|authDomain|databaseURL"
-      > .capture &&
-
-    echo "export default { $$( cat .capture ) }" > firebase.config.js
+    firebase --json apps:sdkconfig | jq .result.sdkConfig > firebase.config.json
   ']
   dir: packages/app
 
   # State:
-  #   - packages/app/firebase.config.js    has the Firebase server "access values", to be baked into the client
+  #   - packages/app/firebase.config.json   has the Firebase server "access values", to be baked into the client
 
 # Build
 - name: docker/compose:${_DOCKER_COMPOSE_TAG}
-  args: ['-f', 'docker-compose.tools.ci.yml', 'run', 'build']
+  args: ['-f', 'docker-compose.prod.build.ci.yml', 'run', 'build']
   dir: packages/app
   env:
     - RELEASE=${SHORT_SHA:-0}
-    - FIREBASE_SERVER_CONFIG_JS=./firebase.config.js
+    - FIREBASE_CONFIG_JSON=firebase.config.json
 
 # DEPLOY
 #
@@ -112,7 +109,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build:  1:30, 1:38
+# Cloud Build:  1:42, 1:30, 1:38
 #
 timeout: 200s
 
@@ -127,10 +124,8 @@ substitutions:
   _TESTED_SHA: ""
 
 #disabled; keep for now
-# Anything baked into the front end are not really hard secrets, but let's treat them as such.
-#
-# #later: If semi-secrets are needed (use them with 'secretEnv: - SECRET_NAME'):
+## Anything baked into the front end are not really hard secrets, but let's treat them as such.
 #availableSecrets:
 #  secretManager:
-#    - versionName: projects/$PROJECT_ID/secrets/XXX/versions/latest
+#    - versionName: projects/$PROJECT_ID/secrets/<SECRET_NAME>/versions/latest
 #      env: 'SECRET_NAME'

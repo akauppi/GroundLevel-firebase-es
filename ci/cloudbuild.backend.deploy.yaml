@@ -67,16 +67,12 @@ steps:
     npm config set update-notifier false &&
 
     npm install &&
-    npm --prefix packages/backend install &&
-
-    (cd packages/backend &&
-      make ci:deploy:firebase.json
-    )
+    npm --prefix packages/backend install
   ']
 
   # State:
   #   - packages/backend/functions                are installed
-  #   - packages/backend/firebase.json            generated ('firebase.app.js' without the emulators)
+  #   - packages/backend/firebase.json            generated (from 'firebase.app.ci.js', without emulators)
 
 # DEPLOY
 #
@@ -84,28 +80,6 @@ steps:
   entrypoint: sh
   args: ['-c', '
     firebase use $PROJECT_ID &&
-
-    LOCATION_ID=$$(firebase apps:sdkconfig | grep -E ''^\s+"locationId":\s.+,'' | cut -d ''"'' -f4) &&
-    [ ! -z $$LOCATION_ID ] || ( >&2 echo "ERROR: No ''locationId'' in Firebase app configuration (needs some tweaks)"; false ) && 
-    echo "Using location id: $${LOCATION_ID}" &&
-    
-    cat functions/config.js | sed -E "s/import\.meta\.env\.LOCATION_ID/''$${LOCATION_ID}''/" > .a &&
-      mv .a functions/config.js
-  ']
-    # ^-- #hack: would rather replace any occurrence of '${LOCATION_ID}' within 'functions/**.js'.
-  dir: packages/backend
-    #
-    # Note: The dance of picking up region id, only to inject it into the Cloud Functions source, so that Firebase can
-    #   again pick it up just feels wrong. Is this really the way?
-    #
-    # tbd. Test that it deploys to 'us-central1'.
-
-  # State:
-  #   - packages/backend/functions/config.js    modified so that 'import.meta.env.LOCATION_ID' is replaced by the target region
-
-- name: $_1
-  entrypoint: sh
-  args: ['-c', '
     echo "LOKI_USER_ID=${_LOKI_USER_ID}\nPROM_USER_ID=${_PROM_USER_ID}" > functions/.env &&
 
     firebase deploy --only functions,firestore,database
@@ -116,7 +90,7 @@ steps:
 
 # --- Timeout
 #
-# Cloud Build: 2:21, 2:40, 3:03
+# Cloud Build: 3:03, 2:21, 2:40, 3:03
 #
 timeout: 300s
 
@@ -129,5 +103,5 @@ substitutions:
   _MY_BUILDER: ci-builder
   _TESTED_SHA: ""
   # Grafana Cloud user id's (override in Cloud Build definition)
-  _LOKI_USER_ID: 0
-  _PROM_USER_ID: 0
+  _LOKI_USER_ID: "0"
+  _PROM_USER_ID: "0"
