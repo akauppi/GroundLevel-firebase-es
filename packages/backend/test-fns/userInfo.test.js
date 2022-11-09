@@ -4,7 +4,7 @@
 * Test that '/projectsC/.../userInfoC' gets updated, by cloud functions, when the global '/userInfoC' changes (if
 * users are in the project).
 */
-import { test, expect, describe, beforeAll } from '@jest/globals'
+import { test, expect, describe, beforeAll, afterAll } from '@jest/globals'
 
 import { collection, doc, preheat_EXP } from 'firebase-jest-testing/firestoreAdmin'
 
@@ -18,6 +18,12 @@ describe("userInfo shadowing", () => {
   beforeAll( () => {
     preheat_EXP("projects/1/userInfo");
   })
+
+  /* tbd. This could solve #83 without needing '--forceExit'. (Integrate with 'firebase-jest-testing', some day..)
+  afterAll(async () => {
+    const firebase = collection("dummy").firebase;
+    await firebase.firestore().disableNetwork();
+  }); */
 
   test('Central user information is distributed to a project where the user is a member', async () => {
     const william = {

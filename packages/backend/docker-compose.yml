@@ -85,15 +85,14 @@ services:
       (
         export J=node_modules/.bin/jest &&
         export NODE_OPTIONS=--experimental-vm-modules &&
-        $$J --config test-fns/jest.config.js --verbose --detectOpenHandles --all &&
-        $$J --config test-firestore-rules/jest.config.js --verbose --detectOpenHandles --all 
+        $$J --config test-fns/jest.config.js --verbose --detectOpenHandles --all --forceExit
       ) &&
 
       touch .healthy &&
       sleep infinity
       '
-      # Note: Returning from Jest (npm command) is taking ~30s on Windows+WSL2. Reason unknown. Be patient! #83
-      #       tbd. test - is this still so?
+      # NOTE: '--forceExit' cuts Jest return time (in WSL2) from 1min to 20s. REAL SOLUTION WOULD BE CLEANING UP PROPERLY
+      #       ON THE TEST SIDE. tbd. #83
     environment:
       - EMUL_HOST=emul
       - WARM_UP_TIMEOUT=10000
