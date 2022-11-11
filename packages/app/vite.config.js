@@ -11,7 +11,7 @@
 import path, { dirname, join as pJoin } from 'path'
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
-import postcssNesting from 'postcss-nesting'
+import postcssPresetEnv from 'postcss-preset-env'
 
 import vue from '@vitejs/plugin-vue'
 
@@ -117,7 +117,16 @@ async function configGen({ command, mode }) {
     css: {
       // From -> https://stackoverflow.com/a/71803365/14455
       postcss: {
-        plugins: [postcssNesting]
+        plugins: [
+          postcssPresetEnv({
+            stage: 3,
+            features: {
+              'nesting-rules': false,
+              'custom-media-queries': true,
+              'media-query-ranges': true
+            }
+          })
+        ]
       },
       devSourceMap: true    // experimental feature of Vite 2.9
     },
@@ -187,22 +196,26 @@ async function configGen({ command, mode }) {
       //inlineLimit: 4096
     },
 
-    server: SERVE_PORT ? {
-      host: true,   // needed for the DC port mapping to work
-      strictPort: true,
-      port: SERVE_PORT,
+    server: {
+      ...SERVE_PORT ? {
+        host: true,   // needed for the DC port mapping to work
+        strictPort: true,
+        port: SERVE_PORT
+      } : {},
 
       // Alternatively, could set 'server.fs.strict' to false
       // See: Vite > Server Options -> https://vitejs.dev/config/server-options.html#server-fs-allow
+      //
+      // Note: 'fs.allow' seems to be needed also for 'make dev' (not just 'make :serve'); warnings if it's omitted.
       fs: {
         allow: [
           '/work/dev',    // bootstrapping code
           '/work/src',    // app itself
-          '/work/firebase.config.json'    // Firebase server configuration
+          '/work/firebase.config.json',   // Firebase server configuration
+          '/usr/local/lib/node_modules/vite/dist/client'
         ]
       }
-
-    } : undefined,
+    },
 
     // Clearing the screen is considered distracting, though one can PgUp to see what was there just prior to Vite launching.
     clearScreen: false
@@ -211,8 +224,4 @@ async function configGen({ command, mode }) {
 
 function fail(msg) { throw new Error(msg) }
 
-export default a => configGen(a).then( o => ({ ...o,
-
-  // See -> https://vitejs.dev/guide/migration.html#experimental
-  //optimizeDeps: { disabled: false },
-}))
+export default configGen

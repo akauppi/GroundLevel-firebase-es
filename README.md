@@ -20,10 +20,10 @@ https://github.com/leg100/cloud-build-badge
 
 Great tools selected for you: 
 
-[Firebase](https://firebase.google.com)
+[Vite](https://github.com/vitejs/vite)
 - [Jest](https://jestjs.io)
-- [Vite](https://github.com/vitejs/vite)
 - [Cypress](https://www.cypress.io)
+- [Firebase](https://firebase.google.com)
 - [Cloud Build](https://cloud.google.com/build)
 - [Grafana Cloud](https://grafana.com)
 

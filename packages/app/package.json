@@ -38,14 +38,17 @@
     "plausible-tracker": "^0.3.5"
   },
   "devDependencies": {
-    "@types/node": "^18.11.9",
+    "@types/postcss-preset-env": "^7.7.0",
     "@vitejs/plugin-vue": "^3.2.0",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-vue": "^9.7.0",
     "prettier": "2.7.1",
-    "postcss-nesting": "^10.2.0",
+    "postcss-preset-env": "^7.8.2",
     "rollup-plugin-visualizer": "^5.8.3",
     "vue-eslint-parser": "^9.1.0"
+  },
+  "//devDependencies": {
+    "postcss-nesting": "^10.2.0"
   },
   "//comments": {
     "devDependencies": {
@@ -53,8 +56,8 @@
         "> when Prettier is installed or updated, it’s strongly recommended to specify the exact version in package.json: \"2.3.0\", not \"^2.3.0\".",
         "Thus, following suit."
       ],
-      "postcss-nesting": [
-        "Allows CSS nesting to be used; transpiles such CSS to code browsers understand."
+      "postcss-preset-env": [
+        "Allows upcoming CSS features (e.g.) nesting to be used; transpiles such CSS to code browsers understand."
       ],
       "rollup-plugin-visualizer": [
         "Optional extra, produces graphical analyses ('stats.html') on builds."

@@ -5,6 +5,7 @@
     "node": "18"
   },
   "devDependencies": {
+    "@types/node": "^18.11.9",
     "eslint": "^8.27.0",
     "eslint-plugin-node": "^11.1.0"
   },
