@@ -1,6 +1,6 @@
 # Approach (first deployment)
 
-The aim is to get people to have their first deployment done *fast*. Not needing to learn CI.
+The aim is to get people to have their first deployment done *fast*. Not needing to learn CI. Not having `gcloud` installed.
 
 
 ## Considerations
@@ -17,7 +17,7 @@ This would mean that the developer needs to have `gcloud` CLI installed. But we'
 Have a Docker Compose file that:
 
 - runs locally
-- uses `firebase-emulators` Docker image
+- uses `firebase-tools` Docker image
 - authenticates with `firebase login`
 
 ||
@@ -26,7 +26,6 @@ Have a Docker Compose file that:
 |<font color=green>+ keeps Firebase credentials safe; each run requires a new authentication|
 |<font color=green>+ fully separate from the rest of the repo|
 |**Cons**|
-|<font color=red>- we don't otherwise deal with `firebase login`|
 
 
 ## Not Modular!

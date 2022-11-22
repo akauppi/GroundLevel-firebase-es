@@ -29,7 +29,6 @@ Great tools selected for you:
 
 <!-- later
 - [Plausible](https://plausible.io)
-- [Sentry](https://sentry.io)
 -->
 
 <font color=green>&check;</font> Built on 2020's technology (ES2022), aiming to stay up to date and lean.

@@ -1,8 +1,7 @@
 #
-# Makefile
+# first/Makefile
 #
-#   Rebuilding is not as important for 'first' as it is for, say, 'app'. Deployments will likely work just fine with
-#	earlier versions, but it is _surprising_ that some earlier version would hang around, nonetheless.
+# Helpers for first-time build and deployment, to the cloud.
 #
 all:
 	false
